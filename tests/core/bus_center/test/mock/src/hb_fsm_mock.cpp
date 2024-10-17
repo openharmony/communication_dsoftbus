@@ -93,9 +93,9 @@ bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
     return HeartBeatFSMInterfaceInstance()->LnnIsHeartbeatEnable(type);
 }
 
-int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbeatType type)
 {
-    return HeartBeatFSMInterfaceInstance()->LnnGetGearModeBySpecificType(mode, type);
+    return HeartBeatFSMInterfaceInstance()->LnnGetGearModeBySpecificType(mode, callerId, type);
 }
 
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)

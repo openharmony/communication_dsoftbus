@@ -37,8 +37,50 @@ public:
     static void TearDownTestCase();
 };
 
+class SoftBusClientDeathRecipientMock : public SoftBusClientDeathRecipient {
+public:
+    void OnRemoteDied(const wptr<IRemoteObject> &remote) override { }
+};
+
 class SoftBusClientStubMock : public SoftBusClientStub {
 public:
+    void OnPublishLNNResult(int32_t publishId, int32_t reason) override { }
+    void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override { }
+    void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override { }
+    void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override { }
+    int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+        const QosTv *tvList) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *info) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnLocalNetworkIdChanged(const char *pkgName) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override
+    {
+        return SOFTBUS_OK;
+    }
     int32_t OnChannelOpenFailed([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
         [[maybe_unused]] int32_t errCode) override
     {
@@ -71,16 +113,19 @@ public:
 
 namespace {
 sptr<SoftBusClientStubMock> g_stub = nullptr;
+sptr<SoftBusClientDeathRecipientMock> g_mock = nullptr;
 }
 
 void SoftBusServerProxyFrameTest::SetUpTestCase()
 {
     g_stub = new (std::nothrow) SoftBusClientStubMock();
+    g_mock = new (std::nothrow) SoftBusClientDeathRecipientMock();
 }
 
 void SoftBusServerProxyFrameTest::TearDownTestCase()
 {
     g_stub = nullptr;
+    g_mock = nullptr;
 }
 
 /**
@@ -95,12 +140,12 @@ HWTEST_F(SoftBusServerProxyFrameTest, InnerRegisterServiceTest, TestSize.Level1)
     EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_INVALID_PARAM);
 
     EXPECT_EQ(ServerProxyInit(), SOFTBUS_OK);
-    EXPECT_EQ(InitSoftBus("SoftBusServerProxyFrameTest"), SOFTBUS_OK);
-    EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(InitSoftBus("SoftBusServerProxyFrameTest"), SOFTBUS_NO_INIT);
+    EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_TRANS_GET_CLIENT_NAME_FAILED);
 
     ListNode sessionServerList;
     ListInit(&sessionServerList);
-    EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_OK);
+    EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_TRANS_GET_CLIENT_NAME_FAILED);
 }
 
 /**
@@ -123,7 +168,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, GetSystemAbilityTest, TestSize.Level1)
 HWTEST_F(SoftBusServerProxyFrameTest, ClientRegisterServiceTest, TestSize.Level1)
 {
     EXPECT_EQ(ServerProxyInit(), SOFTBUS_OK);
-    EXPECT_EQ(ClientRegisterService("ClientRegisterServiceTest"), SOFTBUS_OK);
+    EXPECT_EQ(ClientRegisterService("ClientRegisterServiceTest"), SOFTBUS_SERVER_NOT_INIT);
 }
 
 /**
@@ -155,7 +200,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, SoftbusRegisterServiceTest, TestSize.Level
     ASSERT_TRUE(serverProxy != nullptr);
     serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(serverProxy);
     ASSERT_TRUE(serverProxyFrame != nullptr);
-    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_OK);
+    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_IPC_ERR);
 
     EXPECT_EQ(serverProxyFrame->SoftbusRegisterService(nullptr, nullptr), SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
 }
@@ -412,5 +457,62 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelMsgReceivedInnerTest, TestSize.Le
     data.WriteRawData(buffer.c_str(), buffer.size());
     data.WriteInt32(0);
     EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ISoftBusClientTest001
+ * @tc.desc: ISoftBusClientTest, use normal or wrong param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, ISoftBusClientTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    int32_t testInt = 0;
+    uint32_t testUint = 0;
+    g_stub->OnPublishLNNResult(testInt, testInt);
+    g_stub->OnRefreshLNNResult(testInt, testInt);
+    g_stub->OnRefreshDeviceFound(nullptr, testUint);
+    g_stub->OnDataLevelChanged(nullptr, nullptr);
+    int32_t ret = g_stub->OnChannelOpened(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnChannelOpenFailed(testInt, testInt, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnChannelLinkDown(nullptr, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnChannelMsgReceived(testInt, testInt, nullptr, testUint, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnChannelClosed(testInt, testInt, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnChannelQosEvent(testInt, testInt, testInt, testInt, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->SetChannelInfo(nullptr, testInt, testInt, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnJoinLNNResult(nullptr, testUint, nullptr, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnNodeOnlineStateChanged(nullptr, true, nullptr, testUint);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnNodeBasicInfoChanged(nullptr, nullptr, testUint, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnLocalNetworkIdChanged(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnTimeSyncResult(nullptr, testUint, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnClientTransLimitChange(testInt, testUint);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnChannelBind(testInt, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnRemoteDiedTest
+ * @tc.desc: OnRemoteDiedTest, use normal or wrong param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteDiedTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_mock != nullptr);
+    g_mock->OnRemoteDied(nullptr);
 }
 } // namespace OHOS

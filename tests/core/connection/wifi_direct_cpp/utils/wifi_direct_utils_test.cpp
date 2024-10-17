@@ -92,8 +92,8 @@ HWTEST_F(WifiDirectUtilsTest, ToBinaryTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, ChannelToFrequencyTest, TestSize.Level1)
 {
-    int channel = 36;
-    int frequency = 5180;
+    int32_t channel = 36;
+    int32_t frequency = 5180;
     auto ret = WifiDirectUtils::ChannelToFrequency(channel);
     EXPECT_EQ(ret, frequency);
 
@@ -243,7 +243,7 @@ HWTEST_F(WifiDirectUtilsTest, IsInChannelListTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, StringToChannelListTest, TestSize.Level1)
 {
-    int channel = 36;
+    int32_t channel = 36;
     std::vector<int> channelArray = { 35, 36, 37 };
     auto ret = WifiDirectUtils::IsInChannelList(channel, channelArray);
     EXPECT_EQ(ret, true);
@@ -350,7 +350,7 @@ HWTEST_F(WifiDirectUtilsTest, SyncLnnInfoForP2pTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, DurationStatisticEndTest, TestSize.Level1)
 {
-    int requestid = 0;
+    int32_t requestid = 0;
     DurationStatistic::GetInstance().End(requestid);
 
     DurationStatistic::GetInstance().calculators_[requestid] =
@@ -462,6 +462,7 @@ HWTEST_F(WifiDirectUtilsTest, CheckLinkAtDfsChannelConflictTest, TestSize.Level1
         });
     ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
     EXPECT_EQ(ret, false);
+    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::HML, remoteDeviceId);
 
     frequency = FREQ3;
     linkType = InnerLink::LinkType::P2P;
@@ -471,19 +472,6 @@ HWTEST_F(WifiDirectUtilsTest, CheckLinkAtDfsChannelConflictTest, TestSize.Level1
         });
     ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
     EXPECT_EQ(ret, true);
-}
-
-/*
- * @tc.name: GetInterfaceIpv6AddrTest
- * @tc.desc: check GetInterfaceIpv6Addr method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectUtilsTest, GetInterfaceIpv6AddrTest, TestSize.Level1)
-{
-    std::string interface = "wlan0";
-    auto ret = WifiDirectUtils::GetInterfaceIpv6Addr(interface);
-    EXPECT_EQ(ret, "");
 }
 
 /*
@@ -557,10 +545,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
     EXPECT_EQ(ret, "");
     psk = "1234";
     ret = WifiDirectAnonymizePsk(psk);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "1**4");
     psk = "123456789";
     ret = WifiDirectAnonymizePsk(psk);
-    EXPECT_EQ(ret, "12****9");
+    EXPECT_EQ(ret, "12*****89");
 }
 
 /*

@@ -53,7 +53,7 @@ void DisConnectCB(unsigned int connectionId, const ConnectionInfo *info)
     return;
 }
 
-void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len)
+void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     return;
 }
@@ -70,7 +70,7 @@ void SecondConnectSuccessedCB(unsigned int requestId, unsigned int connectionId,
     return;
 }
 
-void ConnectFailedCB(unsigned int requestId, int reason)
+void ConnectFailedCB(unsigned int requestId, int32_t reason)
 {
     return;
 }
@@ -114,7 +114,7 @@ void ConnectionBleSwitchTest::TearDown(void)
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
 {
     int32_t ret;
-    int reqId;
+    int32_t reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -164,7 +164,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
 {
-    int reqId = 1;
+    int32_t reqId = 1;
     int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
@@ -205,7 +205,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
 {
     int32_t ret;
-    int reqId;
+    int32_t reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -277,12 +277,12 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger004, TestSize.Level1)
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
 
     connRet2.OnConnectFailed = ConnectFailedCB;
     connRet2.OnConnectSuccessed = SecondConnectSuccessedCB;
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId2, &connRet2);
     EXPECT_EQ(SOFTBUS_OK, ret);
     sleep(1);
@@ -326,9 +326,9 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger005, TestSize.Level1)
     (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId1, &connRet);
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
@@ -383,10 +383,10 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
 
-    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId1, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -425,7 +425,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 {
-    int req1 = 1, req2 = 1;
+    int32_t req1 = 1, req2 = 1;
     int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
@@ -468,7 +468,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
 {
     int32_t ret;
-    int reqId;
+    int32_t reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -545,12 +545,12 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
 
     connRet2.OnConnectFailed = ConnectFailedCB;
     connRet2.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId2, &connRet2);
     EXPECT_EQ(SOFTBUS_OK, ret);
     sleep(1);
@@ -594,9 +594,9 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
     (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId1, &connRet);
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
@@ -658,12 +658,12 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0011, TestSize.Level1)
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
 
     connRet2.OnConnectFailed = ConnectFailedCB;
     connRet2.OnConnectSuccessed = SecondConnectSuccessedCB;
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId2, &connRet2);
     EXPECT_EQ(SOFTBUS_OK, ret);
     sleep(1);

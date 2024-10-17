@@ -144,6 +144,10 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 
 void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode)
 {
+    if (softbusErrCode == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "softbusErrCode is null");
+        return;
+    }
     if (hichainErrCode >= HICHAIN_DAS_ERRCODE_MIN && hichainErrCode <= HICHAIN_DAS_ERRCODE_MAX) {
         *softbusErrCode = hichainErrCode & MASK_LOW_16BIT;
         *softbusErrCode = -(((SOFTBUS_SUB_SYSTEM) << ERRCODE_SHIFT_21BIT) |
@@ -270,7 +274,8 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain onDeviceBound, udid=%{public}s, type=%{public}d", anonyUdid, info.groupType);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain onDeviceBound, udid=%{public}s, type=%{public}d",
+        AnonymizeWrapper(anonyUdid), info.groupType);
     AnonymizeFree(anonyUdid);
     if (info.groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
         AUTH_LOGI(AUTH_HICHAIN, "ignore same account udid");
@@ -312,7 +317,7 @@ static void OnDeviceNotTrusted(const char *udid)
     }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%{public}s", anonyUdid);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
         g_dataChangeListener.onDeviceNotTrusted(udid);

@@ -72,7 +72,7 @@ void LnnSettingdataEventMonitorTest::TearDown(void)
 */
 HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSize.Level1)
 {
-    int ret = LnnGetSettingDeviceName(DEVICE_NAME1, DEVICE_NAME_BUF_LEN);
+    int32_t ret = LnnGetSettingDeviceName(DEVICE_NAME1, DEVICE_NAME_BUF_LEN);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -85,7 +85,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSiz
 HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest002, TestSize.Level1)
 {
     LnnDeviceNameHandler handler = NULL;
-    int ret = LnnInitGetDeviceName(handler);
+    int32_t ret = LnnInitGetDeviceName(handler);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 

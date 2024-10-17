@@ -55,7 +55,7 @@ HWTEST_F(DiscBleUtilsTest, CheckBitMapEmptyTest_001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, CheckBitMapEmptyTest_001, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
 
     bool ret = CheckBitMapEmpty(info.capabilityBitmapNum, info.capabilityBitmap);
@@ -74,7 +74,7 @@ HWTEST_F(DiscBleUtilsTest, CheckBitMapEmptyTest_002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, CheckBitMapEmptyTest_002, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = INT32_MAX_BIT_NUM;
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
@@ -95,7 +95,7 @@ HWTEST_F(DiscBleUtilsTest, CheckCapBitMapExistTest_001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, CheckCapBitMapExistTest_001, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = info.capabilityBitmapNum * INT32_MAX_BIT_NUM;
 
@@ -115,7 +115,7 @@ HWTEST_F(DiscBleUtilsTest, CheckCapBitMapExistTest_002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, CheckCapBitMapExistTest_002, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = INT32_MAX_BIT_NUM;
 
@@ -135,7 +135,7 @@ HWTEST_F(DiscBleUtilsTest, CheckCapBitMapExistTest_003, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, CheckCapBitMapExistTest_003, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = INT32_MAX_BIT_NUM;
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
@@ -156,12 +156,12 @@ HWTEST_F(DiscBleUtilsTest, SetCapBitMapPosTest_001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, SetCapBitMapPosTest_001, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = info.capabilityBitmapNum * INT32_MAX_BIT_NUM;
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
 
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         EXPECT_EQ(info.capabilityBitmap[i], 0x0);
     }
 
@@ -178,12 +178,12 @@ HWTEST_F(DiscBleUtilsTest, SetCapBitMapPosTest_002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, SetCapBitMapPosTest_002, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = INT32_MAX_BIT_NUM;
 
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         if (i == (pos / INT32_MAX_BIT_NUM)) {
             EXPECT_EQ(info.capabilityBitmap[i], 0x1);
         } else {
@@ -204,12 +204,12 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, UnsetCapBitMapPosTest_001, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = info.capabilityBitmapNum * INT32_MAX_BIT_NUM;
 
     UnsetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         EXPECT_EQ(info.capabilityBitmap[i], 0x0);
     }
 
@@ -227,12 +227,12 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, UnsetCapBitMapPosTest_002, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     info.capabilityBitmapNum = DISC_MAX_CAPABILITY_NUM;
     uint32_t pos = INT32_MAX_BIT_NUM;
 
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         if (i == (pos / INT32_MAX_BIT_NUM)) {
             EXPECT_EQ(info.capabilityBitmap[i], 0x1);
         } else {
@@ -240,7 +240,7 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_002, TestSize.Level1)
         }
     }
     UnsetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         EXPECT_EQ(info.capabilityBitmap[i], 0x0);
     }
 
@@ -319,7 +319,7 @@ HWTEST_F(DiscBleUtilsTest, AssembleTLVTest_001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, AssembleTLVTest_001, Start");
 
-    BroadcastData broadcastData = {{{0}}};
+    BroadcastData broadcastData = { { { 0 } } };
     broadcastData.dataLen = BROADCAST_MAX_LEN;
     char deviceIdHash[SHORT_DEVICE_ID_HASH_LENGTH + 1] = { 0 };
     int32_t ret =
@@ -339,7 +339,7 @@ HWTEST_F(DiscBleUtilsTest, AssembleTLVTest_002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, AssembleTLVTest_002, Start");
 
-    BroadcastData broadcastData = {{{0}}};
+    BroadcastData broadcastData = { { { 0 } } };
     char deviceName[] = "longlonglongdeviceName";
     int32_t ret = AssembleTLV(&broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)deviceName, strlen(deviceName) + 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -358,9 +358,9 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_001, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     DeviceWrapper device = { .info = &info };
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
     reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
     reportInfo.packet.rspData.id = MANU_COMPANY_ID;
@@ -387,9 +387,9 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_002, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     DeviceWrapper device = { .info = &info };
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
     reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
     reportInfo.packet.rspData.id = MANU_COMPANY_ID;
@@ -417,9 +417,9 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_003, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_003, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     DeviceWrapper device = { .info = &info };
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
     reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
     reportInfo.packet.rspData.id = MANU_COMPANY_ID;
@@ -447,9 +447,9 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_004, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_004, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     DeviceWrapper device = { .info = &info };
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
     reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
     reportInfo.packet.rspData.id = MANU_COMPANY_ID;
@@ -477,9 +477,9 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_005, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_005, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     DeviceWrapper device = { .info = &info };
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
     reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
     reportInfo.packet.rspData.id = MANU_COMPANY_ID;
@@ -506,9 +506,9 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_006, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_006, Start");
 
-    DeviceInfo info = {{0}};
+    DeviceInfo info = { { 0 } };
     DeviceWrapper device = { .info = &info };
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
     reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
     reportInfo.packet.rspData.id = MANU_COMPANY_ID;

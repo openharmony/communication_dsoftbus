@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
         ClearHmlListenerByUuid(peerUuid);
         connType = TRANS_CONN_HML;
     } else {
-        StopP2pSessionListener();
+        StopP2pListenerByRemoteUuid(peerUuid);
         ClearIpInfo(peerUuid);
         connType = TRANS_CONN_P2P;
     }

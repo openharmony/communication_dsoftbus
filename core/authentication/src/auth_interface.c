@@ -100,6 +100,7 @@ void UnregAuthTransListener(int32_t module)
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = NULL;
             g_moduleListener[i].listener.onDisconnected = NULL;
+            g_moduleListener[i].listener.onException = NULL;
             return;
         }
     }
@@ -712,6 +713,16 @@ bool IsAuthHasTrustedRelation(void)
 {
     bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
     return hasTrustedRelation;
+}
+
+int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    if (connInfo == NULL || isExist == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthMetaCheckMetaExist(connInfo, isExist);
+    return SOFTBUS_OK;
 }
 
 int32_t AuthInit(void)

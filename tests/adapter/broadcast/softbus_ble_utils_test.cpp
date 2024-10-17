@@ -195,7 +195,7 @@ HWTEST(SoftbusBleUtilsTest, DumpBleScanFilter, TestSize.Level3)
  */
 HWTEST(SoftbusBleUtilsTest, GetBtScanMode, TestSize.Level3)
 {
-    int scanMode = GetBtScanMode(SOFTBUS_BC_SCAN_INTERVAL_P2, SOFTBUS_BC_SCAN_WINDOW_P2);
+    int32_t scanMode = GetBtScanMode(SOFTBUS_BC_SCAN_INTERVAL_P2, SOFTBUS_BC_SCAN_WINDOW_P2);
     EXPECT_EQ(scanMode, OHOS_BLE_SCAN_MODE_OP_P2_60_3000);
 
     scanMode = GetBtScanMode(SOFTBUS_BC_SCAN_INTERVAL_P10, SOFTBUS_BC_SCAN_WINDOW_P10);

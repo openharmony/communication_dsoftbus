@@ -74,14 +74,11 @@ const std::function<void(void)> BT_STATE_FSM[BtState::BT_STATE_BUTT][BtState::BT
         // BT_STATE_RESTRICT -> BT_STATE_OFF
         []() {
             DisableBle();
-        },
-        // BT_STATE_RESTRICT -> BT_STATE_ON
+        }, // BT_STATE_RESTRICT -> BT_STATE_ON
         []() {
             EnableBr();
-        },
-        // BT_STATE_RESTRICT -> BT_STATE_RESTRICT
-        nullptr,
-    },
+        }, // BT_STATE_RESTRICT -> BT_STATE_RESTRICT
+        nullptr, },
 };
 } // anonymous namespace
 
@@ -243,7 +240,7 @@ int32_t BluetoothMock::ActionBleDeregisterScanCallbacks(int32_t scannerId)
     return OHOS_BT_STATUS_SUCCESS;
 }
 
-bool BluetoothMock::ActionGetLocalAddr(unsigned char *mac, unsigned int len)
+bool BluetoothMock::ActionGetLocalAddr(unsigned char *mac, uint32_t len)
 {
     if (mac == nullptr || len < OHOS_BD_ADDR_LEN) {
         return false;
@@ -355,8 +352,8 @@ void BluetoothMock::CallbackScanResult(const std::string &hexStr)
 void DumpBleAdvRawData(const StartAdvRawData &rawData)
 {
     constexpr uint32_t BUFF_LEN = 200;
-    char advData[BUFF_LEN] = {0};
-    char rspData[BUFF_LEN] = {0};
+    char advData[BUFF_LEN] = { 0 };
+    char rspData[BUFF_LEN] = { 0 };
     if (ConvertBytesToUpperCaseHexString(advData, BUFF_LEN, rawData.advData, rawData.advDataLen) == SOFTBUS_OK &&
         ConvertBytesToUpperCaseHexString(rspData, BUFF_LEN, rawData.rspData, rawData.rspDataLen) == SOFTBUS_OK) {
         LOG("%s adv=%s, rsp=%s", __func__, advData, rspData);
@@ -401,7 +398,7 @@ int32_t GetBtState()
     return BluetoothMock::GetMock()->GetBtState();
 }
 
-bool GetLocalAddr(unsigned char *mac, unsigned int len)
+bool GetLocalAddr(unsigned char *mac, uint32_t len)
 {
     LOG("%s", __func__);
     return BluetoothMock::GetMock()->GetLocalAddr(mac, len);

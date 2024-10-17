@@ -40,7 +40,7 @@ public:
     virtual void LnnOnOhosAccountChanged(void) =0;
     virtual void LnnStopDiscovery(void) = 0;
     virtual int32_t LnnStartDiscovery(void) = 0;
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
     virtual void LnnStopPublish(void) = 0;
     virtual int32_t LnnStartPublish(void) = 0;
@@ -55,6 +55,8 @@ public:
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
+    virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
+    virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -66,7 +68,7 @@ public:
     MOCK_METHOD0(LnnOnOhosAccountChanged, void (void));
     MOCK_METHOD0(LnnStopDiscovery, void (void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
-    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void (void));
     MOCK_METHOD0(LnnStartPublish, int32_t (void));
@@ -79,6 +81,8 @@ public:
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
+    MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void (void));
+    MOCK_METHOD2(LnnUnregisterEventHandler, void (LnnEventType, LnnEventHandler));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

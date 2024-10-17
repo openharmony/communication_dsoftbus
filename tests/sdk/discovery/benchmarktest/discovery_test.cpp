@@ -20,8 +20,8 @@
 #include "token_setproc.h"
 
 namespace OHOS {
-static int g_subscribeId = 0;
-static int g_publishId = 0;
+static int32_t g_subscribeId = 0;
+static int32_t g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
 static bool g_flag = true;
 void AddPermission()
@@ -77,13 +77,13 @@ void DiscoveryTest::SetUpTestCase(void)
 void DiscoveryTest::TearDownTestCase(void)
 {}
 
-static int GetSubscribeId(void)
+static int32_t GetSubscribeId(void)
 {
     g_subscribeId++;
     return g_subscribeId;
 }
 
-static int GetPublishId(void)
+static int32_t GetPublishId(void)
 {
     g_publishId++;
     return g_publishId;
@@ -117,7 +117,7 @@ static void TestDeviceFound(const DeviceInfo *device)
 static void TestDiscoverResult(int32_t refreshId, RefreshResult reason)
 {}
 
-static void TestPublishResult(int publishId, PublishResult reason)
+static void TestPublishResult(int32_t publishId, PublishResult reason)
 {}
 
 static IRefreshCallback g_refreshCb = {
@@ -140,7 +140,7 @@ BENCHMARK_F(DiscoveryTest, PublishLNNTestCase)(benchmark::State &state)
     while (state.KeepRunning()) {
         g_pInfo.publishId = GetPublishId();
         state.ResumeTiming();
-        int ret = PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
+        int32_t ret = PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
         if (ret != 0) {
             state.SkipWithError("PublishLNNTestCase failed.");
         }
@@ -164,7 +164,7 @@ BENCHMARK_F(DiscoveryTest, StopPublishLNNTestCase)(benchmark::State &state)
     while (state.KeepRunning()) {
         g_pInfo.publishId = GetPublishId();
         state.PauseTiming();
-        int ret = PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
+        int32_t ret = PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
         if (ret != 0) {
             state.SkipWithError("PublishLNNTestCase failed.");
         }
@@ -188,7 +188,7 @@ BENCHMARK_F(DiscoveryTest, RefreshLNNTestCase)(benchmark::State &state)
     while (state.KeepRunning()) {
         g_sInfo.subscribeId = GetSubscribeId();
         state.ResumeTiming();
-        int ret = RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
+        int32_t ret = RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
         if (ret != 0) {
             state.SkipWithError("RefreshLNNTestCase failed.");
         }
@@ -212,7 +212,7 @@ BENCHMARK_F(DiscoveryTest, StoptRefreshLNNTestCase)(benchmark::State &state)
     while (state.KeepRunning()) {
         g_sInfo.subscribeId = GetSubscribeId();
         state.PauseTiming();
-        int ret = RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
+        int32_t ret = RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
         if (ret != 0) {
             state.SkipWithError("RefreshLNNTestCase failed.");
         }

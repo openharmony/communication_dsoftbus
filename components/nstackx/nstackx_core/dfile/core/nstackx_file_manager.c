@@ -43,9 +43,9 @@ typedef struct {
     FileListMsgReceiver msgReceiver;
     FileManagerMsgType msgType;
     uint16_t fileId;
+    uint16_t transId;
     FileManagerMsg msg;
     void *context;
-    uint16_t transId;
 } FileListMsgCtx;
 
 static void NotifyFileManagerMsgInner(void *arg)

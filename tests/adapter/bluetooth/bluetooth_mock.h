@@ -87,49 +87,51 @@ public:
     MOCK_METHOD(bool, IsBleEnabled, (), (override));
     MOCK_METHOD(bool, GetLocalAddr, (unsigned char *mac, unsigned int len), (override));
     MOCK_METHOD(bool, SetLocalName, (unsigned char *localName, unsigned char length), (override));
-    MOCK_METHOD(int, GapRegisterCallbacks, (BtGapCallBacks *func), (override));
+    MOCK_METHOD(int32_t, GapRegisterCallbacks, (BtGapCallBacks *func), (override));
     MOCK_METHOD(bool, PairRequestReply, (const BdAddr *bdAddr, int transport, bool accept), (override));
     MOCK_METHOD(bool, SetDevicePairingConfirmation, (const BdAddr *bdAddr, int transport, bool accept), (override));
 
-    MOCK_METHOD(int, BleGattRegisterCallbacks, (BtGattCallbacks *func), (override));
-    MOCK_METHOD(int, BleStartScanEx,
+    MOCK_METHOD(int32_t, BleGattRegisterCallbacks, (BtGattCallbacks *func), (override));
+    MOCK_METHOD(int32_t, BleStartScanEx,
         (int scannerId, BleScanConfigs * configs, BleScanNativeFilter *filter, unsigned int filterSize), (override));
-    MOCK_METHOD(int, BleStopScan, (int scannerId), (override));
-    MOCK_METHOD(int, BleStartAdvEx, (int *advId, const StartAdvRawData rawData, BleAdvParams advParam), (override));
-    MOCK_METHOD(int, BleStopAdv, (int advId), (override));
+    MOCK_METHOD(int32_t, BleStopScan, (int scannerId), (override));
+    MOCK_METHOD(int32_t, BleStartAdvEx, (int *advId, const StartAdvRawData rawData,
+                BleAdvParams advParam), (override));
+    MOCK_METHOD(int32_t, BleStopAdv, (int advId), (override));
 
-    MOCK_METHOD(int, BleGattcRegister, (BtUuid appUuid), (override));
-    MOCK_METHOD(int, BleGattcConnect,
+    MOCK_METHOD(int32_t, BleGattcRegister, (BtUuid appUuid), (override));
+    MOCK_METHOD(int32_t, BleGattcConnect,
         (int clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect,
             BtTransportType transport),
         (override));
-    MOCK_METHOD(int, BleGattcDisconnect, (int clientId), (override));
-    MOCK_METHOD(int, BleGattcSearchServices, (int clientId), (override));
+    MOCK_METHOD(int32_t, BleGattcDisconnect, (int clientId), (override));
+    MOCK_METHOD(int32_t, BleGattcSearchServices, (int clientId), (override));
     MOCK_METHOD(bool, BleGattcGetService, (int clientId, BtUuid serviceUuid), (override));
-    MOCK_METHOD(int, BleGattcRegisterNotification, (int clientId, BtGattCharacteristic characteristic, bool enable),
-        (override));
-    MOCK_METHOD(int, BleGattcConfigureMtuSize, (int clientId, int mtuSize), (override));
-    MOCK_METHOD(int, BleGattcWriteCharacteristic,
+    MOCK_METHOD(int32_t, BleGattcRegisterNotification,
+                (int clientId, BtGattCharacteristic characteristic, bool enable), (override));
+    MOCK_METHOD(int32_t, BleGattcConfigureMtuSize, (int clientId, int mtuSize), (override));
+    MOCK_METHOD(int32_t, BleGattcWriteCharacteristic,
         (int clientId, BtGattCharacteristic characteristic, BtGattWriteType writeType, int len, const char *value),
         (override));
-    MOCK_METHOD(int, BleGattcUnRegister, (int clientId), (override));
-    MOCK_METHOD(int, BleGattcSetFastestConn, (int clientId, bool fastestConnFlag), (override));
-    MOCK_METHOD(int, BleGattcSetPriority, (int clientId, const BdAddr *bdAddr, BtGattPriority priority), (override));
+    MOCK_METHOD(int32_t, BleGattcUnRegister, (int clientId), (override));
+    MOCK_METHOD(int32_t, BleGattcSetFastestConn, (int clientId, bool fastestConnFlag), (override));
+    MOCK_METHOD(int32_t, BleGattcSetPriority, (int clientId, const BdAddr *bdAddr,
+                BtGattPriority priority), (override));
 
-    MOCK_METHOD(int, BleGattsRegisterCallbacks, (BtGattServerCallbacks *func), (override));
-    MOCK_METHOD(int, BleGattsRegister, (BtUuid appUuid), (override));
-    MOCK_METHOD(int, BleGattsAddService, (int serverId, BtUuid srvcUuid, bool isPrimary, int number), (override));
-    MOCK_METHOD(int, BleGattsUnRegister, (int serverId), (override));
-    MOCK_METHOD(int, BleGattsAddCharacteristic,
+    MOCK_METHOD(int32_t, BleGattsRegisterCallbacks, (BtGattServerCallbacks *func), (override));
+    MOCK_METHOD(int32_t, BleGattsRegister, (BtUuid appUuid), (override));
+    MOCK_METHOD(int32_t, BleGattsAddService, (int serverId, BtUuid srvcUuid, bool isPrimary, int number), (override));
+    MOCK_METHOD(int32_t, BleGattsUnRegister, (int serverId), (override));
+    MOCK_METHOD(int32_t, BleGattsAddCharacteristic,
         (int serverId, int srvcHandle, BtUuid characUuid, int properties, int permissions), (override));
     MOCK_METHOD(
-        int, BleGattsAddDescriptor, (int serverId, int srvcHandle, BtUuid descUuid, int permissions), (override));
-    MOCK_METHOD(int, BleGattsStartService, (int serverId, int srvcHandle), (override));
-    MOCK_METHOD(int, BleGattsStopService, (int serverId, int srvcHandle), (override));
-    MOCK_METHOD(int, BleGattsDeleteService, (int serverId, int srvcHandle), (override));
-    MOCK_METHOD(int, BleGattsDisconnect, (int serverId, BdAddr bdAddr, int connId), (override));
-    MOCK_METHOD(int, BleGattsSendResponse, (int serverId, GattsSendRspParam *param), (override));
-    MOCK_METHOD(int, BleGattsSendIndication, (int serverId, GattsSendIndParam *param), (override));
+        int32_t, BleGattsAddDescriptor, (int serverId, int srvcHandle, BtUuid descUuid, int permissions), (override));
+    MOCK_METHOD(int32_t, BleGattsStartService, (int serverId, int srvcHandle), (override));
+    MOCK_METHOD(int32_t, BleGattsStopService, (int serverId, int srvcHandle), (override));
+    MOCK_METHOD(int32_t, BleGattsDeleteService, (int serverId, int srvcHandle), (override));
+    MOCK_METHOD(int32_t, BleGattsDisconnect, (int serverId, BdAddr bdAddr, int connId), (override));
+    MOCK_METHOD(int32_t, BleGattsSendResponse, (int serverId, GattsSendRspParam *param), (override));
+    MOCK_METHOD(int32_t, BleGattsSendIndication, (int serverId, GattsSendIndParam *param), (override));
 
     static MockBluetooth *GetMocker();
 

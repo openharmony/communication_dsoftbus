@@ -27,7 +27,7 @@ int SetTimer(const char *name, unsigned int timeout)
     }
     std::string timerName = std::string(name);
     int id = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer(timerName, timeout, nullptr, nullptr,
-        OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
+        OHOS::HiviewDFX::XCOLLIE_FLAG_LOG);
     return id;
 }
 

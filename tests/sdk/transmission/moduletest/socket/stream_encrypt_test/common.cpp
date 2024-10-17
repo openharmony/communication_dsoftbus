@@ -93,11 +93,11 @@ void AddPermission()
     SetSelfTokenID(tokenId);
 }
 
-static int CheckRemoteDeviceIsNull(bool isSetNetId)
+static int32_t CheckRemoteDeviceIsNull(bool isSetNetId)
 {
-    int nodeNum = 0;
+    int32_t nodeNum = 0;
     NodeBasicInfo *nodeInfo = nullptr;
-    int ret = GetAllNodeDeviceInfo(PKG_NAME, &nodeInfo, &nodeNum);
+    int32_t ret = GetAllNodeDeviceInfo(PKG_NAME, &nodeInfo, &nodeNum);
     LOGI("[check]get node number=%d, ret=%d", nodeNum, ret);
     if (nodeInfo != nullptr && nodeNum > 0) {
         LOGI("[check]get netid is=%s", nodeInfo->networkId);
@@ -116,7 +116,7 @@ int32_t TestInit()
 {
     AddPermission();
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    int ret = RegNodeDeviceStateCb(PKG_NAME, &g_defNodeStateCallback);
+    int32_t ret = RegNodeDeviceStateCb(PKG_NAME, &g_defNodeStateCallback);
     if (ret != SOFTBUS_OK) {
         LOGE("call reg node state callback fail, ret=%d", ret);
         return ret;

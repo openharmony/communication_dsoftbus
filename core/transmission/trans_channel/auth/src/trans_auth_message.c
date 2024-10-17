@@ -44,6 +44,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         !AddStringToJsonObject(msg, "DST_BUS_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(msg, "REQ_ID", appInfo->reqId) ||
         !AddNumberToJsonObject(msg, "MTU_SIZE", (int32_t)appInfo->myData.dataConfig) ||
+        !AddNumberToJsonObject(msg, "API_VERSION", (int32_t)appInfo->myData.apiVersion) ||
         !AddNumberToJsonObject(msg, "ROUTE_TYPE", (int32_t)appInfo->routeType)) {
         TRANS_LOGE(TRANS_SVC, "failed");
         return SOFTBUS_CREATE_JSON_ERR;
@@ -93,6 +94,9 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     }
     if (!GetJsonObjectInt32Item(obj, "ROUTE_TYPE", (int32_t *)&(appInfo->routeType))) {
         TRANS_LOGW(TRANS_SVC, "routeType is null.");
+    }
+    if (!GetJsonObjectNumberItem(obj, "API_VERSION", (int32_t *)&appInfo->myData.apiVersion)) {
+        TRANS_LOGW(TRANS_SVC, "apiVersion is null.");
     }
     if (GetJsonObjectNumberItem(obj, "LANE_LINK_TYPE", (int32_t *)&(appInfo->linkType))
         && (appInfo->linkType == LANE_HML_RAW)) {

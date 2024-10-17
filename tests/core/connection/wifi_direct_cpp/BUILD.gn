@@ -235,6 +235,7 @@ group("unittest") {
     ":WifiDirectManagerCppTest",
     ":WifiDirectRoleOptionTest",
     "adapter:unittest",
+    "channel:unittest",
     "data:unittest",
     "entity:unittest",
     "processor:unittest",

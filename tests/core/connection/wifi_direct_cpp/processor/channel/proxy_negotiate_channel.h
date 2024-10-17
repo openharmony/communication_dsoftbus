@@ -66,7 +66,7 @@ public:
         return channelId_ == other.channelId_;
     }
 
-    int SendMessage(const NegotiateMessage &msg) const override
+    int32_t SendMessage(const NegotiateMessage &msg) const override
     {
         return WifiDirectInterfaceMock::GetMock()->ProxyNegotiateChannelSendMessage(channelId_, msg);
     };

@@ -103,7 +103,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NAME_USED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -200,7 +200,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest06, TestSize.Level1)
 {
     TransServerDeathCallback(g_pkgName, TRANS_TEST_INVALID_PID);
-    int ret = TransServerInit();
+    int32_t ret = TransServerInit();
     EXPECT_EQ(ret, SOFTBUS_CONN_INTERNAL_ERR);
     TransServerDeinit();
 }

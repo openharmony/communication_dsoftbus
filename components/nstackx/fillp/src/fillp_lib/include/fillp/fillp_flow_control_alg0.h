@@ -47,9 +47,9 @@ struct FillpFlowControlAlg0 {
     FILLP_UINT32 maxRateAllowed;
     FILLP_UINT8 fcState;             /* is rate detecting or stable */
     FILLP_UINT8 historyMaxRecvRateIndex;
-    struct FillpMaxRateSample historyMaxRecvRate; /* State for the parameterized max tracker */
     FILLP_UINT8 sendRateIncreaseGainIndex;
     FILLP_UINT32 packDeltaUsArrayIndex;
+    struct FillpMaxRateSample historyMaxRecvRate; /* State for the parameterized max tracker */
     FILLP_UINT32 packDeltaUsArray[FILLP_FC0_PACK_RECV_INTERVAL_SAMPLE_NUM];
 };
 

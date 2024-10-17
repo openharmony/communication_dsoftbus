@@ -86,6 +86,8 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.trafficStats);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.osType);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.deviceState);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.businessId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.businessType);
     EXPECT_EQ(++index, validSize);
     return true;
 }

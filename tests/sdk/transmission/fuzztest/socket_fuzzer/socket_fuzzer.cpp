@@ -34,10 +34,6 @@ void SocketTestWithName(const uint8_t *data, size_t size)
 
     const size_t bufSize = size + 1;
     std::unique_ptr<char[]> socketName = std::make_unique<char[]>(bufSize);
-    if (socketName == nullptr) {
-        return;
-    }
-
     if (memset_s(socketName.get(), bufSize, 0, bufSize) != EOK) {
         return;
     }
@@ -65,10 +61,6 @@ void SocketTestWithPeerName(const uint8_t *data, size_t size)
 
     const size_t bufSize = size + 1;
     std::unique_ptr<char[]> socketPeerName = std::make_unique<char[]>(bufSize);
-    if (socketPeerName == nullptr) {
-        return;
-    }
-
     if (memset_s(socketPeerName.get(), bufSize, 0, bufSize) != EOK) {
         return;
     }
@@ -96,10 +88,6 @@ void SocketTestWithNetworkId(const uint8_t *data, size_t size)
 
     const size_t bufSize = size + 1;
     std::unique_ptr<char[]> socketNetworkId = std::make_unique<char[]>(bufSize);
-    if (socketNetworkId == nullptr) {
-        return;
-    }
-
     if (memset_s(socketNetworkId.get(), bufSize, 0, bufSize) != EOK) {
         return;
     }
@@ -127,10 +115,6 @@ void SocketTestWithPkgName(const uint8_t *data, size_t size)
 
     const size_t bufSize = size + 1;
     std::unique_ptr<char[]> socketPkgName = std::make_unique<char[]>(bufSize);
-    if (socketPkgName == nullptr) {
-        return;
-    }
-
     if (memset_s(socketPkgName.get(), bufSize, 0, bufSize) != EOK) {
         return;
     }
@@ -174,7 +158,7 @@ void SocketTestWithDataType(const uint8_t *data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::SocketTestWithName(data, size);
     OHOS::SocketTestWithPeerName(data, size);

@@ -47,8 +47,8 @@ public:
         LooperDeinit();
     }
 
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 
     static inline std::string g_customCapData = "name=Bill";
     static inline DeviceInfo g_foundDeviceInfo;

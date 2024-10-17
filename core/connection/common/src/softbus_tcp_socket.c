@@ -70,7 +70,8 @@ static int SetQuickStart(int fd, int quick)
     errno = 0;
     int rc = setsockopt(fd, SOFTBUS_IPPROTO_TCP, TCP_QUICK_START, &quick, sizeof(quick));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set TCP_QUICK_START failed. rc=%{public}d", rc);
+        CONN_LOGE(CONN_COMMON, "set TCP_QUICK_START failed. rc=%{public}d, errno=%{public}d(%{public}s)",
+            rc, errno, strerror(errno));
         return -1;
     }
     return 0;
@@ -80,7 +81,8 @@ static int SetSendBufFix(int fd, int val)
 {
     int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_SNDBUF, &val, sizeof(val));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_SNDBUF failed. rc=%{public}d", rc);
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_SNDBUF failed. rc=%{public}d, errno=%{public}d(%{public}s)",
+            rc, errno, strerror(errno));
         return -1;
     }
     return 0;
@@ -90,7 +92,8 @@ static int SetRcvBufFix(int fd, int val)
 {
     int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &val, sizeof(val));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_RCVBUF failed. rc=%{public}d", rc);
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_RCVBUF failed. rc=%{public}d, errno=%{public}d(%{public}s)",
+            rc, errno, strerror(errno));
         return -1;
     }
     return 0;
@@ -318,7 +321,8 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
         CONN_LOGE(CONN_COMMON, "client connect failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, "
-            "error=%{public}d, errno=%{public}d", animizedIp, option->socketOption.port, fd, ret, errno);
+            "ret=%{public}d, errno=%{public}d(%{public}s)", animizedIp, option->socketOption.port, fd, ret,
+            errno, strerror(errno));
         ConnShutdownSocket(fd);
         return ret;
     }

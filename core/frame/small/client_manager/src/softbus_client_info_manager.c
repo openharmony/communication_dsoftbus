@@ -25,8 +25,8 @@ typedef struct {
     ListNode node;
     char name[PKG_NAME_SIZE_MAX]; /* softbus client name */
     unsigned int handle;          /* use for small system device */
-    unsigned int token;           /* use for small system device */
-    unsigned int cookie;          /* use for small system device */
+    uintptr_t token;        /* use for small system device */
+    uintptr_t cookie;       /* use for small system device */
 } SoftBusClientInfoNode;
 
 static SoftBusList *g_clientInfoList = NULL;

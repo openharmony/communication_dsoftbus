@@ -185,7 +185,7 @@ const char *SoftBusFormatTimestamp(uint64_t timestamp)
         formatedDateTime.tm_year + BASE_YEAR, formatedDateTime.tm_mon + BASE_MONTH, formatedDateTime.tm_mday,
         formatedDateTime.tm_hour, formatedDateTime.tm_min, formatedDateTime.tm_sec, milliseconds);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "sprintf failed");
+        COMM_LOGE(COMM_ADAPTER, "sprintf failed, ret=%{public}d", ret);
         return NULL;
     }
 

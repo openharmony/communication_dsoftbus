@@ -79,7 +79,7 @@ int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
     }
     char *anonyPath = NULL;
     Anonymize(path, &anonyPath);
-    LNN_LOGI(LNN_STATE, "full path id=%{public}d, path=%{public}s", id, anonyPath);
+    LNN_LOGI(LNN_STATE, "full path id=%{public}d, path=%{public}s", id, AnonymizeWrapper(anonyPath));
     AnonymizeFree(anonyPath);
     return SOFTBUS_OK;
 }

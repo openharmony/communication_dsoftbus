@@ -130,7 +130,7 @@ void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
         *state = value;
         return WIFI_SUCCESS;
     });
-    EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([this](int *chanList, int len) {
+    EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([this](int32_t *chanList, int32_t len) {
         auto value = context_.Get(TestContextKey::WIFI_5G_CHANNEL_LIST, std::pair<WifiErrorCode, std::vector<int>>());
         for (size_t i = 0; i < len && i < value.second.size(); i++) {
             chanList[i] = value.second[i];
@@ -344,8 +344,8 @@ void P2pV1ProcessorTest::InjectChannel(WifiDirectInterfaceMock &mock)
 HWTEST_F(P2pV1ProcessorTest, ErrorCodeConverter, TestSize.Level1)
 {
     struct {
-        int softbusErrorCode;
-        int protocolErrorCode;
+        int32_t softbusErrorCode;
+        int32_t protocolErrorCode;
     } caseTable[] = {
         {SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE,                     V1_ERROR_IF_NOT_AVAILABLE - V1_ERROR_START    },
         { SOFTBUS_CONN_PV1_BOTH_GO_ERR,                         V1_ERROR_BOTH_GO - V1_ERROR_START             },
@@ -425,7 +425,7 @@ HWTEST_F(P2pV1ProcessorTest, IsNeedDhcp, TestSize.Level1)
 HWTEST_F(P2pV1ProcessorTest, ChooseFrequency, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
-    auto doMock = [&mock](int stationFreq, int recommendFreq, std::vector<int> channels) {
+    auto doMock = [&mock](int32_t stationFreq, int32_t recommendFreq, std::vector<int> channels) {
         EXPECT_CALL(mock, GetLinkedInfo(_)).WillRepeatedly([stationFreq](WifiLinkedInfo *result) {
             result->frequency = stationFreq;
             return WIFI_SUCCESS;
@@ -436,8 +436,8 @@ HWTEST_F(P2pV1ProcessorTest, ChooseFrequency, TestSize.Level1)
                     response->centerFreq = recommendFreq;
                     return WIFI_SUCCESS;
                 });
-        EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([channels](int *chanList, int len) {
-            for (int i = 0; i < channels.size() && i < len; ++i) {
+        EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([channels](int32_t *chanList, int32_t len) {
+            for (int32_t i = 0; i < channels.size() && i < len; ++i) {
                 chanList[i] = channels[i];
             }
             return WIFI_SUCCESS;
@@ -473,7 +473,7 @@ HWTEST_F(P2pV1ProcessorTest, ChooseFrequency, TestSize.Level1)
     EXPECT_EQ(value, 2412);
 
     doMock(-1, -1, std::vector<int>());
-    EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([](int *chanList, int len) {
+    EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([](int32_t *chanList, int32_t len) {
         return ERROR_WIFI_IFACE_INVALID;
     });
     value = P2pV1Processor::ChooseFrequency(-1, gcChannels);
@@ -818,7 +818,7 @@ static bool InspectProcessorState(const std::string &remoteDeviceId, uint32_t ti
     WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
     // expect executor run and terminate
     bool expected[] = { true, false };
-    int index = 0;
+    int32_t index = 0;
     auto times = timeoutMs / deltaMs;
     for (auto i = 0; i < times && index < ARRAY_SIZE(expected); i++) {
         auto status = scheduler.CheckExecutorRunning(remoteDeviceId);
@@ -1237,7 +1237,7 @@ HWTEST_F(P2pV1ProcessorTest, RoleDecision, TestSize.Level1)
         std::string localGoMac;
         std::string remoteGoMac;
 
-        int result;
+        int32_t result;
     } caseTable[] = {
         {WIFI_DIRECT_ROLE_GO,       WIFI_DIRECT_ROLE_GC, WIFI_DIRECT_ROLE_GC, "11:22:33:44:55:66", "11:22:33:44:55:66",
          WIFI_DIRECT_ROLE_GO  },
@@ -1274,7 +1274,7 @@ HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsGo, TestSize.Level1)
         std::string localGoMac;
         std::string remoteGoMac;
 
-        int result;
+        int32_t result;
     } caseTable[] = {
         {WIFI_DIRECT_ROLE_GO,       WIFI_DIRECT_ROLE_GO,      "11:22:33:44:55:66", "22:33:44:55::66:77",
          SOFTBUS_CONN_PV1_BOTH_GO_ERR                                                                                       },
@@ -1315,7 +1315,7 @@ HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsGc, TestSize.Level1)
         std::string localGoMac;
         std::string remoteGoMac;
 
-        int result;
+        int32_t result;
     } caseTable[] = {
         {WIFI_DIRECT_ROLE_GO,    WIFI_DIRECT_ROLE_GO,   "11:22:33:44:55:66", "11:22:33:44:55:66", WIFI_DIRECT_ROLE_GC              },
         { WIFI_DIRECT_ROLE_GO,   WIFI_DIRECT_ROLE_GO,   "",                  "11:22:33:44:55:66",
@@ -1347,7 +1347,7 @@ HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsNone, TestSize.Level1)
         WifiDirectRole peerRole;
         WifiDirectRole expectRole;
 
-        int result;
+        int32_t result;
     } caseTable[] = {
         {WIFI_DIRECT_ROLE_GO,       WIFI_DIRECT_ROLE_GC,      SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR},
         { WIFI_DIRECT_ROLE_GO,      WIFI_DIRECT_ROLE_GO,      WIFI_DIRECT_ROLE_GC                                   },

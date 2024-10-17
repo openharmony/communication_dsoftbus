@@ -35,19 +35,19 @@ class ConnectionBleInterface {
 public:
     ConnectionBleInterface() {};
     virtual ~ConnectionBleInterface() {};
-    virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int num) = 0;
+    virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num) = 0;
     virtual int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac,
         uint32_t binMacLen) = 0;
     virtual int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr) = 0;
-    virtual int BleGattcDisconnect(int clientId) = 0;
-    virtual int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number) = 0;
-    virtual int SoftBusGattsStopService(int srvcHandle) = 0;
-    virtual int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId) = 0;
+    virtual int32_t BleGattcDisconnect(int32_t clientId) = 0;
+    virtual int32_t SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int32_t number) = 0;
+    virtual int32_t SoftBusGattsStopService(int32_t srvcHandle) = 0;
+    virtual int32_t SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int32_t connId) = 0;
     virtual int32_t SoftbusGattcRefreshServices(int32_t clientId) = 0;
     virtual int32_t SoftbusGattcSearchServices(int32_t clientId) = 0;
-    virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target) = 0;
-    virtual int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number) = 0;
-    virtual int BleGattcUnRegister(int clientId) = 0;
+    virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int32_t *target) = 0;
+    virtual int32_t BleGattsAddService(int32_t serverId, BtUuid srvcUuid, bool isPrimary, int32_t number) = 0;
+    virtual int32_t BleGattcUnRegister(int32_t clientId) = 0;
 };
 
 class ConnectionBleInterfaceMock : public ConnectionBleInterface {
@@ -57,13 +57,13 @@ public:
     MOCK_METHOD3(AddNumberToJsonObject, bool (cJSON *, const char * const, int));
     MOCK_METHOD4(ConvertBtMacToBinary, int32_t (const char *, uint32_t, uint8_t *, uint32_t));
     MOCK_METHOD2(SoftbusGattcConnect, int32_t (int32_t, SoftBusBtAddr *));
-    MOCK_METHOD1(BleGattcDisconnect, int (int));
-    MOCK_METHOD3(SoftBusGattsAddService, int (SoftBusBtUuid, bool, int));
-    MOCK_METHOD1(SoftBusGattsStopService, int (int));
-    MOCK_METHOD2(SoftBusGattsDisconnect, int (SoftBusBtAddr, int));
+    MOCK_METHOD1(BleGattcDisconnect, int32_t (int));
+    MOCK_METHOD3(SoftBusGattsAddService, int32_t (SoftBusBtUuid, bool, int));
+    MOCK_METHOD1(SoftBusGattsStopService, int32_t (int));
+    MOCK_METHOD2(SoftBusGattsDisconnect, int32_t (SoftBusBtAddr, int));
     MOCK_METHOD1(SoftbusGattcRefreshServices, int32_t (int32_t));
     MOCK_METHOD1(SoftbusGattcSearchServices, int32_t (int32_t));
-    MOCK_METHOD3(GetJsonObjectSignedNumberItem, bool (const cJSON *, const char * const, int *));
+    MOCK_METHOD3(GetJsonObjectSignedNumberItem, bool (const cJSON *, const char * const, int32_t *));
     MOCK_METHOD(int, BleGattsAddService, (int, BtUuid, bool, int), (override));
     MOCK_METHOD(int, BleGattcUnRegister, (int), (override));
 };

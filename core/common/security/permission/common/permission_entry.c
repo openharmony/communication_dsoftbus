@@ -274,6 +274,17 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     return permissionEntry;
 }
 
+static void PrintAnonymousMessage(const char *src, const char *dest)
+{
+    char *tmpSrc = NULL;
+    char *tmpDest = NULL;
+    Anonymize(src, &tmpSrc);
+    Anonymize(dest, &tmpDest);
+    COMM_LOGD(COMM_PERM, "src=%{public}s, dest=%{public}s", AnonymizeWrapper(tmpSrc), AnonymizeWrapper(tmpDest));
+    AnonymizeFree(tmpSrc);
+    AnonymizeFree(tmpDest);
+}
+
 int32_t CompareString(const char *src, const char *dest, bool regexp)
 {
     if (src == NULL || dest == NULL) {
@@ -286,14 +297,14 @@ int32_t CompareString(const char *src, const char *dest, bool regexp)
             return SOFTBUS_PERMISSION_DENIED;
         }
         if (regexec(&regComp, dest, 0, NULL, 0) == 0) {
-            COMM_LOGD(COMM_PERM, "src=%{public}s, dest=%{public}s", src, dest);
+            PrintAnonymousMessage(src, dest);
             regfree(&regComp);
             return SOFTBUS_OK;
         }
         regfree(&regComp);
     } else {
         if (strcmp(src, dest) == 0) {
-            COMM_LOGD(COMM_PERM, "src=%{public}s, dest=%{public}s", src, dest);
+            PrintAnonymousMessage(src, dest);
             return SOFTBUS_OK;
         }
     }
@@ -496,6 +507,7 @@ void DeinitPermissionJson(void)
     }
     SoftBusMutexUnlock(&g_permissionEntryList->lock);
     DestroySoftBusList(g_permissionEntryList);
+    g_permissionEntryList = NULL;
 }
 
 SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
@@ -520,6 +532,10 @@ static int32_t CheckPidAndUidDynamic(const SoftBusPermissionEntry *pe, const Sof
         if (appInfo->uid == pItem->uid && appInfo->pid == pItem->pid) {
             return GRANTED_APP;
         }
+    }
+    if (appInfo == NULL) {
+        COMM_LOGE(COMM_PERM, "Linked list is empty");
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
     char *tmpName = NULL;
     Anonymize(pe->sessionName, &tmpName);
@@ -617,7 +633,10 @@ bool PermIsSecLevelPublic(const char *sessionName)
         }
     }
     (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
-    COMM_LOGD(COMM_PERM, "PermIsSecLevelPublic: sessionName=%{public}s, ret=%{public}d", sessionName, ret);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    COMM_LOGD(COMM_PERM, "sessionName=%{public}s, ret=%{public}d", AnonymizeWrapper(tmpName), ret);
+    AnonymizeFree(tmpName);
     return ret;
 }
 
@@ -649,7 +668,11 @@ static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry
 
     size_t length = strlen(sessionName);
     if (length >= SESSION_NAME_SIZE_MAX) {
-        COMM_LOGE(COMM_PERM, "the length is too long. length=%{public}zd, sessionName=%{public}s", length, sessionName);
+        char *tmpName = NULL;
+        Anonymize(sessionName, &tmpName);
+        COMM_LOGE(COMM_PERM, "the length is too long. length=%{public}zd, sessionName=%{public}s",
+            length, AnonymizeWrapper(tmpName));
+        AnonymizeFree(tmpName);
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s(permissionEntry->sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
@@ -716,7 +739,10 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     g_dynamicPermissionList->cnt++;
     SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
 
-    COMM_LOGD(COMM_PERM, "session dynamic permission granted. sessionName=%{public}s", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    COMM_LOGD(COMM_PERM, "session dynamic permission granted. sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }
 
@@ -735,7 +761,11 @@ int32_t DeleteDynamicPermission(const char *sessionName)
             SoftBusFree(pe);
             g_dynamicPermissionList->cnt--;
             SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
-            COMM_LOGI(COMM_PERM, "session dynamic permission deleted. sessionName=%{public}s", sessionName);
+            char *tmpName = NULL;
+            Anonymize(sessionName, &tmpName);
+            COMM_LOGI(COMM_PERM, "session dynamic permission deleted. sessionName=%{public}s",
+                AnonymizeWrapper(tmpName));
+            AnonymizeFree(tmpName);
             return SOFTBUS_OK;
         }
     }

@@ -22,7 +22,7 @@
 
 namespace OHOS {
 #define TEST_JSON "{\"errcode\":1}"
-static constexpr int MSG_BUFF_MAX_LEN = 100;
+static constexpr int32_t MSG_BUFF_MAX_LEN = 100;
 static void DoJsonUtilsFuzz(const char *data)
 {
     char buffer[MSG_BUFF_MAX_LEN] = TEST_JSON;
@@ -47,11 +47,12 @@ static void DoJsonUtilsFuzz(const char *data)
     AddStringToJsonObject(object, "name", data);
     int32_t age = *(reinterpret_cast<const int32_t *>(data));
     AddNumberToJsonObject(object, "age", age);
+    cJSON_Delete(object);
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
         return 0;

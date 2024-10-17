@@ -22,10 +22,12 @@
 #include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
 #include "data/link_manager.h"
+#include "event/wifi_direct_event_dispatcher.h"
 #include "processor_selector_factory.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_dfx.h"
+#include "wifi_direct_scheduler_factory.h"
 
 namespace OHOS::SoftBus {
 ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback)
@@ -101,6 +103,11 @@ void ConnectCommand::OnFailure(int32_t reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d, remoteDeviceId=%{public}s",
         info_.info_.requestId, reason, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+    if (reason == SOFTBUS_CONN_NEED_RENEGOTIATE && !HasRetried()) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "retry");
+        WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(info_.info_, callback_, true);
+        return;
+    }
     if (failureCallback_ != nullptr) {
         failureCallback_(reason);
         return;

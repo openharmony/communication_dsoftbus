@@ -44,9 +44,23 @@
 #define P2P_VERIFY_REQUEST 0
 #define P2P_VERIFY_REPLY 1
 
-static int32_t g_p2pSessionPort = -1;
-static char g_p2pSessionIp[IP_LEN] = {0};
-static SoftBusMutex g_p2pLock;
+typedef struct {
+    ListNode node;
+    char peerUuid[UUID_BUF_LEN];
+} P2pListenerInfo;
+
+typedef struct {
+    char p2pSessionIp[IP_LEN];
+    int32_t p2pSessionPort;
+    SoftBusList *peerDeviceInfoList;
+} P2pSessionInfo;
+
+static P2pSessionInfo g_p2pSessionInfo = {
+    .p2pSessionIp = { 0 },
+    .p2pSessionPort = -1,
+    .peerDeviceInfoList = NULL,
+};
+
 static SoftBusList *g_hmlListenerList = NULL;
 
 static int32_t StartNewP2pListener(const char *ip, int32_t *port)
@@ -70,7 +84,7 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
         return SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED;
     }
     *port = listenerPort;
-    g_p2pSessionPort = *port;
+    g_p2pSessionInfo.p2pSessionPort = *port;
     return SOFTBUS_OK;
 }
 
@@ -132,16 +146,80 @@ void StopHmlListener(ListenerModule module)
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
+// need get peerDeviceInfoList->lock before call this function
+static void ClearP2pSessionInfo(void)
+{
+    g_p2pSessionInfo.p2pSessionPort = -1;
+    (void)memset_s(
+        g_p2pSessionInfo.p2pSessionIp, sizeof(g_p2pSessionInfo.p2pSessionIp), 0, sizeof(g_p2pSessionInfo.p2pSessionIp));
+
+    P2pListenerInfo *item = NULL;
+    P2pListenerInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+
+    g_p2pSessionInfo.peerDeviceInfoList->cnt = 0;
+}
+
+// need get peerDeviceInfoList->lock before call this function
 void StopP2pSessionListener()
 {
-    if (g_p2pSessionPort > 0) {
+    if (g_p2pSessionInfo.p2pSessionPort > 0) {
         if (StopBaseListener(DIRECT_CHANNEL_SERVER_P2P) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "stop listener fail");
         }
     }
 
-    g_p2pSessionPort = -1;
-    g_p2pSessionIp[0] = '\0';
+    ClearP2pSessionInfo();
+}
+
+void StopP2pListenerByRemoteUuid(const char *peerUuid)
+{
+    if (peerUuid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, peerUuid is null");
+        return;
+    }
+    if (g_p2pSessionInfo.peerDeviceInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "peerDeviceInfoList is null");
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_p2pSessionInfo.peerDeviceInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock peerDeviceInfoList failed");
+        return;
+    }
+    if (IsListEmpty(&g_p2pSessionInfo.peerDeviceInfoList->list)) {
+        TRANS_LOGI(TRANS_CTRL, "Empty List, just stop p2p listener");
+        ClearP2pSessionInfo();
+        (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
+        (void)StopBaseListener(DIRECT_CHANNEL_SERVER_P2P);
+        return;
+    }
+    char *anonymizePeerUuid = NULL;
+    Anonymize(peerUuid, &anonymizePeerUuid);
+    P2pListenerInfo *item = NULL;
+    P2pListenerInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
+        if (strcmp(item->peerUuid, peerUuid) == 0) {
+            ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL, "del p2p listener peerUuid=%{public}s node", anonymizePeerUuid);
+            AnonymizeFree(anonymizePeerUuid);
+            SoftBusFree(item);
+            g_p2pSessionInfo.peerDeviceInfoList->cnt--;
+            if (g_p2pSessionInfo.peerDeviceInfoList->cnt <= 0) {
+                TRANS_LOGI(TRANS_CTRL, "no device listen on p2p, stop listener");
+                (void)StopBaseListener(DIRECT_CHANNEL_SERVER_P2P);
+                ClearP2pSessionInfo();
+            }
+            (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
+    TRANS_LOGE(TRANS_CTRL, "not found peerUuid=%{public}s in peerDeviceInfoList", anonymizePeerUuid);
+    AnonymizeFree(anonymizePeerUuid);
 }
 
 static void NotifyP2pSessionConnClear(ListNode *sessionConnList)
@@ -200,6 +278,24 @@ static int32_t CreatHmlListenerList(void)
     return SOFTBUS_OK;
 }
 
+static int32_t CreateP2pListenerList(void)
+{
+    (void)memset_s(
+        g_p2pSessionInfo.p2pSessionIp, sizeof(g_p2pSessionInfo.p2pSessionIp), 0, sizeof(g_p2pSessionInfo.p2pSessionIp));
+    g_p2pSessionInfo.p2pSessionPort = -1;
+    if (g_p2pSessionInfo.peerDeviceInfoList != NULL) {
+        TRANS_LOGI(TRANS_CTRL, "list allready init");
+        return SOFTBUS_OK;
+    }
+    g_p2pSessionInfo.peerDeviceInfoList = CreateSoftBusList();
+    if (g_p2pSessionInfo.peerDeviceInfoList == NULL) {
+        TRANS_LOGI(TRANS_CTRL, "create peerDeviceInfoList failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
 ListenerModule GetModuleByHmlIp(const char *ip)
 {
     HmlListenerInfo *item = NULL;
@@ -232,17 +328,30 @@ void ClearHmlListenerByUuid(const char *peerUuid)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            int32_t module = item->moudleType; // item will free in StopHmlListener
             StopHmlListener(item->moudleType);
-            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", item->moudleType);
+            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", module);
         }
     }
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
     return;
 }
 
+static void AnonymizeLogHmlListenerInfo(const char *ip, const char *peerUuid)
+{
+    char *tmpIp = NULL;
+    char *tmpUuid = NULL;
+    Anonymize(ip, &tmpIp);
+    Anonymize(peerUuid, &tmpUuid);
+    TRANS_LOGI(TRANS_CTRL,
+        "StartHmlListener: ip=%{public}s, peerUuid=%{public}s.", AnonymizeWrapper(tmpIp), AnonymizeWrapper(tmpUuid));
+    AnonymizeFree(tmpIp);
+    AnonymizeFree(tmpUuid);
+}
+
 static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerUuid)
 {
-    TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
+    AnonymizeLogHmlListenerInfo(ip, peerUuid);
     if (g_hmlListenerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "hmlListenerList not init");
         return SOFTBUS_NO_INIT;
@@ -254,7 +363,7 @@ static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerU
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
-        if (strncmp(item->myIp, ip, IP_LEN) == 0) {
+        if (strncmp(item->myIp, ip, IP_LEN) == 0 && strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
             *port = item->myPort;
             (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
             TRANS_LOGI(TRANS_CTRL, "succ, port=%{public}d", *port);
@@ -304,43 +413,80 @@ static void AnonymizeIp(const char *ip, char *sessionIp, int32_t port)
     AnonymizeFree(anonyP2pIp);
 }
 
-static int32_t StartP2pListener(const char *ip, int32_t *port)
+// need get peerDeviceInfoList->lock before call this function
+static void CheckAndAddPeerDeviceInfo(const char *peerUuid)
+{
+    if (g_p2pSessionInfo.peerDeviceInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "peerDeviceInfoList is null");
+        return;
+    }
+    char *anonymizePeerUuid = NULL;
+    Anonymize(peerUuid, &anonymizePeerUuid);
+    P2pListenerInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
+        if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            TRANS_LOGD(TRANS_CTRL, "exit p2pListener with peerUuid=%{public}s", anonymizePeerUuid);
+            AnonymizeFree(anonymizePeerUuid);
+            return;
+        }
+    }
+
+    P2pListenerInfo *newItem = (P2pListenerInfo *)SoftBusCalloc(sizeof(P2pListenerInfo));
+    if (newItem == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc P2pListenerInfo failed");
+        AnonymizeFree(anonymizePeerUuid);
+        return;
+    }
+    if (strncpy_s(newItem->peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "strncpy_s peerUuid=%{public}s failed", anonymizePeerUuid);
+        AnonymizeFree(anonymizePeerUuid);
+        SoftBusFree(newItem);
+        return;
+    }
+    ListAdd(&g_p2pSessionInfo.peerDeviceInfoList->list, &newItem->node);
+    g_p2pSessionInfo.peerDeviceInfoList->cnt++;
+    TRANS_LOGD(TRANS_CTRL, "add peerUuid=%{public}s succeed", anonymizePeerUuid);
+    AnonymizeFree(anonymizePeerUuid);
+}
+
+static int32_t StartP2pListener(const char *ip, int32_t *port, const char *peerUuid)
 {
     if (ip == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ip is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_p2pLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_p2pSessionInfo.peerDeviceInfoList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
-        AnonymizeIp(ip, g_p2pSessionIp, g_p2pSessionPort);
+    if (g_p2pSessionInfo.p2pSessionPort > 0 && strcmp(ip, g_p2pSessionInfo.p2pSessionIp) != 0) {
+        AnonymizeIp(ip, g_p2pSessionInfo.p2pSessionIp, g_p2pSessionInfo.p2pSessionPort);
         ClearP2pSessionConn();
         StopP2pSessionListener();
     }
-    if (g_p2pSessionPort > 0) {
-        *port = g_p2pSessionPort;
+    CheckAndAddPeerDeviceInfo(peerUuid);
+    if (g_p2pSessionInfo.p2pSessionPort > 0) {
+        *port = g_p2pSessionInfo.p2pSessionPort;
         TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
-        (void)SoftBusMutexUnlock(&g_p2pLock);
+        (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
         return SOFTBUS_OK;
     }
 
     int32_t ret = StartNewP2pListener(ip, port);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "start new listener fail");
-        (void)SoftBusMutexUnlock(&g_p2pLock);
+        (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
         return ret;
     }
 
-    g_p2pSessionPort = *port;
-    if (strcpy_s(g_p2pSessionIp, sizeof(g_p2pSessionIp), ip) != EOK) {
+    g_p2pSessionInfo.p2pSessionPort = *port;
+    if (strcpy_s(g_p2pSessionInfo.p2pSessionIp, sizeof(g_p2pSessionInfo.p2pSessionIp), ip) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s fail");
         StopP2pSessionListener();
-        (void)SoftBusMutexUnlock(&g_p2pLock);
+        (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
         return SOFTBUS_STRCPY_ERR;
     }
-    (void)SoftBusMutexUnlock(&g_p2pLock);
+    (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
     TRANS_LOGI(TRANS_CTRL, "end: port=%{public}d", *port);
     return SOFTBUS_OK;
 }
@@ -577,9 +723,8 @@ static int32_t PackAndSendVerifyP2pRsp(const char *myIp, int32_t myPort, int64_t
     return SOFTBUS_OK;
 }
 
-static int32_t StartHmlListenerByUuid(AuthHandle authHandle, const char *myIp, int32_t *myPort)
+static int32_t TransGetRemoteUuidByAuthHandle(AuthHandle authHandle, char *peerUuid)
 {
-    char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t ret = SOFTBUS_OK;
     if (authHandle.type == AUTH_LINK_TYPE_BLE) {
         AuthHandle authHandleTmp = { 0 };
@@ -595,7 +740,7 @@ static int32_t StartHmlListenerByUuid(AuthHandle authHandle, const char *myIp, i
         TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
         return ret;
     }
-    return StartHmlListener(myIp, myPort, peerUuid);
+    return SOFTBUS_OK;
 }
 
 static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSON *json, bool isAuthLink)
@@ -626,10 +771,13 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
             "get wifidirectmanager or localip fail", isAuthLink);
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
+    char peerUuid[UUID_BUF_LEN] = { 0 };
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
     if (IsHmlIpAddr(myIp)) {
-        ret = StartHmlListenerByUuid(authHandle, myIp, &myPort);
+        ret = StartHmlListener(myIp, &myPort, peerUuid);
     } else {
-        ret = StartP2pListener(myIp, &myPort);
+        ret = StartP2pListener(myIp, &myPort, peerUuid);
     }
     if (ret != SOFTBUS_OK) {
         OutputAnonymizeIpAddress(myIp, peerIp);
@@ -998,7 +1146,7 @@ static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, 
         if (IsHmlIpAddr(conn->appInfo.myData.addr)) {
             return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
         } else {
-            return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+            return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
         }
     }
     return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
@@ -1056,13 +1204,11 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 int32_t P2pDirectChannelInit(void)
 {
     TRANS_LOGI(TRANS_INIT, "enter.");
-    if (SoftBusMutexInit(&g_p2pLock, NULL) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "init lock failed");
-        return SOFTBUS_TRANS_INIT_FAILED;
-    }
+
     int32_t ret = CreatHmlListenerList();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "CreatHmlListenerList failed");
-
+    ret = CreateP2pListenerList();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "Init p2p listener list failed");
     AuthTransListener p2pTransCb = {
         .onDataReceived = OnAuthDataRecv,
         .onDisconnected = OnAuthChannelClose,

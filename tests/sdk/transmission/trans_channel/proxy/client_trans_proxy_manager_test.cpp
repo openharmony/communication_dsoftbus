@@ -166,7 +166,7 @@ public:
 
 void ClientTransProxyManagerTest::SetUpTestCase(void)
 {
-    int ret = ClientTransProxyInit(&g_clientSessionCb);
+    int32_t ret = ClientTransProxyInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SetAceessTokenPermission("dsoftbusTransTest");
 }
@@ -180,7 +180,7 @@ void ClientTransProxyManagerTest::TearDownTestCase(void) {}
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level0)
 {
-    int ret = ClientTransProxyInit(nullptr);
+    int32_t ret = ClientTransProxyInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -192,7 +192,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level0)
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestSize.Level0)
 {
-    int ret = ClientTransProxyOnChannelOpened(g_proxySessionName, nullptr);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ChannelInfo channelInfo = {0};
@@ -209,7 +209,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSize.Level0)
 {
     int32_t channelId = 1;
-    int ret = ClientTransProxyOnDataReceived(channelId, nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+    int32_t ret = ClientTransProxyOnDataReceived(channelId, nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
@@ -448,7 +448,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize
 HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Level0)
 {
     int32_t channelId = 1;
-    int ret = TransProxyChannelSendFile(channelId, nullptr, g_proxyFileSet, TEST_FILE_CNT);
+    int32_t ret = TransProxyChannelSendFile(channelId, nullptr, g_proxyFileSet, TEST_FILE_CNT);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyChannelSendFile(channelId, g_testProxyFileName, g_proxyFileSet, MAX_SEND_FILE_NUM + TEST_FILE_CNT);
@@ -473,7 +473,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, Te
     int32_t channelId = 1;
     ProxyChannelInfoDetail info;
     memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
-    int ret = ClientTransProxyGetInfoByChannelId(channelId, nullptr);
+    int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyGetInfoByChannelId(channelId, &info);

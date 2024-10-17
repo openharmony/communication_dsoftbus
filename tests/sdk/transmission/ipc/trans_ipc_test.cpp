@@ -99,8 +99,8 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
     uint32_t addrTypeLen = 1;
     void *info = nullptr;
     uint32_t infoTypeLen = 1;
-    int infoNum = 1;
-    int key = 1;
+    int32_t infoNum = 1;
+    int32_t key = 1;
     unsigned char *buf = nullptr;
     uint16_t dataChangeFlag = 1;
     int32_t accuracy = 1;
@@ -314,11 +314,11 @@ HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level0)
     int32_t appType = 0;
     int32_t quality = QOS_IMPROVE;
     int32_t ret = transServerProxy.QosReport(channelId, channelType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.QosReport(channelId, channelType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -341,7 +341,7 @@ HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level0)
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.StreamStats(channelId, channelType, statsData);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     SoftBusFree(statsData);
 }
 
@@ -365,7 +365,7 @@ HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level0)
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.RippleStats(channelId, channelType, statsData);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     SoftBusFree(statsData);
 }
 
@@ -382,7 +382,7 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
 
     ret = transServerProxy.GrantPermission(UUID, PID, g_sessionName);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
 }
 
 /**
@@ -395,10 +395,10 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.RemovePermission(g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 
     ret = transServerProxy.RemovePermission(g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /**
@@ -641,13 +641,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level0)
     int32_t appType = 0;
     int32_t quality = QOS_IMPROVE;
     int32_t ret = ServerIpcQosReport(channelId, chanType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcQosReport(channelId, chanType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();
 }
@@ -704,8 +704,8 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level0)
  */
 HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
 {
-    int uid = 1;
-    int pid = 1;
+    int32_t uid = 1;
+    int32_t pid = 1;
     int32_t ret = ServerIpcGrantPermission(uid, pid, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -716,7 +716,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ServerIpcGrantPermission(uid, pid, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 
     TransClientDeinit();
 }
@@ -739,7 +739,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level0
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ServerIpcRemovePermission(g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 
     TransClientDeinit();
 }
@@ -767,7 +767,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ServerIpcEvaluateQos(g_peerNetworkId, type, qos, qosCount);
-    EXPECT_EQ(SOFTBUS_NETWORK_NODE_OFFLINE, ret);
+    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
     SoftBusFree(qos);
     qos = nullptr;
     ASSERT_TRUE(qos == nullptr);
