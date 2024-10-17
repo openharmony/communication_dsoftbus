@@ -1249,6 +1249,10 @@ int32_t LnnTriggerDataLevelHeartbeat(void)
 int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout)
 {
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDirectHeartbeat");
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "networkId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_DIRECT,
         false, networkId, timeout);
     if (ret != SOFTBUS_OK) {
