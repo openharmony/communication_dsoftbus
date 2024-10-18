@@ -68,7 +68,7 @@ constexpr uint32_t NET_CAP = 63;
 constexpr uint32_t FREQUENCY_2G_FIRST = 2412;
 constexpr uint32_t LOCAL_NUM = 8192;
 constexpr uint32_t ROM_NUM = 8;
-constexpr uint32_t ROM_PORT = 2;
+constexpr uint32_t ROM_NUM2 = 2;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
@@ -96,7 +96,7 @@ static void OnLaneRequestFail(uint32_t laneId, int32_t reason)
     GTEST_LOG_(INFO) << "OnLaneRequestFail";
 }
 
-static ILaneListener g_LaneListener = {
+static ILaneListener g_listener2 = {
     .onLaneRequestSuccess = OnLaneRequestSuccess,
     .onLaneRequestFail = OnLaneRequestFail,
 };
@@ -290,7 +290,7 @@ static void OnLaneAllocFailNoExcept(uint32_t laneHandle, int32_t errCode)
     CondSignal();
 }
 
-static void OnLaneAllocFailNoExceptLnnAlloc(uint32_t laneHandle, int32_t errCode)
+static void OnLaneAllocFailNoExcept2(uint32_t laneHandle, int32_t errCode)
 {
     GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle;
     EXPECT_EQ(errCode, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
@@ -311,9 +311,9 @@ static LaneAllocListener g_listenerCbForP2p = {
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
-static LaneAllocListener g_listenerCbForP2pLnnAlloc = {
+static LaneAllocListener g_listenerCbForP2p2 = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
-    .onLaneAllocFail = OnLaneAllocFailNoExceptLnnAlloc,
+    .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
 };
@@ -2754,35 +2754,35 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_02, TestSize.Level1)
 
     EXPECT_CALL(wifiMock, SoftBusGetWifiState)
         .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_INACTIVE));
-    int32_t ret = GetErrCodeOfLink(NODE_NETWORK_ID, LANE_WLAN_2P4G);
+    int32_t ret = GetErrCodeOfLink("networkId", LANE_WLAN_2P4G);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
-    ret = GetErrCodeOfLink(NODE_NETWORK_ID, LANE_P2P_REUSE);
+    ret = GetErrCodeOfLink("networkId", LANE_P2P_REUSE);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
-    ret = GetErrCodeOfLink(NODE_NETWORK_ID, LANE_HML);
+    ret = GetErrCodeOfLink("networkId", LANE_HML);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
     EXPECT_CALL(wifiMock, SoftBusGetWifiState)
         .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_DEACTIVATING));
-    ret = GetErrCodeOfLink(NODE_NETWORK_ID, LANE_HML);
+    ret = GetErrCodeOfLink("networkId", LANE_HML);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
-    ret = GetErrCodeOfLink(NODE_NETWORK_ID, LANE_P2P_REUSE);
+    ret = GetErrCodeOfLink("networkId", LANE_P2P_REUSE);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
     EXPECT_CALL(mock, SoftBusGetBtState)
         .WillRepeatedly(Return(0));
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BR), SOFTBUS_LANE_BT_OFF);
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BLE), SOFTBUS_LANE_BT_OFF);
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BLE_DIRECT), SOFTBUS_LANE_BT_OFF);
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BLE_REUSE), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BR), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_DIRECT), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_REUSE), SOFTBUS_LANE_BT_OFF);
 
     EXPECT_CALL(mock, SoftBusGetBtState)
         .WillRepeatedly(Return(1));
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BR), SOFTBUS_LANE_LOCAL_NO_BR_CAP);
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BLE), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
-    EXPECT_EQ(GetErrCodeOfLink(NODE_NETWORK_ID, LANE_BLE_DIRECT), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BR), SOFTBUS_LANE_LOCAL_NO_BR_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_DIRECT), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
 }
 
 /*
@@ -3145,7 +3145,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_08, TestSize.Level1)
 
     allocInfo.linkList.linkTypeNum = LANE_LINK_TYPE_BUTT - 1;
     allocInfo.type = LANE_TYPE_TRANS;
-    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForP2pLnnAlloc);
+    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForP2p2);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = laneManager->lnnFreeLane(laneHandle);
@@ -3246,7 +3246,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_13, TestSize.Level1)
     requestOption.requestInfo.trans.expectedLink.linkTypeNum = 1;
     requestOption.requestInfo.trans.expectedLink.linkType[0] = LANE_WLAN_5G;
 
-    int32_t ret = LnnRequestLane(laneReqId, &requestOption, &g_LaneListener);
+    int32_t ret = LnnRequestLane(laneReqId, &requestOption, &g_listener2);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 }
 
@@ -3507,9 +3507,9 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_22, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(ROM_PORT), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(ROM_NUM2), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_PORT), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_NUM2), Return(SOFTBUS_OK)));
     ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
