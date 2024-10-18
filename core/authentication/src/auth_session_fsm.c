@@ -545,9 +545,11 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
         case FSM_MSG_AUTH_TIMEOUT:
             AUTH_LOGE(AUTH_FSM, "auth fsm timeout. authSeq=%{public}" PRId64 "", authFsm->authSeq);
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_TIMEOUT);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         case FSM_MSG_DEVICE_NOT_TRUSTED:
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         case FSM_MSG_DEVICE_DISCONNECTED:
             if (authFsm->info.isNodeInfoReceived && authFsm->info.isCloseAckReceived) {
