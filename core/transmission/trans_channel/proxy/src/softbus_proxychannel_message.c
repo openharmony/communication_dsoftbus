@@ -249,7 +249,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
 
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
-        if (msg->dateLen < sizeof(uint32_t)) {
+        if ((uint32_t)msg->dateLen < sizeof(uint32_t)) {
             TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
