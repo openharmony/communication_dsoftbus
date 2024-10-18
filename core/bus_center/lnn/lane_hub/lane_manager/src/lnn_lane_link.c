@@ -343,7 +343,7 @@ static void DetectEnableWifiDirectApply(const LaneLinkInfo *linkInfo, int32_t po
         LNN_LOGI(LNN_LANE, "link.type=%{public}d, link.bw=%{public}d", item->link.type, item->link.linkInfo.p2p.bw);
         if (item->link.type == LANE_HML) {
             if (item->clientRef > 0) {
-                powerInfo.activeHml = item->clientRef;
+                powerInfo.activeHml += item->clientRef;
             }
             if (item->isServerSide) {
                 powerInfo.passiveHml++;
