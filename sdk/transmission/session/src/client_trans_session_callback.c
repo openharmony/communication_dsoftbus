@@ -308,8 +308,8 @@ static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const 
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
         "TransOnSessionOpened: sessionName=%{public}s, channelId=%{public}d, channelType=%{public}d, flag=%{public}d,"
-        "isServer=%{public}d, type=%{public}d, crc=%{public}d",
-        tmpName, channel->channelId, channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
+        "isServer=%{public}d, type=%{public}d, crc=%{public}d", AnonymizeWrapper(tmpName), channel->channelId,
+        channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 }
 
@@ -613,7 +613,7 @@ int32_t ClientTransIfChannelForSocket(const char *sessionName, bool *isSocket)
     if (ret != SOFTBUS_OK) {
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionName=%{public}s", tmpName);
+        TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionName=%{public}s", AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         return ret;
     }

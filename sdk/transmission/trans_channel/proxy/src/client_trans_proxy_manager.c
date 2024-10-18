@@ -342,7 +342,7 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
         (void)ClientTransProxyDelChannelInfo(channel->channelId);
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGE(TRANS_SDK, "notify session open fail, sessionName=%{public}s.", tmpName);
+        TRANS_LOGE(TRANS_SDK, "notify session open fail, sessionName=%{public}s.", AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         return ret;
     }
