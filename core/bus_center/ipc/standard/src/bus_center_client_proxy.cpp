@@ -125,6 +125,26 @@ int32_t ClinetNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t 
     return SOFTBUS_OK;
 }
 
+int32_t ClientNotifyHichainProofException(
+    const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
+    SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
+    const char *dmPkgName = "ohos.distributedhardware.devicemanager";
+    for (const auto proxy : proxyMap) {
+        if (strcmp(dmPkgName, proxy.first.c_str()) != 0) {
+            continue;
+        }
+        sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_ERR;
+        }
+        clientProxy->OnHichainProofException(proxy.first.c_str(), deviceId, deviceIdLen, deviceTypeId, errCode);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {

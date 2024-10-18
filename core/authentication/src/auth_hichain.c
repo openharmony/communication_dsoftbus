@@ -25,6 +25,7 @@
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "lnn_event.h"
+#include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
@@ -46,7 +47,7 @@
 #define ERRCODE_SHIFT_16BIT        16
 #define ERRCODE_SHIFT_12BIT        12
 #define ERRCODE_SHIFT_8BIT         8
-
+#define SHORT_UDID_HASH_LEN        8
 
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
@@ -221,6 +222,42 @@ static DeviceAuthCallback g_hichainCallback = {
     .onRequest = OnRequest
 };
 
+static int32_t GetUdidHash(const char *udid, char *udidHash)
+{
+    if (udid == NULL || udidHash == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t rc = SOFTBUS_OK;
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
+    rc = SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash);
+    if (rc != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "generate udidhash fail");
+        return rc;
+    }
+    rc = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, SHORT_UDID_HASH_LEN);
+    if (rc != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "convert bytes to string fail");
+        return rc;
+    }
+    return SOFTBUS_OK;
+}
+
+static void DeletePcRestrictNode(const char *udid)
+{
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    uint32_t count = 0;
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+
+    if (GetUdidHash(udid, peerUdidHash) == SOFTBUS_OK &&
+        GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+        DeleteNodeFromPcRestrictMap(peerUdidHash);
+        AUTH_LOGI(AUTH_HICHAIN, "delete restrict node success. udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    }
+    AnonymizeFree(anonyUdid);
+}
+
 static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
 {
     cJSON *msg = cJSON_Parse(groupInfoStr);
@@ -279,6 +316,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     AnonymizeFree(anonyUdid);
     if (info.groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
         AUTH_LOGI(AUTH_HICHAIN, "ignore same account udid");
+        DeletePcRestrictNode(udid);
         return;
     }
     char localUdid[UDID_BUF_LEN] = { 0 };
