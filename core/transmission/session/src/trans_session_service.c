@@ -96,7 +96,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
-        pkgName, tmpName, uid, pid);
+        pkgName, AnonymizeWrapper(tmpName), uid, pid);
     AnonymizeFree(tmpName);
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     if (newNode == NULL) {

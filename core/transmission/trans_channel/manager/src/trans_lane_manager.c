@@ -295,7 +295,7 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
     }
     char *anonymizePkgName = NULL;
     Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
     AnonymizeFree(anonymizePkgName);
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
@@ -399,7 +399,8 @@ static void AnonymizeLogSessionNameWhenNotFound(const char *sessionName, int32_t
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGE(
-        TRANS_SVC, "socket info not found. sessionName=%{public}s, sessionId=%{public}d", tmpName, sessionId);
+        TRANS_SVC, "socket info not found. sessionName=%{public}s, sessionId=%{public}d",
+            AnonymizeWrapper(tmpName), sessionId);
     AnonymizeFree(tmpName);
 }
 
@@ -444,7 +445,8 @@ int32_t TransAddSocketChannelInfo(
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
         TRANS_LOGI(
-            TRANS_SVC, "socket lane info has existed. socketId=%{public}d, sessionName=%{public}s", sessionId, tmpName);
+            TRANS_SVC, "socket lane info has existed. socketId=%{public}d, sessionName=%{public}s",
+                sessionId, AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         SoftBusFree(newSocket);
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
@@ -552,7 +554,7 @@ int32_t TransDeleteSocketChannelInfoBySession(const char *sessionName, int32_t s
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
             TRANS_LOGI(TRANS_CTRL, "delete socket channel info, sessionName=%{public}s, sessionId=%{public}d",
-                tmpName, sessionId);
+                AnonymizeWrapper(tmpName), sessionId);
             AnonymizeFree(tmpName);
             return SOFTBUS_OK;
         }

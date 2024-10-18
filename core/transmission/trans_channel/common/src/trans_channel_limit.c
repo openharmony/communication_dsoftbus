@@ -85,7 +85,7 @@ bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGE(TRANS_CTRL,
-        "auth channel sessionName invalid. sessionName=%{public}s", tmpName);
+        "auth channel sessionName invalid. sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return false;
 }
