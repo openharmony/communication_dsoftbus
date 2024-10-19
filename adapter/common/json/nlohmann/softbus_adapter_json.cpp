@@ -371,3 +371,22 @@ bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value
     *size = bytes.size();
     return true;
 }
+
+bool JSON_IsArrayExist(const JsonObj *obj, const char *key)
+{
+    if (obj == nullptr || key == nullptr) {
+        COMM_LOGE(COMM_ADAPTER, "input invalid");
+        return false;
+    }
+    nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
+    if (json == nullptr) {
+        COMM_LOGE(COMM_ADAPTER, "invaild json param");
+        return false;
+    }
+    if (!json->contains(key)) {
+        COMM_LOGW(COMM_ADAPTER, "key does not exist");
+        return false;
+    }
+    nlohmann::json item = (*json)[key];
+    return item.is_array();
+}
