@@ -184,6 +184,7 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.timeStart = appInfo->timeStart;
     channelInfo.connectType = appInfo->connectType;
     channelInfo.routeType = appInfo->routeType;
+    channelInfo.osType = appInfo->osType;
     return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
         appInfo->myData.sessionName, &channelInfo);
 }
