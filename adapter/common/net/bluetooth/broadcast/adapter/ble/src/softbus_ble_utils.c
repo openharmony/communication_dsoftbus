@@ -425,8 +425,8 @@ uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen)
 static int32_t ParseFlag(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst, uint8_t index)
 {
     if (index + 1 >= advLen) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "parse flag failed");
-        return SOFTBUS_BC_ADAPTER_PARSE_FAIL;
+        DISC_LOGW(DISC_BLE_ADAPTER, "parse flag failed");
+        return SOFTBUS_OK;
     }
     dst->data.flag = advData[index + 1];
     dst->data.isSupportFlag = true;
@@ -437,8 +437,8 @@ static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcS
     uint8_t len)
 {
     if (index + 1 >= advLen) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "parse local name failed");
-        return SOFTBUS_BC_ADAPTER_PARSE_FAIL;
+        DISC_LOGW(DISC_BLE_ADAPTER, "parse local name failed");
+        return SOFTBUS_OK;
     }
     if (memcpy_s(dst->localName, sizeof(dst->localName), &advData[index + 1], len - 1) != EOK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "copy local name failed");
