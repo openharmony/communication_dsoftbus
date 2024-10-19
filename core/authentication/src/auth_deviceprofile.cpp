@@ -50,7 +50,6 @@ static bool IsNotTrustDevice(std::string deviceIdHash)
 {
     std::lock_guard<std::mutex> autoLock(g_mutex);
     if (g_notTrustedDevices.find(deviceIdHash) != g_notTrustedDevices.end()) {
-        LNN_LOGI(LNN_STATE, "device not trusted");
         return true;
     }
     return false;
@@ -123,8 +122,12 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
 {
-    if (deviceIdHash == nullptr || IsNotTrustDevice(deviceIdHash)) {
-        LNN_LOGE(LNN_STATE, "deviceIdHash is null or device not trusted");
+    if (deviceIdHash == nullptr) {
+        LNN_LOGE(LNN_STATE, "deviceIdHash is null");
+        return false;
+    }
+    if (IsNotTrustDevice(deviceIdHash)) {
+        LNN_LOGD(LNN_STATE, "deviceIdHash is null or device not trusted");
         return false;
     }
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
