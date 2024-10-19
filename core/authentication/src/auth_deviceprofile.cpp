@@ -127,7 +127,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         return false;
     }
     if (IsNotTrustDevice(deviceIdHash)) {
-        LNN_LOGD(LNN_STATE, "deviceIdHash is null or device not trusted");
+        LNN_LOGD(LNN_STATE, "device not trusted");
         return false;
     }
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
