@@ -943,7 +943,7 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
 
 int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo)
 {
-    if (connInfo == NULL){
+    if (connInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
