@@ -36,7 +36,6 @@ ohos_fuzztest("ClientTransChannelCallbackFuzzTest") {
     "../../../../../adapter/common/include",
     "../../../../../sdk/transmission/trans_channel/udp/file/include",
     "../../../../../core/transmission/common/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
   ]
 
   cflags = [
@@ -50,7 +49,10 @@ ohos_fuzztest("ClientTransChannelCallbackFuzzTest") {
 
   deps = [ "../../../../../sdk:softbus_client" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("fuzztest") {

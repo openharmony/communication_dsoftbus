@@ -28,8 +28,6 @@ ohos_fuzztest("ClientTransProxyFileCommonFuzzTest") {
     "../../../../../core/common/include",
     "../../../../../core/common/dfx/interface/include",
     "../../../../../sdk/transmission/trans_channel/proxy/include",
-    "//third_party/bounds_checking_function/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
   ]
 
   cflags = [
@@ -43,7 +41,10 @@ ohos_fuzztest("ClientTransProxyFileCommonFuzzTest") {
 
   deps = [ "../../../../../sdk:softbus_client" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("fuzztest") {

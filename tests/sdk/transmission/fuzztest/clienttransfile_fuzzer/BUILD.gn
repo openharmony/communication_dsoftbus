@@ -34,8 +34,6 @@ ohos_fuzztest("ClientTransFileFuzzTest") {
     "../../../../../sdk/transmission/session/include",
     "../../../../../sdk/transmission/trans_channel/udp/common/include",
     "../../../../../sdk/transmission/trans_channel/udp/file/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   cflags = [
