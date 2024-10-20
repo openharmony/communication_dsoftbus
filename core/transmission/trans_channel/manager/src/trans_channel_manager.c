@@ -22,14 +22,17 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_qos.h"
+#include "lnn_network_manager.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
+#include "softbus_proxychannel_transceiver.h"
 #include "softbus_qos.h"
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
@@ -48,6 +51,8 @@
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 
+#define MIGRATE_ENABLE 2
+#define MIGRATE_SUPPORTED 1
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
 #define MIN_FD_ID 1025
@@ -749,5 +754,22 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
             channelId, channelType);
     }
 
+    return ret;
+}
+
+int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
+{
+    if (connInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = SOFTBUS_TRANS_NOT_MATCH;
+    if (connInfo->type == CONNECT_TCP) {
+        ret = CheckIsWifiAuthChannel(connInfo);
+    } else if (connInfo->type == CONNECT_BR || connInfo->type == CONNECT_BLE) {
+        ret = CheckIsProxyAuthChannel(connInfo);
+    }
+    TRANS_LOGW(TRANS_CTRL, "connInfo type=%{public}d, ret=%{public}d", connInfo->type, ret);
     return ret;
 }

@@ -17,7 +17,10 @@
 
 #include <securec.h>
 
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
@@ -27,7 +30,12 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
+#include "softbus_socket.h"
+#include "softbus_transmission_interface.h"
+#include "softbus_utils.h"
+#include "softbus_datahead_transform.h"
 #include "trans_log.h"
+#include "trans_pending_pkt.h"
 
 #define TIME_OUT 10
 #define USECTONSEC 1000
