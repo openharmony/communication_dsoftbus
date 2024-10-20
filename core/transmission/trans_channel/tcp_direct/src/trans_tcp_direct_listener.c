@@ -321,7 +321,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         return SOFTBUS_TRANS_ADD_TRIGGER_FAILED;
     }
     ret = StartVerifySession(conn);
-    TransEventExtra extra = { 
+    TransEventExtra extra = {
         .socketName = NULL,
         .peerNetworkId = NULL,
         .calleePkg = NULL,
@@ -330,7 +330,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         .channelId = conn->channelId,
         .authId = conn->authHandle.authId,
         .errcode = ret,
-        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED 
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
     if (ret != SOFTBUS_OK) {
