@@ -14,6 +14,7 @@
  */
 #include "trans_tcp_direct_json.h"
 
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_message.h"

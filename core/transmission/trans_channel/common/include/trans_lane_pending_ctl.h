@@ -71,7 +71,6 @@ int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *conn
 bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode);
 int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
-int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
 int32_t TransAuthWithParaReqLanePendingInit(void);
 void TransAuthWithParaReqLanePendingDeinit(void);
 int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessionName,

@@ -19,10 +19,13 @@
 
 #include "auth_device_common_key.h"
 #include "lnn_device_info_recovery.h"
+#include "lnn_lane_link.h"
+#include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -35,8 +38,8 @@
 #include "trans_auth_negotiation.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
-#include "trans_event.h"
 #include "trans_log.h"
+#include "trans_event.h"
 
 #define ID_OFFSET (1)
 
@@ -113,6 +116,7 @@ int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer)
 {
     ProxyConnInfo *removeNode = NULL;
     ProxyConnInfo *tmpNode = NULL;
+
     if ((g_proxyConnectionList == NULL) || (connId == 0)) {
         TRANS_LOGE(TRANS_MSG, "g_proxyConnectionList or connId is null");
         return SOFTBUS_NO_INIT;
@@ -384,6 +388,7 @@ static void TransProxyOnConnected(uint32_t connId, const ConnectionInfo *connInf
 {
     (void)connInfo;
     TRANS_LOGI(TRANS_CTRL, "connect enabled, connId=%{public}u", connId);
+    return;
 }
 
 static void TransProxyOnDisConnect(uint32_t connId, const ConnectionInfo *connInfo)
@@ -392,6 +397,7 @@ static void TransProxyOnDisConnect(uint32_t connId, const ConnectionInfo *connIn
     TRANS_LOGI(TRANS_CTRL, "connect disabled, connId=%{public}u", connId);
     TransProxyDelByConnId(connId);
     TransDelConnByConnId(connId);
+    return;
 }
 
 static bool CompareConnectOption(const ConnectOption *itemConnInfo, const ConnectOption *connInfo)
@@ -830,22 +836,21 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
     } else {
         msg->msgHead.cipher |= BAD_CIPHER;
     }
-
     TRANS_LOGW(TRANS_MSG, "send msg is bad key myChannelId=%{public}d, peerChannelId=%{public}d",
         msg->msgHead.myId, msg->msgHead.peerId);
-    
+
     int32_t ret = PackPlaintextMessage(&msg->msgHead, &dataInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "PackPlaintextMessage fail");
 
     ret = TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "send bad key buf fail");
-
     return SOFTBUS_OK;
 }
 
 static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     ProxyMessage msg;
+
     TRANS_LOGI(TRANS_CTRL, "recv data connId=%{public}u, moduleId=%{public}d, seq=%{public}" PRId64 ", len=%{public}d",
         connectionId, moduleId, seq, len);
     TRANS_CHECK_AND_RETURN_LOGE(data != NULL && moduleId == MODULE_PROXY_CHANNEL, TRANS_CTRL, "invalid param");
@@ -933,5 +938,43 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     TRANS_LOGE(TRANS_INIT, "proxy conn node not found. connId=%{public}u", connId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
+int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo)
+{
+    if (connInfo == NULL){
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_proxyConnectionList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "proxy connect list empty.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail.");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ProxyConnInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
+        if (memcmp(item->connInfo.bleOption.bleMac, connInfo->bleOption.bleMac,
+            sizeof(connInfo->bleOption.bleMac)) == 0 ||
+            memcmp(item->connInfo.bleOption.deviceIdHash, connInfo->bleOption.deviceIdHash,
+            SHORT_UDID_HASH_LEN) == 0) {
+            TRANS_LOGI(TRANS_CTRL, "auth channel type is ble");
+            (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+            return SOFTBUS_OK;
+        } else if (memcmp(item->connInfo.brOption.brMac, connInfo->brOption.brMac,
+            sizeof(connInfo->brOption.brMac)) == 0) {
+            TRANS_LOGI(TRANS_CTRL, "auth channel typ is br");
+            (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+    TRANS_LOGE(TRANS_INIT, "proxy conn node not found.");
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
