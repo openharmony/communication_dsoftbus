@@ -1274,7 +1274,7 @@ int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo)
     if (connInfo == NULL || connInfo->socketOption.moduleId != AUTH) {
         TRANS_LOGE(
             TRANS_SVC, "invalid param, moduleId=%{pbulic}d", connInfo == NULL ? -1 :connInfo->socketOption.moduleId);
-        return SOFTBUS_INVALID_PARAM; 
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_authChannelList == NULL) {
         TRANS_LOGE(TRANS_SVC, "not init auth channel");
