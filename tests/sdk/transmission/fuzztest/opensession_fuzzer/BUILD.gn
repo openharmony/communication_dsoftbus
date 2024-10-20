@@ -29,8 +29,6 @@ ohos_fuzztest("OpenSessionFuzzTest") {
     "../../../../../core/common/dfx/interface/include",
     "../../../../../interfaces/kits/common",
     "../../../../../interfaces/inner_kits/transport",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
   ]
   cflags = [
     "-g",
