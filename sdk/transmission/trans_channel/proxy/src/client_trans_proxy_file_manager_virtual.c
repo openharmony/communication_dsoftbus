@@ -45,3 +45,9 @@ int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], co
     (void)fileCnt;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+void ClientDeleteRecvFileList(int32_t sessionId)
+{
+    (void)sessionId;
+    return;
+}

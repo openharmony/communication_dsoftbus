@@ -108,7 +108,7 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
     ListAdd(&(g_fileListener->list), &(fileNode->node));
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
@@ -233,7 +233,7 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK, "set socket file listener ok, sessionName=%{public}s, isReceiver=%{public}d",
-        tmpName, isReceiver);
+        AnonymizeWrapper(tmpName), isReceiver);
     AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }

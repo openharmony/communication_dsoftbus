@@ -3216,6 +3216,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_12, TestSize.Level1)
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
 }
 
 /*

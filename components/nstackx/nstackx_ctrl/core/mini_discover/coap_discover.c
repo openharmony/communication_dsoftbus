@@ -58,6 +58,15 @@ static uint32_t g_coapDiscoverTargetCount;
 static uint8_t g_userRequest;
 static uint8_t g_forceUpdate;
 
+#ifdef DFINDER_SUPPORT_SET_SCREEN_STATUS
+static bool g_isScreenOn = true;
+
+void SetScreenStatus(bool isScreenOn)
+{
+    g_isScreenOn = isScreenOn;
+}
+#endif
+
 static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char **remoteUrl, DeviceInfo *deviceInfo)
 {
     if (GetServiceDiscoverInfo(buf, size, deviceInfo, remoteUrl) != NSTACKX_EOK) {

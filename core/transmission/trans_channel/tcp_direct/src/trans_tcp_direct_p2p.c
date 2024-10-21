@@ -153,8 +153,8 @@ static void ClearP2pSessionInfo(void)
     (void)memset_s(
         g_p2pSessionInfo.p2pSessionIp, sizeof(g_p2pSessionInfo.p2pSessionIp), 0, sizeof(g_p2pSessionInfo.p2pSessionIp));
 
-    P2pListenerInfo *item;
-    P2pListenerInfo *nextItem;
+    P2pListenerInfo *item = NULL;
+    P2pListenerInfo *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -204,7 +204,7 @@ void StopP2pListenerByRemoteUuid(const char *peerUuid)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
         if (strcmp(item->peerUuid, peerUuid) == 0) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_CTRL, "del p2p listener peerUuid=%{public}s node", anonymizePeerUuid);
+            TRANS_LOGI(TRANS_CTRL, "del p2p listener peerUuid=%{public}s node", AnonymizeWrapper(anonymizePeerUuid));
             AnonymizeFree(anonymizePeerUuid);
             SoftBusFree(item);
             g_p2pSessionInfo.peerDeviceInfoList->cnt--;
@@ -218,7 +218,7 @@ void StopP2pListenerByRemoteUuid(const char *peerUuid)
         }
     }
     (void)SoftBusMutexUnlock(&g_p2pSessionInfo.peerDeviceInfoList->lock);
-    TRANS_LOGE(TRANS_CTRL, "not found peerUuid=%{public}s in peerDeviceInfoList", anonymizePeerUuid);
+    TRANS_LOGE(TRANS_CTRL, "not found peerUuid=%{public}s in peerDeviceInfoList", AnonymizeWrapper(anonymizePeerUuid));
     AnonymizeFree(anonymizePeerUuid);
 }
 
@@ -408,7 +408,7 @@ static void AnonymizeIp(const char *ip, char *sessionIp, int32_t port)
     Anonymize(ip, &temp);
     Anonymize(sessionIp, &anonyP2pIp);
     TRANS_LOGE(TRANS_CTRL, "param invalid g_p2pSessionPort=%{public}d, ip=%{public}s, g_p2pSessionIp=%{public}s",
-        port, temp, anonyP2pIp);
+        port, AnonymizeWrapper(temp), AnonymizeWrapper(anonyP2pIp));
     AnonymizeFree(temp);
     AnonymizeFree(anonyP2pIp);
 }
@@ -425,7 +425,7 @@ static void CheckAndAddPeerDeviceInfo(const char *peerUuid)
     P2pListenerInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
         if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
-            TRANS_LOGD(TRANS_CTRL, "exit peerUuid=%{public}s", anonymizePeerUuid);
+            TRANS_LOGD(TRANS_CTRL, "exit p2pListener with peerUuid=%{public}s", AnonymizeWrapper(anonymizePeerUuid));
             AnonymizeFree(anonymizePeerUuid);
             return;
         }

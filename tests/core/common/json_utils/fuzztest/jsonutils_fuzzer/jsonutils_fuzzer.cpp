@@ -47,6 +47,7 @@ static void DoJsonUtilsFuzz(const char *data)
     AddStringToJsonObject(object, "name", data);
     int32_t age = *(reinterpret_cast<const int32_t *>(data));
     AddNumberToJsonObject(object, "age", age);
+    cJSON_Delete(object);
 }
 } // namespace OHOS
 

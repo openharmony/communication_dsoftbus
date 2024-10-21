@@ -422,6 +422,7 @@ if (defined(ohos_lite)) {
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
       "qos:unittest",
+      "statistics:unittest",
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
     ]
