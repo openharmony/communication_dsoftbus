@@ -104,6 +104,9 @@ int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
 bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
 
+void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason);
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

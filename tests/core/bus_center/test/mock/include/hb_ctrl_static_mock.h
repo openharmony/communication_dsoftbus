@@ -20,6 +20,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
+#include "lnn_connection_fsm.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_heartbeat_strategy.h"
@@ -66,6 +67,8 @@ public:
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
     virtual int32_t LnnGenerateCeParams(void) = 0;
+    virtual void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason) = 0;
+    virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -101,6 +104,8 @@ public:
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
     MOCK_METHOD0(AuthLoadDeviceKey, void (void));
     MOCK_METHOD0(LnnGenerateCeParams, int32_t (void));
+    MOCK_METHOD3(SetLnnTriggerInfo, void (uint64_t, int32_t, int32_t));
+    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

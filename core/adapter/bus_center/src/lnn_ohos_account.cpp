@@ -28,6 +28,7 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "lnn_connection_fsm.h"
 
 static const std::string DEFAULT_USER_ID = "0";
 
@@ -86,6 +87,23 @@ int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
+static void DfxRecordUpdateOhosAccountTimestamp(void)
+{
+    LnnEventExtra extra = {0};
+    (void)LnnEventExtraInit(&extra);
+    extra.timeStamp = SoftBusGetSysTimeMs();
+    extra.triggerReason = UPDATE_ACCOUNT;
+    extra.interval = BROADCAST_INTERVAL_DEFAULT;
+    LnnTriggerInfo triggerInfo = {0};
+    GetLnnTriggerInfo(&triggerInfo);
+    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
+        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_UPDATE_ACCOUNT, extra);
+    LNN_LOGI(LNN_STATE, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
+        extra.timeStamp, extra.triggerReason, 1);
+}
+
 void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
     int64_t accountId = 0;
@@ -125,6 +143,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
     }
     if (isNeedUpdateHeartbeat) {
         LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+        DfxRecordUpdateOhosAccountTimestamp();
     }
 }
 
