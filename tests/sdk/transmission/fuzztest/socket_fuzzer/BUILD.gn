@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,41 +18,31 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("TransServerProxyExternFuzzTest") {
+ohos_fuzztest("SocketFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
-
-  fuzz_config_file = "$dsoftbus_test_path/sdk/transmission/fuzztest/transserverproxyextern_fuzzer"
-
-  include_dirs = [
-    "$dsoftbus_core_path/transmission/common/include",
-
-    "$dsoftbus_root_path/adapter/common/include",
-
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-
-    "$dsoftbus_sdk_path/transmission/ipc/include",
-  ]
-
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/socket_fuzzer"
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
-
-  sources = [ "transserverproxyextern_fuzzer.cpp" ]
-
-  deps = [ "$dsoftbus_test_path/sdk:softbus_client_static" ]
-
+  sources = [ "socket_fuzzer.cpp" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:ipc_single",
   ]
 }
 
+###############################################################################
 group("fuzztest") {
   testonly = true
-  deps = [ ":TransServerProxyExternFuzzTest" ]
+  deps = [
+    # deps file
+    ":SocketFuzzTest",
+  ]
 }
+###############################################################################
