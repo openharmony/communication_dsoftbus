@@ -822,9 +822,6 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        if (resourceItem.link.type == LANE_HML_RAW) {
-            LnnDisconnectP2pWithoutLnn(laneReqId);
-        }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
