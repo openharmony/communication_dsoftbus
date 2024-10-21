@@ -493,7 +493,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
     bool res = AddStringToJsonObject(msg, "BLE_MAC", TRANS_TEST_BR_MAC);
     ASSERT_TRUE(res);
     char *data = cJSON_PrintUnformatted(msg);
-    int32_t ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
+    int ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);

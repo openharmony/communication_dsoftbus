@@ -186,6 +186,11 @@ ohos_unittest("TransClientMsgServiceTest") {
 }
 
 ohos_unittest("TransClientSessionTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "client_trans_session_test.cpp" ]
 
