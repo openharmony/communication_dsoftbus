@@ -32,6 +32,8 @@
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_error_code.h"
 #include "wifi_direct_defines.h"
+#include "kits/c/wifi_hotspot.h"
+#include "kits/c/wifi_event.h"
 
 namespace OHOS::SoftBus {
 static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
@@ -464,6 +466,17 @@ int P2pAdapter::GetCoexConflictCode(const char *ifName, int32_t channelId)
         return SOFTBUS_OK;
     }
     return getCoexConflictCodeHook_(ifName, channelId);
+}
+
+int P2pAdapter::GetApChannel()
+{
+    auto hotSpotActive = IsHotspotActive();
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        hotSpotActive == WIFI_HOTSPOT_ACTIVE, CHANNEL_INVALID, CONN_WIFI_DIRECT, "hotspot not active");
+    HotspotConfig hotspotConfig;
+    auto ret = GetHotspotConfig(&hotspotConfig);
+    CONN_CHECK_AND_RETURN_RET_LOGI(ret == WIFI_SUCCESS, CHANNEL_INVALID, CONN_WIFI_DIRECT, "hotspot channel invalid");
+    return hotspotConfig.channelNum;
 }
 
 } // namespace OHOS::SoftBus

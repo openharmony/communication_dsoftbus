@@ -58,12 +58,13 @@ public:
     void SetRetryReason(ConnectCommandRetryReason reason) { retryReason_ = reason; }
     ConnectCommandRetryReason GetRetryReason() const { return retryReason_; }
 
-    void OnSuccess(const WifiDirectLink &link) const;
-    void OnFailure(int32_t reason) const;
+    virtual void OnSuccess(const WifiDirectLink &link) const;
+    virtual void OnFailure(int32_t reason) const;
     bool IsSameCommand(const WifiDirectConnectInfo &info) const;
+    void ResetConnectType(WifiDirectConnectType connectType);
 
 protected:
-    ConnectInfo info_;
+    mutable ConnectInfo info_;
     WifiDirectConnectCallback callback_;
     SuccessCallback successCallback_;
     FailureCallback failureCallback_;
