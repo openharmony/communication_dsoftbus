@@ -60,17 +60,19 @@ ohos_unittest("LnnWifiServiceMonitorTest") {
 
   deps = test_deps
   external_deps = test_external_deps
-  external_deps += [
-    "ability_base:base",
-    "ability_base:want",
-    "ipc:ipc_core",
-  ]
   if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
-    external_deps += [ "wifi:wifi_sdk" ]
+    external_deps += [
+      "ability_base:base",
+      "ability_base:want",
+      "ipc:ipc_core",
+      "wifi:wifi_sdk",
+    ]
   }
 }
 
 group("unittest") {
   testonly = true
-  deps = [ ":LnnWifiServiceMonitorTest" ]
+  if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
+    deps = [ ":LnnWifiServiceMonitorTest" ]
+  }
 }
