@@ -121,6 +121,9 @@ void ConnectCommand::OnFailure(int32_t reason) const
 void ConnectCommand::PreferNegotiateChannel()
 {
     auto innerLink = LinkManager::GetInstance().GetReuseLink(info_.info_.connectType, remoteDeviceId_);
+    if (remoteDeviceId_.length() != (UUID_BUF_LEN - 1) && innerLink == nullptr) {
+        innerLink = LinkManager::GetInstance().GetReuseLink(remoteDeviceId_);
+    }
     if (innerLink == nullptr || innerLink->GetNegotiateChannel() == nullptr) {
         if (info_.info_.negoChannel.type == NEGO_CHANNEL_AUTH) {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input auth channel");
