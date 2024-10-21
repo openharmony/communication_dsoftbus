@@ -40,6 +40,7 @@
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 #include "conn_coap.h"
+#include "lnn_connection_fsm.h"
 
 #define IP_DEFAULT_PORT 0
 #define LNN_LOOPBACK_IP "127.0.0.1"
@@ -579,6 +580,23 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager 
     return NULL;
 }
 
+static void DfxRecordWifiTriggerIpAddrChangeTimestamp()
+{
+    LnnEventExtra extra = { 0 };
+    (void)LnnEventExtraInit(&extra);
+    extra.timeStamp = SoftBusGetSysTimeMs();
+    extra.triggerReason = WIFI_IP_ADDR_CHANGED;
+    extra.interval = BROADCAST_INTERVAL_DEFAULT;
+    LnnTriggerInfo triggerInfo = {0};
+    GetLnnTriggerInfo(&triggerInfo);
+    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
+        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_WIFI_TRIGGER, extra);
+    LNN_LOGI(LNN_BUILDER, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
+        extra.timeStamp, extra.triggerReason, 1);
+}
+
 static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
@@ -588,6 +606,7 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
     if (strlen(event->ifName) != 0) {
         LnnNotifyPhysicalSubnetStatusChanged(event->ifName, LNN_PROTOCOL_IP, NULL);
+        DfxRecordWifiTriggerIpAddrChangeTimestamp();
     }
 }
 

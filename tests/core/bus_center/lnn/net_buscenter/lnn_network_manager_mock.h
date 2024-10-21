@@ -22,6 +22,7 @@
 #include "bus_center_event.h"
 #include "disc_interface.h"
 #include "form/lnn_event_form.h"
+#include "lnn_connection_fsm.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_network_manager.h"
@@ -57,6 +58,8 @@ public:
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
+    virtual void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason) = 0;
+    virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -83,6 +86,8 @@ public:
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
     MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void (void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void (LnnEventType, LnnEventHandler));
+    MOCK_METHOD3(SetLnnTriggerInfo, void (uint64_t, int32_t, int32_t));
+    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

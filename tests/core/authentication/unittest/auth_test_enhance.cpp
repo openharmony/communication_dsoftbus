@@ -21,6 +21,7 @@
 #include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
+#include "lnn_connection_fsm.h"
 #include "lnn_connection_mock.h"
 #include "lnn_hichain_mock.h"
 #include "lnn_map.h"
@@ -132,6 +133,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
+    ON_CALL(hichainMock, GetLnnTriggerInfo(_)).WillByDefault(Return());
     int32_t ret = HichainStartAuth(authSeq, udid, uid);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

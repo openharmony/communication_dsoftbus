@@ -181,5 +181,15 @@ int32_t LnnGenerateCeParams(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
 }
+
+void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason)
+{
+    return HeartBeatCtrlStaticInterface()->SetLnnTriggerInfo(triggerTime, deviceCnt, triggerReason);
+}
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    return HeartBeatCtrlStaticInterface()->GetLnnTriggerInfo(triggerInfo);
+}
 }
 } // namespace OHOS
