@@ -69,6 +69,27 @@ static void UpdateNetworkInfo(const char *udid)
     LnnNotifyBasicInfoChanged(&basic, TYPE_NETWORK_INFO);
 }
 
+static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
+{
+    NodeBasicInfo basic;
+    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset_s basic fail!");
+    }
+    if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "GetBasicInfoByUdid fail.");
+        return;
+    }
+    char *anonyOldDeviceName = NULL;
+    Anonymize(oldDeviceName, &anonyOldDeviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(basic.deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
+        AnonymizeWrapper(anonyOldDeviceName), AnonymizeWrapper(anonyDeviceName));
+    AnonymizeFree(anonyOldDeviceName);
+    AnonymizeFree(anonyDeviceName);
+    LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
+}
+
 int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 {
     if (authTypeValue == NULL || type >= AUTH_TYPE_BUTT) {
@@ -199,7 +220,7 @@ static void NewBrBleDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
         LNN_LOGE(LNN_LEDGER, "LnnGetWiFiIp Fail!");
         return;
     }
-    if (strcmp(ipAddr, DEFAULT_IP) == 0) {
+    if (strcmp(ipAddr, DEFAULT_IP) == 0 || strcmp(ipAddr, LOCAL_IP) == 0) {
         LnnSetWiFiIp(newInfo, LnnGetWiFiIp(oldInfo));
     }
 
@@ -676,9 +697,10 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
 
     UpdateNewNodeAccountHash(newInfo);
-    UpdateDpSameAccount(newInfo->accountHash, newInfo->deviceInfo.deviceUdid);
+    UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid);
     udid = LnnGetDeviceUdid(newInfo);
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -691,14 +713,14 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) ||
-        LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
+    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
         oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
         oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
-    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != 0 ||
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
@@ -716,6 +738,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     }
     oldInfo->accountId = newInfo->accountId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
+        UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
+    }
     return SOFTBUS_OK;
 }
 
@@ -929,16 +954,26 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
         return;
     }
+        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
+        sizeof(info->cipherInfo.key)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
+            return;
+    }
+    if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
+        sizeof(info->cipherInfo.iv)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
+            return;
+    }
     LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
     if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
         return;
     }
+    deviceInfo->netCapacity = info->netCapacity;
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
     }
-    return;
 }
 
 static void BleDirectlyOnlineProc(NodeInfo *info)
@@ -1150,7 +1185,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
-    UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
+    UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }
