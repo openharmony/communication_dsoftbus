@@ -61,6 +61,7 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_device_common_key.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_manager.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_ptk_proc.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/auth_account.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_instance.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",

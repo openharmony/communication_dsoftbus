@@ -484,7 +484,8 @@ void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
 {
     char *anonymizePkgName = NULL;
     Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource", anonymizePkgName, pid);
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource",
+        AnonymizeWrapper(anonymizePkgName), pid);
     AnonymizeFree(anonymizePkgName);
     if (g_tcpChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
@@ -595,7 +596,7 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
 
 int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status)
 {
-    if (num == NULL) {
+    if (num == NULL || authHandle == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invaild param");
         return NULL;
     }

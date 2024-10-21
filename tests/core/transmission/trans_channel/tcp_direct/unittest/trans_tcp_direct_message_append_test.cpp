@@ -1552,12 +1552,13 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     uint32_t flags = FLAG_REPLY;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
+    uint32_t dataLen = 0;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = ProcessMessage(channelId, flags, seq, msg);
+    ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     TransDelSessionConnById(channelId);
@@ -1575,8 +1576,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
     uint32_t flags = FLAG_WIFI;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
+    uint32_t dataLen = 0;
 
-    int32_t ret = ProcessMessage(channelId, flags, seq, msg);
+    int32_t ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 

@@ -39,6 +39,7 @@
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_net_builder.h"
+#include "lnn_net_builder_process.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -571,7 +572,8 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
             auth[i] = NULL;
             continue;
         }
-        if ((currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
+        if (judgeTimeOut && (currentTime > auth[i]->lastActiveTime)
+            && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD)) {
             AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
@@ -981,12 +983,29 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     NotifyAuthResult(authHandle, info);
 }
 
+static void GetPeerUdid(const AuthSessionInfo *info, int32_t reason)
+{
+    if (reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP || reason == SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH) {
+        LnnConnectionFsm *connFsm = FindConnectionFsmByRequestId(info->requestId);
+        if (connFsm == NULL || connFsm->isDead) {
+            AUTH_LOGE(AUTH_FSM, "can not find connection fsm. requestId=%{public}u", info->requestId);
+            return;
+        }
+        AUTH_LOGI(AUTH_FSM, "find connFsm success");
+        if (strcpy_s(connFsm->connInfo.infoReport.peerUdid, UDID_BUF_LEN, info->udid) != EOK) {
+            AUTH_LOGE(AUTH_FSM, "strcpy_s udid fail");
+            return;
+        }
+    }
+}
+
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "auth session info is null");
     AUTH_CHECK_AND_RETURN_LOGE(CheckAuthConnInfoType(&info->connInfo), AUTH_FSM, "connInfo type error");
     AUTH_LOGE(AUTH_FSM, "SetAuthFailed: authSeq=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d", authSeq,
         info->requestId, reason);
+    GetPeerUdid(info, reason);
     AuthManager *auth = NULL;
     if (info->isSavedSessionKey) {
         int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);

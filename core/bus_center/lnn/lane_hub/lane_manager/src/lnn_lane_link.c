@@ -850,13 +850,15 @@ static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint
         return SOFTBUS_INVALID_PARAM;
     }
     uint8_t peerUdidHash[UDID_HASH_LEN] = {0};
-    if (SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), peerUdidHash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "generate udidHash fail");
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    int32_t ret = SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), peerUdidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate udidHash fail, ret=%{public}d", ret);
+        return ret;
     }
-    if (ConvertBytesToHexString(udidHashStr, hashStrLen, peerUdidHash, UDID_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "convert bytes to string fail");
-        return SOFTBUS_BYTE_CONVERT_FAIL;
+    ret = ConvertBytesToHexString(udidHashStr, hashStrLen, peerUdidHash, UDID_SHORT_HASH_LEN_TMP);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert bytes to string fail, ret=%{public}d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -894,11 +896,7 @@ static int32_t FetchLaneResourceByDevId(const char *peerNetworkId, LaneLinkType 
         }
     }
     LaneUnlock();
-    char *anonyPeerNetworkId = NULL;
-    Anonymize(peerNetworkId, &anonyPeerNetworkId);
-    LNN_LOGI(LNN_LANE, "not found lane resource, peerNetworkId=%{public}s, linkType=%{public}d, "
-        "isSameDevice=%{public}d", AnonymizeWrapper(anonyPeerNetworkId), type, isSameDevice);
-    AnonymizeFree(anonyPeerNetworkId);
+    LNN_LOGI(LNN_LANE, "not found lane resource, linkType=%{public}d, isSameDevice=%{public}d", type, isSameDevice);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
@@ -931,11 +929,7 @@ static int32_t FetchLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkTyp
         }
     }
     LaneUnlock();
-    char *anonyUdidHashStr = NULL;
-    Anonymize(udidHashStr, &anonyUdidHashStr);
-    LNN_LOGI(LNN_LANE, "not found lane resource, udidHashStr=%{public}s, linkType=%{public}d, "
-        "isSameDevice=%{public}d", AnonymizeWrapper(anonyUdidHashStr), type, isSameDevice);
-    AnonymizeFree(anonyUdidHashStr);
+    LNN_LOGI(LNN_LANE, "not found lane resource, linkType=%{public}d, isSameDevice=%{public}d", type, isSameDevice);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
@@ -945,19 +939,10 @@ int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType ty
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_OK;
     if (inputInfo->type == IDENTIFY_TYPE_DEV_ID) {
-        ret = FetchLaneResourceByDevId(inputInfo->devInfo.peerDevId, type, false);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "fetch lane resource fail by deviceId");
-        }
-        return ret;
+        return FetchLaneResourceByDevId(inputInfo->devInfo.peerDevId, type, false);
     } else if (inputInfo->type == IDENTIFY_TYPE_UDID_HASH && strlen(inputInfo->devInfo.udidHash) > 0) {
-        ret = FetchLaneResourceByDevIdHash(inputInfo->devInfo.udidHash, type, false);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "fetch lane resource fail by udidHashStr");
-        }
-        return ret;
+        return FetchLaneResourceByDevIdHash(inputInfo->devInfo.udidHash, type, false);
     }
     LNN_LOGE(LNN_LANE, "no fetch lane resource");
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
@@ -973,14 +958,12 @@ bool FindLaneResourceByDevInfo(const DevIdentifyInfo *inputInfo, LaneLinkType ty
     if (inputInfo->type == IDENTIFY_TYPE_DEV_ID) {
         ret = FetchLaneResourceByDevId(inputInfo->devInfo.peerDevId, type, true);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "fetch lane resource fail");
             return false;
         }
         return true;
     } else if (inputInfo->type == IDENTIFY_TYPE_UDID_HASH && strlen(inputInfo->devInfo.udidHash) > 0) {
         ret = FetchLaneResourceByDevIdHash(inputInfo->devInfo.udidHash, type, true);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "fetch lane resource fail");
             return false;
         }
         return true;

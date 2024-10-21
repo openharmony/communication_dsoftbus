@@ -14,6 +14,9 @@
  */
 
 #include "bus_center_client_stub.h"
+#include "bus_center_server_proxy.h"
+#include "client_bus_center_manager.h"
+#include "client_trans_session_manager.h"
 #include "comm_log.h"
 #include "iproxy_client.h"
 #include "ipc_skeleton.h"
@@ -28,8 +31,10 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy.h"
 #include "trans_client_stub.h"
+#include "trans_server_proxy.h"
 
 #define INVALID_CB_ID 0xFF
+#define CYCLE_NUM_MAX 100
 
 static int RegisterServerDeathCb(void);
 static unsigned int g_deathCbId = INVALID_CB_ID;
@@ -119,10 +124,38 @@ static void *DeathProcTask(void *arg)
     (void)arg;
     CLIENT_NotifyObserver(EVENT_SERVER_DEATH, NULL, 0);
 
+    ServerProxyDeInit();
+    TransServerProxyDeInit();
+    BusCenterServerProxyDeInit();
+
+    ListNode sessionServerInfoList;
+    ListInit(&sessionServerInfoList);
+    ClientCleanAllSessionWhenServerDeath(&sessionServerInfoList);
+
+    int32_t cnt = 0;
+    for (cnt = 0; cnt < CYCLE_NUM_MAX; cnt++) {
+        if (ServerProxyInit() == SOFTBUS_OK) {
+            COMM_LOGI(COMM_SDK, "proxy init wait sucess");
+            break;
+        }
+        SoftBusSleepMs(WAIT_SERVER_READY_SHORT_INTERVAL);
+        COMM_LOGI(COMM_SDK, "proxy init wait");
+    }
+
+    if (cnt == CYCLE_NUM_MAX) {
+        COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
+        return NULL;
+    }
+
     if (InnerRegisterService() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "register service failed");
         return NULL;
     }
+
+    TransServerProxyInit();
+    BusCenterServerProxyInit();
+    DiscRecoveryPublish();
+    DiscRecoverySubscribe();
 
     COMM_LOGI(COMM_SDK, "\n<< !!! SERVICE (%{public}s) RECOVER !!! >>\n", SOFTBUS_SERVICE);
     CLIENT_NotifyObserver(EVENT_SERVER_RECOVERY, NULL, 0);

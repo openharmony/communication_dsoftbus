@@ -48,7 +48,15 @@ private:
     bool chained_;
 };
 
+enum class ProcessorTerminateReason {
+    SUCCESS,
+    FAILURE,
+    RETRY,
+};
+
 struct ProcessorTerminate : public std::exception {
+    ProcessorTerminate(ProcessorTerminateReason reason = ProcessorTerminateReason::SUCCESS) : reason_(reason) {}
+    ProcessorTerminateReason reason_;
 };
 }
 #endif

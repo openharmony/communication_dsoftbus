@@ -1201,6 +1201,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     ret = TransProxyProcessHandshake(chan, msg);
     if (ret != SOFTBUS_OK) {
+        ReleaseProxyChannelId(chan->channelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -1935,7 +1937,7 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
         (pkgName != NULL && g_proxyChannelList != NULL), TRANS_CTRL, "pkgName or proxy channel list is null.");
     char *anonymizePkgName = NULL;
     Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
     AnonymizeFree(anonymizePkgName);
     ListNode destroyList;
     ListInit(&destroyList);

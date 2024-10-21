@@ -1156,7 +1156,11 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
         TRANS_INIT, "g_udpNegLock init failed.");
 
     ret = TransUdpChannelMgrInit();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans udp channel manager init failed.");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "trans udp channel manager init failed.");
+        (void)SoftBusMutexDestroy(&g_udpNegLock);
+        return ret;
+    }
 
     AuthTransListener transUdpCb = {
         .onDataReceived = UdpModuleCb,
@@ -1165,7 +1169,11 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
     };
 
     ret = RegAuthTransListener(MODULE_UDP_INFO, &transUdpCb);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register udp callback to auth failed.");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "register udp callback to auth failed.");
+        (void)SoftBusMutexDestroy(&g_udpNegLock);
+        return ret;
+    }
 
     TRANS_LOGI(TRANS_INIT, "server trans udp channel init success.");
     return SOFTBUS_OK;
@@ -1207,7 +1215,7 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
             ListAdd(&destroyList, &tempNode->node);
             char *anonymizePkgName = NULL;
             Anonymize(pkgName, &anonymizePkgName);
-            TRANS_LOGW(TRANS_CTRL, "add pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+            TRANS_LOGW(TRANS_CTRL, "add pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
             AnonymizeFree(anonymizePkgName);
         }
     }

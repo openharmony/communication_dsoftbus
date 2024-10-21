@@ -163,8 +163,8 @@ static void ShowAllSessionInfo(void)
     char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         Anonymize(serverNode->sessionName, &tmpName);
-        TRANS_LOGI(
-            TRANS_SDK, "client session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
+        TRANS_LOGI(TRANS_SDK, "client session server is exist. count=%{public}d, sessionName=%{public}s",
+            count, AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         count++;
         if (IsListEmpty(&serverNode->sessionList)) {
@@ -177,7 +177,7 @@ static void ShowAllSessionInfo(void)
             TRANS_LOGI(TRANS_SDK,
                 "client session info is exist. sessionCount=%{public}d, peerSessionName=%{public}s, "
                 "channelId=%{public}d, channelType=%{public}d",
-                sessionCount, tmpPeerSessionName, sessionNode->channelId, sessionNode->channelType);
+                sessionCount, AnonymizeWrapper(tmpPeerSessionName), sessionNode->channelId, sessionNode->channelType);
             AnonymizeFree(tmpPeerSessionName);
             sessionCount++;
         }
@@ -254,13 +254,14 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
                 AnonymizeFree(tmpName);
                 return ret;
             }
-            TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
+            TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", AnonymizeWrapper(tmpName));
             AnonymizeFree(tmpName);
             return SOFTBUS_OK;
         }
     }
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "not found session server or session list is not empty, sessionName=%{public}s", tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found session server or session list is not empty, sessionName=%{public}s",
+        AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
@@ -345,7 +346,7 @@ void SocketServerStateUpdate(const char *sessionName)
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found session server by sessionName=%{public}s", tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found session server by sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     UnlockClientSessionServerList();
 }
@@ -359,7 +360,8 @@ static void ShowClientSessionServer(void)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_clientSessionServerList->list, ClientSessionServer, node) {
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGE(TRANS_SDK,
-            "client session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
+            "client session server is exist. count=%{public}d, sessionName=%{public}s",
+                count, AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         count++;
     }
@@ -1204,7 +1206,7 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     UnlockClientSessionServerList();
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found session by sessionName=%{public}s", tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found session by sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
@@ -1285,7 +1287,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    TRANS_LOGD(TRANS_SDK, "routeType=%{public}d, networkId=%{public}s", routeType, anonyNetworkId);
+    TRANS_LOGD(TRANS_SDK, "routeType=%{public}d, networkId=%{public}s", routeType, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
 
     ClientSessionServer *serverNode = NULL;
@@ -1414,7 +1416,8 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     char *tmpName = NULL;
     Anonymize(pkgName, &anonymizePkgName);
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, anonymizePkgName);
+    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s",
+        AnonymizeWrapper(tmpName), AnonymizeWrapper(anonymizePkgName));
     AnonymizeFree(anonymizePkgName);
     AnonymizeFree(tmpName);
     return SOFTBUS_OK;
@@ -1985,7 +1988,7 @@ int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt
     UnlockClientSessionServerList();
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found ClientSessionServer by sessionName=%{public}s", tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found ClientSessionServer by sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_SESSION_SERVER_NOT_FOUND;
 }

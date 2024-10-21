@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #ifndef AUTH_DEVICEPROFILE_H
 #define AUTH_DEVICEPROFILE_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -23,7 +25,7 @@ extern "C" {
 #endif
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash);
-void UpdateDpSameAccount(const char *accountHash, const char *deviceId);
+void UpdateDpSameAccount(int64_t accountId, const char *deviceId);
 void DelNotTrustDevice(const char *udid);
 
 #ifdef __cplusplus
