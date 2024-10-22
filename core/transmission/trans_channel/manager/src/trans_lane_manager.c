@@ -684,6 +684,10 @@ int32_t TransGetSocketChannelStateBySession(const char *sessionName, int32_t ses
         TRANS_LOGE(TRANS_SVC, "Invaild param, state is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
