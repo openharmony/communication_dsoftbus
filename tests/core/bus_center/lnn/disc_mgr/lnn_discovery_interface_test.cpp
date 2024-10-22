@@ -336,7 +336,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_ERR));
     ret = LnnStopCoapDiscovery();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_OK));
     ret = LnnStopCoapDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -360,7 +360,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_ERR));
     ret = LnnStopCoapPublish();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_OK));
     ret = LnnStopCoapPublish();
     EXPECT_EQ(ret, SOFTBUS_OK);
