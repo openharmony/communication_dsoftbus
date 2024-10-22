@@ -589,10 +589,14 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
         (void)LnnGenerateCeParams();
         AuthLoadDeviceKey();
+        LnnUpdateOhosAccount(false);
+        if (!LnnIsDefaultOhosAccount()) {
+            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+        }
     }
     lockState = lockState == SOFTBUS_USER_UNLOCK ? SOFTBUS_SCREEN_UNLOCK : lockState;
     if (g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK) {
-        LNN_LOGD(LNN_HEART_BEAT, "screen unlocked once already, ignoring this event");
+        LNN_LOGI(LNN_HEART_BEAT, "screen unlocked once already, ignoring this event");
         return;
     }
     g_hbConditionState.lockState = lockState;

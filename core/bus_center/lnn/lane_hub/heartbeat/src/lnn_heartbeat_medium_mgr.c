@@ -679,16 +679,6 @@ static int32_t SoftBusNetNodeResult(
         anonyUdid, device->addr[0].type, isConnect, connectReason);
     AnonymizeFree(anonyUdid);
 
-    bool flag = false;
-    if (isConnect) {
-        flag = IsSameAccountDevice(device);
-    }
-    if (flag) {
-        if (!AuthHasSameAccountGroup()) {
-            LNN_LOGE(LNN_HEART_BEAT, "device has not same account group relation with local device");
-            return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
-        }
-    }
     LnnDfxDeviceInfoReport info;
     (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     if (hbResp != NULL) {
