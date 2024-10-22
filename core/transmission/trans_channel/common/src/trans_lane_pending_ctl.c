@@ -1770,7 +1770,7 @@ int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWith
     }
     (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
     TRANS_LOGE(TRANS_SVC, "TransAuthWithParaGetLaneReqByLaneReqId not found. laneReqId=%{public}u", laneReqId);
-    return SOFTBUS_TRNAS_AUTH_CHANNEL_NOT_FOUND;
+    return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
 }
 static int32_t TransAddFreeLaneToPending(uint32_t laneHandle)
 {
