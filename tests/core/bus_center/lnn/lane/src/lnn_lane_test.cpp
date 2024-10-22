@@ -46,6 +46,7 @@ using namespace testing;
 
 constexpr char NODE_NETWORK_ID[] = "111122223333abcdef";
 constexpr char PEER_IP_HML[] = "172.30.0.1";
+constexpr char PEER_WLAN_ADDR[] = "172.30.0.1";
 constexpr char PEER_MAC[] = "a1:b2:c3:d4:e5:f6";
 constexpr char LOCAL_MAC[] = "a2:b2:c3:d4:e5:f6";
 constexpr char PEER_UDID[] = "111122223333abcdef";
@@ -72,13 +73,13 @@ constexpr uint32_t ROM_NUM2 = 2;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
+static int32_t g_errCode = 0;
 
 static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info);
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode);
 static void OnLaneFreeSuccess(uint32_t laneHandle);
 static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode);
 
-static int32_t g_errCode = 0;
 static LaneAllocListener g_listener = {
     .onLaneAllocSuccess = OnLaneAllocSuccess,
     .onLaneAllocFail = OnLaneAllocFail,
@@ -235,7 +236,8 @@ static void OnLaneLinkFailForDetect(uint32_t reqId, int32_t reason, LaneLinkType
     (void)reqId;
     (void)linkType;
     GTEST_LOG_(INFO) << "on laneLink fail for detect";
-    EXPECT_EQ(reason, SOFTBUS_OK);
+    EXPECT_EQ(reason, SOFTBUS_LANE_DETECT_TIMEOUT);
+    CondSignal();
 }
 
 static void OnLaneAllocSuccessForHml(uint32_t laneHandle, const LaneConnInfo *info)
@@ -1235,6 +1237,14 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_005, TestSize.Level1)
     info.type = LANE_COC;
     ret = LaneInfoProcess(&info, &connInfo, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.type = LANE_HML_RAW;
+    ret = LaneInfoProcess(&info, &connInfo, &profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.type = LANE_LINK_TYPE_BUTT;
+    ret = LaneInfoProcess(&info, &connInfo, &profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1296,6 +1306,37 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
     (void)UnbindLaneIdFromProfile(laneId, profileId);
 
     (void)UnbindLaneIdFromProfile(0, profileId);
+}
+
+/*
+* @tc.name: LNN_LANE_PROFILE_002
+* @tc.desc: BindLaneIdToProfile
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_002, TestSize.Level1)
+{
+    uint64_t laneId = 0x1000000000000002;
+    uint32_t profileId = 111111;
+    LaneProfile profile = {};
+    int32_t ret = GetLaneProfile(profileId, &profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    uint64_t *laneReqIdList = nullptr;
+    uint32_t listSize = 0;
+    ret = GetLaneIdList(profileId, &laneReqIdList, &listSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    profile.linkType = LANE_P2P;
+    profile.content = LANE_T_FILE;
+    profile.priority = LANE_PRI_LOW;
+    ret = BindLaneIdToProfile(laneId, &profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = BindLaneIdToProfile(laneId, &profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    (void)UnbindLaneIdFromProfile(laneId, profileId);
 }
 
 /*
@@ -2210,6 +2251,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_001, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
+    
 
     LaneLinkInfo linkInfo;
     linkInfo.type = LANE_WLAN_2P4G;
@@ -2370,6 +2412,73 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_004, TestSize.Level1)
 
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LANE_DETECT_RELIABILITY_005
+* @tc.desc: WLAN LANE DETECT RELIABILITY, SOFTBUS_SOCKET_EXCEPTION
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_005, TestSize.Level1)
+{
+    const char *ipAddr = "127.0.0.1";
+    LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccessForDetect,
+        .onLaneLinkFail = OnLaneLinkFailForDetect,
+    };
+
+    LaneLinkInfo linkInfo;
+    linkInfo.type = LANE_WLAN_5G;
+    linkInfo.linkInfo.wlan.connInfo.port = PORT_A;
+    EXPECT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr), EOK);
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+    LaneDepsInterfaceMock::socketEvent = SOFTBUS_SOCKET_EXCEPTION;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AddTrigger).WillRepeatedly(LaneDepsInterfaceMock::ActionOfAddTrigger);
+    char buf[] = "lanedetect";
+    EXPECT_CALL(mock, ConnSendSocketData).WillRepeatedly(Return(sizeof(buf)));
+
+    int32_t ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LANE_DETECT_RELIABILITY_006
+* @tc.desc: WLAN LANE DETECT RELIABILITY TIMEOUT
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_006, TestSize.Level1)
+{
+    const char *ipAddr = "127.0.0.1";
+    LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccessForDetect,
+        .onLaneLinkFail = OnLaneLinkFailForDetect,
+    };
+
+    LaneLinkInfo linkInfo;
+    linkInfo.type = LANE_WLAN_5G;
+    linkInfo.linkInfo.wlan.connInfo.port = PORT_A;
+    EXPECT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr), EOK);
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
+    char buf[] = "lanedetect";
+    EXPECT_CALL(mock, ConnSendSocketData).WillRepeatedly(Return(sizeof(buf)));
+
+    int32_t ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
 }
 
 /*
@@ -3249,6 +3358,8 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_13, TestSize.Level1)
 
     int32_t ret = LnnRequestLane(laneReqId, &requestOption, &g_listener2);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+    ret = LnnFreeLane(laneReqId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
 }
 
 /*
@@ -3564,5 +3675,173 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_25, TestSize.Level1)
     LaneLinkType linkType = LANE_ETH;
     int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_LANE_UPDATE_LANE_ID_001
+* @tc.desc: test UpdateLaneResourceLaneId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_UPDATE_LANE_ID_001, TestSize.Level1)
+{
+    LaneLinkInfo linkInfo = {};
+    linkInfo.type = LANE_HML;
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
+
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    uint64_t laneId = LANE_ID_BASE;
+    uint64_t laneIdNew = LANE_ID_BASE + 1;
+    int32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UpdateLaneResourceLaneId(laneId, laneIdNew, PEER_UDID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DelLaneResourceByLaneId(laneIdNew, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_LANE_DETECT_ENABLE_WIFI_DIRECT_001
+* @tc.desc: test DetectEnableWifiDirectApply & DetectDisableWifiDirectApply
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_DETECT_DISABLE_WIFI_DIRECT_001, TestSize.Level1)
+{
+    LaneLinkInfo linkInfo = {};
+    linkInfo.type = LANE_HML;
+    linkInfo.linkInfo.p2p.bw = LANE_BW_160M;
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    uint64_t laneId = LANE_ID_BASE;
+    int32_t ret = AddLaneResourceToPool(&linkInfo, laneId, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    linkInfo.type = LANE_HML_RAW;
+    uint64_t laneIdNew = LANE_ID_BASE + 1;
+    ret = AddLaneResourceToPool(&linkInfo, laneIdNew, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DetectDisableWifiDirectApply();
+    ret = DelLaneResourceByLaneId(laneId, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DelLaneResourceByLaneId(laneIdNew, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_CHECK_LANE_RESOURCE_NUM_001
+* @tc.desc: test CheckLaneResourceNumByLinkType
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_CHECK_LANE_RESOURCE_NUM_001, TestSize.Level1)
+{
+    LaneLinkInfo linkInfo = {};
+    linkInfo.type = LANE_HML;
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t laneNum = 0;
+    int32_t ret = CheckLaneResourceNumByLinkType(nullptr, LANE_HML, &laneNum);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLaneResourceNumByLinkType(nullptr, LANE_LINK_TYPE_BUTT, &laneNum);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLaneResourceNumByLinkType(PEER_UDID, LANE_HML, &laneNum);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    uint64_t laneId = LANE_ID_BASE;
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckLaneResourceNumByLinkType(PEER_UDID, LANE_HML, &laneNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DelLaneResourceByLaneId(laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ADD_LANE_IS_VALID_LINK_ADDR_001
+* @tc.desc: test IsValidLinkAddr(hml/br/ble)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    LaneLinkInfo linkInfo = {};
+    linkInfo.type = LANE_HML;
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.br.brMac, BT_MAC_LEN, PEER_MAC, strlen(PEER_MAC)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, PEER_MAC, strlen(PEER_MAC)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    int32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    linkInfo.type = LANE_BR;
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    linkInfo.type = LANE_BLE;
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ADD_LANE_IS_VALID_LINK_ADDR_002
+* @tc.desc: test IsValidLinkAddr(coc_direct/wlan)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    LaneLinkInfo linkInfo = {};
+    linkInfo.type = LANE_COC_DIRECT;
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN,
+        PEER_WLAN_ADDR, strlen(PEER_WLAN_ADDR)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
+        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    int32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    linkInfo.type = LANE_WLAN_5G;
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    linkInfo.type = LANE_LINK_TYPE_BUTT;
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
