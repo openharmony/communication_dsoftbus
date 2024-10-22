@@ -917,13 +917,13 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocEx
     for (uint32_t i = 0; i < param->qosCount; i++) {
         switch (param->qos[i].qos) {
             case QOS_TYPE_MIN_BW:
-                qosInfo->minBW = (param->qos[i].value >0) ? param->qos[i].value :0;
+                qosInfo->minBW = (param->qos[i].value > 0) ? param->qos[i].value : 0;
                 break;
             case QOS_TYPE_MAX_LATENCY:
-                qosInfo->maxLaneLatency = (param->qos[i].value >0) ? param->qos[i].value :0;
+                qosInfo->maxLaneLatency = (param->qos[i].value > 0) ? param->qos[i].value : 0;
                 break;
             case QOS_TYPE_MIN_LATENCY:
-                qosInfo->minLaneLatency = (param->qos[i].value >0) ? param->qos[i].value :0;
+                qosInfo->minLaneLatency = (param->qos[i].value > 0) ? param->qos[i].value : 0;
                 break;
             case QOS_TYPE_RTT_LEVEL:
                 qosInfo->rttLevel = (LaneRttLevel)((param->qos[i].value > 0) ? param->qos[i].value : 0);
@@ -1577,7 +1577,7 @@ int32_t TransAuthWithParaReqLanePendingInit(void)
     g_authWithParaAsyncReqLaneList = CreateSoftBusList();
     if (g_authWithParaAsyncReqLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_authWithParaAsyncReqLaneList is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_LIST_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -1631,7 +1631,7 @@ static int32_t FillTransAuthWithParaNode(TransAuthWithParaNode *item, uint32_t l
 int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessionName,
     const LinkPara *linkPara, int32_t channelId)
 {
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_TRANS_CHANNEL_OPEN_FAILED;
     if (g_authWithParaAsyncReqLaneList == NULL) {
         TRANS_LOGE(TRANS_SVC, "g_authWithParaAsyncReqLaneList no init.");
         return SOFTBUS_NO_INIT;
@@ -1699,14 +1699,14 @@ int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
             SoftBusFree(laneItem->sessionName);
             laneItem->sessionName = NULL;
             SoftBusFree(laneItem);
-            laneItem =NULL;
+            laneItem = NULL;
             (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
             return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
     TRANS_LOGE(TRANS_SVC, "TransAuthWithParaDelLaneReqById not found, laneReqId=%{public}u", laneReqId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
 }
 
 int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, const LaneConnInfo *connInfo,
@@ -1770,7 +1770,7 @@ int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWith
     }
     (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
     TRANS_LOGE(TRANS_SVC, "TransAuthWithParaGetLaneReqByLaneReqId not found. laneReqId=%{public}u", laneReqId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRNAS_AUTH_CHANNEL_NOT_FOUND;
 }
 static int32_t TransAddFreeLaneToPending(uint32_t laneHandle)
 {
