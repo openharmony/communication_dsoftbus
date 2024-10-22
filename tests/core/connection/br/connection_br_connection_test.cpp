@@ -747,7 +747,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
     (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abcde");
     ListInit(&connectingDevice->requests);
     g_brManager.connecting = connectingDevice;
+    SoftBusList *list = CreateSoftBusList();
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    connection->connectProcessStatus = list;
     ClientConnectFailed(connectionId, error);
+    ConnBrReturnConnection(&connection);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager017, TestSize.Level1)
