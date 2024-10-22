@@ -2239,8 +2239,7 @@ static bool BrAuthIsMostPriority(const char *networkId)
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true));
 }
 
-static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList,
-    uint32_t *linksNum)
+static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
 {
     if (request == NULL || guideList == NULL || linksNum == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
