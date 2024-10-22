@@ -41,7 +41,7 @@ public:
 
 private:
     static constexpr int CONNECT_TIMEOUT_MS = 5000;
-    static constexpr int CONNECT_TIMEOUT_DHCP_MS = 15000;
+    static constexpr int CONNECT_TIMEOUT_DHCP_MS = 10000;
 
     P2pConnectState();
     std::string CalculateGcIp(const std::string &goIpAddr);
