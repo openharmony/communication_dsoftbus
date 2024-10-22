@@ -1268,3 +1268,33 @@ int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
     TRANS_LOGE(TRANS_SVC, "get connid failed");
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
+
+int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo)
+{
+    if (connInfo == NULL || connInfo->socketOption.moduleId != AUTH) {
+        TRANS_LOGE(
+            TRANS_SVC, "invalid param, moduleId=%{pbulic}d", connInfo == NULL ? -1 :connInfo->socketOption.moduleId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_authChannelList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "not init auth channel");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get mutex lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (info->connOpt.socketOption.port == connInfo->socketOption.port &&
+            memcmp(info->connOpt.socketOption.addr, connInfo->socketOption.addr,
+            strlen(connInfo->socketOption.addr)) == 0) {
+            TRANS_LOGI(TRANS_SVC, "auth channel type is wifi");
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+            }
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "auth channel is not exit");
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
