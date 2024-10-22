@@ -28,6 +28,8 @@
 #include "softbus_adapter_mem.h"
 #include "trans_log.h"
 
+#define OH_OS_TYPE 10
+
 int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len, int32_t businessType)
 {
     uint32_t dataConfig = INVALID_DATA_CONFIG;
@@ -79,11 +81,15 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         TRANS_BYTES, "ClientGetChannelBySessionId fail, sessionId=%{public}d", sessionId);
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
+    int32_t osType = OH_OS_TYPE;
     ret = ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_BYTES, "ClientGetChannelBusinessTypeBySessionId fail, sessionId=%{public}d", sessionId);
+    ret = ClientGetChannelOsTypeBySessionId(sessionId, &osType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "ClientGetChannelOsTypeBySessionId fail, sessionId=%{public}d", sessionId);
 
-    if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+    if ((osType == OH_OS_TYPE) && (businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
         (channelType != CHANNEL_TYPE_AUTH)) {
         TRANS_LOGE(TRANS_BYTES,
             "BusinessType no match, businessType=%{public}d,  sessionId=%{public}d", businessType, sessionId);

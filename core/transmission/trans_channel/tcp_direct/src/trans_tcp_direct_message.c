@@ -411,6 +411,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.timeStart = conn.appInfo.timeStart;
     info.linkType = conn.appInfo.linkType;
     info.connectType = conn.appInfo.connectType;
+    info.osType = conn.appInfo.osType;
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
