@@ -132,7 +132,7 @@ int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, Devi
     AUTH_CHECK_AND_RETURN_RET_LOGE(g_hichain != NULL, SOFTBUS_ERR, AUTH_HICHAIN, "hichain not initialized");
 
     int32_t ret = g_hichain->processData(authSeq, data, len, cb);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, AUTH_HICHAIN,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, ret, AUTH_HICHAIN,
         "hichain processData failed. ret=%{public}d", ret);
 
     return SOFTBUS_OK;
