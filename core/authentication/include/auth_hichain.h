@@ -30,15 +30,6 @@ extern "C" {
 #define GROUP_TYPE_MESH (1 << 2)
 #define GROUP_TYPE_COMPATIBLE (1 << 3)
 
-#define SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x040C)))
-#define SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0607)))
-#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
-#define SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x100D)))
-
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);

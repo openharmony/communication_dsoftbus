@@ -76,6 +76,9 @@
 #define SHORT_UDID_HASH_STR_LEN          16
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define WAIT_SEND_NOT_TRUST_MSG          200
+#define DEVICE_LIST_MAX_LEN              (2 * 1024)
+#define PC_DEVICE_TYPE_ID                12
+#define PC_AUTH_ERRCODE                  36870
 
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
@@ -1567,5 +1570,16 @@ int32_t UpdateNodeFromPcRestrictMap(const char *udidHash)
     Anonymize(udidHash, &anonyUdid);
     LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", AnonymizeWrapper(anonyUdid), *tempCount);
     AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
+}
+
+int32_t AuthFailNotifyDeviceList(int32_t errCode, const char *errorReturn, uint32_t listLen)
+{
+    if (errCode == PC_AUTH_ERRCODE && listLen != 0 && listLen < DEVICE_LIST_MAX_LEN) {
+        LnnNotifyHichainProofException(errorReturn, listLen + 1, PC_DEVICE_TYPE_ID, errCode);
+        LNN_LOGI(LNN_BUILDER,
+            "notify hichain proof exception event, devIdListLen=%{public}d, errCode=%{public}d, type=%{public}d",
+            listLen + 1, errCode, PC_DEVICE_TYPE_ID);
+    }
     return SOFTBUS_OK;
 }
