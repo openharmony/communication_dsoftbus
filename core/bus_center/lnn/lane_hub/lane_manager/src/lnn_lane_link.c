@@ -458,7 +458,6 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
         LNN_LOGE(LNN_LANE, "linkInfo is nullptr or invalid laneId");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t powerNum = 1;
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -468,10 +467,6 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     if (resourceItem != NULL) {
         addResult = UpdateExistLaneResource(resourceItem, isServerSide);
         LaneUnlock();
-        if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
-            powerNum++;
-            DetectEnableWifiDirectApply(linkInfo, powerNum);
-        }
         return addResult;
     }
     LaneUnlock();
@@ -482,9 +477,6 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     }
     if (!isServerSide) {
         AddNetworkResourceInner(linkInfo, laneId);
-    }
-    if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
-        DetectEnableWifiDirectApply(linkInfo, powerNum);
     }
     return SOFTBUS_OK;
 }
