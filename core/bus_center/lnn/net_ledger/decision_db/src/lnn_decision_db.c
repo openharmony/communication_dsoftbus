@@ -809,6 +809,15 @@ int32_t LnnGenerateCeParams(void)
     return LnnGenerateCeKeyByHuks(&g_ceKeyAlias);
 }
 
+int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
+{
+    if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate decision db huks de key fail");
+        return SOFTBUS_GENERATE_KEY_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {

@@ -30,6 +30,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_meta_node_interface.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
@@ -223,7 +224,7 @@ int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
         return SOFTBUS_INVALID_PARAM;
     }
     if (authHandle->type < AUTH_LINK_TYPE_WIFI || authHandle->type >= AUTH_LINK_TYPE_MAX) {
-        AUTH_LOGE(AUTH_CONN, "auth type error");
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
@@ -753,4 +754,5 @@ void AuthDeinit(void)
 void AuthServerDeathCallback(const char *pkgName, int32_t pid)
 {
     DelAuthMetaManagerByPid(pkgName, pid);
+    ClearMetaNodeRequestByPid(pkgName, pid);
 }

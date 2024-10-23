@@ -1807,6 +1807,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [

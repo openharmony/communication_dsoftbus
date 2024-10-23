@@ -335,7 +335,7 @@ static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info
     /* first, reuse ble authKey */
     if (AuthFindLatestNormalizeKey(udidHash, deviceKey, true) == SOFTBUS_OK ||
         AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
-        AUTH_LOGD(AUTH_FSM, "get authKey succ");
+        AUTH_LOGD(AUTH_FSM, "get ble authKey succ");
         return SOFTBUS_OK;
     }
     /* second, reuse wifi authKey */
@@ -936,7 +936,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
     char peerUdid[UDID_BUF_LEN] = {0};
     bool isExchangeUdid = true;
     if (idType == EXCHANGE_NETWORKID) {
-        if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+        if (GetPeerUdidByNetworkId(info->udid, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));
@@ -1068,7 +1068,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
     }
     UnPackVersionByDeviceId(obj, info);
     if (SetExchangeIdTypeAndValue(obj, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "set exchange id type or value failed");
+        AUTH_LOGE(AUTH_FSM, "set exchange id type or value fail");
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
@@ -1851,7 +1851,7 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
     }
     if (strcpy_s(info->networkId, NETWORK_ID_BUF_LEN, info->uuid) != EOK) {
         AUTH_LOGE(AUTH_FSM, "strcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1936,8 +1936,7 @@ static void UpdateLocalNetBrMac(void)
         SoftBusGetBtState() == BLE_ENABLE) {
         char brMac[BT_MAC_LEN] = {0};
         SoftBusBtAddr mac = {0};
-        int32_t ret = 0;
-        ret = SoftBusGetBtMacAddr(&mac);
+        int32_t ret = SoftBusGetBtMacAddr(&mac);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get bt mac addr fail, do not update local brmac");
             return;
