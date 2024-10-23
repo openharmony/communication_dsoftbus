@@ -278,7 +278,7 @@ static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
         if (!bcManager->isUsed || bcManager->bcCallback == NULL ||
             bcManager->bcCallback->OnStartBroadcastingCallback == NULL) {
             SoftBusMutexUnlock(&g_bcLock);
-            DISC_LOGE(DISC_BROADCAST, "bcManager not available, adapterBcId=%{public}d, managerId=%{public}d",
+            DISC_LOGE(DISC_BROADCAST, "bcManager not available, adapterBcId=%{public}d, managerId=%{public}u",
                 adapterBcId, managerId);
             continue;
         }
@@ -310,7 +310,7 @@ static void BcStopBroadcastingCallback(int32_t adapterBcId, int32_t status)
         if (!bcManager->isUsed || bcManager->bcCallback == NULL ||
             bcManager->bcCallback->OnStopBroadcastingCallback == NULL) {
             SoftBusMutexUnlock(&g_bcLock);
-            DISC_LOGE(DISC_BROADCAST, "bcManager not available, adapterBcId=%{public}d, managerId=%{public}d",
+            DISC_LOGE(DISC_BROADCAST, "bcManager not available, adapterBcId=%{public}d, managerId=%{public}u",
                 adapterBcId, managerId);
             continue;
         }
