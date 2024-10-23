@@ -393,8 +393,6 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByReqId002, TestSize.Level1)
     ret = TransDelConnByReqId(reqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     DestroySoftBusList(g_proxyConnectionList);
-    SoftBusFree(removeNode);
-    DestroySoftBusList(g_proxyConnectionList);
     g_proxyConnectionList = nullptr;
 }
 
