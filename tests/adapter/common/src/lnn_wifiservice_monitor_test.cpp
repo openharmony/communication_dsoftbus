@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include <securec.h>
+
+#include "bus_center_client_proxy.h"
+#include "common_event_data.h"
+#include "gtest/gtest.h"
 #include "lnn_wifiservice_monitor.cpp"
 #include "lnn_wifiservice_monitor_mock.cpp"
-#include "common_event_data.h"
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_errcode.h"
-#include "bus_center_client_proxy.h"
 
 namespace OHOS {
 using namespace testing;
@@ -57,6 +58,12 @@ void LnnWifiServiceMonitorTest::TearDown()
 {
 }
 
+/**
+ * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
+ * @tc.desc: Verify the SetSoftBusWifiConnState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiConnState_001, TestSize.Level1)
 {
     SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
@@ -75,6 +82,12 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiConnSt
     EXPECT_EQ(state, SOFTBUS_WIFI_UNKNOWN);
 }
 
+/**
+ * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
+ * @tc.desc: Verify the SetSoftBusWifiUseState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiUseState_001, TestSize.Level1)
 {
     SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
@@ -90,6 +103,12 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiUseSta
     EXPECT_EQ(state, SOFTBUS_WIFI_UNKNOWN);
 }
 
+/**
+ * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
+ * @tc.desc: Verify the SetSoftBusWifiHotSpotState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiHotSpotState_001, TestSize.Level1)
 {
     SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;

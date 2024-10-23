@@ -190,7 +190,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
     FsmStateMachine fsm;
     connFsm3->fsm = fsm;
     ret = LnnSendAuthResultMsgToConnFsm(connFsm3, retCode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_SEND_FAIL);
 }
 
 /*
@@ -231,7 +231,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     ret = LnnSendLeaveRequestToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSendLeaveRequestToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(FUNC_SLEEP_MS);
@@ -248,7 +248,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSendSyncOfflineFinishToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSendSyncOfflineFinishToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(FUNC_SLEEP_MS);
@@ -263,7 +263,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnSendNewNetworkOnlineToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSendNewNetworkOnlineToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(FUNC_SLEEP_MS);
@@ -586,7 +586,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_UDID_HASH_FOR_DFX_TEST_001, TestSize.Level1)
     char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     int32_t ret = GetUdidHashForDfx(localUdidHash, peerUdidHash, &connInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
     ret = GetUdidHashForDfx(localUdidHash, peerUdidHash, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     connInfo.addr.type = CONNECTION_ADDR_BLE;
@@ -881,10 +881,10 @@ HWTEST_F(LNNConnectionFsmTest, SYNC_BR_OFFLINE_TEST_001, TestSize.Level1)
         .connInfo.flag = 1,
     };
     int32_t ret = SyncBrOffline(&connFsm);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_LEAVE_OFFLINE);
     connFsm.connInfo.addr.type = CONNECTION_ADDR_BR;
     ret = SyncBrOffline(&connFsm);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_LEAVE_OFFLINE);
     connFsm.connInfo.flag = LNN_CONN_INFO_FLAG_LEAVE_REQUEST;
     ret = SyncBrOffline(&connFsm);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

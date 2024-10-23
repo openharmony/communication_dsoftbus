@@ -351,6 +351,7 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001, TestSize.L
     authFsm->info.normalizedKey = (SessionKey *)SoftBusMalloc(sizeof(SessionKey));
     if (authFsm->info.normalizedKey == nullptr) {
         SoftBusFree(authFsm);
+        return;
     }
     ret = RecoveryNormalizedDeviceKey(authFsm);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

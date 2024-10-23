@@ -25,6 +25,8 @@
 #include "lnn_common_utils.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_interface.h"
+#include "lnn_net_builder.h"
+#include "lnn_net_builder_process.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_bt_common.h"
@@ -54,6 +56,9 @@ public:
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
     virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
+    virtual int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count) = 0;
+    virtual void DeleteNodeFromPcRestrictMap(const char *udidHash) = 0;
+    virtual LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -77,6 +82,9 @@ public:
     MOCK_METHOD1(LnnNotifyLeaveLnnByAuthHandle, int32_t (AuthHandle *));
     MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
     MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
+    MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t (const char *, uint32_t *));
+    MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void (const char *));
+    MOCK_METHOD1(FindConnectionFsmByRequestId, LnnConnectionFsm * (uint32_t));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

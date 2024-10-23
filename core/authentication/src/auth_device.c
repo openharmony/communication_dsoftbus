@@ -34,12 +34,6 @@
 #include "softbus_adapter_mem.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)
-#define SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x040C)))
-#define SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0607)))
-#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
 
 static AuthVerifyListener g_verifyListener = { 0 };
 static GroupChangeListener g_groupChangeListener = { 0 };

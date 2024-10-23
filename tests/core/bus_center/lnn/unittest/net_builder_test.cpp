@@ -97,7 +97,7 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
 
     EXPECT_TRUE(LnnGenLocalIrk(irkFirst, LFINDER_IRK_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(LnnGenLocalIrk(irkSecond, LFINDER_IRK_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(memcmp(irkFirst, irkSecond, LFINDER_IRK_LEN) == 0);
+    EXPECT_NE(memcmp(irkFirst, irkSecond, LFINDER_IRK_LEN), 0);
 }
 
 /*

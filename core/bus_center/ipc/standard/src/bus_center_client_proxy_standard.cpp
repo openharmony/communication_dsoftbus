@@ -438,6 +438,52 @@ int32_t BusCenterClientProxy::OnNodeDeviceTrustedChange(const char *pkgName, int
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterClientProxy::OnHichainProofException(
+    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    if (pkgName == nullptr || deviceId == nullptr || deviceIdLen != UDID_BUF_LEN) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteUint32(deviceIdLen)) {
+        LNN_LOGE(LNN_EVENT, "write deviceId length failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteRawData(deviceId, deviceIdLen)) {
+        LNN_LOGE(LNN_EVENT, "write deviceId failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteUint16(deviceTypeId)) {
+        LNN_LOGE(LNN_EVENT, "write deviceTypeId failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteInt32(errCode)) {
+        LNN_LOGE(LNN_EVENT, "write errcode failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (remote->SendRequest(CLIENT_ON_HICHAIN_PROOF_EXCEPTION, data, reply, option) != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -1937,7 +1937,7 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
         (pkgName != NULL && g_proxyChannelList != NULL), TRANS_CTRL, "pkgName or proxy channel list is null.");
     char *anonymizePkgName = NULL;
     Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
     AnonymizeFree(anonymizePkgName);
     ListNode destroyList;
     ListInit(&destroyList);

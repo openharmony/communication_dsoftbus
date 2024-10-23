@@ -95,7 +95,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         if (ret != SOFTBUS_OK) {
             char *anonyUuid = NULL;
             Anonymize(appInfo->peerData.deviceId, &anonyUuid);
-            TRANS_LOGE(TRANS_CTRL, "get info networkId fail, uuid=%{public}s", anonyUuid);
+            TRANS_LOGE(TRANS_CTRL, "get info networkId fail, uuid=%{public}s", AnonymizeWrapper(anonyUuid));
             AnonymizeFree(anonyUuid);
             return ret;
         }
@@ -306,7 +306,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     Anonymize(appInfo->myData.sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed:sessionName=%{public}s, channelId=%{public}d, appType=%{public}d, errCode=%{public}d",
-        tmpName, channelId, appInfo->appType, errCode);
+        AnonymizeWrapper(tmpName), channelId, appInfo->appType, errCode);
     AnonymizeFree(tmpName);
     return TransProxyNotifyOpenFailedByType(appInfo, appInfo->appType, channelId, errCode);
 }

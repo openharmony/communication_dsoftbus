@@ -29,14 +29,23 @@ void LnnDeinitCipherKeyManager(void)
     LNN_LOGI(LNN_INIT, "Deinit virtual lnn cipherkey manager");
 }
 
-bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, unsigned char *key,
+bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, AesCtrCipherKey *cipherkey,
     int32_t keyLen)
 {
+    (void)networkId;
+    (void)seq;
+    (void)tableIndex;
+    (void)cipherkey;
+    (void)keyLen;
     return true;
 }
 
-bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, unsigned char *key, int32_t keyLen)
+bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, AesCtrCipherKey *cipherkey, int32_t keyLen)
 {
+    (void)seq;
+    (void)tableIndex;
+    (void)cipherkey;
+    (void)keyLen;
     return true;
 }
 

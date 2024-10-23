@@ -180,7 +180,7 @@ void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyLi
     ListDelete(&(server->node));
     char *tmpName = NULL;
     Anonymize(server->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "destroy session server sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "destroy session server sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     SoftBusFree(server);
 }
@@ -495,7 +495,7 @@ SessionInfo *CreateNewSocketSession(const SessionParam *param)
         char *anonySessionName = NULL;
         Anonymize(param->peerSessionName, &anonySessionName);
         TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
-            anonySessionName, strlen(param->peerSessionName));
+            AnonymizeWrapper(anonySessionName), strlen(param->peerSessionName));
         AnonymizeFree(anonySessionName);
         SoftBusFree(session);
         return NULL;
@@ -506,7 +506,7 @@ SessionInfo *CreateNewSocketSession(const SessionParam *param)
         char *anonyNetworkId = NULL;
         Anonymize(param->peerDeviceId, &anonyNetworkId);
         TRANS_LOGI(TRANS_SDK, "strcpy peerDeviceId failed, peerDeviceId=%{public}s, peerDeviceIdLen=%{public}zu",
-            anonyNetworkId, strlen(param->peerDeviceId));
+            AnonymizeWrapper(anonyNetworkId), strlen(param->peerDeviceId));
         AnonymizeFree(anonyNetworkId);
         SoftBusFree(session);
         return NULL;
@@ -543,8 +543,8 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
         Anonymize(session->info.peerSessionName, &anonySessionName);
         Anonymize(session->info.peerDeviceId, &anonyNetworkId);
         TRANS_LOGI(TRANS_SDK, "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
-                              "peerNetworkIdLen=%{public}zu", anonySessionName,
-            strlen(session->info.peerSessionName), anonyNetworkId, strlen(session->info.peerDeviceId));
+            "peerNetworkIdLen=%{public}zu", AnonymizeWrapper(anonySessionName), strlen(session->info.peerSessionName),
+            AnonymizeWrapper(anonyNetworkId), strlen(session->info.peerDeviceId));
         AnonymizeFree(anonyNetworkId);
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
@@ -752,7 +752,7 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList)
         int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName);
         Anonymize(infoNode->sessionName, &tmpName);
         TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
-            tmpName, infoNode->pkgName, ret);
+            AnonymizeWrapper(tmpName), infoNode->pkgName, ret);
         AnonymizeFree(tmpName);
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -820,7 +820,7 @@ int32_t ClientGrantPermission(int uid, int pid, const char *busName)
     }
     char *tmpName = NULL;
     Anonymize(busName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     int32_t ret = ServerIpcGrantPermission(uid, pid, busName);
     if (ret != SOFTBUS_OK) {
@@ -837,7 +837,7 @@ int32_t ClientRemovePermission(const char *busName)
     }
     char *tmpName = NULL;
     Anonymize(busName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     int32_t ret = ServerIpcRemovePermission(busName);
     if (ret != SOFTBUS_OK) {
