@@ -1065,7 +1065,13 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
         LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_AUTH_DATA, lnnAuditExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
-            CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+            if (ret > 0) {
+                uint32_t authErrCode = 0;
+                (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+                CompleteAuthSession(authFsm, authErrCode);
+            } else {
+                CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+            }
         } else {
             AUTH_LOGD(AUTH_FSM, "auth has finished, ignore this processing failure");
         }
