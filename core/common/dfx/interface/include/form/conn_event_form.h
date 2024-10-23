@@ -106,6 +106,10 @@ typedef struct {
     int32_t osType;             // OS_TYPE
     const char *localDeviceType;  // LOCAL_DEVICE_TYPE
     const char *remoteDeviceType; // REMOTE_DEVICE_TYPE
+    int32_t p2pChannel;           // P2P_CHAN
+    int32_t hmlChannel;           // HML_CHAN
+    int32_t staChannel;           // STA_CHAN
+    int32_t apChannel;            // HOTSPOT_CHAN
 } ConnEventExtra;
 
 typedef enum {

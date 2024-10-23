@@ -494,6 +494,18 @@ typedef struct {
      * @version 1.0
      */
     void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status);
+    /**
+     * @brief Called when the devices have non-consistent group relationship.
+     *
+     * @param deviceId The device id.
+     * @param deviceIdLen The device id length.
+     * @param deviceTypeId The device type id.
+     * @param errcode Indicates the result code.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onHichainProofException)(uint16_t deviceTypeId, int32_t errCode);
 } INodeStateCb;
 
 /**

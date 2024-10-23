@@ -166,6 +166,80 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
 }
 
 /*
+* @tc.name: LNN_NET_CAPABILITY_Test_002
+* @tc.desc: lnn net capability function test, LnnSetNetCapability, LnnHasCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_002, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetNetCapability(&capability, BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetNetCapability(&capability, BIT_BR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_BR);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetNetCapability(&capability, BIT_WIFI);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_WIFI);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetNetCapability(&capability, BIT_WIFI_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_WIFI_P2P);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetNetCapability(&capability, BIT_WIFI_24G);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_WIFI_24G);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetNetCapability(&capability, BIT_WIFI_5G);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_WIFI_5G);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetNetCapability(&capability, BIT_ETH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_ETH);
+    EXPECT_EQ(hasCapability, true);
+}
+
+/*
+* @tc.name: LNN_NET_CAPABILITY_Test_003
+* @tc.desc: lnn net capability function test, LnnSetNetCapability, LnnClearNetCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_003, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetNetCapability(&capability, BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnClearNetCapability(&capability, BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasCapability(capability, BIT_BLE);
+    EXPECT_EQ(hasCapability, false);
+
+    ret = LnnSetNetCapability(&capability, BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    hasCapability = LnnHasCapability(capability, BIT_COUNT);
+    EXPECT_EQ(hasCapability, false);
+    ret = LnnClearNetCapability(&capability, BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
 * @tc.name: LNN_NODE_INFO_Test_001
 * @tc.desc: lnn node info function test
 * @tc.type: FUNC
@@ -207,6 +281,363 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnSetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetPtk(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_002
+* @tc.desc: lnn node info function test, LnnSetDiscoveryType, LnnHasDiscoveryType, LnnClearDiscoveryType
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_002, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t ret = LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDiscoveryType(nullptr, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasDiscoveryType = LnnHasDiscoveryType(nullptr, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(hasDiscoveryType, false);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(hasDiscoveryType, false);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(hasDiscoveryType, false);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(hasDiscoveryType, true);
+
+    ret = LnnClearDiscoveryType(nullptr, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(hasDiscoveryType, false);
+    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(hasDiscoveryType, false);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_003
+* @tc.desc: lnn node info function test, LnnSetDeviceUdid, LnnGetDeviceUdid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_003, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t ret = LnnSetDeviceUdid(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDeviceUdid(nullptr, LOCAL_UDID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    char *udid = (char *)SoftBusCalloc((UDID_BUF_LEN + 1) * sizeof(char));
+    ret = LnnSetDeviceUdid(&nodeInfo, udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(udid);
+
+    ret = LnnSetDeviceUdid(&nodeInfo, LOCAL_UDID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(strcmp(nodeInfo.deviceInfo.deviceUdid, LOCAL_UDID), 0);
+
+    const char *deviceUdid = LnnGetDeviceUdid(nullptr);
+    EXPECT_EQ(deviceUdid, nullptr);
+    deviceUdid = LnnGetDeviceUdid(&nodeInfo);
+    EXPECT_EQ(strcmp(deviceUdid, LOCAL_UDID), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_004
+* @tc.desc: lnn node info function test, LnnGetDeviceUuid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_004, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t ret = strncpy_s(nodeInfo.uuid, UUID_BUF_LEN, LOCAL_UUID, strlen(LOCAL_UUID));
+    EXPECT_EQ(ret, EOK);
+
+    const char *uuid = LnnGetDeviceUuid(nullptr);
+    EXPECT_EQ(uuid, nullptr);
+    uuid = LnnGetDeviceUuid(&nodeInfo);
+    EXPECT_EQ(strcmp(uuid, LOCAL_UUID), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_005
+* @tc.desc: lnn node info function testm, LnnSetBtMac, LnnGetBtMac
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_005, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+
+    LnnSetBtMac(nullptr, LOCAL_BT_MAC);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.macAddr, LOCAL_BT_MAC), 0);
+
+    LnnSetBtMac(&nodeInfo, nullptr);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.macAddr, LOCAL_BT_MAC), 0);
+
+    LnnSetBtMac(&nodeInfo, LOCAL_BT_MAC);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.macAddr, LOCAL_BT_MAC), 0);
+
+    const char *btMac = nullptr;
+    btMac = LnnGetBtMac(&nodeInfo);
+    EXPECT_EQ(strcmp(btMac, LOCAL_BT_MAC), 0);
+
+    char* localBtMac = (char *)SoftBusCalloc((MAC_LEN + 1) * sizeof(char));
+    LnnSetBtMac(&nodeInfo, localBtMac);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.macAddr, localBtMac), 0);
+    SoftBusFree(localBtMac);
+
+    btMac = LnnGetBtMac(nullptr);
+    EXPECT_EQ(strcmp(btMac, DEFAULT_MAC), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_006
+* @tc.desc: lnn node info function test, LnnSetNetIfName, LnnGetNetIfName
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_006, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    constexpr char netIfName1[] = "wlan0";
+
+    LnnSetNetIfName(nullptr, netIfName1);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+
+    LnnSetNetIfName(&nodeInfo, nullptr);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+
+    char *netIfName2 = (char *)SoftBusCalloc((NET_IF_NAME_LEN + 1) * sizeof(char));
+    LnnSetNetIfName(&nodeInfo, netIfName2);
+    SoftBusFree(netIfName2);
+
+    LnnSetNetIfName(&nodeInfo, netIfName1);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+
+    const char *netIfName = nullptr;
+    netIfName = LnnGetNetIfName(&nodeInfo);
+    EXPECT_EQ(strcmp(netIfName, netIfName1), 0);
+
+    netIfName = LnnGetNetIfName(nullptr);
+    EXPECT_EQ(strcmp(netIfName, DEFAULT_IFNAME), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_007
+* @tc.desc: lnn node info function test, LnnSetWiFiIp
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_007, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+
+    LnnSetWiFiIp(nullptr, LOCAL_WLAN_IP);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.deviceIp, LOCAL_WLAN_IP), 0);
+    LnnSetWiFiIp(&nodeInfo, LOCAL_WLAN_IP);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.deviceIp, LOCAL_WLAN_IP), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_008
+* @tc.desc: lnn node info function test, LnnSetMasterUdid, LnnGetMasterUdid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_008, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t  ret = LnnSetMasterUdid(nullptr, MASTER_NODE_UDID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetMasterUdid(&nodeInfo, MASTER_NODE_UDID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    const char *udid = LnnGetMasterUdid(nullptr);
+    EXPECT_EQ(udid, nullptr);
+    udid = LnnGetMasterUdid(&nodeInfo);
+    EXPECT_EQ(strcmp(udid, MASTER_NODE_UDID), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_009
+* @tc.desc: lnn node info function test, LnnSetWifiCfg, LnnGetWifiCfg
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_009, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    char wifiCfg1[] = "wifiCfg test msg";
+
+    int32_t ret = LnnSetWifiCfg(nullptr, wifiCfg1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetWifiCfg(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    char *wifiCfg2 = (char *)SoftBusCalloc((WIFI_CFG_INFO_MAX_LEN + 1) * sizeof(char));
+    ret = LnnSetWifiCfg(&nodeInfo, wifiCfg2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(wifiCfg2);
+
+    ret = LnnSetWifiCfg(&nodeInfo, wifiCfg1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    const char *wifiCfg = nullptr;
+    wifiCfg = LnnGetWifiCfg(&nodeInfo);
+    EXPECT_EQ(wifiCfg, nodeInfo.p2pInfo.wifiCfg);
+
+    wifiCfg = LnnGetWifiCfg(nullptr);
+    EXPECT_EQ(wifiCfg, nullptr);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_012
+* @tc.desc: lnn node info function test, LnnSetStaFrequency, LnnGetStaFrequency
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_012, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t staFrequency = 1;
+
+    int32_t ret = LnnSetStaFrequency(nullptr, staFrequency);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetStaFrequency(&nodeInfo, staFrequency);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t rst = LnnGetStaFrequency(&nodeInfo);
+    EXPECT_EQ(rst, 1);
+
+    rst = LnnGetStaFrequency(nullptr);
+    EXPECT_EQ(rst, 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_013
+* @tc.desc: lnn node info function test, LnnSetP2pMac, LnnGetP2pMac
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_013, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    const char *mac = nullptr;
+
+    int32_t ret = LnnSetP2pMac(nullptr, LOCAL_P2P_MAC);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetP2pMac(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetP2pMac(&nodeInfo, LOCAL_P2P_MAC);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    mac = LnnGetP2pMac(nullptr);
+    EXPECT_EQ(mac, nullptr);
+    mac = LnnGetP2pMac(&nodeInfo);
+    EXPECT_EQ(strcmp(mac, LOCAL_P2P_MAC), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_014
+* @tc.desc: lnn node info function test, LnnSetDataDynamicLevel, LnnGetDataDynamicLevel
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_014, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    uint16_t dataDynamicLevel = 1;
+
+    int32_t ret = LnnSetDataDynamicLevel(nullptr, dataDynamicLevel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetDataDynamicLevel(&nodeInfo, dataDynamicLevel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint16_t Level = LnnGetDataDynamicLevel(&nodeInfo);
+    EXPECT_EQ(Level, 1);
+
+    Level = LnnGetDataDynamicLevel(nullptr);
+    EXPECT_NE(Level, 1);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_015
+* @tc.desc: lnn node info function test, LnnSetDataStaticLevel, LnnGetDataStaticLevel
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_015, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    uint16_t dataStaticLevel = 1;
+
+    int32_t ret = LnnSetDataStaticLevel(nullptr, dataStaticLevel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetDataStaticLevel(&nodeInfo, dataStaticLevel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint16_t Level = LnnGetDataStaticLevel(&nodeInfo);
+    EXPECT_EQ(Level, 1);
+
+    Level = LnnGetDataStaticLevel(nullptr);
+    EXPECT_NE(Level, 1);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_016
+* @tc.desc: lnn node info function test, LnnSetDataSwitchLevel, LnnGetDataSwitchLevel
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_016, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    uint32_t dataSwitchLevel = 1;
+
+    int32_t ret = LnnSetDataSwitchLevel(nullptr, dataSwitchLevel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetDataSwitchLevel(&nodeInfo, dataSwitchLevel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint32_t Level = LnnGetDataSwitchLevel(&nodeInfo);
+    EXPECT_EQ(Level, 1);
+
+    Level = LnnGetDataSwitchLevel(nullptr);
+    EXPECT_NE(Level, 1);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_017
+* @tc.desc: lnn node info function test, LnnSetDataSwitchLength, LnnGetDataSwitchLength
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_017, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    uint16_t dataSwitchLength = 1;
+
+    int32_t ret = LnnSetDataSwitchLength(nullptr, dataSwitchLength);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetDataSwitchLength(&nodeInfo, dataSwitchLength);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint16_t Level = LnnGetDataSwitchLength(&nodeInfo);
+    EXPECT_EQ(Level, 1);
+
+    Level = LnnGetDataSwitchLength(nullptr);
+    EXPECT_NE(Level, 1);
 }
 
 /*

@@ -48,6 +48,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_NODE_STATUS_CHANGED] = &SoftBusClientStub::OnNodeStatusChangedInner;
     memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_DEVICE_TRUST_CHANGED] = &SoftBusClientStub::OnNodeDeviceTrustedChangeInner;
+    memberFuncMap_[CLIENT_ON_HICHAIN_PROOF_EXCEPTION] = &SoftBusClientStub::OnHichainProofExceptionInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
@@ -540,6 +541,41 @@ int32_t SoftBusClientStub::OnNodeDeviceTrustedChangeInner(MessageParcel &data, M
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnHichainProofExceptionInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t deviceIdLen = 0;
+    if (!data.ReadUint32(deviceIdLen) || deviceIdLen != UDID_BUF_LEN) {
+        COMM_LOGE(COMM_SDK, "read failed! deviceIdLen=%{public}u", deviceIdLen);
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    char *deviceId = (char *)data.ReadRawData(deviceIdLen);
+    if (deviceId == nullptr) {
+        COMM_LOGE(COMM_SDK, "read deviceId failed!");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    uint16_t deviceTypeId = 0;
+    if (!data.ReadUint16(deviceTypeId)) {
+        COMM_LOGE(COMM_SDK, "read failed! deviceTypeId=%{public}hu", deviceTypeId);
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!data.ReadInt32(errCode)) {
+        COMM_LOGE(COMM_SDK, "read failed! errCode=%{public}d", errCode);
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t retReply = OnHichainProofException(pkgName, deviceId, deviceIdLen, deviceTypeId, errCode);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SDK, "OnHichainProofException write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t infoTypeLen;
@@ -693,6 +729,12 @@ int32_t SoftBusClientStub::OnNodeDeviceTrustedChange(const char *pkgName, int32_
     uint32_t msgLen)
 {
     return LnnOnNodeDeviceTrustedChange(pkgName, type, msg, msgLen);
+}
+
+int32_t SoftBusClientStub::OnHichainProofException(
+    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    return LnnOnHichainProofException(pkgName, deviceId, deviceIdLen, deviceTypeId, errCode);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

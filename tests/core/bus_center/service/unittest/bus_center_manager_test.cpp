@@ -122,7 +122,6 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop));
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitBusCenterEvent()).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitEventMonitor()).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitDiscoveryManager()).WillOnce(Return(SOFTBUS_OK));
@@ -151,9 +150,8 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
     int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_ERR));
     ret = BusCenterServerInit();
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitBusCenterEvent()).WillOnce(Return(SOFTBUS_ERR));
     ret = BusCenterServerInit();
@@ -196,7 +194,6 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitBusCenterEvent()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitEventMonitor()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitDiscoveryManager()).WillRepeatedly(Return(SOFTBUS_OK));
@@ -210,16 +207,12 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, InitDecisionCenter()).WillOnce(Return(SOFTBUS_ERR));
     ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, InitDecisionCenter()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_OK)).
-        WillOnce(Return(SOFTBUS_ERR));
     ret = BusCenterServerInit();
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }
-       

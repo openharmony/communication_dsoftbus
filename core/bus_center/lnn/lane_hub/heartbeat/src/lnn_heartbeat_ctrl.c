@@ -342,6 +342,30 @@ static void HbDelaySetHighScanParam(void *para)
     }
 }
 
+static void HbHandleBleStateChange(SoftBusBtState btState)
+{
+    g_enableState = false;
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON, state=%{public}d", btState);
+    LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
+    ClearAuthLimitMap();
+    ClearLnnBleReportExtraMap();
+    HbConditionChanged(false);
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB async set high param fail");
+    }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
+        HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB async set normal param fail");
+    }
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
+        STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+    }
+    if (btState == SOFTBUS_BR_TURN_ON) {
+        LnnUpdateHeartbeatInfo(UPDATE_BR_TURN_ON_INFO);
+    }
+}
+
 static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_STATE_CHANGED) {
@@ -354,19 +378,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
         case SOFTBUS_BR_TURN_ON:
-            g_enableState = false;
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON, state=%{public}d", btState);
-            LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
-            ClearAuthLimitMap();
-            ClearLnnBleReportExtraMap();
-            HbConditionChanged(false);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, 0);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
-                                        HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
-            if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
-                STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
-            }
+            HbHandleBleStateChange(btState);
             break;
         case SOFTBUS_BR_TURN_OFF:
             if (SoftBusGetBtState() == BLE_DISABLE) {
@@ -1237,6 +1249,10 @@ int32_t LnnTriggerDataLevelHeartbeat(void)
 int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout)
 {
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDirectHeartbeat");
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "networkId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_DIRECT,
         false, networkId, timeout);
     if (ret != SOFTBUS_OK) {
