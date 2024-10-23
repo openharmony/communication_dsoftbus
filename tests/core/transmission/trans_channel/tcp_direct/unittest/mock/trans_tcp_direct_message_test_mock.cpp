@@ -57,11 +57,6 @@ int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLe
     return GetTransTcpDirectMessageInterface()->AuthEncrypt(authHandle, inData, inLen, outData, outLen);
 }
 
-int32_t GetSessionConnById(int32_t channelId, SessionConn *conn)
-{
-    return GetTransTcpDirectMessageInterface()->GetSessionConnById(channelId, conn);
-}
-
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     return GetTransTcpDirectMessageInterface()->ConnSendSocketData(fd, buf, len, timeout);
@@ -92,11 +87,6 @@ int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t localI
     return GetTransTcpDirectMessageInterface()->GetLocalIpByRemoteIp(remoteIp, localIp, localIpSize);
 }
 
-char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
-{
-    return GetTransTcpDirectMessageInterface()->TransTdcPackFastData(appInfo, outLen);
-}
-
 int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
 {
     return GetTransTcpDirectMessageInterface()->UnpackReplyErrCode(msg, errCode);
@@ -115,11 +105,6 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
 {
     return GetTransTcpDirectMessageInterface()->SetAppInfoById(channelId, appInfo);
-}
-
-char *PackError(int errCode, const char *errDesc)
-{
-    return GetTransTcpDirectMessageInterface()->PackError(errCode, errDesc);
 }
 
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
@@ -152,11 +137,6 @@ int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLe
     return GetTransTcpDirectMessageInterface()->AuthDecrypt(authHandle, inData, inLen, outData, outLen);
 }
 
-cJSON* cJSON_Parse(const char *value)
-{
-    return GetTransTcpDirectMessageInterface()->cJSON_Parse(value);
-}
-
 int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
 {
     return GetTransTcpDirectMessageInterface()->SoftBusGenerateSessionKey(key, len);
@@ -177,9 +157,76 @@ char *PackRequest(const AppInfo *appInfo)
     return GetTransTcpDirectMessageInterface()->PackRequest(appInfo);
 }
 
-int32_t TransTdcAddSessionConn(SessionConn *conn)
+int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
-    return GetTransTcpDirectMessageInterface()->TransTdcAddSessionConn(conn);
+    return GetTransTcpDirectMessageInterface()->LnnSetLocalStrInfo(key, info);
+}
+
+int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp)
+{
+    return GetTransTcpDirectMessageInterface()->LnnSetDLP2pIp(id, type, p2pIp);
+}
+
+int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
+{
+    return GetTransTcpDirectMessageInterface()->LnnGetNetworkIdByUuid(uuid, buf, len);
+}
+
+int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcGetUidAndPid(sessionName, uid, pid);
+}
+
+int32_t TransGetLaneIdByChannelId(int32_t channelId, uint64_t *laneId)
+{
+    return GetTransTcpDirectMessageInterface()->TransGetLaneIdByChannelId(channelId, laneId);
+}
+
+int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
+    const ChannelInfo *channel)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcOnChannelOpened(pkgName, pid, sessionName, channel);
+}
+
+int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
+{
+    return GetTransTcpDirectMessageInterface()->SetSessionConnStatusById(channelId, status);
+}
+
+int32_t TransTdcOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcOnChannelBind(pkgName, pid, channelId);
+}
+
+int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    return GetTransTcpDirectMessageInterface()->SoftBusEncryptData(cipherKey, input, inLen, encryptData, encryptLen);
+}
+
+int32_t SetIpTos(int32_t fd, uint32_t tos)
+{
+    return GetTransTcpDirectMessageInterface()->SetIpTos(fd, tos);
+}
+
+int32_t TransTdcOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcOnMsgReceived(pkgName, pid, channelId, receiveData);
+}
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetTransTcpDirectMessageInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
+{
+    return GetTransTcpDirectMessageInterface()->TransCheckServerAccessControl(callingTokenId);
+}
+
+int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcOnChannelClosed(pkgName, pid, channelId);
 }
 }
 }
