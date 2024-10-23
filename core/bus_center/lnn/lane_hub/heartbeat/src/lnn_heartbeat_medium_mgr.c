@@ -97,7 +97,7 @@ static int32_t HbFirstSaveRecvTime(
 {
     LnnHeartbeatRecvInfo *recvInfo = NULL;
 
-    recvInfo = (LnnHeartbeatRecvInfo *)SoftBusMalloc(sizeof(LnnHeartbeatRecvInfo));
+    recvInfo = (LnnHeartbeatRecvInfo *)SoftBusCalloc(sizeof(LnnHeartbeatRecvInfo));
     if (recvInfo == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "medium mgr malloc recvInfo err");
         return SOFTBUS_MALLOC_ERR;

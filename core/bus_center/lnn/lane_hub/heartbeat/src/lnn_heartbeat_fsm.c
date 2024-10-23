@@ -430,7 +430,7 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
     }
     LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     hbFsm->state = STATE_HB_MASTER_NODE_INDEX;
-    LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)SoftBusMalloc(sizeof(LnnProcessSendOnceMsgPara));
+    LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)SoftBusCalloc(sizeof(LnnProcessSendOnceMsgPara));
     if (msgPara == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "enter master node malloc err. fsmId=%{public}d", hbFsm->id);
         return;
@@ -439,6 +439,7 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
     msgPara->strategyType = hbFsm->strategyType;
     msgPara->isRelay = false;
     msgPara->isSyncData = false;
+    msgPara->isDirectBoardcast = false;
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, hbFsm->strategyType);
     if (LnnFsmPostMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE, (void *)msgPara) != SOFTBUS_OK) {
         SoftBusFree(msgPara);
@@ -1135,7 +1136,7 @@ int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSe
         LNN_LOGE(LNN_HEART_BEAT, "post next loop msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    dupPara = (LnnProcessSendOnceMsgPara *)SoftBusMalloc(sizeof(LnnProcessSendOnceMsgPara));
+    dupPara = (LnnProcessSendOnceMsgPara *)SoftBusCalloc(sizeof(LnnProcessSendOnceMsgPara));
     if (dupPara == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "post next loop msg malloc dupPara fail");
         return SOFTBUS_MALLOC_ERR;
