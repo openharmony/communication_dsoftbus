@@ -193,6 +193,11 @@ int32_t GetInterfaceIpString(const std::string &interface, std::string &ip)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetInterfaceIpString(interface, ip);
 }
 
+int IsWifiActive()
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->IsWifiActive();
+}
+
 WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetLinkedInfo(info);
