@@ -345,19 +345,7 @@ static void HbDelaySetHighScanParam(void *para)
 
 static void DfxRecordBleTriggerTimestamp(LnnTriggerReason reason)
 {
-    LnnEventExtra extra = {0};
-    (void)LnnEventExtraInit(&extra);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.triggerReason = reason;
-    extra.interval = BROADCAST_INTERVAL_DEFAULT;
-    LnnTriggerInfo triggerInfo = {0};
-    GetLnnTriggerInfo(&triggerInfo);
-    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
-        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
-    }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_BLE_TRIGGER, extra);
-    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
-        extra.timeStamp, extra.triggerReason, 1);
+    DfxRecordTriggerTime(reason, EVENT_STAGE_LNN_BLE_TRIGGER);
 }
 
 static void HbHandleBleStateChange(SoftBusBtState btState)
@@ -562,19 +550,7 @@ static void HbScreenOnOnceTryCloudSync(void)
 
 static void DfxRecordScreenChangeTimestamp(LnnTriggerReason reason)
 {
-    LnnEventExtra extra = {0};
-    (void)LnnEventExtraInit(&extra);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.triggerReason = reason;
-    extra.interval = BROADCAST_INTERVAL_DEFAULT;
-    LnnTriggerInfo triggerInfo = {0};
-    GetLnnTriggerInfo(&triggerInfo);
-    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
-        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
-    }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_SCREEN_STATE_CHANGED, extra);
-    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
-        extra.timeStamp, extra.triggerReason, 1);
+    DfxRecordTriggerTime(reason, EVENT_STAGE_LNN_SCREEN_STATE_CHANGED);
 }
 
 static void HbScreenOnChangeEventHandler(int64_t nowTime)
@@ -836,23 +812,6 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-static void DfxRecordHbUserSwitchedTimestamp(void)
-{
-    LnnEventExtra extra = {0};
-    (void)LnnEventExtraInit(&extra);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.triggerReason = USER_SWITCHED;
-    extra.interval = BROADCAST_INTERVAL_DEFAULT;
-    LnnTriggerInfo triggerInfo = {0};
-    GetLnnTriggerInfo(&triggerInfo);
-    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
-        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
-    }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_USER_SWITCHED, extra);
-    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
-        extra.timeStamp, extra.triggerReason, 1);
-}
-
 static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
@@ -871,7 +830,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                     HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
                     LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
                 }
-                DfxRecordHbUserSwitchedTimestamp();
+                DfxRecordTriggerTime(USER_SWITCHED, EVENT_STAGE_LNN_USER_SWITCHED);
             }
             RestartCoapDiscovery();
             break;
@@ -1035,22 +994,6 @@ static void ReportBusinessDiscoveryResultEvt(const char *pkgName, int32_t discCn
         LNN_LOGE(LNN_HEART_BEAT, "report business discovery result fail");
     }
 }
-static void DfxRecordDmTriggerTimestamp(void)
-{
-    LnnEventExtra extra = {0};
-    (void)LnnEventExtraInit(&extra);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.triggerReason = DM_TRIGGER;
-    extra.interval = BROADCAST_INTERVAL_DEFAULT;
-    LnnTriggerInfo triggerInfo = {0};
-    GetLnnTriggerInfo(&triggerInfo);
-    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
-        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
-    }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_SHIFT_GEAR, extra);
-    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
-        extra.timeStamp, extra.triggerReason, 1);
-}
 
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
@@ -1093,7 +1036,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
         return SOFTBUS_ERR;
     }
-    DfxRecordDmTriggerTimestamp();
+    DfxRecordTriggerTime(DM_TRIGGER, EVENT_STAGE_LNN_SHIFT_GEAR);
     int32_t ret = AuthFlushDevice(uuid);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_INVALID_PARAM) {
         LNN_LOGI(LNN_HEART_BEAT, "tcp flush failed, wifi will offline");
@@ -1312,23 +1255,6 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
 }
 
-static void DfxRecordDbTriggerTimestamp(void)
-{
-    LnnEventExtra extra = {0};
-    (void)LnnEventExtraInit(&extra);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.triggerReason = DB_TRIGGER;
-    extra.interval = BROADCAST_INTERVAL_DEFAULT;
-    LnnTriggerInfo triggerInfo = {0};
-    GetLnnTriggerInfo(&triggerInfo);
-    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
-        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
-    }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_DATA_LEVEL, extra);
-    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
-        extra.timeStamp, extra.triggerReason, 1);
-}
-
 int32_t LnnTriggerDataLevelHeartbeat(void)
 {
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartbeat");
@@ -1337,7 +1263,7 @@ int32_t LnnTriggerDataLevelHeartbeat(void)
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
         return SOFTBUS_ERR;
     }
-    DfxRecordDbTriggerTimestamp();
+    DfxRecordTriggerTime(DB_TRIGGER, EVENT_STAGE_LNN_DATA_LEVEL);
     return SOFTBUS_OK;
 }
 

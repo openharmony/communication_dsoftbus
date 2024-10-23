@@ -153,7 +153,6 @@ typedef struct {
     int32_t chanReqId;          // CHAN_REQ_ID
     int32_t connReqId;          // CONN_REQ_ID
     int32_t strategy;           // STRATEGY_FOR_LNN_BLE
-    uint64_t timeStamp;         // TIME_STAMP
     uint64_t timeLatency;       // TIME_LATENCY
     int32_t triggerReason;      // TRIGGER_REASON
     int64_t authSeq;            // AUTH_SEQ

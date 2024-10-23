@@ -67,8 +67,7 @@ public:
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
     virtual int32_t LnnGenerateCeParams(void) = 0;
-    virtual void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason) = 0;
-    virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
+    virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -104,8 +103,7 @@ public:
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
     MOCK_METHOD0(AuthLoadDeviceKey, void (void));
     MOCK_METHOD0(LnnGenerateCeParams, int32_t (void));
-    MOCK_METHOD3(SetLnnTriggerInfo, void (uint64_t, int32_t, int32_t));
-    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
+    MOCK_METHOD2(DfxRecordTriggerTime, void (LnnTriggerReason, LnnEventLnnStage));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

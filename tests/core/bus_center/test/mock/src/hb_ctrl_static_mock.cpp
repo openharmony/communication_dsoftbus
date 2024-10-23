@@ -182,14 +182,9 @@ int32_t LnnGenerateCeParams(void)
     return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
 }
 
-void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason)
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
 {
-    return HeartBeatCtrlStaticInterface()->SetLnnTriggerInfo(triggerTime, deviceCnt, triggerReason);
-}
-
-void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
-{
-    return HeartBeatCtrlStaticInterface()->GetLnnTriggerInfo(triggerInfo);
+    return HeartBeatCtrlStaticInterface()->DfxRecordTriggerTime(reason, stage);
 }
 }
 } // namespace OHOS

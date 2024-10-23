@@ -1182,13 +1182,14 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
 
 static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, const AuthDataHead *head)
 {
+    uint64_t timeStamp = 0;
     int32_t ret = SOFTBUS_OK;
     LnnEventExtra extra = { 0 };
     (void)LnnEventExtraInit(&extra);
     LnnTriggerInfo triggerInfo = { 0 };
     GetLnnTriggerInfo(&triggerInfo);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.timeLatency = extra.timeStamp - triggerInfo.triggerTime;
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
     extra.authSeq = head->seq;
     char *udidHash = (char *)SoftBusCalloc(SHORT_UDID_HASH_HEX_LEN + 1);
     if (udidHash == NULL) {
@@ -1199,7 +1200,7 @@ static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, con
         ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
                                       connInfo->info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail. ret=%{public}d", ret);
             SoftBusFree(udidHash);
             return;
         }
@@ -1208,7 +1209,7 @@ static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, con
         ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
                                       connInfo->info.ipInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail. ret=%{public}d", ret);
             SoftBusFree(udidHash);
             return;
         }

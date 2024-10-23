@@ -179,6 +179,10 @@ void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerR
 
 void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
 {
+    if (triggerInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
     if (!g_lnnTriggerInfoIsInit) {
         LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
         return;
@@ -187,14 +191,28 @@ void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
         LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
         return;
     }
-    if (triggerInfo == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid param");
-        return;
-    }
     triggerInfo->triggerTime = g_lnnTriggerInfo.triggerTime;
     triggerInfo->deviceCnt = g_lnnTriggerInfo.deviceCnt;
     triggerInfo->triggerReason = g_lnnTriggerInfo.triggerReason;
     (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    uint64_t timeStamp = 0;
+    LnnEventExtra extra = {0};
+    (void)LnnEventExtraInit(&extra);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.triggerReason = reason;
+    extra.interval = BROADCAST_INTERVAL_DEFAULT;
+    LnnTriggerInfo triggerInfo = {0};
+    GetLnnTriggerInfo(&triggerInfo);
+    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
+        SetLnnTriggerInfo(timeStamp, 1, extra.triggerReason);
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, stage, extra);
+    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=1",
+        timeStamp, extra.triggerReason);
 }
 
 static bool CheckStateMsgCommonArgs(const FsmStateMachine *fsm)
@@ -764,6 +782,7 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
         LNN_LOGE(LNN_BUILDER, "connInfo is NULL");
         return;
     }
+    uint64_t timeStamp = 0;
     LnnTriggerInfo triggerInfo = { 0 };
     GetLnnTriggerInfo(&triggerInfo);
     int32_t osType = connInfo->infoReport.osType;
@@ -778,8 +797,8 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
                 return;
             }
             if ((SoftBusGetSysTimeMs() - triggerInfo.triggerTime) < MAX_TIME_LATENCY) {
-                extra.timeStamp = SoftBusGetSysTimeMs();
-                extra.timeLatency = extra.timeStamp - triggerInfo.triggerTime;
+                timeStamp = SoftBusGetSysTimeMs();
+                extra.timeLatency = timeStamp - triggerInfo.triggerTime;
                 extra.onlineDevCnt = triggerInfo.deviceCnt;
                 extra.triggerReason = triggerInfo.triggerReason;
                 LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
@@ -793,8 +812,8 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
         return;
     }
     if (reason == SOFTBUS_OK && (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) < MAX_TIME_LATENCY) {
-        extra.timeStamp = SoftBusGetSysTimeMs();
-        extra.timeLatency = extra.timeStamp - triggerInfo.triggerTime;
+        timeStamp = SoftBusGetSysTimeMs();
+        extra.timeLatency = timeStamp - triggerInfo.triggerTime;
         extra.onlineDevCnt = triggerInfo.deviceCnt;
         extra.triggerReason = triggerInfo.triggerReason;
         SetLnnTriggerInfoDeviceCntIncrease();

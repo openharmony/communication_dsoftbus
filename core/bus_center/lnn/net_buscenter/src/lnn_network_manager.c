@@ -227,19 +227,7 @@ static int32_t LnnInitManagerByConfig(void)
 
 static void DfxRecordWifiTriggerTimestamp(LnnTriggerReason reason)
 {
-    LnnEventExtra extra = {0};
-    (void)LnnEventExtraInit(&extra);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.triggerReason = reason;
-    extra.interval = BROADCAST_INTERVAL_DEFAULT;
-    LnnTriggerInfo triggerInfo = {0};
-    GetLnnTriggerInfo(&triggerInfo);
-    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
-        SetLnnTriggerInfo(extra.timeStamp, 1, extra.triggerReason);
-    }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_WIFI_TRIGGER, extra);
-    LNN_LOGI(LNN_BUILDER, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=%{public}d",
-        extra.timeStamp, extra.triggerReason, 1);
+    DfxRecordTriggerTime(reason, EVENT_STAGE_LNN_WIFI_TRIGGER);
 }
 
 static void NetUserStateEventHandler(const LnnEventBasicInfo *info)

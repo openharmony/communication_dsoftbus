@@ -85,29 +85,30 @@ void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)
 
 static void DfxRecordDeviceInfoExchangeEndTime(const NodeInfo *info)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
+    uint64_t timeStamp = 0;
     LnnEventExtra extra = { 0 };
     (void)LnnEventExtraInit(&extra);
     LnnTriggerInfo triggerInfo = { 0 };
     GetLnnTriggerInfo(&triggerInfo);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.timeLatency = extra.timeStamp - triggerInfo.triggerTime;
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
     uint8_t hash[UDID_HASH_LEN] = { 0 };
     char *udidHash = (char *)SoftBusCalloc(SHORT_UDID_HASH_HEX_LEN + 1);
     if (udidHash == NULL) {
         LNN_LOGE(LNN_BUILDER, "udidHash calloc fail");
         return;
     }
-    rc = SoftBusGenerateStrHash((uint8_t *)info->deviceInfo.deviceUdid, strlen(info->deviceInfo.deviceUdid),
+    ret = SoftBusGenerateStrHash((uint8_t *)info->deviceInfo.deviceUdid, strlen(info->deviceInfo.deviceUdid),
         hash);
-    if (rc != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udidhash fail. ret=%{public}d", ret);
         SoftBusFree(udidHash);
         return;
     }
-    rc = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
-    if (rc != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+    ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert bytes to string fail. ret=%{public}d", ret);
         SoftBusFree(udidHash);
         return;
     }
