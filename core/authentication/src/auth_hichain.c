@@ -114,12 +114,13 @@ static void DfxRecordLnnExchangekeyEnd(int64_t authSeq, int32_t reason)
 
 static void DfxRecordCertEndTime(int64_t authSeq)
 {
+    uint64_t timeStamp = 0;
     LnnEventExtra extra = { 0 };
     (void)LnnEventExtraInit(&extra);
     LnnTriggerInfo triggerInfo = { 0 };
     GetLnnTriggerInfo(&triggerInfo);
-    extra.timeStamp = SoftBusGetSysTimeMs();
-    extra.timeLatency = extra.timeStamp - triggerInfo.triggerTime;
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
     extra.authSeq = authSeq;
     AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
     if (authFsm == NULL) {

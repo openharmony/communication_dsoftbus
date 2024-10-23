@@ -141,7 +141,6 @@ BUSCENTER_BEHAVIOR:
   OS_TYPE: { type: INT32, desc: os type }
   CONN_ONLINE_REASON: { type: UINT32, desc: connect online reason }
   STRATEGY_FOR_LNN_BLE: { type: UINT32, desc: strategy for lnn ble }
-  TIME_STAMP: { type: UINT64, desc: time stamp }
   TIME_LATENCY: { type: UINT64, desc: time latency }
   TRIGGER_REASON: { type: INT32, desc: lnn trigger reason }
   AUTH_SEQ: { type: INT64, desc: auth seq }

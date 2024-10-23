@@ -106,6 +106,7 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
 
 void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason);
 void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo);
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage);
 
 #ifdef __cplusplus
 #if __cplusplus

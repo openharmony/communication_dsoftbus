@@ -137,14 +137,9 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
     return GetNetworkManagerInterface()->LnnUnregisterEventHandler(event, handler);
 }
 
-void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason)
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
 {
-    return GetNetworkManagerInterface()->SetLnnTriggerInfo(triggerTime, deviceCnt, triggerReason);
-}
-
-void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
-{
-    return GetNetworkManagerInterface()->GetLnnTriggerInfo(triggerInfo);
+    return GetNetworkManagerInterface()->DfxRecordTriggerTime(reason, stage);
 }
 }
 }

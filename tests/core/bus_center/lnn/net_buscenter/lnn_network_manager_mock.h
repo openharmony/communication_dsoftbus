@@ -58,8 +58,7 @@ public:
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
-    virtual void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason) = 0;
-    virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
+    virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -86,8 +85,7 @@ public:
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
     MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void (void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void (LnnEventType, LnnEventHandler));
-    MOCK_METHOD3(SetLnnTriggerInfo, void (uint64_t, int32_t, int32_t));
-    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
+    MOCK_METHOD2(DfxRecordTriggerTime, void (LnnTriggerReason, LnnEventLnnStage));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H
