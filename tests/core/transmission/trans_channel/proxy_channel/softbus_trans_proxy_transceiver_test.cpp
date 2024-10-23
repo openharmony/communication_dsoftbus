@@ -414,7 +414,6 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByConnId001, TestSize.Level1)
     ListAdd(&(g_proxyConnectionList->list), &(removeNode->node));
     g_proxyConnectionList->cnt++;
     TransDelConnByConnId(connId);
-    SoftBusFree(removeNode);
     DestroySoftBusList(g_proxyConnectionList);
     g_proxyConnectionList = nullptr;
 }
