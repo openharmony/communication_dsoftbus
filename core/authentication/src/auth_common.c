@@ -466,36 +466,40 @@ void AuthCommonDeinit(void)
     }
 }
 
-int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
+int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid, uint32_t len)
 {
-    if (networkId == NULL || udid == NULL) {
+    if (networkId == NULL || udid == NULL || len < UDID_BUF_LEN) {
         AUTH_LOGW(AUTH_CONN, "param err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    NodeInfo *info = LnnRetrieveDeviceInfoByNetworkId(networkId);
-    if (info != NULL && info->deviceInfo.deviceUdid[0] != '\0') {
-        if (memcpy_s(udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
-            return SOFTBUS_ERR;
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfoByNetworkId(networkId, &cacheInfo) == SOFTBUS_OK &&
+        cacheInfo.deviceInfo.deviceUdid[0] != '\0') {
+        if (strcpy_s(udid, len, cacheInfo.deviceInfo.deviceUdid) != EOK) {
+            AUTH_LOGE(AUTH_CONN, "copy deviceUdid failed");
+            return SOFTBUS_MEM_ERR;
         }
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_CONN, "info or deviceUdid is null");
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid)
 {
     if (networkId == NULL || isExchangeUdid == NULL) {
         AUTH_LOGW(AUTH_CONN, "param err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    NodeInfo *info = LnnRetrieveDeviceInfoByNetworkId(networkId);
-    if (info != NULL) {
-        *isExchangeUdid = info->isAuthExchangeUdid;
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfoByNetworkId(networkId, &cacheInfo) == SOFTBUS_OK) {
+        *isExchangeUdid = cacheInfo.isAuthExchangeUdid;
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_CONN, "deviceInfo not found");
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)

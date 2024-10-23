@@ -33,6 +33,7 @@
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ctrl_lane.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
@@ -145,8 +146,8 @@ void DelAuthManager(AuthManager *auth, int32_t type)
             return;
         }
     }
-    AUTH_LOGI(AUTH_FSM, "delete auth manager, udid=%{public}s, side=%{public}s, authId=%{public}" PRId64, anonyUdid,
-        GetAuthSideStr(auth->isServer), auth->authId);
+    AUTH_LOGI(AUTH_FSM, "delete auth manager, udid=%{public}s, side=%{public}s, authId=%{public}" PRId64,
+        AnonymizeWrapper(anonyUdid), GetAuthSideStr(auth->isServer), auth->authId);
     AnonymizeFree(anonyUdid);
     ListDelete(&auth->node);
     CancelUpdateSessionKey(auth->authId);
@@ -215,8 +216,6 @@ static AuthManager *FindAuthManagerByAuthId(int64_t authId)
             return item;
         }
     }
-
-    AUTH_LOGE(AUTH_FSM, "auth manager not found. authId=%{public}" PRId64 "", authId);
     return NULL;
 }
 
@@ -294,8 +293,8 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType typ
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        ReleaseAuthLock();
         AUTH_LOGI(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
+        ReleaseAuthLock();
         return;
     }
     RemoveSessionkeyByIndex(&auth->sessionKeyList, index, type);
@@ -385,7 +384,7 @@ int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo 
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "uuid is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
-    if (type < AUTH_LINK_TYPE_WIFI || type > AUTH_LINK_TYPE_MAX) {
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_CONN, "connInfo type error");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -422,13 +421,15 @@ static int32_t GetAvailableAuthConnInfoByUuid(const char *uuid, AuthLinkType typ
     char *anonyUuid = NULL;
     Anonymize(uuid, &anonyUuid);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s",
+            type, AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     if (GetLatestAvailableSessionKeyTime(&auth->sessionKeyList, type) == 0) {
-        AUTH_LOGI(AUTH_FSM, "not available session key, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AUTH_LOGI(AUTH_FSM, "not available session key, connType=%{public}d, uuid=%{public}s",
+            type, AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_SESSION_KEY_INVALID;
@@ -575,8 +576,7 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
     /* Get lastest authId */
     int64_t authId = AUTH_INVALID_ID;
     uint64_t maxVerifyTime = 0;
-    uint32_t authMgrNum = sizeof(auth) / sizeof(auth[0]);
-    for (uint32_t i = 0; i < authMgrNum; i++) {
+    for (uint32_t i = 0; i < sizeof(auth) / sizeof(auth[0]); i++) {
         if (auth[i] == NULL) {
             continue;
         }
@@ -1008,7 +1008,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     ReportAuthRequestFailed(info->requestId, reason);
     if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
         DisconnectAuthDevice((uint64_t *)&info->connId);
-    } else if (!info->isServer) {
+    } else if (!info->isConnectServer) {
         /* Bluetooth networking only the client to close the connection. */
         UpdateAuthDevicePriority(info->connId);
         DisconnectAuthDevice((uint64_t *)&info->connId);
@@ -1226,8 +1226,8 @@ static void FlushDeviceProcess(const AuthConnInfo *connInfo, bool isServer, Devi
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, isServer);
     if (auth == NULL) {
         PrintAuthConnInfo(connInfo);
-        ReleaseAuthLock();
         AUTH_LOGE(AUTH_FSM, "auth manager not found");
+        ReleaseAuthLock();
         return;
     }
     if (PostDeviceMessage(auth, FLAG_REPLY, connInfo->type, messageParse) == SOFTBUS_OK) {
@@ -1403,7 +1403,7 @@ static void HandleDecryptFailData(
     uint32_t decDataLen = 0;
     int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)data);
     InDataInfo inDataInfo = { .inData = data, .inLen = head->len };
-    AuthHandle authHandle = { .type = connInfo->type };
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = connInfo->type };
     if (auth[0] != NULL && DecryptInner(&auth[0]->sessionKeyList, connInfo->type, &inDataInfo,
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
@@ -1420,7 +1420,7 @@ static void HandleDecryptFailData(
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
     }
-    if (g_transCallback.onException != NULL) {
+    if (g_transCallback.onException != NULL && authHandle.authId != AUTH_INVALID_ID) {
         AUTH_LOGE(AUTH_CONN, "notify exception");
         g_transCallback.onException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
     }
@@ -1556,8 +1556,8 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
         return;
     }
     if (!auth->hasAuthPassed[authHandle.type]) {
-        ReleaseAuthLock();
         AUTH_LOGI(AUTH_FSM, "auth pass = false, don't need to leave");
+        ReleaseAuthLock();
         return;
     }
     AuthFsm *authFsm = GetAuthFsmByConnId(auth->connId[authHandle.type], auth->isServer, false);
@@ -1686,8 +1686,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE };
-    uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
-    for (uint32_t i = 0; i < linkTypeNum; i++) {
+    for (uint32_t i = 0; i < sizeof(linkList) / sizeof(linkList[0]); i++) {
         if (GetAuthConnInfoByUuid(uuid, linkList[i], connInfo) != SOFTBUS_OK) {
             continue;
         }
