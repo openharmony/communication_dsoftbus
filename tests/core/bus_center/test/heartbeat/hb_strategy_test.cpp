@@ -452,4 +452,285 @@ HWTEST_F(HeartBeatStrategyTest, LNN_BLE_HEARTBEAT_VIRTUAL_TEST_01, TestSize.Leve
     ret = HbUpdateBleScanFilter(LISTENER_ID, LNN_HB_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
+/*
+ * @tc.name: LNN_START_STRATEGY_DIRECTLY_TEST_01
+ * @tc.desc: LnnStartHbByTypeAndStrategyDirectly test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_START_STRATEGY_DIRECTLY_TEST_01, TestSize.Level1)
+{
+    uint64_t timeout = 100;
+    int32_t ret = LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE,
+        false, NULL, timeout);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_DIRECT_SEND_STRATEGY_TEST_01
+ * @tc.desc: DirectAdvSendStrategy test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_DIRECT_SEND_STRATEGY_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    int32_t ret = DirectAdvSendStrategy(&hbFsm, (void *)&obj);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    obj.strategyType = STRATEGY_HB_SEND_DIRECT;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = true;
+    ret = DirectAdvSendStrategy(&hbFsm, (void *)&obj);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    ret = DirectAdvSendStrategy(&hbFsm, (void *)&obj);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR);
+}
+
+/*
+ * @tc.name: LNN_GET_STRATEGY_MANAGER_TEST_01
+ * @tc.desc: LnnGetHbStrategyManager test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_GET_STRATEGY_MANAGER_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(false));
+    LnnHeartbeatStrategyManager strategyMgr;
+    int32_t ret = LnnGetHbStrategyManager(NULL, HEARTBEAT_TYPE_MAX, STRATEGY_HB_SEND_SINGLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetHbStrategyManager(&strategyMgr, HEARTBEAT_TYPE_MAX, STRATEGY_HB_SEND_SINGLE);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_FIXED_PERIOD_SEND_STRATEGY_TEST_01
+ * @tc.desc: FixedPeriodSendStrategy test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_FIXED_PERIOD_SEND_STRATEGY_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_FIXED_PERIOD;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V1;
+    obj.isDirectBoardcast = false;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    int32_t ret = FixedPeriodSendStrategy(&hbFsm, (void *)&obj);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostNextSendOnceMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    ret = FixedPeriodSendStrategy(&hbFsm, (void *)&obj);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_SINGLE_SEND_STRATEGY_TEST_01
+ * @tc.desc: SingleSendStrategy test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_SINGLE_SEND_STRATEGY_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V1;
+    obj.isDirectBoardcast = false;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    int32_t ret = SingleSendStrategy(&hbFsm, (void *)&obj);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_PROCESS_BEAT_STRATEGY_TEST_01
+ * @tc.desc: ProcessSendOnceStrategy test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_PROCESS_BEAT_STRATEGY_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = true;
+    obj.strategyType = STRATEGY_HB_SEND_DIRECT;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    int32_t ret = ProcessSendOnceStrategy(&hbFsm, &obj, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR);
+    obj.isDirectBoardcast = false;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    ret = ProcessSendOnceStrategy(&hbFsm, &obj, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR);
+    obj.isRelay = true;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = ProcessSendOnceStrategy(&hbFsm, &obj, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_PROCESSCHECK_DEVSTATUSMSG_TEST_01
+ * @tc.desc: ProcessCheckDevStatusMsg test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_PROCESSCHECK_DEVSTATUSMSG_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = true;
+    EXPECT_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = ProcessCheckDevStatusMsg(&hbFsm, &obj, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_SEND_DIRECTBOARD_CAST_TEST_01
+ * @tc.desc: SendDirectBoardcast test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_SEND_DIRECTBOARD_CAST_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_DIRECT;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = true;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_MEM_ERR));
+    int32_t ret = SendDirectBoardcast(&hbFsm, &obj, NULL, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = SendDirectBoardcast(&hbFsm, &obj, NULL, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = SendDirectBoardcast(&hbFsm, &obj, NULL, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_SEND_EACH_SEPARATELY_TEST_01
+ * @tc.desc: SendEachSeparately test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_SEND_EACH_SEPARATELY_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = false;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnIsMultiDeviceOnline).WillOnce(Return(true));
+    int32_t ret = SendEachSeparately(&hbFsm, &obj, NULL, HEARTBEAT_TYPE_BLE_V0, true);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnIsMultiDeviceOnline).WillOnce(Return(false));
+    ret = SendEachSeparately(&hbFsm, &obj, NULL, HEARTBEAT_TYPE_BLE_V0, true);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = SendEachSeparately(&hbFsm, &obj, NULL, HEARTBEAT_TYPE_BLE_V1, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_RELAY_HEARTBEAT_V1_SPLIT_TEST_01
+ * @tc.desc: RelayHeartbeatV1Split test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V1_SPLIT_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = false;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = RelayHeartbeatV1Split(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    ret = RelayHeartbeatV1Split(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = RelayHeartbeatV1Split(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_RELAY_HEARTBEAT_V0_SPLIT_OLD_TEST_01
+ * @tc.desc: RelayHeartbeatV0SplitOld test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V0_SPLIT_OLD_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    LnnHeartbeatFsm hbFsm;
+    LnnProcessSendOnceMsgPara obj;
+    obj.strategyType = STRATEGY_HB_SEND_SINGLE;
+    obj.hbType = HEARTBEAT_TYPE_BLE_V0;
+    obj.isDirectBoardcast = false;
+    LnnHeartbeatSendEndData endData;
+    uint32_t delayTime = 11;
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    SendEachOnce(&hbFsm, &obj, &endData, &delayTime, 11);
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = RelayHeartbeatV0SplitOld(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    SendEachOnce(&hbFsm, &obj, &endData, &delayTime, 11);
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    ret = RelayHeartbeatV0SplitOld(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = RelayHeartbeatV0SplitOld(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_SET_GEARMODE_BY_SPECIFICTYPE_TEST_01
+ * @tc.desc: LnnSetGearModeBySpecificType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_SET_GEARMODE_BY_SPECIFICTYPE_TEST_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    EXPECT_CALL(hbMock, LnnConvertHbTypeToId).WillRepeatedly(Return(1));
+    LnnHbStrategyInit();
+    GearMode mode;
+    int32_t ret = LnnSetGearModeBySpecificType(NULL, &mode, HEARTBEAT_TYPE_BLE_V0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
 } // namespace OHOS
