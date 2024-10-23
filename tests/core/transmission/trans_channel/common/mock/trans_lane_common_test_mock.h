@@ -32,7 +32,6 @@ public:
     TransLaneCommonTestInterface() {};
     virtual ~TransLaneCommonTestInterface() {};
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
-    virtual struct WifiDirectManager *GetWifiDirectManager() = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
@@ -51,7 +50,6 @@ public:
     TransLaneCommonTestInterfaceMock();
     ~TransLaneCommonTestInterfaceMock() override;
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType type, unsigned char *val, uint32_t len));
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager *());
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *networkId, InfoKey key, char *info, uint32_t len));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
