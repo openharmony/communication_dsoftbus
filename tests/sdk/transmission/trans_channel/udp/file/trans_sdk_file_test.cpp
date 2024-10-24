@@ -655,6 +655,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
     int32_t on = 65536;
     int32_t ret = SetReuseAddr(fd, on);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = SetReuseAddr(-1, -1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
     
     ret = SetReuseAddr(0, on);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
@@ -781,6 +784,95 @@ HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level0)
     ret = TransAddNewSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     TransFileDeinit();
+}
+
+/**
+ * @tc.name: TransFileTest016
+ * @tc.desc: trans open tcp server.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level0)
+{
+    int32_t port = 5683;
+    int32_t ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port);
+    EXPECT_TRUE(ret);
+
+    ret = CreateServerSocketByIpv6("280567565", port);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
+
+    ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", 0);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: TransFileTest017
+ * @tc.desc: trans open tcp server.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level0)
+{
+    int32_t port = 5683;
+    int32_t fd = 1;
+    int32_t ret = CreateServerSocket(nullptr, &fd, &port);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", nullptr, &port);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, &port);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
+
+    ret = CreateServerSocket("280567565", &fd, &port);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
+
+    ret = CreateServerSocket("127.0.0.1", &fd, &port);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/**
+ * @tc.name: TransFileTest018
+ * @tc.desc: trans open tcp server.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest018, TestSize.Level0)
+{
+    struct sockaddr_in localAddr = { 0 };
+    int32_t port = 5683;
+    int32_t ret = InitSockAddrInByIpPort(nullptr, port, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitSockAddrInByIpPort("127.0.0.1", -1, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitSockAddrInByIpPort("127.0.0.1", port, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitSockAddrInByIpPort("280567565", port, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = InitSockAddrInByIpPort("127.0.0.1", port, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransFileTest019
+ * @tc.desc: trans open tcp server.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest019, TestSize.Level0)
+{
+    struct sockaddr_in6 localAddr = { 0 };
+    int32_t port = 5683;
+    int32_t ret = InitSockAddrIn6ByIpPort(nullptr, port, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitSockAddrIn6ByIpPort("3FFF:FFFF:0000:0000:0000:0000:0000:0000", -1, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitSockAddrIn6ByIpPort("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitSockAddrIn6ByIpPort("280567565", port, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
+    ret = InitSockAddrIn6ByIpPort("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port, &localAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
