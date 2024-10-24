@@ -148,7 +148,7 @@ const char *GetAuthSideStr(bool isServer);
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash);
 int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option);
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo);
-int32_t GetPeerUdidByNetworkId(const char *networkId, char *udidHash);
+int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid, uint32_t len);
 int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid);
 DiscoveryType ConvertToDiscoveryType(AuthLinkType type);
 AuthLinkType ConvertToAuthLinkType(DiscoveryType type);

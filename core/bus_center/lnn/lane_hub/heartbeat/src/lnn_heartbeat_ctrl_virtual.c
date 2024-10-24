@@ -14,7 +14,7 @@
  */
 
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_heartbeat_utils.h"
+
 #include "lnn_log.h"
 #include "softbus_errcode.h"
 
