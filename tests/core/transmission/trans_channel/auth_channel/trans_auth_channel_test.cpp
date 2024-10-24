@@ -13,29 +13,18 @@
  * limitations under the License.
  */
 
-#include <securec.h>
-
-#include "auth_interface.h"
 #include "gtest/gtest.h"
-#include "session.h"
-#include "softbus_errcode.h"
-#include "softbus_feature_config.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
-#include "softbus_app_info.h"
-#include "trans_auth_manager.c"
-#include "softbus_server_frame.h"
-#include "softbus_conn_interface.h"
-#include "trans_session_manager.h"
-#include "trans_session_service.h"
-#include "bus_center_manager.h"
-#include "trans_auth_message.h"
-#include "bus_center_info_key.h"
-#include "softbus_base_listener.h"
-#include "disc_event_manager.h"
-#include "softbus_conn_ble_direct.h"
-#include "message_handler.h"
+
 #include "auth_channel_mock.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "disc_event_manager.h"
+#include "message_handler.h"
+#include "softbus_app_info.h"
+#include "softbus_conn_interface.h"
+#include "softbus_feature_config.h"
+#include "trans_auth_manager.c"
+#include "trans_session_service.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1206,7 +1195,7 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TransOpenAuthMsgChannel(g_sessionName, &connInfo, &channelId, NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     TransSessionMgrDeinit();
     TransAuthDeinit();

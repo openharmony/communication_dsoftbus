@@ -15,13 +15,7 @@
 
 #include "transproxyonmessagereceived_fuzzer.h"
 
-#include <cstddef>
-#include <cstring>
-#include <securec.h>
-
-#include "softbus_adapter_thread.h"
 #include "softbus_proxychannel_manager.h"
-#include "softbus_proxychannel_message.h"
 
 namespace OHOS {
 class TransProxyOnMessageReceivedTestEvent {
