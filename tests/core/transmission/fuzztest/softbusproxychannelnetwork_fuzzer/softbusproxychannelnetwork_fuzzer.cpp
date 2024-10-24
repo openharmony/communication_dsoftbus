@@ -16,7 +16,6 @@
 #include "softbusproxychannellistener_fuzzer.h"
 
 #include <cstddef>
-#include <cstdint>
 #include <securec.h>
 
 #include "softbus_transmission_interface.h"

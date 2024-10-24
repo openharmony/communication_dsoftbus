@@ -28,19 +28,28 @@ ohos_unittest("SoftbusServerStubTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/frame/standard/init/include",
-    "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/core/frame/standard/init/src",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/tests/core/frame/unittest/mock",
+    "$dsoftbus_root_path/tests/sdk/common/include",
   ]
 
   deps = [
@@ -49,15 +58,58 @@ ohos_unittest("SoftbusServerStubTest") {
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "googletest:gmock",
-    "hilog:libhilog",
-    "samgr:samgr_proxy",
+  if (is_standard_system) {
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libprivacy_sdk",
+      "access_token:libtokenid_sdk",
+      "c_utils:utils",
+      "googletest:gmock",
+      "hilog:libhilog",
+      "ipc:ipc_single",
+      "samgr:samgr_proxy",
+    ]
+  }
+}
+
+ohos_unittest("SoftbusServerTest") {
+  module_out_path = module_output_path
+  sources = [
+    "mock/softbus_server_test_mock.cpp",
+    "softbus_server_test.cpp",
   ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/frame/standard/client_manager/include",
+    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/core/frame/standard/init/src",
+    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/core/frame/standard/init/src",
+    "$dsoftbus_root_path/tests/core/frame/unittest/mock",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gmock",
+      "hilog:libhilog",
+      "samgr:samgr_proxy",
+    ]
+  }
 }
 
 group("unittest") {
   testonly = true
-  deps = [ ":SoftbusServerStubTest" ]
+  deps = [
+    ":SoftbusServerStubTest",
+    ":SoftbusServerTest",
+  ]
 }
