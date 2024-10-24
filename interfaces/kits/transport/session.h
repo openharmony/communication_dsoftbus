@@ -96,8 +96,6 @@ typedef enum  {
     LINK_TYPE_COC = 8,
     LINK_TYPE_COC_DIRECT = 9,
     LINK_TYPE_MAX = 10,
-
-
 } LinkType;
 
 /**
