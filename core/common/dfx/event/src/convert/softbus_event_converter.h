@@ -75,10 +75,6 @@ static inline bool AssignerInt32(int32_t value, HiSysEventParam **param)
 /* Used by ASSIGNER macros */
 static inline bool AssignerInt64(int64_t value, HiSysEventParam **param)
 {
-    if (value <= INVALID_INT_VALUE) {
-        (*param)->v.i64 = INVALID_INT_VALUE;
-        return false;
-    }
     (*param)->v.i64 = value;
     return true;
 }
