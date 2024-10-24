@@ -311,7 +311,7 @@ static SoftBusLinkType ConvertAddrTypeToHisysEvtLinkType(ConnectionAddrType type
 
 static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 {
-    LNN_LOGI(LNN_BUILDER, "report lnn result evt enter");
+    LNN_LOGD(LNN_BUILDER, "report lnn result evt enter");
     SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(connFsm->connInfo.addr.type);
     if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         return;
