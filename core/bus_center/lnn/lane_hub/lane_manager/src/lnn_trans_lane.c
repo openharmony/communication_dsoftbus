@@ -33,6 +33,7 @@
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -121,6 +122,7 @@ static SoftBusMutex g_transLaneMutex;
 static TransLaneList *g_requestList = NULL;
 static SoftBusHandler g_laneLoopHandler;
 static ILaneIdStateListener *g_laneIdCallback = NULL;
+static int32_t g_powerPid = 0;
 
 static int32_t Lock(void)
 {
@@ -827,6 +829,12 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
         }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_powerPid = 0;
+    Unlock();
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
 }
 
