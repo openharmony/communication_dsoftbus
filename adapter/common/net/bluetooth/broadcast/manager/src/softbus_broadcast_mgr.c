@@ -503,7 +503,7 @@ static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayloa
 static void DumpSoftbusData(const char *description, uint16_t len, const uint8_t *data)
 {
     DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BROADCAST, "description is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BROADCAST, "description=%{public}s, len is 0", description);
+    DISC_CHECK_AND_RETURN_LOGD(len != 0, DISC_BROADCAST, "description=%{public}s, len is 0", description);
     DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BROADCAST, "description=%{public}s, data is nullptr", description);
 
     int32_t hexLen = HEXIFY_LEN(len);
@@ -865,7 +865,7 @@ static bool CheckSrvRegistered(BaseServiceType srvType)
 int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const ScanCallback *cb)
 {
     static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter callCount=%{public}u", callCount++);
+    DISC_LOGD(DISC_BROADCAST, "enter callCount=%{public}u", callCount++);
     int32_t ret = SOFTBUS_OK;
     int32_t adapterScanId = -1;
     DISC_CHECK_AND_RETURN_RET_LOGE(IsSrvTypeValid(srvType), SOFTBUS_BC_MGR_INVALID_SRV, DISC_BROADCAST, "bad srvType");
@@ -1746,7 +1746,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
 
 int32_t GetScanFilter(int32_t listenerId, BcScanFilter **scanFilter, uint8_t *filterNum)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter get scan filter");
+    DISC_LOGD(DISC_BROADCAST, "enter get scan filter");
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid scanFilter");
     DISC_CHECK_AND_RETURN_RET_LOGE(filterNum != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid filterNum");
 
@@ -1787,7 +1787,7 @@ bool BroadcastIsLpDeviceAvailable(void)
 bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter set adv dev param");
+    DISC_LOGD(DISC_BROADCAST, "enter set adv dev param");
     DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL, false, DISC_BROADCAST, "invalid param bcParam");
     DISC_CHECK_AND_RETURN_RET_LOGE(scanParam != NULL, false, DISC_BROADCAST, "invalid param scanParam");
     DISC_CHECK_AND_RETURN_RET_LOGE(type < SOFTBUS_UNKNOW_TYPE && type >= SOFTBUS_HEARTBEAT_TYPE,
@@ -1837,7 +1837,7 @@ bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcPar
 
 int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter get bc handle");
+    DISC_LOGD(DISC_BROADCAST, "enter get bc handle");
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bad id");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
         DISC_BROADCAST, "interface is nullptr");
