@@ -126,7 +126,7 @@ int32_t ClinetNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t 
 }
 
 int32_t ClientNotifyHichainProofException(
-    const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
@@ -140,7 +140,7 @@ int32_t ClientNotifyHichainProofException(
             LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
             return SOFTBUS_ERR;
         }
-        clientProxy->OnHichainProofException(proxy.first.c_str(), deviceId, deviceIdLen, deviceTypeId, errCode);
+        clientProxy->OnHichainProofException(proxy.first.c_str(), deviceList, deviceListLen, deviceTypeId, errCode);
     }
     return SOFTBUS_OK;
 }
