@@ -718,6 +718,16 @@ bool IsAuthHasTrustedRelation(void)
     return hasTrustedRelation;
 }
 
+int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    if (connInfo == NULL || isExist == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthMetaCheckMetaExist(connInfo, isExist);
+    return SOFTBUS_OK;
+}
+
 int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
