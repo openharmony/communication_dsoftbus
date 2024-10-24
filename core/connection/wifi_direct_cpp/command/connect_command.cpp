@@ -93,7 +93,7 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
         successCallback_(link);
         return;
     }
-    WifiDirectDfx::GetInstance().DfxRecord(true, SOFTBUS_OK, info_);
+    WifiDirectDfx::GetInstance().DfxRecord(true, SOFTBUS_OK, info_.info_);
     if (callback_.onConnectSuccess != nullptr) {
         callback_.onConnectSuccess(info_.info_.requestId, &link);
     }
@@ -112,7 +112,7 @@ void ConnectCommand::OnFailure(int32_t reason) const
         failureCallback_(reason);
         return;
     }
-    WifiDirectDfx::GetInstance().DfxRecord(false, reason, info_);
+    WifiDirectDfx::GetInstance().DfxRecord(false, reason, info_.info_);
     if (callback_.onConnectFailure != nullptr) {
         callback_.onConnectFailure(info_.info_.requestId, reason);
     }
@@ -121,6 +121,9 @@ void ConnectCommand::OnFailure(int32_t reason) const
 void ConnectCommand::PreferNegotiateChannel()
 {
     auto innerLink = LinkManager::GetInstance().GetReuseLink(info_.info_.connectType, remoteDeviceId_);
+    if (remoteDeviceId_.length() != (UUID_BUF_LEN - 1) && innerLink == nullptr) {
+        innerLink = LinkManager::GetInstance().GetReuseLink(remoteDeviceId_);
+    }
     if (innerLink == nullptr || innerLink->GetNegotiateChannel() == nullptr) {
         if (info_.info_.negoChannel.type == NEGO_CHANNEL_AUTH) {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input auth channel");
@@ -142,5 +145,13 @@ void ConnectCommand::PreferNegotiateChannel()
 bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info) const
 {
     return (info.requestId == info_.info_.requestId) && (info.pid == info_.info_.pid);
+}
+
+void ConnectCommand::ResetConnectType(WifiDirectConnectType connectType)
+{
+    auto oldConnectType = info_.info_.connectType;
+    CONN_LOGI(
+        CONN_WIFI_DIRECT, "old connect type=%{public}d, new connect type=%{public}d", oldConnectType, connectType);
+    info_.info_.connectType = connectType;
 }
 } // namespace OHOS::SoftBus

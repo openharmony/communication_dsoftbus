@@ -37,7 +37,7 @@ extern "C" {
 CONN_ASSIGNER(Errcode, Result, result)
 CONN_ASSIGNER(Errcode, Errcode, errcode)
 CONN_ASSIGNER(Int32, ConnectionId, connectionId)
-CONN_ASSIGNER(Int32, ConnReqId, requestId)
+CONN_ASSIGNER(Errcode, ConnReqId, requestId)
 CONN_ASSIGNER(Int32, LinkType, linkType)
 CONN_ASSIGNER(Int32, AuthType, authType)
 CONN_ASSIGNER(Int32, AuthId, authId)
@@ -73,8 +73,15 @@ CONN_ASSIGNER(Errcode, IsRenegotiate, isRenegotiate)
 CONN_ASSIGNER(Errcode, IsReuse, isReuse)
 CONN_ASSIGNER(Uint64, NegotiateTime, negotiateTime)
 CONN_ASSIGNER(Uint64, LinkTime, linkTime)
+CONN_ASSIGNER(Errcode, OsType, osType)
+CONN_ASSIGNER(AnonymizeString, LocalDeviceType, localDeviceType)
+CONN_ASSIGNER(AnonymizeString, RemoteDeviceType, remoteDeviceType)
+CONN_ASSIGNER(Errcode, P2pChannel, p2pChannel)
+CONN_ASSIGNER(Errcode, HmlChannel, hmlChannel)
+CONN_ASSIGNER(Errcode, StaChannel, staChannel)
+CONN_ASSIGNER(Errcode, ApChannel, apChannel)
 
-#define CONN_ASSIGNER_SIZE 39 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 46 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -115,7 +122,14 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "IS_REUSE",          HISYSEVENT_INT32,  ConnAssignerIsReuse       },
     { "NEGOTIATE_TIME",    HISYSEVENT_UINT64, ConnAssignerNegotiateTime },
     { "LINK_TIME",         HISYSEVENT_UINT64, ConnAssignerLinkTime      },
-    // Modification Note: remember updating CONN_ASSIGNER_SIZE
+    { "OS_TYPE",           HISYSEVENT_INT32,  ConnAssignerOsType          },
+    { "LOCAL_DEVICE_TYPE", HISYSEVENT_STRING, ConnAssignerLocalDeviceType },
+    { "REMOTE_DEVICE_TYPE", HISYSEVENT_STRING, ConnAssignerRemoteDeviceType },
+    { "P2P_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerP2pChannel      },
+    { "HML_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerHmlChannel      },
+    { "STA_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerStaChannel      },
+    { "AP_CHANNEL",        HISYSEVENT_INT32,  ConnAssignerApChannel       },
+ // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
 #define CONN_ALARM_ASSIGNER(type, fieldName, field)                                                           \

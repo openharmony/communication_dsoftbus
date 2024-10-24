@@ -134,7 +134,7 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_003, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_ERR));
     ON_CALL(busCenterMock, LnnNotifyJoinResult(_, _, _)).WillByDefault(Return());
     ret = LnnSendJoinRequestToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_BLE_DISABLE);
 
     ret = LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
     EXPECT_TRUE(ret == SOFTBUS_OK);
