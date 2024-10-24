@@ -3125,12 +3125,12 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_08, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_10
+* @tc.name: LNN_LANE_09
 * @tc.desc: SelectLaneRule
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LNN_LANE_10, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_LANE_09, TestSize.Level1)
 {
     LnnMacInfo macInfo;
     LaneLinkInfo linkInfo;
