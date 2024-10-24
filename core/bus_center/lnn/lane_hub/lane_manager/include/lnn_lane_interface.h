@@ -114,6 +114,7 @@ typedef struct {
     char peerIp[IP_LEN];
     int32_t port;
     bool isReuse;
+    int32_t pid;
 } RawWifiDirectConnInfo;
 
 typedef struct {
