@@ -903,7 +903,12 @@ void LnnDeinitSyncInfoManager(void)
     UnregAuthTransListener(MODULE_P2P_NETWORKING_SYNC);
     LnnUnregisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange);
     UnregAuthTransListener(MODULE_AUTH_SYNC_INFO);
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        LNN_LOGE(LNN_BUILDER, "clear reg sync info lock fail");
+        return;
+    }
     ClearSyncChannelInfo();
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
 }
 
