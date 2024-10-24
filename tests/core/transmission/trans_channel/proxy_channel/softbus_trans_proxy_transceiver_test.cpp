@@ -751,6 +751,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
     TransProxyLoopMsgHandler(msg);
     msg->what = LOOP_AUTHSTATECHECK_MSG;
     TransProxyLoopMsgHandler(msg);
+    SoftBusFree(msg);
 }
 
 } // namespace OHOS
