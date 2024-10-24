@@ -151,10 +151,11 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
   ]
 
   deps = [
@@ -281,9 +282,9 @@ ohos_unittest("HeartBeatUtilsTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
   deps = [
@@ -410,11 +411,6 @@ ohos_unittest("ClientProxyTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
-    "../../transmission/ipc/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//foundation/window/window_manager/previewer/mock",
-    "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/",
   ]
 
   deps = [

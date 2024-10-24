@@ -224,8 +224,10 @@ if (defined(ohos_lite)) {
       "hilog:libhilog",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
-      "wifi:wifi_sdk",
     ]
+    if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
+      external_deps += [ "wifi:wifi_sdk" ]
+    }
   }
 
   ohos_unittest("AdapterDsoftbusNetworkTest") {
@@ -257,7 +259,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
     ]
     deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
     external_deps = [
