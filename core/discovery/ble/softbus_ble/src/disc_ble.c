@@ -1361,7 +1361,7 @@ static int32_t BleStopActivePublish(const PublishOption *option)
 
 static int32_t BleStopPassivePublish(const PublishOption *option)
 {
-    DISC_LOGI(DISC_BLE, "stop passive publish");
+    DISC_LOGD(DISC_BLE, "stop passive publish");
     return ProcessBleDiscFunc(false, BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, (void *)option);
 }
 
