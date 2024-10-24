@@ -138,6 +138,123 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     return GetServiceInterface()->AuthGetDeviceUuid(authId, uuid, size);
 }
 
+int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
+{
+    return GetServiceInterface()->SoftBusGetWifiDeviceConfig(configList, num);
+}
+
+int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
+{
+    return GetServiceInterface()->SoftBusConnectToDevice(wifiConfig);
+}
+
+int32_t SoftBusDisconnectDevice(void)
+{
+    return GetServiceInterface()->SoftBusDisconnectDevice();
+}
+
+ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
+{
+    return GetServiceInterface()->LnnDiscTypeToConnAddrType(type);
+}
+
+void UpdateProfile(const NodeInfo *info)
+{
+    return GetServiceInterface()->UpdateProfile(info);
+}
+
+bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
+{
+    return GetServiceInterface()->IsFeatureSupport(feature, capaBit);
+}
+
+int32_t LnnStartHbByTypeAndStrategy(
+    LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategy, bool isRelay)
+{
+    return GetServiceInterface()->LnnStartHbByTypeAndStrategy(hbType, strategy, isRelay);
+}
+
+bool SoftBusIsWifiTripleMode(void)
+{
+    return GetServiceInterface()->SoftBusIsWifiTripleMode();
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return GetServiceInterface()->SoftBusGetLinkBand();
+}
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    return GetServiceInterface()->SoftBusGetWifiState();
+}
+
+bool SoftBusHasWifiDirectCapability(void)
+{
+    return GetServiceInterface()->SoftBusHasWifiDirectCapability();
+}
+
+char* SoftBusGetWifiInterfaceCoexistCap(void)
+{
+    return GetServiceInterface()->SoftBusGetWifiInterfaceCoexistCap();
+}
+
+int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
+{
+    return GetServiceInterface()->LnnAsyncCallbackHelper(looper, callback, para);
+}
+
+int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis)
+{
+    return GetServiceInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
+{
+    return GetServiceInterface()->SoftBusGenerateRandomArray(randStr, len);
+}
+
+int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetDeviceDisplayName(nickName, defaultName, deviceName, len);
+}
+
+int32_t LnnGetUnifiedDeviceName(char *unifiedName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetUnifiedDeviceName(unifiedName, len);
+}
+
+int32_t LnnGetUnifiedDefaultDeviceName(char *unifiedDefaultName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetUnifiedDefaultDeviceName(unifiedDefaultName, len);
+}
+
+int32_t GetCurrentAccount(int64_t *account)
+{
+    return GetServiceInterface()->GetCurrentAccount(account);
+}
+
+int32_t LnnSetLocalUnifiedName(const char *unifiedName)
+{
+    return GetServiceInterface()->LnnSetLocalUnifiedName(unifiedName);
+}
+
+void LnnNotifyLocalNetworkIdChanged(void)
+{
+    return GetServiceInterface()->LnnNotifyLocalNetworkIdChanged();
+}
+
+int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, char *nickName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetSettingNickName(defaultName, unifiedName, nickName, len);
+}
+
+int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+{
+    return GetServiceInterface()->SoftbusGetConfig(type, val, len);
+}
+
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
 {
     return GetServiceInterface()->LnnSubscribeAccountBootEvent(handle);
@@ -173,5 +290,5 @@ int32_t LnnServicetInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceNa
     }
     return SOFTBUS_OK;
 }
-}
-}
+} // extern "C"
+} // namespace OHOS

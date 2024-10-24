@@ -24,7 +24,6 @@
 #include "form/lnn_event_form.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
@@ -66,6 +65,7 @@ public:
     MOCK_METHOD0(LnnOnOhosAccountChanged, void (void));
     MOCK_METHOD0(LnnStopDiscovery, void (void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
+    MOCK_METHOD0(SetCallLnnStatus, void (void));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void (void));

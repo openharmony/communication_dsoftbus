@@ -41,6 +41,7 @@ constexpr int64_t AUTH_ID = 10;
 constexpr int64_t AUTH_ID_ADD = 11;
 constexpr char NODE1_BR_MAC[] = "12345TTU";
 constexpr char NODE2_BR_MAC[] = "56789TTU";
+constexpr char ACCOUNT_HASH[] = "5FEC";
 constexpr uint32_t REQUEST_ID = 1;
 constexpr uint32_t REQUEST_ID_ADD = 2;
 constexpr uint16_t FSM_ID = 1;
@@ -54,6 +55,8 @@ constexpr uint32_t CONN_FLAG2 = 255;
 constexpr uint32_t CONN_FLAG3 = 1;
 constexpr uint32_t MSG_ERR_LEN0 = 0;
 constexpr uint32_t MSG_ERR_LEN1 = 1;
+constexpr uint8_t SELECT_MASTER_MSG[] = "{\"MasterWeight\":\"500\", \"MasterUdid\":\"123456\"}";
+constexpr uint8_t EMPTY_ACCOUNT[] = "5FEC";
 
 using namespace testing;
 class LNNNetBuilderMockTest : public testing::Test {
@@ -71,6 +74,20 @@ void LNNNetBuilderMockTest::TearDownTestCase() {}
 void LNNNetBuilderMockTest::SetUp() {}
 
 void LNNNetBuilderMockTest::TearDown() {}
+
+static void ClearNetBuilderFsmList()
+{
+    NetBuilder *netBuilder = LnnGetNetBuilder();
+    if (netBuilder == nullptr) {
+        return;
+    }
+    LnnConnectionFsm *item = NULL;
+    LnnConnectionFsm *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
+        ListDelete(&item->node);
+        --netBuilder->connCount;
+    }
+}
 
 /*
 * @tc.name: LNN_INIT_NET_BUILDER_TEST_001
@@ -148,6 +165,62 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Le
     EXPECT_TRUE(LnnInitNetBuilderDelay() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilderDelay() == SOFTBUS_OK);
     EXPECT_TRUE(LnnInitNetBuilderDelay() == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002
+* @tc.desc: ProcessLeaveByAddrType test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002, TestSize.Level1)
+{
+    ClearNetBuilderFsmList();
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    EXPECT_TRUE(connFsm != nullptr);
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, NODE1_IP);
+    connFsm->connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    connFsm->connInfo.authHandle.authId = AUTH_ID_ADD;
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    ++LnnGetNetBuilder()->connCount;
+    LnnConnectionFsm *connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    EXPECT_TRUE(connFsm1 != nullptr);
+    connFsm1->connInfo.addr.type = CONNECTION_ADDR_BR;
+    connFsm1->isDead = true;
+    ListInit(&connFsm1->node);
+    ListAdd(&g_netBuilder.fsmList, &connFsm1->node);
+    ++LnnGetNetBuilder()->connCount;
+    bool addrType[CONNECTION_ADDR_MAX] = {
+        [CONNECTION_ADDR_BR] = false,
+        [CONNECTION_ADDR_WLAN] = true,
+        [CONNECTION_ADDR_BLE] = false,
+    };
+    bool *para = reinterpret_cast<bool *>(SoftBusMalloc(sizeof(bool) * CONNECTION_ADDR_MAX));
+    EXPECT_TRUE(para != nullptr);
+    EXPECT_EQ(EOK, memcpy_s(para, sizeof(bool) * CONNECTION_ADDR_MAX, addrType, sizeof(bool) * CONNECTION_ADDR_MAX));
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnNotifyAllTypeOffline(_)).WillRepeatedly(Return());
+    int32_t ret = ProcessLeaveByAddrType(reinterpret_cast<const void *>(para));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool *para1 = reinterpret_cast<bool *>(SoftBusMalloc(sizeof(bool) * CONNECTION_ADDR_MAX));
+    EXPECT_TRUE(para1 != nullptr);
+    EXPECT_EQ(EOK, memcpy_s(para1, sizeof(bool) * CONNECTION_ADDR_MAX, addrType, sizeof(bool) * CONNECTION_ADDR_MAX));
+    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = ProcessLeaveByAddrType(reinterpret_cast<const void *>(para1));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(NetBuilderMock, LnnDestroyConnectionFsm).WillRepeatedly(Return());
+    EXPECT_CALL(NetBuilderMock, LnnStopConnectionFsm).WillOnce(Return(SOFTBUS_ERR));
+    CleanConnectionFsm(nullptr);
+    CleanConnectionFsm(connFsm);
+    StopConnectionFsm(connFsm);
+    EXPECT_CALL(NetBuilderMock, LnnStopConnectionFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    StopConnectionFsm(connFsm1);
+    ret = FindRequestIdByAddr(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ClearNetBuilderFsmList();
 }
 
 /*
@@ -251,7 +324,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnConvertAuthConnInfoToAddr(_, _, _))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    AuthHandle authHandle = { .authId = AUTH_META_ID, .type = AUTH_LINK_TYPE_WIFI};
+    AuthHandle authHandle = { .authId = AUTH_META_ID, .type = AUTH_LINK_TYPE_WIFI };
     OnDeviceVerifyPass(authHandle, &info);
     OnDeviceVerifyPass(authHandle, &info);
     OnDeviceVerifyPass(authHandle, nullptr);
@@ -557,7 +630,11 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_001, TestSize.Lev
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 {
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGetNetworkIdByUdid(_, _, _)).WillOnce(Return(SOFTBUS_ERR));
+    const char *peerUdid = NODE_UDID;
+    LnnDeleteLinkFinderInfo(peerUdid);
     EXPECT_CALL(NetBuilderMock, LnnGetNetworkIdByUdid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnDeleteLinkFinderInfo(peerUdid);
     EXPECT_TRUE(ProcessDeviceNotTrusted(nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
@@ -734,9 +811,10 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) == nullptr);
 
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID) != nullptr);
+
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID_ADD) == nullptr);
     AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_BR };
-    AuthHandle authHandle2 = {.authId = AUTH_ID_ADD, .type = AUTH_LINK_TYPE_WIFI };
+    AuthHandle authHandle2 = { .authId = AUTH_ID_ADD, .type = AUTH_LINK_TYPE_WIFI };
     EXPECT_TRUE(FindConnectionFsmByAuthHandle(&authHandle) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByAuthHandle(&authHandle2) == nullptr);
     EXPECT_TRUE(FindConnectionFsmByNetworkId(NODE_NETWORK_ID) != nullptr);
@@ -758,19 +836,29 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_001, TestSize.Level1)
 {
+    ClearNetBuilderFsmList();
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->isDead = false;
     connFsm->connInfo.flag = CONN_FLAG1;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    g_netBuilder.maxConcurrentCount = 0;
+    EXPECT_EQ(false, NeedPendingJoinRequest());
     g_netBuilder.maxConcurrentCount = 1;
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     SendElectMessageToAll(NODE1_NETWORK_ID);
     SendElectMessageToAll(NODE1_NETWORK_ID);
     EXPECT_TRUE(NeedPendingJoinRequest() == false);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
+    LnnConnectionFsm *connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm1->node);
+    (void)strcpy_s(connFsm1->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
+    connFsm1->isDead = true;
+    connFsm1->connInfo.flag = CONN_FLAG3;
+    ListAdd(&g_netBuilder.fsmList, &connFsm1->node);
+    EXPECT_TRUE(NeedPendingJoinRequest() == false);
+    ClearNetBuilderFsmList();
 }
 
 /*
@@ -804,6 +892,7 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_002, TestSize.Lev
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, AddStringToJsonObject).WillOnce(Return(true)).WillRepeatedly(Return(false));
     EXPECT_CALL(NetBuilderMock, AddNumberToJsonObject).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     SendElectMessageToAll(NODE1_NETWORK_ID);
     SendElectMessageToAll(NODE1_NETWORK_ID);
     SendElectMessageToAll(NODE1_NETWORK_ID);
@@ -870,7 +959,6 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize
     TryDisconnectAllConnection(&fsmTest);
 
     EXPECT_CALL(NetBuilderMock, LnnConvertAddrToOption(_, _)).WillOnce(Return(true));
-    EXPECT_CALL(NetBuilderMock, ConnDisconnectDeviceAllConn(_)).WillOnce(Return(SOFTBUS_OK));
     TryDisconnectAllConnection(&fsmTest);
 
     fsmTest.connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -1655,5 +1743,410 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_REQUEST_LEAVE_ALL_ONLINE_NODES_TEST_001, Tes
     EXPECT_CALL(NetBuilderMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(false)).WillRepeatedly(Return(true));
     LnnRequestLeaveAllOnlineNodes();
     LnnRequestLeaveAllOnlineNodes();
+}
+
+/*
+* @tc.name: PROCESS_LEAVE_BY_AUTH_ID_TEST_001
+* @tc.desc: ProcessLeaveByAuthId test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_AUTH_ID_TEST_001, TestSize.Level1)
+{
+    ClearNetBuilderFsmList();
+    int32_t maxConnCount = CONN_COUNT;
+    LnnGetNetBuilder()->connCount = 0;
+    LnnGetNetBuilder()->maxConnCount = maxConnCount;
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    EXPECT_TRUE(connFsm != nullptr);
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
+    connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    ++LnnGetNetBuilder()->connCount;
+    LnnConnectionFsm *connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    EXPECT_TRUE(connFsm1 != nullptr);
+    ListInit(&connFsm1->node);
+    (void)strcpy_s(connFsm1->connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, NODE2_IP);
+    connFsm1->connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    connFsm1->connInfo.authHandle.authId = AUTH_ID_ADD;
+    connFsm1->isDead = true;
+    ListAdd(&g_netBuilder.fsmList, &connFsm1->node);
+    ++LnnGetNetBuilder()->connCount;
+    SoftBusMessage msg = { .what = MSG_TYPE_BUILD_MAX, };
+    NetBuilderMessageHandler(nullptr);
+    NetBuilderMessageHandler(&msg);
+    int64_t *authId = reinterpret_cast<int64_t *>(SoftBusCalloc(sizeof(int64_t)));
+    EXPECT_TRUE(authId != nullptr);
+    *authId = AUTH_ID_ADD;
+    const void *para = reinterpret_cast<const void *>(authId);
+    EXPECT_EQ(ProcessLeaveByAuthId(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ProcessLeaveByAuthId(para), SOFTBUS_OK);
+    int64_t *authId1 = reinterpret_cast<int64_t *>(SoftBusCalloc(sizeof(int64_t)));
+    EXPECT_TRUE(authId1 != nullptr);
+    *authId1 = AUTH_ID;
+    const void *para1 = reinterpret_cast<const void *>(authId1);
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_EQ(ProcessLeaveByAuthId(para1), SOFTBUS_ERR);
+    int64_t *authId2 = reinterpret_cast<int64_t *>(SoftBusCalloc(sizeof(int64_t)));
+    EXPECT_TRUE(authId2 != nullptr);
+    *authId2 = AUTH_ID;
+    const void *para2 = reinterpret_cast<const void *>(authId2);
+    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(ProcessLeaveByAuthId(para2), SOFTBUS_OK);
+    ClearNetBuilderFsmList();
+}
+
+/*
+* @tc.name: CREATE_PASSIVE_CONNECTION_FSM_TEST_001
+* @tc.desc: CreatePassiveConnectionFsm test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, CREATE_PASSIVE_CONNECTION_FSM_TEST_001, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnCreateConnectionFsm).WillOnce(Return(nullptr));
+    ConnectionAddr addr;
+    const char *pkgName = "testPkgName";
+    LnnConnectionFsm *fsm = StartNewConnectionFsm(&addr, pkgName, false);
+    EXPECT_TRUE(fsm == nullptr);
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    EXPECT_TRUE(connFsm != nullptr);
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE2_BR_MAC);
+    connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
+    EXPECT_CALL(NetBuilderMock, LnnCreateConnectionFsm).WillRepeatedly(Return(connFsm));
+    EXPECT_CALL(NetBuilderMock, LnnStartConnectionFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnDestroyConnectionFsm).WillRepeatedly(Return());
+    fsm = StartNewConnectionFsm(&addr, pkgName, false);
+    EXPECT_TRUE(fsm == nullptr);
+    DeviceVerifyPassMsgPara msgPara;
+    EXPECT_CALL(NetBuilderMock, LnnStartConnectionFsm).WillOnce(Return(SOFTBUS_ERR));
+    int32_t ret = CreatePassiveConnectionFsm(&msgPara);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ClearNetBuilderFsmList();
+}
+
+/*
+* @tc.name: IS_SAME_PENDING_REQUEST_TEST_001
+* @tc.desc: IsSamePendingRequest test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, IS_SAME_PENDING_REQUEST_TEST_001, TestSize.Level1)
+{
+    PendingJoinRequestNode *request =
+        reinterpret_cast<PendingJoinRequestNode *>(SoftBusCalloc(sizeof(PendingJoinRequestNode)));
+    EXPECT_TRUE(request != nullptr);
+    ListInit(&request->node);
+    request->needReportFailure = true;
+    ListAdd(&g_netBuilder.pendingList, &request->node);
+    PendingJoinRequestNode request1 = { .needReportFailure = true, };
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr).WillRepeatedly(Return(false));
+    bool ret = IsSamePendingRequest(&request1);
+    EXPECT_EQ(ret, false);
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr).WillRepeatedly(Return(true));
+    ret = IsSamePendingRequest(&request1);
+    EXPECT_EQ(ret, true);
+    request1.needReportFailure = false;
+    EXPECT_EQ(ret, true);
+    bool addrType[CONNECTION_ADDR_MAX] = {
+        [CONNECTION_ADDR_BR] = false,
+    };
+    const bool *addr = reinterpret_cast<const bool *>(&addrType);
+    RemovePendingRequestByAddrType(nullptr, CONNECTION_ADDR_MAX);
+    RemovePendingRequestByAddrType(addr, CONNECTION_ADDR_MAX - 1);
+}
+
+/*
+* @tc.name: IS_NEED_WIFI_REAUTH_TEST_001
+* @tc.desc: IsNeedWifiReauth test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, IS_NEED_WIFI_REAUTH_TEST_001, TestSize.Level1)
+{
+    const char *networkId = NODE_NETWORK_ID;
+    const char *newAccountHash = "0000";
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnIsDefaultOhosAccount).WillOnce(Return(false));
+    bool ret = IsNeedWifiReauth(networkId, newAccountHash, MAX_ACCOUNT_HASH_LEN);
+    EXPECT_EQ(ret, true);
+    EXPECT_CALL(NetBuilderMock, LnnIsDefaultOhosAccount).WillOnce(Return(true));
+    ret = IsNeedWifiReauth(networkId, newAccountHash, MAX_ACCOUNT_HASH_LEN);
+    EXPECT_EQ(ret, false);
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(EOK, strcpy_s(info.accountHash, SHA_256_HASH_LEN, ACCOUNT_HASH));
+    EXPECT_CALL(NetBuilderMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR));
+    ret = IsNeedWifiReauth(networkId, newAccountHash, MAX_ACCOUNT_HASH_LEN);
+    EXPECT_EQ(ret, false);
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
+    EXPECT_CALL(NetBuilderMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_ERR));
+    ret = IsNeedWifiReauth(networkId, newAccountHash, MAX_ACCOUNT_HASH_LEN);
+    EXPECT_EQ(ret, false);
+    char *newAccountHash1 = reinterpret_cast<char *>(const_cast<uint8_t *>(EMPTY_ACCOUNT));
+    unsigned char *hash = reinterpret_cast<unsigned char *>(const_cast<uint8_t *>(EMPTY_ACCOUNT));
+    EXPECT_CALL(NetBuilderMock, SoftBusGenerateStrHash)
+        .WillOnce(DoAll(SetArgPointee<2>(*hash), Return(SOFTBUS_OK)));
+    ret = IsNeedWifiReauth(networkId, newAccountHash1, MAX_ACCOUNT_HASH_LEN);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+* @tc.name: DELETE_PC_NODE_INFO_TEST_001
+* @tc.desc: DeletePcNodeInfo test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, DELETE_PC_NODE_INFO_TEST_001, TestSize.Level1)
+{
+    LnnEventExtra lnnEventExtra;
+    (void)memset_s(&lnnEventExtra, sizeof(LnnEventExtra), 0, sizeof(LnnEventExtra));
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_BLE, };
+    BuildLnnEvent(nullptr, &addr);
+    BuildLnnEvent(&lnnEventExtra, nullptr);
+    BuildLnnEvent(&lnnEventExtra, &addr);
+    const char *packageName = "";
+    DfxRecordLnnServerjoinStart(nullptr, nullptr, true);
+    DfxRecordLnnServerjoinStart(&addr, nullptr, true);
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    JoinLnnMsgPara para;
+    (void)memset_s(&para, sizeof(JoinLnnMsgPara), 0, sizeof(JoinLnnMsgPara));
+    EXPECT_EQ(EOK, strcpy_s(para.pkgName, PKG_NAME_SIZE_MAX, packageName));
+    DfxRecordLnnAuthStart(nullptr, &para, REQUEST_ID);
+    DfxRecordLnnAuthStart(&connInfo, nullptr, REQUEST_ID);
+    DfxRecordLnnAuthStart(&connInfo, &para, REQUEST_ID);
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    NodeInfo info = { .accountId = AUTH_ID, };
+    EXPECT_EQ(EOK, strcpy_s(info.uuid, UDID_BUF_LEN, NODE_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE_UDID));
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR));
+    const char *peerUdid = NODE_UDID;
+    bool ret = DeletePcNodeInfo(peerUdid);
+    EXPECT_EQ(ret, false);
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalNodeInfo).WillOnce(Return(NULL));
+    ret = DeletePcNodeInfo(peerUdid);
+    EXPECT_EQ(ret, false);
+    NodeInfo localNodeInfo = { .accountId = AUTH_ID, };
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalNodeInfo).WillOnce(Return(&localNodeInfo));
+    ret = DeletePcNodeInfo(peerUdid);
+    EXPECT_EQ(ret, false);
+    localNodeInfo.accountId = AUTH_ID_ADD;
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalNodeInfo).WillOnce(Return(&localNodeInfo));
+    EXPECT_CALL(NetBuilderMock, DeleteFromProfile).WillOnce(Return());
+    EXPECT_CALL(NetBuilderMock, LnnRemoveNode).WillOnce(Return());
+    ret = DeletePcNodeInfo(peerUdid);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+* @tc.name: LNN_NOTIFY_AUTH_HANDLE_LEAVE_LNN_TEST_001
+* @tc.desc: LnnNotifyAuthHandleLeaveLNN test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, LNN_NOTIFY_AUTH_HANDLE_LEAVE_LNN_TEST_001, TestSize.Level1)
+{
+    ClearNetBuilderFsmList();
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    EXPECT_TRUE(connFsm != nullptr);
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
+    connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    ++LnnGetNetBuilder()->connCount;
+    g_netBuilder.isInit = false;
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = CONNECTION_ADDR_BR, };
+    int32_t ret = LnnNotifyAuthHandleLeaveLNN(authHandle);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    const char *networkId = NODE_NETWORK_ID;
+    uint8_t *msg = const_cast<uint8_t *>(SELECT_MASTER_MSG);
+    uint32_t len = strlen(reinterpret_cast<const char *>(msg));
+    OnReceiveMasterElectMsg(LNN_INFO_TYPE_NICK_NAME, networkId, msg, len);
+    g_netBuilder.isInit = true;
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, AuthHandleLeaveLNN).WillRepeatedly(Return());
+    ret = LnnNotifyAuthHandleLeaveLNN(authHandle);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    authHandle.type = 0;
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    OnVerifyPassed(REQUEST_ID, authHandle, &info);
+    authHandle.type = AUTH_LINK_TYPE_MAX;
+    OnVerifyPassed(REQUEST_ID, authHandle, &info);
+    OnReceiveMasterElectMsg(LNN_INFO_TYPE_MASTER_ELECT, networkId, msg, len);
+}
+
+static void PostMessageFunc(const SoftBusLooper *looper, SoftBusMessage *msg)
+{
+    (void)looper;
+    if (msg != nullptr) {
+        SoftBusFree(msg);
+    }
+}
+
+static void SetNetBuilderLooper()
+{
+    g_netBuilder.looper->PostMessage = PostMessageFunc;
+}
+
+/*
+* @tc.name: LNN_NOTIFY_LEAVE_LNN_BY_AUTH_HANDLE_TEST_001
+* @tc.desc: LnnNotifyLeaveLnnByAuthHandle test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, LNN_NOTIFY_LEAVE_LNN_BY_AUTH_HANDLE_TEST_001, TestSize.Level1)
+{
+    SetNetBuilderLooper();
+    AuthHandle authHandle;
+    int32_t ret = LnnNotifyLeaveLnnByAuthHandle(&authHandle);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnNotifyEmptySessionKey(AUTH_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_BLE_REPORT_EXTRA_MAP_INIT_TEST_001
+* @tc.desc: LnnBleReportExtraMapInit test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, LNN_BLE_REPORT_EXTRA_MAP_INIT_TEST_001, TestSize.Level1)
+{
+    const char *udidHash = NODE_UDID;
+    LnnBleReportExtra bleExtra = { .extra.result = SOFTBUS_OK, .status = BLE_REPORT_EVENT_INIT, };
+    LnnBleReportExtra bleExtraDest;
+    (void)memset_s(&bleExtraDest, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+    AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+    DeleteNodeFromLnnBleReportExtraMap(udidHash);
+    int32_t rc = GetNodeFromLnnBleReportExtraMap(udidHash, &bleExtraDest);
+    EXPECT_EQ(rc, SOFTBUS_INVALID_PARAM);
+    bool ret = IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra);
+    EXPECT_EQ(ret, false);
+    ret = LnnBleReportExtraMapInit();
+    EXPECT_EQ(ret, true);
+    AddNodeToLnnBleReportExtraMap(nullptr, &bleExtra);
+    AddNodeToLnnBleReportExtraMap(udidHash, nullptr);
+    AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+    rc = GetNodeFromLnnBleReportExtraMap(nullptr, &bleExtraDest);
+    EXPECT_EQ(rc, SOFTBUS_INVALID_PARAM);
+    rc = GetNodeFromLnnBleReportExtraMap(udidHash, nullptr);
+    EXPECT_EQ(rc, SOFTBUS_INVALID_PARAM);
+    rc = GetNodeFromLnnBleReportExtraMap(udidHash, &bleExtraDest);
+    EXPECT_EQ(rc, SOFTBUS_OK);
+    const char *udidHash1 = NODE_NETWORK_ID;
+    rc = GetNodeFromLnnBleReportExtraMap(udidHash1, &bleExtraDest);
+    EXPECT_EQ(rc, SOFTBUS_NOT_FIND);
+}
+
+/*
+* @tc.name: IS_EXIST_LNN_DFX_NODE_BY_UDID_HASH_TEST_001
+* @tc.desc: IsExistLnnDfxNodeByUdidHash test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, IS_EXIST_LNN_DFX_NODE_BY_UDID_HASH_TEST_001, TestSize.Level1)
+{
+    const char *udidHash = NODE_UDID;
+    const char *udidHash1 = NODE_NETWORK_ID;
+    LnnBleReportExtra bleExtra;
+    (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+    bool ret = IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra);
+    EXPECT_EQ(ret, true);
+    ret = IsExistLnnDfxNodeByUdidHash(udidHash1, &bleExtra);
+    EXPECT_EQ(ret, false);
+    ret = IsExistLnnDfxNodeByUdidHash(nullptr, &bleExtra);
+    EXPECT_EQ(ret, false);
+    ret = IsExistLnnDfxNodeByUdidHash(udidHash, nullptr);
+    EXPECT_EQ(ret, false);
+    DeleteNodeFromLnnBleReportExtraMap(nullptr);
+    DeleteNodeFromLnnBleReportExtraMap(udidHash1);
+    DeleteNodeFromLnnBleReportExtraMap(udidHash);
+    ClearLnnBleReportExtraMap();
+}
+
+/*
+* @tc.name: GET_NODE_FROM_PC_RESTRICT_MAP_TEST_001
+* @tc.desc: GetNodeFromPcRestrictMap test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, GET_NODE_FROM_PC_RESTRICT_MAP_TEST_001, TestSize.Level1)
+{
+    const char *udidHash = NODE_UDID;
+    const char *udidHash1 = NODE_NETWORK_ID;
+    uint32_t count = 0;
+    AddNodeToPcRestrictMap(udidHash);
+    DeleteNodeFromPcRestrictMap(udidHash);
+    int32_t ret = GetNodeFromPcRestrictMap(udidHash, &count);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateNodeFromPcRestrictMap(udidHash);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    LnnBlePcRestrictMapInit();
+    AddNodeToPcRestrictMap(udidHash);
+    AddNodeToPcRestrictMap(nullptr);
+    ret = GetNodeFromPcRestrictMap(udidHash, &count);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = GetNodeFromPcRestrictMap(udidHash1, &count);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = GetNodeFromPcRestrictMap(nullptr, &count);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetNodeFromPcRestrictMap(udidHash, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateNodeFromPcRestrictMap(udidHash);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UpdateNodeFromPcRestrictMap(udidHash1);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = UpdateNodeFromPcRestrictMap(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    DeleteNodeFromPcRestrictMap(nullptr);
+    DeleteNodeFromPcRestrictMap(udidHash);
+    DeleteNodeFromPcRestrictMap(udidHash1);
+    ClearPcRestrictMap();
+}
+
+/*
+* @tc.name: USER_SWITCHED_HANDLER_TEST_001
+* @tc.desc: UserSwitchedHandler test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderMockTest, USER_SWITCHED_HANDLER_TEST_001, TestSize.Level1)
+{
+    LnnMonitorHbStateChangedEvent event = {
+        .basic.event = LNN_EVENT_IP_ADDR_CHANGED,
+        .status = SOFTBUS_USER_SWITCH_UNKNOWN,
+    };
+    const LnnEventBasicInfo *info = reinterpret_cast<const LnnEventBasicInfo *>(&event);
+    UserSwitchedHandler(nullptr);
+    UserSwitchedHandler(info);
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnSetUnlockState).WillOnce(Return());
+    event.basic.event = LNN_EVENT_USER_SWITCHED;
+    const LnnEventBasicInfo *info1 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
+    UserSwitchedHandler(info1);
+    event.status = SOFTBUS_USER_SWITCHED;
+    const LnnEventBasicInfo *info2 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
+    UserSwitchedHandler(info2);
+    AuthHandle authHandle = { .type = 0, .authId = AUTH_ID_ADD, };
+    OnDeviceDisconnect(authHandle);
+    authHandle.type = AUTH_LINK_TYPE_MAX;
+    OnDeviceDisconnect(authHandle);
+    bool ret = IsSupportMasterNodeElect(SOFTBUS_NEW_V1);
+    EXPECT_EQ(ret, true);
 }
 } // namespace OHOS
