@@ -149,7 +149,6 @@ typedef struct {
     DeviceType type;
     int32_t osType;
     ConnectOnlineReason bleConnectReason;
-    char peerUdid[UDID_BUF_LEN];
 } LnnDfxDeviceInfoReport;
 
 typedef enum {

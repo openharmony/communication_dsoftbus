@@ -439,9 +439,9 @@ int32_t BusCenterClientProxy::OnNodeDeviceTrustedChange(const char *pkgName, int
 }
 
 int32_t BusCenterClientProxy::OnHichainProofException(
-    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    if (pkgName == nullptr || deviceId == nullptr || deviceIdLen != UDID_BUF_LEN) {
+    if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -459,12 +459,12 @@ int32_t BusCenterClientProxy::OnHichainProofException(
         LNN_LOGE(LNN_EVENT, "write pkgName failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteUint32(deviceIdLen)) {
-        LNN_LOGE(LNN_EVENT, "write deviceId length failed");
+    if (!data.WriteUint32(deviceListLen)) {
+        LNN_LOGE(LNN_EVENT, "write deviceList length failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteRawData(deviceId, deviceIdLen)) {
-        LNN_LOGE(LNN_EVENT, "write deviceId failed");
+    if (deviceList != NULL && deviceListLen != 0 && !data.WriteRawData(deviceList, deviceListLen)) {
+        LNN_LOGE(LNN_EVENT, "write deviceList failed");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteUint16(deviceTypeId)) {
