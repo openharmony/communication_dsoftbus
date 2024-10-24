@@ -363,4 +363,3 @@ int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo
         return QueryByDefaultLink(queryInfo);
     }
 }
-

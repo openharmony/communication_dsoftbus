@@ -1212,7 +1212,8 @@ static MsgHandlerCommand g_commands[] = {
 static void BrManagerMsgHandler(SoftBusMessage *msg)
 {
     COMM_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_BR, "msg is null");
-    if (msg->what != MSG_DATA_RECEIVED) {
+    if (msg->what != MSG_DATA_RECEIVED && msg->what != MSG_NEXT_CMD && msg->what != MSG_CONNECT_REQUEST &&
+        msg->what != MSG_CONNECTION_EXECEPTION && msg->what != MGR_DISCONNECT_REQUEST) {
         CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
     }
     size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
@@ -1599,10 +1600,14 @@ static bool BrCheckActiveConnection(const ConnectOption *option, bool needOccupy
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BR, "BrCheckActiveConnection: option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, false, CONN_BR,
         "BrCheckActiveConnection: not br type, type=%{public}d", option->type);
+    
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, option->brOption.brMac, BT_MAC_LEN);
 
     ConnBrConnection *connection = ConnBrGetConnectionByAddr(option->brOption.brMac, option->brOption.sideType);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        connection != NULL, false, CONN_BR, "BrCheckActiveConnection: connection is not exist");
+        connection != NULL, false, CONN_BR, "BrCheckActiveConnection: connection is not exist addr=%{public}s",
+        anomizeAddress);
     bool isActive = (connection->state == BR_CONNECTION_STATE_CONNECTED);
     if (isActive && needOccupy) {
         ConnBrOccupy(connection);

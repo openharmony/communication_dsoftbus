@@ -1125,6 +1125,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->algorithm = channel->algorithm;
                 sessionNode->crc = channel->crc;
                 sessionNode->isEncrypt = channel->isEncrypt;
+                sessionNode->osType = channel->osType;
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     ClientSetAuthSessionTimer(serverNode, sessionNode);
@@ -1886,8 +1887,8 @@ static void ClientTransSessionTimerProc(void)
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            ClientUpdateIdleTimeout(serverNode, sessionNode, &destroyList);
             ClientCheckWaitTimeOut(serverNode, sessionNode, waitOutSocket, MAX_SESSION_ID, &waitOutNum);
+            ClientUpdateIdleTimeout(serverNode, sessionNode, &destroyList);
         }
     }
     UnlockClientSessionServerList();
@@ -2444,4 +2445,29 @@ int32_t ClientCancelAuthSessionTimer(int32_t sessionId)
     UnlockClientSessionServerList();
     TRANS_LOGE(TRANS_SDK, "not found ishare auth session by sessionId=%{public}d", sessionId);
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
+int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType)
+{
+    if ((sessionId < 0) || (osType == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    *osType = sessionNode->osType;
+
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
 }

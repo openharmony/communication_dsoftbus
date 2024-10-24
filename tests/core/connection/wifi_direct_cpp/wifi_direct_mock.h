@@ -75,6 +75,7 @@ public:
     virtual int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len) = 0;
 
     // Defines dependencies short-reach interface here
+    virtual int IsWifiActive() = 0;
     virtual WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info) = 0;
     virtual WifiErrorCode Hid2dGetRecommendChannel(const RecommendChannelRequest *request,
         RecommendChannelResponse *response) = 0;
@@ -165,6 +166,7 @@ public:
     MOCK_METHOD(uint64_t, LnnGetFeatureCapabilty, (), (override));
     MOCK_METHOD(bool, IsFeatureSupport, (uint64_t, FeatureCapability), (override));
 
+    MOCK_METHOD(int, IsWifiActive, (), (override));
     MOCK_METHOD(WifiErrorCode, GetLinkedInfo, (WifiLinkedInfo *), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dGetRecommendChannel,
         (const RecommendChannelRequest *, RecommendChannelResponse *), (override));
