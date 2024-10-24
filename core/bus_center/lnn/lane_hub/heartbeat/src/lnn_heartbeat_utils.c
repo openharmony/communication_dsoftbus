@@ -388,6 +388,7 @@ void LnnDumpLocalBasicInfo(void)
     (void)LnnGetLocalDeviceInfo(&localInfo);
     (void)LnnGetLocalStrInfo(STRING_KEY_UUID, localUuid, UUID_BUF_LEN);
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
+    (void)LnnGenerateHexStringHash((const unsigned char *)localUuid, udidShortHash, HB_SHORT_UDID_HASH_HEX_LEN);
     Anonymize(udidShortHash, &anonyUdidHash);
     Anonymize(localUuid, &anonyUuid);
     Anonymize(localUdid, &anonyUdid);
@@ -408,8 +409,8 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localBtMac, &anonyBtMac);
     Anonymize(localP2PMac, &anonyP2pMac);
     Anonymize(localInfo.deviceName, &anonyDeviceName);
-    LNN_LOGI(LNN_HEART_BEAT, "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=..%{public}s, "
-        "brMac=::%{public}s, p2pMac=::%{public}s, onlineNodeNum=%{public}d", devTypeStr, localInfo.deviceTypeId,
+    LNN_LOGI(LNN_HEART_BEAT, "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, "
+        "brMac=%{public}s, p2pMac=%{public}s, onlineNodeNum=%{public}d", devTypeStr, localInfo.deviceTypeId,
         AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyIp), AnonymizeWrapper(anonyBtMac),
         AnonymizeWrapper(anonyP2pMac), onlineNodeNum);
     AnonymizeFree(anonyDeviceName);
