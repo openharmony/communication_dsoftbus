@@ -96,7 +96,7 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "CHAN_REQ_ID",          HISYSEVENT_INT32,  LnnAssignerChanReqId        },
     { "CONN_REQ_ID",          HISYSEVENT_INT32,  LnnAssignerConnReqId        },
     { "STRATEGY_FOR_LNN_BLE", HISYSEVENT_INT32,  LnnAssignerStrategy         },
-    { "TIME_LATENCY",         HISYSEVENT_INT64,  LnnAssignerTimeLatency      },
+    { "TIME_LATENCY",         HISYSEVENT_UINT64, LnnAssignerTimeLatency      },
     { "TRIGGER_REASON",       HISYSEVENT_INT32,  LnnAssignerTriggerReason    },
     { "AUTH_SEQ",             HISYSEVENT_INT64,  LnnAssignerAuthSeq          },
     { "ONLINE_DEV_CNT",       HISYSEVENT_INT32,  LnnAssignerOnlineDevCnt     },
