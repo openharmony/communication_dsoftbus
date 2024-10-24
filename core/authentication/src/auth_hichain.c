@@ -122,13 +122,18 @@ static void DfxRecordCertEndTime(int64_t authSeq)
     timeStamp = SoftBusGetSysTimeMs();
     extra.timeLatency = timeStamp - triggerInfo.triggerTime;
     extra.authSeq = authSeq;
+    if (!RequireAuthLock()) {
+        return;
+    }
     AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
     if (authFsm == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "auth fsm not found");
+        ReleaseAuthLock();
         return;
     }
     extra.peerUdidHash = authFsm->info.udidHash;
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_EXCHANGE_CIPHER, extra);
+    ReleaseAuthLock();
 }
 
 static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
