@@ -58,6 +58,7 @@
 #define LANE_ID_HASH_LEN 32
 #define UDID_SHORT_HASH_HEXSTR_LEN_TMP 16
 #define UDID_SHORT_HASH_LEN_TMP 8
+#define ISHARE_SESSION_NUM 2
 
 static bool g_enabledLowPower = false;
 
@@ -326,7 +327,7 @@ void DetectDisableWifiDirectApply(void)
     HandleDetectWifiDirectApply(&powerInfo, &wifiDirectInfo);
 }
 
-static void DetectEnableWifiDirectApply(const LaneLinkInfo *linkInfo, int32_t powerNum)
+void DetectEnableWifiDirectApply(PowerControlInfo powerInfo)
 {
     PowerControlInfo powerInfo;
     (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));
@@ -357,10 +358,11 @@ static void DetectEnableWifiDirectApply(const LaneLinkInfo *linkInfo, int32_t po
             powerInfo.rawHml++;
         }
     }
-    if (powerInfo.activeHml > powerNum) {
+    if (powerInfo.isDifferentPid == true&& powerInfo.activeHml > ISHARE_SESSION_NUM) {
         powerInfo.isDisableLowPower = true;
     }
-    if (((powerInfo.activeHml == 0) || (powerInfo.passiveHml > 0) || (powerInfo.rawHml > 0)) && g_enabledLowPower) {
+    if (((powerInfo.isDifferentPid == true) || (powerInfo.passiveHml > 0) ||
+        (powerInfo.rawHml > 0)) && g_enabledLowPower) {
         powerInfo.isDisableLowPower = true;
     }
     LaneUnlock();
