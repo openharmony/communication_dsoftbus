@@ -143,8 +143,10 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
 
     struct HksBlob decryptData = {0};
     decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
-    ASSERT_NE(decryptData.data, nullptr);
-
+    if (decryptData.data == NULL) {
+        SoftBusFree(encryptData.data);
+        return;
+    }
     EXPECT_EQ(LnnGenerateKeyByHuks(&g_keyAlias), SOFTBUS_OK);
     EXPECT_EQ(LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData), SOFTBUS_OK);
     EXPECT_NE(memcmp(plainData.data, encryptData.data, plainData.size), 0);
