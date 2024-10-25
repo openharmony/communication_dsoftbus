@@ -170,9 +170,8 @@ void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusEr
 static int32_t CheckErrReturnValidity(const char *errorReturn)
 {
     cJSON *json = cJSON_Parse(errorReturn);
-    if (json == NULL || !cJSON_IsString(json)) {
+    if (json == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
-        cJSON_Delete(json);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     cJSON_Delete(json);
