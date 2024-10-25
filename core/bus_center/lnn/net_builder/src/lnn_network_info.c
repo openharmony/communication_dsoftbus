@@ -144,7 +144,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
 
 static uint8_t *ConvertCapabilityToMsg(uint32_t localCapability)
 {
-    LNN_LOGE(LNN_BUILDER, "convert capability to msg enter");
+    LNN_LOGD(LNN_BUILDER, "convert capability to msg enter");
     uint8_t *arr = (uint8_t *)SoftBusCalloc(MSG_LEN);
     if (arr == NULL) {
         LNN_LOGE(LNN_BUILDER, "convert capability to msg calloc msg fail");

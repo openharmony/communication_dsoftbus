@@ -547,7 +547,7 @@ static void HbScreenOnChangeEventHandler(int64_t nowTime)
     HbChangeMediumParamByState(g_hbConditionState.screenState);
     g_lastScreenOnTime = nowTime;
     if (g_lastScreenOnTime - g_lastScreenOffTime >= HB_SCREEN_ON_COAP_TIME) {
-        LNN_LOGI(LNN_HEART_BEAT, "screen on start coap discovery");
+        LNN_LOGD(LNN_HEART_BEAT, "screen on start coap discovery");
         RestartCoapDiscovery();
     }
     if (LnnStartHbByTypeAndStrategy(

@@ -215,7 +215,7 @@ static void CloseUnusedChannel(void *para)
     int64_t diff;
 
     (void)para;
-    LNN_LOGI(LNN_BUILDER, "try close unused channel");
+    LNN_LOGD(LNN_BUILDER, "try close unused channel");
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
         LNN_LOGE(LNN_BUILDER, "close unused channel lock fail");
         return;

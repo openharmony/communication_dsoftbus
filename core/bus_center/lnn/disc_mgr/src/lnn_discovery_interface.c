@@ -69,7 +69,7 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     if (!isInnerRequest) {
         if ((ret = DiscUnPublishService(pkgName, publishId)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
-            LNN_LOGE(LNN_BUILDER, "DiscUnPublishService failed\n");
+            LNN_LOGD(LNN_BUILDER, "DiscUnPublishService failed\n");
             return SOFTBUS_ERR;
         }
         return SOFTBUS_OK;
