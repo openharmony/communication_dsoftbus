@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,44 +16,29 @@ import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("TransChannelManagerTest") {
+ohos_unittest("TransChannelManagerMockTest") {
   module_out_path = module_output_path
   sources = [
-    "../mock/trans_manager_mock.cpp",
-    "trans_channel_manager_test.cpp",
+    "trans_channel_manager_mock_test.cpp",
+    "trans_manager_test_mock.cpp",
   ]
 
   include_dirs = [
-    "unittest/common/",
-
     "$dsoftbus_core_path/authentication/interface",
 
     "$dsoftbus_core_path/bus_center/interface",
-    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_qos/include",
-    "$dsoftbus_core_path/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
 
     "$dsoftbus_core_path/common/include",
-    "$dsoftbus_core_path/common/security/permission/include",
 
     "$dsoftbus_core_path/discovery/event_manager/include",
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
 
-    "$dsoftbus_core_path/frame/common/include",
-
     "$dsoftbus_core_path/transmission/session/include",
-    "$dsoftbus_core_path/transmission/trans_channel/auth/include",
-    "$dsoftbus_core_path/transmission/trans_channel/common/include",
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
-    "$dsoftbus_core_path/transmission/trans_channel/manager/src",
-    "$dsoftbus_core_path/transmission/trans_channel/qos/interface",
-    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
-    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
 
-    "../mock",
+    "unittest/common/",
   ]
 
   deps = [
@@ -75,5 +60,5 @@ ohos_unittest("TransChannelManagerTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":TransChannelManagerTest" ]
+  deps = [ ":TransChannelManagerMockTest" ]
 }
