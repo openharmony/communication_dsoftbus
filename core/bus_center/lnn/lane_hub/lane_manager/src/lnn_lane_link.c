@@ -322,7 +322,7 @@ void DetectDisableWifiDirectApply(void)
         powerInfo.isDisableLowPower = true;
     }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d, g_enabledLowPower=%{public}d",
+    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d, isDisableLowPower=%{public}d",
         powerInfo.activeHml, powerInfo.passiveHml, powerInfo.rawHml, powerInfo.isDisableLowPower);
     HandleDetectWifiDirectApply(&powerInfo, &wifiDirectInfo);
 }
@@ -358,12 +358,12 @@ void DetectEnableWifiDirectApply(PowerControlInfo powerInfo)
     if (powerInfo.isDifferentPid == false && powerInfo.activeHml > ISHARE_SESSION_NUM) {
         powerInfo.isDisableLowPower = true;
     }
-    if (((powerInfo.isDifferentPid == true) || (powerInfo.passiveHml > 0) ||
-        (powerInfo.rawHml > 0)) && g_enabledLowPower) {
+    if ((powerInfo.isDifferentPid == true || powerInfo.passiveHml > 0 ||
+        powerInfo.rawHml > 0) && g_enabledLowPower) {
         powerInfo.isDisableLowPower = true;
     }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d, g_enabledLowPower=%{public}d",
+    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d, isDisableLowPower=%{public}d",
         powerInfo.activeHml, powerInfo.passiveHml, powerInfo.rawHml, powerInfo.isDisableLowPower);
     HandleDetectWifiDirectApply(&powerInfo, &wifiDirectInfo);
 }
