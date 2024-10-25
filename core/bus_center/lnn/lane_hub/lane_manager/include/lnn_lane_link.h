@@ -97,7 +97,6 @@ typedef struct {
     char peerUdid[UDID_BUF_LEN];
     char netifName[NET_IF_NAME_LEN];
     LaneLinkType type;
-    LaneTransType transType;
     union {
         WlanLinkInfo wlan;
         P2pLinkInfo p2p;
