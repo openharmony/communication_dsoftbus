@@ -907,7 +907,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleStopServer001, TestSize.Level1)
     EXPECT_CALL(bleMock, ConnGattServerStopService).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     ret = ConnBleStopServer();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusSleepMs(3*1000); //to call RetryServerStatConsistentHandler function
+    SoftBusSleepMs(3 * 1000); //to call RetryServerStatConsistentHandler function
 }
 
 /*
