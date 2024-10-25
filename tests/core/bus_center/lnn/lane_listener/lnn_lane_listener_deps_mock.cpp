@@ -96,9 +96,9 @@ void DetectDisableWifiDirectApply(void)
     GetLaneListenerDepsInterface()->DetectDisableWifiDirectApply();
 }
 
-void ProcessPowerControlInfoByLaneReqId(const LaneLinkType, uint32_t laneReqId)
+void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
 {
-    GetLaneListenerDepsInterface()->ProcessPowerControlInfoByLaneReqId();
+    GetLaneListenerDepsInterface()->ProcessPowerControlInfoByLaneReqId(linkType, laneReqId);
 }
 }
 } // namespace OHOS
