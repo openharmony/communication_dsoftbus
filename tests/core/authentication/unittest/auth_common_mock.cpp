@@ -137,9 +137,9 @@ void DeleteNodeFromPcRestrictMap(const char *udidHash)
     return GetCommonInterface()->DeleteNodeFromPcRestrictMap(udidHash);
 }
 
-int32_t AuthFailNotifyDeviceList(int32_t errCode, const char *errorReturn, uint32_t listLen)
+int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen)
 {
-    return GetCommonInterface()->AuthFailNotifyDeviceList(errCode, errorReturn, listLen);
+    return GetCommonInterface()->AuthFailNotifyProofInfo(errCode, errorReturn, errorReturnLen);
 }
 }
 } // namespace OHOS

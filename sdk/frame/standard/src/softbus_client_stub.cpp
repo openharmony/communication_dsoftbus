@@ -548,33 +548,33 @@ int32_t SoftBusClientStub::OnHichainProofExceptionInner(MessageParcel &data, Mes
         COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t deviceListLen = 0;
-    if (!data.ReadUint32(deviceListLen)) {
-        COMM_LOGE(COMM_SDK, "read failed! deviceListLen=%{public}u", deviceListLen);
-        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    uint32_t proofLen = 0;
+    if (!data.ReadUint32(proofLen)) {
+        COMM_LOGE(COMM_SDK, "read failed! proofLen=%{public}u", proofLen);
+        return SOFTBUS_NETWORK_PROXY_READINT_FAILED;
     }
-    char *deviceList = NULL;
-    if (deviceListLen != 0) {
-        deviceList = (char *)data.ReadRawData(deviceListLen);
-        if (deviceList == nullptr) {
-            COMM_LOGE(COMM_SDK, "read deviceList failed!");
-            return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    char *proofInfo = nullptr;
+    if (proofLen != 0) {
+        proofInfo = (char *)data.ReadRawData(proofLen);
+        if (proofInfo == nullptr) {
+            COMM_LOGE(COMM_SDK, "read proofInfo failed!");
+            return SOFTBUS_NETWORK_READRAWDATA_FAILED;
         }
     }
     uint16_t deviceTypeId = 0;
     if (!data.ReadUint16(deviceTypeId)) {
         COMM_LOGE(COMM_SDK, "read failed! deviceTypeId=%{public}hu", deviceTypeId);
-        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+        return SOFTBUS_NETWORK_PROXY_READINT_FAILED;
     }
     int32_t errCode = 0;
     if (!data.ReadInt32(errCode)) {
         COMM_LOGE(COMM_SDK, "read failed! errCode=%{public}d", errCode);
-        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+        return SOFTBUS_NETWORK_PROXY_READINT_FAILED;
     }
-    int32_t retReply = OnHichainProofException(pkgName, deviceList, deviceListLen, deviceTypeId, errCode);
+    int32_t retReply = OnHichainProofException(pkgName, proofInfo, proofLen, deviceTypeId, errCode);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SDK, "OnHichainProofException write reply failed!");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -735,9 +735,9 @@ int32_t SoftBusClientStub::OnNodeDeviceTrustedChange(const char *pkgName, int32_
 }
 
 int32_t SoftBusClientStub::OnHichainProofException(
-    const char *pkgName, const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    return LnnOnHichainProofException(pkgName, deviceList, deviceListLen, deviceTypeId, errCode);
+    return LnnOnHichainProofException(pkgName, proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

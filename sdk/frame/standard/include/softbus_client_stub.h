@@ -51,7 +51,7 @@ public:
     int32_t OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type) override;
     int32_t OnLocalNetworkIdChanged(const char *pkgName) override;
     int32_t OnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen) override;
-    int32_t OnHichainProofException(const char *pkgName, const char *deviceList, uint32_t deviceListLen,
+    int32_t OnHichainProofException(const char *pkgName, const char *proofInfo, uint32_t proofLen,
         uint16_t deviceTypeId, int32_t errCode) override;
     int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
