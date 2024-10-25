@@ -315,7 +315,7 @@ void DetectDisableWifiDirectApply(void)
             powerInfo.rawHml++;
         }
     }
-    if (powerInfo.activeHml == 1) {
+    if (powerInfo.activeHml > 0) {
         powerInfo.isDisableLowPower = true;
     }
     if (((powerInfo.activeHml == 0) || (powerInfo.passiveHml > 0) || (powerInfo.rawHml > 0)) && g_enabledLowPower) {
