@@ -34,8 +34,10 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
+#include "softbus_utils.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
 
@@ -607,7 +609,7 @@ static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
         /* Send once ble v0 heartbeat to recovery ble network. */
-        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
 }
@@ -622,7 +624,7 @@ static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         return SOFTBUS_ERR;
     }
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
-        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
 }
@@ -845,7 +847,6 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     LnnHeartbeatType hbType = msgPara->hbType;
     NodeInfo nodeInfo;
     SoftBusSysTime times = {0};
-    uint64_t nowTime;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "check dev status get nodeInfo fail");
@@ -854,8 +855,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     discType = LnnConvAddrTypeToDiscType(LnnConvertHbTypeToConnAddrType(hbType));
     if (!LnnHasDiscoveryType(&nodeInfo, discType)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT,
-            "check dev status node doesn't have discType. networkId=%{public}s, discType=%{public}d",
+        LNN_LOGE(LNN_HEART_BEAT, "check dev status doesn't have discType. networkId=%{public}s, discType=%{public}d",
             anonyNetworkId, discType);
         AnonymizeFree(anonyNetworkId);
         return;
@@ -867,7 +867,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         return;
     }
     SoftBusGetTime(&times);
-    nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+    uint64_t nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType)) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "check dev status receive heartbeat in time, networkId=%{public}s, "
@@ -885,6 +885,8 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     }
     if (ProcessLostHeartbeat(networkId, hbType, msgPara->isWakeUp) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return;
     }
     AnonymizeFree(anonyNetworkId);
 }
@@ -1048,7 +1050,6 @@ static void DeinitHbFsmCallback(FsmStateMachine *fsm)
 
     LNN_LOGI(LNN_HEART_BEAT, "fsm deinit callback enter");
     if (!CheckHbFsmStateMsgArgs(fsm)) {
-        LNN_LOGE(LNN_HEART_BEAT, "fsm deinit callback error");
         return;
     }
     hbFsm = TO_HEARTBEAT_FSM(fsm);

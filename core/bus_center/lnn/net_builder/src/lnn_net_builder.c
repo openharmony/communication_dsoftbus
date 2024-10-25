@@ -76,6 +76,7 @@
 #define NOT_TRUSTED_DEVICE_MSG_DELAY     5000
 #define SHORT_UDID_HASH_STR_LEN          16
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
+#define WAIT_SEND_NOT_TRUST_MSG          200
 
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
@@ -219,6 +220,17 @@ void SendElectMessageToAll(const char *skipNetworkId)
     }
 }
 
+static void FreeJoinLnnMsgPara(const JoinLnnMsgPara *para)
+{
+    if (para == NULL) {
+        return;
+    }
+    if (para->dupInfo != NULL) {
+        SoftBusFree((void *)para->dupInfo);
+    }
+    SoftBusFree((void *)para);
+}
+
 int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     int32_t ret = SOFTBUS_OK;
@@ -229,11 +241,11 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     if (connFsm == NULL || connFsm->isDead) {
         if (TryPendingJoinRequest(para, needReportFailure)) {
             LNN_LOGI(LNN_BUILDER, "join request is pending, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
-            SoftBusFree((void *)para);
+            FreeJoinLnnMsgPara(para);
             return SOFTBUS_OK;
         }
         ret = PostJoinRequestToConnFsm(connFsm, para, needReportFailure);
-        SoftBusFree((void *)para);
+        FreeJoinLnnMsgPara(para);
         return ret;
     }
     connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
@@ -255,14 +267,14 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     if (addr.type != CONNECTION_ADDR_WLAN ||
         !IsNeedWifiReauth(connFsm->connInfo.peerNetworkId, addr.peerUid, MAX_ACCOUNT_HASH_LEN)) {
         LNN_LOGI(LNN_BUILDER, "account not change no need reauth");
-        SoftBusFree((void *)para);
+        FreeJoinLnnMsgPara(para);
         return SOFTBUS_OK;
     }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
     DfxRecordLnnAuthStart(&authConn, para, requestId);
-    SoftBusFree((void *)para);
+    FreeJoinLnnMsgPara(para);
     if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
         return SOFTBUS_ERR;
@@ -447,7 +459,7 @@ void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo, const JoinLnnMsgPara *p
 
 NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 {
-    NodeInfo *node = (NodeInfo *)SoftBusMalloc(sizeof(NodeInfo));
+    NodeInfo *node = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     if (node == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc NodeInfo fail");
         return NULL;
@@ -547,6 +559,9 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
     for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
         LNN_LOGI(LNN_BUILDER, "authSeq:%{public}" PRId64 "->%{public}" PRId64, curAuthSeq[type], authSeq[type]);
         if (authSeq[type] == curAuthSeq[type] && authSeq[type] != 0 && curAuthSeq[type] != 0) {
+            if (type == DISCOVERY_TYPE_WIFI) {
+                SoftBusSleepMs(WAIT_SEND_NOT_TRUST_MSG);
+            }
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
             LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d", anonyNetworkId, type);
@@ -938,6 +953,34 @@ void UpdateLocalNetCapability(void)
     }
     LNN_LOGI(LNN_INIT, "local capability change:%{public}u->%{public}u, brState=%{public}d, isWifiActive=%{public}d,",
         oldNetCap, netCapability, brState, isWifiActive);
+}
+
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
+{
+    if (addr == NULL || info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "prepare join with nodeinfo message fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, false);
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "prepare join with nodeinfo create lnn msg para fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    para->dupInfo = DupNodeInfo(info);
+    if (para->dupInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "join with nodeinfo dup node info fail");
+        SoftBusFree(para);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (PostBuildMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
+        SoftBusFree(para->dupInfo);
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
