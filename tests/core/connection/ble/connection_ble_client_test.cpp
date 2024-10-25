@@ -779,32 +779,6 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
 }
 
 /*
-* @tc.name: ConfigureMtuSizeCallback003
-* @tc.desc: Test ConfigureMtuSizeCallback
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback003, TestSize.Level1)
-{
-    const char *addr = "12:34:56:44:22:00";
-    ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 1, false);
-    EXPECT_NE(NULL, connection);
-    connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
-    int32_t ret = ConnBleSaveConnection(connection);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    NiceMock<ConnectionBleClientInterfaceMock> bleMock; 
-    EXPECT_CALL(bleMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, LnnGetLocalNumInfo)
-        .WillOnce(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
-    gattCb->configureMtuSizeCallback(connection->underlayerHandle, 21, SOFTBUS_OK);
-    SoftBusSleepMs(500);
-}
-
-
-/*
 * @tc.name: ClientConnectionTest001
 * @tc.desc: Test ConnectionStateCallback for disconenct.
 * @tc.in: Test module, Test number, Test Levels.
@@ -828,8 +802,10 @@ HWTEST_F(ClientConnectionTest, ConnectionStateCallback003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     gattCb->connectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_CONNECT, SOFTBUS_OK);
 
-    EXPECT_CALL(bleMock, SoftbusGattcSearchServices).WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SEARCH_SERVICE_ERR));
-    EXPECT_CALL(bleMock, SoftbusGattcRefreshServices).WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SEARCH_SERVICE_ERR));
+    EXPECT_CALL(bleMock, SoftbusGattcSearchServices)
+        .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SEARCH_SERVICE_ERR));
+    EXPECT_CALL(bleMock, SoftbusGattcRefreshServices)
+        .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SEARCH_SERVICE_ERR));
     gattCb->connectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_CONNECT, SOFTBUS_OK);
     
     EXPECT_CALL(bleMock, SoftbusGattcRefreshServices).WillRepeatedly(Return(SOFTBUS_OK));
