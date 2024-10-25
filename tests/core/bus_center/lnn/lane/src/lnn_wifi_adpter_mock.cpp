@@ -162,5 +162,10 @@ bool SoftBusIsWifiActive(void)
 {
     return GetWifiAdpterInterface()->SoftBusIsWifiActive();
 }
+
+int32_t RemoveAuthSessionServer(const char *peerIp)
+{
+    return GetWifiAdpterInterface()->RemoveAuthSessionServer(peerIp);
+}
 }
 }
