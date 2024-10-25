@@ -506,8 +506,8 @@ typedef struct {
     /**
      * @brief Called when the devices have non-consistent group relationship.
      *
-     * @param deviceList The device list.
-     * @param deviceListLen The device list length.
+     * @param proofInfo The device proof info.
+     * @param proofLen The device proof info length.
      * @param deviceTypeId The device type id.
      * @param errcode Indicates the result code.
      *
@@ -515,7 +515,7 @@ typedef struct {
      * @version 1.0
      */
     void (*onHichainProofException)(
-        const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode);
+        const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 } INodeStateCb;
 
 /**

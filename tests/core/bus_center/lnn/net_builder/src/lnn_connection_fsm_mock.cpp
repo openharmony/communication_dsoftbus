@@ -148,9 +148,9 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 }
 
 void LnnNotifyHichainProofException(
-    const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    return GetLnnConnInterface()->LnnNotifyHichainProofException(deviceList, deviceListLen, deviceTypeId, errCode);
+    return GetLnnConnInterface()->LnnNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 }
 } // namespace OHOS

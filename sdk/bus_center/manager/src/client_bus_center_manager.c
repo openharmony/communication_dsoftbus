@@ -1301,7 +1301,7 @@ int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const ch
 }
 
 int32_t LnnOnHichainProofException(
-    const char *pkgName, const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
     NodeStateCallbackItem *item = NULL;
     ListNode dupList;
@@ -1326,17 +1326,17 @@ int32_t LnnOnHichainProofException(
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
             (item->cb.events & EVENT_NODE_HICHAIN_PROOF_EXCEPTION) != 0 && item->cb.onHichainProofException != NULL) {
-            item->cb.onHichainProofException(deviceList, deviceListLen, deviceTypeId, errCode);
+            item->cb.onHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
             char *anonyPkgName = NULL;
-            char *anonyDeviceList = NULL;
+            char *anonyProofInfo = NULL;
             Anonymize(pkgName, &anonyPkgName);
-            Anonymize(deviceList, &anonyDeviceList);
+            Anonymize(proofInfo, &anonyProofInfo);
             LNN_LOGI(LNN_STATE,
-                "onHichainProofException, pkgName=%{public}s, deviceList=%{public}s, errCode=%{public}d, "
+                "onHichainProofException, pkgName=%{public}s, proofInfo=%{public}s, errCode=%{public}d, "
                 "type=%{public}hu",
-                AnonymizeWrapper(anonyPkgName), AnonymizeWrapper(anonyDeviceList), errCode, deviceTypeId);
+                AnonymizeWrapper(anonyPkgName), AnonymizeWrapper(anonyProofInfo), errCode, deviceTypeId);
             AnonymizeFree(anonyPkgName);
-            AnonymizeFree(anonyDeviceList);
+            AnonymizeFree(anonyProofInfo);
         }
     }
     ClearNodeStateCbList(&dupList);
