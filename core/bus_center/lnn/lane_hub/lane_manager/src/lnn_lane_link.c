@@ -329,9 +329,6 @@ void DetectDisableWifiDirectApply(void)
 
 void DetectEnableWifiDirectApply(PowerControlInfo powerInfo)
 {
-    PowerControlInfo powerInfo;
-    (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));
-    powerInfo.transType = linkInfo->transType;
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     if (LaneLock() != SOFTBUS_OK) {
@@ -358,7 +355,7 @@ void DetectEnableWifiDirectApply(PowerControlInfo powerInfo)
             powerInfo.rawHml++;
         }
     }
-    if (powerInfo.isDifferentPid == true&& powerInfo.activeHml > ISHARE_SESSION_NUM) {
+    if (powerInfo.isDifferentPid == false && powerInfo.activeHml > ISHARE_SESSION_NUM) {
         powerInfo.isDisableLowPower = true;
     }
     if (((powerInfo.isDifferentPid == true) || (powerInfo.passiveHml > 0) ||
