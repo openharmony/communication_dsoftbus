@@ -478,7 +478,7 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid, uint32_t len)
         cacheInfo.deviceInfo.deviceUdid[0] != '\0') {
         if (strcpy_s(udid, len, cacheInfo.deviceInfo.deviceUdid) != EOK) {
             AUTH_LOGE(AUTH_CONN, "copy deviceUdid failed");
-            return SOFTBUS_MEM_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
         return SOFTBUS_OK;
     }

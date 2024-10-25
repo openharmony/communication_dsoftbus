@@ -21,6 +21,7 @@
 #include "anonymizer.h"
 #include "auth_manager.h"
 #include "auth_device_common_key.h"
+#include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -35,6 +36,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_lane_vap_info.h"
@@ -337,6 +339,11 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
         return false;
     }
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
+        char *anonyUdid = NULL;
+        Anonymize(storedInfo->device->devId, &anonyUdid);
+        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
+            AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
         return true;
     }
     storedInfo->lastJoinLnnTime = nowTime;
