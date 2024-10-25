@@ -829,12 +829,6 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
         }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
-    if (Lock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    g_powerPid = 0;
-    Unlock();
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
 }
 
@@ -1340,6 +1334,33 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
+void ProcessPowerControlInfoByLaneReqId(const LaneLinkType, uint32_t laneReqId)
+{
+    PowerControlInfo powerInfo;
+    (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
+    }
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneReqId == laneReqId) {
+            powerInfo.transType = item->allocInfo.transType;
+            if (g_powerPid == item->allocInfo.pid) {
+                powerInfo.isDifferentPid = false;
+            } else {
+                powerInfo.isDifferentPid = true;
+            }
+            g_powerPid = item->allocInfo.pid;
+        }
+    }
+    Unlock();
+    if (linkType == LANE_HML && IsPowerControlEnabled()) {
+        DetectEnableWifiDirectApply(powerInfo);
+    }
+}
+
 static void NotifyLinkSucc(uint32_t laneReqId)
 {
     LaneLinkType linkType;
@@ -1374,6 +1395,7 @@ static void NotifyLinkSucc(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "add linkInfo item fail, laneReqId=%{public}u", laneReqId);
         goto FAIL;
     }
+    ProcessPowerControlInfoByLaneReqId(linkType, laneReqId);
     NotifyLaneAllocSuccess(laneReqId, laneId, &info);
     FreeLowPriorityLink(laneReqId, linkType);
     return;
