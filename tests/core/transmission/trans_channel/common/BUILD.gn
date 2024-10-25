@@ -15,66 +15,151 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
-dsoftbus_root_path = "../../../../.."
-softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 ohos_unittest("TransLaneTest") {
   module_out_path = module_output_path
   sources = [ "trans_lane_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/security/permission/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/src",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-    "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/core/transmission/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/transmission/ipc/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/src",
-    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
-    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_core_path/authentication/interface",
+
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
+
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/common/security/permission/include",
+
+    "$dsoftbus_core_path/connection/wifi_direct_cpp",
+
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/manager/include",
+
+    "$dsoftbus_core_path/transmission/ipc/include",
+    "$dsoftbus_core_path/transmission/trans_channel/auth/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+    "$dsoftbus_core_path/transmission/trans_channel/qos/interface",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_core_path/transmission/session/include",
+
+    "$softbus_adapter_common/net/wifi/include",
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("TransLaneCommonTest") {
+  module_out_path = module_output_path
+  sources = [
+    "mock/trans_lane_common_test_mock.cpp",
+    "trans_lane_common_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/authentication/interface",
+
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_core_path/bus_center/utils/include",
+
+    "$dsoftbus_core_path/common/security/permission/include",
+
+    "$dsoftbus_core_path/connection/wifi_direct_cpp",
+
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/manager/include",
+
+    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/trans_channel/auth/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+    "$dsoftbus_core_path/transmission/trans_channel/qos/interface",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
+
+    "$dsoftbus_test_path/core/transmission/trans_channel/common/mock",
+
+    "$softbus_adapter_common/net/wifi/include",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("TransLanePendingTest") {
+  module_out_path = module_output_path
+  sources = [
+    "mock/trans_lane_pending_test_mock.cpp",
+    "trans_lane_pending_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/authentication/interface",
+
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
+
+    "$dsoftbus_core_path/common/security/permission/include",
+
+    "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/discovery/interface",
+
+    "$dsoftbus_core_path/transmission/ipc/include",
+    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+
+    "$dsoftbus_test_path/core/transmission/trans_channel/common/mock",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {
   testonly = true
-  deps = [ ":TransLaneTest" ]
+  deps = [
+    ":TransLaneCommonTest",
+    ":TransLanePendingTest",
+    ":TransLaneTest",
+  ]
 }
