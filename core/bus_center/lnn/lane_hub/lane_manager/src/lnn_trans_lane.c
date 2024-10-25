@@ -1333,7 +1333,7 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
-void ProcessPowerControlInfoByLaneReqId(const LaneLinkType, uint32_t laneReqId)
+void ProcessPowerControlInfoByLaneReqId(const LaneLinkType LinkType, uint32_t laneReqId)
 {
     PowerControlInfo powerInfo;
     (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));

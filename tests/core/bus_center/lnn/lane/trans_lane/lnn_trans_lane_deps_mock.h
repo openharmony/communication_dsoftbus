@@ -53,7 +53,7 @@ public:
     virtual int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType) = 0;
     virtual int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType) = 0;
     virtual int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, int32_t *laneNum) = 0;
-    virtual void DetectEnableWifiDirectApply(PowerControlInfo powerInfo) = 0; 
+    virtual void DetectEnableWifiDirectApply(PowerControlInfo powerInfo) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
