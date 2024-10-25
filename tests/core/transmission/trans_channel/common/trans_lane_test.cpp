@@ -13,29 +13,15 @@
  * limitations under the License.
  */
 
-#include <cstring>
-#include <securec.h>
-#include <unistd.h>
-
-#include "auth_interface.h"
 #include "gtest/gtest.h"
-#include "lnn_distributed_net_ledger.h"
+#include <securec.h>
+
 #include "lnn_lane.h"
-#include "lnn_lane_interface.h"
-#include "session.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
-#include "softbus_server_frame.h"
-#include "softbus_trans_def.h"
-#include "trans_channel_limit.h"
-#include "trans_channel_common.h"
-#include "trans_channel_common.c"
-#include "trans_channel_manager.h"
-#include "trans_lane_pending_ctl.c"
-#include "trans_session_manager.h"
 #include "softbus_feature_config.h"
-#include "softbus_conn_interface.h"
-#include "bus_center_manager.h"
+#include "trans_channel_common.c"
+#include "trans_channel_limit.h"
+#include "trans_lane_pending_ctl.c"
 #include "trans_session_service.h"
 
 using namespace testing::ext;
@@ -193,7 +179,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     (void)TransReqLanePendingInit();
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransGetLaneReqItemByLaneHandle(invalidId, &bSucc, connInfo, &errCode);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
@@ -234,7 +220,7 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(invalidId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
@@ -249,7 +235,7 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     ret = TransDelLaneReqFromPendingList(laneHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransReqLanePendingDeinit();
-    
+
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     TransReqLanePendingDeinit();
@@ -271,7 +257,7 @@ HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     TransOnLaneRequestSuccess(invalidId, connInfo);
     connInfo->connInfo.p2p.protocol = 1;
@@ -299,8 +285,7 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     TransOnLaneRequestFail(invalidId, reason);
     connInfo->connInfo.p2p.protocol = 1;
     TransOnLaneRequestFail(laneHandle, reason);
@@ -574,7 +559,6 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneHandle = 1;
-
     LaneConnInfo connInfo = {
         .type = LANE_P2P,
         .connInfo.p2p.protocol = 1,
