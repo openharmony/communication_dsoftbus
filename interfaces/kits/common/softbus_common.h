@@ -369,7 +369,9 @@ typedef enum {
     /**Approach capability */
     APPROACH_CAPABILITY_BITMAP,
     /**virtual link capability */
-    VLINK_CAPABILITY_BITMAP
+    VLINK_CAPABILITY_BITMAP,
+    /**Touch capability */
+    TOUCH_CAPABILITY_BITMAP
 } DataBitMap;
 
 typedef struct {
@@ -403,7 +405,8 @@ static const CapabilityMap g_capabilityMap[] = {
     {OSD_CAPABILITY_BITMAP, (char *)"osdCapability"},
     {SHARE_CAPABILITY_BITMAP, (char *)"share"},
     {APPROACH_CAPABILITY_BITMAP, (char *)"approach"},
-    {VLINK_CAPABILITY_BITMAP, (char *)"virtualLink"}
+    {VLINK_CAPABILITY_BITMAP, (char *)"virtualLink"},
+    {TOUCH_CAPABILITY_BITMAP, (char *)"touch"}
 };
 
 /**
