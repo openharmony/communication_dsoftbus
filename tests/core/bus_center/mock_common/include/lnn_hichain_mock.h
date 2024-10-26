@@ -56,6 +56,8 @@ public:
         int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
     static int32_t InvokeGetJoinedGroups2(
         int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
+    static int32_t InvokeGetJoinedGroups3(
+        int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
     static int32_t ActionofunRegDataChangeListener(const char *appId);
     static int32_t ActionOfProcessData(
         int64_t authSeq, const uint8_t *data, uint32_t len, const DeviceAuthCallback *gaCallback);

@@ -260,4 +260,35 @@ HWTEST_F(AuthHichainTest, HI_CHAIN_GET_JOINED_GROUPS_TEST_001, TestSize.Level1)
     const char *appId = "111";
     CancelRequest(authReqId, appId);
 }
+
+/*
+ * @tc.name: IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001
+ * @tc.desc: is potential trusted device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnHichainInterfaceMock> hichainMock;
+    DeviceGroupManager grounpManager;
+    grounpManager.regDataChangeListener = LnnHichainInterfaceMock::InvokeDataChangeListener;
+    grounpManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
+    grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
+    grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
+    EXPECT_CALL(hichainMock, GetGmInstance)
+        .WillOnce(Return(NULL))
+        .WillRepeatedly(Return(&grounpManager));
+    bool ret = IsSameAccountGroupDevice();
+    EXPECT_TRUE(ret == false);
+    ret = IsSameAccountGroupDevice();
+    EXPECT_TRUE(ret == false);
+    grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups3;
+    EXPECT_CALL(hichainMock, GetGmInstance).WillRepeatedly(Return(&grounpManager));
+    ret = IsSameAccountGroupDevice();
+    EXPECT_TRUE(ret == false);
+    grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups1;
+    EXPECT_CALL(hichainMock, GetGmInstance).WillRepeatedly(Return(&grounpManager));
+    ret = IsSameAccountGroupDevice();
+    EXPECT_TRUE(ret == true);
+}
 } // namespace OHOS

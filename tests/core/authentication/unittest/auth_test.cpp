@@ -601,6 +601,8 @@ HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_002, TestSize.Level1)
     (void)memset_s(&authManager, sizeof(AuthManager), 0, sizeof(AuthManager));
     int32_t ret = PostDeviceMessage(auth, flagRelay, AUTH_LINK_TYPE_WIFI, &messageParse);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     type = LINK_TYPE;
@@ -1371,6 +1373,8 @@ HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetVersion(authId, &version);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    DelAuthManager(auth, 0);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX + 1);
     DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
