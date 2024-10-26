@@ -430,13 +430,14 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     }
 
     const char *sessionName = data.ReadCString();
-    std::string strName(sessionName);
+    std::string strName;
     uint32_t code = SERVER_CREATE_SESSION_SERVER;
     SoftbusRecordCalledApiInfo(pkgName, code);
     if (pkgName == nullptr || sessionName == nullptr) {
         retReply = SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
         goto EXIT;
     }
+    strName = sessionName;
     callingUid = OHOS::IPCSkeleton::GetCallingUid();
     callingPid = OHOS::IPCSkeleton::GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
