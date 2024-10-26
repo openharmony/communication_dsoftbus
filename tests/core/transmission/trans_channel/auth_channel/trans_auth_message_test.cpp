@@ -13,15 +13,11 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <securec.h>
 
-#include <gtest/gtest.h>
-#include "softbus_def.h"
-#include "softbus_json_utils.h"
-#include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "trans_auth_message.h"
-#include "softbus_app_info.h"
 
 using namespace testing::ext;
 
