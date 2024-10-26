@@ -50,6 +50,7 @@ public:
     virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
     virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
+    virtual int32_t LnnSyncPtk(char *networkId) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -80,12 +81,15 @@ public:
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
     MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
+    MOCK_METHOD1(LnnSyncPtk, int32_t (char *networkId));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
     static int32_t ActionOfChannelOpened(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
     static int32_t ActionOfDetectSuccess(uint32_t laneReqId, const LaneLinkInfo *linkInfo,
+        const LaneLinkCb *callback);
+    static int32_t ActionOfDetectFail(uint32_t laneReqId, const LaneLinkInfo *linkInfo,
         const LaneLinkCb *callback);
 };
 } // namespace OHOS
