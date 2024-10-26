@@ -35,7 +35,6 @@ typedef struct {
     * @param[in] channelId indicates that channel is open.
     * @param[in] uuid indicates the pointer to the uuid.
     * @param[in] isServer indicates server side or client side.
-    * @return <b>SOFTBUS_ERR</b> the processing failed after the callback.
     * @return <b>SOFTBUS_OK</b> the processing success after the callback.
     */
     int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer);
@@ -104,7 +103,6 @@ int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dat
  * this interface is current only called once when the sync info manager.
  * @see {@link INetworkingListener}
  * @param[in] listener indicates regiestered function callback.
- * @return <b>SOFTBUS_ERR</b> Failed to add listener to channel listener manager.
  * @return <b>SOFTBUS_OK</b> Success to register channel listener, return other internal errorcodes otherwise.
  */
 int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener);
