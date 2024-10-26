@@ -110,6 +110,8 @@ typedef struct {
     int32_t hmlChannel;           // HML_CHAN
     int32_t staChannel;           // STA_CHAN
     int32_t apChannel;            // HOTSPOT_CHAN
+    const char *peerDevVer;       // REMOTE_OS_VERSION
+    int32_t remoteScreenStatus;   // REMOTE_SCREEN_STATUS
 } ConnEventExtra;
 
 typedef enum {
