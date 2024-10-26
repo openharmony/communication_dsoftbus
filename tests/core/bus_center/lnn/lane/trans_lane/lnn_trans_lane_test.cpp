@@ -497,8 +497,8 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_RAW_LANE_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = UpdateReqListLaneId(LANE_REQ_ID, NEW_LANE_REQ_ID);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-    NotifyFreeLaneResult(LANE_REQ_ID, SOFTBUS_ERR);
-    NotifyFreeLaneResult(NEW_LANE_REQ_ID, SOFTBUS_ERR);
+    NotifyFreeLaneResult(LANE_REQ_ID, SOFTBUS_LOCK_ERR);
+    NotifyFreeLaneResult(NEW_LANE_REQ_ID, SOFTBUS_LOCK_ERR);
     transObj->deinit();
 }
 } // namespace OHOS

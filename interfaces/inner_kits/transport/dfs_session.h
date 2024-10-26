@@ -68,7 +68,6 @@ extern "C" {
  * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
- * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
  * @return Returns <b>SOFTBUS_MEM_ERR</b> if the operation fails due to insufficient memory.
  * @since 1.0
  * @version 1.0
@@ -84,7 +83,6 @@ int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len);
  * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
- * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
  * @return Returns <b>SOFTBUS_MEM_ERR</b> if the operation fails due to insufficient memory.
  * @since 1.0
  * @version 1.0
@@ -99,7 +97,6 @@ int32_t GetSessionHandle(int32_t sessionId, int *handle);
  * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
- * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
  * @since 1.0
  * @version 1.0
  */

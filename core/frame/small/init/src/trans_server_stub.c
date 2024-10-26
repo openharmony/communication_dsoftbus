@@ -41,12 +41,12 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
     const char *pkgName = (const char*)ReadString(req, &size);
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerCreateSessionServer pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     const char *sessionName = (const char *)ReadString(req, &size);
     if (sessionName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "sessionName pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
@@ -71,12 +71,12 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
     const char *pkgName = (const char*)ReadString(req, &size);
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     const char *sessionName = (const char *)ReadString(req, &size);
     if (sessionName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer sessionName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
@@ -234,7 +234,7 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
         WriteUint32(reply, sizeof(TransSerializer));
         bool value = WriteBuffer(reply, (void *)&transSerializer, sizeof(TransSerializer));
         if (!value) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_MALLOC_ERR;
         }
         return ret;
     }
@@ -244,7 +244,7 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     WriteUint32(reply, sizeof(TransSerializer));
     bool value = WriteBuffer(reply, (void *)&transSerializer, sizeof(TransSerializer));
     if (!value) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     return ret;
 }
@@ -263,8 +263,8 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
     ConnectionAddr *addr = (ConnectionAddr *)ReadRawData(req, sizeof(ConnectionAddr));
     if (!LnnConvertAddrToOption(addr, &connOpt)) {
         TRANS_LOGE(TRANS_CTRL, "LnnConvertAddrToOption fail");
-        WriteInt32(reply, SOFTBUS_ERR);
-        return SOFTBUS_ERR;
+        WriteInt32(reply, SOFTBUS_NO_INIT);
+        return SOFTBUS_NO_INIT;
     }
     ret = CheckOpenSessionPremission(sessionName, sessionName);
     if (ret != SOFTBUS_OK) {

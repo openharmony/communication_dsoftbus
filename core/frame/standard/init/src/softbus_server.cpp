@@ -72,7 +72,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     if (abilityDeath == nullptr) {
         COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
-        return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
+        return SOFTBUS_TRANS_DEATH_RECIPIENT_INVALID;
     }
     bool ret = object->AddDeathRecipient(abilityDeath);
     if (!ret) {
