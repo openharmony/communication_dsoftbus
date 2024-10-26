@@ -67,6 +67,8 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
 int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId);
 
 void ReleaseProxyChannelId(int32_t channelId);
+
+int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
