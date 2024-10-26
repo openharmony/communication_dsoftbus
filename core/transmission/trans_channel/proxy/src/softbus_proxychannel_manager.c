@@ -376,9 +376,8 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
-    TRANS_CHECK_AND_RETURN_LOGE((g_proxyChannelList != NULL && !IsListEmpty(proxyChannelList)), TRANS_CTRL,
-        "g_proxyChannelList is null or empty");
+    TRANS_CHECK_AND_RETURN_LOGE(!IsListEmpty(proxyChannelList), TRANS_CTRL, "proxyChannelList is empty");
+
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyChannelList, ProxyChannelInfo, node) {
@@ -402,8 +401,7 @@ void TransProxyDelByConnId(uint32_t connId)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyChannelList;
 
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
@@ -889,13 +887,13 @@ static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     if (!noNeedGetPkg) {
         if (TransProxyGetPkgName(chan->appInfo.myData.sessionName,
             chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "proc handshake get pkg name fail");
+            TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d proc handshake get pkg name fail", chan->channelId);
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
 
         if (TransProxyGetUidAndPidBySessionName(chan->appInfo.myData.sessionName,
             &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "proc handshake get uid pid fail");
+            TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d proc handshake get uid pid fail", chan->channelId);
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
     }
@@ -905,7 +903,8 @@ static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
         key = STRING_KEY_DEV_UDID;
     }
     int32_t ret = LnnGetLocalStrInfo(key, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Handshake get local info fail");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "channelId=%{public}d Handshake get local info fail", chan->channelId);
     return SOFTBUS_OK;
 }
 
@@ -1050,7 +1049,6 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     }
     ret = TransProxyGetLocalInfo(chan);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransProxyGetLocalInfo fail. ret=%{public}d.", ret);
         return ret;
     }
 
