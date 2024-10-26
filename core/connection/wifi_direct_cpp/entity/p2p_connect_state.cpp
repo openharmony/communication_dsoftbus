@@ -135,11 +135,6 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
         return;
     }
     P2pEntity::GetInstance().Lock();
-    if (operation_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
-        P2pEntity::GetInstance().Unlock();
-        return;
-    }
     auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
     if (operation == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
@@ -191,6 +186,19 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
     P2pEntity::GetInstance().Unlock();
 }
 
+bool P2pConnectState::DetectDhcpTimeout()
+{
+    auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    if (operation == nullptr || !operation->content_.isNeedDhcp) {
+        return false;
+    }
+    P2pAdapter::WifiDirectP2pGroupInfo groupInfo {};
+    if (P2pAdapter::GetGroupInfo(groupInfo) != SOFTBUS_OK) {
+        return false;
+    }
+    return true;
+}
+
 void P2pConnectState::OnTimeout()
 {
     P2pEntity::GetInstance().Lock();
@@ -201,33 +209,12 @@ void P2pConnectState::OnTimeout()
         return;
     }
 
-    do {
-        auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
-        if (operation != nullptr && !operation->content_.isNeedDhcp) {
-            break;
-        }
-        auto groupInfo = std::make_shared<P2pAdapter::WifiDirectP2pGroupInfo>();
-        if (P2pAdapter::GetGroupInfo(*groupInfo) != SOFTBUS_OK) {
-            break;
-        }
-        auto gcIp = CalculateGcIp(groupInfo->groupOwner.address);
-        if (gcIp.empty()) {
-            break;
-        }
-        CONN_LOGI(CONN_WIFI_DIRECT, "calculated gc ip %{public}s", WifiDirectAnonymizeIp(gcIp).c_str());
-        if (P2pAdapter::P2pConfigGcIp(groupInfo->interface, gcIp) != SOFTBUS_OK) {
-            break;
-        }
-        P2pEntity::GetInstance().Unlock();
-        BroadcastParam param;
-        param.p2pLinkInfo.connectState = P2pConnectionState::P2P_CONNECTED;
-        param.groupInfo = groupInfo;
-        P2pBroadcast::GetInstance()->DispatchWorkHandler(
-            BroadcastReceiverAction::WIFI_P2P_CONNECTION_CHANGED_ACTION, param);
-        return;
-    } while (false);
+    SoftBusErrNo resultCode = SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT;
+    if (DetectDhcpTimeout()) {
+        resultCode = SOFTBUS_CONN_CONNECT_DHCP_TIMEOUT;
+    }
     ChangeState(P2pAvailableState::Instance(), nullptr);
-    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT)));
+    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(resultCode)));
     operation_ = nullptr;
     P2pEntity::GetInstance().Unlock();
 }
