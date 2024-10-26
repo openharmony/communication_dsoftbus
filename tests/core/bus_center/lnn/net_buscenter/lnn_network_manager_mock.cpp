@@ -136,5 +136,10 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     return GetNetworkManagerInterface()->LnnUnregisterEventHandler(event, handler);
 }
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    return GetNetworkManagerInterface()->DfxRecordTriggerTime(reason, stage);
+}
 }
 }

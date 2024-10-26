@@ -181,5 +181,10 @@ int32_t LnnGenerateCeParams(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
 }
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    return HeartBeatCtrlStaticInterface()->DfxRecordTriggerTime(reason, stage);
+}
 }
 } // namespace OHOS

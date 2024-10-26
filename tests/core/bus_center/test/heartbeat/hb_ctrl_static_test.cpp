@@ -270,6 +270,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_TRY_CLOUD_SYNC_TEST_001, TestSize.Level1)
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))

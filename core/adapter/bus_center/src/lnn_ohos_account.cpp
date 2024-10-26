@@ -28,6 +28,7 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "lnn_connection_fsm.h"
 
 static const std::string DEFAULT_USER_ID = "0";
 
@@ -125,6 +126,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
     }
     if (isNeedUpdateHeartbeat) {
         LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+        DfxRecordTriggerTime(UPDATE_ACCOUNT, EVENT_STAGE_LNN_UPDATE_ACCOUNT);
     }
 }
 
