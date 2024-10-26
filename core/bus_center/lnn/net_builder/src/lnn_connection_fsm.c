@@ -102,6 +102,10 @@ typedef struct {
     char bleMacAddr[MAC_LEN];
 } LnnDfxReportConnectInfo;
 
+static LnnTriggerInfo g_lnnTriggerInfo = { 0 };
+static SoftBusMutex g_lnnTriggerInfoMutex;
+static bool g_lnnTriggerInfoIsInit = false;
+
 static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static void OnlineStateEnter(FsmStateMachine *fsm);
@@ -132,6 +136,84 @@ static FsmState g_states[STATE_NUM_MAX] = {
         .exit = NULL,
     },
 };
+
+static bool LnnTriggerInfoInit(void)
+{
+    if (SoftBusMutexInit(&g_lnnTriggerInfoMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo mutex init fail");
+        return false;
+    }
+    g_lnnTriggerInfoIsInit = true;
+    return true;
+}
+
+static void SetLnnTriggerInfoDeviceCntIncrease(void)
+{
+    if (!g_lnnTriggerInfoIsInit) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnTriggerInfoMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    g_lnnTriggerInfo.deviceCnt++;
+    (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason)
+{
+    if (!g_lnnTriggerInfoIsInit && !LnnTriggerInfoInit()) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnTriggerInfoMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    g_lnnTriggerInfo.triggerTime = triggerTime;
+    g_lnnTriggerInfo.deviceCnt = deviceCnt;
+    g_lnnTriggerInfo.triggerReason = triggerReason;
+    (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    if (triggerInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (!g_lnnTriggerInfoIsInit) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnTriggerInfoMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    triggerInfo->triggerTime = g_lnnTriggerInfo.triggerTime;
+    triggerInfo->deviceCnt = g_lnnTriggerInfo.deviceCnt;
+    triggerInfo->triggerReason = g_lnnTriggerInfo.triggerReason;
+    (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    uint64_t timeStamp = 0;
+    LnnEventExtra extra = {0};
+    (void)LnnEventExtraInit(&extra);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.triggerReason = reason;
+    extra.interval = BROADCAST_INTERVAL_DEFAULT;
+    LnnTriggerInfo triggerInfo = {0};
+    GetLnnTriggerInfo(&triggerInfo);
+    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
+        SetLnnTriggerInfo(timeStamp, 1, extra.triggerReason);
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, stage, extra);
+    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=1",
+        timeStamp, extra.triggerReason);
+}
 
 static bool CheckStateMsgCommonArgs(const FsmStateMachine *fsm)
 {
@@ -700,22 +782,41 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
         LNN_LOGE(LNN_BUILDER, "connInfo is NULL");
         return;
     }
+    uint64_t timeStamp = 0;
+    LnnTriggerInfo triggerInfo = { 0 };
+    GetLnnTriggerInfo(&triggerInfo);
     int32_t osType = connInfo->infoReport.osType;
     LNN_LOGI(LNN_BUILDER, "osType=%{public}d, extra.osType=%{public}d", osType, extra.osType);
     if (connInfo->addr.type == CONNECTION_ADDR_BLE) {
         LnnBleReportExtra bleExtra;
         (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
         if (IsExistLnnDfxNodeByUdidHash(extra.peerUdidHash, &bleExtra)) {
-            if (reason == SOFTBUS_OK) {
-                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
-                bleExtra.status = BLE_REPORT_EVENT_SUCCESS;
-                AddNodeToLnnBleReportExtraMap(extra.peerUdidHash, &bleExtra);
-            } else {
+            if (reason != SOFTBUS_OK) {
                 extra.osType = osType;
                 DfxAddBleReportExtra(connInfo, &extra, &bleExtra);
+                return;
             }
+            if ((SoftBusGetSysTimeMs() - triggerInfo.triggerTime) < MAX_TIME_LATENCY) {
+                timeStamp = SoftBusGetSysTimeMs();
+                extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+                extra.onlineDevCnt = triggerInfo.deviceCnt;
+                extra.triggerReason = triggerInfo.triggerReason;
+                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+                SetLnnTriggerInfoDeviceCntIncrease();
+            } else {
+                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+            }
+            bleExtra.status = BLE_REPORT_EVENT_SUCCESS;
+            AddNodeToLnnBleReportExtraMap(extra.peerUdidHash, &bleExtra);
         }
         return;
+    }
+    if (reason == SOFTBUS_OK && (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) < MAX_TIME_LATENCY) {
+        timeStamp = SoftBusGetSysTimeMs();
+        extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+        extra.onlineDevCnt = triggerInfo.deviceCnt;
+        extra.triggerReason = triggerInfo.triggerReason;
+        SetLnnTriggerInfoDeviceCntIncrease();
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
 }
