@@ -167,6 +167,9 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
     }
     if (connFsm == NULL || connFsm->isDead) {
         connFsm = StartNewConnectionFsm(&para->addr, para->pkgName, para->isNeedConnect);
+        if (connFsm != NULL) {
+            connFsm->connInfo.dupInfo = (para->dupInfo == NULL) ? NULL : DupNodeInfo(para->dupInfo);
+        }
         isCreate = true;
     }
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
@@ -445,13 +448,13 @@ static void DeinitNodeInfoSync(void)
 
 static void NetBuilderConfigInit(void)
 {
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT,
-        (unsigned char *)&LnnGetNetBuilder()->maxConnCount, sizeof(LnnGetNetBuilder()->maxConnCount)) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char *)&LnnGetNetBuilder()->maxConnCount,
+        sizeof(LnnGetNetBuilder()->maxConnCount)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get lnn max connection count fail, use default value");
         LnnGetNetBuilder()->maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
-    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
-        (unsigned char *)&LnnGetNetBuilder()->maxConcurrentCount, sizeof(LnnGetNetBuilder()->maxConcurrentCount)) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM, (unsigned char *)&LnnGetNetBuilder()->maxConcurrentCount,
+        sizeof(LnnGetNetBuilder()->maxConcurrentCount)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get lnn max conncurent count fail, use default value");
         LnnGetNetBuilder()->maxConcurrentCount = 0;
     }

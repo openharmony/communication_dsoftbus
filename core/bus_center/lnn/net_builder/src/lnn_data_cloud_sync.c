@@ -176,7 +176,7 @@ static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const 
         LNN_LOGI(LNN_BUILDER, "success. authCapacity=%{public}u", cacheInfo->authCapacity);
     } else if (strcmp(fieldName, DEVICE_INFO_HB_CAP) == 0) {
         cacheInfo->heartbeatCapacity = (uint32_t)atoi(value);
-        LNN_LOGI(LNN_BUILDER, "success. heartbeatCapacity=%{public}u", cacheInfo->authCapacity);
+        LNN_LOGI(LNN_BUILDER, "success. heartbeatCapacity=%{public}u", cacheInfo->heartbeatCapacity);
     }
     LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
@@ -739,7 +739,7 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
 static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
 {
-    LNN_CHECK_AND_RETURN_LOGW(cacheInfo != NULL, LNN_BUILDER, "invalid param");
+    LNN_CHECK_AND_RETURN_LOGE(cacheInfo != NULL, LNN_BUILDER, "invalid param");
     char accountId[INT64_TO_STR_MAX_LEN] = {0};
     if (!Int64ToString(cacheInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
         LNN_LOGE(LNN_BUILDER, "accountId to str fail");

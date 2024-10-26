@@ -17,8 +17,8 @@
 
 #include <securec.h>
 
-#include "auth_device_common_key.h"
 #include "anonymizer.h"
+#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"

@@ -284,7 +284,7 @@ static void DuplicateNodeStateCbList(ListNode *list)
             LNN_LOGE(LNN_STATE, "malloc node state callback item fail");
             continue;
         }
-        strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1);
+        (void)strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1);
         ListInit(&copyItem->node);
         copyItem->cb = item->cb;
         ListAdd(list, &copyItem->node);
@@ -693,7 +693,7 @@ void RestartRegDataLevelChange(void)
 
 int32_t UnregDataLevelChangeCbInner(const char *pkgName)
 {
-    LNN_LOGI(LNN_STATE, "enter");
+    LNN_LOGI(LNN_STATE, "UnregDataLevelChangeCbInner enter");
     g_busCenterClient.dataLevelCb.onDataLevelChanged = NULL;
     int32_t ret = ServerIpcUnregDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
