@@ -672,5 +672,10 @@ void RegisterOOBEMonitor(void *p)
     (void)p;
     return GetNetBuilderDepsInterface()->RegisterOOBEMonitor(p);
 }
+
+int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
+{
+    return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
+}
 } // extern "C"
 } // namespace OHOS
