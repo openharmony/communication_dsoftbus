@@ -264,8 +264,6 @@ HWTEST_F(ServiceConnectionTest, ClientConnection002, TestSize.Level1)
 */
 HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
 {
-    int32_t ret;
-    ConnectBlePriority priority;
     int32_t underlayerHandle = 1;
     const char *bleMac = "11:22:33:44:55:66";
     ConnBleConnection *connection =
@@ -273,8 +271,8 @@ HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
     ASSERT_NE(nullptr, connection);
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
-    priority = CONN_BLE_PRIORITY_BALANCED;
-    ret = ConnGattClientUpdatePriority(NULL, priority);
+    ConnectBlePriority priority = CONN_BLE_PRIORITY_BALANCED;
+    int32_t ret = ConnGattClientUpdatePriority(NULL, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connection->connectionId = 1;
