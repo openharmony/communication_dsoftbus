@@ -279,11 +279,11 @@ static int32_t HbHandleLeaveLnn(void)
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (info == NULL || infoNum == 0) {
         LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_ONLINE_DEVICE;
     }
     int32_t ret;
     NodeInfo nodeInfo;
@@ -909,12 +909,12 @@ int32_t LnnStartHeartbeatFrameDelay(void)
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
     if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "medium manager init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_MGR_INIT_FAIL;
     }
     HbTryRecoveryNetwork();
     if (LnnStartNewHbStrategyFsm() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start strategy fsm fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_FSM_START_FAIL;
     }
     bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
     if (LnnIsDefaultOhosAccount() && !hasTrustedRelation) {
@@ -947,7 +947,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     (void)LnnStopOfflineTimingStrategy(networkId, addrType);
     if (LnnStartOfflineTimingStrategy(networkId, addrType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start offline timing strategy fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
@@ -1023,18 +1023,18 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     if (mode->action == CHANGE_TCP_KEEPALIVE) {
         if (AuthSendKeepaliveOption(uuid, mode->cycle) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive option fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL;
         }
         return SOFTBUS_OK;
     }
     if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset medium mode fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_SET_GEAR_MODE_FAIL;
     }
     if (LnnStartHbByTypeAndStrategy(
         HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
     DfxRecordTriggerTime(DM_TRIGGER, EVENT_STAGE_LNN_SHIFT_GEAR);
     int32_t ret = AuthFlushDevice(uuid);
@@ -1057,23 +1057,23 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
         callerId, mode->cycle, mode->duration, mode->wakeupFlag);
     if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset medium mode fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_SET_GEAR_MODE_FAIL;
     }
     if (LnnStartHbByTypeAndStrategy(
         HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, strategyType, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
     int32_t i, infoNum;
     char uuid[UUID_BUF_LEN] = { 0 };
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (info == NULL || infoNum == 0) {
         LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_ONLINE_DEVICE;
     }
     int32_t ret;
     NodeInfo nodeInfo;
@@ -1170,15 +1170,15 @@ static int32_t LnnRegisterNetworkEvent(void)
 {
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist ip addr change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, HbBtStateChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist bt state change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_LANE_VAP_CHANGE, HbLaneVapChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist vap state change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1187,27 +1187,27 @@ static int32_t LnnRegisterHeartbeatEvent(void)
 {
     if (LnnRegisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, HbMasterNodeChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist node state change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_HOME_GROUP_CHANGED, HbHomeGroupStateChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist homeGroup state change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, HbAccountStateChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED, HbDifferentAccountEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist different account evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, HbUserBackgroundEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist user background evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist lp report evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1216,19 +1216,19 @@ int32_t LnnInitHeartbeat(void)
 {
     if (LnnHbStrategyInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "strategy module init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_INIT_STRATEGY_FAIL;
     }
     if (LnnRegisterCommonEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist common event handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterNetworkEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist network event handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterHeartbeatEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist heartbeat event handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     InitHbConditionState();
     InitHbSpecificConditionState();
@@ -1261,7 +1261,7 @@ int32_t LnnTriggerDataLevelHeartbeat(void)
     if (LnnStartHbByTypeAndStrategy(
         HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
     DfxRecordTriggerTime(DB_TRIGGER, EVENT_STAGE_LNN_DATA_LEVEL);
     return SOFTBUS_OK;
@@ -1289,7 +1289,7 @@ int32_t LnnTriggerCloudSyncHeartbeat(void)
     if (LnnStartHbByTypeAndStrategy(
         HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
     DfxRecordBleTriggerTimestamp(TRIGGER_CLOUD_SYNC_HEARTBEAT);
     return SOFTBUS_OK;
