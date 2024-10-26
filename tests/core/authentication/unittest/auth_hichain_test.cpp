@@ -70,6 +70,12 @@ void OnGroupDeletedTest(const char *groupId, int32_t groupType)
     (void)groupId;
     (void)groupType;
 }
+
+void OnDeviceBound(const char *udid, const char *groupInfo)
+{
+    (void)udid;
+    (void)groupInfo;
+}
 /*
  * @tc.name: ON_DEVICE_NOT_TRUSTED_TEST_001
  * @tc.desc: on device not trusted test
@@ -113,6 +119,16 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = ParseGroupInfo(groupInfoStr, &info);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    int64_t authSeq = 0;
+    uint8_t sessionKey[SESSION_KEY_LENGTH] = {0};
+    OnSessionKeyReturned(authSeq, nullptr, SESSION_KEY_LENGTH + 1);
+    OnSessionKeyReturned(authSeq, nullptr, SESSION_KEY_LENGTH);
+    OnSessionKeyReturned(authSeq, sessionKey, SESSION_KEY_LENGTH + 1);
+
+    uint32_t softbusErrCode = 0;
+    GetSoftbusHichainAuthErrorCode(HICHAIN_DAS_ERRCODE_MIN, &softbusErrCode);
+    GetSoftbusHichainAuthErrorCode(0, &softbusErrCode);
 }
 
 /*
@@ -131,9 +147,11 @@ HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
     EXPECT_TRUE(msgStr == nullptr);
 
     const char *udid = "111";
-    OnDeviceBound(udid, NULL);
-    const char *groupInfo;
-    OnDeviceBound(NULL, groupInfo);
+    const char *groupInfo = "{\"groupId\":\"1111\", \"groupType\":1}";
+    OnDeviceBound(udid, nullptr);
+    OnDeviceBound(nullptr, groupInfo);
+    OnDeviceBound(nullptr, nullptr);
+    g_dataChangeListener.onDeviceBound = OnDeviceBound;
     OnDeviceBound(udid, groupInfo);
 
     DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_OK);
