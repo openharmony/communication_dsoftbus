@@ -173,7 +173,7 @@ void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerR
     }
     g_lnnTriggerInfo.triggerTime = triggerTime;
     g_lnnTriggerInfo.deviceCnt = deviceCnt;
-    g_lnnTriggerInfo.triggerTime = triggerReason;
+    g_lnnTriggerInfo.triggerReason = triggerReason;
     (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
 }
 
