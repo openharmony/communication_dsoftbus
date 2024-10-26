@@ -1031,6 +1031,7 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
         .strategyType = strategyType,
         .isRelay = isRelay,
         .isSyncData = false,
+        .isDirectBoardcast = false,
     };
     if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, &msgPara, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB start heartbeat fail, type=%{public}d", hbType);

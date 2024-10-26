@@ -32,4 +32,3 @@ void NotifyDetectTimeout(uint32_t detectId);
 }
 #endif
 #endif  // LNN_LANE_RELIABILITY_H
-

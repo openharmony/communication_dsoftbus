@@ -167,15 +167,29 @@ void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusEr
     }
 }
 
+static int32_t CheckErrReturnValidity(const char *errorReturn)
+{
+    cJSON *json = cJSON_Parse(errorReturn);
+    if (json == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    cJSON_Delete(json);
+    return SOFTBUS_OK;
+}
+
 static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
-    (void)errorReturn;
     DfxRecordLnnEndHichainEnd(authSeq, errCode);
     uint32_t authErrCode = 0;
     (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
         authSeq, errCode, authErrCode);
+    if (errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
+        uint32_t errorReturnLen = strlen(errorReturn);
+        (void)AuthFailNotifyDeviceList(errCode, errorReturn, errorReturnLen);
+    }
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
 
@@ -247,15 +261,14 @@ static void DeletePcRestrictNode(const char *udid)
 {
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     uint32_t count = 0;
-    char *anonyUdid = NULL;
-    Anonymize(udid, &anonyUdid);
 
-    if (GetUdidHash(udid, peerUdidHash) == SOFTBUS_OK &&
-        GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+    if (GetUdidHash(udid, peerUdidHash) == SOFTBUS_OK && GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
         DeleteNodeFromPcRestrictMap(peerUdidHash);
+        char *anonyUdid = NULL;
+        Anonymize(udid, &anonyUdid);
         AUTH_LOGI(AUTH_HICHAIN, "delete restrict node success. udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
     }
-    AnonymizeFree(anonyUdid);
 }
 
 static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)

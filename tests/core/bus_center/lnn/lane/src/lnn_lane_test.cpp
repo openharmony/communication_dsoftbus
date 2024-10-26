@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3125,12 +3125,12 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_08, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_10
+* @tc.name: LNN_LANE_09
 * @tc.desc: SelectLaneRule
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LNN_LANE_10, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_LANE_09, TestSize.Level1)
 {
     LnnMacInfo macInfo;
     LaneLinkInfo linkInfo;

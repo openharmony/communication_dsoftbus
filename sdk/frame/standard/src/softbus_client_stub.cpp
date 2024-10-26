@@ -26,6 +26,7 @@
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "securec.h"
+#include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -33,6 +34,8 @@
 #include "client_trans_udp_manager.h"
 
 namespace OHOS {
+static constexpr uint32_t DFX_TIMERS_S = 15;
+
 SoftBusClientStub::SoftBusClientStub()
 {
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] = &SoftBusClientStub::OnChannelOpenedInner;
@@ -117,7 +120,10 @@ int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t t
 
 int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
 {
-    return TransOnChannelOpened(sessionName, info);
+    int32_t id = SetTimer("OnChannelOpened", DFX_TIMERS_S);
+    int32_t ret = TransOnChannelOpened(sessionName, info);
+    CancelTimer(id);
+    return ret;
 }
 
 int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
@@ -548,15 +554,18 @@ int32_t SoftBusClientStub::OnHichainProofExceptionInner(MessageParcel &data, Mes
         COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t deviceIdLen = 0;
-    if (!data.ReadUint32(deviceIdLen) || deviceIdLen != UDID_BUF_LEN) {
-        COMM_LOGE(COMM_SDK, "read failed! deviceIdLen=%{public}u", deviceIdLen);
+    uint32_t deviceListLen = 0;
+    if (!data.ReadUint32(deviceListLen)) {
+        COMM_LOGE(COMM_SDK, "read failed! deviceListLen=%{public}u", deviceListLen);
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-    char *deviceId = (char *)data.ReadRawData(deviceIdLen);
-    if (deviceId == nullptr) {
-        COMM_LOGE(COMM_SDK, "read deviceId failed!");
-        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    char *deviceList = NULL;
+    if (deviceListLen != 0) {
+        deviceList = (char *)data.ReadRawData(deviceListLen);
+        if (deviceList == nullptr) {
+            COMM_LOGE(COMM_SDK, "read deviceList failed!");
+            return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+        }
     }
     uint16_t deviceTypeId = 0;
     if (!data.ReadUint16(deviceTypeId)) {
@@ -568,7 +577,7 @@ int32_t SoftBusClientStub::OnHichainProofExceptionInner(MessageParcel &data, Mes
         COMM_LOGE(COMM_SDK, "read failed! errCode=%{public}d", errCode);
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-    int32_t retReply = OnHichainProofException(pkgName, deviceId, deviceIdLen, deviceTypeId, errCode);
+    int32_t retReply = OnHichainProofException(pkgName, deviceList, deviceListLen, deviceTypeId, errCode);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SDK, "OnHichainProofException write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
@@ -732,9 +741,9 @@ int32_t SoftBusClientStub::OnNodeDeviceTrustedChange(const char *pkgName, int32_
 }
 
 int32_t SoftBusClientStub::OnHichainProofException(
-    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    return LnnOnHichainProofException(pkgName, deviceId, deviceIdLen, deviceTypeId, errCode);
+    return LnnOnHichainProofException(pkgName, deviceList, deviceListLen, deviceTypeId, errCode);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

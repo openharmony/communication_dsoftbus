@@ -33,10 +33,6 @@ public:
     virtual cJSON *cJSON_CreateObject() = 0;
     virtual bool AddNumber16ToJsonObject(cJSON *json, const char *const string, uint16_t num) = 0;
     virtual char *cJSON_PrintUnformatted(const cJSON *json) = 0;
-    virtual int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *taskName) = 0;
-    virtual int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority leastPriority) = 0;
-    virtual int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen,
-        SoftBusCond *cond, SoftBusMutex *mutex) = 0;
 };
 
 class ConnectionBleTransInterfaceMock : public ConnectionBleTransInterface {
@@ -50,10 +46,6 @@ public:
     MOCK_METHOD(cJSON *, cJSON_CreateObject, (), (override));
     MOCK_METHOD(bool, AddNumber16ToJsonObject, (cJSON *, const char *const, uint16_t), (override));
     MOCK_METHOD(char *, cJSON_PrintUnformatted, (const cJSON *), (override));
-    MOCK_METHOD(int32_t, ConnStartActionAsync, (void *, void *(*)(void *), const char *), (override));
-    MOCK_METHOD(int32_t, GetMsg, (ConnectionQueue *, void **, bool *, QueuePriority), (override));
-    MOCK_METHOD(int32_t, WaitQueueLength, (const LockFreeQueue *, uint32_t, uint32_t, SoftBusCond *, SoftBusMutex *),
-        (override));
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_TRANS_MOCK_H

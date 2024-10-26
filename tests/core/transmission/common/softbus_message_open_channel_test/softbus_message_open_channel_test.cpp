@@ -77,6 +77,10 @@ char *TestGetMsgPack()
         cJSON_Delete(msg);
         return nullptr;
     }
+    if (!AddStringToJsonObject(msg, AUTH_STATE, g_sessionKey)) {
+        cJSON_Delete(msg);
+        return nullptr;
+    }
     char *data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
 
