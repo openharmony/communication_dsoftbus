@@ -28,6 +28,7 @@
 #include "softbus_config_type.h"
 #include "softbus_conn_ble_connection.h"
 #include "ohos_bt_def.h"
+#include "ohos_bt_gatt_client.h"
 
 
 namespace OHOS {
@@ -45,9 +46,10 @@ public:
     virtual int32_t SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int32_t connId) = 0;
     virtual int32_t SoftbusGattcRefreshServices(int32_t clientId) = 0;
     virtual int32_t SoftbusGattcSearchServices(int32_t clientId) = 0;
-    virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int32_t *target) = 0;
-    virtual int32_t BleGattsAddService(int32_t serverId, BtUuid srvcUuid, bool isPrimary, int32_t number) = 0;
-    virtual int32_t BleGattcUnRegister(int32_t clientId) = 0;
+    virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target) = 0;
+    virtual int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number) = 0;
+    virtual int BleGattcUnRegister(int clientId) = 0;
+    virtual int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority) = 0;
 };
 
 class ConnectionBleInterfaceMock : public ConnectionBleInterface {
@@ -66,6 +68,7 @@ public:
     MOCK_METHOD3(GetJsonObjectSignedNumberItem, bool (const cJSON *, const char * const, int32_t *));
     MOCK_METHOD(int, BleGattsAddService, (int, BtUuid, bool, int), (override));
     MOCK_METHOD(int, BleGattcUnRegister, (int), (override));
+    MOCK_METHOD(int, BleGattcSetPriority, (int, const BdAddr *, BtGattPriority), (override));
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_MOCK_H

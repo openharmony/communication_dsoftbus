@@ -1209,7 +1209,7 @@ static int32_t StartSelectThread(void)
             (void)SoftBusMutexUnlock(&g_selectThreadState->lock);
             WakeupSelectThread();
 
-            CONN_LOGW(CONN_COMMON,
+            CONN_LOGD(CONN_COMMON,
                 "select thread is already start, selectTrace=%{public}d, ctrlRfd=%{public}d, ctrlWfd=%{public}d, "
                 "referenceCount=%{public}d",
                 g_selectThreadState->traceId, g_selectThreadState->ctrlRfd, g_selectThreadState->ctrlWfd,

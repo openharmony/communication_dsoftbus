@@ -469,10 +469,10 @@ int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t 
 }
 
 int32_t LnnIpcNotifyHichainProofException(
-    const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    (void)deviceId;
-    (void)deviceIdLen;
+    (void)deviceList;
+    (void)deviceListLen;
     (void)deviceTypeId;
     (void)errCode;
     LNN_LOGI(LNN_EVENT, "not implement");

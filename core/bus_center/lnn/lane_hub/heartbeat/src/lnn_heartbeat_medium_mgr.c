@@ -97,7 +97,7 @@ static int32_t HbFirstSaveRecvTime(
 {
     LnnHeartbeatRecvInfo *recvInfo = NULL;
 
-    recvInfo = (LnnHeartbeatRecvInfo *)SoftBusMalloc(sizeof(LnnHeartbeatRecvInfo));
+    recvInfo = (LnnHeartbeatRecvInfo *)SoftBusCalloc(sizeof(LnnHeartbeatRecvInfo));
     if (recvInfo == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "medium mgr malloc recvInfo err");
         return SOFTBUS_MALLOC_ERR;
@@ -839,7 +839,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
         return;
     }
     if (info == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "online info is null");
+        LNN_LOGD(LNN_HEART_BEAT, "online info is null");
         return;
     }
     if (infoNum == 0) {

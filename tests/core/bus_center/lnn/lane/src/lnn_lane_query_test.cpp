@@ -111,7 +111,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_LANE_QUERY_001, TestSize.Level1)
     LaneQueryInfo query;
     memset_s(&query, sizeof(LaneQueryInfo), 0, sizeof(LaneQueryInfo));
     query.transType = LANE_T_BYTE;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
 
     ret = LnnQueryLaneResource(&query, &qosInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -142,7 +142,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_LANE_QUERY_002, TestSize.Level1)
 
     LaneQueryInfo query;
     query.transType = LANE_T_BYTE;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     ret = QueryLaneResource(&query, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -168,7 +168,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_LANE_QUERY_003, TestSize.Level1)
     QosInfo qosInfo = {0};
     LaneQueryInfo query;
     query.transType = LANE_T_MSG;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
 
     qosInfo.minBW = LOW_BW;
     int32_t ret = QueryLaneResource(&query, &qosInfo);
@@ -192,7 +192,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_LANE_QUERY_004, TestSize.Level1)
     QosInfo qosInfo = {0};
     LaneQueryInfo query;
     query.transType = LANE_T_FILE;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
 
     qosInfo.minBW = LOW_BW;
     int32_t ret = QueryLaneResource(&query, &qosInfo);
@@ -220,7 +220,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_LANE_QUERY_005, TestSize.Level1)
     QosInfo qosInfo = {0};
     LaneQueryInfo query;
     query.transType = LANE_T_RAW_STREAM;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
 
     qosInfo.minBW = MID_BW;
     int32_t ret = QueryLaneResource(&query, &qosInfo);
@@ -248,7 +248,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_QUERY_LANE_006, TestSize.Level1)
     QosInfo qosInfo = {0};
     LaneQueryInfo query;
     query.transType = LANE_T_RAW_STREAM;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     qosInfo.minBW = 0;
     int32_t ret = QueryLaneResource(&query, &qosInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -491,9 +491,9 @@ HWTEST_F(LNNLaneQueryTest, LNN_QUERY_LANE_014, TestSize.Level1)
 {
     QosInfo qosInfo = {0};
     LaneQueryInfo query;
-    memset_s(&query, sizeof(LaneQueryInfo), 0, sizeof(LaneQueryInfo));
+    (void)memset_s(&query, sizeof(LaneQueryInfo), 0, sizeof(LaneQueryInfo));
     query.transType = LANE_T_MIX;
-    (void)memcpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    EXPECT_EQ(strncpy_s(query.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     int32_t ret = QueryByRequireLink(&query, &qosInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = QueryByDefaultLink(&query);
