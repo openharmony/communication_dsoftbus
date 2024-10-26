@@ -80,8 +80,10 @@ CONN_ASSIGNER(Errcode, P2pChannel, p2pChannel)
 CONN_ASSIGNER(Errcode, HmlChannel, hmlChannel)
 CONN_ASSIGNER(Errcode, StaChannel, staChannel)
 CONN_ASSIGNER(Errcode, ApChannel, apChannel)
+CONN_ASSIGNER(String, PeerDevVer, peerDevVer)
+CONN_ASSIGNER(Errcode, RemoteScreenStatus, remoteScreenStatus)
 
-#define CONN_ASSIGNER_SIZE 46 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 48 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -129,6 +131,8 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "HML_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerHmlChannel      },
     { "STA_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerStaChannel      },
     { "AP_CHANNEL",        HISYSEVENT_INT32,  ConnAssignerApChannel       },
+    { "PEER_DEV_VER",         HISYSEVENT_STRING, ConnAssignerPeerDevVer        },
+    { "REMOTE_SCREEN_STATUS", HISYSEVENT_INT32,  ConnAssignerRemoteScreenStatus},
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
