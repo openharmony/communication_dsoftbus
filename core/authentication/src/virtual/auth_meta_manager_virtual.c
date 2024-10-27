@@ -178,3 +178,14 @@ int32_t AuthMetaGetConnIdByInfo(const AuthConnInfo *connInfo, uint32_t *connecti
     (void)connectionId;
     return SOFTBUS_OK;
 }
+
+void AuthMetaCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    (void)connInfo;
+    (void)isExist;
+}
+
+void DelAuthMetaManagerByConnectionId(uint32_t connectionId)
+{
+    (void)connectionId;
+}
