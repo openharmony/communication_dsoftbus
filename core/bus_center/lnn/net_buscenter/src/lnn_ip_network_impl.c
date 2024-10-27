@@ -398,6 +398,7 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
     LNN_LOGI(LNN_BUILDER, "open ip link and start discovery");
     if (OpenIpLink() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "open ip link failed");
+        return SOFTBUS_CONN_AUTH_START_LISTEN_FAIL;
     }
     if (ConnCoapStartServerListen() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "start coap conn server failed");

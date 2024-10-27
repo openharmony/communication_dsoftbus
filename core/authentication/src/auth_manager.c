@@ -293,7 +293,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType typ
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
+        AUTH_LOGE(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
         ReleaseAuthLock();
         return;
     }
@@ -398,7 +398,8 @@ int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo 
     char *anonyUuid = NULL;
     Anonymize(uuid, &anonyUuid);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s",
+            type, AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
@@ -589,21 +590,21 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
     return authId;
 }
 
-static int32_t ProcessSessionKey(SessionKeyList *list, const SessionKey *key, AuthSessionInfo *info,
-    bool isOldKey, int64_t *peerAuthSeq)
+static int32_t ProcessSessionKey(SessionKeyList *list, int64_t *index, const SessionKey *key, AuthSessionInfo *info,
+    bool isOldKey)
 {
     if (info->normalizedType == NORMALIZED_SUPPORT) {
         if (SetSessionKeyAuthLinkType(list, info->normalizedIndex, info->connInfo.type) == SOFTBUS_OK) {
             AUTH_LOGI(AUTH_FSM, "index is alread exist");
             return SOFTBUS_OK;
         }
-        *peerAuthSeq = info->normalizedIndex;
+        *index = info->normalizedIndex;
     }
-    if (AddSessionKey(list, TO_INT32(*peerAuthSeq), key, info->connInfo.type, isOldKey) != SOFTBUS_OK) {
+    if (AddSessionKey(list, TO_INT32(*index), key, info->connInfo.type, isOldKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "failed to add a sessionKey");
         return SOFTBUS_ERR;
     }
-    AUTH_LOGI(AUTH_FSM, "add key index=%{public}d, new type=%{public}d", TO_INT32(*peerAuthSeq), info->connInfo.type);
+    AUTH_LOGI(AUTH_FSM, "add session key index=%{public}d, new type=%{public}d", TO_INT32(*index), info->connInfo.type);
     return SOFTBUS_OK;
 }
 
@@ -638,6 +639,7 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(isNewCreated != NULL, NULL, AUTH_FSM, "isNewCreated is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(&info->connInfo), NULL, AUTH_FSM, "connInfo type error");
+    *isNewCreated = false;
     AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth != NULL && auth->connInfo[info->connInfo.type].type != 0) {
         if (strcpy_s(auth->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
@@ -670,6 +672,8 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
     auth->lastAuthSeq[info->connInfo.type] = lastAuthSeq;
     auth->lastVerifyTime = GetCurrentTimeMs();
     auth->lastActiveTime = GetCurrentTimeMs();
+
+    AUTH_LOGI(AUTH_FSM, "auth manager exist.");
     return auth;
 }
 
@@ -752,7 +756,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         ReleaseAuthLock();
         return SOFTBUS_ERR;
     }
-    if (ProcessSessionKey(&auth->sessionKeyList, sessionKey, info, isOldKey, &sessionKeyIndex) != SOFTBUS_OK) {
+    if (ProcessSessionKey(&auth->sessionKeyList, &sessionKeyIndex, sessionKey, info, isOldKey) != SOFTBUS_OK) {
         if (isNewCreated) {
             DelAuthManager(auth, info->connInfo.type);
         }
@@ -938,9 +942,9 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth == NULL) {
         PrintAuthConnInfo(&info->connInfo);
+        AUTH_LOGE(AUTH_FSM, "auth manager not found, connType=%{public}d, side=%{public}s",
+            info->connInfo.type, GetAuthSideStr(info->isServer));
         ReleaseAuthLock();
-        AUTH_LOGE(AUTH_FSM, "auth manager not found, connType=%{public}d, side=%{public}s", info->connInfo.type,
-            GetAuthSideStr(info->isServer));
         return;
     }
     int64_t index = authSeq;
@@ -1667,7 +1671,7 @@ int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
         return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
     if (((local & (1 << BIT_BR)) == 0) || ((remote & (1 << BIT_BR)) == 0)) {
-        AUTH_LOGW(AUTH_CONN, "can't support BR");
+        AUTH_LOGI(AUTH_CONN, "can't support BR");
         return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, connInfo->info.brInfo.brMac, BT_MAC_LEN) != SOFTBUS_OK ||

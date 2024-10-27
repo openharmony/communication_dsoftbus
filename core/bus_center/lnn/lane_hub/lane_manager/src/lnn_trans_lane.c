@@ -812,6 +812,10 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
     if (FindLaneResourceByLaneId(laneId, &resourceItem) != SOFTBUS_OK) {
         return PostNotifyFreeLaneResult(laneReqId, SOFTBUS_OK, 0);
     }
+    if (resourceItem.link.type == LANE_HML_RAW) {
+        LNN_LOGI(LNN_LANE, "del flag for raw hml laneReqId=%{public}u", laneReqId);
+        (void)RemoveAuthSessionServer(resourceItem.link.linkInfo.rawWifiDirect.peerIp);
+    }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get networkId fail");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,16 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
-#include "session.h"
-#include "softbus_errcode.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
-#include "trans_channel_callback.h"
-#include "softbus_def.h"
-#include "softbus_app_info.h"
-#include "trans_session_manager.h"
-#include "trans_client_proxy.h"
-#include "softbus_adapter_mem.h"
-#include "trans_lane_manager.h"
+#include "trans_channel_callback.c"
 
 using namespace testing::ext;
 namespace OHOS {
 #define TEST_SESSION_NAME "com.softbus.transmission.test"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
+#define TEST_PID 5520
 
 class TransChannelCallbackTest : public testing::Test {
 public:
@@ -75,13 +66,14 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
     ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
+    channel->isEncrypt = true;
     channel->isServer = false;
     channel->channelType = CHANNEL_TYPE_UDP;
     ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, sessionName, channel);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     channel->isServer = true;
-    channel->channelType = (CHANNEL_TYPE_UDP - 1);
+    channel->channelType = CHANNEL_TYPE_TCP_DIRECT;
     ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, sessionName, channel);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
 
@@ -219,8 +211,22 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed, TestSize.Level1)
 {
     int32_t channelId = 12;
     int32_t channelType = CHANNEL_TYPE_UDP;
-    int32_t pid = 212;
-    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType, MESSAGE_TYPE_NOMAL);
+    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, TEST_PID, channelId, channelType,
+        MESSAGE_TYPE_NOMAL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: TransServerOnChannelBind Test
+ * @tc.desc: TransServerOnChannelBind001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelCallbackTest, TransServerOnChannelBind001, TestSize.Level1)
+{
+    int32_t ret = TransServerOnChannelBind(nullptr, TEST_PID, 1, 2);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransServerOnChannelBind(TEST_PKG_NAME, TEST_PID, 1, 2);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
 }
 } // OHOS

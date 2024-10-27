@@ -84,7 +84,7 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
     char *anonyDeviceName = NULL;
     Anonymize(basic.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
-        AnonymizeWrapper(anonyOldDeviceName), AnonymizeWrapper(anonyDeviceName));
+        anonyOldDeviceName, anonyDeviceName);
     AnonymizeFree(anonyOldDeviceName);
     AnonymizeFree(anonyDeviceName);
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
@@ -719,8 +719,8 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
-    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != 0 ||
-        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
@@ -954,15 +954,15 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
         return;
     }
-        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
+    if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
         sizeof(info->cipherInfo.key)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
-            return;
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
+        return;
     }
     if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
         sizeof(info->cipherInfo.iv)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
-            return;
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
+        return;
     }
     LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
     if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
