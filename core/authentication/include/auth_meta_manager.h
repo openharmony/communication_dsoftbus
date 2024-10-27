@@ -55,6 +55,7 @@ int32_t AuthMetaGetConnIdByInfo(const AuthConnInfo *connInfo, uint32_t *connecti
 void DelAuthMetaManagerByPid(const char *pkgName, int32_t pid);
 void AuthMetaCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist);
 void DelAuthMetaManagerByConnectionId(uint32_t connectionId);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

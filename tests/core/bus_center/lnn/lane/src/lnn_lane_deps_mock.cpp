@@ -440,5 +440,10 @@ void AddNetworkResource(NetworkResource *networkResource)
 {
     return GetLaneDepsInterface()->AddNetworkResource(networkResource);
 }
+
+int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    return GetLaneDepsInterface()->AuthCheckMetaExist(connInfo, isExist);
+}
 }
 } // namespace OHOS

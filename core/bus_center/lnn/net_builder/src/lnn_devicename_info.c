@@ -115,8 +115,8 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         return;
     }
     char deviceName[DEVICE_NAME_BUF_LEN + 1] = {0};
-    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN + 1, (char *)msg) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "strcpy fail");
+    if (memcpy_s(deviceName, DEVICE_NAME_BUF_LEN, msg, len) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memcpy fail");
         return;
     }
     char *anonyNetworkId = NULL;
@@ -212,7 +212,6 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         LNN_LOGE(LNN_BUILDER, "set remote device nick name fail");
         return;
     }
-
     char *anonyUnifiedDefaultName = NULL;
     Anonymize(peerNodeInfo.deviceInfo.unifiedDefaultName, &anonyUnifiedDefaultName);
     anonyNickName = NULL;

@@ -601,6 +601,8 @@ HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_002, TestSize.Level1)
     (void)memset_s(&authManager, sizeof(AuthManager), 0, sizeof(AuthManager));
     int32_t ret = PostDeviceMessage(auth, flagRelay, AUTH_LINK_TYPE_WIFI, &messageParse);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     type = LINK_TYPE;
@@ -1056,6 +1058,8 @@ HWTEST_F(AuthTest, AUTH_OPEN_CONN_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthOpenConn(&info, requestId, nullptr, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthOpenConn(nullptr, requestId, nullptr, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthOpenConn(&info, requestId, &callback, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     info.type = AUTH_LINK_TYPE_WIFI;
@@ -1369,6 +1373,8 @@ HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetVersion(authId, &version);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    DelAuthManager(auth, 0);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX + 1);
     DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
@@ -1620,6 +1626,16 @@ HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
     };
     ret = CheckVerifyCallback(&verifyCb);
     EXPECT_TRUE(ret == false);
+
+    uint32_t requestId = 0;
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_MAX };
+    NodeInfo nodeinfo;
+    (void)memset_s(&nodeinfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    PerformVerifyCallback(requestId, SOFTBUS_INVALID_PARAM, authHandle, &nodeinfo);
+    authHandle.type = 0;
+    PerformVerifyCallback(requestId, SOFTBUS_INVALID_PARAM, authHandle, &nodeinfo);
+    authHandle.type = AUTH_LINK_TYPE_WIFI;
+    PerformVerifyCallback(requestId, SOFTBUS_INVALID_PARAM, authHandle, &nodeinfo);
 }
 
 static void OnConnOpenedTest(uint32_t requestId, AuthHandle authHandle)
@@ -1653,6 +1669,15 @@ HWTEST_F(AuthTest, CHECK_AUTH_CONN_CALLBACK_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == false);
     ret = CheckAuthConnCallback(&cb);
     EXPECT_TRUE(ret == true);
+
+    AuthRequest request = {0};
+    uint32_t requestId = 0;
+    int64_t authId = 0;
+    PerformAuthConnCallback(requestId, SOFTBUS_OK, authId);
+    request.connCb = cb;
+    int32_t result = AddAuthRequest(&request);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    PerformAuthConnCallback(requestId, SOFTBUS_OK, authId);
 }
 
 /*
@@ -2032,6 +2057,7 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     uint32_t len = 0;
     NotifyTransDataReceived(authHandle, &head, reinterpret_cast<const uint8_t *>(data), len);
     NotifyTransDisconnected(authHandle);
+    NotifyTransException(authHandle, SOFTBUS_INVALID_PARAM);
     UnregAuthTransListener(MODULE_UDP_INFO);
 }
 
@@ -2179,5 +2205,23 @@ HWTEST_F(AuthTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
     EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
     EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
     EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_P2P), false);
+}
+
+/*
+ * @tc.name: AUTH_GET_CONNINFO_BY_TYPE_Test_001
+ * @tc.desc: AuthGetConnInfoByType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_GET_CONNINFO_BY_TYPE_Test_001, TestSize.Level1)
+{
+    const char *uuid = "12345678";
+    AuthConnInfo connInfo;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    int32_t ret = AuthGetConnInfoByType(uuid, AUTH_LINK_TYPE_WIFI, &connInfo, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthGetConnInfoByType(nullptr, AUTH_LINK_TYPE_WIFI, &connInfo, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

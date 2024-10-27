@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
-#include "session.h"
-#include "softbus_trans_def.h"
-#include "softbus_errcode.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
 #include "softbus_adapter_mem.h"
-#include "trans_lane_manager.h"
+#include "trans_channel_common.c"
 #include "trans_lane_manager.c"
-#include "trans_log.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -33,6 +27,14 @@ namespace OHOS {
 #define TEST_AUTH_PORT 6000
 #define TEST_AUTH_DATA "test auth message data"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
+
+static SessionAttribute g_sessionAttr[] = {
+    {.dataType = TYPE_MESSAGE},
+    {.dataType = TYPE_BYTES},
+    {.dataType = TYPE_FILE},
+    {.dataType = TYPE_STREAM},
+    {.dataType = LANE_T_BUTT},
+};
 
 class TransLaneManagerTest : public testing::Test {
 public:
@@ -63,13 +65,11 @@ void TransLaneManagerTest::TearDownTestCase(void)
  */
 HWTEST_F(TransLaneManagerTest, GetTransSessionInfoByLane001, TestSize.Level1)
 {
-    TransLaneInfo *laneItem = (TransLaneInfo *)SoftBusMalloc(sizeof(TransLaneInfo));
+    TransLaneInfo *laneItem = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
     ASSERT_TRUE(laneItem != nullptr);
-    memset_s(laneItem, sizeof(TransLaneInfo), 0, sizeof(TransLaneInfo));
 
-    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     TransDumpLaneLinkType transDumpLaneLinkType;
 
@@ -324,5 +324,140 @@ HWTEST_F(TransLaneManagerTest, TransSocketChannelInfoTest001, TestSize.Level1)
     ret = TransAddSocketChannelInfo(
         sessionName, sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: CopyAppInfoFromSessionParam001
+ * @tc.desc: CopyAppInfoFromSessionParam, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != NULL);
+    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
+
+    int32_t ret = CopyAppInfoFromSessionParam(appInfo, sessionParam);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftBusFree(appInfo);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransGetChannelType001
+ * @tc.desc: TransGetChannelType, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, TransGetChannelType001, TestSize.Level1)
+{
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(param != nullptr);
+
+    int32_t tmp = 0;
+    param->attr = &g_sessionAttr[tmp];
+
+    LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
+    ASSERT_TRUE(connInfo != nullptr);
+
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
+    ASSERT_TRUE(transInfo != nullptr);
+
+    transInfo->channelType = TransGetChannelType(NULL, connInfo->type);
+    EXPECT_EQ(CHANNEL_TYPE_BUTT, transInfo->channelType);
+
+    connInfo->type = LANE_BR;
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
+    EXPECT_EQ(CHANNEL_TYPE_PROXY, transInfo->channelType);
+
+    connInfo->type = LANE_P2P;
+    tmp = 2;
+    param->attr = &g_sessionAttr[tmp];
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
+    EXPECT_EQ(CHANNEL_TYPE_UDP, transInfo->channelType);
+
+    tmp = 0;
+    param->attr = &g_sessionAttr[tmp];
+    connInfo->type = LANE_BR;
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
+    EXPECT_EQ(CHANNEL_TYPE_PROXY, transInfo->channelType);
+    connInfo->type = LANE_P2P;
+
+    tmp = 1;
+    param->attr = &g_sessionAttr[tmp];
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
+    EXPECT_EQ(CHANNEL_TYPE_TCP_DIRECT, transInfo->channelType);
+
+    SoftBusFree(param);
+    SoftBusFree(connInfo);
+    SoftBusFree(transInfo);
+}
+
+/**
+ * @tc.name: FindConfigType001
+ * @tc.desc: FindConfigType001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, FindConfigType001, TestSize.Level1)
+{
+    int32_t channelType = 0;
+    int32_t businessType = 0;
+
+    int32_t ret = FindConfigType(channelType, businessType);
+    EXPECT_EQ(SOFTBUS_CONFIG_TYPE_MAX, ret);
+
+    channelType = CHANNEL_TYPE_AUTH;
+    businessType = BUSINESS_TYPE_BYTE;
+    ret = FindConfigType(channelType, businessType);
+    EXPECT_EQ(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, ret);
+}
+
+/**
+ * @tc.name: ConvertLaneLinkTypeToConnectType Test
+ * @tc.desc: ConvertLaneLinkTypeToConnectType001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, ConvertLaneLinkTypeToConnectType001, TestSize.Level1)
+{
+    ConnectType ret = ConvertLaneLinkTypeToConnectType(LANE_BR);
+    EXPECT_EQ(CONNECT_BR, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_BLE);
+    EXPECT_EQ(CONNECT_BLE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_P2P);
+    EXPECT_EQ(CONNECT_P2P, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_WLAN_5G);
+    EXPECT_EQ(CONNECT_TCP, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_P2P_REUSE);
+    EXPECT_EQ(CONNECT_P2P_REUSE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_COC_DIRECT);
+    EXPECT_EQ(CONNECT_BLE_DIRECT, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_HML);
+    EXPECT_EQ(CONNECT_HML, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_BLE_REUSE);
+    EXPECT_EQ(CONNECT_BLE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_LINK_TYPE_BUTT);
+    EXPECT_EQ(CONNECT_TYPE_MAX, ret);
+}
+
+/**
+ * @tc.name: TransGetConnectTypeByChannelId Test
+ * @tc.desc: TransGetConnectTypeByChannelId001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, TransGetConnectTypeByChannelId001, TestSize.Level1)
+{
+    int32_t ret = TransGetConnectTypeByChannelId(1, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ConnectType type = CONNECT_TCP;
+    ret = TransGetConnectTypeByChannelId(1, &type);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
 } // OHOS

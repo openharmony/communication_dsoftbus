@@ -60,6 +60,7 @@ typedef struct {
 typedef struct {
     ConnectionAddr addr;
     NodeInfo *nodeInfo;
+    NodeInfo *dupInfo;
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     LnnInvalidCleanInfo *cleanInfo;
     AuthHandle authHandle;

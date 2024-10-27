@@ -47,7 +47,7 @@
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
 #define DEFAULT_SUPPORT_HBCAPACITY 0x2
-#define DEFAULT_SUPPORT_AUTHCAPACITY 0x7
+#define DEFAULT_SUPPORT_AUTHCAPACITY 0xF
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
@@ -68,7 +68,7 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 1;
     }
-    g_localNetLedger.localInfo.stateVersionReason |= reason;
+    g_localNetLedger.localInfo.stateVersionReason = reason;
     LNN_LOGI(LNN_LEDGER,
         "reason=%{public}u changed, update local stateVersion=%{public}d, stateVersionReason=%{public}u", reason,
         g_localNetLedger.localInfo.stateVersion, g_localNetLedger.localInfo.stateVersionReason);
@@ -201,17 +201,17 @@ static int32_t LlGetUuid(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t L1GetNodeScreenOnFlag(void *buff, uint32_t len)
+static int32_t L1GetNodeScreenOnFlag(void *buf, uint32_t len)
 {
-    if (buff == NULL) {
-        LNN_LOGE(LNN_LEDGER, "buff is NULL");
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "buf is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     if (len != NODE_SCREEN_STATUS_LEN) {
-        LNN_LOGE(LNN_LEDGER, "buff len=%{public}d is invalid", len);
+        LNN_LOGE(LNN_LEDGER, "buf len=%{public}d is invalid", len);
         return SOFTBUS_INVALID_PARAM;
     }
-    *((bool *)buff) = g_localNetLedger.localInfo.isScreenOn;
+    *((bool *)buf) = g_localNetLedger.localInfo.isScreenOn;
     return SOFTBUS_OK;
 }
 
@@ -1900,7 +1900,7 @@ int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "para error");
+        LNN_LOGE(LNN_LEDGER, "info is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
@@ -1910,7 +1910,7 @@ int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len)
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].getInfo != NULL) {
-                ret = g_localKeyTable[i].getInfo((void*)info, len);
+                ret = g_localKeyTable[i].getInfo((void *)info, len);
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
@@ -2079,31 +2079,6 @@ static int32_t LnnGenBroadcastCipherInfo(void)
     } while (0);
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return ret;
-}
-
-int32_t LnnSetLocalStateVersionReason(void)
-{
-    int32_t ret = SOFTBUS_OK;
-    NodeInfo localInfo;
-    (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    g_localNetLedger.localInfo.stateVersionReason = 0;
-    if (memcpy_s(&localInfo, sizeof(NodeInfo), LnnGetLocalNodeInfo(), sizeof(NodeInfo)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy node info fail");
-        SoftBusMutexUnlock(&g_localNetLedger.lock);
-        return SOFTBUS_MEM_ERR;
-    }
-    SoftBusMutexUnlock(&g_localNetLedger.lock);
-    ret = LnnSaveLocalDeviceInfo(&localInfo);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local store fail");
-        return ret;
-    }
-    
-    return SOFTBUS_OK;
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)

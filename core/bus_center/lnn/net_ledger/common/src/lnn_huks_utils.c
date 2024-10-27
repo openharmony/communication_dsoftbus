@@ -438,7 +438,7 @@ static int32_t GenerateDeKeyByHuks(struct HksBlob *keyAlias)
         return SOFTBUS_HUKS_ERR;
     }
     if (HksKeyExist(keyAlias, paramSet) == HKS_SUCCESS) {
-        LNN_LOGD(LNN_LEDGER, "huks de key has generated");
+        LNN_LOGI(LNN_LEDGER, "huks de key has generated");
         HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
@@ -448,6 +448,7 @@ static int32_t GenerateDeKeyByHuks(struct HksBlob *keyAlias)
         LNN_LOGE(LNN_LEDGER, "huks generate de key fail, errcode=%{public}d", ret);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LEDGER, "huks generate new de key");
     return SOFTBUS_OK;
 }
 
