@@ -298,7 +298,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         ret = AddAuthChannelInfo(item);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SVC,
-                "AddAuthChannelInfo failed, ret=%{public}d, authId=%{public}d, channelId=%{public}"PRId64,
+                "AddAuthChannelInfo failed, ret=%{public}d, authId=%{public}d, channelId=%{public}" PRId64,
                 ret, authId, item->appInfo.myData.channelId);
             SoftBusFree(item);
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -951,7 +951,7 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
     channel->connOpt.socketOption.moduleId = AUTH_RAW_P2P_CLIENT;
 
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, channel->appInfo.peerNetWorkId,
-            sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
+        sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed");
     }
 
