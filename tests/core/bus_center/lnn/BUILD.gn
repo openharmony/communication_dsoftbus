@@ -746,40 +746,45 @@ ohos_unittest("LNNSyncInfoManagerTest") {
   sources = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
+    "net_builder/mock/lnn_sync_info_manager_mock.cpp",
     "net_builder/src/lnn_auth_mock.cpp",
+    "net_builder/src/lnn_connection_fsm_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_service_mock.cpp",
     "net_builder/src/lnn_sync_info_manager_test.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs
+  include_dirs += [
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/adapter/common/include",
+  ]
+
   deps = lnn_mock_test_deps
+
+  deps += [
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
 
   if (is_standard_system) {
     external_deps = [
-      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "googletest:gmock",
-      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
-      "cJSON:cjson",
       "c_utils:utils",
-      "googletest:gmock",
-      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
