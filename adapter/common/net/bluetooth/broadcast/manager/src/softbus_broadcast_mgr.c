@@ -1460,8 +1460,8 @@ int32_t StopBroadcasting(int32_t bcId)
     int32_t ret = SoftBusMutexLock(&g_bcLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
 
-    if (!g_bcManager[bcId].isAdvertising) {
-        DISC_LOGW(DISC_BROADCAST, "bcId is not advertising, bcId=%{public}d", bcId);
+    if (!g_bcManager[bcId].isStarted) {
+        DISC_LOGW(DISC_BROADCAST, "bcId is not start, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_OK;
     }
