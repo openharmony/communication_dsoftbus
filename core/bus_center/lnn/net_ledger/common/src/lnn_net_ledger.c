@@ -221,10 +221,6 @@ int32_t LnnInitEventMoniterDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitDeviceNameMonitorImpl() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
-        return SOFTBUS_ERR;
-    }
     LnnInitOOBEStateMonitorImpl();
     return SOFTBUS_OK;
 }

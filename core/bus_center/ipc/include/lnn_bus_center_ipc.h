@@ -64,6 +64,7 @@ int32_t LnnIpcNotifyTimeSyncResult(
 int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t LnnIpcSetLocalDeviceName(const char *pkgName, const char *displayName);
 
 void BusCenterServerDeathCallback(const char *pkgName);
 

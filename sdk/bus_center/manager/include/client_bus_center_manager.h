@@ -54,6 +54,7 @@ int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_
 int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t SetLocalDeviceNameInner(const char *pkgName, const char *displayName);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
