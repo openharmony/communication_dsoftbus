@@ -837,22 +837,28 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
 {
     DeviceInfo device;
     HbRespData hbResp;
-    ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
+    LnnConnectCondition connectCondition;
+    uint64_t nowTime = GetNowTime();
+    LnnHeartbeatRecvInfo storedInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
+    (void)memset_s(&storedInfo, sizeof(storedInfo), 0, sizeof(storedInfo));
     NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(heartBeatMock, LnnNotifyDiscoveryDevice)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    connectCondition.connectReason = CONNECT_INITIAL_VALUE;
+    connectCondition.isConnect = false;
     EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_ERR));
-    int32_t ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);
+    int32_t ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_DIRECT_ONLINE);
-    ret = SoftBusNetNodeResult(&device, &hbResp, true, connectReason);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
+    ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
+    connectCondition.isConnect = true;
+    ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
 }
 
 /*
