@@ -311,6 +311,16 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
 {
     return SOFTBUS_OK;
 }
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return SOFTBUS_OK;
+}
 }
 
 namespace OHOS::SoftBus {
