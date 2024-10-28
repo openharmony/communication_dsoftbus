@@ -58,7 +58,6 @@
 #define LANE_ID_HASH_LEN 32
 #define UDID_SHORT_HASH_HEXSTR_LEN_TMP 16
 #define UDID_SHORT_HASH_LEN_TMP 8
-#define ISHARE_SESSION_NUM 2
 
 static bool g_enabledLowPower = false;
 
