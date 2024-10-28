@@ -40,10 +40,16 @@ static std::recursive_mutex g_listenerModuleIdLock;
 static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
+static PtkMismatchListener g_ptkMismatchListener;
 
 static uint32_t GetRequestId(void)
 {
     return g_requestId++;
+}
+
+static void AddPtkMismatchListener(PtkMismatchListener listener)
+{
+    g_ptkMismatchListener = listener;
 }
 
 static void SetBootLinkTypeByAuthHandle(WifiDirectConnectInfo &info)
@@ -550,6 +556,16 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
     g_syncPtkListener(remoteDeviceId, result);
 }
 
+static void NotifyPtkMismatch(const char *remoteNetworkId, uint32_t len, int32_t reason)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (g_ptkMismatchListener == nullptr) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "listener is null");
+        return;
+    }
+    g_ptkMismatchListener(remoteNetworkId, len, reason);
+}
+
 static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
@@ -575,6 +591,7 @@ static struct WifiDirectManager g_manager = {
     .savePTK = SavePtk,
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
+    .addPtkMismatchListener = AddPtkMismatchListener,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
@@ -596,6 +613,7 @@ static struct WifiDirectManager g_manager = {
     .notifyDisconnectedForSink = NotifyDisconnectedForSink,
     .registerEnhanceManager = RegisterEnhanceManager,
     .notifyPtkSyncResult = NotifyPtkSyncResult,
+    .notifyPtkMismatch = NotifyPtkMismatch,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
