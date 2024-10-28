@@ -69,6 +69,7 @@
         "huks",
         "init",
         "ipc",
+        "i18n",
         "openssl",
         "os_account",
         "relational_store",
