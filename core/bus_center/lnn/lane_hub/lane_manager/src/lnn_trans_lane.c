@@ -134,6 +134,16 @@ static void Unlock(void)
     (void)SoftBusMutexUnlock(&g_transLaneMutex);
 }
 
+static void SetPowerPidStatus(int32_t powerPid)
+{
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
+    }
+    g_powerPid = powerPid;
+    Unlock(); 
+}
+
 static int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
     void *obj, uint64_t delayMillis)
 {
@@ -829,6 +839,7 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
         }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
+    SetPowerPidStatus(0);
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
 }
 
@@ -1351,12 +1362,15 @@ void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t la
             } else {
                 powerInfo.isDifferentPid = true;
             }
-            g_powerPid = item->allocInfo.pid;
+            powerInfo.powerPid = item->allocInfo.pid;
         }
     }
     Unlock();
     if (linkType == LANE_HML && IsPowerControlEnabled()) {
-        DetectEnableWifiDirectApply(powerInfo);
+        DetectEnableWifiDirectApply(&powerInfo);
+    }
+    if (powerInfo.isChangedPid == true) {
+        SetPowerPidStatus(powerInfo.powerPid) 
     }
 }
 
