@@ -35,7 +35,7 @@ typedef struct {
     * @param[in] channelId indicates that channel is open.
     * @param[in] uuid indicates the pointer to the uuid.
     * @param[in] isServer indicates server side or client side.
-    * @return <b>SOFTBUS_OK</b> the processing success after the callback.
+    * @return <b>SOFTBUS_OK</b> the processing success after the callback; returns an error code otherwise..
     */
     int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer);
     /**
