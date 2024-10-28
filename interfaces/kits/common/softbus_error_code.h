@@ -80,6 +80,7 @@ enum DisSubModule {
 
 enum LnnSubModule {
     LNN_LANE_MODULE_CODE = 1,
+    LNN_LP_MODULE_CODE = 2,
 };
 
 enum SoftBusErrNo {
@@ -646,6 +647,10 @@ enum SoftBusErrNo {
     SOFTBUS_LANE_SUCC_AFTER_CANCELED,
     SOFTBUS_LANE_PTK_NOT_MATCH,
     SOFTBUS_LANE_ASYNC_FAIL,
+
+    /* errno begin: -((203 << 21) | (4 << 16) | (2 << 12) | 0x0FFF) */
+    SOFTBUS_NETWORK_LP_ERR_BASE = SOFTBUS_SUB_ERRNO(LNN_SUB_MODULE_CODE, LNN_LP_MODULE_CODE),
+    SOFTBUS_NETWORK_I3C_TIME_OUT,
 
     /* errno begin: -((203 << 21) | (2 << 16) | 0xFFFF) */
     SOFTBUS_CONN_ERR_BASE = SOFTBUS_ERRNO(CONN_SUB_MODULE_CODE),
