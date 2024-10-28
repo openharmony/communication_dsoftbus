@@ -57,7 +57,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
         if (channel.isServer) {
             int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
             WriteInt32(reply, udpPort);
-            return SOFTBUS_TRANS_CHANNEL_OPEN_FAILED;
+            return udpPort;
         }
         ReadInt32(data, &(channel.peerPort));
         channel.peerIp = (char *)ReadString(data, &size);
