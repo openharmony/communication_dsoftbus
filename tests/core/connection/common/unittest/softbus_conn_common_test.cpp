@@ -18,14 +18,18 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "softbus_adapter_mock.h"
 #include "softbus_base_listener.h"
+#include "softbus_conn_common.h"
+#include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
-#include "softbus_conn_manager.h"
 
 using namespace testing::ext;
+using namespace testing;
 
 static const int32_t INVALID_FD = -1;
 static const int32_t TEST_FD = 1;
@@ -107,6 +111,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener002, TestSize.Level1)
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         LocalListenerInfo info = {
             .type = CONNECT_TCP,
@@ -182,13 +189,14 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
     int32_t triggerType;
     int32_t fd = 1;
     int32_t port = 6666;
-
+    SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
-        SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
-        ASSERT_TRUE(listener != nullptr);
-        listener->onConnectEvent = ConnectEvent;
-        listener->onDataEvent = DataEvent;
-
         LocalListenerInfo info = {
             .type = CONNECT_TCP,
             .socketOption = {.addr = "127.0.0.1",
@@ -208,8 +216,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
                 fd, static_cast<TriggerType>(triggerType)));
         }
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-        free(listener);
+        ++port;
     }
+    free(listener);
 };
 
 /*
@@ -226,6 +235,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
+    
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         LocalListenerInfo info = {
             .type = CONNECT_TCP,
@@ -389,6 +401,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket001, TestSize.Level1)
         }
     };
 
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     int32_t fd = tcp->OpenServerSocket(&info);
     int32_t ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -429,6 +443,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket002, TestSize.Level1)
         }
     };
 
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     int32_t fd = tcp->OpenClientSocket(nullptr, "127.0.0.1", false);
     int32_t ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -472,6 +488,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket004, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     int32_t clientFd = tcp->OpenClientSocket(nullptr, "127.5.0.1", false);
     int32_t ret = (clientFd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -501,6 +519,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket006, TestSize.Level1)
         }
     };
 
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     int32_t fd = tcp->OpenServerSocket(&info);
     int32_t ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -545,11 +565,14 @@ HWTEST_F(SoftbusConnCommonTest, testSocket001, TestSize.Level1)
 HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
     int32_t ret;
-    ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
-    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 
     ret = ConnGetPeerSocketAddr(TEST_FD, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillRepeatedly(Return(SOFTBUS_ADAPTER_ERR));
+    ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 
     ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
     EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
@@ -566,9 +589,12 @@ HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
 {
     int32_t fd = -1;
-    uint32_t millSec= 1;
+    uint32_t millSec = 1;
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
     int32_t ret = ConnSetTcpUserTimeOut(fd, millSec);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
 /*
@@ -582,9 +608,12 @@ HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
 HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
 {
     int32_t fd = 1;
-    uint32_t millSec= 321;
+    uint32_t millSec = 321;
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_ERR));
     int32_t ret = ConnSetTcpUserTimeOut(fd, millSec);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
 /*
@@ -597,8 +626,10 @@ HWTEST_F(SoftbusConnCommonTest, testSocket003, TestSize.Level1)
 {
     int32_t ret;
     SocketAddr socketAddr;
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_ADAPTER_ERR));
     ret = ConnGetPeerSocketAddr(INVALID_FD, &socketAddr);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 }
 
 /*
@@ -613,4 +644,88 @@ HWTEST_F(SoftbusConnCommonTest, testSocket004, TestSize.Level1)
     ret = ConnGetLocalSocketPort(INVALID_FD);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
+
+/*
+* @tc.name: testConnPreAssignPort001
+* @tc.desc: test ConnPreAssignPort SoftBusSocketCreate is failed
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, testConnPreAssignPort001, TestSize.Level1)
+{
+    int32_t ret;
+    ret = ConnPreAssignPort(-1);
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
+
+    SoftbusAdapterMock mock;
+
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillOnce(Return(SOFTBUS_ADAPTER_OK));
+    ret = ConnPreAssignPort(SOFTBUS_AF_INET);
+
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillOnce(Return(SOFTBUS_ADAPTER_OK));
+    ret = ConnPreAssignPort(SOFTBUS_AF_INET6);
+
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillOnce(Return(SOFTBUS_ADAPTER_ERR));
+    ret = ConnPreAssignPort(SOFTBUS_AF_INET);
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
+};
+
+/*
+* @tc.name: ConnGetPeerSocketAddr001
+* @tc.desc: test ConnGetPeerSocketAddr is SUCC
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnGetPeerSocketAddr001, TestSize.Level1)
+{
+    int32_t ret;
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_ADAPTER_OK))
+        .WillRepeatedly(SoftbusAdapterMock::ActionOfSoftBusSocketGetPeerName);
+    ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: WaitQueueLength001
+* @tc.desc: test WaitQueueLength001 is failed
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, WaitQueueLength001, TestSize.Level1)
+{
+    int32_t ret;
+    uint32_t unitNum = 1;
+    LockFreeQueue *lockFreeQueue = CreateQueue(unitNum);
+    SoftbusAdapterMock mock;
+    SoftBusCond *cond = { 0 };
+    SoftBusMutex *mutex = { 0 };
+
+    EXPECT_CALL(mock, SoftBusGetTime).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, SoftBusCondWait).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ret = WaitQueueLength(lockFreeQueue, 0, 0, cond, mutex);
+    EXPECT_EQ(SOFTBUS_CONN_COND_WAIT_FAIL, ret);
+};
+
+/*
+* @tc.name: SoftbusListenerNodeOp001
+* @tc.desc: test SoftbusListenerNodeOp001 DestroyBaseListener
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, SoftbusListenerNodeOp001, TestSize.Level1)
+{
+    int32_t ret;
+    ListenerModule module = LISTENER_MODULE_DYNAMIC_START;
+    CreateListenerModule();
+    ret = IsListenerNodeExist(module);
+    EXPECT_EQ(true, ret);
+
+    DeinitBaseListener();
+    ret = IsListenerNodeExist(module);
+    EXPECT_EQ(false, ret);
+};
 }
