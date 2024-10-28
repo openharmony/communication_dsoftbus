@@ -508,9 +508,9 @@ int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t 
 }
 
 int32_t LnnIpcNotifyHichainProofException(
-    const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    return ClientNotifyHichainProofException(deviceList, deviceListLen, deviceTypeId, errCode);
+    return ClientNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,

@@ -460,9 +460,9 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
 }
 
 void LnnNotifyHichainProofException(
-    const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    (void)LnnIpcNotifyHichainProofException(deviceList, deviceListLen, deviceTypeId, errCode);
+    (void)LnnIpcNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

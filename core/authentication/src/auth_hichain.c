@@ -24,6 +24,7 @@
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_event.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
@@ -35,6 +36,7 @@
 #define GROUPID_BUF_LEN 65
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
 #define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
+#define PC_AUTH_ERRCODE                36870
 
 #define HICHAIN_DAS_ERRCODE_MIN    0xF0000001
 #define HICHAIN_DAS_ERRCODE_MAX    0xF00010FF
@@ -54,6 +56,12 @@ typedef struct {
     char groupId[GROUPID_BUF_LEN];
     GroupType groupType;
 } GroupInfo;
+
+typedef struct {
+    int32_t errCode;
+    uint32_t errorReturnLen;
+    uint8_t data[0];
+} ProofInfo;
 
 static TrustDataChangeListener g_dataChangeListener;
 
@@ -204,6 +212,50 @@ static int32_t CheckErrReturnValidity(const char *errorReturn)
     return SOFTBUS_OK;
 }
 
+static void ProcessAuthFailCallBack(void *para)
+{
+    if (para == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "invalid para");
+        return;
+    }
+    ProofInfo *proofInfo = (ProofInfo *)para;
+    if (AuthFailNotifyProofInfo(proofInfo->errCode, (char *)proofInfo->data, proofInfo->errorReturnLen) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "AuthFailNotifyProofInfo fail");
+        SoftBusFree(proofInfo);
+        return;
+    }
+    SoftBusFree(proofInfo);
+}
+
+static void NotifyAuthFailEvent(int32_t errCode, const char *errorReturn)
+{
+    uint32_t errorReturnLen = strlen(errorReturn) + 1;
+    char *anonyErrorReturn = NULL;
+    Anonymize(errorReturn, &anonyErrorReturn);
+    AUTH_LOGW(AUTH_HICHAIN, "errorReturn=%{public}s, errorReturnLen=%{public}u, errCode=%{public}d",
+        AnonymizeWrapper(anonyErrorReturn), errorReturnLen, errCode);
+    AnonymizeFree(anonyErrorReturn);
+
+    ProofInfo *proofInfo = (ProofInfo *)SoftBusCalloc(sizeof(ProofInfo) + errorReturnLen);
+    if (proofInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "proofInfo calloc fail");
+        return;
+    }
+    if (memcpy_s(proofInfo->data, errorReturnLen, (uint8_t *)errorReturn, errorReturnLen) != EOK) {
+        AUTH_LOGE(AUTH_HICHAIN, "memcpy_s errorReturn fail");
+        SoftBusFree(proofInfo);
+        return;
+    }
+    proofInfo->errorReturnLen = errorReturnLen;
+    proofInfo->errCode = errCode;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessAuthFailCallBack, (void *)proofInfo, 0) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "set async ProcessAuthFailCallBack callback fail");
+        SoftBusFree(proofInfo);
+        return;
+    }
+}
+
 static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
@@ -212,9 +264,8 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
         authSeq, errCode, authErrCode);
-    if (errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
-        uint32_t errorReturnLen = strlen(errorReturn);
-        (void)AuthFailNotifyDeviceList(errCode, errorReturn, errorReturnLen);
+    if (errCode == PC_AUTH_ERRCODE && errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
+        NotifyAuthFailEvent(errCode, errorReturn);
     }
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
