@@ -127,11 +127,11 @@ int32_t ISoftBusClient::OnNodeDeviceTrustedChange(const char *pkgName, int32_t t
 }
 
 int32_t ISoftBusClient::OnHichainProofException(
-    const char *pkgName, const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
     (void)pkgName;
-    (void)deviceList;
-    (void)deviceListLen;
+    (void)proofInfo;
+    (void)proofLen;
     (void)deviceTypeId;
     (void)errCode;
     COMM_LOGI(COMM_EVENT, "ipc default impl");

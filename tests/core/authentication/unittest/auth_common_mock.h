@@ -57,7 +57,7 @@ public:
     virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count) = 0;
     virtual void DeleteNodeFromPcRestrictMap(const char *udidHash) = 0;
-    virtual int32_t AuthFailNotifyDeviceList(int32_t errCode, const char *errorReturn, uint32_t listLen) = 0;
+    virtual int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -83,7 +83,7 @@ public:
     MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
     MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t (const char *, uint32_t *));
     MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void (const char *));
-    MOCK_METHOD3(AuthFailNotifyDeviceList, int32_t (int32_t, const char *, uint32_t));
+    MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t (int32_t, const char *, uint32_t));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

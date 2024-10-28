@@ -63,7 +63,7 @@ public:
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
     virtual void LnnNotifyHichainProofException(
-        const char *deviceList, uint32_t deviceListLen, uint16_t deviceTypeId, int32_t errCode) = 0;
+        const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
