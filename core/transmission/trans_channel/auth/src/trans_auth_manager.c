@@ -565,7 +565,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         return;
     }
     TransEventExtra extra;
-    (void)memcpy_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     InitExtra(&extra, &info, authId);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
@@ -952,7 +952,7 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
 
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, channel->appInfo.peerNetWorkId,
         sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed");
+        TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed, channelId=%{public}d", *channelId);
     }
 
     if (strcpy_s(channel->appInfo.myData.addr, IP_LEN, connInfo->connInfo.rawWifiDirect.localIp) != EOK) {
