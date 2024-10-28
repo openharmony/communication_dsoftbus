@@ -359,13 +359,11 @@ void DetectEnableWifiDirectApply(PowerControlInfo *powerInfo)
             powerInfo->rawHml++;
         }
     }
-    if (powerInfo->isDifferentPid == true && g_enabledLowPower) {
-        powerInfo->isDisableLowPower = true;
-    }
     if (powerInfo->activeHml > 1 && !g_enabledLowPower) {
         powerInfo->isDisableLowPower = true;
     }
-    if ((powerInfo->passiveHml > 0 || powerInfo->rawHml > 0) && g_enabledLowPower) {
+    if ((powerInfo->isDifferentPid == true || powerInfo->passiveHml > 0
+        || powerInfo->rawHml > 0) && g_enabledLowPower) {
         powerInfo->isDisableLowPower = true;
     }
     LaneUnlock();
