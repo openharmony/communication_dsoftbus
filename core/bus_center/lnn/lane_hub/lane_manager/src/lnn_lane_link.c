@@ -362,10 +362,7 @@ void DetectEnableWifiDirectApply(PowerControlInfo *powerInfo)
     if (powerInfo->isDifferentPid == true && g_enabledLowPower) {
         powerInfo->isDisableLowPower = true;
     }
-    if (powerInfo->isDifferentPid == true && !g_enabledLowPower) {
-        powerInfo->isDisableLowPower = false;
-    }
-    if (powerInfo->isDifferentPid == false && !g_enabledLowPower && powerInfo->activeHml > 1) {
+    if (powerInfo->activeHml > 1 && !g_enabledLowPower) {
         powerInfo->isDisableLowPower = true;
     }
     if ((powerInfo->passiveHml > 0 || powerInfo->rawHml > 0) && g_enabledLowPower) {
