@@ -32,6 +32,12 @@ declare_args() {
   dsoftbus_feature_lnn_cloud_sync = true
   softbus_lnn_lp_feature = true
   dsoftbus_build_eng = false
+
+  if (product_name != "qemu-arm-linux-min") {
+    qemu_arm_disable = true
+  } else {
+    qemu_arm_disable = false
+  }
 }
 
 if (defined(global_parts_info) &&
