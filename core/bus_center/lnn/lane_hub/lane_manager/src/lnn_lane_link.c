@@ -113,7 +113,8 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
         Anonymize(localUdid, &anonyLocalUdid);
         Anonymize(remoteUdid, &anonyRemoteUdid);
         LNN_LOGI(LNN_LANE, "generate laneId=%{public}" PRIu64 " with localUdid=%{public}s,"
-            "remoteUdid=%{public}s, linkType=%{public}d", laneId, anonyLocalUdid, anonyRemoteUdid, linkType);
+            "remoteUdid=%{public}s, linkType=%{public}d",
+            laneId, AnonymizeWrapper(anonyLocalUdid), AnonymizeWrapper(anonyRemoteUdid), linkType);
         AnonymizeFree(anonyLocalUdid);
         AnonymizeFree(anonyRemoteUdid);
         return laneId;
@@ -520,7 +521,7 @@ static void DumpWifiDirectInfo(const LaneLinkInfo *resource)
 {
     char *anonyPeerUdid = NULL;
     Anonymize(resource->peerUdid, &anonyPeerUdid);
-    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s, linkType=%{public}s, channel=%{public}d", anonyPeerUdid,
+    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s, linkType=%{public}s, channel=%{public}d", AnonymizeWrapper(anonyPeerUdid),
         resource->type == LANE_HML ? "hml" : "p2p", resource->linkInfo.p2p.channel);
     AnonymizeFree(anonyPeerUdid);
 }
@@ -655,7 +656,8 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
     LaneUnlock();
     char *anonyPeerUdid = NULL;
     Anonymize(peerUdid, &anonyPeerUdid);
-    LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s", type, anonyPeerUdid);
+    LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s",
+        type, AnonymizeWrapper(anonyPeerUdid));
     AnonymizeFree(anonyPeerUdid);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
@@ -765,7 +767,8 @@ int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, 
     LaneUnlock();
     char *anonyPeerUdid = NULL;
     Anonymize(peerUdid, &anonyPeerUdid);
-    LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s", type, anonyPeerUdid);
+    LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s",
+        type, AnonymizeWrapper(anonyPeerUdid));
     AnonymizeFree(anonyPeerUdid);
     return SOFTBUS_NOT_FIND;
 }
@@ -794,7 +797,7 @@ static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, c
             }
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_LANE, "networkId=%{public}s exist link=%{public}d", anonyNetworkId, type);
+            LNN_LOGI(LNN_LANE, "networkId=%{public}s exist link=%{public}d", AnonymizeWrapper(anonyNetworkId), type);
             AnonymizeFree(anonyNetworkId);
             tmpList += 1;
             tmpCnt += 1;
@@ -868,7 +871,7 @@ static int32_t FetchLaneResourceByDevId(const char *peerNetworkId, LaneLinkType 
     if (LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         char *anonyPeerNetworkId = NULL;
         Anonymize(peerNetworkId, &anonyPeerNetworkId);
-        LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", anonyPeerNetworkId);
+        LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", AnonymizeWrapper(anonyPeerNetworkId));
         AnonymizeFree(anonyPeerNetworkId);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -894,7 +897,7 @@ static int32_t FetchLaneResourceByDevId(const char *peerNetworkId, LaneLinkType 
     char *anonyPeerNetworkId = NULL;
     Anonymize(peerNetworkId, &anonyPeerNetworkId);
     LNN_LOGI(LNN_LANE, "not found lane resource, peerNetworkId=%{public}s, linkType=%{public}d, "
-        "isSameDevice=%{public}d", anonyPeerNetworkId, type, isSameDevice);
+        "isSameDevice=%{public}d", AnonymizeWrapper(anonyPeerNetworkId), type, isSameDevice);
     AnonymizeFree(anonyPeerNetworkId);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
@@ -931,7 +934,7 @@ static int32_t FetchLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkTyp
     char *anonyUdidHashStr = NULL;
     Anonymize(udidHashStr, &anonyUdidHashStr);
     LNN_LOGI(LNN_LANE, "not found lane resource, udidHashStr=%{public}s, linkType=%{public}d, "
-        "isSameDevice=%{public}d", anonyUdidHashStr, type, isSameDevice);
+        "isSameDevice=%{public}d", AnonymizeWrapper(anonyUdidHashStr), type, isSameDevice);
     AnonymizeFree(anonyUdidHashStr);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
@@ -1444,7 +1447,7 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     char *anonyNetworkId = NULL;
     Anonymize(netWorkId, &anonyNetworkId);
     LNN_LOGI(LNN_LANE, "networkId=%{public}s select protocol=%{public}d, pri=%{public}u",
-        anonyNetworkId, req.selectedProtocol, req.currPri);
+        AnonymizeWrapper(anonyNetworkId), req.selectedProtocol, req.currPri);
     AnonymizeFree(anonyNetworkId);
     if (req.selectedProtocol == 0) {
         req.selectedProtocol = LNN_PROTOCOL_IP;
@@ -1627,7 +1630,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     char *anonyNetworkId = NULL;
     Anonymize(reqInfo->peerNetworkId, &anonyNetworkId);
     LNN_LOGI(LNN_LANE, "build link, linktype=%{public}d, laneReqId=%{public}u, peerNetworkId=%{public}s",
-        reqInfo->linkType, reqId, anonyNetworkId);
+        reqInfo->linkType, reqId, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     int32_t ret = g_linkTable[reqInfo->linkType](reqId, reqInfo, callback);
     if (ret != SOFTBUS_OK) {
