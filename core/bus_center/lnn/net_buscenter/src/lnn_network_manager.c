@@ -35,6 +35,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "lnn_connection_fsm.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","
@@ -224,6 +225,11 @@ static int32_t LnnInitManagerByConfig(void)
     return SOFTBUS_OK;
 }
 
+static void DfxRecordWifiTriggerTimestamp(LnnTriggerReason reason)
+{
+    DfxRecordTriggerTime(reason, EVENT_STAGE_LNN_WIFI_TRIGGER);
+}
+
 static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_USER_STATE_CHANGED) {
@@ -238,6 +244,7 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
             g_backgroundState = userState;
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_USER_FOREGROUND");
             RestartCoapDiscovery();
+            DfxRecordWifiTriggerTimestamp(WIFI_USER_FOREGROUND);
             break;
         case SOFTBUS_USER_BACKGROUND:
             g_backgroundState = userState;
@@ -272,6 +279,7 @@ static void NetLockStateEventHandler(const LnnEventBasicInfo *info)
             g_isUnLock = true;
             LNN_LOGI(LNN_BUILDER, "wifi handle %{public}d", lockState);
             RestartCoapDiscovery();
+            DfxRecordWifiTriggerTimestamp(WIFI_NET_LOCK_STATE_CHANGED);
             break;
         case SOFTBUS_SCREEN_LOCK:
             LNN_LOGI(LNN_BUILDER, "ignore wifi SOFTBUS_SCREEN_LOCK");
@@ -300,6 +308,7 @@ static void NetOOBEStateEventHandler(const LnnEventBasicInfo *info)
             if (!g_isOOBEEnd) {
                 g_isOOBEEnd = true;
                 RestartCoapDiscovery();
+                DfxRecordWifiTriggerTimestamp(WIFI_FACK_OOBE);
             }
             break;
         default:
@@ -440,6 +449,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     }
     RestartCoapDiscovery();
+    DfxRecordWifiTriggerTimestamp(WIFI_GROUP_CREATED);
     EhLoginEventHandler();
 }
 
@@ -463,6 +473,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
     LNN_LOGD(LNN_BUILDER, "wifi handle OnDeviceBound");
     RestartCoapDiscovery();
+    DfxRecordWifiTriggerTimestamp(WIFI_DEVICE_BOUND);
 }
 
 static GroupChangeListener g_groupChangeListener = {
@@ -555,6 +566,7 @@ static void NightModeChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_NIGHT_MODE_OFF");
         g_isNightMode = false;
         RestartCoapDiscovery();
+        DfxRecordWifiTriggerTimestamp(WIFI_NIGHT_MODE_CHANGED);
         RestoreBrNetworkDevices();
         return;
     }
@@ -583,6 +595,7 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_IN");
             RestartCoapDiscovery();
+            DfxRecordWifiTriggerTimestamp(WIFI_NET_ACCOUNT_STATE_CHANGED);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_OUT");

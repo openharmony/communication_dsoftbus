@@ -325,6 +325,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     AuthHandle authHandle = { .authId = AUTH_META_ID, .type = AUTH_LINK_TYPE_WIFI};
+    EXPECT_CALL(NetBuilderMock, GetLnnTriggerInfo(_)).WillRepeatedly(Return());
     OnDeviceVerifyPass(authHandle, &info);
     OnDeviceVerifyPass(authHandle, &info);
     OnDeviceVerifyPass(authHandle, nullptr);

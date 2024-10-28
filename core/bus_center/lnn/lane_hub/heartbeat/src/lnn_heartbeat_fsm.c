@@ -229,7 +229,7 @@ static int32_t RemoveCheckDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage
     LnnCheckDevStatusMsgPara *delMsgPara = (LnnCheckDevStatusMsgPara *)delMsg->obj;
 
     if (delMsgPara->hasNetworkId != msgPara->hasNetworkId) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     if (!delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType) {
         SoftBusFree(msgPara);
@@ -242,7 +242,7 @@ static int32_t RemoveCheckDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage
         msgPara = NULL;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
 static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -256,7 +256,7 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
         msgPara = NULL;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
 static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -272,7 +272,7 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
     }
     if (msgPara->wakeupFlag && !delMsgPara->wakeupFlag) {
         *delMsgPara->isRemoved = false;
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     if (msgPara->isRelay && (msgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
         *delMsgPara->isRemoved = true;
@@ -282,7 +282,7 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
     }
     if (delMsgPara->isRelay && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
         *delMsgPara->isRemoved = false;
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     if ((msgPara->hbType & HEARTBEAT_TYPE_BLE_V1) != 0 && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
         *delMsgPara->isRemoved = true;
@@ -292,7 +292,7 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
     }
     if ((msgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0 && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V1) != 0) {
         *delMsgPara->isRemoved = false;
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     if (msgPara->hbType == delMsgPara->hbType && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
         *delMsgPara->isRemoved = true;
@@ -302,10 +302,10 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
     }
     if (msgPara->hbType == delMsgPara->hbType && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V1) != 0) {
         *delMsgPara->isRemoved = false;
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     *delMsgPara->isRemoved = false;
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
 static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -314,7 +314,7 @@ static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMess
     LnnCheckDevStatusMsgPara *delMsgPara = (LnnCheckDevStatusMsgPara *)delMsg->obj;
 
     if (delMsgPara->hasNetworkId != msgPara->hasNetworkId) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     if (!delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType) {
         SoftBusFree(msgPara);
@@ -327,18 +327,18 @@ static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMess
         msgPara = NULL;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
 static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
 {
     if (!CheckRemoveHbMsgParams(msg, args)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
 
     SoftBusMessage *delMsg = (SoftBusMessage *)args;
     if (msg->what != delMsg->what || msg->arg1 != delMsg->arg1) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
     }
     FsmCtrlMsgObj *ctrlMsgObj = (FsmCtrlMsgObj *)msg->obj;
     switch (delMsg->arg1) {
@@ -353,7 +353,7 @@ static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
         default:
             break;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
 static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType, void *obj)
@@ -499,7 +499,7 @@ static void HbNoneStateExit(FsmStateMachine *fsm)
 static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR;
     LnnHeartbeatFsm *hbFsm = NULL;
     LnnHeartbeatStrategyManager strategyMgr = {0};
 
@@ -548,7 +548,7 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
 {
     (void)fsm;
     (void)msgType;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_HB_SEND_BEGIN_FAILED;
 
     LnnHeartbeatSendBeginData *custData = (LnnHeartbeatSendBeginData *)para;
     if (custData == NULL) {
@@ -572,7 +572,7 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
 static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_HB_SEND_END_FAILED;
 
     LnnHeartbeatSendEndData *custData = (LnnHeartbeatSendEndData *)para;
     if (custData == NULL) {
@@ -620,7 +620,7 @@ static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
     if (!CheckHbFsmStateMsgArgs(fsm)) {
         LNN_LOGW(LNN_HEART_BEAT, "start process get invalid fsm");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
         LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
@@ -631,7 +631,7 @@ static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_HB_STOP_PROCESS_FAIL;
 
     LnnHeartbeatType *hbType = (LnnHeartbeatType *)para;
     if (hbType == NULL) {
@@ -736,7 +736,7 @@ static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *pa
     }
     if (LnnFsmTransactState(fsm, g_hbState + nextState) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process transact fsm state fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_HB_TRANSACT_PROCESS_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -787,7 +787,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         AnonymizeFree(anonyNetworkId);
         if (LnnOfflineTimingByHeartbeat(networkId, addrType) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "process dev lost start new offline timing err");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
         }
         return SOFTBUS_OK;
     }
@@ -806,7 +806,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
     AnonymizeFree(anonyUdidHash);
     if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost send request to NetBuilder fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REQ_LEAVE_LNN_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -943,7 +943,7 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
 static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR;
 
     LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)para;
     if (msgPara == NULL) {
@@ -1006,7 +1006,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
         nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
         if (!CheckHbFsmStateMsgArgs(fsm)) {
             LNN_LOGE(LNN_HEART_BEAT, "check dev status get invalid fsm");
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR;
             break;
         }
         LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
@@ -1018,7 +1018,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
         NodeBasicInfo *info = NULL;
         if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "check dev status get online node info fail");
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
             break;
         }
         if (info == NULL || infoNum == 0) {
@@ -1064,16 +1064,16 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
     if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "LnnHbFsm-%u", hbFsm->id) == -1) {
         LNN_LOGE(LNN_HEART_BEAT, "format fsm name fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SPRINTF_ERR;
     }
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_LNN);
     if (looper == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "create looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     if (LnnFsmInit(&hbFsm->fsm, looper, hbFsm->fsmName, DeinitHbFsmCallback) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "init lnn fsm fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_FSM_INIT_FAIL;
     }
     for (int32_t i = 0; i < STATE_HB_INDEX_MAX; ++i) {
         LnnFsmAddState(&hbFsm->fsm, &g_hbState[i]);
@@ -1108,7 +1108,7 @@ int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     }
     if (LnnFsmStart(&hbFsm->fsm, g_hbState + STATE_HB_NONE_INDEX) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "start fsm failed. fsmId=%{public}u", hbFsm->id);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_FSM_START_FAIL;
     }
     LNN_LOGI(LNN_HEART_BEAT, "fsm is starting. fsmId=%{public}u", hbFsm->id);
     return SOFTBUS_OK;
@@ -1122,7 +1122,7 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     }
     if (LnnFsmStop(&hbFsm->fsm) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "stop fsm failed. fsmId=%{public}u", hbFsm->id);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_FSM_STOP_FAIL;
     }
     return LnnFsmDeinit(&hbFsm->fsm);
 }
@@ -1145,7 +1145,7 @@ int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSe
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_PROCESS_SEND_ONCE, (void *)dupPara, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post next loop msg to hbFsm fail");
         SoftBusFree(dupPara);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     LnnNotifyHBRepeat();
     LNN_LOGD(LNN_HEART_BEAT, "post next loop msg, delayMillis=%{public}" PRIu64, delayMillis);
@@ -1184,7 +1184,7 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send begin msg to hbFsm fail");
         SoftBusFree(custData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1208,7 +1208,7 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_END, (void *)dupData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg to hbFsm fail");
         SoftBusFree(dupData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1239,7 +1239,7 @@ int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type)
     if (LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_STOP_SPECIFIC, (void *)newType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post stop msg to hbFsm fail");
         SoftBusFree(newType);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1274,7 +1274,7 @@ int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbe
     if (LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_SET_MEDIUM_PARAM, (void *)dupPara) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post set medium param msg to hbFsm fail");
         SoftBusFree(dupPara);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1305,7 +1305,7 @@ int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDe
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS, (void *)dupPara, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post check dev status msg to hbFsm fail");
         SoftBusFree(dupPara);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1336,7 +1336,7 @@ int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
         (void *)dupPara, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post check dev status msg to hbFsm fail");
         SoftBusFree(dupPara);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL;
     }
     return SOFTBUS_OK;
 }

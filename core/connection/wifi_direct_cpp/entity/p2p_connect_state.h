@@ -38,6 +38,7 @@ public:
     void OnP2pConnectionChangeEvent(
         const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo) override;
     void OnTimeout();
+    bool DetectDhcpTimeout();
 
 private:
     static constexpr int CONNECT_TIMEOUT_MS = 5000;

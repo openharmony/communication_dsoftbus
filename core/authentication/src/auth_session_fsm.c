@@ -1396,7 +1396,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     return true;
 }
 
-static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {

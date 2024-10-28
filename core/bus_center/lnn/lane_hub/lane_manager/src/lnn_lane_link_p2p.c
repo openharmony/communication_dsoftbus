@@ -177,14 +177,14 @@ static SoftBusMutex g_rawLinkLock;
 #define RAW_LINK_CHECK_DELAY           (200)
 #define RAW_LINK_CHECK_NUM             (10)
 
-#define DFX_RECORD_LNN_LANE_SELECT_END(lnnLaneId, lnnConnReqId)                     \
-    do {                                                                      \
-        LnnEventExtra extra = { 0 };                                          \
-        LnnEventExtraInit(&extra);                                            \
-        extra.result = EVENT_STAGE_RESULT_OK;                                 \
-        extra.laneId = (int32_t)lnnLaneId;                                       \
-        extra.connReqId = (int32_t)lnnConnReqId;                                 \
-        LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);   \
+#define DFX_RECORD_LNN_LANE_SELECT_END(lnnLaneId, lnnConnReqId)                    \
+    do {                                                                           \
+        LnnEventExtra extra = { 0 };                                               \
+        LnnEventExtraInit(&extra);                                                 \
+        extra.result = EVENT_STAGE_RESULT_OK;                                      \
+        extra.laneId = (int32_t)(lnnLaneId);                                       \
+        extra.connReqId = (int32_t)(lnnConnReqId);                                 \
+        LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);        \
     } while (0)
 
 typedef int32_t (*GuideLinkByType)(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);

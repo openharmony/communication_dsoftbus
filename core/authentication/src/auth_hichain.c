@@ -30,6 +30,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
+#include "lnn_connection_fsm.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -119,6 +120,30 @@ static void DfxRecordLnnExchangekeyEnd(int64_t authSeq, int32_t reason)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_EXCHANGE_CIPHER, extra);
 }
 
+static void DfxRecordCertEndTime(int64_t authSeq)
+{
+    uint64_t timeStamp = 0;
+    LnnEventExtra extra = { 0 };
+    (void)LnnEventExtraInit(&extra);
+    LnnTriggerInfo triggerInfo = { 0 };
+    GetLnnTriggerInfo(&triggerInfo);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+    extra.authSeq = authSeq;
+    if (!RequireAuthLock()) {
+        return;
+    }
+    AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
+    if (authFsm == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "auth fsm not found");
+        ReleaseAuthLock();
+        return;
+    }
+    extra.peerUdidHash = authFsm->info.udidHash;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_EXCHANGE_CIPHER, extra);
+    ReleaseAuthLock();
+}
+
 static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnSessionKeyReturned: authSeq=%{public}" PRId64 ", len=%{public}u", authSeq,
@@ -130,6 +155,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     }
     DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_OK);
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
+    DfxRecordCertEndTime(authSeq);
 }
 
 static void DfxRecordLnnEndHichainEnd(int64_t authSeq, int32_t reason)
