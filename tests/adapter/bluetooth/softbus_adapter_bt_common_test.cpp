@@ -141,7 +141,7 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
     MockBluetooth mocker;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
-    g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_OFF);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_OFF);
 
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_ON);
     auto btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_ON);
