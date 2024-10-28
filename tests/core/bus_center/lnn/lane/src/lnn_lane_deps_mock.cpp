@@ -127,7 +127,6 @@ int32_t LaneDepsInterfaceMock::ActionOfStartBaseClient(ListenerModule module, co
     return SOFTBUS_OK;
 }
 
-int32_t LaneDepsInterfaceMock::socketEvent = SOFTBUS_SOCKET_OUT;
 int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     (void)trigger;
@@ -136,7 +135,7 @@ int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t
         GTEST_LOG_(INFO) << "invalid lane onDataEvent";
         return SOFTBUS_OK;
     }
-    return g_baseListener.onDataEvent(module, socketEvent, fd);
+    return g_baseListener.onDataEvent(module, SOFTBUS_SOCKET_OUT, fd);
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfConnOpenFailed(const AuthConnInfo *info, uint32_t requestId,
