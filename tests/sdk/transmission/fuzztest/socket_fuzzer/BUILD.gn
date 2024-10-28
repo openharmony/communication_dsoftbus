@@ -35,6 +35,9 @@ ohos_fuzztest("SocketFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+  if (!defined(ohos_lite)) {
+    external_deps += [ "access_token:libtokenid_sdk" ]
+  }
 }
 
 ###############################################################################
