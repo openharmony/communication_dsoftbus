@@ -141,7 +141,7 @@ static void SetPowerPidStatus(int32_t powerPid)
         return;
     }
     g_powerPid = powerPid;
-    Unlock(); 
+    Unlock();
 }
 
 static int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
@@ -1370,7 +1370,7 @@ void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t la
         DetectEnableWifiDirectApply(&powerInfo);
     }
     if (powerInfo.isChangedPid == true) {
-        SetPowerPidStatus(powerInfo.powerPid) 
+        SetPowerPidStatus(powerInfo.powerPid);
     }
 }
 
