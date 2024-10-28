@@ -956,8 +956,8 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
     CONN_LOGI(CONN_WIFI_DIRECT, "start connect group");
     ret = ConnectGroup(msg, command->GetNegotiateChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL, CONN_WIFI_DIRECT,
-        "connect group failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", ret);
     ret = SendNegotiateResult(*command->GetNegotiateChannel(), SOFTBUS_OK);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send result message failed, error=%{public}d", ret);
