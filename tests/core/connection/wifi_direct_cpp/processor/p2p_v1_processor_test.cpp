@@ -1171,6 +1171,200 @@ HWTEST_F(P2pV1ProcessorTest, PassiveReuse, TestSize.Level1)
     sleep(1);
 }
 
+/*
+ * @tc.name: GetGoMac
+ * @tc.desc: test role decision
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, GetGoMac, TestSize.Level1)
+{
+    struct {
+        // parameter
+        LinkInfo::LinkMode myRole;
+        // context
+        string interfaceBaseMac;
+        string linkRemoteBaseMac;
+
+        string result;
+    } caseTable[] = {
+        {LinkInfo::LinkMode::NONE, "",                  "",                  ""                 },
+        { LinkInfo::LinkMode::GO,  "11:22:33:44:55:66", "",                  "11:22:33:44:55:66"},
+        { LinkInfo::LinkMode::GC,  "11:22:33:44:55:66", "22:33:44:55:66:77", "22:33:44:55:66:77"},
+        { LinkInfo::LinkMode::GC,  "11:22:33:44:55:66", "",                  ""                 },
+    };
+
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    P2pV1Processor processor(deviceId);
+    for (const auto &ct : caseTable) {
+        PrepareContext();
+        WifiDirectInterfaceMock mock;
+        if (ct.linkRemoteBaseMac.empty()) {
+            context_.Set(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, false);
+            InjectData(mock);
+        } else {
+            context_.Set(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, true);
+            InjectData(mock);
+            LinkManager::GetInstance().ProcessIfPresent(InnerLink::LinkType::P2P, deviceId, [ct](InnerLink &link) {
+                link.SetRemoteBaseMac(ct.linkRemoteBaseMac);
+            });
+        }
+        InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [ct](InterfaceInfo &interface) {
+            interface.SetBaseMac(ct.interfaceBaseMac);
+            return SOFTBUS_OK;
+        });
+
+        auto goMac = processor.GetGoMac(ct.myRole);
+        ASSERT_EQ(goMac, ct.result) << "my role: " << static_cast<int>(ct.myRole)
+                                    << ", interface base mac: " << ct.interfaceBaseMac
+                                    << ",  link remote base mac: " << ct.linkRemoteBaseMac << ", result: " << ct.result;
+        testing::Mock::VerifyAndClearExpectations(&mock);
+    }
+}
+
+/*
+ * @tc.name: RoleDecision
+ * @tc.desc: test role decision
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, RoleDecision, TestSize.Level1)
+{
+    struct {
+        WifiDirectRole myRole;
+        WifiDirectRole peerRole;
+        WifiDirectRole expectRole;
+        std::string localGoMac;
+        std::string remoteGoMac;
+
+        int result;
+    } caseTable[] = {
+        {WIFI_DIRECT_ROLE_GO,       WIFI_DIRECT_ROLE_GC, WIFI_DIRECT_ROLE_GC, "11:22:33:44:55:66", "11:22:33:44:55:66",
+         WIFI_DIRECT_ROLE_GO  },
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GO, "11:22:33:44:55:66", "11:22:33:44:55:66",
+         WIFI_DIRECT_ROLE_GC  },
+        { WIFI_DIRECT_ROLE_NONE,    WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GO, "",                  "11:22:33:44:55:66",
+         WIFI_DIRECT_ROLE_GC  },
+        { WIFI_DIRECT_ROLE_INVALID, WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GO, "",                  "11:22:33:44:55:66",
+         SOFTBUS_INVALID_PARAM},
+    };
+
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    P2pV1Processor processor(deviceId);
+    for (const auto &ct : caseTable) {
+        auto role = processor.GetFinalRoleWithPeerExpectedRole(
+            ct.myRole, ct.peerRole, ct.expectRole, ct.localGoMac, ct.remoteGoMac);
+        ASSERT_EQ(role, ct.result) << "my role: " << ct.myRole << ", peer role: " << ct.peerRole
+                                   << ", expect role: " << ct.expectRole << "local go mac: " << ct.localGoMac
+                                   << ", remote go mac: " << ct.remoteGoMac;
+    }
+}
+
+/*
+ * @tc.name: RoleDecisionAsGo
+ * @tc.desc: test role decision as Go
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsGo, TestSize.Level1)
+{
+    struct {
+        WifiDirectRole peerRole;
+        WifiDirectRole expectRole;
+        std::string localGoMac;
+        std::string remoteGoMac;
+
+        int result;
+    } caseTable[] = {
+        {WIFI_DIRECT_ROLE_GO,       WIFI_DIRECT_ROLE_GO,      "11:22:33:44:55:66", "22:33:44:55::66:77",
+         SOFTBUS_CONN_PV1_BOTH_GO_ERR                                                                                       },
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GC,      "11:22:33:44:55:66", "",
+         SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE                                                               },
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GC,      "11:22:33:44:55:66", "22:33:44:55::66:77",
+         SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE                                                               },
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GO,      "11:22:33:44:55:66", "11:22:33:44:55:66",
+         SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR                                                             },
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GC,      "11:22:33:44:55:66", "11:22:33:44:55:66",  WIFI_DIRECT_ROLE_GO},
+        { WIFI_DIRECT_ROLE_NONE,    WIFI_DIRECT_ROLE_GO,      "11:22:33:44:55:66", "",
+         SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR                                                             },
+        { WIFI_DIRECT_ROLE_NONE,    WIFI_DIRECT_ROLE_NONE,    "11:22:33:44:55:66", "",                   WIFI_DIRECT_ROLE_GO},
+        { WIFI_DIRECT_ROLE_INVALID, WIFI_DIRECT_ROLE_INVALID, "11:22:33:44:55:66", "",
+         SOFTBUS_CONN_PV1_PEER_ROLE_INVALID                                                                                 },
+    };
+
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    P2pV1Processor processor(deviceId);
+    for (const auto &ct : caseTable) {
+        auto role = processor.GetFinalRoleAsGo(ct.peerRole, ct.expectRole, ct.localGoMac, ct.remoteGoMac);
+        ASSERT_EQ(role, ct.result) << "peer role: " << ct.peerRole << ", expect role: " << ct.expectRole
+                                   << "local go mac: " << ct.localGoMac << ", remote go mac: " << ct.remoteGoMac;
+    }
+}
+
+/*
+ * @tc.name: RoleDecisionAsGc
+ * @tc.desc: test role decision as Gc
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsGc, TestSize.Level1)
+{
+    struct {
+        WifiDirectRole peerRole;
+        WifiDirectRole expectRole;
+        std::string localGoMac;
+        std::string remoteGoMac;
+
+        int result;
+    } caseTable[] = {
+        {WIFI_DIRECT_ROLE_GO,    WIFI_DIRECT_ROLE_GO,   "11:22:33:44:55:66", "11:22:33:44:55:66", WIFI_DIRECT_ROLE_GC              },
+        { WIFI_DIRECT_ROLE_GO,   WIFI_DIRECT_ROLE_GO,   "",                  "11:22:33:44:55:66",
+         SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                                           },
+        { WIFI_DIRECT_ROLE_GO,   WIFI_DIRECT_ROLE_GO,   "11:22:33:44:55:66", "22:33:44:55:66:77",
+         SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                                           },
+        { WIFI_DIRECT_ROLE_NONE, WIFI_DIRECT_ROLE_NONE, "11:22:33:44:55:66", "",                  SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE},
+        { WIFI_DIRECT_ROLE_GC,   WIFI_DIRECT_ROLE_GC,   "11:22:33:44:55:66", "22:33:44:55:66:77",
+         SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                                           },
+    };
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    P2pV1Processor processor(deviceId);
+    for (const auto &ct : caseTable) {
+        auto role = processor.GetFinalRoleAsGc(ct.peerRole, ct.expectRole, ct.localGoMac, ct.remoteGoMac);
+        ASSERT_EQ(role, ct.result) << "peer role: " << ct.peerRole << ", expect role: " << ct.expectRole
+                                   << "local go mac: " << ct.localGoMac << ", remote go mac: " << ct.remoteGoMac;
+    }
+}
+
+/*
+ * @tc.name: RoleDecisionAsNone
+ * @tc.desc: test role decision as none
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsNone, TestSize.Level1)
+{
+    struct {
+        WifiDirectRole peerRole;
+        WifiDirectRole expectRole;
+
+        int result;
+    } caseTable[] = {
+        {WIFI_DIRECT_ROLE_GO,       WIFI_DIRECT_ROLE_GC,      SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR},
+        { WIFI_DIRECT_ROLE_GO,      WIFI_DIRECT_ROLE_GO,      WIFI_DIRECT_ROLE_GC                                   },
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GO,      SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR},
+        { WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GC,      SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE       },
+        { WIFI_DIRECT_ROLE_NONE,    WIFI_DIRECT_ROLE_GC,      WIFI_DIRECT_ROLE_GO                                   },
+        { WIFI_DIRECT_ROLE_NONE,    WIFI_DIRECT_ROLE_GO,      WIFI_DIRECT_ROLE_GC                                   },
+        { WIFI_DIRECT_ROLE_INVALID, WIFI_DIRECT_ROLE_INVALID, SOFTBUS_INVALID_PARAM                                 },
+    };
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    P2pV1Processor processor(deviceId);
+    for (const auto &ct : caseTable) {
+        auto role = processor.GetFinalRoleAsNone(ct.peerRole, ct.expectRole);
+        ASSERT_EQ(role, ct.result) << "peer role: " << ct.peerRole << ", expect role: " << ct.expectRole;
+    }
+}
+
 static P2pV1FuzzHelper::FuzzInjector g_fuzzInjectorTable[] = {
     P2pV1FuzzHelper::FuzzContentType,
     P2pV1FuzzHelper::FuzzGcChannelList,
