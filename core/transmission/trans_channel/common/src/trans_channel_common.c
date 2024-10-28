@@ -611,7 +611,6 @@ TransDeviceState TransGetDeviceState(const char *networkId)
     uint32_t local = 0;
     uint32_t remote = 0;
     if (!TransGetNetCapability(networkId, &local, &remote)) {
-        TRANS_LOGE(TRANS_CTRL, "get cap err.");
         return DEVICE_STATE_INVALID;
     }
     if ((local & (1 << BIT_BLE)) && !(local & (1 << BIT_BR))) {
