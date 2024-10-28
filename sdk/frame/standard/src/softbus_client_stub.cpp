@@ -26,6 +26,7 @@
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "securec.h"
+#include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -33,6 +34,8 @@
 #include "client_trans_udp_manager.h"
 
 namespace OHOS {
+static constexpr uint32_t DFX_TIMERS_S = 15;
+
 SoftBusClientStub::SoftBusClientStub()
 {
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] = &SoftBusClientStub::OnChannelOpenedInner;
@@ -116,7 +119,10 @@ int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t t
 
 int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
 {
-    return TransOnChannelOpened(sessionName, info);
+    int32_t id = SetTimer("OnChannelOpened", DFX_TIMERS_S);
+    int32_t ret = TransOnChannelOpened(sessionName, info);
+    CancelTimer(id);
+    return ret;
 }
 
 int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
