@@ -61,17 +61,6 @@ int32_t LaneLinkDepsInterfaceMock::ActionOfDetectSuccess(uint32_t laneReqId, con
     return SOFTBUS_OK;
 }
 
-int32_t LaneLinkDepsInterfaceMock::ActionOfDetectFail(uint32_t laneReqId, const LaneLinkInfo *linkInfo,
-    const LaneLinkCb *callback)
-{
-    if (linkInfo == nullptr || callback == nullptr) {
-        GTEST_LOG_(INFO) << "invalid param";
-        return SOFTBUS_INVALID_PARAM;
-    }
-    callback->onLaneLinkFail(laneReqId, SOFTBUS_LANE_DETECT_TIMEOUT, linkInfo->type);
-    return SOFTBUS_OK;
-}
-
 extern "C" {
 int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
 {
@@ -168,11 +157,6 @@ void RemoveDelayDestroyMessage(uint64_t laneId)
 void DelLogicAndLaneRelationship(uint64_t laneId)
 {
     GetLaneLinkDepsInterface()->DelLogicAndLaneRelationship(laneId);
-}
-
-int32_t LnnSyncPtk(char *networkId)
-{
-    return GetLaneLinkDepsInterface()->LnnSyncPtk(networkId);
 }
 }
 } // namespace OHOS
