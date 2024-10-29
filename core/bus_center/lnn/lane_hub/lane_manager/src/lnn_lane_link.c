@@ -266,6 +266,10 @@ static void SetLanePowerStatus(bool status)
 
 static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirectLinkInfo *wifiDirectInfo)
 {
+    if (powerInfo == NULL || wifiDirectInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
     if (powerInfo->isDisableLowPower) {
         if (powerInfo->transType == LANE_T_BYTE || powerInfo->transType == LANE_T_MSG) {
             powerInfo->isChangedPid = true;
@@ -333,6 +337,10 @@ void DetectDisableWifiDirectApply(void)
 
 void DetectEnableWifiDirectApply(PowerControlInfo *powerInfo)
 {
+    if (powerInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     if (LaneLock() != SOFTBUS_OK) {
