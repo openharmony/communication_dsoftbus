@@ -69,15 +69,15 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     if (!isInnerRequest) {
         if ((ret = DiscUnPublishService(pkgName, publishId)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
-            LNN_LOGD(LNN_BUILDER, "DiscUnPublishService failed\n");
-            return SOFTBUS_ERR;
+            LNN_LOGE(LNN_BUILDER, "DiscUnPublishService failed\n");
+            return SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL;
         }
         return SOFTBUS_OK;
     }
     if ((ret = DiscUnpublish(MODULE_LNN, publishId)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, LNN_DEFAULT_PKG_NAME, ret);
         LNN_LOGE(LNN_BUILDER, "DiscUnpublish fail!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -115,14 +115,14 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
         if ((ret = DiscStopDiscovery(pkgName, subscribeId)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, ret);
             LNN_LOGE(LNN_BUILDER, "DiscStopDiscovery failed\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
         }
         return SOFTBUS_OK;
     }
     if ((ret = DiscStopAdvertise(MODULE_LNN, subscribeId)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, LNN_DEFAULT_PKG_NAME, ret);
         LNN_LOGE(LNN_BUILDER, "DiscStopAdvertise fail!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
     }
     return SOFTBUS_OK;
 }

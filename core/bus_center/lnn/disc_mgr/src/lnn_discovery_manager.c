@@ -82,7 +82,7 @@ int32_t LnnInitDiscoveryManager(void)
         }
         if (g_discoveryImpl[i].InitDiscoveryImpl(&g_discoveryCallback) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "init discovery impl failed. i=%{public}d", i);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
         }
     }
     return SOFTBUS_OK;
@@ -99,7 +99,7 @@ int32_t LnnStartPublish(void)
         }
         if (g_discoveryImpl[i].StartPublishImpl() != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "start publish impl failed. i=%{public}d", i);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
         }
     }
     return SOFTBUS_OK;
@@ -139,7 +139,7 @@ int32_t LnnStartDiscovery(void)
         }
         if (g_discoveryImpl[i].StartDiscoveryImpl() != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "start discovery impl failed. i=%{public}d", i);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
         }
     }
     ReportStartDiscoveryResultEvt();
