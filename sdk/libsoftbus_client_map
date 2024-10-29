@@ -409,6 +409,7 @@
         "GetSocketOpt";
         "SetExtSocketOpt";
         "GetExtSocketOpt";
+        "LnnOnDataLevelChanged"
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
         "SoftBusFtDestroy";
@@ -457,8 +458,6 @@
         "SoftBusFtSetDfxEventCb";
         "SoftBusFtDfxHiDumper";
         "LnnOnDataLevelChanged";
-        "SetTimer";
-        "CancelTimer";
         "SetSoftbusConfig";
         "ClientEmitFileEvent";
         "SoftBusDFileServer";
@@ -485,7 +484,6 @@
         "UpdateChannelStatistics";
         "SetTimer";
         "CancelTimer";
-        "SetSoftbusConfig";
         "RegistDirSchema";
         "UnregistDirSchema";
         "TransRegistDirSchema";
@@ -494,13 +492,13 @@
         "NotifyTransLimitChanged";
         "GetMacInfoBySession";
         "TransSetUdpChanelSessionId";
-        "ResourceConflictCheck";
-        "RegisterConflictListener";
         "ClientTransProxyOnChannelBind";
         "ClientTransTdcOnChannelBind";
         "TransOnUdpChannelBind";
         "TransOnChannelBind";
         "OpenAuthSessionWithPara";
+        "ResourceConflictCheck";
+        "RegisterConflictListener";
         "ClientTransTdcIfChannelForSocket";
         "SetFileRenameHook";
         "RegisterFileSchema";
