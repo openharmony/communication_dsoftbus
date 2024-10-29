@@ -76,10 +76,12 @@ ohos_unittest("DiscBleUtilsTest") {
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
     "disc_ble_utils_test.cpp",
   ]
-  if (qemu_arm_disable) {
-    sources += [ "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/locale_config_wrapper.cpp" ]
+  if (support_i18n && qemu_arm_disable) {
+    sources += [
+      "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
+    ]
   } else {
-    sources += [ "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/locale_config_wrapper_mock.cpp" ]
+    sources += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
   }
 
   include_dirs = [
@@ -92,6 +94,7 @@ ohos_unittest("DiscBleUtilsTest") {
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/core/discovery/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
   ]
@@ -107,7 +110,7 @@ ohos_unittest("DiscBleUtilsTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
-  if (qemu_arm_disable) {
+  if (support_i18n && qemu_arm_disable) {
     external_deps += [ "i18n:intl_util" ]
   }
 }
