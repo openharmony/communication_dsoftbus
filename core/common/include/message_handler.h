@@ -27,9 +27,11 @@ typedef struct SoftBusMessage SoftBusMessage;
 typedef struct SoftBusHandler SoftBusHandler;
 typedef struct SoftBusLooperContext SoftBusLooperContext;
 typedef struct SoftBusLooper SoftBusLooper;
+typedef struct FfrtMsgQueue MsgQueue;
 
 struct SoftBusLooper {
     SoftBusLooperContext *context;
+    MsgQueue *queue;
     bool dumpable;
     void (*PostMessage)(const SoftBusLooper *looper, SoftBusMessage *msg);
     void (*PostMessageDelay)(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t delayMillis);

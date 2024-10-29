@@ -33,6 +33,9 @@ static int8_t g_isNeedDestroy = 0;
 static int8_t g_isThreadStarted = 0;
 static uint32_t g_looperCnt = 0;
 
+struct FfrtMsgQueue {
+};
+
 typedef struct {
     SoftBusMessage *msg;
     ListNode node;
