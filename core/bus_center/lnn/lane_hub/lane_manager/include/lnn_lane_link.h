@@ -40,10 +40,10 @@ typedef struct {
     uint32_t activeHml;
     int32_t passiveHml;
     int32_t rawHml;
-    int32_t powerPid;
+    int32_t powerEnabledPid;
     bool isDisableLowPower;
     bool isDifferentPid;
-    bool isChangedPid;
+    bool isNeedToChangePid;
     LaneTransType transType;
 } PowerControlInfo;
 
