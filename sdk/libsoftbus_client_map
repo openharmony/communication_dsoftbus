@@ -409,7 +409,7 @@
         "GetSocketOpt";
         "SetExtSocketOpt";
         "GetExtSocketOpt";
-        "LnnOnDataLevelChanged"
+        "LnnOnDataLevelChanged";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
         "SoftBusFtDestroy";
