@@ -329,6 +329,29 @@ if (defined(ohos_lite)) {
     ]
   }
 
+  ohos_unittest("BusCenterServerProxyTest") {
+    module_out_path = module_output_path
+    sources = [ "bus_center_server_proxy_test.cpp" ]
+    include_dirs = bus_center_sdk_test_inc
+    include_dirs += [ "unittest/common/" ]
+    deps = bus_center_sdk_test_deps
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hilog:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+    external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
+      "c_utils:utils",
+      "ipc:ipc_single",
+    ]
+  }
+
   group("unittest") {
     testonly = true
     deps = [
@@ -336,6 +359,7 @@ if (defined(ohos_lite)) {
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
       ":BusCenterServerProxyStandardTest",
+      ":BusCenterServerProxyTest",
       ":BusCenterServerTest",
       ":ClientBusCentManagerTest",
       ":ClientBusCenterSdkTest",
