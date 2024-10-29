@@ -16,6 +16,8 @@
 #ifndef SOFTBUS_CLIENT_CONTEXT_MANAGER_H
 #define SOFTBUS_CLIENT_CONTEXT_MANAGER_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,8 +25,8 @@ extern "C" {
 int ClientContextInit(void);
 void ClientContextDeinit(void);
 
-void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie);
-int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie);
+void SetClientIdentity(unsigned int handle, uintptr_t token, uintptr_t cookie);
+int GetClientIdentity(unsigned int *handle, uintptr_t *token, uintptr_t *cookie);
 
 #ifdef __cplusplus
 }

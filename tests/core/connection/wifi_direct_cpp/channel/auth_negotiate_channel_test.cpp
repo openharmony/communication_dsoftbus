@@ -62,7 +62,7 @@ std::shared_ptr<AuthNegotiateChannel> AuthNegotiateChannelTest::NewAuthNegotiate
     auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
     EXPECT_CALL(mock, AuthGetDeviceUuid(_, _, _))
         .WillRepeatedly([this](int64_t authId, char *uuid, uint16_t size) {
-            auto id = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));;
+            auto id = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
             EXPECT_EQ(EOK, strcpy_s(uuid, size, id.c_str()));
             return SOFTBUS_OK;
         });

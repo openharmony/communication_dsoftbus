@@ -18,9 +18,9 @@
 
 #include <functional>
 #include <memory>
-#include "connect_command.h"
-#include "disconnect_command.h"
-#include "force_disconnect_command.h"
+#include "command/connect_command.h"
+#include "command/disconnect_command.h"
+#include "command/force_disconnect_command.h"
 
 namespace OHOS::SoftBus {
 class CommandFactory {

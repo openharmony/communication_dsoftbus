@@ -81,6 +81,8 @@ typedef struct {
     int32_t retCode;
 } TimeSyncCompleteMsgPara;
 
+static SoftBusMutex g_startReqListLock;
+
 static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t retCode);
 
 static TimeSyncCtrl g_timeSyncCtrl;
@@ -102,7 +104,7 @@ static TimeSyncReqInfo *FindTimeSyncReqInfo(const char *networkId)
 }
 
 static StartTimeSyncReq *CreateStartTimeSyncReq(const char *pkgName, TimeSyncAccuracy accuracy,
-    TimeSyncPeriod period)
+    TimeSyncPeriod period, int32_t pid)
 {
     StartTimeSyncReq *req = (StartTimeSyncReq *)SoftBusMalloc(sizeof(StartTimeSyncReq));
 
@@ -116,6 +118,7 @@ static StartTimeSyncReq *CreateStartTimeSyncReq(const char *pkgName, TimeSyncAcc
         return NULL;
     }
     req->accuracy = accuracy;
+    req->pid = pid;
     req->period = period;
     ListInit(&req->node);
     return req;
@@ -148,6 +151,10 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
 
     char *anonyPkgName = NULL;
     Anonymize(startReq->pkgName, &anonyPkgName);
+    if (SoftBusMutexLock(&g_startReqListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lock list err");
+        return SOFTBUS_LOCK_ERR;
+    }
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         if (strcmp(startReq->pkgName, item->pkgName) != 0 || item->pid != startReq->pid) {
             continue;
@@ -161,17 +168,20 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
             item->period = startReq->period;
         }
         AnonymizeFree(anonyPkgName);
+        SoftBusMutexUnlock(&g_startReqListLock);
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_CLOCK, "add start time sync request. pkgName=%{public}s, accuracy=%{public}d, period=%{public}d",
         AnonymizeWrapper(anonyPkgName), startReq->accuracy, startReq->period);
     AnonymizeFree(anonyPkgName);
-    item = CreateStartTimeSyncReq(startReq->pkgName, startReq->accuracy, startReq->period);
+    item = CreateStartTimeSyncReq(startReq->pkgName, startReq->accuracy, startReq->period, startReq->pid);
     if (item == NULL) {
         LNN_LOGE(LNN_CLOCK, "create start time sync request fail");
+        SoftBusMutexUnlock(&g_startReqListLock);
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&info->startReqList, &item->node);
+    SoftBusMutexUnlock(&g_startReqListLock);
     return SOFTBUS_OK;
 }
 
@@ -180,6 +190,10 @@ static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgN
     StartTimeSyncReq *item = NULL;
     StartTimeSyncReq *next = NULL;
 
+    if (SoftBusMutexLock(&g_startReqListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lock list err");
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &info->startReqList, StartTimeSyncReq, node) {
         if (strcmp(pkgName, item->pkgName) != 0 || item->pid != pid) {
             continue;
@@ -192,6 +206,7 @@ static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgN
         AnonymizeFree(anonyPkgName);
         break;
     }
+    SoftBusMutexUnlock(&g_startReqListLock);
 }
 
 static bool TryUpdateTimeSyncReqInfo(TimeSyncReqInfo *info, TimeSyncAccuracy accuracy, TimeSyncPeriod period)
@@ -264,6 +279,10 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
     TimeSyncPeriod curPeriod = LONG_PERIOD;
     uint32_t count = 0;
 
+    if (SoftBusMutexLock(&g_startReqListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lock list err");
+        return;
+    }
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         ++count;
         if (item->accuracy > curAccuracy) {
@@ -273,6 +292,7 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
             curPeriod = item->period;
         }
     }
+    SoftBusMutexUnlock(&g_startReqListLock);
     if (count > 0) {
         if (curAccuracy > info->curAccuracy || curPeriod < info->curPeriod) {
             LNN_LOGI(LNN_CLOCK,
@@ -493,6 +513,10 @@ int32_t LnnInitTimeSync(void)
     g_timeSyncCtrl.handler.name = (char *)"TimeSync";
     g_timeSyncCtrl.handler.looper = g_timeSyncCtrl.looper;
     g_timeSyncCtrl.handler.HandleMessage = TimeSyncMessageHandler;
+    if (SoftBusMutexInit(&g_startReqListLock, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "mutex init fail");
+        return SOFTBUS_NO_INIT;
+    }
     LNN_LOGI(LNN_INIT, "init time sync success");
     return LnnTimeSyncImplInit();
 }
@@ -506,6 +530,7 @@ void LnnDeinitTimeSync(void)
     if (PostMessageToHandler(MSG_TYPE_REMOVE_ALL, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "post remove all time sync msg fail");
     }
+    (void)SoftBusMutexDestroy(&g_startReqListLock);
     LnnTimeSyncImplDeinit();
 }
 

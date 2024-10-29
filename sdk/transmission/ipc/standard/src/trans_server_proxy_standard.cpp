@@ -312,7 +312,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     }
     char *tmpName = nullptr;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "ServerIpcOpenAuthSession begin. sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "ServerIpcOpenAuthSession begin. sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

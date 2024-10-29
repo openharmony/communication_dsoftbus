@@ -41,11 +41,10 @@ struct LocalIface {
 
     uint8_t type;
     uint8_t state;
+    uint8_t createCount;
     struct timespec updateTime;
 
     Timer *timer;
-    uint8_t createCount;
-
     CoapCtxType *ctx;
 };
 

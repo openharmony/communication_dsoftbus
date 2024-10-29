@@ -155,7 +155,7 @@ void TransTdcCloseChannel(int32_t channelId)
         TransTdcReleaseFd(item->detail.fd);
         item->detail.needRelease = true;
         if (item->detail.fdRefCnt <= 0) {
-            SoftBusMutexDestroy(&(item->detail.fdLock));
+            (void)SoftBusMutexDestroy(&(item->detail.fdLock));
             ListDelete(&item->node);
             SoftBusFree(item);
             item = NULL;
@@ -190,11 +190,13 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
         return NULL;
     }
     if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        (void)SoftBusMutexDestroy(&(item->detail.fdLock));
         SoftBusFree(item);
         TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
         return NULL;
     }
     if (strcpy_s(item->detail.myIp, IP_LEN, channel->myIp) != EOK) {
+        (void)SoftBusMutexDestroy(&(item->detail.fdLock));
         SoftBusFree(item);
         TRANS_LOGE(TRANS_SDK, "myIp copy failed");
         return NULL;
@@ -244,7 +246,7 @@ static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
                 TransTdcReleaseFd(item->detail.fd);
             }
             ListDelete(&item->node);
-            SoftBusMutexDestroy(&(item->detail.fdLock));
+            (void)SoftBusMutexDestroy(&(item->detail.fdLock));
             SoftBusFree(item);
             item = NULL;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
@@ -392,6 +394,7 @@ void TransTdcManagerDeinit(void)
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
     PendingDeinit(PENDING_TYPE_DIRECT);
+    TdcLockDeinit();
 }
 
 int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId, int32_t errCode)
@@ -468,7 +471,7 @@ void TransUpdateFdState(int32_t channelId)
         if (item->channelId == channelId) {
             item->detail.fdRefCnt--;
             if (item->detail.needRelease && item->detail.fdRefCnt <= 0) {
-                SoftBusMutexDestroy(&(item->detail.fdLock));
+                (void)SoftBusMutexDestroy(&(item->detail.fdLock));
                 ListDelete(&item->node);
                 SoftBusFree(item);
                 item = NULL;

@@ -16,6 +16,8 @@
 #ifndef SOFTBUS_IPC_DEF_H
 #define SOFTBUS_IPC_DEF_H
 
+#include <stdint.h>
+
 #define SOFTBUS_SERVER_SA_ID_INNER 4700
 
 #ifdef __cplusplus
@@ -30,8 +32,8 @@ extern "C" {
 
 struct CommonScvId {
     unsigned int handle;
-    unsigned int token;
-    unsigned int cookie;
+    uintptr_t token;
+    uintptr_t cookie;
     void *ipcCtx;
     unsigned int cbId;
 };
@@ -94,6 +96,7 @@ enum SoftBusFuncId {
     CLIENT_ON_LEAVE_RESULT,
     CLIENT_ON_LEAVE_METANODE_RESULT,
     CLIENT_ON_NODE_DEVICE_TRUST_CHANGED,
+    CLIENT_ON_HICHAIN_PROOF_EXCEPTION,
     CLIENT_ON_NODE_ONLINE_STATE_CHANGED,
     CLIENT_ON_NODE_BASIC_INFO_CHANGED,
     CLIENT_ON_NODE_STATUS_CHANGED,

@@ -29,9 +29,9 @@ extern "C" {
 #endif
 
 typedef struct {
-    SoftBusBtUuid charaUuid;
     uint32_t dataLen;
     uint8_t *data;
+    SoftBusBtUuid charaUuid;
 } SoftBusGattcNotify;
 
 typedef enum {
@@ -43,11 +43,11 @@ typedef enum {
 } SoftBusGattWriteType;
 
 typedef struct {
+    uint32_t valueLen;
+    SoftBusGattWriteType writeType;
+    const uint8_t *value;
     SoftBusBtUuid serviceUuid;
     SoftBusBtUuid characterUuid;
-    uint32_t valueLen;
-    const uint8_t *value;
-    SoftBusGattWriteType writeType;
 } SoftBusGattcData;
 
 typedef struct {
@@ -65,9 +65,9 @@ typedef enum {
 } SoftbusBleGattPriority;
 
 typedef struct {
-    SoftBusGattcCallback callback;
-    ListNode node;
     int32_t clientId;
+    ListNode node;
+    SoftBusGattcCallback callback;
 } SoftBusGattcManager;
 
 int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId);

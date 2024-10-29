@@ -346,6 +346,10 @@ static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info
         return SOFTBUS_ERR;
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get AuthManager fail");
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
     int32_t index;
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
@@ -1264,6 +1268,23 @@ static void DumpRpaCipherKey(char *cipherKey, char *cipherIv, const char *peerIr
     AnonymizeFree(anonyIrk);
 }
 
+static int32_t UpdateBroadcastCipherKey(const NodeInfo *info)
+{
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    if (FillBroadcastCipherKey(&broadcastKey, info) != SOFTBUS_OK) {
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+        return SOFTBUS_ERR;
+    }
+    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    return SOFTBUS_OK;
+}
+
 static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
 {
     char cipherKey[SESSION_KEY_STR_LEN] = {0};
@@ -1302,19 +1323,10 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
-
-    BroadcastCipherKey broadcastKey;
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (FillBroadcastCipherKey(&broadcastKey, info) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        return SOFTBUS_ERR;
+    int32_t ret = UpdateBroadcastCipherKey(info);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        return SOFTBUS_ERR;
-    }
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return SOFTBUS_OK;
 }
 

@@ -48,14 +48,14 @@ static volatile bool g_isLpScanCbReg = false;
 static int32_t RegisterInfoDump(int fd);
 
 typedef struct {
-    BaseServiceType srvType;
-    int32_t adapterBcId;
     bool isUsed;
     bool isAdvertising;
     bool isStarted;
-    int64_t time;
+    BaseServiceType srvType;
+    int32_t adapterBcId;
     SoftBusCond cond;
     BroadcastCallback *bcCallback;
+    int64_t time;
 } BroadcastManager;
 
 typedef enum {
@@ -71,15 +71,15 @@ typedef enum {
 } ScanFreq;
 
 typedef struct {
-    BaseServiceType srvType;
-    int32_t adapterScanId;
     bool isUsed;
     bool isNeedReset;
     bool isScanning;
+    uint8_t filterSize;
+    BaseServiceType srvType;
+    int32_t adapterScanId;
     BcScanParams param;
     ScanFreq freq;
     BcScanFilter *filter;
-    uint8_t filterSize;
     ScanCallback *scanCallback;
 } ScanManager;
 
@@ -265,15 +265,21 @@ static char *GetSrvType(BaseServiceType srvType)
 static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
 {
     static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "start bc cb adapterBcId=%{public}d", adapterBcId);
     for (uint32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         int32_t ret = SoftBusMutexLock(&g_bcLock);
-        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BROADCAST, "mutex error");
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK,
+            DISC_BROADCAST, "mutex error, adapterBcId=%{public}d", adapterBcId);
 
         BroadcastManager *bcManager = &g_bcManager[managerId];
-        if (bcManager->adapterBcId != adapterBcId || !bcManager->isUsed || bcManager->bcCallback == NULL ||
+        if (bcManager->adapterBcId != adapterBcId) {
+            SoftBusMutexUnlock(&g_bcLock);
+            continue;
+        }
+        if (!bcManager->isUsed || bcManager->bcCallback == NULL ||
             bcManager->bcCallback->OnStartBroadcastingCallback == NULL) {
             SoftBusMutexUnlock(&g_bcLock);
+            DISC_LOGE(DISC_BROADCAST, "bcManager not available, adapterBcId=%{public}d, managerId=%{public}u",
+                adapterBcId, managerId);
             continue;
         }
         DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d,"
@@ -291,16 +297,21 @@ static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
 
 static void BcStopBroadcastingCallback(int32_t adapterBcId, int32_t status)
 {
-    static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "stop bc cb, adapterBcId=%{public}d, callCount=%{public}u", adapterBcId, callCount++);
     for (uint32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         int32_t ret = SoftBusMutexLock(&g_bcLock);
-        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BROADCAST, "mutex error");
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK,
+            DISC_BROADCAST, "mutex error, adapterBcId=%{public}d", adapterBcId);
 
         BroadcastManager *bcManager = &g_bcManager[managerId];
-        if (bcManager->adapterBcId != adapterBcId || !bcManager->isUsed || bcManager->bcCallback == NULL ||
+        if (bcManager->adapterBcId != adapterBcId) {
+            SoftBusMutexUnlock(&g_bcLock);
+            continue;
+        }
+        if (!bcManager->isUsed || bcManager->bcCallback == NULL ||
             bcManager->bcCallback->OnStopBroadcastingCallback == NULL) {
             SoftBusMutexUnlock(&g_bcLock);
+            DISC_LOGE(DISC_BROADCAST, "bcManager not available, adapterBcId=%{public}d, managerId=%{public}u",
+                adapterBcId, managerId);
             continue;
         }
         DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d",
@@ -492,7 +503,7 @@ static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayloa
 static void DumpSoftbusData(const char *description, uint16_t len, const uint8_t *data)
 {
     DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BROADCAST, "description is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BROADCAST, "description=%{public}s, len is 0", description);
+    DISC_CHECK_AND_RETURN_LOGD(len != 0, DISC_BROADCAST, "description=%{public}s, len is 0", description);
     DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BROADCAST, "description=%{public}s, data is nullptr", description);
 
     int32_t hexLen = HEXIFY_LEN(len);
@@ -854,7 +865,7 @@ static bool CheckSrvRegistered(BaseServiceType srvType)
 int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const ScanCallback *cb)
 {
     static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter callCount=%{public}u", callCount++);
+    DISC_LOGD(DISC_BROADCAST, "enter callCount=%{public}u", callCount++);
     int32_t ret = SOFTBUS_OK;
     int32_t adapterScanId = -1;
     DISC_CHECK_AND_RETURN_RET_LOGE(IsSrvTypeValid(srvType), SOFTBUS_BC_MGR_INVALID_SRV, DISC_BROADCAST, "bad srvType");
@@ -1347,21 +1358,36 @@ static void StartBroadcastingWaitSignal(int32_t bcId, SoftBusMutex *mutex)
     g_bcManager[bcId].isAdvertising = false;
 }
 
-int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
+static int32_t CheckInterface(bool isStart)
 {
-    static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter start bc, bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bad id");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
         DISC_BROADCAST, "interface is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartBroadcasting != NULL,
-        SOFTBUS_BC_MGR_FUNC_NULL, DISC_BROADCAST, "function is nullptr");
-    int32_t ret = CheckBroadcastingParam(param, packet);
+    if (isStart) {
+        DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartBroadcasting != NULL,
+            SOFTBUS_BC_MGR_FUNC_NULL, DISC_BROADCAST, "function is nullptr");
+    } else {
+        DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopBroadcasting != NULL,
+            SOFTBUS_BC_MGR_FUNC_NULL, DISC_BROADCAST, "function is nullptr");
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
+{
+    static uint32_t callCount = 0;
+    int32_t ret = CheckInterface(true);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        DISC_BROADCAST, "interface check failed, bcId=%{public}d", bcId);
+    ret = CheckBroadcastingParam(param, packet);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "check param failed");
     ret = SoftBusMutexLock(&g_bcLock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
-    if (!CheckBcIdIsValid(bcId)) {
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST,
+        "mutex error, bcId=%{public}d", bcId);
+    if (!CheckBcIdIsValid(bcId) || g_bcManager[bcId].bcCallback == NULL ||
+        g_bcManager[bcId].bcCallback->OnStartBroadcastingCallback == NULL) {
         SoftBusMutexUnlock(&g_bcLock);
+        DISC_LOGE(DISC_BROADCAST, "invalid bcId, bcId=%{public}d", bcId);
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
     if (g_bcManager[bcId].isAdvertising && !g_bcManager[bcId].isStarted) {
@@ -1373,7 +1399,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     SoftbusBroadcastData softbusBcData = {0};
     ret = BuildSoftbusBroadcastData(packet, &softbusBcData);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BROADCAST, "build SoftbusBroadcastData failed");
+        DISC_LOGE(DISC_BROADCAST, "build SoftbusBroadcastData failed, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
         return ret;
     }
@@ -1393,8 +1419,8 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
         return ret;
     }
 
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_BROADCAST, "lock failed");
+    ret = SoftBusMutexLock(&g_bcLock);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "lock failed");
     g_bcManager[bcId].isStarted = true;
     SoftBusMutexUnlock(&g_bcLock);
     ReleaseSoftbusBroadcastData(&softbusBcData);
@@ -1427,7 +1453,8 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
     int32_t ret = SoftBusMutexLock(&g_bcLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
 
-    if (!CheckBcIdIsValid(bcId)) {
+    if (!CheckBcIdIsValid(bcId) || g_bcManager[bcId].bcCallback == NULL ||
+        g_bcManager[bcId].bcCallback->OnSetBroadcastingCallback == NULL) {
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
@@ -1463,14 +1490,11 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 
 int32_t StopBroadcasting(int32_t bcId)
 {
-    static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter stop bc, bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
-    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bad id");
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
-        DISC_BROADCAST, "interface is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopBroadcasting != NULL,
-        SOFTBUS_BC_MGR_FUNC_NULL, DISC_BROADCAST, "function is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(CheckBcIdIsValid(bcId), SOFTBUS_BC_MGR_INVALID_BC_ID, DISC_BROADCAST, "bad bcId");
+    int32_t ret = CheckInterface(false);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        DISC_BROADCAST, "interface check failed, bcId=%{public}d", bcId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckBcIdIsValid(bcId), SOFTBUS_BC_MGR_INVALID_BC_ID,
+        DISC_BROADCAST, "bad bcId, bcId=%{public}d", bcId);
 
     int64_t time = MgrGetSysTime();
     if (time - g_bcManager[bcId].time < BC_WAIT_TIME_MICROSEC) {
@@ -1479,13 +1503,19 @@ int32_t StopBroadcasting(int32_t bcId)
         usleep(diffTime);
     }
 
-    int32_t ret = SoftBusMutexLock(&g_bcLock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
+    ret = SoftBusMutexLock(&g_bcLock);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_BROADCAST, "mutex error, bcId=%{public}d", bcId);
 
     if (!g_bcManager[bcId].isStarted) {
         DISC_LOGW(DISC_BROADCAST, "bcId is not start, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_OK;
+    }
+    if (g_bcManager[bcId].bcCallback == NULL || g_bcManager[bcId].bcCallback->OnStopBroadcastingCallback == NULL) {
+        DISC_LOGE(DISC_BROADCAST, "bc callback is null, bcId=%{public}d", bcId);
+        SoftBusMutexUnlock(&g_bcLock);
+        return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
 
     DISC_LOGI(DISC_BROADCAST, "stop service srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
@@ -1716,7 +1746,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
 
 int32_t GetScanFilter(int32_t listenerId, BcScanFilter **scanFilter, uint8_t *filterNum)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter get scan filter");
+    DISC_LOGD(DISC_BROADCAST, "enter get scan filter");
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid scanFilter");
     DISC_CHECK_AND_RETURN_RET_LOGE(filterNum != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid filterNum");
 
@@ -1757,7 +1787,7 @@ bool BroadcastIsLpDeviceAvailable(void)
 bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter set adv dev param");
+    DISC_LOGD(DISC_BROADCAST, "enter set adv dev param");
     DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL, false, DISC_BROADCAST, "invalid param bcParam");
     DISC_CHECK_AND_RETURN_RET_LOGE(scanParam != NULL, false, DISC_BROADCAST, "invalid param scanParam");
     DISC_CHECK_AND_RETURN_RET_LOGE(type < SOFTBUS_UNKNOW_TYPE && type >= SOFTBUS_HEARTBEAT_TYPE,
@@ -1807,7 +1837,7 @@ bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcPar
 
 int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter get bc handle");
+    DISC_LOGD(DISC_BROADCAST, "enter get bc handle");
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bad id");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
         DISC_BROADCAST, "interface is nullptr");

@@ -50,40 +50,62 @@ int32_t LnnInitNetLedger(void)
 {
     if (LnnInitHuksInterface() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init huks interface fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_HUKS_INIT_FAILED;
     }
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local net ledger fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitDistributedLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init distributed net ledger fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ext ledger fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }
 
-static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
+static bool IsCapacityChange(NodeInfo *info)
 {
-    char softBusVersion[VERSION_MAX_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
-        if (strcmp(softBusVersion, info->softBusVersion) != 0) {
-            LNN_LOGW(LNN_LEDGER, "softbus version=%{public}s->%{public}s", softBusVersion, info->softBusVersion);
-            return true;
-        }
-    }
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
         if (softbusFeature != info->feature) {
             LNN_LOGW(LNN_LEDGER, "feature=%{public}" PRIu64 "->%{public}" PRIu64, info->feature, softbusFeature);
+            return true;
+        }
+    }
+    uint32_t authCapacity = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
+        if (authCapacity != info->authCapacity) {
+            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
+            return true;
+        }
+    }
+    uint32_t heartbeatCapacity = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_HB_CAP, &heartbeatCapacity) == SOFTBUS_OK) {
+        if (heartbeatCapacity != info->heartbeatCapacity) {
+            LNN_LOGW(LNN_LEDGER, "hbCapacity=%{public}d->%{public}d", info->heartbeatCapacity, heartbeatCapacity);
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
+{
+    if (IsCapacityChange(info)) {
+        return true;
+    }
+    char softBusVersion[VERSION_MAX_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
+        if (strcmp(softBusVersion, info->softBusVersion) != 0) {
+            LNN_LOGW(LNN_LEDGER, "softbus version=%{public}s->%{public}s", softBusVersion, info->softBusVersion);
             return true;
         }
     }
@@ -99,13 +121,6 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
         if (osType != info->deviceInfo.osType) {
             LNN_LOGW(LNN_LEDGER, "osType=%{public}d->%{public}d", info->deviceInfo.osType, osType);
-            return true;
-        }
-    }
-    uint32_t authCapacity = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
-        if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
             return true;
         }
     }
@@ -141,6 +156,7 @@ static void ProcessLocalDeviceInfo(void)
         info.stateVersion++;
         LnnSaveLocalDeviceInfo(&info);
     }
+    LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
     if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set state version fail");
     }
@@ -151,6 +167,7 @@ static void ProcessLocalDeviceInfo(void)
     LnnNotifyLocalNetworkIdChanged();
     if (info.networkIdTimestamp != 0) {
         LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
+        LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
     }
 }
 

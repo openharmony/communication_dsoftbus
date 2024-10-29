@@ -268,7 +268,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/proxy/mock",
     ]
     deps = trans_sdk_test_common_deps
-    deps += trans_sdk_proxy_test_deps
     external_deps = [
       "googletest:gmock",
       "hilog:libhilog",
@@ -422,6 +421,7 @@ if (defined(ohos_lite)) {
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
       "qos:unittest",
+      "statistics:unittest",
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
     ]

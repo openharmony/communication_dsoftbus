@@ -325,6 +325,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     AuthHandle authHandle = { .authId = AUTH_META_ID, .type = AUTH_LINK_TYPE_WIFI};
+    EXPECT_CALL(NetBuilderMock, GetLnnTriggerInfo(_)).WillRepeatedly(Return());
     OnDeviceVerifyPass(authHandle, &info);
     OnDeviceVerifyPass(authHandle, &info);
     OnDeviceVerifyPass(authHandle, nullptr);
@@ -958,7 +959,6 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize
     TryDisconnectAllConnection(&fsmTest);
 
     EXPECT_CALL(NetBuilderMock, LnnConvertAddrToOption(_, _)).WillOnce(Return(true));
-    EXPECT_CALL(NetBuilderMock, ConnDisconnectDeviceAllConn(_)).WillOnce(Return(SOFTBUS_OK));
     TryDisconnectAllConnection(&fsmTest);
 
     fsmTest.connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -1437,6 +1437,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(false));
     para->isNeedConnect = false;
+    para->dupInfo = NULL;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(nullptr, true, false) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_ERR);
@@ -1470,6 +1471,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_002, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(false));
     para->isNeedConnect = true;
+    para->dupInfo = NULL;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_OK);
 
@@ -1501,6 +1503,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_003, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(true));
     para->isNeedConnect = true;
+    para->dupInfo = NULL;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_OK);
 
@@ -1532,6 +1535,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_004, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(true));
     para->isNeedConnect = true;
+    para->dupInfo = NULL;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_OK);
 

@@ -808,6 +808,10 @@ static bool IsSameNodeStateCb(const INodeStateCb *callback1, const INodeStateCb 
         callback1->onNodeStatusChanged != callback2->onNodeStatusChanged) {
         return false;
     }
+    if ((callback1->events & EVENT_NODE_HICHAIN_PROOF_EXCEPTION) &&
+        callback1->onHichainProofException != callback2->onHichainProofException) {
+        return false;
+    }
     return true;
 }
 
@@ -1290,6 +1294,49 @@ int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const ch
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
             (item->cb.onNodeDeviceTrustedChange) != NULL) {
             item->cb.onNodeDeviceTrustedChange((TrustChangeType)type, msg, msgLen);
+        }
+    }
+    ClearNodeStateCbList(&dupList);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnOnHichainProofException(
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    NodeStateCallbackItem *item = NULL;
+    ListNode dupList;
+
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock auth restrict cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&dupList);
+    DuplicateNodeStateCbList(&dupList);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock auth restrict cb list in notify");
+    }
+    LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.events & EVENT_NODE_HICHAIN_PROOF_EXCEPTION) != 0 && item->cb.onHichainProofException != NULL) {
+            item->cb.onHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
+            char *anonyPkgName = NULL;
+            char *anonyProofInfo = NULL;
+            Anonymize(pkgName, &anonyPkgName);
+            Anonymize(proofInfo, &anonyProofInfo);
+            LNN_LOGI(LNN_STATE,
+                "onHichainProofException, pkgName=%{public}s, proofInfo=%{public}s, errCode=%{public}d, "
+                "type=%{public}hu",
+                AnonymizeWrapper(anonyPkgName), AnonymizeWrapper(anonyProofInfo), errCode, deviceTypeId);
+            AnonymizeFree(anonyPkgName);
+            AnonymizeFree(anonyProofInfo);
         }
     }
     ClearNodeStateCbList(&dupList);

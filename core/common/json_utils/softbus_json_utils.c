@@ -211,18 +211,18 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
 
 bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const char * const *strings, int32_t count)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(json != NULL && string != NULL && strings != NULL, false, COMM_EVENT,
+    COMM_CHECK_AND_RETURN_RET_LOGE(json != NULL && string != NULL && strings != NULL, false, COMM_UTILS,
         "param is null");
-    COMM_CHECK_AND_RETURN_RET_LOGE(count > 0, false, COMM_EVENT, "count <= 0");
+    COMM_CHECK_AND_RETURN_RET_LOGE(count > 0, false, COMM_UTILS, "count <= 0");
 
     cJSON *item = cJSON_CreateStringArray(strings, count);
     if (item == NULL) {
-        COMM_LOGE(COMM_EVENT, "Cannot create cJSON string array object. string=%{public}s", string);
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON string array object. string=%{public}s", string);
         return false;
     }
 
     if (!cJSON_AddItemToObject(json, string, item)) {
-        COMM_LOGE(COMM_EVENT, "Cannot add string array object to json. string=%{public}s", string);
+        COMM_LOGE(COMM_UTILS, "Cannot add string array object to json. string=%{public}s", string);
         cJSON_Delete(item);
         return false;
     }
@@ -314,23 +314,23 @@ char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * co
 
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
-        COMM_LOGD(COMM_EVENT, "Cannot find or invalid string. string=%{public}s", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return NULL;
     }
     uint32_t length = strlen(item->valuestring);
     if (length > limit) {
-        COMM_LOGE(COMM_EVENT,
+        COMM_LOGE(COMM_UTILS,
             "key length is large than limit. string=%{public}s, length=%{public}u, limit=%{public}u", string, length,
             limit);
         return NULL;
     }
     char *value = SoftBusCalloc(length + 1);
     if (value == NULL) {
-        COMM_LOGE(COMM_EVENT, "malloc failed, length=%{public}u", length);
+        COMM_LOGE(COMM_UTILS, "malloc failed, length=%{public}u", length);
         return NULL;
     }
     if (strcpy_s(value, length + 1, item->valuestring) != EOK) {
-        COMM_LOGE(COMM_EVENT, "copy failed, length=%{public}u", length);
+        COMM_LOGE(COMM_UTILS, "copy failed, length=%{public}u", length);
         SoftBusFree(value);
         return NULL;
     }

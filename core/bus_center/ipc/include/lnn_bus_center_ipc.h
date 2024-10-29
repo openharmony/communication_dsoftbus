@@ -56,6 +56,8 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
 int32_t LnnIpcNotifyNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t LnnIpcLocalNetworkIdChanged(void);
 int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen);
+int32_t LnnIpcNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 int32_t LnnIpcNotifyTimeSyncResult(
     const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode);
 

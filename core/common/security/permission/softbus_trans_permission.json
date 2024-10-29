@@ -482,5 +482,16 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DBINDER",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.systemserver",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]

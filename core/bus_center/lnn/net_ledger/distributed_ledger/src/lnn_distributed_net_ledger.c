@@ -74,6 +74,7 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
     NodeBasicInfo basic;
     if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memset_s basic fail!");
+        return;
     }
     if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetBasicInfoByUdid fail.");
@@ -701,7 +702,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
 
     UpdateNewNodeAccountHash(newInfo);
-    UpdateDpSameAccount(newInfo->accountHash, newInfo->deviceInfo.deviceUdid);
+    UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid);
     udid = LnnGetDeviceUdid(newInfo);
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -825,7 +826,7 @@ int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
     }
-    LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success");
+    LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success, discType=%{public}d", discType);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -1178,7 +1179,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
-    UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
+    UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }

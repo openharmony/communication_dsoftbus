@@ -471,6 +471,21 @@ static AuthFsm *GetAuthFsmByConnInfo(const AuthConnInfo *connInfo, bool isServer
     return NULL;
 }
 
+static void ProcessTimeoutErrorCode(AuthFsm *authFsm, int32_t *result)
+{
+    AuthFsmStateIndex curState = authFsm->curState;
+    if (curState == STATE_SYNC_NEGOTIATION || curState == STATE_SYNC_DEVICE_ID) {
+        *result = SOFTBUS_AUTH_SYNC_DEVICEID_TIMEOUT;
+    } else if (curState == STATE_DEVICE_AUTH) {
+        *result = (authFsm->info.normalizedType == NORMALIZED_SUPPORT || authFsm->info.isSupportFastAuth) ?
+            SOFTBUS_AUTH_SAVE_SESSIONKEY_TIMEOUT : SOFTBUS_AUTH_HICHAIN_TIMEOUT;
+    } else if (curState == STATE_SYNC_DEVICE_INFO) {
+        *result = SOFTBUS_AUTH_SYNC_DEVICEINFO_TIMEOUT;
+    } else {
+        AUTH_LOGE(AUTH_FSM, "authFsm state error, curState=%{public}d", curState);
+    }
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
@@ -500,6 +515,9 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
             }
         }
     } else {
+        if (result == SOFTBUS_AUTH_TIMEOUT) {
+            ProcessTimeoutErrorCode(authFsm, &result);
+        }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
         if (!authFsm->info.isServer) {
             NotifyNormalizeRequestFail(authFsm->authSeq, result);
@@ -527,9 +545,11 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
         case FSM_MSG_AUTH_TIMEOUT:
             AUTH_LOGE(AUTH_FSM, "auth fsm timeout. authSeq=%{public}" PRId64 "", authFsm->authSeq);
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_TIMEOUT);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         case FSM_MSG_DEVICE_NOT_TRUSTED:
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         case FSM_MSG_DEVICE_DISCONNECTED:
             if (authFsm->info.isNodeInfoReceived && authFsm->info.isCloseAckReceived) {
@@ -1376,7 +1396,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     return true;
 }
 
-static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
