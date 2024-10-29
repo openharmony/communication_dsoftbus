@@ -88,20 +88,20 @@ typedef enum {
 typedef union {
     bool b;
     uint8_t u8v;
+    char str[SOFTBUS_HISYSEVT_PARAM_LEN];
     uint16_t u16v;
     int32_t i32v;
     uint32_t u32v;
-    int64_t i64v;
-    uint64_t u64v;
+    uint32_t u32a[SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE];
     float f;
     double d;
-    char str[SOFTBUS_HISYSEVT_PARAM_LEN];
-    uint32_t u32a[SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE];
+    int64_t i64v;
+    uint64_t u64v;
 } SoftbusEvtParamValue;
 
 typedef struct {
-    SoftBusEvtParamType paramType;
     char paramName[SOFTBUS_HISYSEVT_NAME_LEN];
+    SoftBusEvtParamType paramType;
     SoftbusEvtParamValue paramValue;
 } SoftBusEvtParam;
 

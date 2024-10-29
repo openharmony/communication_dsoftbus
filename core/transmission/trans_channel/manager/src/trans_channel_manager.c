@@ -226,7 +226,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel, sessionName=%{public}s, socket=%{public}d, actionId=%{public}d, "
                            "isQosLane=%{public}d, isAsync=%{public}d",
-        tmpName, param->sessionId, param->actionId, param->isQosLane, param->isAsync);
+        AnonymizeWrapper(tmpName), param->sessionId, param->actionId, param->isQosLane, param->isAsync);
     AnonymizeFree(tmpName);
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
@@ -261,7 +261,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         if (ret != SOFTBUS_OK) {
             Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
-                tmpName, param->sessionId);
+                AnonymizeWrapper(tmpName), param->sessionId);
             AnonymizeFree(tmpName);
             if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
                 TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
@@ -284,7 +284,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
         "sessionName=%{public}s, socket=%{public}d, laneHandle=%{public}u, linkType=%{public}u.",
-        tmpName, param->sessionId, laneHandle, connInfo.type);
+        AnonymizeWrapper(tmpName), param->sessionId, laneHandle, connInfo.type);
     AnonymizeFree(tmpName);
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     if (ret != SOFTBUS_OK) {
@@ -677,11 +677,9 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
         curChannelPid = appInfo.myData.pid;
     }
     if (pid != (pid_t)curChannelPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid=%{public}d, pid=%{public}d",
-            pid, curChannelPid);
+        TRANS_LOGE(TRANS_CTRL, "callingPid=%{public}d not equal curChannelPid=%{public}d", pid, curChannelPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", curChannelPid);
     return SOFTBUS_OK;
 }
 
@@ -690,15 +688,13 @@ int32_t TransGetAndComparePidBySession(pid_t pid, const char *sessionName, int32
     pid_t curSessionPid;
     int32_t ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionlId, &curSessionPid);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get pid by session failed, ret = %{public}d", ret);
+        TRANS_LOGE(TRANS_CTRL, "get pid by session failed, ret=%{public}d", ret);
         return ret;
     }
     if (pid != curSessionPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curSessionPid, callingPid=%{public}d, pid=%{public}d",
-            pid, curSessionPid);
+        TRANS_LOGE(TRANS_CTRL, "callingPid=%{public}d not equal curSessionPid=%{public}d", pid, curSessionPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", pid);
     return SOFTBUS_OK;
 }
 

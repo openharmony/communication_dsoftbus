@@ -96,7 +96,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
-        pkgName, tmpName, uid, pid);
+        pkgName, AnonymizeWrapper(tmpName), uid, pid);
     AnonymizeFree(tmpName);
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     if (newNode == NULL) {
@@ -153,14 +153,15 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 
 int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
 {
-    TRANS_LOGI(TRANS_CTRL, "trans server opensession.");
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX) ||
         (param->isQosLane && param->qosCount > QOS_TYPE_BUTT)) {
+        TRANS_LOGE(TRANS_CTRL, "SessionParam check failed");
         return SOFTBUS_INVALID_PARAM;
     }
     if (param->groupId == NULL || strlen(param->groupId) >= GROUP_ID_SIZE_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "invalid groupId");
         return SOFTBUS_TRANS_SESSION_GROUP_INVALID;
     }
 

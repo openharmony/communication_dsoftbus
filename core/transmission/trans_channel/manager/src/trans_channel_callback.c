@@ -97,7 +97,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         if (state == CORE_SESSION_STATE_CANCELLING) {
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
-            TRANS_LOGW(TRANS_CTRL, "Cancel bind name=%{public}s, channelId=%{public}d", tmpName, channel->channelId);
+            TRANS_LOGW(TRANS_CTRL, "Cancel bind name=%{public}s, channelId=%{public}d",
+                AnonymizeWrapper(tmpName), channel->channelId);
             AnonymizeFree(tmpName);
             extra.result = EVENT_STAGE_RESULT_CANCELED;
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -133,9 +134,7 @@ static int32_t TransServerOnChannelClosed(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
-    }
+    (void)TransLaneMgrDelLane(channelId, channelType, true);
     NotifyQosChannelClosed(channelId, channelType);
     ChannelMsg data = {
         .msgChannelId = channelId,
@@ -245,7 +244,7 @@ static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_
     Anonymize(pkgName, &anonymizePkgName);
     TRANS_LOGI(TRANS_CTRL,
         "trasn server on channel bind. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
-        anonymizePkgName, channelId, channelType);
+        AnonymizeWrapper(anonymizePkgName), channelId, channelType);
     AnonymizeFree(anonymizePkgName);
     return SOFTBUS_OK;
 }

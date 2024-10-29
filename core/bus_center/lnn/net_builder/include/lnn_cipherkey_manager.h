@@ -35,9 +35,9 @@ typedef struct {
 
 int32_t LnnInitCipherKeyManager(void);
 void LnnDeinitCipherKeyManager(void);
-bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, unsigned char *key,
+bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, AesCtrCipherKey *cipherkey,
     int32_t keyLen);
-bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, unsigned char *key, int32_t keyLen);
+bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, AesCtrCipherKey *cipherkey, int32_t keyLen);
 void LoadBleBroadcastKey(void);
 bool IsCipherManagerFindKey(const char *udid);
 bool PackCipherKeySyncMsg(void *json);

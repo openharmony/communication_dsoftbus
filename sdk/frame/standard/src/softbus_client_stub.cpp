@@ -26,6 +26,7 @@
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "securec.h"
+#include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -33,6 +34,8 @@
 #include "client_trans_udp_manager.h"
 
 namespace OHOS {
+static constexpr uint32_t DFX_TIMERS_S = 15;
+
 SoftBusClientStub::SoftBusClientStub()
 {
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] = &SoftBusClientStub::OnChannelOpenedInner;
@@ -48,6 +51,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_NODE_STATUS_CHANGED] = &SoftBusClientStub::OnNodeStatusChangedInner;
     memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_DEVICE_TRUST_CHANGED] = &SoftBusClientStub::OnNodeDeviceTrustedChangeInner;
+    memberFuncMap_[CLIENT_ON_HICHAIN_PROOF_EXCEPTION] = &SoftBusClientStub::OnHichainProofExceptionInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
@@ -116,7 +120,10 @@ int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t t
 
 int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
 {
-    return TransOnChannelOpened(sessionName, info);
+    int32_t id = SetTimer("OnChannelOpened", DFX_TIMERS_S);
+    int32_t ret = TransOnChannelOpened(sessionName, info);
+    CancelTimer(id);
+    return ret;
 }
 
 int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
@@ -540,6 +547,44 @@ int32_t SoftBusClientStub::OnNodeDeviceTrustedChangeInner(MessageParcel &data, M
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnHichainProofExceptionInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t proofLen = 0;
+    if (!data.ReadUint32(proofLen)) {
+        COMM_LOGE(COMM_SDK, "read failed! proofLen=%{public}u", proofLen);
+        return SOFTBUS_NETWORK_PROXY_READINT_FAILED;
+    }
+    char *proofInfo = nullptr;
+    if (proofLen != 0) {
+        proofInfo = (char *)data.ReadRawData(proofLen);
+        if (proofInfo == nullptr) {
+            COMM_LOGE(COMM_SDK, "read proofInfo failed!");
+            return SOFTBUS_NETWORK_READRAWDATA_FAILED;
+        }
+    }
+    uint16_t deviceTypeId = 0;
+    if (!data.ReadUint16(deviceTypeId)) {
+        COMM_LOGE(COMM_SDK, "read failed! deviceTypeId=%{public}hu", deviceTypeId);
+        return SOFTBUS_NETWORK_PROXY_READINT_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!data.ReadInt32(errCode)) {
+        COMM_LOGE(COMM_SDK, "read failed! errCode=%{public}d", errCode);
+        return SOFTBUS_NETWORK_PROXY_READINT_FAILED;
+    }
+    int32_t retReply = OnHichainProofException(pkgName, proofInfo, proofLen, deviceTypeId, errCode);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SDK, "OnHichainProofException write reply failed!");
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t infoTypeLen;
@@ -693,6 +738,12 @@ int32_t SoftBusClientStub::OnNodeDeviceTrustedChange(const char *pkgName, int32_
     uint32_t msgLen)
 {
     return LnnOnNodeDeviceTrustedChange(pkgName, type, msg, msgLen);
+}
+
+int32_t SoftBusClientStub::OnHichainProofException(
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    return LnnOnHichainProofException(pkgName, proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

@@ -67,6 +67,7 @@
         "hitrace",
         "hilog",
         "huks",
+        "i18n",
         "init",
         "ipc",
         "openssl",

@@ -475,19 +475,6 @@ HWTEST_F(WifiDirectUtilsTest, CheckLinkAtDfsChannelConflictTest, TestSize.Level1
 }
 
 /*
- * @tc.name: GetInterfaceIpv6AddrTest
- * @tc.desc: check GetInterfaceIpv6Addr method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectUtilsTest, GetInterfaceIpv6AddrTest, TestSize.Level1)
-{
-    std::string interface = "wlan0";
-    auto ret = WifiDirectUtils::GetInterfaceIpv6Addr(interface);
-    EXPECT_EQ(ret, "");
-}
-
-/*
  * @tc.name: WifiDirectAnonymizeIpTest
  * @tc.desc: check WifiDirectAnonymizeIp method
  * @tc.type: FUNC
@@ -543,10 +530,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeSsidTest, TestSize.Level1)
 HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
 {
     std::string psk = "";
-    ConnectInfo conInfo{};
+    WifiDirectConnectInfo conInfo{};
     ConnEventExtra conEventExtra = { 0 };
     WifiDirectInterfaceMock mock;
-    conInfo.info_.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+    conInfo.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
     DurationStatistic::GetInstance().Record(1, TOTAL_START);
     DurationStatistic::GetInstance().Record(1, TOTAL_END);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));

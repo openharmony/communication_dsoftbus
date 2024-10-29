@@ -39,18 +39,18 @@ extern "C" {
 
 typedef struct {
     uint16_t fileId;
+    uint8_t flags;
     char fileName[NSTACKX_MAX_REMOTE_PATH_LEN];
     char *fullFileName;
     char *remotePath; /* just usefully for sender */
     uint64_t fileSize;
-    uint8_t flags;
     uint64_t startOffset;
 } FileListEntry;
 
 typedef struct FileList {
     FileListEntry *list;
-    uint32_t num;
     char *userData;
+    uint32_t num;
     uint8_t userDataFlag;
     uint8_t noticeFileNameType; /* just usefully for sender */
     uint16_t pathType;
@@ -75,8 +75,8 @@ typedef struct {
     char **remotePath; /* remote file path */
     uint64_t startOffset[NSTACKX_DFILE_MAX_FILE_NUM];
     uint64_t fileSize[NSTACKX_DFILE_MAX_FILE_NUM];
-    uint32_t fileNum;
     char *userData;
+    uint32_t fileNum;
     uint8_t tarFlag;
     uint8_t smallFlag;
     uint8_t noSyncFlag;
@@ -95,9 +95,9 @@ typedef struct {
     const char **files; /* file name */
     const char **remotePath; /* remote file path */
     uint64_t *startOffset;
-    uint32_t fileNum;
     uint64_t *fileSize;
     const char *userData;
+    uint32_t fileNum;
     uint8_t tarFlag;
 } FileListPara;
 

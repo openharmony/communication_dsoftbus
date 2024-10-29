@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t ServerProxyInit(void);
 int32_t RegisterService(const char *name, const struct CommonScvId *svcId);
+int32_t ServerProxyDeInit(void);
 
 #ifdef __cplusplus
 }

@@ -83,6 +83,40 @@ void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)
     connFsm->statisticData.beginJoinLnnTime = LnnUpTimeMs();
 }
 
+static void DfxRecordDeviceInfoExchangeEndTime(const NodeInfo *info)
+{
+    int32_t ret = SOFTBUS_OK;
+    uint64_t timeStamp = 0;
+    LnnEventExtra extra = { 0 };
+    (void)LnnEventExtraInit(&extra);
+    LnnTriggerInfo triggerInfo = { 0 };
+    GetLnnTriggerInfo(&triggerInfo);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
+    char *udidHash = (char *)SoftBusCalloc(SHORT_UDID_HASH_HEX_LEN + 1);
+    if (udidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "udidHash calloc fail");
+        return;
+    }
+    ret = SoftBusGenerateStrHash((uint8_t *)info->deviceInfo.deviceUdid, strlen(info->deviceInfo.deviceUdid),
+        hash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udidhash fail. ret=%{public}d", ret);
+        SoftBusFree(udidHash);
+        return;
+    }
+    ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert bytes to string fail. ret=%{public}d", ret);
+        SoftBusFree(udidHash);
+        return;
+    }
+    extra.peerUdidHash = udidHash;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS, extra);
+    SoftBusFree(udidHash);
+}
+
 static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
     LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, authId=%{public}" PRId64,
@@ -115,7 +149,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
             NodeInfo nodeInfo;
             (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
             (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
-            UpdateDpSameAccount(nodeInfo.accountHash, nodeInfo.deviceInfo.deviceUdid);
+            UpdateDpSameAccount(nodeInfo.accountId, nodeInfo.deviceInfo.deviceUdid);
         }
     } else {
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
@@ -455,7 +489,8 @@ static void NetBuilderConfigInit(void)
         LnnGetNetBuilder()->maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
-        (unsigned char *)&LnnGetNetBuilder()->maxConcurrentCount, sizeof(LnnGetNetBuilder()->maxConcurrentCount)) != SOFTBUS_OK) {
+        (unsigned char *)&LnnGetNetBuilder()->maxConcurrentCount,
+        sizeof(LnnGetNetBuilder()->maxConcurrentCount)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get lnn max conncurent count fail, use default value");
         LnnGetNetBuilder()->maxConcurrentCount = 0;
     }
@@ -571,6 +606,7 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
     if (info != NULL) {
         LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
     }
+    DfxRecordDeviceInfoExchangeEndTime(info);
 }
 
 static void OnDeviceDisconnect(AuthHandle authHandle)

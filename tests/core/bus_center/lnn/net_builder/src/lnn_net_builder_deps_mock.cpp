@@ -731,5 +731,10 @@ int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
 {
     return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
 }
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    return GetNetBuilderDepsInterface()->GetLnnTriggerInfo(triggerInfo);
+}
 } // extern "C"
 } // namespace OHOS

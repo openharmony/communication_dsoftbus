@@ -29,6 +29,7 @@
 #include "lnn_lane_vap_info.h"
 #include <algorithm>
 #include <arpa/inet.h>
+#include <charconv>
 #include <endian.h>
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -36,6 +37,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "softbus_adapter_mem.h"
 
 namespace OHOS::SoftBus {
 std::vector<std::string> WifiDirectUtils::SplitString(const std::string &input, const std::string &delimiter)
@@ -436,6 +438,11 @@ std::string WifiDirectUtils::ChannelListToString(const std::vector<int> &channel
     return stringChannels;
 }
 
+static bool StringToInt(const std::string &channelString, int32_t &result)
+{
+    auto [ptr, ec] = std::from_chars(channelString.data(), channelString.data() + channelString.size(), result);
+    return ec == std::errc{} && ptr == channelString.data() + channelString.size();
+}
 std::vector<int> WifiDirectUtils::StringToChannelList(std::string channels)
 {
     std::vector<int> vectorChannels;
@@ -445,7 +452,10 @@ std::vector<int> WifiDirectUtils::StringToChannelList(std::string channels)
 
     auto values = SplitString(channels, "##");
     for (auto c : values) {
-        vectorChannels.push_back(std::stoi(c));
+        int32_t result = 0;
+        CONN_CHECK_AND_RETURN_RET_LOGE(StringToInt(c, result), std::vector<int>(),
+            CONN_WIFI_DIRECT, "not a int value=%{public}s", c.c_str());
+        vectorChannels.push_back(result);
     }
     return vectorChannels;
 }
@@ -632,5 +642,37 @@ int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetwor
         "remoteNetworkId=%{public}s, get connSubFeature failed", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
     feature = connSubFeature;
     return SOFTBUS_OK;
+}
+
+std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
+{
+    std::string remoteOsVersion;
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, "", CONN_WIFI_DIRECT, "nodeInfo malloc err");
+    auto ret = LnnGetRemoteNodeInfoById(remoteNetworkId, CATEGORY_NETWORK_ID, nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get remote os version failed");
+        SoftBusFree(nodeInfo);
+        return "";
+    }
+    remoteOsVersion = nodeInfo->deviceInfo.deviceVersion;
+    SoftBusFree(nodeInfo);
+    return remoteOsVersion;
+}
+
+int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
+{
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "nodeInfo malloc err");
+    auto ret = LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get screen status failed");
+        SoftBusFree(nodeInfo);
+        return ret;
+    }
+    int screenStatus = nodeInfo->isScreenOn;
+    CONN_LOGI(CONN_WIFI_DIRECT, "remote screen status %{public}d", screenStatus);
+    SoftBusFree(nodeInfo);
+    return screenStatus;
 }
 } // namespace OHOS::SoftBus

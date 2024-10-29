@@ -363,7 +363,7 @@ static int32_t CloseUdpChannel(AppInfo *appInfo, bool isServerSide)
     return SOFTBUS_OK;
 }
 
-static void NotifyWifiByAddScenario(StreamType streamType, int pid)
+void NotifyWifiByAddScenario(StreamType streamType, int32_t pid)
 {
     if (streamType == COMMON_AUDIO_STREAM || streamType == COMMON_VIDEO_STREAM) {
         if (AddScenario(LOCAL_MAC_1, PEER_MAC_1, pid, SM_AUDIO_TYPE) !=0) {
@@ -374,7 +374,7 @@ static void NotifyWifiByAddScenario(StreamType streamType, int pid)
     }
 }
 
-static void NotifyWifiByDelScenario(StreamType streamType, int pid)
+void NotifyWifiByDelScenario(StreamType streamType, int32_t pid)
 {
     if (streamType == COMMON_AUDIO_STREAM || streamType == COMMON_VIDEO_STREAM) {
         if (DelScenario(LOCAL_MAC_1, PEER_MAC_1, pid, SM_AUDIO_TYPE) !=0) {
@@ -1156,7 +1156,11 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
         TRANS_INIT, "g_udpNegLock init failed.");
 
     ret = TransUdpChannelMgrInit();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans udp channel manager init failed.");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "trans udp channel manager init failed.");
+        (void)SoftBusMutexDestroy(&g_udpNegLock);
+        return ret;
+    }
 
     AuthTransListener transUdpCb = {
         .onDataReceived = UdpModuleCb,
@@ -1165,7 +1169,11 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
     };
 
     ret = RegAuthTransListener(MODULE_UDP_INFO, &transUdpCb);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register udp callback to auth failed.");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "register udp callback to auth failed.");
+        (void)SoftBusMutexDestroy(&g_udpNegLock);
+        return ret;
+    }
 
     TRANS_LOGI(TRANS_INIT, "server trans udp channel init success.");
     return SOFTBUS_OK;
@@ -1207,7 +1215,7 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
             ListAdd(&destroyList, &tempNode->node);
             char *anonymizePkgName = NULL;
             Anonymize(pkgName, &anonymizePkgName);
-            TRANS_LOGW(TRANS_CTRL, "add pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+            TRANS_LOGW(TRANS_CTRL, "add pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
             AnonymizeFree(anonymizePkgName);
         }
     }
@@ -1218,9 +1226,9 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
         if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "open udp negotiation failed.");
         }
+        NotifyWifiByDelScenario(udpChannelNode->info.streamType, pid);
         ListDelete(&udpChannelNode->node);
         SoftBusFree(udpChannelNode);
     }
-
     return;
 }

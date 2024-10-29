@@ -123,8 +123,8 @@ typedef struct {
     /* Obsoleted. Use localIfInfo instead. */
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     uint8_t is5GHzBandSupported;
-    uint32_t deviceType;
     uint8_t businessType;
+    uint32_t deviceType;
 } NSTACKX_LocalDeviceInfo;
 
 typedef enum {
@@ -150,17 +150,17 @@ typedef struct {
     uint8_t discoveryMode;      /* discovery mode, e.g. PUBLISH_MODE_PROACTIVE */
     uint32_t advertiseCount;    /* the number of broadcasts to be sent */
     uint32_t advertiseDuration; /* duration of discovery this time */
-    char *businessData;         /* business data in broadcast: {"bData":"xxx"} */
     uint32_t length;            /* the length of business data, include '\0' */
+    char *businessData;         /* business data in broadcast: {"bData":"xxx"} */
 } NSTACKX_DiscoverySettings;
 
 typedef struct {
     uint8_t businessType;
     uint8_t discoveryMode;
-    uint32_t *bcastInterval;
     uint32_t intervalArrLen;
-    char *businessData;
+    uint32_t *bcastInterval;
     uint32_t businessDataLen;
+    char *businessData;
 } DFinderDiscConfig;
 
 typedef struct {
@@ -201,11 +201,11 @@ typedef enum {
 
 /* store the notification config, used with interface: NSTACKX_SendNotification */
 typedef struct {
-    uint8_t businessType;     /* service identify, see enum NSTACKX_BusinessType */
     char *msg;                /* notification data in json format */
     size_t msgLen;            /* strlen of notification data */
     uint16_t *intervalsMs;    /* pointer to intervals to send notification, first element should be 0 */
     uint8_t intervalLen;      /* configured number of intervals */
+    uint8_t businessType;     /* service identify, see enum NSTACKX_BusinessType */
 } NSTACKX_NotificationConfig;
 
 /* Data receive callback type */
@@ -467,11 +467,11 @@ DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySetti
 DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscoveryWithConfig(const DFinderDiscConfig *discConfig);
 
 typedef struct {
-    uint8_t businessType;                                   /* service identify */
     char localNetworkName[NSTACKX_MAX_INTERFACE_NAME_LEN];  /* nic name of local device */
     char remoteIp[NSTACKX_MAX_IP_STRING_LEN];               /* ip of remote device */
     char *businessData;                                     /* business data in unicast: {"bData":"xxx"} */
     uint32_t length;                                        /* the length of business data, include '\0' */
+    uint8_t businessType;                                   /* service identify */
 } NSTACKX_ResponseSettings;
 
 /**

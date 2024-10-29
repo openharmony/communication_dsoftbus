@@ -72,6 +72,11 @@ const DeviceGroupManager *GetGmInstance(void)
     AUTH_LOGI(AUTH_TEST, "GetGmInstance");
     return GetHichainInterface()->GetGmInstance();
 }
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    return GetHichainInterface()->GetLnnTriggerInfo(triggerInfo);
+}
 }
 
 int32_t LnnHichainInterfaceMock::ActionOfProcessData(

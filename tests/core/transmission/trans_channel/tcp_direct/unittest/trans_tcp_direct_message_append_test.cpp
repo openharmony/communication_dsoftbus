@@ -500,7 +500,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest004, TestSize.L
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
         channelId, type);
-    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
 /**
@@ -516,14 +516,14 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest005, TestSize.L
     int32_t fd = TEST_FD;
     int32_t recvLen = 2;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, ConnRecvSocketData).WillOnce(Return(recvLen));
+    EXPECT_CALL(TcpMessageMock, ConnRecvSocketData).WillRepeatedly(Return(recvLen));
 
     int32_t ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
         channelId, type);
-    EXPECT_EQ(SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
 /**
@@ -539,7 +539,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest006, TestSize.L
     int32_t fd = TEST_FD;
     int32_t recvLen = VALIDRECVLEN;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, ConnRecvSocketData).WillOnce(Return(recvLen));
+    EXPECT_CALL(TcpMessageMock, ConnRecvSocketData).WillRepeatedly(Return(recvLen));
 
     int32_t ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1552,12 +1552,13 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     uint32_t flags = FLAG_REPLY;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
+    uint32_t dataLen = 0;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = ProcessMessage(channelId, flags, seq, msg);
+    ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     TransDelSessionConnById(channelId);
@@ -1575,8 +1576,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
     uint32_t flags = FLAG_WIFI;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
+    uint32_t dataLen = 0;
 
-    int32_t ret = ProcessMessage(channelId, flags, seq, msg);
+    int32_t ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 

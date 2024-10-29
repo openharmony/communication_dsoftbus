@@ -62,6 +62,8 @@ public:
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo) = 0;
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
+    virtual void LnnNotifyHichainProofException(
+        const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -91,6 +93,7 @@ public:
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
+    MOCK_METHOD4(LnnNotifyHichainProofException, void(const char *, uint32_t, uint16_t, int32_t));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

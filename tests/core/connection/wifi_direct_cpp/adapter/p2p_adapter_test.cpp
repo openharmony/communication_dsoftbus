@@ -53,8 +53,10 @@ public:
 */
 HWTEST_F(P2pAdapterTest, IsWifiEnableTest, TestSize.Level1)
 {
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, IsWifiActive).WillOnce(Return(1));
     bool flag = P2pAdapter::IsWifiEnable();
-    EXPECT_FALSE(flag);
+    EXPECT_TRUE(flag);
 }
 
 /*
@@ -338,18 +340,9 @@ HWTEST_F(P2pAdapterTest, GetIpAddressTest001, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
     std::string ipString = "127.0.0.X";
-    WifiP2pGroupInfo info;
-    if (strcpy_s(info.interface, sizeof(info.interface), "wlan0") != EOK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "strcpy interfaceName fail");
-        return;
-    }
-    EXPECT_CALL(mock, GetCurrentGroup)
-        .WillOnce(Return(ERROR_WIFI_UNKNOWN))
-        .WillOnce(DoAll(SetArgPointee<0>(info), Return(WIFI_SUCCESS)));
+    EXPECT_CALL(mock, GetCurrentGroup).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     int32_t ret = P2pAdapter::GetIpAddress(ipString);
     EXPECT_EQ(ret, ToSoftBusErrorCode(static_cast<int32_t>(ERROR_WIFI_UNKNOWN)));
-    ret = P2pAdapter::GetIpAddress(ipString);
-    EXPECT_TRUE((ret != SOFTBUS_OK));
 }
 
 /*

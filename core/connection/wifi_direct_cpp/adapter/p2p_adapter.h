@@ -89,6 +89,8 @@ public:
     using GetCoexConflictCodeHook = std::function<int(const char *, int32_t)>;
     static void Register(const GetCoexConflictCodeHook &coexConflictor);
     static int GetCoexConflictCode(const char *ifName, int32_t channelId);
+    static int GetApChannel();
+    static int32_t GetP2pGroupFrequency();
 
 private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_SSID = 0;
