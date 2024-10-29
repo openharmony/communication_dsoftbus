@@ -238,24 +238,17 @@ static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t InitAuthChannelInfo(int32_t authId, AuthChannelInfo **item, AppInfo *appInfo)
+static int32_t InitAuthChannelInfo(int32_t authId, AuthChannelInfo *item, AppInfo *appInfo)
 {
-    *item = CreateAuthChannelInfo(appInfo->myData.sessionName, false);
-    if (*item == NULL) {
-        TRANS_LOGE(TRANS_SVC, "CreateAuthChannelInfo failed, authId=%{public}d", authId);
-        return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
-    }
-    (*item)->authId = authId;
-    appInfo->myData.channelId = (*item)->appInfo.myData.channelId;
-    appInfo->myData.dataConfig = (*item)->appInfo.myData.dataConfig;
-    (*item)->connOpt.socketOption.moduleId = AUTH_RAW_P2P_SERVER;
+    item->authId = authId;
+    appInfo->myData.channelId = item->appInfo.myData.channelId;
+    appInfo->myData.dataConfig = item->appInfo.myData.dataConfig;
+    item->connOpt.socketOption.moduleId = AUTH_RAW_P2P_SERVER;
     if (appInfo->linkType == LANE_HML_RAW) {
-        (*item)->appInfo.linkType = appInfo->linkType;
-        if (memcpy_s((*item)->appInfo.peerData.addr, IP_LEN, appInfo->peerData.addr, IP_LEN) != EOK ||
-            memcpy_s((*item)->appInfo.myData.addr, IP_LEN, appInfo->myData.addr, IP_LEN) != EOK) {
+        item->appInfo.linkType = appInfo->linkType;
+        if (memcpy_s(item->appInfo.peerData.addr, IP_LEN, appInfo->peerData.addr, IP_LEN) != EOK ||
+            memcpy_s(item->appInfo.myData.addr, IP_LEN, appInfo->myData.addr, IP_LEN) != EOK) {
             TRANS_LOGE(TRANS_SVC, "copy clientIp and serverIp fail, authId=%{public}d", authId);
-            SoftBusFree((*item));
-            *item = NULL;
             return SOFTBUS_MEM_ERR;
         }
     }
@@ -278,10 +271,16 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
     }
     int32_t ret = SOFTBUS_OK;
     if (!exists) {
-        ret = InitAuthChannelInfo(authId, &item, appInfo);
+        item = CreateAuthChannelInfo(appInfo->myData.sessionName, false);
+        if (item == NULL) {
+            TRANS_LOGE(TRANS_SVC, "CreateAuthChannelInfo failed, authId=%{public}d", authId);
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_TRANS_AUTH_CREATE_CHANINFO_FAIL;
+        }
+        ret = InitAuthChannelInfo(authId, item, appInfo);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "init auth channel info failed, ret=%{public}d, authId=%{public}d",
-                ret, authId);
+            TRANS_LOGE(TRANS_SVC, "init auth channel info failed, ret=%{public}d, authId=%{public}d", ret, authId);
+            SoftBusFree(item);
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
             return ret;
         }
@@ -295,9 +294,9 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
     }
     ret = CopyPeerAppInfo(appInfo, &(item->appInfo));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "CopyPeerAppInfo failed");
         ListDelete(&item->node);
-        TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}" PRId64, item->appInfo.myData.channelId);
+        TRANS_LOGE(TRANS_CTRL, "copy peer appInfo failed ret=%{public}d, delete channelId=%{public}" PRId64,
+            ret, item->appInfo.myData.channelId);
         SoftBusFree(item);
         g_authChannelList->cnt--;
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -616,6 +615,7 @@ static void OnDisconnect(int32_t authId)
     if (strcmp(dstInfo.appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
         DelAuthMetaManagerByConnectionId(authId);
     }
+    TransAuthCloseChannel(authId, dstInfo.appInfo.linkType, dstInfo.isClient);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
     (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);

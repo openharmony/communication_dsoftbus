@@ -137,9 +137,9 @@ void DeleteNodeFromPcRestrictMap(const char *udidHash)
     return GetCommonInterface()->DeleteNodeFromPcRestrictMap(udidHash);
 }
 
-LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId)
+int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen)
 {
-    return GetCommonInterface()->FindConnectionFsmByRequestId(requestId);
+    return GetCommonInterface()->AuthFailNotifyProofInfo(errCode, errorReturn, errorReturnLen);
 }
 }
 } // namespace OHOS

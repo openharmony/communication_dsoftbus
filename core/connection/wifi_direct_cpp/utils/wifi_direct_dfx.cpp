@@ -61,7 +61,6 @@ void WifiDirectDfx::Clear(uint32_t requestId)
 
 void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &wifiDirectConnectInfo)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "FillConnEventExtra enter");
     SetLinkType(wifiDirectConnectInfo);
     enum StatisticLinkType type = wifiDirectConnectInfo.dfxInfo.linkType;
     if (type == STATISTIC_P2P) {
@@ -108,6 +107,9 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnec
     extra.apChannel = dfxInfo.apChannel;
     CONN_LOGI(CONN_WIFI_DIRECT, "sta=%{public}d, p2p=%{public}d, hml=%{public}d, ap=%{public}d", extra.staChannel,
         extra.p2pChannel, extra.hmlChannel, extra.apChannel);
+    auto remoteOsVersion = WifiDirectUtils::GetRemoteOsVersion(wifiDirectConnectInfo.remoteNetworkId);
+    extra.peerDevVer = remoteOsVersion.c_str();
+    extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 

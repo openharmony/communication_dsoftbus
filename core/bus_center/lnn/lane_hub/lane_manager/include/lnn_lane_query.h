@@ -28,4 +28,3 @@ int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo
 }
 #endif
 #endif // LNN_LANE_QUERY_H
-

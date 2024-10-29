@@ -30,8 +30,6 @@
 #include "wifi_direct_manager.h"
 #include "softbus_socket.h"
 
-#define HML_IP_PREFIX_LEN 7
-#define HML_IP_PREFIX "172.30."
 const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LANE_TYPE_CTRL};
 
 typedef struct {
@@ -359,7 +357,7 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, Lane
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    laneLinkInfo->type = (strncmp(peerIp, HML_IP_PREFIX, HML_IP_PREFIX_LEN) == 0) ? LANE_HML : LANE_P2P;
+    laneLinkInfo->type = IsHmlIpAddr(peerIp) ? LANE_HML : LANE_P2P;
     if (strncpy_s(laneLinkInfo->linkInfo.p2p.connInfo.peerIp, IP_LEN, peerIp, IP_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "strncpy peerIp fail");
         return SOFTBUS_STRCPY_ERR;
