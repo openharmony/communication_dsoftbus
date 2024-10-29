@@ -519,7 +519,6 @@ static int32_t SoftbusStartAdv(int32_t advId, const SoftbusBroadcastParam *param
     g_advChannel[advId].isAdvertising = true;
     SoftBusMutexUnlock(&g_advLock);
     int32_t ret = StartBleAdv(advId, &btAdvId, param, data);
-    DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
     if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, advId=%{public}d, btAdvId=%{public}d", advId, btAdvId);
         return SOFTBUS_LOCK_ERR;
@@ -528,6 +527,7 @@ static int32_t SoftbusStartAdv(int32_t advId, const SoftbusBroadcastParam *param
     g_advChannel[advId].isAdvertising = (ret == SOFTBUS_OK);
     SoftBusMutexUnlock(&g_advLock);
     if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -553,8 +553,8 @@ static int32_t SoftbusStopAdv(int32_t advId)
     g_advChannel[advId].isAdvertising = false;
     SoftBusMutexUnlock(&g_advLock);
     int32_t ret = BleStopAdv(btAdvId);
-    DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
         return ret;
     }
     return SOFTBUS_OK;
