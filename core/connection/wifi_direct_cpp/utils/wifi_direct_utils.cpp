@@ -274,7 +274,7 @@ std::vector<uint8_t> WifiDirectUtils::MacStringToArray(const std::string &macStr
     auto tokens = SplitString(macString, ":");
     for (const auto &token : tokens) {
         size_t idx {};
-        unsigned long result;
+        unsigned long result = 0;
         try {
             result = std::stoul(token, &idx, BASE_HEX);
         } catch (const std::out_of_range& e) {
