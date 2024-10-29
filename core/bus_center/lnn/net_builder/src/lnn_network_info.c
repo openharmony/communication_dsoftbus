@@ -496,12 +496,12 @@ int32_t LnnInitNetworkInfo(void)
     InitWifiDirectCapability();
     int32_t ret = LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "network info register bt state change fail");
+        LNN_LOGE(LNN_BUILDER, "network info register bt state change fail, ret=%{public}d", ret);
         return ret;
     }
     ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail");
+        LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail, ret=%{public}d", ret);
         return ret;
     }
     ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
