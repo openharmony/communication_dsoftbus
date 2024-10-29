@@ -144,7 +144,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
     struct HksBlob keyAlias;
     (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
     EXPECT_TRUE(LnnGenerateKeyByHuks(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGenerateKeyByHuks(&keyAlias) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnGenerateKeyByHuks(&keyAlias) == SOFTBUS_HUKS_ERR);
     EXPECT_TRUE(LnnDeleteKeyByHuks(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnDeleteKeyByHuks(&keyAlias) == SOFTBUS_OK);
     EXPECT_TRUE(LnnEncryptDataByHuks(nullptr, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
