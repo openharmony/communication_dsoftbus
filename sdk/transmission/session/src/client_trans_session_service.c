@@ -1249,10 +1249,8 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         TRANS_LOGI(TRANS_SDK, "Bind timeout Shutdown ok, no delete socket: socket=%{public}d", socket);
         return;
     }
-    ret = ClientDeleteSocketSession(socket);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ClientShutdown delete socket session server: ret=%{public}d", ret);
-    }
+    (void)ClientDeleteSocketSession(socket);
+
     TRANS_LOGI(TRANS_SDK, "Shutdown ok: socket=%{public}d", socket);
 }
 

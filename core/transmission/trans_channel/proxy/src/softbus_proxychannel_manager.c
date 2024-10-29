@@ -376,8 +376,6 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(!IsListEmpty(proxyChannelList), TRANS_CTRL, "proxyChannelList is empty");
-
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyChannelList, ProxyChannelInfo, node) {
