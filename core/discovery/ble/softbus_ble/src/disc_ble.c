@@ -1573,7 +1573,7 @@ static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
         DISC_LOGD(DISC_BLE, "find key");
         return 0;
     }
-    DISC_LOGD(DISC_BLE, "not find key");
+    DISC_LOGW(DISC_BLE, "not find key");
     return 1;
 }
 
