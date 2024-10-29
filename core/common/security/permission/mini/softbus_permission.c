@@ -56,3 +56,11 @@ bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
     (void)pkgName;
     return true;
 }
+
+int32_t CompareString(const char *src, const char *dest, bool regexp)
+{
+    (void)src;
+    (void)dest;
+    (void)regexp;
+    return SOFTBUS_OK;
+}

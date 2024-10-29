@@ -342,7 +342,7 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
         (void)ClientTransProxyDelChannelInfo(channel->channelId);
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGE(TRANS_SDK, "notify session open fail, sessionName=%{public}s.", tmpName);
+        TRANS_LOGE(TRANS_SDK, "notify session open fail, sessionName=%{public}s.", AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         return ret;
     }
@@ -732,6 +732,19 @@ static int32_t ClientTransProxyFirstSliceProcess(
     return SOFTBUS_OK;
 }
 
+static bool IsValidCheckoutProcess(int32_t channelId)
+{
+    ChannelSliceProcessor *processor = NULL;
+    LIST_FOR_EACH_ENTRY(processor, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
+        if (processor->channelId == channelId) {
+            return true;
+        }
+    }
+
+    TRANS_LOGE(TRANS_SDK, "Process not exist.");
+    return false;
+}
+
 static int32_t ClientTransProxyLastSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t channelId)
 {
@@ -752,7 +765,11 @@ static int32_t ClientTransProxyLastSliceProcess(
         TRANS_LOGE(TRANS_SDK, "process packets err");
         return ret;
     }
-    ClientTransProxyClearProcessor(processor);
+
+    if (IsValidCheckoutProcess(channelId)) {
+        ClientTransProxyClearProcessor(processor);
+    }
+
     TRANS_LOGI(TRANS_SDK, "LastSliceProcess ok");
     return ret;
 }

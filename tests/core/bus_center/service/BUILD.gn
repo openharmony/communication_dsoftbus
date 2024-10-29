@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/bus_center"
+dsoftbus_root_path = "../../../.."
 
 ohos_unittest("BusCenterDecisionTest") {
   module_out_path = module_output_path
@@ -129,10 +130,72 @@ ohos_unittest("BusCenterManagerTest") {
   }
   external_deps = bus_center_manager_test_external_deps
 }
+
+ohos_unittest("BusCenterEventTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
+    "unittest/bus_center_event_deps_mock.cpp",
+    "unittest/bus_center_event_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/service/unittest",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/adapter/common/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include/",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface/",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  bus_center_event_test_external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  if (is_standard_system) {
+    bus_center_event_test_external_deps += [
+      "bounds_checking_function:libsec_shared",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
+      "huks:libhukssdk",
+    ]
+  }
+  external_deps = bus_center_event_test_external_deps
+}
 group("unittest") {
   testonly = true
   deps = [
     ":BusCenterDecisionTest",
+    ":BusCenterEventTest",
     ":BusCenterManagerTest",
   ]
 }

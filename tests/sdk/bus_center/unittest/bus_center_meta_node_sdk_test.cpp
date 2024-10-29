@@ -95,7 +95,7 @@ HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_002, TestSize.L
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum = MAX_META_NODE_NUM;
     MetaNodeConfigInfo configInfo;
-    int i;
+    int32_t i;
 
     configInfo.addrNum = 1;
     EXPECT_TRUE(strncpy_s(configInfo.udid, UDID_BUF_LEN, udid, UDID_BUF_LEN) == EOK);

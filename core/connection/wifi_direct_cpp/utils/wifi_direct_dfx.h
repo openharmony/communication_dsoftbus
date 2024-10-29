@@ -32,12 +32,13 @@ public:
         static WifiDirectDfx instance;
         return instance;
     }
-    void DfxRecord(bool success, int32_t reason, const ConnectInfo &connectInfo);
+    void DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo);
     void Record(uint32_t requestId, uint16_t challengeCode);
     void Clear(uint32_t requestId);
-
+    static void SetLinkType(WifiDirectConnectInfo &info);
+    
 private:
-    void ReportConnEventExtra(ConnEventExtra &extra, const ConnectInfo &connectInfo);
+    void ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &connectInfo);
     
     std::map<uint32_t, uint16_t> challengeCodeMap_;
     std::recursive_mutex mutex_;

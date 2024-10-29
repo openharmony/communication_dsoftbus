@@ -17,13 +17,12 @@
 #include <cstring>
 #include "disc_log.h"
 #include "if_softbus_client.h"
-#include "softbus_server_ipc_interface_code.h"
 #include "securec.h"
+#include "softbus_server_ipc_interface_code.h"
 
 using testing::_;
 namespace OHOS {
-RemoteObjectMock::RemoteObjectMock()
-    : IRemoteObject(std::u16string())
+RemoteObjectMock::RemoteObjectMock() : IRemoteObject(std::u16string())
 {
     DISC_LOGI(DISC_TEST, "construct");
 }
@@ -54,8 +53,8 @@ sptr<RemoteObjectMock> RemoteObjectMock::Get()
     return instance_;
 }
 
-bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, int publishId, int subscribeId,
-                                 int reason)
+bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, int32_t publishId, int32_t subscribeId,
+                                 int32_t reason)
 {
     if (descriptor_ != ISoftBusClient::GetDescriptor()) {
         DISC_LOGE(DISC_TEST, "descriptor mismatch");

@@ -1441,7 +1441,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest001, TestSize.Level
  */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest001, TestSize.Level1)
 {
-    int status = TEST_NUMBER_THREE;
+    int32_t status = TEST_NUMBER_THREE;
     ProxyChannelInfo info1;
     ProxyChannelInfo info2;
 
@@ -1505,9 +1505,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest001, TestSiz
  */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest003, TestSize.Level1)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
 
-    int ret = TransRefreshProxyTimesNative(channelId);
+    int32_t ret = TransRefreshProxyTimesNative(channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -1714,7 +1714,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest002, TestSize.Level
  */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest002, TestSize.Level1)
 {
-    int status = 3;
+    int32_t status = 3;
     ProxyChannelInfo info1;
     ProxyChannelInfo info2;
 
@@ -1779,7 +1779,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest002, TestSiz
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize.Level1)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    int ret = TransProxyGetLocalInfo(chan);
+    int32_t ret = TransProxyGetLocalInfo(chan);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     chan->appInfo.appType = APP_TYPE_INNER;

@@ -77,6 +77,10 @@ char *TestGetMsgPack()
         cJSON_Delete(msg);
         return nullptr;
     }
+    if (!AddStringToJsonObject(msg, AUTH_STATE, g_sessionKey)) {
+        cJSON_Delete(msg);
+        return nullptr;
+    }
     char *data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
 
@@ -140,7 +144,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     char *msg = PackRequest(NULL);
     EXPECT_EQ(NULL, msg);
 
-    int res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_sessionName);
+    int32_t res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_sessionName);
     EXPECT_EQ(EOK, res);
     res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
     EXPECT_EQ(EOK, res);
@@ -177,7 +181,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
     ret = UnpackRequest(NULL, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    int res = strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), g_groupid);
+    int32_t res = strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), g_groupid);
     EXPECT_EQ(EOK, res);
     ret = UnpackRequest(json, appInfo);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
@@ -260,7 +264,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReply001, TestSize.Level1)
 HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReplyErrCode001, TestSize.Level1)
 {
     int32_t errCode = -12345;
-    int ret = UnpackReplyErrCode(NULL, NULL);
+    int32_t ret = UnpackReplyErrCode(NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     char *mag = TestGetMsgPack();
@@ -297,7 +301,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackFirstData001, TestSize.Level1)
     appInfo->fastTransDataSize = fastTransDataSize;
     appInfo->fastTransData = (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc";
 
-    int res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), TEST_SESSION_KEY);
+    int32_t res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), TEST_SESSION_KEY);
     EXPECT_EQ(EOK, res);
 
     ret = PackFirstData(appInfo, json);

@@ -41,7 +41,7 @@ void LnnNotifyDeviceVerified(const char *udid)
     return GetLnnConnInterface()->LnnNotifyDeviceVerified(udid);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetLnnConnInterface()->SoftBusGetBtState();
 }
@@ -145,6 +145,12 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 {
     return GetLnnConnInterface()->LnnNotifyOOBEStateChangeEvent(state);
+}
+
+void LnnNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    return GetLnnConnInterface()->LnnNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 }
 } // namespace OHOS

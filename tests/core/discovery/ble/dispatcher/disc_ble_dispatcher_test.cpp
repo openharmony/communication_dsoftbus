@@ -17,8 +17,8 @@
 #include <unistd.h>
 
 #include "disc_ble_dispatcher.h"
-#include "disc_log.h"
 #include "disc_interface.h"
+#include "disc_log.h"
 #include "softbus_errcode.h"
 
 using namespace testing::ext;
@@ -50,8 +50,7 @@ typedef struct {
 
 #define IS_CONCERNA 1
 #define IS_CONCERNB 2
-InterfaceFunCntA g_interfaceFunCntA = {
-    .publishCntA = 0,
+InterfaceFunCntA g_interfaceFunCntA = { .publishCntA = 0,
     .startScanCntA = 0,
     .unpublishCntA = 0,
     .stopScanCntA = 0,
@@ -60,8 +59,7 @@ InterfaceFunCntA g_interfaceFunCntA = {
     .unsubscribeCntA = 0,
     .stopAdvertiseCntA = 0,
     .linkStatusChangedCntA = 0,
-    .updateLocalDeviceInfoCntA = 0
-};
+    .updateLocalDeviceInfoCntA = 0 };
 
 InterfaceFunCntB g_interfaceFunCntB = {
     .publishCntB = 0,
@@ -252,14 +250,12 @@ static PublishOption g_pOption0 = {
     .ranging = true
 };
 
-static SubscribeOption g_sOption0 = {
-    .freq = 1,
+static SubscribeOption g_sOption0 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
-    .capabilityBitmap = {0},
+    .capabilityBitmap = { 0 },
     .capabilityData = nullptr,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 static PublishOption g_pOption1 = {
     .freq = 1,
@@ -269,14 +265,12 @@ static PublishOption g_pOption1 = {
     .ranging = true
 };
 
-static SubscribeOption g_sOption1 = {
-    .freq = 1,
+static SubscribeOption g_sOption1 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
-    .capabilityBitmap = {1},
+    .capabilityBitmap = { 1 },
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 static PublishOption g_pOption2 = {
     .freq = 1,
@@ -286,14 +280,12 @@ static PublishOption g_pOption2 = {
     .ranging = true
 };
 
-static SubscribeOption g_sOption2 = {
-    .freq = 1,
+static SubscribeOption g_sOption2 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
-    .capabilityBitmap = {2},
+    .capabilityBitmap = { 2 },
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 static PublishOption g_pOption3 = {
     .freq = 1,
@@ -303,21 +295,17 @@ static PublishOption g_pOption3 = {
     .ranging = true
 };
 
-static SubscribeOption g_sOption3 = {
-    .freq = 1,
+static SubscribeOption g_sOption3 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
-    .capabilityBitmap = {3},
+    .capabilityBitmap = { 3 },
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 class DiscBleDispatcherTest : public testing::Test {
 public:
-    DiscBleDispatcherTest()
-    {}
-    ~DiscBleDispatcherTest()
-    {}
+    DiscBleDispatcherTest() { }
+    ~DiscBleDispatcherTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -360,29 +348,25 @@ static DiscoveryBleDispatcherInterface g_interfaceB = {
     .mediumInterface = &g_discoveryFuncB,
 };
 
-void DiscBleDispatcherTest::SetUpTestCase(void)
-{}
+void DiscBleDispatcherTest::SetUpTestCase(void) { }
 
-void DiscBleDispatcherTest::TearDownTestCase(void)
-{}
+void DiscBleDispatcherTest::TearDownTestCase(void) { }
 
-void DiscBleDispatcherTest::SetUp(void)
-{}
+void DiscBleDispatcherTest::SetUp(void) { }
 
-void DiscBleDispatcherTest::TearDown(void)
-{}
+void DiscBleDispatcherTest::TearDown(void) { }
 
 /*
-* @tc.name: testDiscPublish001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testDiscPublish001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 {
     printf("testDiscPublish001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -426,16 +410,16 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 };
 
 /*
-* @tc.name: testDiscovery001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testDiscovery001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testDiscovery001, TestSize.Level1)
 {
     printf("testDiscovery001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -479,16 +463,16 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery001, TestSize.Level1)
 };
 
 /*
-* @tc.name: testDiscPublish002
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testDiscPublish002
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 {
     printf("testDiscPublish002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -532,16 +516,16 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 };
 
 /*
-* @tc.name: testDiscovery002
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testDiscovery002
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testDiscovery002, TestSize.Level1)
 {
     printf("testDiscovery002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -585,16 +569,16 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery002, TestSize.Level1)
 };
 
 /*
-* @tc.name: testDiscPublish003
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testDiscPublish003
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 {
     printf("testDiscDispatcher003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -638,16 +622,16 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 };
 
 /*
-* @tc.name: testDiscovery003
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testDiscovery003
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testDiscovery003, TestSize.Level1)
 {
     printf("testDiscovery003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -691,11 +675,11 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery003, TestSize.Level1)
 };
 
 /*
-* @tc.name: testLinkStatusChanged001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testLinkStatusChanged001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
 {
     printf("testLinkStatusChanged001\r\n");
@@ -710,11 +694,11 @@ HWTEST_F(DiscBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
 };
 
 /*
-* @tc.name: testUpdateLocalDeviceInfo001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testUpdateLocalDeviceInfo001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
 {
     printf("testUpdateLocalDeviceInfo001\r\n");
@@ -729,11 +713,11 @@ HWTEST_F(DiscBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
 }
 
 /*
-* @tc.name: BleDispatchPublishOption001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BleDispatchPublishOption001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "BleDispatchPublishOption001");
@@ -743,11 +727,11 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
 }
 
 /*
-* @tc.name: BleDispatchSubscribeOption001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BleDispatchSubscribeOption001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOption001");
@@ -757,11 +741,11 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscBleInit001
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscBleInit001
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, DiscBleInit001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleInit001");
@@ -770,11 +754,11 @@ HWTEST_F(DiscBleDispatcherTest, DiscBleInit001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscBleInit002
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscBleInit002
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscBleDispatcherTest, DiscBleInit002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscBleInit002");
@@ -783,4 +767,4 @@ HWTEST_F(DiscBleDispatcherTest, DiscBleInit002, TestSize.Level1)
     DiscoveryFuncInterface *interface = DiscBleInit(&g_discMgrMediumCb);
     EXPECT_EQ(interface, nullptr);
 }
-}
+} // namespace OHOS

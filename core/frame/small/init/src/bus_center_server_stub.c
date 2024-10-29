@@ -542,7 +542,7 @@ int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply)
 
 int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply)
 {
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char *)ReadString(req, &size);
     if (pkgName == NULL || size >= PKG_NAME_SIZE_MAX) {
         LNN_LOGE(LNN_STATE, "read pkgName failed");
@@ -579,7 +579,7 @@ int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply)
 
 int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply)
 {
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char *)ReadString(req, &size);
     if (pkgName == NULL || size >= PKG_NAME_SIZE_MAX) {
         LNN_LOGE(LNN_STATE, "read pkgName failed");
@@ -608,7 +608,7 @@ int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply)
 
 int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply)
 {
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char *)ReadString(req, &size);
     if (pkgName == NULL || size >= PKG_NAME_SIZE_MAX) {
         LNN_LOGE(LNN_STATE, "read pkgName failed");

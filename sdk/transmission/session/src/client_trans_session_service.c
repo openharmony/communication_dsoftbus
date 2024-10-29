@@ -31,6 +31,7 @@
 #include "dfs_session.h"
 #include "inner_session.h"
 #include "securec.h"
+#include "session_ipc_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
@@ -110,7 +111,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, tmpName);
+    TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "init softbus err");
@@ -151,7 +152,7 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, tmpName);
+    TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, AnonymizeWrapper(tmpName));
 
     int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
@@ -162,7 +163,8 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 
     ret = ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "delete session server failed, sessionName=%{public}s, ret=%{public}d.", tmpName, ret);
+        TRANS_LOGE(TRANS_SDK, "delete session server failed, sessionName=%{public}s, ret=%{public}d.",
+            AnonymizeWrapper(tmpName), ret);
         DeleteFileListener(sessionName);
         AnonymizeFree(tmpName);
         return ret;
@@ -179,21 +181,21 @@ static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSess
     if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX - 1)) {
         char *tmpMyName = NULL;
         Anonymize(mySessionName, &tmpMyName);
-        TRANS_LOGE(TRANS_SDK, "invalid mySessionName. tmpMyName=%{public}s", tmpMyName);
+        TRANS_LOGE(TRANS_SDK, "invalid mySessionName. tmpMyName=%{public}s", AnonymizeWrapper(tmpMyName));
         AnonymizeFree(tmpMyName);
         return SOFTBUS_TRANS_INVALID_SESSION_NAME;
     }
     if (!IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX - 1)) {
         char *tmpPeerName = NULL;
         Anonymize(peerSessionName, &tmpPeerName);
-        TRANS_LOGE(TRANS_SDK, "invalid peerSessionName. tmpPeerName=%{public}s", tmpPeerName);
+        TRANS_LOGE(TRANS_SDK, "invalid peerSessionName. tmpPeerName=%{public}s", AnonymizeWrapper(tmpPeerName));
         AnonymizeFree(tmpPeerName);
         return SOFTBUS_TRANS_INVALID_SESSION_NAME;
     }
     if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX - 1)) {
         char *tmpPeerNetworkId = NULL;
         Anonymize(peerNetworkId, &tmpPeerNetworkId);
-        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId. tmpPeerNetworkId=%{public}s", tmpPeerNetworkId);
+        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId. tmpPeerNetworkId=%{public}s", AnonymizeWrapper(tmpPeerNetworkId));
         AnonymizeFree(tmpPeerNetworkId);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -220,7 +222,7 @@ static void PrintSessionName(const char *mySessionName, const char *peerSessionN
     Anonymize(mySessionName, &tmpMyName);
     Anonymize(peerSessionName, &tmpPeerName);
     TRANS_LOGI(TRANS_SDK, "OpenSession: mySessionName=%{public}s, peerSessionName=%{public}s",
-        tmpMyName, tmpPeerName);
+        AnonymizeWrapper(tmpMyName), AnonymizeWrapper(tmpPeerName));
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
 }
@@ -407,7 +409,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     int32_t sessionId;
     int32_t ret = ClientAddAuthSession(sessionName, &sessionId);
@@ -646,7 +648,7 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return TransSetFileReceiveListener(sessionName, recvListener, rootDir);
 }
@@ -664,7 +666,7 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return TransSetFileSendListener(sessionName, sendListener);
 }
@@ -875,39 +877,71 @@ int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uin
     return g_SessionOptionArr[option].readFunc(channelId, type, optionValue, valueSize);
 }
 
+bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
+{
+    if ((sessionName == NULL) || (newSessionName == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return false;
+    }
+    const char tag = '-';
+    const char *posName = strchr(sessionName, tag);
+    if (posName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "sdk not find bundlename");
+        return false;
+    }
+    const char *posId = strchr(posName + 1, tag);
+    if (posId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "sdk not find appid");
+        return false;
+    }
+    size_t len = posId - sessionName;
+    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, len) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "copy sessionName failed");
+        return false;
+    }
+    return true;
+}
+
 int CreateSocket(const char *pkgName, const char *sessionName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         TRANS_LOGE(TRANS_SDK, "invalid pkgName or sessionName");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "init softbus err");
         return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
-
     if (CheckPackageName(pkgName) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "invalid pkg name");
         return SOFTBUS_INVALID_PKGNAME;
     }
-
-    int ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName);
+    char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
+    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, strlen(sessionName)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "copy session name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (CheckIsNormalApp(sessionName)) {
+        if (!RemoveAppIdFromSessionName(sessionName, newSessionName)) {
+            TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
+            return SOFTBUS_TRANS_NOT_FIND_APPID;
+        }
+    }
+    int32_t ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d.", ret);
+        TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d", ret);
         return ret;
     }
-
     ret = ServerIpcCreateSessionServer(pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "ok, SocketServer is already created in server");
         return SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
-        SocketServerStateUpdate(sessionName);
+        SocketServerStateUpdate(newSessionName);
         TRANS_LOGE(TRANS_SDK, "createSocketServer failed, ret=%{public}d", ret);
-        (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
+        (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, newSessionName);
         return ret;
     }
     TRANS_LOGD(TRANS_SDK, "ok");

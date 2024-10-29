@@ -29,6 +29,8 @@ extern "C" {
 #define LNN_DEFAULT_PKG_NAME "MODULE_LNN"
 #define DEVICE_TYPE_SIZE_LEN 3
 #define HB_SHORT_UDID_HASH_HEX_LEN 16
+#define BROADCAST_INTERVAL_DEFAULT 50
+#define MAX_TIME_LATENCY 30000
 
 typedef enum {
     EVENT_SCENE_LNN = 1,
@@ -46,6 +48,12 @@ typedef enum {
     EVENT_STAGE_LNN_LANE_SELECT_START = 7,
     EVENT_STAGE_LNN_LANE_SELECT_END = 8,
     EVENT_STAGE_LNN_CTRL_BLE = 9,
+    EVENT_STAGE_LNN_DATA_LEVEL = 10,
+    EVENT_STAGE_LNN_BLE_TRIGGER = 11,
+    EVENT_STAGE_LNN_WIFI_TRIGGER = 12,
+    EVENT_STAGE_LNN_SCREEN_STATE_CHANGED = 13,
+    EVENT_STAGE_LNN_USER_SWITCHED = 14,
+    EVENT_STAGE_LNN_UPDATE_ACCOUNT = 15,
 } LnnEventLnnStage;
 
 typedef enum {
@@ -60,11 +68,44 @@ typedef enum {
     EVENT_STAGE_AUTH_DEVICE_INFO_POST = 9,
     EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS = 10,
     EVENT_STAGE_JOIN_LNN_END = 11,
+    EVENT_STAGE_JOIN_LNN_RECEIVE_BROADCAST = 12,
+    EVENT_STAGE_JOIN_LNN_DEVICE_FOUND = 13,
 } LnnEventJoinLnnStage;
 
 typedef enum {
     EVENT_STAGE_LEAVE_LNN = 1,
 } LnnEventLeaveLnnStage;
+
+typedef enum {
+    DB_TRIGGER = 0,
+    DM_TRIGGER = 1,
+    UPDATE_ACCOUNT = 2,
+    SCREEN_ON = 3,
+    SCREEN_OFF = 4,
+    BLE_TURN_ON = 5,
+    BLE_TURN_OFF = 6,
+    BLE_MULTISCREEN_COLLABORATION = 7,
+    BLE_LANE_VAP_CHANGED = 8,
+    USER_SWITCHED = 9,
+    MSDP_MOVEMENT_AND_STATIONARY = 10,
+    TRIGGER_CLOUD_SYNC_HEARTBEAT = 11,
+    WIFI_STATE_CHANGED = 12,
+    WIFI_USER_FOREGROUND = 13,
+    WIFI_NET_LOCK_STATE_CHANGED = 14,
+    WIFI_FACK_OOBE = 15,
+    WIFI_NIGHT_MODE_CHANGED = 16,
+    WIFI_NET_ACCOUNT_STATE_CHANGED = 17,
+    WIFI_IP_ADDR_CHANGED = 18,
+    WIFI_GROUP_CREATED = 19,
+    WIFI_DEVICE_BOUND = 20,
+    OTHER,
+}LnnTriggerReason;
+
+typedef struct {
+    uint64_t triggerTime;        // TRIGGER_LNN_TIME
+    int32_t deviceCnt;           // DEVICE_CNT
+    int32_t triggerReason;       // TRIGGER_REASON
+}LnnTriggerInfo;
 
 typedef enum {
     DISC_SERVER_PUBLISH = 1,
@@ -112,6 +153,11 @@ typedef struct {
     int32_t chanReqId;          // CHAN_REQ_ID
     int32_t connReqId;          // CONN_REQ_ID
     int32_t strategy;           // STRATEGY_FOR_LNN_BLE
+    uint64_t timeLatency;       // TIME_LATENCY
+    int32_t triggerReason;      // TRIGGER_REASON
+    int64_t authSeq;            // AUTH_SEQ
+    int32_t onlineDevCnt;       // ONLINE_DEV_CNT_FOR_LNN_TIME_LATENCY
+    int32_t interval;           // BROADCAST_INTERVAL
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

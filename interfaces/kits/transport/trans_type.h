@@ -21,6 +21,7 @@ extern "C" {
 #endif
 
 #define MAX_MAC_LEN  18
+#define MAX_IP_LEN  46
 #define MAX_PATH_LEN 4096
 
 /**

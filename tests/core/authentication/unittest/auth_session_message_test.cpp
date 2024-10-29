@@ -85,7 +85,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(json, FAST_AUTH, "jsontest");
     OptString(json, DEVICE_ID, target, 10, "");
     OptString(json, FAST_AUTH, target, 10, "");
-    int val = 0;
+    int32_t val = 0;
     OptInt(json, P2P_ROLE, &val, 0);
     JSON_AddInt32ToObject(json, SOFTBUS_VERSION_TAG, 123);
     OptInt(json, SOFTBUS_VERSION_TAG, &val, 0);
@@ -102,7 +102,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
     EXPECT_TRUE(obj != nullptr);
     AuthDeviceKeyInfo deviceCommKey;
     (void)memset_s(&deviceCommKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    ASSERT_TRUE(memcpy_s(deviceCommKey.deviceKey, SESSION_KEY_LENGTH,
+    EXPECT_TRUE(memcpy_s(deviceCommKey.deviceKey, SESSION_KEY_LENGTH,
         DEVICE_KEY, strlen(DEVICE_KEY)) == EOK);
     deviceCommKey.keyLen = 5;
     deviceCommKey.keyIndex = 12345;
@@ -202,7 +202,7 @@ HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Leve
     EXPECT_TRUE(obj != nullptr);
     JSON_AddStringToObject(obj, FAST_AUTH, encryptedFastAuth);
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
-    ASSERT_TRUE(memcpy_s(info.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     UnpackFastAuth(obj, &info);
     info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
@@ -376,19 +376,19 @@ HWTEST_F(AuthSessionMessageTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
     EXPECT_TRUE(json != nullptr);
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ASSERT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN,
+    EXPECT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN,
         INVALID_UNIFIED_NAME, strlen(INVALID_UNIFIED_NAME)) == EOK);
-    ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, INVALID_UDID, strlen(INVALID_UDID)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, INVALID_UDID, strlen(INVALID_UDID)) == EOK);
     EXPECT_TRUE(PackCommonDevInfo(json, &info, true) == SOFTBUS_OK);
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ASSERT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN,
+    EXPECT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN,
         UNIFIED_NAME, strlen(UNIFIED_NAME)) == EOK);
-    ASSERT_TRUE(memcpy_s(info.networkId, NETWORK_ID_BUF_LEN,
+    EXPECT_TRUE(memcpy_s(info.networkId, NETWORK_ID_BUF_LEN,
         NETWORK_ID_TEST, strlen(NETWORK_ID_TEST)) == EOK);
-    ASSERT_TRUE(memcpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN,
+    EXPECT_TRUE(memcpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN,
         DEVICE_NAME_TEST, strlen(DEVICE_NAME_TEST)) == EOK);
     info.deviceInfo.deviceTypeId = 12;
-    ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     EXPECT_TRUE(PackCommonDevInfo(json, &info, false) == SOFTBUS_OK);
     JSON_Delete(json);
 }
@@ -409,10 +409,10 @@ HWTEST_F(AuthSessionMessageTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
     (void)JSON_AddStringToObject(json, PUB_MAC, "pubMac");
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ASSERT_TRUE(memcpy_s(info.cipherInfo.key, SESSION_KEY_LENGTH, KEY_TEST, strlen(KEY_TEST)) == EOK);
-    ASSERT_TRUE(memcpy_s(info.cipherInfo.iv, BROADCAST_IV_LEN, IV_TEST, strlen(IV_TEST)) == EOK);
-    ASSERT_TRUE(memcpy_s(info.rpaInfo.peerIrk, LFINDER_IRK_LEN, PEER_IRK, PEER_IRK_LEN) == EOK);
-    ASSERT_TRUE(memcpy_s(info.rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN,
+    EXPECT_TRUE(memcpy_s(info.cipherInfo.key, SESSION_KEY_LENGTH, KEY_TEST, strlen(KEY_TEST)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.cipherInfo.iv, BROADCAST_IV_LEN, IV_TEST, strlen(IV_TEST)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.rpaInfo.peerIrk, LFINDER_IRK_LEN, PEER_IRK, PEER_IRK_LEN) == EOK);
+    EXPECT_TRUE(memcpy_s(info.rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN,
         PUBLIC_ADDRESS, PUBLIC_ADDRESS_LEN) == EOK);
     UnpackCipherRpaInfo(json, &info);
     JSON_Delete(json);
@@ -437,7 +437,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
     (void)JSON_AddStringToObject(json, IRK, "peerIrk");
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ASSERT_TRUE(memcpy_s(info.staticCapability, STATIC_CAP_LEN, STATIC_CAPABILITY, CAPABILITY_LEN) == EOK);
+    EXPECT_TRUE(memcpy_s(info.staticCapability, STATIC_CAP_LEN, STATIC_CAPABILITY, CAPABILITY_LEN) == EOK);
     UnpackWifiDirectInfo(json, &info, false);
     JSON_AddInt32ToObject(json, STATIC_CAP_LENGTH, 10);
     UnpackWifiDirectInfo(json, &info, false);
@@ -445,7 +445,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
     UnpackWifiDirectInfo(json, &info, false);
     JSON_AddStringToObject(json, PTK, "encodePtk");
     UnpackWifiDirectInfo(json, &info, false);
-    ASSERT_TRUE(memcpy_s(info.remotePtk, PTK_DEFAULT_LEN, REMOTE_PTK, strlen(REMOTE_PTK)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.remotePtk, PTK_DEFAULT_LEN, REMOTE_PTK, strlen(REMOTE_PTK)) == EOK);
     UnpackWifiDirectInfo(json, &info, false);
     UnpackCommon(json, &info, SOFTBUS_OLD_V1, true);
     JSON_AddStringToObject(json, DEVICE_TYPE, "TV");
@@ -661,7 +661,6 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     SoftBusVersion version = SOFTBUS_NEW_V1;
-    ASSERT_NE(obj, NULL);
     if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) ||
         !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
         !JSON_AddInt32ToObject(obj, "BUS_MIN_VERSION", (int32_t)1) ||
@@ -865,7 +864,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
     PackNormalizedKey(obj, &info);
     info.normalizedKey = &sessionKey;
     PackNormalizedKey(obj, &info);
-    ASSERT_TRUE(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN,
+    EXPECT_TRUE(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN,
         UUID_TEST, strlen(UUID_TEST)) == EOK);
     PackNormalizedKey(obj, &info);
     EXPECT_EQ(SOFTBUS_OK, PackNormalizedKeyValue(obj, &sessionKey));
@@ -915,7 +914,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1
     UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
     info.isServer = true;
     info.normalizedKey = nullptr;
-    ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
     info.isConnectServer = true;
     EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));

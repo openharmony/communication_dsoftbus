@@ -126,6 +126,18 @@ int32_t ISoftBusClient::OnNodeDeviceTrustedChange(const char *pkgName, int32_t t
     return SOFTBUS_OK;
 }
 
+int32_t ISoftBusClient::OnHichainProofException(
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    (void)pkgName;
+    (void)proofInfo;
+    (void)proofLen;
+    (void)deviceTypeId;
+    (void)errCode;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
 int32_t ISoftBusClient::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");

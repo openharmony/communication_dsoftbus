@@ -16,10 +16,10 @@
 #include "hilog_mock.h"
 
 namespace {
-constexpr int ARG_COUNT = 1;
+constexpr int32_t ARG_COUNT = 1;
 }
 
-int HilogMock::HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
+int32_t HilogMock::HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
 {
     return 0;
 }
@@ -33,12 +33,12 @@ HilogMock::~HilogMock()
     mock.store(nullptr);
 }
 
-int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
+int32_t HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
 {
     char *args;
     va_list va_args;
     va_start(va_args, fmt);
-    for (int i = 0; i < ARG_COUNT; ++i) {
+    for (int32_t i = 0; i < ARG_COUNT; ++i) {
         args = va_arg(va_args, char *);
     }
     va_end(va_args);
@@ -46,7 +46,7 @@ int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *ta
 }
 
 #ifdef HILOG_RAWFORMAT
-int HiLogPrintDictNew(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+int32_t HiLogPrintDictNew(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
     const unsigned int uuid, const unsigned int fmtOffset, const char *fmt, ...)
 {
     (void)uuid;
@@ -54,7 +54,7 @@ int HiLogPrintDictNew(const LogType type, const LogLevel level, const unsigned i
     char *args;
     va_list va_args;
     va_start(va_args, fmt);
-    for (int i = 0; i < ARG_COUNT; ++i) {
+    for (int32_t i = 0; i < ARG_COUNT; ++i) {
         args = va_arg(va_args, char *);
     }
     va_end(va_args);

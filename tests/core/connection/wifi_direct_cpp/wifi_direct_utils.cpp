@@ -36,6 +36,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "softbus_adapter_mem.h"
 
 namespace OHOS::SoftBus {
 std::vector<std::string> WifiDirectUtils::SplitString(const std::string &input, const std::string &delimiter)
@@ -64,7 +65,7 @@ uint32_t WifiDirectUtils::BytesToInt(const uint8_t *data, uint32_t size)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(size <= sizeof(uint32_t), 0, CONN_WIFI_DIRECT, "data len invalid");
     uint32_t result = 0;
-    int res = memcpy_s(&result, sizeof(result), data, size);
+    int32_t res = memcpy_s(&result, sizeof(result), data, size);
     CONN_CHECK_AND_RETURN_RET_LOGW(res == EOK, 0, CONN_WIFI_DIRECT, "copy failed");
     return le32toh(result);
 }
@@ -79,7 +80,7 @@ void WifiDirectUtils::IntToBytes(uint32_t data, uint32_t len, std::vector<uint8_
     out.insert(out.end(), result.begin(), result.end());
 }
 
-static constexpr int BYTE_HEX_BUF_LEN = 4;
+static constexpr int32_t BYTE_HEX_BUF_LEN = 4;
 std::string WifiDirectUtils::ToString(const std::vector<uint8_t> &input)
 {
     char buf[BYTE_HEX_BUF_LEN] {};
@@ -91,7 +92,7 @@ std::string WifiDirectUtils::ToString(const std::vector<uint8_t> &input)
     return result;
 }
 
-static constexpr int BYTE_HEX_SIZE = 2;
+static constexpr int32_t BYTE_HEX_SIZE = 2;
 std::vector<uint8_t> WifiDirectUtils::ToBinary(const std::string &input)
 {
     std::vector<uint8_t> result;
@@ -104,17 +105,17 @@ std::vector<uint8_t> WifiDirectUtils::ToBinary(const std::string &input)
     return result;
 }
 
-bool WifiDirectUtils::Is2GBand(int frequency)
+bool WifiDirectUtils::Is2GBand(int32_t frequency)
 {
     return frequency >= FREQUENCY_2G_FIRST && frequency <= FREQUENCY_2G_LAST;
 }
 
-bool WifiDirectUtils::Is5GBand(int frequency)
+bool WifiDirectUtils::Is5GBand(int32_t frequency)
 {
     return frequency >= FREQUENCY_5G_FIRST && frequency <= FREQUENCY_5G_LAST;
 }
 
-int WifiDirectUtils::ChannelToFrequency(int channel)
+int32_t WifiDirectUtils::ChannelToFrequency(int32_t channel)
 {
     if (channel >= CHANNEL_2G_FIRST && channel <= CHANNEL_2G_LAST) {
         return (channel - CHANNEL_2G_FIRST) * FREQUENCY_STEP + FREQUENCY_2G_FIRST;
@@ -125,7 +126,7 @@ int WifiDirectUtils::ChannelToFrequency(int channel)
     }
 }
 
-int WifiDirectUtils::FrequencyToChannel(int frequency)
+int32_t WifiDirectUtils::FrequencyToChannel(int32_t frequency)
 {
     if (Is2GBand(frequency)) {
         return (frequency - FREQUENCY_2G_FIRST) / FREQUENCY_STEP + CHANNEL_2G_FIRST;
@@ -136,12 +137,12 @@ int WifiDirectUtils::FrequencyToChannel(int frequency)
     }
 }
 
-int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
+int32_t WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
 {
     char udid[UDID_BUF_LEN] {};
-    int ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
+    int32_t ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret = %{public}d", ret);
-    int channelIdLnn = 0;
+    int32_t channelIdLnn = 0;
     ret = LnnGetRecommendChannel(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
@@ -151,7 +152,7 @@ int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
 std::string WifiDirectUtils::NetworkIdToUuid(const std::string &networkId)
 {
     char uuid[UUID_BUF_LEN] {};
-    int ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_UUID, uuid, UUID_BUF_LEN);
+    int32_t ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_UUID, uuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get uuid failed");
     return uuid;
 }
@@ -180,7 +181,7 @@ std::string WifiDirectUtils::GetLocalUuid()
     return uuid;
 }
 
-static constexpr int PTK_128BIT_LEN = 16;
+static constexpr int32_t PTK_128BIT_LEN = 16;
 std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetworkId)
 {
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
@@ -235,7 +236,7 @@ bool WifiDirectUtils::IsDeviceOnline(const std::string &remoteNetworkId)
     return LnnGetOnlineStateById(remoteNetworkId.c_str(), CATEGORY_NETWORK_ID);
 }
 
-static constexpr int MAC_BYTE_HEX_SIZE = 4;
+static constexpr int32_t MAC_BYTE_HEX_SIZE = 4;
 std::string WifiDirectUtils::MacArrayToString(const std::vector<uint8_t> &macArray)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(!macArray.empty(), "", CONN_WIFI_DIRECT, "mac empty");
@@ -251,13 +252,13 @@ std::string WifiDirectUtils::MacArrayToString(const std::vector<uint8_t> &macArr
     return macString;
 }
 
-std::string WifiDirectUtils::MacArrayToString(const uint8_t *mac, int size)
+std::string WifiDirectUtils::MacArrayToString(const uint8_t *mac, int32_t size)
 {
     std::vector<uint8_t> macArray(mac, mac + size);
     return MacArrayToString(macArray);
 }
 
-static constexpr int BASE_HEX = 16;
+static constexpr int32_t BASE_HEX = 16;
 std::vector<uint8_t> WifiDirectUtils::MacStringToArray(const std::string &macString)
 {
     std::vector<uint8_t> array;
@@ -275,7 +276,7 @@ std::vector<uint8_t> WifiDirectUtils::GetInterfaceMacAddr(const std::string &int
     struct ifreq ifr { };
     std::vector<uint8_t> macArray;
 
-    int ret = strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), interface.c_str());
+    int32_t ret = strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), interface.c_str());
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, macArray, CONN_WIFI_DIRECT, "copy interface name failed");
     int32_t fd = 0;
     CONN_CHECK_AND_RETURN_RET_LOGW(fd > 0, macArray, CONN_WIFI_DIRECT, "open socket failed");
@@ -335,7 +336,7 @@ std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
     return ipv4Infos;
 }
 
-int WifiDirectUtils::CompareIgnoreCase(const std::string &left, const std::string &right)
+int32_t WifiDirectUtils::CompareIgnoreCase(const std::string &left, const std::string &right)
 {
     std::string leftLower = left;
     std::transform(left.begin(), left.end(), leftLower.begin(), ::tolower);
@@ -462,7 +463,7 @@ WifiDirectRole WifiDirectUtils::ToWifiDirectRole(LinkInfo::LinkMode mode)
 
 void WifiDirectUtils::ShowLinkInfoList(const std::string &banana, const std::vector<LinkInfo> &inkList)
 {
-    int count = 0;
+    int32_t count = 0;
     for (const auto &info : inkList) {
         CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s[%{public}d]: name=%{public}s, mode=%{public}d", banana.c_str(), count,
                   info.GetLocalInterface().c_str(), info.GetLocalLinkMode());
@@ -470,12 +471,12 @@ void WifiDirectUtils::ShowLinkInfoList(const std::string &banana, const std::vec
     }
 }
 
-enum WifiDirectBandWidth WifiDirectUtils::BandWidthNumberToEnum(int bandWidth)
+enum WifiDirectBandWidth WifiDirectUtils::BandWidthNumberToEnum(int32_t bandWidth)
 {
     return bandWidth >= BAND_WIDTH_160M_NUMBER ? BAND_WIDTH_160M : BAND_WIDTH_80M;
 }
 
-int WifiDirectUtils::BandWidthEnumToNumber(WifiDirectBandWidth bandWidth)
+int32_t WifiDirectUtils::BandWidthEnumToNumber(WifiDirectBandWidth bandWidth)
 {
     switch (bandWidth) {
         case BAND_WIDTH_160M:
@@ -578,4 +579,35 @@ int32_t WifiDirectUtils::GetDeviceType()
     return deviceTypeId;
 }
 
+std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
+{
+    std::string remoteOsVersion;
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, "", CONN_WIFI_DIRECT, "nodeInfo malloc err");
+    auto ret = LnnGetRemoteNodeInfoById(remoteNetworkId, CATEGORY_NETWORK_ID, nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get remote os version failed");
+        SoftBusFree(nodeInfo);
+        return "";
+    }
+    remoteOsVersion = nodeInfo->deviceInfo.deviceVersion;
+    SoftBusFree(nodeInfo);
+    return remoteOsVersion;
+}
+
+int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
+{
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "nodeInfo malloc err");
+    auto ret = LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get screen status failed");
+        SoftBusFree(nodeInfo);
+        return ret;
+    }
+    int screenStatus = nodeInfo->isScreenOn;
+    CONN_LOGI(CONN_WIFI_DIRECT, "remote screen status %{public}d", screenStatus);
+    SoftBusFree(nodeInfo);
+    return screenStatus;
+}
 } // namespace OHOS::SoftBus

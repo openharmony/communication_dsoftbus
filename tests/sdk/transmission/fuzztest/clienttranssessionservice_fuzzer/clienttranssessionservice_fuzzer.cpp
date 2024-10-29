@@ -45,7 +45,7 @@ namespace OHOS {
         if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
-        int handle = 1;
+        int32_t handle = 1;
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
         GetSessionHandle(sessionId, &handle);
     }
@@ -78,7 +78,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::GetSessionKeyTest(data, size);

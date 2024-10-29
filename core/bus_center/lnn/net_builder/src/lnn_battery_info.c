@@ -64,7 +64,7 @@ static void OnReceiveBatteryInfo(LnnSyncInfoType type, const char *networkId, co
     if (type != LNN_INFO_TYPE_BATTERY_INFO) {
         return;
     }
-    cJSON *json = cJSON_Parse((char *)msg);
+    cJSON *json = cJSON_ParseWithLength((char *)msg, (size_t)len);
     if (json == NULL) {
         LNN_LOGE(LNN_LANE, "parse elect msg json fail");
         return;

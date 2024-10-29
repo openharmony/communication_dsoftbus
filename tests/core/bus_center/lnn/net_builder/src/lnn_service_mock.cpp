@@ -158,6 +158,11 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
     return GetServiceInterface()->LnnDiscTypeToConnAddrType(type);
 }
 
+bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr)
+{
+    return GetServiceInterface()->LnnIsConnectionAddrInvalid(addr);
+}
+
 void UpdateProfile(const NodeInfo *info)
 {
     return GetServiceInterface()->UpdateProfile(info);
@@ -250,7 +255,7 @@ int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, 
     return GetServiceInterface()->LnnGetSettingNickName(defaultName, unifiedName, nickName, len);
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetServiceInterface()->SoftbusGetConfig(type, val, len);
 }

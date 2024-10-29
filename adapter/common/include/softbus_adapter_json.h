@@ -70,6 +70,8 @@ bool JSON_AddBytesToObject(JsonObj *obj, const char *key, uint8_t *value, uint32
 
 bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value, uint32_t bufLen, uint32_t *size);
 
+bool JSON_IsArrayExist(const JsonObj *obj, const char *key);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

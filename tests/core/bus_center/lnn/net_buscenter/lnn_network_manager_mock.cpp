@@ -61,7 +61,7 @@ int32_t LnnStartDiscovery(void)
     return GetNetworkManagerInterface()->LnnStartDiscovery();
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);
 }
@@ -135,6 +135,11 @@ void LnnDeinitPhysicalSubnetManager(void)
 void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     return GetNetworkManagerInterface()->LnnUnregisterEventHandler(event, handler);
+}
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    return GetNetworkManagerInterface()->DfxRecordTriggerTime(reason, stage);
 }
 }
 }

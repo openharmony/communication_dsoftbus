@@ -31,11 +31,13 @@ using namespace testing;
 using ::testing::_;
 using ::testing::Invoke;
 namespace OHOS::SoftBus {
-static constexpr int CHANNEL_ARRAY_NUM_MAX = 256;
+static constexpr int32_t CHANNEL_ARRAY_NUM_MAX = 256;
 class P2pAdapterTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
+        WifiDirectInterfaceMock mock;
+        EXPECT_CALL(mock, GetP2pEnableStatus).WillOnce(Return(WIFI_SUCCESS));
         P2pEntity::Init();
     }
     static void TearDownTestCase() {}
@@ -51,8 +53,10 @@ public:
 */
 HWTEST_F(P2pAdapterTest, IsWifiEnableTest, TestSize.Level1)
 {
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, IsWifiActive).WillOnce(Return(1));
     bool flag = P2pAdapter::IsWifiEnable();
-    EXPECT_FALSE(flag);
+    EXPECT_TRUE(flag);
 }
 
 /*
@@ -123,10 +127,10 @@ HWTEST_F(P2pAdapterTest, GetStationFrequencyWithFilterTest, TestSize.Level1)
     EXPECT_CALL(mock, Hid2dGetChannelListFor5G).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     int32_t result = P2pAdapter::GetStationFrequencyWithFilter();
     EXPECT_EQ(result, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
-    int size = CHANNEL_ARRAY_NUM_MAX;
+    int32_t size = CHANNEL_ARRAY_NUM_MAX;
     std::vector<int> array(CHANNEL_ARRAY_NUM_MAX, 34);
     EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillOnce(
-        [&array, size](int *chanList, int len) {
+        [&array, size](int32_t *chanList, int32_t len) {
         array[0] = 34;
         chanList[0] = array[0];
         len = size;
@@ -336,18 +340,9 @@ HWTEST_F(P2pAdapterTest, GetIpAddressTest001, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
     std::string ipString = "127.0.0.X";
-    WifiP2pGroupInfo info;
-    if (strcpy_s(info.interface, sizeof(info.interface), "wlan0") != EOK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "strcpy interfaceName fail");
-        return;
-    }
-    EXPECT_CALL(mock, GetCurrentGroup)
-        .WillOnce(Return(ERROR_WIFI_UNKNOWN))
-        .WillOnce(DoAll(SetArgPointee<0>(info), Return(WIFI_SUCCESS)));
+    EXPECT_CALL(mock, GetCurrentGroup).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     int32_t ret = P2pAdapter::GetIpAddress(ipString);
     EXPECT_EQ(ret, ToSoftBusErrorCode(static_cast<int32_t>(ERROR_WIFI_UNKNOWN)));
-    ret = P2pAdapter::GetIpAddress(ipString);
-    EXPECT_TRUE((ret != SOFTBUS_OK));
 }
 
 /*

@@ -317,9 +317,9 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    BroadcastDataType type; // broadcast data type {@link BroadcastDataType}.
     uint16_t id; // broadcast data id, uuid or company id.
     uint16_t payloadLen;
+    BroadcastDataType type; // broadcast data type {@link BroadcastDataType}.
     uint8_t *payload; // if pointer defines rsp payload, pointer may be null
 } BroadcastPayload;
 
@@ -330,11 +330,11 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    BroadcastPayload bcData;
-    BroadcastPayload rspData;
     // By default, the flag behavior is supported. If the flag behavior is not supported, the value must be set to false
     bool isSupportFlag;
     uint8_t flag;
+    BroadcastPayload bcData;
+    BroadcastPayload rspData;
 } BroadcastPacket;
 
 /**
@@ -373,9 +373,9 @@ typedef struct {
     int8_t txPower;
     int8_t rssi;
     uint8_t addrType;
+    uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
     BcMacAddr addr;
     int8_t *deviceName;
-    uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
     BroadcastPacket packet;
 } BroadcastReportInfo;
 
@@ -386,20 +386,20 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    int32_t minInterval;
-    int32_t maxInterval;
     uint8_t advType;
     uint8_t advFilterPolicy;
     uint8_t ownAddrType;
     uint8_t peerAddrType;
-    BcMacAddr peerAddr;
-    int32_t channelMap;
-    int32_t duration;
     int8_t txPower;
     bool isSupportRpa;
     uint8_t ownIrk[BC_IRK_LEN];
     uint8_t ownUdidHash[BC_UDID_HASH_LEN];
+    BcMacAddr peerAddr;
     BcMacAddr localAddr;
+    int32_t channelMap;
+    int32_t duration;
+    int32_t minInterval;
+    int32_t maxInterval;
 } BroadcastParam;
 
 /**
@@ -409,17 +409,17 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    int8_t *address;
-    int8_t *deviceName;
+    bool advIndReport;
     uint16_t serviceUuid;
     uint32_t serviceDataLength;
-    uint8_t *serviceData;
-    uint8_t *serviceDataMask;
     uint16_t manufactureId;
     uint32_t manufactureDataLength;
+    int8_t *address;
+    int8_t *deviceName;
+    uint8_t *serviceData;
+    uint8_t *serviceDataMask;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    bool advIndReport;
 } BcScanFilter;
 
 /**
@@ -429,11 +429,11 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    uint16_t scanInterval;
-    uint16_t scanWindow;
     uint8_t scanType;
     uint8_t scanPhy;
     uint8_t scanFilterPolicy;
+    uint16_t scanInterval;
+    uint16_t scanWindow;
 } BcScanParams;
 
 /**

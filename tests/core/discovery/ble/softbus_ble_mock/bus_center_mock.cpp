@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "bus_center_adapter.h"
 #include "bus_center_mock.h"
-#include "softbus_error_code.h"
+#include "bus_center_adapter.h"
 #include "securec.h"
+#include "softbus_error_code.h"
 
 /* implement related global function of bus center */
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)

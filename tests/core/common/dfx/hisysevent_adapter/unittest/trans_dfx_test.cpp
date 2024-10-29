@@ -81,25 +81,25 @@ static AppInfo g_testAppInfo = {
     .fileProtocol = 1
 };
 
-static int32_t TransRegisterSessionTest1(int fd)
+static int32_t TransRegisterSessionTest1(int32_t fd)
 {
     SoftBusTransDumpRegisterSession(fd, g_testPkgName, g_testSessionName, TEST_TRANS_UID, TEST_TRANS_PID);
     return SOFTBUS_OK;
 }
-static int32_t TransRunningSessionInfo1(int fd)
+static int32_t TransRunningSessionInfo1(int32_t fd)
 {
     SoftBusTransDumpRunningSession(fd, DUMPER_LANE_BR, &g_testAppInfo);
     return SOFTBUS_OK;
 }
 
-static int32_t TransRegisterSessionTest2(int fd)
+static int32_t TransRegisterSessionTest2(int32_t fd)
 {
     SoftBusTransDumpRegisterSession(fd, nullptr, g_testSessionName, TEST_TRANS_UID, TEST_TRANS_PID);
     return SOFTBUS_OK;
 }
 
 
-static int32_t TransRunningSessionInfo2(int fd)
+static int32_t TransRunningSessionInfo2(int32_t fd)
 {
     SoftBusTransDumpRunningSession(fd, DUMPER_LANE_BR, nullptr);
     return SOFTBUS_OK;
@@ -133,10 +133,10 @@ HWTEST_F(TransDfxTest, SoftbusReportTransInfoEvt001, TestSize.Level0)
  */
 HWTEST_F(TransDfxTest, SoftBusTransDumpHandler_001, TestSize.Level1)
 {
-    int fd = 1;
-    int argc = 1;
+    int32_t fd = 1;
+    int32_t argc = 1;
     const char* argv = "aaa";
-    int ret = SoftBusTransDumpHandler(fd, argc, &argv);
+    int32_t ret = SoftBusTransDumpHandler(fd, argc, &argv);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

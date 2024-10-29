@@ -27,7 +27,7 @@ ohos_benchmarktest("BusCenterTest") {
     "$dsoftbus_root_path/adapter/common/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_test_path/sdk:softbus_client_static" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",

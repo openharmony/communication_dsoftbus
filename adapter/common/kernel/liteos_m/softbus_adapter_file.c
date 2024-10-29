@@ -42,13 +42,13 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
     }
     int32_t ret = UtilsFileStat(fileName, &fileLen);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileStat fail");
+        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileStat fail, ret=%{public}d", ret);
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileSeek(fd, 0, SEEK_SET_FS);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileSeek fail");
+        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileSeek fail, ret=%{public}d", ret);
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -82,7 +82,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
     if (ret != (int32_t)len) {
-        COMM_LOGE(COMM_ADAPTER, "UtilsFileWrite fail");
+        COMM_LOGE(COMM_ADAPTER, "UtilsFileWrite fail, ret=%{public}d", ret);
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }

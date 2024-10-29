@@ -93,7 +93,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject003, TestSize.Level1)
 
 /**
  * @tc.name: InvalidStringTest
- * @tc.desc: Test returns SOFTBUS_ERR when the specified string does not exist in the json object
+ * @tc.desc: Test returns SOFTBUS_PARSE_JSON_ERR when the specified string does not exist in the json object
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -102,7 +102,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject004, TestSize.Level1)
     cJSON *json = cJSON_CreateObject();
     char target[ARRAY_LEN];
     int32_t ret = GetStringItemByJsonObject(json, "string", target, ARRAY_LEN);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_Delete(json);
 }
 
@@ -825,7 +825,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject003, TestSize.Lev
 
 /**
  * @tc.name: InvalidStringTest
- * @tc.desc: Test returns SOFTBUS_ERR when the specified string does not exist in the json object
+ * @tc.desc: Test returns false when the specified string does not exist in the json object
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -907,7 +907,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject003, TestSize.Level1)
 
 /**
  * @tc.name: InvalidStringTest
- * @tc.desc: Test returns SOFTBUS_ERR when the specified string does not exist in the json object
+ * @tc.desc: Test returns false when the specified string does not exist in the json object
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -983,7 +983,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem003, TestSize.Level1)
 
 /**
  * @tc.name: InvalidStringTest
- * @tc.desc: Test returns SOFTBUS_ERR when the specified string does not exist in the json object
+ * @tc.desc: Test returns false when the specified string does not exist in the json object
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -93,7 +93,7 @@ static int32_t EnableBtSubnet(LnnPhysicalSubnet *subnet)
     }
     char *anonyMac = NULL;
     Anonymize(macStr, &anonyMac);
-    LNN_LOGI(LNN_BUILDER, "btmac=%{public}s", anonyMac);
+    LNN_LOGI(LNN_BUILDER, "btmac=%{public}s", AnonymizeWrapper(anonyMac));
     AnonymizeFree(anonyMac);
     return LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr);
 }
@@ -283,7 +283,7 @@ static void LeaveSpecificBrNetwork(const char *btMac)
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "start leave specific br networkId=%{public}s", anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "start leave specific br networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
     if (ret != SOFTBUS_OK) {

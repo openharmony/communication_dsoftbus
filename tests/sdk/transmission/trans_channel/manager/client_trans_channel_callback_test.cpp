@@ -95,7 +95,7 @@ public:
 
 void ClientTransChannelCallbackTest::SetUpTestCase(void)
 {
-    int ret = ClientTransAuthInit(&g_clientSessionCb);
+    int32_t ret = ClientTransAuthInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyInit(&g_clientSessionCb);
@@ -119,7 +119,7 @@ void ClientTransChannelCallbackTest::TearDownTestCase(void) {}
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Level0)
 {
     ChannelInfo info = {0};
-    int ret = TransOnChannelOpened(nullptr, &info);
+    int32_t ret = TransOnChannelOpened(nullptr, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOnChannelOpened(g_sessionName, nullptr);
@@ -160,8 +160,8 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Lev
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSize.Level0)
 {
-    int channelId = 1;
-    int ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_AUTH, SOFTBUS_MEM_ERR);
+    int32_t channelId = 1;
+    int32_t ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_AUTH, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_PROXY, SOFTBUS_MEM_ERR);
@@ -188,7 +188,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSi
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize.Level0)
 {
-    int ret = TransOnChannelLinkDown(nullptr, 0);
+    int32_t ret = TransOnChannelLinkDown(nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOnChannelLinkDown(g_networkid, 0);
@@ -203,10 +203,10 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.Level0)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
     int32_t messageType = MESSAGE_TYPE_NOMAL;
     int32_t udpMessageType = MESSAGE_TYPE_CLOSE_ACK;
-    int ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, messageType, SHUTDOWN_REASON_UNKNOWN);
+    int32_t ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
@@ -245,10 +245,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.L
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestSize.Level0)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
     const void *data = (const void *)"test";
 
-    int ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+    int32_t ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_AUTH,
+                                            nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
@@ -272,14 +273,14 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestS
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize.Level0)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
     int32_t eventId = 0;
     int32_t tvCount = 1;
     const QosTv tvList = {
         .type = WIFI_CHANNEL_QUALITY,
     };
 
-    int ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, nullptr);
+    int32_t ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, &tvList);

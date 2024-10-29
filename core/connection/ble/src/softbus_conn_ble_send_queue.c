@@ -176,7 +176,7 @@ int32_t ConnBleDequeueBlock(void **msg)
             status = SOFTBUS_CONN_COND_WAIT_FAIL;
             break;
         }
-        CONN_LOGI(CONN_BLE, "ble queue wakeup.");
+        CONN_LOGD(CONN_BLE, "ble queue wakeup.");
     } while (true);
     
     if (isFull) {

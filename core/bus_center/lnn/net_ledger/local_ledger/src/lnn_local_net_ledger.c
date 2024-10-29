@@ -494,7 +494,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     }
     char *anonyIp = NULL;
     Anonymize(ip, &anonyIp);
-    LNN_LOGD(LNN_LEDGER, "get LocalIp=%{public}s", anonyIp);
+    LNN_LOGD(LNN_LEDGER, "get LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
@@ -717,6 +717,17 @@ static int32_t LlGetAuthCapability(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->authCapacity;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetHbCapability(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint32_t)) {
+        LNN_LOGE(LNN_LEDGER, "buf of heartbeatCapacity is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = info->heartbeatCapacity;
     return SOFTBUS_OK;
 }
 
@@ -1076,8 +1087,8 @@ static int32_t UpdateLocalDeviceName(const void *name)
     Anonymize((char *)name, &anonyName);
     char *anonyDeviceName = NULL;
     Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
-    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", anonyBeforeName, anonyName,
-        anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s",
+        AnonymizeWrapper(anonyBeforeName), AnonymizeWrapper(anonyName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyBeforeName);
     AnonymizeFree(anonyName);
     AnonymizeFree(anonyDeviceName);
@@ -1233,7 +1244,8 @@ static int32_t UpdateLocalNetworkId(const void *id)
     Anonymize(g_localNetLedger.localInfo.lastNetworkId, &anonyOldNetworkId);
     g_localNetLedger.localInfo.networkIdTimestamp = (int64_t)SoftBusGetSysTimeMs();
     LNN_LOGI(LNN_LEDGER, "networkId change %{public}s -> %{public}s, networkIdTimestamp=%{public}" PRId64,
-        anonyOldNetworkId, anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
+        AnonymizeWrapper(anonyOldNetworkId), AnonymizeWrapper(anonyNetworkId),
+        g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyOldNetworkId);
@@ -1349,7 +1361,7 @@ static int32_t UpdateLocalDeviceIp(const void *ip)
     LnnSetWiFiIp(&g_localNetLedger.localInfo, (char *)ip);
     char *anonyIp = NULL;
     Anonymize((char *)ip, &anonyIp);
-    LNN_LOGI(LNN_LEDGER, "set LocalIp=%{public}s", anonyIp);
+    LNN_LOGI(LNN_LEDGER, "set LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     return SOFTBUS_OK;
 }
@@ -1810,6 +1822,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_OS_TYPE, -1, LlGetOsType, NULL},
     {NUM_KEY_AUTH_CAP, -1, LlGetAuthCapability, NULL},
+    {NUM_KEY_HB_CAP, -1, LlGetHbCapability, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_STATE_VERSION, -1, LlGetStateVersion, UpdateStateVersion},

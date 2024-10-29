@@ -188,6 +188,9 @@ void P2pV1Processor::WaitingReqResponseState()
         })
         .Handle<std::shared_ptr<TimeoutEvent>>([this](std::shared_ptr<TimeoutEvent> &event) {
             OnWaitReqResponseTimeoutEvent();
+        })
+        .Handle<std::shared_ptr<AuthExceptionEvent>>([this](std::shared_ptr<AuthExceptionEvent> &event) {
+            ProcessAuthExceptionEvent(event);
         });
 }
 
@@ -598,6 +601,21 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
     Terminate();
 }
 
+void P2pV1Processor::ProcessAuthExceptionEvent(const std::shared_ptr<AuthExceptionEvent> &event)
+{
+    CONN_CHECK_AND_RETURN_LOGE(connectCommand_ != nullptr, CONN_WIFI_DIRECT, "connect command is nullptr");
+    CONN_LOGE(CONN_WIFI_DIRECT, "AuthExceptionEvent error=%{public}d", event->error_);
+    auto negotiateChannel = connectCommand_->GetConnectInfo().channel_;
+    CONN_CHECK_AND_RETURN_LOGE(negotiateChannel != nullptr, CONN_WIFI_DIRECT, "auth negotiate channel is nullptr");
+    auto authChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(negotiateChannel);
+    CONN_CHECK_AND_RETURN_LOGE(authChannel != nullptr && *authChannel == event->handle_,
+        CONN_WIFI_DIRECT, "other auth exception ignore");
+    CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
+    connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(event->error_));
+    connectCommand_ = nullptr;
+    Terminate();
+}
+
 void P2pV1Processor::OnWaitReqResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait connect response timeout");
@@ -748,6 +766,7 @@ int P2pV1Processor::CreateLinkAsGo()
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "save remote ip failed");
 
+    clientJoiningMac_ = remoteMac;
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
 
     connectCommand_->PreferNegotiateChannel();
@@ -856,6 +875,7 @@ int P2pV1Processor::ProcessConnectRequestAsGo(std::shared_ptr<NegotiateCommand> 
             success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     }
 
+    clientJoiningMac_ = remoteMac;
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     auto ret = SendConnectResponseAsGo(*command->GetNegotiateChannel(), remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -936,8 +956,8 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
     CONN_LOGI(CONN_WIFI_DIRECT, "start connect group");
     ret = ConnectGroup(msg, command->GetNegotiateChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL, CONN_WIFI_DIRECT,
-        "connect group failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", ret);
     ret = SendNegotiateResult(*command->GetNegotiateChannel(), SOFTBUS_OK);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send result message failed, error=%{public}d", ret);
@@ -1584,6 +1604,7 @@ int P2pV1Processor::UpdateWhenCreateSuccess(const NegotiateMessage &msg)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
 
+    clientJoiningMac_ = remoteMac;
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     return StartAuthListening(localIp);
 }
@@ -1636,15 +1657,11 @@ int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const Nego
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "update interface failed, error=%{public}d", ret);
     std::string remoteMac = msg.GetLegacyP2pMac();
-    std::string remoteIp = msg.GetLegacyP2pGoIp();
-    auto success = LinkManager::GetInstance().ProcessIfAbsent(
-        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [localMac, localIp, remoteMac, remoteIp](InnerLink &link) {
-            link.SetRemoteBaseMac(remoteMac);
-            link.SetLocalBaseMac(localMac);
-            link.SetRemoteIpv4(remoteIp);
-            link.SetLocalIpv4(localIp);
-            link.SetState(InnerLink::LinkState::CONNECTED);
-        });
+    auto success = LinkManager::GetInstance().ProcessIfPresent(remoteMac, [localMac, localIp](InnerLink &link) {
+        link.SetLocalBaseMac(localMac);
+        link.SetLocalIpv4(localIp);
+        link.SetState(InnerLink::LinkState::CONNECTED);
+    });
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectUtils::ToWifiDirectRole(myRole), localMac, msg.GetLegacyP2pGoMac());
@@ -1669,6 +1686,15 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P0, WifiDirectUtils::FrequencyToChannel(freq));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, errorcode=%{public}d", coexCode);
+    std::string remoteMac = msg.GetLegacyP2pMac();
+    std::string remoteIp = msg.GetLegacyP2pGoIp();
+    auto success = LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [remoteMac, remoteIp](InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetRemoteIpv4(remoteIp);
+        });
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     P2pAdapter::ConnectParam params {};
     params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
     params.groupConfig = groupConfig;

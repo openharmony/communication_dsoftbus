@@ -378,7 +378,8 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     char *anonyDeviceName = NULL;
     Anonymize(info->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_EVENT, "notify node. deviceName=%{public}s, isOnline=%{public}s, networkId=%{public}s",
-        anonyDeviceName, (isOnline == true) ? "online" : "offline", anonyNetworkId);
+        AnonymizeWrapper(anonyDeviceName), (isOnline == true) ? "online" : "offline",
+        AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceName);
     SetDefaultQdisc();
@@ -428,7 +429,8 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
     if (type == TYPE_DEVICE_NAME) {
         char *anonyDeviceName = NULL;
         Anonymize(info->deviceName, &anonyDeviceName);
-        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", anonyDeviceName);
+        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s",
+            AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
     }
     (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
@@ -455,6 +457,12 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
         return;
     }
     (void)LnnIpcNotifyDeviceTrustedChange(type, msg, msgLen);
+}
+
+void LnnNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    (void)LnnIpcNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -644,7 +652,8 @@ void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
     }
     char *anonyMac = NULL;
     Anonymize(btMac, &anonyMac);
-    LNN_LOGI(LNN_EVENT, "notify bt acl state changed: state=%{public}d, btMac=%{public}s.", state, anonyMac);
+    LNN_LOGI(LNN_EVENT, "notify bt acl state changed: state=%{public}d, btMac=%{public}s.",
+        state, AnonymizeWrapper(anonyMac));
     AnonymizeFree(anonyMac);
     LnnMonitorBtAclStateChangedEvent event = {.basic.event = LNN_EVENT_BT_ACL_STATE_CHANGED, .status = state};
     if (strcpy_s(event.btMac, sizeof(event.btMac), btMac) != EOK) {

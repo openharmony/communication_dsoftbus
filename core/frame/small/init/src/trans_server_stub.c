@@ -37,7 +37,7 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char*)ReadString(req, &size);
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerCreateSessionServer pkgName is null");
@@ -67,7 +67,7 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char*)ReadString(req, &size);
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer pkgName is null");
@@ -207,7 +207,7 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     }
 
     int32_t ret;
-    uint32_t size;
+    size_t size;
     SessionParam param;
     SessionAttribute getAttr;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -257,7 +257,7 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret;
-    uint32_t size;
+    size_t size;
     ConnectOption connOpt;
     const char *sessionName = (const char*)ReadString(req, &size);
     ConnectionAddr *addr = (ConnectionAddr *)ReadRawData(req, sizeof(ConnectionAddr));

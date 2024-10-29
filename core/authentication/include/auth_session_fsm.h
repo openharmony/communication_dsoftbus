@@ -137,6 +137,7 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
 int32_t AuthNotifyRequestVerify(int64_t authSeq);
 AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer, bool isConnectSide);
 void AuthSessionFsmExit(void);
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq);
 
 #ifdef __cplusplus
 #if __cplusplus

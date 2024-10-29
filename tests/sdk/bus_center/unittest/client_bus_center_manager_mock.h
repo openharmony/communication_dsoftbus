@@ -32,12 +32,12 @@ public:
 
     virtual int32_t BusCenterServerProxyInit(void);
     virtual void BusCenterServerProxyDeInit(void);
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
     virtual int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName,
         void **info, uint32_t infoTypeLen, int32_t *infoNum);
     virtual int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
     virtual int32_t ServerIpcGetNodeKeyInfo(const char *pkgName,
-        const char *networkId, int key, unsigned char *buf, uint32_t len);
+        const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
     virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName,
         const char *networkId, uint16_t dataChangeFlag);
     virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
@@ -57,7 +57,7 @@ public:
 
     MOCK_METHOD0(BusCenterServerProxyInit, int32_t ());
     MOCK_METHOD0(BusCenterServerProxyDeInit, void ());
-    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD4(ServerIpcGetAllOnlineNodeInfo, int32_t (const char *, void **, uint32_t, int32_t *));
     MOCK_METHOD3(ServerIpcGetLocalDeviceInfo, int32_t (const char *, void *, uint32_t));
     MOCK_METHOD5(ServerIpcGetNodeKeyInfo, int32_t (const char *, const char *, int, unsigned char *, uint32_t));

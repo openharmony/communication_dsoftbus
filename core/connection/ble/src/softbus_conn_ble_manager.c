@@ -508,8 +508,13 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
             break;
         }
         g_bleManager.connecting = device;
-        ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connection->connectionId, 0, address,
-            BLE_CONNECT_TIMEOUT_MILLIS);
+        status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT,
+            connection->connectionId, 0, address, BLE_CONNECT_TIMEOUT_MILLIS);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "post msg failed, requestAddress=%{public}s, udid=%{public}s, error=%{public}d",
+                anomizeAddress, anomizeUdid, status);
+            break;
+        }
         TransitionToState(BLE_MGR_STATE_CONNECTING);
     } while (false);
 
@@ -949,12 +954,17 @@ static void BleDataReceived(ConnBleDataReceivedContext *ctx)
             break;
         }
 
+        if (ctx->dataLen < sizeof(ConnPktHead)) {
+            CONN_LOGE(CONN_BLE, "dataLength(=%{public}u) is less than header size, connId=%{public}u",
+                ctx->dataLen, ctx->connectionId);
+            break;
+        }
+
         ConnPktHead *head = (ConnPktHead *)ctx->data;
         UnpackConnPktHead(head);
-        CONN_LOGI(CONN_BLE,
-            "ble dispatch receive data, connId=%{public}u, "
-            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-            connection->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
+        CONN_LOGI(CONN_BLE, "ble dispatch receive data, connId=%{public}u, Len=%{public}u, Flg=%{public}d, "
+            "Module=%{public}d, Seq=%{public}" PRId64 "", connection->connectionId, ctx->dataLen, head->flag,
+            head->module, head->seq);
         uint32_t pktHeadLen = ConnGetHeadSize();
         if (head->module == MODULE_CONNECTION) {
             ReceivedControlData(connection, ctx->data + pktHeadLen, ctx->dataLen - pktHeadLen);
@@ -1447,7 +1457,7 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
 int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGD(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "connection not exist, connectionId=%{public}u", connectionId);
     bool isExist = false;
     ConnRemoveMsgFromLooper(
@@ -1541,6 +1551,7 @@ static void ConnectRequestFunc(SoftBusMessage *msg)
     if (g_bleManager.state->connectRequest == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     ConnBleConnectRequestContext *ctx = (ConnBleConnectRequestContext *)msg->obj;
     g_bleManager.state->connectRequest(ctx);
 }
@@ -1566,6 +1577,7 @@ static void ClientConnectFailedFunc(SoftBusMessage *msg)
     if (g_bleManager.state->clientConnectFailed == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
     g_bleManager.state->clientConnectFailed(ctx->connectionId, ctx->status);
 }
@@ -1580,10 +1592,13 @@ static void ServerAcceptedFunc(SoftBusMessage *msg)
 
 static void DataReceivedFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
+    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
     if (g_bleManager.state->dataReceived == NULL) {
+        SoftBusFree(ctx->data);
         return;
     }
-    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
+
     g_bleManager.state->dataReceived(ctx);
 }
 
@@ -1592,6 +1607,7 @@ static void ConnectionClosedFunc(SoftBusMessage *msg)
     if (g_bleManager.state->connectionClosed == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
     g_bleManager.state->connectionClosed(ctx->connectionId, ctx->status);
 }
@@ -1614,6 +1630,7 @@ static void DisconnectRequestFunc(SoftBusMessage *msg)
 
 static void PreventTimeoutFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     if (g_bleManager.state->preventTimeout != NULL) {
         char *udid = (char *)msg->obj;
         g_bleManager.state->preventTimeout(udid);
@@ -1626,6 +1643,7 @@ static void ResetFunc(SoftBusMessage *msg)
     if (g_bleManager.state->reset == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
     g_bleManager.state->reset(ctx->status);
 }
@@ -1657,7 +1675,8 @@ static MsgHandlerCommand g_commands[] = {
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
     CONN_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_BLE, "msg is null");
-    if (msg->what != BLE_MGR_MSG_DATA_RECEIVED) {
+    if (msg->what != BLE_MGR_MSG_DATA_RECEIVED && msg->what != BLE_MGR_MSG_NEXT_CMD &&
+        msg->what != BLE_MGR_MSG_CONNECTION_CLOSED) {
         CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
             msg->what, g_bleManager.state->name());
     }
@@ -1825,12 +1844,21 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
 
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, option->bleOption.bleMac, BT_MAC_LEN);
-    CONN_LOGI(CONN_BLE, "ble disconnect device now, addr=%{public}s", animizeAddress);
+    char hashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
+    if (ConvertBytesToHexString(hashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
+        (unsigned char *)option->bleOption.deviceIdHash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "convert bytes to array failed");
+    }
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, hashStr);
+    CONN_LOGI(CONN_BLE, "ble disconnect device now, addr=%{public}s, udid=%{public}s", animizeAddress, anomizeUdid);
 
-    ConnBleConnection *connection =
-        ConnBleGetConnectionByAddr(option->bleOption.bleMac, CONN_SIDE_ANY, option->bleOption.protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
-        "ble disconnect device now failed: connection is not exist");
+    ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, hashStr, BLE_PROTOCOL_ANY);
+    if (connection == NULL) {
+        connection = ConnBleGetConnectionByAddr(option->bleOption.bleMac, CONN_SIDE_ANY, option->bleOption.protocol);
+        CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
+            "ble disconnect device now failed: connection is not exist");
+    }
 
     int32_t status = ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_FORCELY);
     ConnBleReturnConnection(&connection);
@@ -1921,7 +1949,12 @@ static void OnConnectFailed(uint32_t connectionId, int32_t error)
     CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = error;
-    ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_FAIL, 0, 0, ctx, 0);
+    int32_t ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_FAIL, 0, 0, ctx, 0);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE,
+            "post msg to looper failed, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+        SoftBusFree(ctx);
+    }
 }
 
 static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
@@ -1955,7 +1988,12 @@ static void OnConnectionClosed(uint32_t connectionId, int32_t status)
     CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = status;
-    ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_CLOSED, 0, 0, ctx, 0);
+    int32_t ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_CLOSED, 0, 0, ctx, 0);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE,
+            "post msg to looper failed, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+        SoftBusFree(ctx);
+    }
 }
 
 static void OnConnectionResume(uint32_t connectionId)
@@ -2137,11 +2175,16 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
                 break;
             }
         }
+        int32_t ret = SOFTBUS_OK;
         if (exist != NULL) {
             CONN_LOGW(CONN_BLE, "dumplicate occupy, refresh timeout, udid=%{public}s", anomizeUdid);
             exist->timeout = timeout;
             ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid);
-            ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
+            ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
+            if (ret != SOFTBUS_OK) {
+                CONN_LOGE(CONN_BLE, "post msg to looper failed, udid=%{public}s, error=%{public}d", anomizeUdid, ret);
+                SoftBusFree(copyUdid);
+            }
             break;
         }
         BlePrevent *prevent = (BlePrevent *)SoftBusCalloc(sizeof(BlePrevent));
@@ -2160,7 +2203,13 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
         }
         ListAdd(&g_bleManager.prevents->list, &prevent->node);
         g_bleManager.prevents->cnt++;
-        ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
+        ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "post msg to looper failed, udid=%{public}s, error=%{public}d", anomizeUdid, ret);
+            SoftBusFree(copyUdid);
+            SoftBusFree(prevent);
+            break;
+        }
     } while (false);
     SoftBusMutexUnlock(&g_bleManager.prevents->lock);
     CONN_LOGI(CONN_BLE, "conflict occupy, add udid prevent done, udid=%{public}s", anomizeUdid);

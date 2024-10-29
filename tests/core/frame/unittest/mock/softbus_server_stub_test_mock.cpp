@@ -98,5 +98,9 @@ int32_t TransReleaseUdpResources(int32_t channelId)
 {
     return GetSoftbusServerStubTestInterface()->TransReleaseUdpResources(channelId);
 }
+bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid)
+{
+    return GetSoftbusServerStubTestInterface()->CheckUidAndPid(sessionName, callingUid, callingPid);
+}
 }
 }

@@ -44,10 +44,10 @@ const SoftbusTestEntry *GetTestEntry(void)
     return &g_testEntry;
 }
 
-static void ProcessCustomArgs(const char *arg, unordered_map<string, int> &customArgs, int *custom)
+static void ProcessCustomArgs(const char *arg, unordered_map<string, int> &customArgs, int32_t *custom)
 {
-    int result = 0;
-    int customCnt = 0;
+    int32_t result = 0;
+    int32_t customCnt = 0;
     for (auto &argItem : customArgs) {
         if (!strncmp(arg, argItem.first.c_str(), strlen(argItem.first.c_str()))) {
             const char *findPtr = strchr(arg, '=');
@@ -63,14 +63,14 @@ static void ProcessCustomArgs(const char *arg, unordered_map<string, int> &custo
     *custom = customCnt;
 }
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, char **argv)
 {
     printf("Running main() from %s\n", __FILE__);
     testing::GTEST_FLAG(output) = "xml:./";
-    int isCustomArg = 0;
-    int customCnt = 0;
+    int32_t isCustomArg = 0;
+    int32_t customCnt = 0;
 
-    for (int i = 1; i < argc; i++) {
+    for (int32_t i = 1; i < argc; i++) {
         ProcessCustomArgs(argv[i], g_customArgs, &isCustomArg);
         if (isCustomArg > 0) {
             customCnt = customCnt + isCustomArg;

@@ -36,12 +36,12 @@ typedef struct {
 } PublishOption;
 
 typedef struct {
-    int32_t freq;
     bool isSameAccount;
     bool isWakeRemote;
+    int32_t freq;
     uint32_t capabilityBitmap[CAPABILITY_NUM];
-    uint8_t *capabilityData;
     uint32_t dataLen;
+    uint8_t *capabilityData;
 } SubscribeOption;
 
 typedef enum {

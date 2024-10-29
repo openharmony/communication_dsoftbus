@@ -31,7 +31,6 @@ namespace OHOS {
 
 #define PID 2024
 #define UID 4000
-#define MAX_IP_LEN 16
 
 static const char *g_pkgName = "dms";
 static const char *g_sessionName = "com.test.trans.auth.demo";
@@ -304,6 +303,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransSrvDelDataBufNode(channeId);
+    TransSrvDataListDeinit();
 }
 
 /**
@@ -529,7 +529,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int errCode = SOFTBUS_OK;
+    int32_t errCode = SOFTBUS_OK;
     int32_t channelId = 2;
     ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
@@ -577,7 +577,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedBySessionConnTest0018, T
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int errCode = SOFTBUS_OK;
+    int32_t errCode = SOFTBUS_OK;
     ret = NotifyChannelOpenFailedBySessionConn(nullptr, errCode);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 

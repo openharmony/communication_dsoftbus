@@ -102,6 +102,11 @@ int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
+bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
+
+void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason);
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo);
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage);
 
 #ifdef __cplusplus
 #if __cplusplus

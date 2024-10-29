@@ -22,6 +22,7 @@
 #include "device_auth.h"
 #include "device_auth_defines.h"
 #include "softbus_adapter_thread.h"
+#include "lnn_connection_fsm.h"
 #include "softbus_errcode.h"
 #include <map>
 
@@ -38,6 +39,7 @@ public:
     virtual void DestroyDeviceAuthService() = 0;
     virtual GroupAuthManager *GetGaInstance() = 0;
     virtual DeviceGroupManager *GetGmInstance() = 0;
+    virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
 };
 
 class LnnHichainInterfaceMock : public LnnHichainInterface {
@@ -48,16 +50,17 @@ public:
     MOCK_METHOD0(DestroyDeviceAuthService, void());
     MOCK_METHOD0(GetGaInstance, GroupAuthManager *());
     MOCK_METHOD0(GetGmInstance, DeviceGroupManager *());
+    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
 
     static int32_t InvokeAuthDevice(
         int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback);
     static int32_t InvokeDataChangeListener(const char *appId, const DataChangeListener *listener);
     static int32_t InvokeGetJoinedGroups1(
-        int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
+        int32_t osAccountId, const char *appId, int32_t groupType, char **returnGroupVec, uint32_t *groupNum);
     static int32_t InvokeGetJoinedGroups2(
-        int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
+        int32_t osAccountId, const char *appId, int32_t groupType, char **returnGroupVec, uint32_t *groupNum);
     static int32_t InvokeGetJoinedGroups3(
-        int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
+        int32_t osAccountId, const char *appId, int32_t groupType, char **returnGroupVec, uint32_t *groupNum);
     static int32_t ActionofunRegDataChangeListener(const char *appId);
     static int32_t ActionOfProcessData(
         int64_t authSeq, const uint8_t *data, uint32_t len, const DeviceAuthCallback *gaCallback);

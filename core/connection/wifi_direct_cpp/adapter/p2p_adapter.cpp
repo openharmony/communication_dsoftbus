@@ -32,6 +32,8 @@
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_error_code.h"
 #include "wifi_direct_defines.h"
+#include "kits/c/wifi_hotspot.h"
+#include "kits/c/wifi_event.h"
 
 namespace OHOS::SoftBus {
 static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
@@ -77,7 +79,7 @@ bool P2pAdapter::IsWifiP2pEnabled()
     enum P2pState state;
     auto ret = GetP2pEnableStatus(&state);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, false, CONN_WIFI_DIRECT, "get p2p enable status failed");
-
+    CONN_LOGI(CONN_WIFI_DIRECT, "P2pEnableStatus=%{public}d", static_cast<int>(state));
     return state == P2P_STATE_STARTED;
 }
 
@@ -466,4 +468,23 @@ int P2pAdapter::GetCoexConflictCode(const char *ifName, int32_t channelId)
     return getCoexConflictCodeHook_(ifName, channelId);
 }
 
+int P2pAdapter::GetApChannel()
+{
+    auto hotSpotActive = IsHotspotActive();
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        hotSpotActive == WIFI_HOTSPOT_ACTIVE, CHANNEL_INVALID, CONN_WIFI_DIRECT, "hotspot not active");
+    HotspotConfig hotspotConfig;
+    auto ret = GetHotspotConfig(&hotspotConfig);
+    CONN_CHECK_AND_RETURN_RET_LOGI(ret == WIFI_SUCCESS, CHANNEL_INVALID, CONN_WIFI_DIRECT, "hotspot channel invalid");
+    return hotspotConfig.channelNum;
+}
+
+int32_t P2pAdapter::GetP2pGroupFrequency()
+{
+    WifiP2pGroupInfo p2pGroupInfo{};
+    int32_t ret = GetCurrentGroup(&p2pGroupInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret), CONN_WIFI_DIRECT,
+        "get current group info failed, error=%{public}d", ToSoftBusErrorCode(ret));
+    return p2pGroupInfo.frequency;
+}
 } // namespace OHOS::SoftBus

@@ -26,14 +26,14 @@
 #define ECHO_SERVICE_SESSION_NAME          "ohos.distributedschedule.dms.echo"
 #define ECHO_SERVICE_CONSUMER_SESSION_NAME "ohos.distributedschedule.dms.echo"
 
-inline void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen) { }
+inline void EsOnDataReceived(int32_t sessionId, const void *data, unsigned int dataLen) { }
 
 inline void EsOnStreamReceived(
-    int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+    int32_t sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     LOG("%s:enter", __func__);
 }
-inline void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
+inline void EsOnQosEvent(int32_t sessionId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     LOG("%s:enter", __func__);
 }

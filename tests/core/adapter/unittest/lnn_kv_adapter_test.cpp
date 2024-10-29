@@ -247,6 +247,30 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DeleteByPrefix003
+ * @tc.desc: DeleteByPrefix failed, keyPrefix is empty.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, DeleteByPrefix003, TestSize.Level1)
+{
+    std::string keyPrefix = "";
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->DeleteByPrefix(keyPrefix));
+}
+
+/**
+ * @tc.name: DeleteByPrefix004
+ * @tc.desc: DeleteByPrefix failed, keyPrefix length exceeds MAX_STRING_LEN.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, DeleteByPrefix004, TestSize.Level1)
+{
+    std::string keyPrefix(MAX_STRING_LEN + 1, 'a');
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->DeleteByPrefix(keyPrefix));
+}
+
+/**
  * @tc.name: Get001
  * @tc.desc: Get succeed.
  * @tc.type: FUNC

@@ -45,7 +45,6 @@ bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/frame:softbus_server",
-  "$dsoftbus_root_path/sdk:softbus_client",
 ]
 
 if (dsoftbus_feature_lnn_meta_node) {
@@ -100,6 +99,7 @@ if (defined(ohos_lite)) {
       deps = bus_center_sdk_test_deps
       deps += [
         "$dsoftbus_root_path/core/frame:softbus_server_frame",
+        "$dsoftbus_root_path/sdk:softbus_client",
         "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
         "$hilog_lite_deps_path",
       ]
@@ -306,12 +306,36 @@ if (defined(ohos_lite)) {
     ]
   }
 
+  ohos_unittest("BusCenterServerProxyStandardTest") {
+    module_out_path = module_output_path
+    sources = [ "bus_center_server_standard_test.cpp" ]
+    include_dirs = bus_center_sdk_test_inc
+    include_dirs += [ "unittest/common/" ]
+    deps = bus_center_sdk_test_deps
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hilog:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+    external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
+      "c_utils:utils",
+      "ipc:ipc_single",
+    ]
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":BusCenterHeartbeatSdkTest",
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
+      ":BusCenterServerProxyStandardTest",
       ":BusCenterServerTest",
       ":ClientBusCentManagerTest",
       ":ClientBusCenterSdkTest",

@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "softbus_common.h"
+#include "broadcast_protocol_constant.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -53,6 +54,10 @@ typedef struct {
 typedef struct {
     DeviceInfo *info;
     int8_t power;
+    char devName[DISC_MAX_DEVICE_NAME_LEN];
+    uint32_t devNameLen;
+    char nickname[DISC_MAX_NICKNAME_LEN];
+    uint32_t nicknameLen;
 } DeviceWrapper;
 
 typedef enum {
