@@ -124,8 +124,8 @@ static int32_t SoftBusGetOsType(void)
         strcmp(osVersion, UNDEFINED_VALUE) != 0) {
         char *anonyBootSN = NULL;
         Anonymize(bootSN, &anonyBootSN);
-        LNN_LOGI(LNN_STATE, "apiVersion: %{public}s bootSN: %{public}s osVersion: %{public}s", apiVersion, anonyBootSN,
-            osVersion);
+        LNN_LOGI(LNN_STATE, "apiVersion: %{public}s bootSN: %{public}s osVersion: %{public}s",
+            apiVersion, AnonymizeWrapper(anonyBootSN), osVersion);
         AnonymizeFree(anonyBootSN);
         return OH_OS_TYPE;
     }

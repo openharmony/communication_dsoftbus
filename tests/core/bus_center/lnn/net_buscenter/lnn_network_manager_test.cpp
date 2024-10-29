@@ -125,7 +125,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     EXPECT_CALL(ledgerMock, LnnSetLocalNum64Info).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = LnnInitNetworkManager();
+    int32_t ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -180,7 +180,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = LnnRegistProtocol(nullptr);
+    int32_t ret = LnnRegistProtocol(nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     LnnProtocolManager protocolMgr;
@@ -233,7 +233,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level1)
 {
-    int len = 0;
+    int32_t len = 0;
     char buf[] = "nullptr";
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -246,7 +246,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
     EXPECT_TRUE(ret == false);
 
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
-    int res = LnnInitManagerByConfig();
+    int32_t res = LnnInitManagerByConfig();
     EXPECT_TRUE(res != SOFTBUS_OK);
 
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -268,6 +268,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_USER_STATE_EVENTHANDLER_TEST_001, TestSi
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     (void)NetUserStateEventHandler(nullptr);
     LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
     EXPECT_TRUE(info1 != nullptr);
@@ -298,6 +299,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_LOCK_STATE_EVENTHANDLER_TEST_001, TestSi
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());;
     LnnEventBasicInfo info;
     (void)NetLockStateEventHandler(nullptr);
 
@@ -311,6 +313,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSiz
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     (void)NetOOBEStateEventHandler(nullptr);
     LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
     EXPECT_TRUE(info1 != nullptr);
@@ -339,6 +342,7 @@ HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     (void)OnDeviceBound(udid, groupInfo);
     EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
@@ -418,6 +422,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_00
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     (void)NetAccountStateChangeEventHandler(nullptr);
     LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
     EXPECT_TRUE(info1 != nullptr);
@@ -447,6 +452,7 @@ HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
     EXPECT_CALL(managerMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, LnnNotifyAccountStateChangeEvent).WillRepeatedly(Return());
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     (void)OnGroupCreated(groupId, groupType);
     groupType = AUTH_PEER_TO_PEER_GROUP;
     EXPECT_CALL(managerMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
@@ -470,6 +476,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001, Tes
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     (void)NightModeChangeEventHandler(nullptr);
     LnnEventBasicInfo info;
     info.event = LNN_EVENT_NIGHT_MODE_CHANGED;

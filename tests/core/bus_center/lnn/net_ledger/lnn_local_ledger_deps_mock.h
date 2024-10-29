@@ -48,8 +48,8 @@ public:
     virtual int32_t GetCommonOsVersion(char *value, uint32_t len);
     virtual int32_t GetCommonDeviceVersion(char *value, uint32_t len);
     virtual int32_t GetDeviceSecurityLevel(int32_t *level);
-    virtual int SoftBusGetBtState(void) = 0;
-    virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
+    virtual int32_t SoftBusGetBtState(void) = 0;
+    virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -67,8 +67,8 @@ public:
     MOCK_METHOD2(GetCommonOsVersion, int32_t (char *, uint32_t));
     MOCK_METHOD2(GetCommonDeviceVersion, int32_t (char *, uint32_t));
     MOCK_METHOD1(GetDeviceSecurityLevel, int32_t (int32_t *));
-    MOCK_METHOD0(SoftBusGetBtState, int (void));
-    MOCK_METHOD1(SoftBusGetBtMacAddr, int (SoftBusBtAddr *));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);

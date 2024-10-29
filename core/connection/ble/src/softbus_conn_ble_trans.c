@@ -654,18 +654,23 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
         "init ble trans failed: invalid param, listener onPostByteFinshed is null");
 
     struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
-    CONN_CHECK_AND_RETURN_RET_LOGW(controller, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_INIT,
+    CONN_CHECK_AND_RETURN_RET_LOGW(controller != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_INIT,
         "init br trans module failed: init flow controller failed");
 
     int32_t status = ConnBleInitSendQueue();
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: init send queue failed, err=%{public}d",
-        status);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGW(CONN_INIT, "init ble trans failed: init send queue failed, err=%{public}d", status);
+        ConnSlideWindowControllerDelete(controller);
+        return status;
+    }
 
     status = SoftBusMutexInit(&g_startBleSendLPInfo.lock, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: init send lp lock failed, err=%{public}d",
-        status);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGW(CONN_INIT, "init ble trans failed: init send lp lock failed, err=%{public}d", status);
+        ConnBleDeinitSendQueue();
+        ConnSlideWindowControllerDelete(controller);
+        return status;
+    }
     g_transEventListener = *listener;
     g_flowController = controller;
     return SOFTBUS_OK;

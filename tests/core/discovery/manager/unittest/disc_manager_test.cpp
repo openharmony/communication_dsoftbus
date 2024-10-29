@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <cstdio>
 #include <ctime>
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <securec.h>
-#include <cstdint>
 
+#include "disc_coap.h"
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "nstackx.h"
-#include "disc_coap.h"
 #include "softbus_errcode.h"
 
-#define TEST_ERRO_MOUDULE1      ((MODULE_LNN) - 1)
-#define TEST_ERRO_MOUDULE2      ((MODULE_LNN) - 2)
-#define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
-#define ERRO_CAPDATA_LEN        (MAX_CAPABILITYDATA_LEN + 1)
-#define TEST_ASSERT_TRUE(ret)  \
-    if (ret) {                 \
-        DISC_LOGI(DISC_TEST, "[succ]\n");    \
-        g_succTestCount++;       \
-    } else {                   \
-        DISC_LOGI(DISC_TEST, "[error]\n");    \
-        g_failTestCount++;       \
+#define TEST_ERRO_MOUDULE1 ((MODULE_LNN)-1)
+#define TEST_ERRO_MOUDULE2 ((MODULE_LNN)-2)
+#define TEST_ERRO_MOUDULE  ((MODULE_LNN) + 3)
+#define ERRO_CAPDATA_LEN   (MAX_CAPABILITYDATA_LEN + 1)
+#define TEST_ASSERT_TRUE(ret)              \
+    if (ret) {                             \
+        DISC_LOGI(DISC_TEST, "[succ]\n");  \
+        g_succTestCount++;                 \
+    } else {                               \
+        DISC_LOGI(DISC_TEST, "[error]\n"); \
+        g_failTestCount++;                 \
     }
 
 using namespace testing::ext;
@@ -49,14 +49,13 @@ static int32_t g_devieceFoundCount = 0;
 static const char *g_corrPkgName = "CorrCorrCorrCorrCorrCorrCorrCorrCorrCorrCorrCorrCorrCorrCorrCorr";
 static const char *g_erroPkgName = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroE";
 static DiscoveryFuncInterface *g_coapDiscFunc = NULL;
-static PublishOption g_publishOption = {.freq = 0, .capabilityBitmap = {1}, .capabilityData = NULL, .dataLen = 0};
-static SubscribeOption g_subscribeOption = {.freq = 1,
+static PublishOption g_publishOption = { .freq = 0, .capabilityBitmap = { 1 }, .capabilityData = NULL, .dataLen = 0 };
+static SubscribeOption g_subscribeOption = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
-    .capabilityBitmap = {2},
+    .capabilityBitmap = { 2 },
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 const int32_t TEST_PUBLISHINNER_ID = 1;
 const int32_t TEST_PUBLISH_ID = 2;
@@ -74,26 +73,20 @@ const uint32_t DISC_MODE_2 = 8;
 
 class DiscManagerTest : public testing::Test {
 public:
-    DiscManagerTest()
-    {}
-    ~DiscManagerTest()
-    {}
+    DiscManagerTest() { }
+    ~DiscManagerTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void DiscManagerTest::SetUpTestCase(void)
-{}
+void DiscManagerTest::SetUpTestCase(void) { }
 
-void DiscManagerTest::TearDownTestCase(void)
-{}
+void DiscManagerTest::TearDownTestCase(void) { }
 
-static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions)
+static int32_t TestDeviceFound(
+    const char *packageName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     (void)additions;
     g_devieceFoundCount++;
@@ -109,9 +102,7 @@ static void TestInnerDeviceFound(const DeviceInfo *device, const InnerDeviceInfo
     DISC_LOGI(DISC_TEST, "[inner device found]success!\n");
 }
 
-static DiscInnerCallback g_innerCallback = {
-    .OnDeviceFound = TestInnerDeviceFound
-};
+static DiscInnerCallback g_innerCallback = { .OnDeviceFound = TestInnerDeviceFound };
 
 static int32_t DiscCoapStartDiscovery(uint32_t filterCapBitmap, uint32_t discMode)
 {
@@ -193,36 +184,27 @@ static int32_t DiscCoapUnpulbishService(uint32_t pubCapBitmap, uint32_t publishM
     return SOFTBUS_OK;
 }
 
-static DiscInnerCallback g_discInnerCb = {
-    .OnDeviceFound = NULL
-};
+static DiscInnerCallback g_discInnerCb = { .OnDeviceFound = NULL };
 
-static IServerDiscInnerCallback g_subscribeCb = {
-    .OnServerDeviceFound = TestDeviceFound
-};
+static IServerDiscInnerCallback g_subscribeCb = { .OnServerDeviceFound = TestDeviceFound };
 
-static PublishInfo g_pInnerInfo = {
-    .publishId = TEST_PUBLISHINNER_ID,
+static PublishInfo g_pInnerInfo = { .publishId = TEST_PUBLISHINNER_ID,
     .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = LOW,
     .capability = "hicall",
     .capabilityData = (unsigned char *)"capdata1",
-    .dataLen = sizeof("capdata1")
-};
+    .dataLen = sizeof("capdata1") };
 
-static PublishInfo g_pInfo = {
-    .publishId = TEST_PUBLISH_ID,
+static PublishInfo g_pInfo = { .publishId = TEST_PUBLISH_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata2",
-    .dataLen = sizeof("capdata2")
-};
+    .dataLen = sizeof("capdata2") };
 
-static SubscribeInfo g_sInnerInfo = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID,
+static SubscribeInfo g_sInnerInfo = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -230,11 +212,9 @@ static SubscribeInfo g_sInnerInfo = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .dataLen = sizeof("capdata3") };
 
-static SubscribeInfo g_sInfo = {
-    .subscribeId = TEST_SUBSCRIBE_ID,
+static SubscribeInfo g_sInfo = { .subscribeId = TEST_SUBSCRIBE_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -242,31 +222,25 @@ static SubscribeInfo g_sInfo = {
     .isWakeRemote = false,
     .capability = "hicall",
     .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = sizeof("capdata4")
-};
+    .dataLen = sizeof("capdata4") };
 
-static PublishInfo g_pInnerInfo1 = {
-    .publishId = TEST_PUBLISHINNER_ID1,
+static PublishInfo g_pInnerInfo1 = { .publishId = TEST_PUBLISHINNER_ID1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = LOW,
     .capability = "hicall",
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
-static PublishInfo g_pInfo1 = {
-    .publishId = TEST_PUBLISH_ID1,
+static PublishInfo g_pInfo1 = { .publishId = TEST_PUBLISH_ID1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
-static SubscribeInfo g_sInnerInfo1 = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID1,
+static SubscribeInfo g_sInnerInfo1 = { .subscribeId = TEST_SUBSCRIBEINNER_ID1,
     .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
@@ -274,11 +248,9 @@ static SubscribeInfo g_sInnerInfo1 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
-static SubscribeInfo g_sInfo1 = {
-    .subscribeId = TEST_SUBSCRIBE_ID1,
+static SubscribeInfo g_sInfo1 = { .subscribeId = TEST_SUBSCRIBE_ID1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -286,8 +258,7 @@ static SubscribeInfo g_sInfo1 = {
     .isWakeRemote = false,
     .capability = "hicall",
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 /**
  * @tc.name: DiscPublishTest001
@@ -309,15 +280,13 @@ HWTEST_F(DiscManagerTest, DiscPublishTest001, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscPublishTest002, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISHINNER_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISHINNER_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "hicall",
         .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1")
-    };
+        .dataLen = sizeof("capdata1") };
 
     DiscMgrInit();
 
@@ -394,29 +363,25 @@ HWTEST_F(DiscManagerTest, DiscPublishTest004, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscPublishTest005, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISHINNER_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISHINNER_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "hicall",
-        .capabilityData = (unsigned char*)"capdata1",
-        .dataLen = sizeof("capdata1")
-    };
+        .capabilityData = (unsigned char *)"capdata1",
+        .dataLen = sizeof("capdata1") };
 
     int32_t ret = DiscPublish(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-PublishInfo discPublishTestAbstractInfo001 = {
-    .publishId = TEST_PUBLISHINNER_ID,
+PublishInfo discPublishTestAbstractInfo001 = { .publishId = TEST_PUBLISHINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = AUTO,
     .freq = LOW,
     .capability = "hicall",
     .capabilityData = (unsigned char *)"capdata1",
-    .dataLen = sizeof("capdata1")
-};
+    .dataLen = sizeof("capdata1") };
 
 void DiscPublishTestAbstract001(DiscModule module, PublishInfo *info)
 {
@@ -476,15 +441,13 @@ HWTEST_F(DiscManagerTest, DiscPublishTest006, TestSize.Level1)
     DiscPublishTestAbstract001(MODULE_CONN, &discPublishTestAbstractInfo001);
 }
 
-PublishInfo discPublishTestAbstractInfo002 = {
-    .publishId = TEST_PUBLISHINNER_ID,
+PublishInfo discPublishTestAbstractInfo002 = { .publishId = TEST_PUBLISHINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = LOW,
     .capability = "hicall",
-    .capabilityData = (unsigned char*)"capdata1",
-    .dataLen = sizeof("capdata1")
-};
+    .capabilityData = (unsigned char *)"capdata1",
+    .dataLen = sizeof("capdata1") };
 
 void DiscPublishTestAbstract002(DiscModule module, PublishInfo *info)
 {
@@ -548,13 +511,13 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest001, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscStartScanTest002, TestSize.Level1)
 {
-    PublishInfo testInfo = {.publishId = TEST_PUBLISHINNER_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISHINNER_ID,
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "hicall",
         .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1")};
+        .dataLen = sizeof("capdata1") };
 
     DiscMgrInit();
 
@@ -625,29 +588,25 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest004, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscStartScanTest005, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISHINNER_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISHINNER_ID,
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "hicall",
         .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1")
-    };
+        .dataLen = sizeof("capdata1") };
 
     int32_t ret = DiscStartScan(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-PublishInfo discStartScanTestAbstractInfo001 = {
-    .publishId = TEST_PUBLISHINNER_ID,
+PublishInfo discStartScanTestAbstractInfo001 = { .publishId = TEST_PUBLISHINNER_ID,
     .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = LOW,
     .capability = "hicall",
-    .capabilityData = (unsigned char*)"capdata1",
-    .dataLen = sizeof("capdata1")
-};
+    .capabilityData = (unsigned char *)"capdata1",
+    .dataLen = sizeof("capdata1") };
 
 void DiscStartScanTestAbstract001(DiscModule module, PublishInfo *info, DiscModule erroModule)
 {
@@ -711,8 +670,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
 {
-    SubscribeInfo testInfo = {
-        .subscribeId = TEST_SUBSCRIBEINNER_ID,
+    SubscribeInfo testInfo = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
@@ -720,8 +678,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
-    };
+        .dataLen = sizeof("capdata3") };
 
     DiscMgrInit();
 
@@ -784,8 +741,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-SubscribeInfo discStartAdvertiseTestAbstractInfo001 = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID,
+SubscribeInfo discStartAdvertiseTestAbstractInfo001 = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -793,8 +749,7 @@ SubscribeInfo discStartAdvertiseTestAbstractInfo001 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .dataLen = sizeof("capdata3") };
 
 void DiscStartAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
 {
@@ -844,8 +799,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-SubscribeInfo discStartAdvertiseTestAbstractInfo002 = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID,
+SubscribeInfo discStartAdvertiseTestAbstractInfo002 = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = AUTO,
     .freq = LOW,
@@ -853,8 +807,7 @@ SubscribeInfo discStartAdvertiseTestAbstractInfo002 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .dataLen = sizeof("capdata3") };
 
 void DiscStartAdvertiseTestAbstract002(DiscModule module, SubscribeInfo *info)
 {
@@ -933,7 +886,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest001, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscSubscribeTest002, TestSize.Level1)
 {
-    SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
+    SubscribeInfo testInfo = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = MID,
@@ -941,7 +894,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest002, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")};
+        .dataLen = sizeof("capdata3") };
 
     DiscMgrInit();
 
@@ -1021,17 +974,15 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest005, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-SubscribeInfo discSubscribeTestAbstractInfo001 = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID,
+SubscribeInfo discSubscribeTestAbstractInfo001 = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
     .mode = DISCOVER_MODE_PASSIVE,
     .medium = BLE,
     .freq = MID,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "dvKit",
-    .capabilityData = (unsigned char*)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .capabilityData = (unsigned char *)"capdata3",
+    .dataLen = sizeof("capdata3") };
 
 void DiscSubscribeTestAbstract001(DiscModule module, SubscribeInfo *info)
 {
@@ -1174,15 +1125,13 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest006, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-PublishInfo discUnpublishTestAbstractInfo001 = {
-    .publishId = TEST_PUBLISHINNER_ID,
+PublishInfo discUnpublishTestAbstractInfo001 = { .publishId = TEST_PUBLISHINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = AUTO,
     .freq = LOW,
     .capability = "hicall",
     .capabilityData = (unsigned char *)"capdata1",
-    .dataLen = sizeof("capdata1")
-};
+    .dataLen = sizeof("capdata1") };
 
 void DiscUnpublishTestAbstract001(DiscModule module, PublishInfo *info)
 {
@@ -1338,8 +1287,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest006, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-SubscribeInfo discStopAdvertiseTestAbstractInfo001 = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID,
+SubscribeInfo discStopAdvertiseTestAbstractInfo001 = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = AUTO,
     .freq = LOW,
@@ -1347,8 +1295,7 @@ SubscribeInfo discStopAdvertiseTestAbstractInfo001 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .dataLen = sizeof("capdata3") };
 
 void DiscStopAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
 {
@@ -1427,15 +1374,13 @@ HWTEST_F(DiscManagerTest, PublishServiceTest001, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, PublishServiceTest002, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISH_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISH_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
-    };
+        .dataLen = sizeof("capdata2") };
 
     DiscMgrInit();
 
@@ -1527,15 +1472,13 @@ HWTEST_F(DiscManagerTest, PublishServiceTest004, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, PublishServiceTest005, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISH_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISH_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
-    };
+        .dataLen = sizeof("capdata2") };
 
     DiscMgrInit();
 
@@ -1560,15 +1503,13 @@ HWTEST_F(DiscManagerTest, PublishServiceTest005, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, PublishServiceTest006, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISH_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISH_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = BLE,
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
-    };
+        .dataLen = sizeof("capdata2") };
 
     DiscMgrInit();
 
@@ -1593,15 +1534,13 @@ HWTEST_F(DiscManagerTest, PublishServiceTest006, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, PublishServiceTest007, TestSize.Level1)
 {
-    PublishInfo testInfo = {
-        .publishId = TEST_PUBLISH_ID,
+    PublishInfo testInfo = { .publishId = TEST_PUBLISH_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = AUTO,
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
-    };
+        .dataLen = sizeof("capdata2") };
 
     DiscMgrInit();
 
@@ -1618,15 +1557,13 @@ HWTEST_F(DiscManagerTest, PublishServiceTest007, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-PublishInfo publishServiceTestAbstractInfo = {
-    .publishId = TEST_PUBLISH_ID,
+PublishInfo publishServiceTestAbstractInfo = { .publishId = TEST_PUBLISH_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = AUTO,
     .freq = LOW,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata2",
-    .dataLen = sizeof("capdata2")
-};
+    .dataLen = sizeof("capdata2") };
 
 void PublishServiceTestAbstract001(PublishInfo *info)
 {
@@ -1713,8 +1650,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest001, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
 {
-    SubscribeInfo testInfo = {
-        .subscribeId = TEST_SUBSCRIBEINNER_ID,
+    SubscribeInfo testInfo = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
@@ -1722,8 +1658,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
-    };
+        .dataLen = sizeof("capdata3") };
 
     DiscMgrInit();
 
@@ -1807,17 +1742,15 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-SubscribeInfo startDiscoveryTestAbstractInfo002 = {
-    .subscribeId = TEST_SUBSCRIBEINNER_ID,
+SubscribeInfo startDiscoveryTestAbstractInfo002 = { .subscribeId = TEST_SUBSCRIBEINNER_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "dvKit",
-    .capabilityData = (unsigned char*)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .capabilityData = (unsigned char *)"capdata3",
+    .dataLen = sizeof("capdata3") };
 
 void StartDiscoveryTestAbstract002(SubscribeInfo *info)
 {
@@ -1857,8 +1790,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest005, TestSize.Level1)
     StartDiscoveryTestAbstract002(&startDiscoveryTestAbstractInfo002);
 }
 
-SubscribeInfo startDiscoveryTestAbstractInfo001 = {
-    .subscribeId = TEST_SUBSCRIBE_ID,
+SubscribeInfo startDiscoveryTestAbstractInfo001 = { .subscribeId = TEST_SUBSCRIBE_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = AUTO,
     .freq = LOW,
@@ -1866,8 +1798,7 @@ SubscribeInfo startDiscoveryTestAbstractInfo001 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .dataLen = sizeof("capdata3") };
 
 void StartDiscoveryTestAbstract001(SubscribeInfo *info)
 {
@@ -2155,8 +2086,7 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-SubscribeInfo stopDiscoveryTestAbstractInfo001 = {
-    .subscribeId = TEST_SUBSCRIBE_ID,
+SubscribeInfo stopDiscoveryTestAbstractInfo001 = { .subscribeId = TEST_SUBSCRIBE_ID,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = LOW,
@@ -2164,8 +2094,7 @@ SubscribeInfo stopDiscoveryTestAbstractInfo001 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
-};
+    .dataLen = sizeof("capdata3") };
 
 void StopDiscoveryTestAbstract001(SubscribeInfo *info)
 {

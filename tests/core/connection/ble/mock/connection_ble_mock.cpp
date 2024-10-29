@@ -36,7 +36,7 @@ static ConnectionBleInterface *GetConnectionBleInterface()
 }
 
 extern "C" {
-bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
 {
     return GetConnectionBleInterface()->AddNumberToJsonObject(json, string, num);
 }
@@ -51,22 +51,22 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
     return GetConnectionBleInterface()->SoftbusGattcConnect(clientId, addr);
 }
 
-int BleGattcDisconnect(int clientId)
+int32_t BleGattcDisconnect(int32_t clientId)
 {
     return GetConnectionBleInterface()->BleGattcDisconnect(clientId);
 }
 
-int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)
+int32_t SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int32_t number)
 {
     return GetConnectionBleInterface()->SoftBusGattsAddService(srvcUuid, isPrimary, number);
 }
 
-int SoftBusGattsStopService(int srvcHandle)
+int32_t SoftBusGattsStopService(int32_t srvcHandle)
 {
     return GetConnectionBleInterface()->SoftBusGattsStopService(srvcHandle);
 }
 
-int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
+int32_t SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int32_t connId)
 {
     return GetConnectionBleInterface()->SoftBusGattsDisconnect(btAddr, connId);
 }
@@ -81,19 +81,24 @@ int32_t SoftbusGattcSearchServices(int32_t clientId)
     return GetConnectionBleInterface()->SoftbusGattcSearchServices(clientId);
 }
 
-bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target)
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int32_t *target)
 {
     return GetConnectionBleInterface()->GetJsonObjectSignedNumberItem(json, string, target);
 }
 
-int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number)
+int32_t BleGattsAddService(int32_t serverId, BtUuid srvcUuid, bool isPrimary, int32_t number)
 {
     return GetConnectionBleInterface()->BleGattsAddService(serverId, srvcUuid, isPrimary, number);
 }
  
-int BleGattcUnRegister(int clientId)
+int32_t BleGattcUnRegister(int32_t clientId)
 {
     return GetConnectionBleInterface()->BleGattcUnRegister(clientId);
+}
+
+int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority)
+{
+    return GetConnectionBleInterface()->BleGattcSetPriority(clientId, bdAddr, priority);
 }
 }
 }

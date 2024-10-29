@@ -49,12 +49,12 @@ void TransSdkCommStreamTest::TearDownTestCase(void)
  */
 HWTEST_F(TransSdkCommStreamTest, SendCommStreamTest001, TestSize.Level0)
 {
-    int sessionId = 1;
+    int32_t sessionId = 1;
     const StreamData streamData = {0};
     const StreamData extData = {0};
     const StreamFrameInfo frameInfo = {0};
 
-    int ret = SendStream(-1, &streamData, &extData, &frameInfo);
+    int32_t ret = SendStream(-1, &streamData, &extData, &frameInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendStream(sessionId, NULL, &extData, &frameInfo);

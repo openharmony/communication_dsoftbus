@@ -72,6 +72,11 @@ const DeviceGroupManager *GetGmInstance(void)
     AUTH_LOGI(AUTH_TEST, "GetGmInstance");
     return GetHichainInterface()->GetGmInstance();
 }
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    return GetHichainInterface()->GetLnnTriggerInfo(triggerInfo);
+}
 }
 
 int32_t LnnHichainInterfaceMock::ActionOfProcessData(
@@ -111,7 +116,7 @@ int32_t LnnHichainInterfaceMock::InvokeDataChangeListener(const char *appId, con
     return SOFTBUS_OK;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, const char *appId, int groupType,
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, const char *appId, int32_t groupType,
     char **returnGroupVec, uint32_t *groupNum)
 {
     (void)osAccountId;
@@ -131,7 +136,7 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, con
     return HC_SUCCESS;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(int32_t osAccountId, const char *appId, int groupType,
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(int32_t osAccountId, const char *appId, int32_t groupType,
     char **returnGroupVec, uint32_t *groupNum)
 {
     (void)osAccountId;
@@ -143,7 +148,7 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(int32_t osAccountId, con
     return HC_ERR_INVALID_PARAMS;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups3(int32_t osAccountId, const char *appId, int groupType,
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups3(int32_t osAccountId, const char *appId, int32_t groupType,
     char **returnGroupVec, uint32_t *groupNum)
 {
     (void)osAccountId;

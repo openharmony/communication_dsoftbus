@@ -79,16 +79,16 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_ADV_BY_TYPE_NOW_TEST_01, Test
 {
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
     EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_MIN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_MAX);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_MAX - 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_FAIL);
     ret = LnnStartNewHbStrategyFsm();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_FSM_CREATE_FAIL);
     ret = LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_MAX - 1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -143,11 +143,11 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_OFFLINE_TIMING_STRATEGY_TEST_01, TestS
     ON_CALL(hbMock, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbMock, IsFeatureSupport).WillByDefault(Return(false));
     ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
-    ON_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillByDefault(Return(SOFTBUS_ERR));
+    ON_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = LnnStartOfflineTimingStrategy(nullptr, CONNECTION_ADDR_WLAN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStartOfflineTimingStrategy(NETWORKID, CONNECTION_ADDR_WLAN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_GET_GEAR_MODE_FAIL);
 }
 
 /*
@@ -212,7 +212,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, T
     ret = LnnGetMediumParamBySpecificType(nullptr, LNN_HB_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetMediumParamBySpecificType(&param, LNN_HB_TYPE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_INVALID_MGR);
     LnnHbStrategyDeinit();
 }
 
@@ -234,7 +234,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, T
     ret = LnnSetMediumParamBySpecificType(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSetMediumParamBySpecificType(&param);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_INVALID_MGR);
     LnnHbStrategyDeinit();
 }
 
@@ -255,9 +255,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Le
     ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
     ON_CALL(hbMock, LnnRemoveSendEndMsg).WillByDefault(Return());
     ON_CALL(hbMock, LnnFsmRemoveMessage).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillByDefault(Return(SOFTBUS_ERR));
+    ON_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
     ON_CALL(hbMock, LnnRemoveCheckDevStatusMsg).WillByDefault(Return());
-    ON_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillByDefault(Return(SOFTBUS_ERR));
+    ON_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
 
     int32_t ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_MAX, STRATEGY_HB_SEND_SINGLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -284,7 +284,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     msgPara.hbType = HEARTBEAT_TYPE_BLE_V0;
     ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_GET_GEAR_MODE_FAIL);
     msgPara.strategyType = STRATEGY_HB_RECV_SINGLE;
     ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -308,10 +308,10 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01, Test
     ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
     int32_t ret = LnnHbStrategyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnGetGearModeBySpecificType(nullptr, LNN_HB_TYPE);
+    ret = LnnGetGearModeBySpecificType(nullptr, nullptr, LNN_HB_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnGetGearModeBySpecificType(&mode, LNN_HB_TYPE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGetGearModeBySpecificType(&mode, nullptr, LNN_HB_TYPE);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_INVALID_MGR);
     LnnHbStrategyDeinit();
 }
 
@@ -348,15 +348,15 @@ HWTEST_F(HeartBeatStrategyTest, SEND_EACH_SEPARATELY_TEST_01, TestSize.Level1)
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
     ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
     EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SendEachSeparately(&hbFsm, &msgPara, &mode, HEARTBEAT_TYPE_BLE_V3, false);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_FAIL);
     ret = SendEachSeparately(&hbFsm, &msgPara, &mode, HEARTBEAT_TYPE_BLE_V3, false);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_FAIL);
     ret = SendEachSeparately(&hbFsm, &msgPara, &mode, HEARTBEAT_TYPE_BLE_V3, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -420,10 +420,10 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_HEARTBEAT_TEST_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
     EXPECT_CALL(hbMock, LnnPostStartMsgToHbFsm)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnStartHeartbeat(DELAY_MILLIS);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnStartHeartbeat(DELAY_MILLIS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

@@ -91,23 +91,23 @@ void TransClientSessionManagerTest::TearDownTestCase(void)
     TransServerDeinit();
 }
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d", sessionId);
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
@@ -118,7 +118,7 @@ static SessionInfo *GenerateSession(const SessionParam *param)
     EXPECT_TRUE(session != NULL);
     memset_s(session, sizeof(SessionInfo), 0, sizeof(SessionInfo));
 
-    int ret = strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName);
+    int32_t ret = strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName);
     EXPECT_EQ(ret, EOK);
 
     ret = strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId);
@@ -288,7 +288,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest05, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSize.Level1)
 {
     int32_t ret = 0;
-    for (int i = 0; i < MAX_SESSION_SERVER_NUMBER; ++i) {
+    for (int32_t i = 0; i < MAX_SESSION_SERVER_NUMBER; ++i) {
         char sessionNme[SESSION_NAME_SIZE_MAX] = {0};
         char pkgName[PKG_NAME_SIZE_MAX] = {0};
         ret = sprintf_s(sessionNme, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
@@ -300,7 +300,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSiz
     }
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_NUM);
-    for (int i = 0; i < MAX_SESSION_SERVER_NUMBER; ++i) {
+    for (int32_t i = 0; i < MAX_SESSION_SERVER_NUMBER; ++i) {
         char sessionNme[SESSION_NAME_SIZE_MAX] = {0};
         ret = sprintf_s(sessionNme, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
         EXPECT_GT(ret, 0);
@@ -325,7 +325,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientAddSessionOutOfMaxTest01, Tes
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret,  SOFTBUS_OK);
 
-    for (int i = 0; i < MAX_SESSION_ID; ++i) {
+    for (int32_t i = 0; i < MAX_SESSION_ID; ++i) {
         char sessionName[SESSION_NAME_SIZE_MAX] = {0};
         ret = sprintf_s(sessionName, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
         ASSERT_GT(ret, 0);
@@ -485,7 +485,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest10, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest11, TestSize.Level1)
 {
-    int data = 0;
+    int32_t data = 0;
     int32_t ret = ClientGetSessionIntegerDataById(TRANS_TEST_SESSION_ID, &data, KEY_PEER_PID);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
@@ -498,7 +498,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest11, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest12, TestSize.Level1)
 {
-    int data = 0;
+    int32_t data = 0;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
@@ -619,7 +619,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest16, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest17, TestSize.Level1)
 {
-    int data = 0;
+    int32_t data = 0;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = GetEncryptByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &data);
@@ -1184,7 +1184,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest31, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest32, TestSize.Level1)
 {
-    int data = 0;
+    int32_t data = 0;
     int32_t ret = ClientGetSessionIntegerDataById(TRANS_TEST_INVALID_SESSION_ID, &data, KEY_PEER_PID);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionIntegerDataById(TRANS_TEST_SESSION_ID, NULL, KEY_PEER_PID);
@@ -1240,7 +1240,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest34, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest35, TestSize.Level1)
 {
-    int data = 0;
+    int32_t data = 0;
     int32_t ret = GetEncryptByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &data);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = GetEncryptByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, NULL);
@@ -1257,7 +1257,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest35, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest36, TestSize.Level1)
 {
-    int sessionId = 0;
+    int32_t sessionId = 0;
     bool isClosing = false;
     int32_t ret = ClientGetSessionIdByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);

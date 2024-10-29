@@ -97,6 +97,7 @@ typedef struct {
     uint32_t dataConfig;
     SocketLifecycleData lifecycle;
     uint32_t actionId;
+    int32_t osType;
 } SessionInfo;
 
 typedef struct {
@@ -286,6 +287,8 @@ void SocketServerStateUpdate(const char *sessionName);
 int32_t ClientCancelAuthSessionTimer(int32_t sessionId);
 
 int32_t ClientSetStatusClosingBySocket(int32_t socket, bool isClosing);
+
+int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
 #ifdef __cplusplus
 }
 #endif

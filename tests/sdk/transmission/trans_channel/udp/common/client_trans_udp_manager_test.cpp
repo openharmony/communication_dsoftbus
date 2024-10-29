@@ -89,7 +89,7 @@ static IClientSessionCallBack g_sessionCb = {
 
 void ClientTransUdpManagerTest::SetUpTestCase(void)
 {
-    int ret = ClientTransUdpMgrInit(&g_sessionCb);
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransClientInit();
     EXPECT_EQ(ret, SOFTBUS_OK);

@@ -273,7 +273,7 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkStatisticsInfo *info)
     }
  
     char laneId[MAX_LANE_ID_LEN] = { 0 };
-    if (sprintf_s(laneId, sizeof(laneId), "%"PRIu64"", info->resource.laneId) < 0) {
+    if (sprintf_s(laneId, sizeof(laneId), "%" PRIu64, info->resource.laneId) < 0) {
         COMM_LOGE(COMM_DFX, "sprintf lane id fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -295,7 +295,7 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkStatisticsInfo *info)
     ChannelStatisticsInfo *temp = NULL;
     LIST_FOR_EACH_ENTRY(temp, &info->channels, ChannelStatisticsInfo, node) {
         if (temp->channelInfo != NULL) {
-            cJSON_AddItemToArray(channelStatsObj, cJSON_Parse(temp->channelInfo));
+            cJSON_AddItemToArray(channelStatsObj, cJSON_ParseWithLength(temp->channelInfo, temp->len));
         }
     }
     return SOFTBUS_OK;

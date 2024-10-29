@@ -68,6 +68,7 @@ public:
     virtual int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig) = 0;
     virtual int32_t SoftBusDisconnectDevice(void) = 0;
     virtual ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type) = 0;
+    virtual bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr) = 0;
     virtual void UpdateProfile(const NodeInfo *info) = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategy(
@@ -91,7 +92,7 @@ public:
     virtual void LnnNotifyLocalNetworkIdChanged(void);
     virtual int32_t LnnGetSettingNickName(const char *defaultName,
         const char *unifiedName, char *nickName, uint32_t len);
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle) = 0;
 };
 
@@ -122,6 +123,7 @@ public:
     MOCK_METHOD1(SoftBusConnectToDevice, int32_t (const SoftBusWifiDevConf *));
     MOCK_METHOD0(SoftBusDisconnectDevice, int32_t ());
     MOCK_METHOD1(LnnDiscTypeToConnAddrType, ConnectionAddrType (DiscoveryType));
+    MOCK_METHOD1(LnnIsConnectionAddrInvalid, bool (const ConnectionAddr *addr));
     MOCK_METHOD1(UpdateProfile, void (const NodeInfo *));
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t (LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
@@ -140,7 +142,7 @@ public:
     MOCK_METHOD1(LnnSetLocalUnifiedName, int32_t (const char *));
     MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
     MOCK_METHOD4(LnnGetSettingNickName, int32_t (const char *, const char *, char *, uint32_t));
-    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t (AccountEventHandle handle));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);

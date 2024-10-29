@@ -471,6 +471,21 @@ static AuthFsm *GetAuthFsmByConnInfo(const AuthConnInfo *connInfo, bool isServer
     return NULL;
 }
 
+static void ProcessTimeoutErrorCode(AuthFsm *authFsm, int32_t *result)
+{
+    AuthFsmStateIndex curState = authFsm->curState;
+    if (curState == STATE_SYNC_NEGOTIATION || curState == STATE_SYNC_DEVICE_ID) {
+        *result = SOFTBUS_AUTH_SYNC_DEVICEID_TIMEOUT;
+    } else if (curState == STATE_DEVICE_AUTH) {
+        *result = (authFsm->info.normalizedType == NORMALIZED_SUPPORT || authFsm->info.isSupportFastAuth) ?
+            SOFTBUS_AUTH_SAVE_SESSIONKEY_TIMEOUT : SOFTBUS_AUTH_HICHAIN_TIMEOUT;
+    } else if (curState == STATE_SYNC_DEVICE_INFO) {
+        *result = SOFTBUS_AUTH_SYNC_DEVICEINFO_TIMEOUT;
+    } else {
+        AUTH_LOGE(AUTH_FSM, "authFsm state error, curState=%{public}d", curState);
+    }
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
@@ -500,6 +515,9 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
             }
         }
     } else {
+        if (result == SOFTBUS_AUTH_TIMEOUT) {
+            ProcessTimeoutErrorCode(authFsm, &result);
+        }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
         if (!authFsm->info.isServer) {
             NotifyNormalizeRequestFail(authFsm->authSeq, result);
@@ -527,9 +545,11 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
         case FSM_MSG_AUTH_TIMEOUT:
             AUTH_LOGE(AUTH_FSM, "auth fsm timeout. authSeq=%{public}" PRId64 "", authFsm->authSeq);
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_TIMEOUT);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         case FSM_MSG_DEVICE_NOT_TRUSTED:
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         case FSM_MSG_DEVICE_DISCONNECTED:
             if (authFsm->info.isNodeInfoReceived && authFsm->info.isCloseAckReceived) {
@@ -576,7 +596,8 @@ static uint32_t AddConcurrentAuthRequest(AuthFsm *authFsm)
     num = AddNormalizeRequest(&normalizeRequest);
     char *anonyUdidHash = NULL;
     Anonymize(normalizeRequest.udidHash, &anonyUdidHash);
-    AUTH_LOGI(AUTH_CONN, "add normalize queue, num=%{public}d, udidHash=%{public}s", num, anonyUdidHash);
+    AUTH_LOGI(AUTH_CONN, "add normalize queue, num=%{public}d, udidHash=%{public}s",
+        num, AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     return num;
 }
@@ -743,14 +764,14 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_BR:
             Anonymize(info->connInfo.info.brInfo.brMac, &anonyBrMac);
-            if (strcpy_s((char *)lnnAuditExtra->peerBrMac, BT_MAC_LEN, anonyBrMac) != EOK) {
+            if (strcpy_s((char *)lnnAuditExtra->peerBrMac, BT_MAC_LEN, AnonymizeWrapper(anonyBrMac)) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "BR MAC COPY ERROR");
             }
             AnonymizeFree(anonyBrMac);
             break;
         case AUTH_LINK_TYPE_BLE:
             Anonymize(info->connInfo.info.bleInfo.bleMac, &anonyBleMac);
-            if (strcpy_s((char *)lnnAuditExtra->peerBleMac, BT_MAC_LEN, anonyBleMac) != EOK) {
+            if (strcpy_s((char *)lnnAuditExtra->peerBleMac, BT_MAC_LEN, AnonymizeWrapper(anonyBleMac)) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "BLE MAC COPY ERROR");
             }
             AnonymizeFree(anonyBleMac);
@@ -759,7 +780,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             Anonymize(info->connInfo.info.ipInfo.ip, &anonyIp);
-            if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, anonyIp) != EOK) {
+            if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, AnonymizeWrapper(anonyIp)) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "IP COPY ERROR");
             }
             AnonymizeFree(anonyIp);
@@ -776,7 +797,7 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, reportInfo->localIp, IP_LEN);
     char *anonyLocalIp = NULL;
     Anonymize(reportInfo->localIp, &anonyLocalIp);
-    if (strcpy_s((char *)lnnAuditExtra->localIp, IP_LEN, anonyLocalIp) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localIp, IP_LEN, AnonymizeWrapper(anonyLocalIp)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL IP COPY ERROR");
     }
     AnonymizeFree(anonyLocalIp);
@@ -784,7 +805,7 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, reportInfo->localBrMac, MAC_LEN);
     char *anonyLocalBrMac = NULL;
     Anonymize(reportInfo->localBrMac, &anonyLocalBrMac);
-    if (strcpy_s((char *)lnnAuditExtra->localBrMac, MAC_LEN, anonyLocalBrMac) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localBrMac, MAC_LEN, AnonymizeWrapper(anonyLocalBrMac)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL BR MAC COPY ERROR");
     }
     AnonymizeFree(anonyLocalBrMac);
@@ -792,7 +813,7 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_BLE_MAC, reportInfo->localBleMac, MAC_LEN);
     char *anonyLocalBleMac = NULL;
     Anonymize(reportInfo->localBleMac, &anonyLocalBleMac);
-    if (strcpy_s((char *)lnnAuditExtra->localBleMac, MAC_LEN, anonyLocalBleMac) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localBleMac, MAC_LEN, AnonymizeWrapper(anonyLocalBleMac)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL BLE MAC COPY ERROR");
     }
     AnonymizeFree(anonyLocalBleMac);
@@ -800,7 +821,8 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_NETWORKID, reportInfo->localNetworkId, NETWORK_ID_BUF_LEN);
     char *anonyLocalNetworkId = NULL;
     Anonymize(reportInfo->localNetworkId, &anonyLocalNetworkId);
-    if (strcpy_s((char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN, anonyLocalNetworkId) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN,
+        AnonymizeWrapper(anonyLocalNetworkId)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL NETWORKID COPY ERROR");
     }
     AnonymizeFree(anonyLocalNetworkId);
@@ -808,7 +830,8 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, reportInfo->localDevName, DEVICE_NAME_BUF_LEN);
     char *anonyLocalDevName = NULL;
     Anonymize(reportInfo->localDevName, &anonyLocalDevName);
-    if (strcpy_s((char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN, anonyLocalDevName) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN,
+        AnonymizeWrapper(anonyLocalDevName)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL DEVICE NAME COPY ERROR");
     }
     AnonymizeFree(anonyLocalDevName);
@@ -844,7 +867,7 @@ static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
     }
     char *anonyLocalUdid = NULL;
     Anonymize(reportInfo.localUdid, &anonyLocalUdid);
-    if (strcpy_s((char *)lnnAuditExtra->localUdid, SHA_256_HEX_HASH_LEN, anonyLocalUdid) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localUdid, SHA_256_HEX_HASH_LEN, AnonymizeWrapper(anonyLocalUdid)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL UDID COPY ERROR");
     }
     AnonymizeFree(anonyLocalUdid);
@@ -886,7 +909,7 @@ static void UpdateUdidHashIfEmpty(AuthFsm *authFsm, AuthSessionInfo *info)
         authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
         char *anonyUdid = NULL;
         Anonymize(info->udid, &anonyUdid);
-        AUTH_LOGW(AUTH_FSM, "udidhash is empty, udid=%{public}s", anonyUdid);
+        AUTH_LOGW(AUTH_FSM, "udidhash is empty, udid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
         if (SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->udid),
             (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
@@ -1183,7 +1206,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     }
     char *anonyUdid = NULL;
     Anonymize(authFsm->info.udid, &anonyUdid);
-    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s", anonyUdid);
+    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid);
 }
@@ -1373,7 +1396,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     return true;
 }
 
-static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {

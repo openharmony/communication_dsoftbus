@@ -61,28 +61,6 @@ void LNNBatteryInfoTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_ON_RECEIVE_BATTERY_INFO_TEST_001
-* @tc.desc: test OnReceiveBatteryInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNBatteryInfoTest, LNN_ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)
-{
-    OnReceiveBatteryInfo(LNN_INFO_TYPE_DEVICE_NAME, nullptr, nullptr, TEST_VALID_UDID_LEN);
-}
-
-/*
-* @tc.name: LNN_ON_RECEIVE_BATTERY_INFO_TEST_002
-* @tc.desc: test OnReceiveBatteryInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNBatteryInfoTest, LNN_ON_RECEIVE_BATTERY_INFO_TEST_002, TestSize.Level1)
-{
-    OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, nullptr, nullptr, TEST_VALID_UDID_LEN);
-}
-
-/*
 * @tc.name: LNN_SYNC_BATTERY_INFO_TEST_001
 * @tc.desc: test LnnSyncBatteryInfo
 * @tc.type: FUNC
@@ -110,14 +88,20 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNBatteryInfoTest, ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)
 {
+    NodeInfo nodeInfo;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnSetDLBatteryInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetNodeInfoById).WillRepeatedly(Return(&nodeInfo));
     const char *networkId = NETWORKID;
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_DEVICE_NAME, nullptr, nullptr, TEST_VALID_UDID_LEN);
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, nullptr, nullptr, TEST_VALID_UDID_LEN);
     OnReceiveBatteryInfo(LNN_INFO_TYPE_DEVICE_NAME, networkId, nullptr, 0);
     OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, nullptr, 0);
     OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, MSG1, 0);
+    EXPECT_NE(nodeInfo.batteryInfo.isCharging, true);
     OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, MSG2, 0);
+    EXPECT_NE(nodeInfo.batteryInfo.isCharging, true);
     OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, MSG3, 0);
+    EXPECT_NE(nodeInfo.batteryInfo.isCharging, true);
 }
 } // namespace OHOS
 

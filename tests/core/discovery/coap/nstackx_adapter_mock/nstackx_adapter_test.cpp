@@ -17,25 +17,25 @@
 #include "disc_log.h"
 #include "nstackx_adapter_mock.h"
 
-#include "softbus_error_code.h"
-#include "nstackx_error.h"
 #include "lnn_local_net_ledger.h"
+#include "nstackx_error.h"
+#include "softbus_error_code.h"
 
 #include "disc_nstackx_adapter.h"
 
 using namespace testing::ext;
-using testing::Return;
 using testing::_;
 using testing::NotNull;
+using testing::Return;
 
 namespace OHOS {
 class NstackxAdapterTest : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void SetUpTestCase() { }
+    static void TearDownTestCase() { }
 
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 /*
@@ -61,4 +61,4 @@ HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
     EXPECT_EQ(DiscCoapRegisterServiceData(&option, 0), SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
     DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 end ----");
 }
-}
+} // namespace OHOS

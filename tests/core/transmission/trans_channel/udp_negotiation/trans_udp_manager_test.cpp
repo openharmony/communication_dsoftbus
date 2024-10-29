@@ -701,7 +701,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest024, TestSize.Level1)
 
 /**
  * @tc.name: TransUdpManagerTest025
- * @tc.desc: TransUdpGetLocalIpAndConnectTypeById test.
+ * @tc.desc: TransUdpGetIpAndConnectTypeById test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -713,11 +713,12 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest025, TestSize.Level1)
     uint32_t maxIpLen = TEST_LEN;
     int32_t connectType = CONNECT_TYPE_MAX;
 
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, nullptr, maxIpLen, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, nullptr, nullptr, maxIpLen, &connectType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     char localIp[IP_LEN] = { 0 };
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, maxIpLen, &connectType);
+    char remoteIp[IP_LEN] = { 0 };
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, maxIpLen, &connectType);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -725,7 +726,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest025, TestSize.Level1)
     channel->info.myData.channelId = channelId;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, maxIpLen, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, maxIpLen, &connectType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransDelUdpChannel(channelId);
@@ -757,24 +758,25 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest026, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpGetLocalIpAndConnectTypeById
+ * @tc.name: TransUdpGetIpAndConnectTypeById
  * @tc.desc: Get localIp and connectType wiht channelId
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById001, TestSize.Level1)
+HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById001, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = -1;
     char localIp[IP_LEN] = { 0 };
+    char remoteIp[IP_LEN] = { 0 };
     int32_t connectType = CONNECT_TYPE_MAX;
 
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     channelId = INT32_MAX;
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     TransUdpChannelMgrDeinit();
@@ -873,49 +875,51 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpGetLocalIpAndConnectTypeById002
+ * @tc.name: TransUdpGetIpAndConnectTypeById002
  * @tc.desc: Get localIp and connectType with 'localIp' parameter
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById002, TestSize.Level1)
+HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById002, TestSize.Level1)
 {
     int32_t channelId = INT32_MAX;
     int32_t connectType = CONNECT_TYPE_MAX;
 
-    int32_t ret = TransUdpGetLocalIpAndConnectTypeById(channelId, nullptr, 0, &connectType);
+    int32_t ret = TransUdpGetIpAndConnectTypeById(channelId, nullptr, nullptr, 0, &connectType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, nullptr, IP_LEN, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, nullptr, nullptr, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     char localIp[IP_LEN] = { 0 };
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, 0, &connectType);
+    char remoteIp[IP_LEN] = { 0 };
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, 0, &connectType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN - 1, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN - 1, &connectType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
- * @tc.name: TransUdpGetLocalIpAndConnectTypeById003
+ * @tc.name: TransUdpGetIpAndConnectTypeById003
  * @tc.desc: Get localIp and connectType with 'connectType' parameter
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById003, TestSize.Level1)
+HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById003, TestSize.Level1)
 {
     int32_t channelId = INT32_MAX - 1;
     char localIp[IP_LEN] = { 0 };
+    char remoteIp[IP_LEN] = { 0 };
     int32_t connectType = CONNECT_TYPE_MAX;
 
-    int32_t ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, nullptr);
+    int32_t ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
+    ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 }

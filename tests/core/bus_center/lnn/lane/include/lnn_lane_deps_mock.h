@@ -68,7 +68,7 @@ public:
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta) = 0;
-    virtual int SoftBusFrequencyToChannel(int frequency) = 0;
+    virtual int32_t SoftBusFrequencyToChannel(int32_t frequency) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
@@ -110,10 +110,11 @@ public:
     virtual void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual void DeleteNetworkResourceByLaneId(uint64_t laneId) = 0;
-    virtual int SoftBusGetBtState() = 0;
+    virtual int32_t SoftBusGetBtState() = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual void AddNetworkResource(NetworkResource *networkResource) = 0;
     virtual int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout) = 0;
+    virtual int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -132,7 +133,7 @@ public:
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
-    MOCK_METHOD1(SoftBusFrequencyToChannel, int (int));
+    MOCK_METHOD1(SoftBusFrequencyToChannel, int32_t (int));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
@@ -175,10 +176,11 @@ public:
     MOCK_METHOD3(AuthDeviceGetLatestIdByUuid, void (const char *uuid, AuthLinkType type, AuthHandle *authHandle));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *, int32_t *));
     MOCK_METHOD1(DeleteNetworkResourceByLaneId, void (uint64_t laneId));
-    MOCK_METHOD0(SoftBusGetBtState, int (void));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **info, int32_t *infoNum));
     MOCK_METHOD1(AddNetworkResource, void (NetworkResource *));
     MOCK_METHOD2(LnnRequestCheckOnlineStatus, int32_t (const char *networkId, uint64_t timeout));
+    MOCK_METHOD2(AuthCheckMetaExist, int32_t (const AuthConnInfo *connInfo, bool *isExist));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);
@@ -190,6 +192,7 @@ public:
         const AuthConnCallback *callback, bool isMeta);
     static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
         bool isMeta);
+    static int32_t socketEvent;
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H

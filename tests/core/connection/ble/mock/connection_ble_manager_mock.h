@@ -47,11 +47,11 @@ public:
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
 
-    virtual int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions) = 0;
-    virtual int SoftBusGattsAddCharacteristic(
-        int srvcHandle, SoftBusBtUuid characUuid, int properties, int permissions) = 0;
-    virtual int SoftBusGattsStartService(int srvcHandle) = 0;
-    virtual int SoftBusGattsSendResponse(SoftBusGattsResponse *param) = 0;
+    virtual int32_t SoftBusGattsAddDescriptor(int32_t srvcHandle, SoftBusBtUuid descUuid, int32_t permissions) = 0;
+    virtual int32_t SoftBusGattsAddCharacteristic(
+        int32_t srvcHandle, SoftBusBtUuid characUuid, int32_t properties, int32_t permissions) = 0;
+    virtual int32_t SoftBusGattsStartService(int32_t srvcHandle) = 0;
+    virtual int32_t SoftBusGattsSendResponse(SoftBusGattsResponse *param) = 0;
     virtual ConnBleConnection *LegacyBleCreateConnection(
         const char *addr, ConnSideType side, int32_t underlayerHandle, bool fastestConnectEnable) = 0;
     virtual int32_t LegacyBleSaveConnection(ConnBleConnection *connection) = 0;

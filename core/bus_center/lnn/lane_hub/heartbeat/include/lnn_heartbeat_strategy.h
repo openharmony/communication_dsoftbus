@@ -30,7 +30,7 @@ typedef struct {
 } LnnHeartbeatStrategyManager;
 
 int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type);
-int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type);
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbeatType type);
 int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param);
 int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type);
 

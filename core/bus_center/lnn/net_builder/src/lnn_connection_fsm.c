@@ -78,8 +78,7 @@ typedef enum {
 
 #define CONN_CODE_SHIFT 16
 #define PC_DEV_TYPE "00C"
-#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
+
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_DONE,
@@ -103,12 +102,17 @@ typedef struct {
     char bleMacAddr[MAC_LEN];
 } LnnDfxReportConnectInfo;
 
+static LnnTriggerInfo g_lnnTriggerInfo = { 0 };
+static SoftBusMutex g_lnnTriggerInfoMutex;
+static bool g_lnnTriggerInfoIsInit = false;
+
 static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static void OnlineStateEnter(FsmStateMachine *fsm);
 static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static void LeavingStateEnter(FsmStateMachine *fsm);
 static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
+static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo, bool isUpdate);
 
 static FsmState g_states[STATE_NUM_MAX] = {
     [STATE_AUTH_INDEX] = {
@@ -132,6 +136,84 @@ static FsmState g_states[STATE_NUM_MAX] = {
         .exit = NULL,
     },
 };
+
+static bool LnnTriggerInfoInit(void)
+{
+    if (SoftBusMutexInit(&g_lnnTriggerInfoMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo mutex init fail");
+        return false;
+    }
+    g_lnnTriggerInfoIsInit = true;
+    return true;
+}
+
+static void SetLnnTriggerInfoDeviceCntIncrease(void)
+{
+    if (!g_lnnTriggerInfoIsInit) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnTriggerInfoMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    g_lnnTriggerInfo.deviceCnt++;
+    (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason)
+{
+    if (!g_lnnTriggerInfoIsInit && !LnnTriggerInfoInit()) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnTriggerInfoMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    g_lnnTriggerInfo.triggerTime = triggerTime;
+    g_lnnTriggerInfo.deviceCnt = deviceCnt;
+    g_lnnTriggerInfo.triggerReason = triggerReason;
+    (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    if (triggerInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (!g_lnnTriggerInfoIsInit) {
+        LNN_LOGE(LNN_BUILDER, "lnnTriggerInfo is not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnTriggerInfoMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    triggerInfo->triggerTime = g_lnnTriggerInfo.triggerTime;
+    triggerInfo->deviceCnt = g_lnnTriggerInfo.deviceCnt;
+    triggerInfo->triggerReason = g_lnnTriggerInfo.triggerReason;
+    (void)SoftBusMutexUnlock(&g_lnnTriggerInfoMutex);
+}
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    uint64_t timeStamp = 0;
+    LnnEventExtra extra = {0};
+    (void)LnnEventExtraInit(&extra);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.triggerReason = reason;
+    extra.interval = BROADCAST_INTERVAL_DEFAULT;
+    LnnTriggerInfo triggerInfo = {0};
+    GetLnnTriggerInfo(&triggerInfo);
+    if (triggerInfo.triggerTime == 0 || (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) > MAX_TIME_LATENCY) {
+        SetLnnTriggerInfo(timeStamp, 1, extra.triggerReason);
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, stage, extra);
+    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=1",
+        timeStamp, extra.triggerReason);
+}
 
 static bool CheckStateMsgCommonArgs(const FsmStateMachine *fsm)
 {
@@ -311,7 +393,7 @@ static SoftBusLinkType ConvertAddrTypeToHisysEvtLinkType(ConnectionAddrType type
 
 static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 {
-    LNN_LOGI(LNN_BUILDER, "report lnn result evt enter");
+    LNN_LOGD(LNN_BUILDER, "report lnn result evt enter");
     SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(connFsm->connInfo.addr.type);
     if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         return;
@@ -507,7 +589,7 @@ static int32_t GetUdidHashForDfx(char *localUdidHash, char *peerUdidHash, LnnCon
     const NodeInfo *localInfo = LnnGetLocalNodeInfo();
     if (localInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "localInfo is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     uint8_t hash[UDID_HASH_LEN] = { 0 };
     rc = SoftBusGenerateStrHash((uint8_t *)localInfo->deviceInfo.deviceUdid, strlen(localInfo->deviceInfo.deviceUdid),
@@ -700,22 +782,41 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
         LNN_LOGE(LNN_BUILDER, "connInfo is NULL");
         return;
     }
+    uint64_t timeStamp = 0;
+    LnnTriggerInfo triggerInfo = { 0 };
+    GetLnnTriggerInfo(&triggerInfo);
     int32_t osType = connInfo->infoReport.osType;
     LNN_LOGI(LNN_BUILDER, "osType=%{public}d, extra.osType=%{public}d", osType, extra.osType);
     if (connInfo->addr.type == CONNECTION_ADDR_BLE) {
         LnnBleReportExtra bleExtra;
         (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
         if (IsExistLnnDfxNodeByUdidHash(extra.peerUdidHash, &bleExtra)) {
-            if (reason == SOFTBUS_OK) {
-                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
-                bleExtra.status = BLE_REPORT_EVENT_SUCCESS;
-                AddNodeToLnnBleReportExtraMap(extra.peerUdidHash, &bleExtra);
-            } else {
+            if (reason != SOFTBUS_OK) {
                 extra.osType = osType;
                 DfxAddBleReportExtra(connInfo, &extra, &bleExtra);
+                return;
             }
+            if ((SoftBusGetSysTimeMs() - triggerInfo.triggerTime) < MAX_TIME_LATENCY) {
+                timeStamp = SoftBusGetSysTimeMs();
+                extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+                extra.onlineDevCnt = triggerInfo.deviceCnt;
+                extra.triggerReason = triggerInfo.triggerReason;
+                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+                SetLnnTriggerInfoDeviceCntIncrease();
+            } else {
+                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+            }
+            bleExtra.status = BLE_REPORT_EVENT_SUCCESS;
+            AddNodeToLnnBleReportExtraMap(extra.peerUdidHash, &bleExtra);
         }
         return;
+    }
+    if (reason == SOFTBUS_OK && (SoftBusGetSysTimeMs() - triggerInfo.triggerTime) < MAX_TIME_LATENCY) {
+        timeStamp = SoftBusGetSysTimeMs();
+        extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+        extra.onlineDevCnt = triggerInfo.deviceCnt;
+        extra.triggerReason = triggerInfo.triggerReason;
+        SetLnnTriggerInfoDeviceCntIncrease();
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
 }
@@ -766,6 +867,16 @@ static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnli
         *connOnlineReason, connectReason, peerReason, localReason);
 }
 
+static void NotifyProofExceptionEvent(DeviceType type, int32_t reason, const char *peerDeviceType)
+{
+    if ((reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP || reason == SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH) &&
+        (strncmp(peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
+        LnnNotifyHichainProofException(NULL, 0, (uint16_t)type, reason);
+        LNN_LOGE(LNN_BUILDER, "notify hichain proof exception event, reason=%{public}d, type=%{public}hu", reason,
+            (uint16_t)type);
+    }
+}
+
 static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onlineNum, int32_t lnnType, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -792,6 +903,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.localDeviceType = dfxConnectInfo.localDeviceType;
     extra.peerDeviceType = dfxConnectInfo.peerDeviceType;
     extra.connOnlineReason = connOnlineReason;
+    NotifyProofExceptionEvent(connInfo->infoReport.type, reason, extra.peerDeviceType);
     if (connInfo->nodeInfo == NULL) {
         DfxReportOnlineEvent(connInfo, reason, extra);
         return;
@@ -990,7 +1102,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
 static int32_t OnJoinFail(LnnConnectionFsm *connFsm, int32_t retCode)
 {
     if (CheckDeadFlag(connFsm, true)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CONN_FSM_DEAD;
     }
     CompleteJoinLNN(connFsm, NULL, retCode);
     return SOFTBUS_OK;
@@ -1013,25 +1125,26 @@ static void FilterRetrieveDeviceInfo(NodeInfo *info)
 
 static int32_t LnnRecoveryBroadcastKey()
 {
-    int32_t ret = SOFTBUS_ERR;
-    if (LnnLoadLocalBroadcastCipherKey() != SOFTBUS_OK) {
+    int32_t ret = LnnLoadLocalBroadcastCipherKey();
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "load BroadcastCipherInfo fail");
         return ret;
     }
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     do {
-        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        ret = LnnGetLocalBroadcastCipherKey(&broadcastKey);
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "get local info failed");
             break;
         }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, broadcastKey.cipherInfo.key,
-            SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        ret = LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH);
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "set key failed");
             break;
         }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv,
-            BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        ret = LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN);
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "set iv failed");
             break;
         }
@@ -1067,7 +1180,7 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
         (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
-    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
+    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (ret == SOFTBUS_OK) {
         if ((dupOk || LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK) &&
@@ -1078,7 +1191,7 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
             return SOFTBUS_OK;
         }
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_BLE_DIRECT_FAILED;
 }
 
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
@@ -1088,7 +1201,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     if (CheckDeadFlag(connFsm, true)) {
         NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_CONN_FSM_DEAD);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CONN_FSM_DEAD;
     }
     LNN_CHECK_AND_RETURN_RET_LOGW(connInfo->authHandle.authId <= 0, SOFTBUS_OK, LNN_BUILDER,
         "[id=%{public}u]join LNN is ongoing, waiting...", connFsm->id);
@@ -1113,10 +1226,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     }
     DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
-    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true) != SOFTBUS_OK) {
+    rc = AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true);
+    if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
-        rc = SOFTBUS_ERR;
     } else {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
         rc = SOFTBUS_OK;
@@ -1127,6 +1240,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
+    if (connInfo->nodeInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     bool isAuthServer = false;
     SoftBusVersion version;
     NodeInfo *nodeInfo = connInfo->nodeInfo;
@@ -1136,25 +1253,26 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
     nodeInfo->authChannelId[connInfo->addr.type][isAuthServer ? AUTH_AS_SERVER_SIDE : AUTH_AS_CLIENT_SIDE] =
         (int32_t)connInfo->authHandle.authId;
     nodeInfo->relation[connInfo->addr.type]++;
-    if (AuthGetVersion(connInfo->authHandle.authId, &version) != SOFTBUS_OK) {
+    int32_t ret = AuthGetVersion(connInfo->authHandle.authId, &version);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fill version fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     connInfo->version = version;
-    if (AuthGetDeviceUuid(connInfo->authHandle.authId, nodeInfo->uuid, sizeof(nodeInfo->uuid)) != SOFTBUS_OK ||
-        nodeInfo->uuid[0] == '\0') {
+    ret = AuthGetDeviceUuid(connInfo->authHandle.authId, nodeInfo->uuid, sizeof(nodeInfo->uuid));
+    if (ret != SOFTBUS_OK || nodeInfo->uuid[0] == '\0') {
         LNN_LOGE(LNN_BUILDER, "fill uuid fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (connInfo->addr.type == CONNECTION_ADDR_ETH || connInfo->addr.type == CONNECTION_ADDR_WLAN) {
         if (strcpy_s(nodeInfo->connectInfo.deviceIp, MAX_ADDR_LEN, connInfo->addr.info.ip.ip) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fill deviceIp fail");
-            return SOFTBUS_MEM_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
     }
     if (strcpy_s(connInfo->peerNetworkId, sizeof(connInfo->peerNetworkId), nodeInfo->networkId) != EOK) {
         LNN_LOGE(LNN_BUILDER, "fill networkId fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1162,6 +1280,23 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 static bool IsSupportBrDupBle(uint32_t feature, AuthCapability capaBit)
 {
     return ((feature & (1 << (uint32_t)capaBit)) != 0);
+}
+
+bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
+{
+    if (newNodeInfo == NULL) {
+        return false;
+    }
+    NodeInfo oldNodeInfo;
+    if (memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memset fail");
+        return false;
+    }
+    if (LnnGetRemoteNodeInfoById(newNodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote node info fail");
+        return false;
+    }
+    return IsBasicNodeInfoChanged(&oldNodeInfo, newNodeInfo, false);
 }
 
 static void ProcessBleOnline(const LnnConntionInfo *connInfo)
@@ -1172,7 +1307,8 @@ static void ProcessBleOnline(const LnnConntionInfo *connInfo)
         return;
     }
     if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
-        &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE)) {
+        &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE) &&
+        !CheckRemoteBasicInfoChanged(connInfo->nodeInfo)) {
         LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
         return;
     }
@@ -1212,7 +1348,7 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
     }
     if (CheckDeadFlag(connFsm, true)) {
         SoftBusFree(retCode);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CONN_FSM_DEAD;
     }
 
     LNN_LOGI(LNN_BUILDER,
@@ -1280,7 +1416,8 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
         char *oldNetworkId = NULL;
         Anonymize(newNodeInfo->networkId, &newNetworkId);
         Anonymize(oldNodeInfo->networkId, &oldNetworkId);
-        LNN_LOGI(LNN_BUILDER, "networkId changed %{public}s -> %{public}s", oldNetworkId, newNetworkId);
+        LNN_LOGI(LNN_BUILDER, "networkId changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldNetworkId), AnonymizeWrapper(newNetworkId));
         AnonymizeFree(newNetworkId);
         AnonymizeFree(oldNetworkId);
         if (isUpdate) {
@@ -1293,7 +1430,8 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
         char *oldUuid = NULL;
         Anonymize(newNodeInfo->uuid, &newUuid);
         Anonymize(oldNodeInfo->uuid, &oldUuid);
-        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s", oldUuid, newUuid);
+        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldUuid), AnonymizeWrapper(newUuid));
         AnonymizeFree(newUuid);
         AnonymizeFree(oldUuid);
         return true;
@@ -1303,7 +1441,8 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
         char *oldSoftBusVersion = NULL;
         Anonymize(newNodeInfo->softBusVersion, &newSoftBusVersion);
         Anonymize(oldNodeInfo->softBusVersion, &oldSoftBusVersion);
-        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s", oldSoftBusVersion, newSoftBusVersion);
+        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldSoftBusVersion), AnonymizeWrapper(newSoftBusVersion));
         AnonymizeFree(newSoftBusVersion);
         AnonymizeFree(oldSoftBusVersion);
     }
@@ -1321,7 +1460,8 @@ static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo
         char *oldIp = NULL;
         Anonymize(newNodeInfo->connectInfo.deviceIp, &newIp);
         Anonymize(oldNodeInfo->connectInfo.deviceIp, &oldIp);
-        LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s", oldIp, newIp);
+        LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldIp), AnonymizeWrapper(newIp));
         AnonymizeFree(newIp);
         AnonymizeFree(oldIp);
         return true;
@@ -1466,8 +1606,9 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     LNN_LOGI(LNN_BUILDER,
         "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
         "uuid=%{public}s, deviceName=%{public}s, peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "", isNodeInfoValid ? anonyUuid : "",
-        isNodeInfoValid ? anonyDeviceName : "",
+        connFsm->id, anonyNetworkId, isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
+        isNodeInfoValid ? AnonymizeWrapper(anonyUuid) : "",
+        isNodeInfoValid ? AnonymizeWrapper(anonyDeviceName) : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     if (isNodeInfoValid) {
         AnonymizeFree(anonyUdid);
@@ -1534,11 +1675,11 @@ static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
 
     if (connFsm->connInfo.addr.type != CONNECTION_ADDR_BR) {
         LNN_LOGI(LNN_BUILDER, "just br need send offline");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEAVE_OFFLINE;
     }
     if (!((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_LEAVE_REQUEST) != 0)) {
         LNN_LOGI(LNN_BUILDER, "just leave lnn request need send offline");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEAVE_OFFLINE;
     }
     (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     code = LnnGetCnnCode(uuid, DISCOVERY_TYPE_BR);
@@ -1552,7 +1693,7 @@ static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_OFFLINE, connFsm->connInfo.peerNetworkId,
         (uint8_t *)&combinedInt, sizeof(int32_t), LnnSyncOfflineComplete) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send sync offline fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -1582,8 +1723,8 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     LNN_LOGI(LNN_BUILDER,
         "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
         "peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
-        isNodeInfoValid ? anonyDeviceName : "",
+        connFsm->id, anonyNetworkId, isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
+        isNodeInfoValid ? AnonymizeWrapper(anonyDeviceName) : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     if (isNodeInfoValid) {
         AnonymizeFree(anonyUdid);
@@ -1660,11 +1801,11 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
 
     if (sprintf_s(connFsm->fsmName, LNN_CONNECTION_FSM_NAME_LEN, "LnnConnFsm-%u", connFsm->id) == -1) {
         LNN_LOGE(LNN_BUILDER, "format lnn connection fsm name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SPRINTF_ERR;
     }
     if (LnnFsmInit(&connFsm->fsm, NULL, connFsm->fsmName, ConnectionFsmDinitCallback) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "init fsm failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_FSM_INIT_FAILED;
     }
     for (i = 0; i < STATE_NUM_MAX; ++i) {
         LnnFsmAddState(&connFsm->fsm, &g_states[i]);
@@ -1732,9 +1873,10 @@ int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
         LNN_LOGE(LNN_BUILDER, "connection fsm is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnFsmStart(&connFsm->fsm, g_states + STATE_AUTH_INDEX) != SOFTBUS_OK) {
+    int32_t ret = LnnFsmStart(&connFsm->fsm, g_states + STATE_AUTH_INDEX);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "start connection fsm failed. [id=%{public}u]", connFsm->id);
-        return SOFTBUS_ERR;
+        return ret;
     }
     LNN_LOGI(LNN_BUILDER, "connection fsm is starting. [id=%{public}u]", connFsm->id);
     return SOFTBUS_OK;
@@ -1747,9 +1889,10 @@ int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCall
         return SOFTBUS_INVALID_PARAM;
     }
     connFsm->stopCallback = callback;
-    if (LnnFsmStop(&connFsm->fsm) != SOFTBUS_OK) {
+    int32_t ret = LnnFsmStop(&connFsm->fsm);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "stop connection fsm failed. [id=%{public}u]", connFsm->id);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return LnnFsmDeinit(&connFsm->fsm);
 }
@@ -1764,7 +1907,7 @@ int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
     if ((connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE || connFsm->connInfo.addr.type == CONNECTION_ADDR_BR) &&
         SoftBusGetBtState() != BLE_ENABLE) {
         LNN_LOGE(LNN_BUILDER, "send join request while bt is turn off");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BLE_DISABLE;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }
@@ -1786,7 +1929,7 @@ int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode
     if (LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post auth result message to connFsm fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1813,7 +1956,7 @@ int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, NULL);
 }
@@ -1822,7 +1965,7 @@ int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_OFFLINE_DONE, NULL);
 }
@@ -1831,7 +1974,7 @@ int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_INITIATE_ONLINE, NULL);
 }

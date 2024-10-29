@@ -48,7 +48,7 @@
 namespace OHOS {
 using namespace testing::ext;
 
-static int InitServer()
+static int32_t InitServer()
 {
     if (ConnServerInit() == SOFTBUS_ERR) {
         printf("softbus conn server init failed.");
@@ -109,9 +109,9 @@ void NetBusCenterTest::TearDown()
 {
 }
 
-static int SetIpaddr(const std::string &ip)
+static int32_t SetIpaddr(const std::string &ip)
 {
-    int sockFd  = -1;
+    int32_t sockFd  = -1;
     struct sockaddr_in addr;
     struct ifreq ifr;
     if (memset_s((void *)&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
@@ -157,9 +157,9 @@ static int SetIpaddr(const std::string &ip)
     return SOFTBUS_OK;
 }
 
-static int SetIpDown()
+static int32_t SetIpDown()
 {
-    int sockFd  = -1;
+    int32_t sockFd  = -1;
     struct ifreq ifr;
     if (memset_s((void *)&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
         printf("memset_s 1 fail\n");

@@ -40,6 +40,7 @@
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 #include "conn_coap.h"
+#include "lnn_connection_fsm.h"
 
 #define IP_DEFAULT_PORT 0
 #define LNN_LOOPBACK_IP "127.0.0.1"
@@ -121,7 +122,7 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
         retryTime = GET_IP_RETRY_TIMES;
         return SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_BUILDER, "get ip retry time=%{public}d", retryTime);
+    LNN_LOGD(LNN_BUILDER, "get ip retry time=%{public}d", retryTime);
     if (--retryTime > 0 && LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryGetAvailableIpAddr,
         NULL, GET_IP_INTERVAL_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper get available ip fail");
@@ -154,7 +155,7 @@ static int32_t OpenAuthPort(void)
     }
     char *anonyIp = NULL;
     Anonymize(localIp, &anonyIp);
-    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%{public}s", anonyIp);
+    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     if (authPort == 0) {
         return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
@@ -365,7 +366,7 @@ static int32_t RequestMainPort(const char *ifName, const char *address)
         LNN_LOGE(LNN_BUILDER, "get local ifName error");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "get local ifName end");
+    LNN_LOGD(LNN_BUILDER, "get local ifName end");
     if (strcmp(oldMainIf, ifName) != 0 && strcmp(oldMainIf, LNN_LOOPBACK_IFNAME) != 0) {
         LNN_LOGE(LNN_BUILDER, "Only 1 local subnet is allowed");
         return SOFTBUS_ERR;
@@ -466,7 +467,7 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEven
         [IP_SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status}
     };
     subnet->status = transactMap[event][isAccepted ? IP_EVENT_RESULT_ACCEPTED : IP_EVENT_RESULT_REJECTED];
-    LNN_LOGI(LNN_BUILDER, "subnet state change. ifName=%{public}s, protocolId=%{public}u, status=%{public}d",
+    LNN_LOGD(LNN_BUILDER, "subnet state change. ifName=%{public}s, protocolId=%{public}u, status=%{public}d",
         subnet->ifName, subnet->protocol->id, subnet->status);
 }
 
@@ -586,9 +587,9 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
-    LNN_LOGI(LNN_BUILDER, "ifName len=%{public}d", (int32_t)strlen(event->ifName));
     if (strlen(event->ifName) != 0) {
         LnnNotifyPhysicalSubnetStatusChanged(event->ifName, LNN_PROTOCOL_IP, NULL);
+        DfxRecordTriggerTime(WIFI_IP_ADDR_CHANGED, EVENT_STAGE_LNN_WIFI_TRIGGER);
     }
 }
 

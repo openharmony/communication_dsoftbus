@@ -48,14 +48,13 @@ public:
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t localIpSize) = 0;
     virtual int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode) = 0;
-    virtual int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize) = 0;
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize) = 0;
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo) = 0;
     virtual int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo) = 0;
     virtual int32_t GetRemoteUuidByIp(const char *remoteIp, char *localIp, int32_t localIpSize) = 0;
-    virtual cJSON* cJSON_Parse(const char *value) = 0;
     virtual int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
     virtual int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
@@ -74,7 +73,7 @@ public:
     virtual int32_t TransTdcOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId) = 0;
     virtual int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
         unsigned char *encryptData, uint32_t *encryptLen) = 0;
-    virtual int32_t SetIpTos(int fd, uint32_t tos) = 0;
+    virtual int32_t SetIpTos(int32_t fd, uint32_t tos) = 0;
     virtual int32_t TransTdcOnMsgReceived(const char *pkgName, int32_t pid,
         int32_t channelId, TransReceiveData *receiveData) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
@@ -99,14 +98,13 @@ public:
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey key, char *info, uint32_t len));
     MOCK_METHOD3(GetLocalIpByRemoteIp, int32_t (const char *remoteIp, char *localIp, int32_t localIpSize));
     MOCK_METHOD2(UnpackReplyErrCode, int32_t (const cJSON *msg, int32_t *errCode));
-    MOCK_METHOD3(UnpackReply, int (const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize));
-    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType type, unsigned char *val, uint32_t len));
+    MOCK_METHOD3(UnpackReply, int32_t (const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize));
+    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType type, unsigned char *val, uint32_t len));
     MOCK_METHOD2(SetAppInfoById, int32_t (int32_t channelId, const AppInfo *appInfo));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t authId, char *uuid, uint16_t size));
     MOCK_METHOD2(UnpackRequest, int32_t (const cJSON *msg, AppInfo *appInfo));
     MOCK_METHOD2(GetAppInfoById, int32_t (int32_t channelId, AppInfo *appInfo));
     MOCK_METHOD3(GetRemoteUuidByIp, int32_t (const char *remoteIp, char *localIp, int32_t localIpSize));
-    MOCK_METHOD1(cJSON_Parse, cJSON * (const char *value));
     MOCK_METHOD2(SetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
     MOCK_METHOD5(AuthDecrypt, int32_t (AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen));
@@ -125,7 +123,7 @@ public:
     MOCK_METHOD3(TransTdcOnChannelBind, int32_t (const char *pkgName, int32_t pid, int32_t channelId));
     MOCK_METHOD5(SoftBusEncryptData, int32_t (AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
         unsigned char *encryptData, uint32_t *encryptLen));
-    MOCK_METHOD2(SetIpTos, int32_t (int fd, uint32_t tos));
+    MOCK_METHOD2(SetIpTos, int32_t (int32_t fd, uint32_t tos));
     MOCK_METHOD4(TransTdcOnMsgReceived, int32_t (const char *pkgName, int32_t pid,
         int32_t channelId, TransReceiveData *receiveData));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));

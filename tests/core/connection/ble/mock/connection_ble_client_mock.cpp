@@ -147,7 +147,7 @@ int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *server
         serverUuid, charaUuid, descriptorUuid);
 }
 
-int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
+int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int32_t mtuSize)
 {
     return GetConnectionBleClientInterface()->SoftbusGattcConfigureMtuSize(clientId, mtuSize);
 }

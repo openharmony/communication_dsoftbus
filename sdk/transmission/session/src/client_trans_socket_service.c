@@ -14,6 +14,7 @@
  */
 
 #include "string.h"
+#include <securec.h>
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
@@ -25,8 +26,10 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+#include "client_trans_session_service.h"
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
@@ -40,7 +43,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         char *anonySessionName = NULL;
         Anonymize(info->peerName, &anonySessionName);
         TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
-            anonySessionName, strlen(info->peerName));
+            AnonymizeWrapper(anonySessionName), strlen(info->peerName));
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -49,7 +52,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         char *anonyNetworkId = NULL;
         Anonymize(info->peerNetworkId, &anonyNetworkId);
         TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
-            anonyNetworkId, strlen(info->peerNetworkId));
+            AnonymizeWrapper(anonyNetworkId), strlen(info->peerNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -68,8 +71,8 @@ static void PrintSocketInfo(const SocketInfo *info)
     Anonymize(info->pkgName, &tmpPkgName);
     TRANS_LOGI(TRANS_SDK,
         "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, peerNetworkId=%{public}s, "
-        "pkgName=%{public}s, dataType=%{public}d",
-        tmpMyName, tmpPeerName, tmpPeerNetworkId, tmpPkgName, info->dataType);
+        "pkgName=%{public}s, dataType=%{public}d", AnonymizeWrapper(tmpMyName), AnonymizeWrapper(tmpPeerName),
+        AnonymizeWrapper(tmpPeerNetworkId), AnonymizeWrapper(tmpPkgName), info->dataType);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
     AnonymizeFree(tmpPeerNetworkId);
@@ -92,13 +95,24 @@ int32_t Socket(SocketInfo info)
     }
 
     int32_t socketFd = INVALID_SESSION_ID;
+    char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
+    if (CheckIsNormalApp(info.name)) {
+        if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, info.name, strlen(info.name)) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy session name failed");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        if (!RemoveAppIdFromSessionName(info.name, newSessionName)) {
+            TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
+            return SOFTBUS_TRANS_NOT_FIND_APPID;
+        }
+        info.name = newSessionName;
+    }
     ret = ClientAddSocket(&info, &socketFd);
     SocketServerStateUpdate(info.name);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
         return ret;
     }
-
     TRANS_LOGD(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
     return socketFd;
 }

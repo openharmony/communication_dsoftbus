@@ -25,8 +25,8 @@
 using namespace testing::ext;
 
 namespace OHOS {
-static int g_subscribeId = 0;
-static int g_publishId = 0;
+static int32_t g_subscribeId = 0;
+static int32_t g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
 
 class DiscSdkOnlyL2Test : public testing::Test {
@@ -51,13 +51,13 @@ void DiscSdkOnlyL2Test::SetUpTestCase(void)
 void DiscSdkOnlyL2Test::TearDownTestCase(void)
 {}
 
-static int GetSubscribeId(void)
+static int32_t GetSubscribeId(void)
 {
     g_subscribeId++;
     return g_subscribeId;
 }
 
-static int GetPublishId(void)
+static int32_t GetPublishId(void)
 {
     g_publishId++;
     return g_publishId;
@@ -97,7 +97,7 @@ static void TestOnDiscoverResult(int32_t refreshId, RefreshResult reason)
     printf("[client]TestDiscoverResult\n");
 }
 
-static void TestOnPublishResult(int publishId, PublishResult reason)
+static void TestOnPublishResult(int32_t publishId, PublishResult reason)
 {
     (void)publishId;
     (void)reason;
@@ -123,8 +123,8 @@ static IPublishCb g_publishCb = {
  */
 HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest001, TestSize.Level2)
 {
-    int ret;
-    int tmpId = GetPublishId();
+    int32_t ret;
+    int32_t tmpId = GetPublishId();
 
     ret = StopPublishLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret != 0);
@@ -140,8 +140,8 @@ HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest001, TestSize.Level2)
  */
 HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest002, TestSize.Level2)
 {
-    int ret;
-    int tmpId = GetPublishId();
+    int32_t ret;
+    int32_t tmpId = GetPublishId();
 
     g_pInfo.publishId = tmpId;
     PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
@@ -161,8 +161,8 @@ HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest002, TestSize.Level2)
  */
 HWTEST_F(DiscSdkOnlyL2Test, StopRefreshLNNTest001, TestSize.Level2)
 {
-    int ret;
-    int tmpId = GetSubscribeId();
+    int32_t ret;
+    int32_t tmpId = GetSubscribeId();
 
     ret = StopRefreshLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret != 0);
@@ -178,8 +178,8 @@ HWTEST_F(DiscSdkOnlyL2Test, StopRefreshLNNTest001, TestSize.Level2)
  */
 HWTEST_F(DiscSdkOnlyL2Test, StopRefreshLNNTest002, TestSize.Level2)
 {
-    int ret;
-    int tmpId = GetSubscribeId();
+    int32_t ret;
+    int32_t tmpId = GetSubscribeId();
 
     g_sInfo.subscribeId = tmpId;
     RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);

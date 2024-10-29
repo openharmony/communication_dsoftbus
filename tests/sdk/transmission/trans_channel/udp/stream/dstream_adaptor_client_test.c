@@ -33,12 +33,12 @@
 #define SESSION_KEY_LENGTH   32
 #define STREAM_DATA_LENGTH   10
 
-void SetStatus(int channelId, int status)
+void SetStatus(int32_t channelId, int32_t status)
 {
     printf("[client]:channelID:%d, status:%d\n", channelId, status);
 }
 
-void OnStreamReceived(int channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     printf("[client]:OnStreamReceived, len:%d, extLen:%d", data->bufLen, ext->bufLen);
     printf("[client]:channelID:%d, streamBuf:%.*s\n", channelId, data->bufLen, data->buf);
@@ -49,14 +49,14 @@ static IStreamListener g_callback = {
     .OnStreamReceived = OnStreamReceived,
 };
 
-int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, char *argv[])
+int32_t ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, char *argv[])
 {
-    int port = 0;
+    int32_t port = 0;
     if (sscanf_s(argv[FIRST_ARGV], "%d", &port) <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int port2 = 0;
+    int32_t port2 = 0;
     if (sscanf_s(argv[SECOND_ARGV], "%d", &port2) <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -80,13 +80,13 @@ int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, 
     return SOFTBUS_OK;
 }
 
-int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStreamListener *callback)
+int32_t SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStreamListener *callback)
 {
     if (p1 == NULL || p2 == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret = StartVtpStreamChannelClient(CHANNELID, p1, callback);
+    int32_t ret = StartVtpStreamChannelClient(CHANNELID, p1, callback);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -111,7 +111,7 @@ int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStr
     };
     StreamFrameInfo tmpf = {};
 
-    for (int i  = 0; i < LOOP_ROUND; i++) {
+    for (int32_t i  = 0; i < LOOP_ROUND; i++) {
         ret = SendVtpStream(CHANNELID, &tmpData, NULL, &tmpf);
         printf("[client]:DstreamSendStream1 ret:%d\n", ret);
         ret = SendVtpStream(CHANNELID2, &tmpData2, NULL, &tmpf);
@@ -126,7 +126,7 @@ int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStr
     return SOFTBUS_OK;
 }
 
-int main(int argc, char *argv[])
+int32_t main(int32_t argc, char *argv[])
 {
     if (argc != TWO_CLIENT_ARGC) {
         printf("[client]:Please input server sorcket to connect\n");
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     }
     VtpStreamOpenParam p1;
     VtpStreamOpenParam p2;
-    int ret = ConstructVtpStreamOpenParam(&p1, &p2, argv);
+    int32_t ret = ConstructVtpStreamOpenParam(&p1, &p2, argv);
     if (ret != SOFTBUS_OK) {
         return ret;
     }

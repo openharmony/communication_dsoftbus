@@ -40,14 +40,14 @@ std::string g_pkgName3 = "test";
 std::string g_peerNetWorkId1;
 std::string g_peerNetWorkId2 = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 std::string g_groupId;
-int g_flags = 0;
+int32_t g_flags = 0;
 
 class ISessionListenerTest : public Communication::SoftBus::ISessionListener {
 public:
     ISessionListenerTest() = default;
     ~ISessionListenerTest() = default;
 
-    int OnSessionOpened(std::shared_ptr<Communication::SoftBus::Session> session)
+    int32_t OnSessionOpened(std::shared_ptr<Communication::SoftBus::Session> session)
     {
         return SOFTBUS_OK;
     }
@@ -101,7 +101,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest001, TestSi
     Communication::SoftBus::SessionServiceImpl testSessionServiceImpl;
     std::shared_ptr<Communication::SoftBus::ISessionListener> listern = std::make_shared<ISessionListenerTest>();
 
-    int ret = testSessionServiceImpl.CreateSessionServer(g_pkgName1, g_sessionName1, listern);
+    int32_t ret = testSessionServiceImpl.CreateSessionServer(g_pkgName1, g_sessionName1, listern);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName1, listern);
@@ -129,7 +129,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest001, TestSi
 HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSize.Level0)
 {
     Communication::SoftBus::SessionServiceImpl testSessionServiceImpl;
-    int ret;
+    int32_t ret;
     std::shared_ptr<Communication::SoftBus::Session> session = testSessionServiceImpl.OpenSession(g_sessionName1,
         g_sessionName2, g_peerNetWorkId2, g_groupId, g_flags);
     EXPECT_EQ(nullptr, session);
@@ -143,8 +143,8 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
     session = testSessionServiceImpl.OpenSession(g_sessionName2, g_sessionName2, g_peerNetWorkId2, g_groupId, g_flags);
     EXPECT_EQ(nullptr, session);
 
-    int uid = 0;
-    int pid = 0;
+    int32_t uid = 0;
+    int32_t pid = 0;
     ret = testSessionServiceImpl.GrantPermission(-1, -1, g_pkgName1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
@@ -154,7 +154,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
     ret = testSessionServiceImpl.GrantPermission(uid, pid, g_pkgName2);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
-    int sessionId = 1;
+    int32_t sessionId = 1;
     ret = testSessionServiceImpl.OpenSessionCallback(sessionId);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
@@ -186,7 +186,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest003, TestSi
 {
     Communication::SoftBus::SessionImpl testSessionImpl;
     ssize_t len = 0;
-    int ret = testSessionImpl.SendBytes(nullptr, len);
+    int32_t ret = testSessionImpl.SendBytes(nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *data = "test";
@@ -212,7 +212,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest004, TestSi
 {
     Communication::SoftBus::SessionServiceImpl testSessionServiceImpl;
     std::shared_ptr<Communication::SoftBus::ISessionListener> listern = std::make_shared<ISessionListenerTest>();
-    int ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName2, listern);
+    int32_t ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName2, listern);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *groupId = "test";

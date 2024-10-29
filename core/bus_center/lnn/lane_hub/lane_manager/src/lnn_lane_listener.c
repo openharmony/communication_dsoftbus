@@ -30,8 +30,6 @@
 #include "wifi_direct_manager.h"
 #include "softbus_socket.h"
 
-#define HML_IP_PREFIX_LEN 7
-#define HML_IP_PREFIX "172.30."
 const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LANE_TYPE_CTRL};
 
 typedef struct {
@@ -107,7 +105,7 @@ int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId)
     LaneBusinessInfo *item = GetLaneBusinessInfoWithoutLock(&laneBusinessInfo);
     if (item != NULL) {
         item->laneId = newLaneId;
-        LNN_LOGI(LNN_LANE, "update oldLaneId=%{public}" PRIu64 " newLaneId=%{public}" PRIu64, oldLaneId, newLaneId);
+        LNN_LOGI(LNN_LANE, "update oldLaneId=%{public}" PRIu64 ", newLaneId=%{public}" PRIu64, oldLaneId, newLaneId);
         LaneListenerUnlock();
         return SOFTBUS_OK;
     }
@@ -359,7 +357,7 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, Lane
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    laneLinkInfo->type = (strncmp(peerIp, HML_IP_PREFIX, HML_IP_PREFIX_LEN) == 0) ? LANE_HML : LANE_P2P;
+    laneLinkInfo->type = IsHmlIpAddr(peerIp) ? LANE_HML : LANE_P2P;
     if (strncpy_s(laneLinkInfo->linkInfo.p2p.connInfo.peerIp, IP_LEN, peerIp, IP_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "strncpy peerIp fail");
         return SOFTBUS_STRCPY_ERR;
@@ -370,7 +368,7 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, Lane
     if (LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(peerUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, peerUuid=%{public}s", anonyUuid);
+        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, peerUuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -494,7 +492,7 @@ static int32_t CreateSinkLinkInfo(const struct WifiDirectSinkLink *link, LaneLin
     if (LnnGetRemoteNodeInfoById(link->remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(link->remoteUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", anonyUuid);
+        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -550,7 +548,7 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
     if (LnnGetRemoteNodeInfoById(link->remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(link->remoteUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", anonyUuid);
+        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return;
     }

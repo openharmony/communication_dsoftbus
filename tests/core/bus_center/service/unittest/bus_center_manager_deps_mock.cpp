@@ -42,7 +42,7 @@ bool GetWatchdogFlag(void)
     return GetBusCenterManagerDepsInterface()->GetWatchdogFlag();
 }
 
-SoftBusLooper *GetLooper(int looper)
+SoftBusLooper *GetLooper(int32_t looper)
 {
     return GetBusCenterManagerDepsInterface()->GetLooper(looper);
 }

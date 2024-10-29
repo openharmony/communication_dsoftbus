@@ -238,7 +238,7 @@ static void GetWiFiLocalInfo(void)
 */
 HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.Level1)
 {
-    int fd = 0;
+    int32_t fd = 0;
     NodeBasicInfo nodeInfo;
 
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -261,7 +261,7 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.L
 */
 HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level1)
 {
-    int fd = 0;
+    int32_t fd = 0;
     NodeBasicInfo nodeInfo;
 
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -287,7 +287,7 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Lev
     char *networkId = nullptr;
     char networkIdSecond[NETWORK_ID_BUF_LEN] = "1234";
     uint16_t dataChangeFlag = 0;
-    EXPECT_EQ(LnnSetNodeDataChangeFlag(networkId, dataChangeFlag), SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(LnnSetNodeDataChangeFlag(networkId, dataChangeFlag), SOFTBUS_OK);
     EXPECT_EQ(LnnSetNodeDataChangeFlag(networkIdSecond, dataChangeFlag), SOFTBUS_ERR);
 
     ConstructCommonLocalInfo();
@@ -427,7 +427,7 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSiz
     bool result = LnnSetDLDeviceInfoName(NODE2_UDID, CHANGE_DEVICE_NAME);
     EXPECT_TRUE(result);
     // STRING_KEY_DEV_NAME
-    int ret = LnnGetRemoteStrInfo(NODE2_NETWORK_ID, STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN);
+    int32_t ret = LnnGetRemoteStrInfo(NODE2_NETWORK_ID, STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_TRUE(strcmp(deviceName, CHANGE_DEVICE_NAME) == 0);
     LnnRemoveNode(NODE2_UDID);

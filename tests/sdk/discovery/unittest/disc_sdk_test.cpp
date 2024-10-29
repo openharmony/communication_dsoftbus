@@ -28,8 +28,8 @@
 using namespace testing::ext;
 
 namespace OHOS {
-static int g_subscribeId = 0;
-static int g_publishId = 0;
+static int32_t g_subscribeId = 0;
+static int32_t g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
 static const char *g_pkgName_1 = "Softbus_Kits_1";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
@@ -59,13 +59,13 @@ void DiscSdkTest::SetUpTestCase(void)
 void DiscSdkTest::TearDownTestCase(void)
 {}
 
-static int GetSubscribeId(void)
+static int32_t GetSubscribeId(void)
 {
     g_subscribeId++;
     return g_subscribeId;
 }
 
-static int GetPublishId(void)
+static int32_t GetPublishId(void)
 {
     g_publishId++;
     return g_publishId;
@@ -155,7 +155,7 @@ static const IRefreshCallback g_refreshCb = {
     .OnDiscoverResult = TestOnDiscoverResult
 };
 
-static void TestOnPublishResult(int publishId, PublishResult reason)
+static void TestOnPublishResult(int32_t publishId, PublishResult reason)
 {
     (void)publishId;
     (void)reason;
@@ -1008,7 +1008,7 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest005, TestSize.Level1)
  */
 HWTEST_F(DiscSdkTest, DiscRecoveryPublishTest01, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -1046,7 +1046,7 @@ HWTEST_F(DiscSdkTest, DiscRecoveryPublishTest01, TestSize.Level1)
  */
 HWTEST_F(DiscSdkTest, DiscRecoverySubscribeTest01, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,

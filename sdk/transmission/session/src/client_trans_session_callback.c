@@ -23,13 +23,11 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
-#include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "trans_log.h"
 
-#define DFX_TIMERS_S            15
 #define RETRY_GET_INFO_TIMES_MS 300
 
 static IClientSessionCallBack g_sessionCb;
@@ -59,6 +57,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->crc = channel->crc;
     session->dataConfig = channel->dataConfig;
     session->isAsync = false;
+    session->osType = channel->osType;
     session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
@@ -308,8 +307,8 @@ static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const 
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
         "TransOnSessionOpened: sessionName=%{public}s, channelId=%{public}d, channelType=%{public}d, flag=%{public}d,"
-        "isServer=%{public}d, type=%{public}d, crc=%{public}d",
-        tmpName, channel->channelId, channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
+        "isServer=%{public}d, type=%{public}d, crc=%{public}d", AnonymizeWrapper(tmpName), channel->channelId,
+        channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 }
 
@@ -346,21 +345,17 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     if (channel->channelType == CHANNEL_TYPE_UDP) {
         TransSetUdpChanelSessionId(channel->channelId, sessionId);
     }
-    int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);
     if (sessionCallback.isSocketListener) {
         ret = HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
-        CancelTimer(id);
         return ret;
     }
     TRANS_LOGD(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
         (sessionCallback.session.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
-        CancelTimer(id);
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_TRANS_ON_SESSION_OPENED_FAILED;
     }
-    CancelTimer(id);
     TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
@@ -613,7 +608,7 @@ int32_t ClientTransIfChannelForSocket(const char *sessionName, bool *isSocket)
     if (ret != SOFTBUS_OK) {
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionName=%{public}s", tmpName);
+        TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionName=%{public}s", AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         return ret;
     }

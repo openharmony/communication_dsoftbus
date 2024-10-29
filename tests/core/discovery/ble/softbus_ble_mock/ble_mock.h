@@ -29,8 +29,8 @@
 
 class BleInterface {
 public:
-    virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
-    virtual int SoftBusRemoveBtStateListener(int listenerId) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusRemoveBtStateListener(int32_t listenerId) = 0;
 
     virtual int32_t InitBroadcastMgr() = 0;
     virtual int32_t DeInitBroadcastMgr() = 0;
@@ -52,9 +52,9 @@ public:
     virtual int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet) = 0;
     virtual int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet) = 0;
 
-    virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
-    virtual int SoftBusGetBtState() = 0;
-    virtual int SoftBusGetBrState() = 0;
+    virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
+    virtual int32_t SoftBusGetBtState() = 0;
+    virtual int32_t SoftBusGetBrState() = 0;
 };
 
 class BleMock : public BleInterface {
@@ -67,8 +67,8 @@ public:
     BleMock();
     ~BleMock();
 
-    MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
-    MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
     MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
     MOCK_METHOD(int32_t, DeInitBroadcastMgr, (), (override));
     MOCK_METHOD(
@@ -87,9 +87,9 @@ public:
     MOCK_METHOD(int32_t, SetBroadcastingData, (int32_t bcId, const BroadcastPacket *packet), (override));
     MOCK_METHOD(int32_t, UpdateBroadcasting, (int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet),
         (override));
-    MOCK_METHOD(int, SoftBusGetBtMacAddr, (SoftBusBtAddr * mac), (override));
-    MOCK_METHOD(int, SoftBusGetBtState, (), (override));
-    MOCK_METHOD(int, SoftBusGetBrState, (), (override));
+    MOCK_METHOD(int32_t, SoftBusGetBtMacAddr, (SoftBusBtAddr * mac), (override));
+    MOCK_METHOD(int32_t, SoftBusGetBtState, (), (override));
+    MOCK_METHOD(int32_t, SoftBusGetBrState, (), (override));
 
     void SetupSuccessStub();
     void AsyncAdvertiseDone();
@@ -98,7 +98,7 @@ public:
     bool IsScanning();
 
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
-    static int32_t ActionOfRemoveBtStateListener(int listenerId);
+    static int32_t ActionOfRemoveBtStateListener(int32_t listenerId);
     static int32_t ActionOfInitBroadcastMgr();
     static int32_t ActionOfDeInitBroadcastMgr();
     static int32_t ActionOfRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
@@ -132,11 +132,11 @@ public:
     static void WaitRecvMessageObsolete();
     static bool IsDeInitSuccess();
 
-    static constexpr int CON_ADV_ID = 0;
-    static constexpr int NON_ADV_ID = 1;
+    static constexpr int32_t CON_ADV_ID = 0;
+    static constexpr int32_t NON_ADV_ID = 1;
     static constexpr int32_t BT_STATE_LISTENER_ID = 1;
-    static constexpr int SCAN_LISTENER_ID = 2;
-    static constexpr int BLE_MSG_TIME_OUT_MS = 6000;
+    static constexpr int32_t SCAN_LISTENER_ID = 2;
+    static constexpr int32_t BLE_MSG_TIME_OUT_MS = 6000;
 
     static inline const ScanCallback *scanListener {};
     static inline const SoftBusBtStateListener *btStateListener {};
@@ -162,8 +162,8 @@ public:
 
     static inline uint8_t passivePublishAdvDataOfCust[] = { 0x04, 0x05, 0x10, 0x00, 0x00, 0x02, 0x00, 0x18, 0xE8, 0x31,
         0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x56, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E };
-    static inline uint8_t passivePublishRspDataOfCust[] = { 0x0F, 0x41, 0x01, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65,
-        0x76, 0x69, 0x63, 0x65, 0x00 };
+    static inline uint8_t passivePublishRspDataOfCust[] = { 0x0F, 0x43, 0x01, 0xAA, 0x00, 0x3A, 0x4D, 0x79, 0x20, 0x44,
+        0x65, 0x76, 0x69, 0x63, 0x65, 0x00 };
 
 private:
     static void HexDump(const uint8_t *data, uint32_t len);

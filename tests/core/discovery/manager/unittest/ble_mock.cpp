@@ -17,8 +17,8 @@
 #include "disc_log.h"
 #include "softbus_error_code.h"
 
-using testing::Return;
 using testing::NotNull;
+using testing::Return;
 
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *callback)
 {

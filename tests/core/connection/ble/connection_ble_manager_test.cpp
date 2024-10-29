@@ -97,7 +97,7 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -890,6 +890,27 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest003, TestSize.Level1
 }
 
 /*
+ * @tc.name: ConnBleStopServer001
+ * @tc.desc: Test ConnBleOccupy.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleStopServer001, TestSize.Level1)
+{
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, ConnGattServerStartService).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = ConnBleStartServer();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(bleMock, ConnGattServerStopService).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+    ret = ConnBleStopServer();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(3 * 1000); //to call RetryServerStatConsistentHandler function
+}
+
+/*
  * @tc.name: ConnBleSend001
  * @tc.desc: Test ConnBleSend.
  * @tc.in: Test module, Test number, Test Levels.
@@ -953,5 +974,25 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleOccupy001, TestSize.Level1)
     EXPECT_EQ(connection->state, BLE_CONNECTION_STATE_NEGOTIATION_CLOSING);
     ConnBleRemoveConnection(connection);
     ConnBleReturnConnection(&connection);
+}
+
+/*
+ * @tc.name: ConnBleDisconnectNow001
+ * @tc.desc: Test ConnBleOccupy.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleDisconnectNow001, TestSize.Level1)
+{
+    ConnBleConnection connection = {{0}};
+    connection.protocol = BLE_GATT;
+    connection.connectionId = 1;
+    connection.side = CONN_SIDE_CLIENT;
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, ConnGattClientDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = ConnBleDisconnectNow(&connection, BLE_DISCONNECT_REASON_CONNECT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

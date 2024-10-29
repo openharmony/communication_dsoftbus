@@ -205,7 +205,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest06, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    int res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_pkgName);
+    int32_t res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_pkgName);
     EXPECT_EQ(res, EOK);
     appInfo->myData.pid = INVALID_PID;
     appInfo->myData.channelId = TEST_CHANNEL_ID;
@@ -227,7 +227,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
+    int32_t res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                        g_sessionName);
     EXPECT_EQ(res, EOK);
     ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
@@ -245,7 +245,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
+    int32_t res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                    g_sessionName);
     EXPECT_EQ(res, EOK);
     appInfo->myData.channelId = TEST_CHANNEL_ID;
@@ -265,7 +265,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
+    int32_t res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                        g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, NULL);
@@ -283,7 +283,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
+    int32_t res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                    g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, NULL);
@@ -323,7 +323,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
     EXPECT_TRUE(newChannel != NULL);
     newChannel->seq = 1;
     newChannel->info.myData.channelId = TEST_CHANNEL_ID;
-    int res = strcpy_s(newChannel->info.myData.pkgName, sizeof(newChannel->info.myData.pkgName),
+    int32_t res = strcpy_s(newChannel->info.myData.pkgName, sizeof(newChannel->info.myData.pkgName),
                        g_pkgName);
     newChannel->info.myData.pid = INVALID_PID;
     EXPECT_EQ(res, EOK);

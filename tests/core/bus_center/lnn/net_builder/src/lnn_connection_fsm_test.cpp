@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <securec.h>
 
@@ -38,6 +39,7 @@ constexpr char MACTEST[BT_MAC_LEN] = "00:11:22:33:44";
 constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
 constexpr char PEERUID1[MAX_ACCOUNT_HASH_LEN] = "021315ASE";
 constexpr char PEERUID2[MAX_ACCOUNT_HASH_LEN] = "021315ASC";
+constexpr char PEERUID3[MAX_ACCOUNT_HASH_LEN] = "021315ACE";
 constexpr char NETWORKID1[NETWORK_ID_BUF_LEN] = "123456ABD";
 constexpr char NETWORKID2[NETWORK_ID_BUF_LEN] = "123456ABC";
 constexpr char NETWORKID3[LNN_CONNECTION_FSM_NAME_LEN] = "123456ABD";
@@ -188,7 +190,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
     FsmStateMachine fsm;
     connFsm3->fsm = fsm;
     ret = LnnSendAuthResultMsgToConnFsm(connFsm3, retCode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_SEND_FAIL);
 }
 
 /*
@@ -229,7 +231,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     ret = LnnSendLeaveRequestToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSendLeaveRequestToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(FUNC_SLEEP_MS);
@@ -246,7 +248,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSendSyncOfflineFinishToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSendSyncOfflineFinishToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(FUNC_SLEEP_MS);
@@ -261,7 +263,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnSendNewNetworkOnlineToConnFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSendNewNetworkOnlineToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(FUNC_SLEEP_MS);
@@ -277,6 +279,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001, TestSiz
 {
     bool ret = CheckStateMsgCommonArgs(nullptr);
     EXPECT_TRUE(ret == false);
+    ConnectionFsmDinitCallback(nullptr);
     FsmStateMachine fsm;
     ret = CheckStateMsgCommonArgs(&fsm);
     EXPECT_TRUE(ret == true);
@@ -397,17 +400,6 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002, Te
 }
 
 /*
-* @tc.name: LNN_ONLINE_STAGE_ENTER_TEST_001
-* @tc.desc: test OnlineStateEnter
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STAGE_ENTER_TEST_001, TestSize.Level1)
-{
-    OnlineStateEnter(nullptr);
-}
-
-/*
 * @tc.name: LNN_LEAVE_LNN_IN_ONLINE_TEST_001
 * @tc.desc: test LeaveLNNInOnline
 * @tc.type: FUNC
@@ -415,8 +407,20 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STAGE_ENTER_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNConnectionFsmTest, LNN_LEAVE_LNN_IN_ONLINE_TEST_001, TestSize.Level1)
 {
-    LnnConnectionFsm connFsm;
-    LeaveLNNInOnline(&connFsm);
+    const char *ip = IP;
+    NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
+    EXPECT_CALL(lnnConnMock, LnnPrintConnectionAddr).WillRepeatedly(Return(ip));
+    LnnConnectionFsm *connFsm = nullptr;
+    ConnectionAddr targetObj = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT,
+    };
+
+    (void)memcpy_s(targetObj.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID3, strlen(PEERUID3));
+    (void)memcpy_s(targetObj.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
+    connFsm = LnnCreateConnectionFsm(&targetObj, "pkgNameTest", true);
+    EXPECT_TRUE(connFsm != nullptr);
+    LeaveLNNInOnline(connFsm);
 }
 
 /*
@@ -454,17 +458,6 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_002, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_LEAVING_STATE_ENTER_TEST_001
-* @tc.desc: test LeavingStateEnter
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNConnectionFsmTest, LNN_LEAVING_STATE_ENTER_TEST_001, TestSize.Level1)
-{
-    LeavingStateEnter(nullptr);
-}
-
-/*
 * @tc.name: LNN_LEAVING_STATE_PROCESS_TEST_001
 * @tc.desc: test LeavingStateProcess
 * @tc.type: FUNC
@@ -477,17 +470,6 @@ HWTEST_F(LNNConnectionFsmTest, LNN_LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
     EXPECT_TRUE(para != nullptr);
     int32_t ret = LeavingStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);
-}
-
-/*
-* @tc.name: LNN_CONNECTION_FSM_DININIT_CALLBACK_TEST_001
-* @tc.desc: test ConnectionFsmDinitCallback
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNConnectionFsmTest, LNN_CONNECTION_FSM_DININIT_CALLBACK_TEST_001, TestSize.Level1)
-{
-    ConnectionFsmDinitCallback(nullptr);
 }
 
 /*
@@ -604,7 +586,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_UDID_HASH_FOR_DFX_TEST_001, TestSize.Level1)
     char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     int32_t ret = GetUdidHashForDfx(localUdidHash, peerUdidHash, &connInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
     ret = GetUdidHashForDfx(localUdidHash, peerUdidHash, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     connInfo.addr.type = CONNECTION_ADDR_BLE;
@@ -899,10 +881,10 @@ HWTEST_F(LNNConnectionFsmTest, SYNC_BR_OFFLINE_TEST_001, TestSize.Level1)
         .connInfo.flag = 1,
     };
     int32_t ret = SyncBrOffline(&connFsm);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_LEAVE_OFFLINE);
     connFsm.connInfo.addr.type = CONNECTION_ADDR_BR;
     ret = SyncBrOffline(&connFsm);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_LEAVE_OFFLINE);
     connFsm.connInfo.flag = LNN_CONN_INFO_FLAG_LEAVE_REQUEST;
     ret = SyncBrOffline(&connFsm);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

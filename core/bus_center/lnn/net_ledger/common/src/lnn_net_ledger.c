@@ -71,15 +71,8 @@ int32_t LnnInitNetLedger(void)
     return SOFTBUS_OK;
 }
 
-static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
+static bool IsCapacityChange(NodeInfo *info)
 {
-    char softBusVersion[VERSION_MAX_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
-        if (strcmp(softBusVersion, info->softBusVersion) != 0) {
-            LNN_LOGW(LNN_LEDGER, "softbus version=%{public}s->%{public}s", softBusVersion, info->softBusVersion);
-            return true;
-        }
-    }
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
         if (softbusFeature != info->feature) {
@@ -87,11 +80,40 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
             return true;
         }
     }
+    uint32_t authCapacity = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
+        if (authCapacity != info->authCapacity) {
+            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
+            return true;
+        }
+    }
+    uint32_t heartbeatCapacity = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_HB_CAP, &heartbeatCapacity) == SOFTBUS_OK) {
+        if (heartbeatCapacity != info->heartbeatCapacity) {
+            LNN_LOGW(LNN_LEDGER, "hbCapacity=%{public}d->%{public}d", info->heartbeatCapacity, heartbeatCapacity);
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
+{
+    if (IsCapacityChange(info)) {
+        return true;
+    }
+    char softBusVersion[VERSION_MAX_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
+        if (strcmp(softBusVersion, info->softBusVersion) != 0) {
+            LNN_LOGW(LNN_LEDGER, "softbus version=%{public}s->%{public}s", softBusVersion, info->softBusVersion);
+            return true;
+        }
+    }
     char *anonyNewUuid = NULL;
     char uuid[UUID_BUF_LEN] = { 0 };
     if ((LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) == SOFTBUS_OK) && (strcmp(uuid, info->uuid) != 0)) {
         Anonymize(info->uuid, &anonyNewUuid);
-        LNN_LOGW(LNN_LEDGER, "uuid change, new=%{public}s", anonyNewUuid);
+        LNN_LOGW(LNN_LEDGER, "uuid change, new=%{public}s", AnonymizeWrapper(anonyNewUuid));
         AnonymizeFree(anonyNewUuid);
         return true;
     }
@@ -99,13 +121,6 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
         if (osType != info->deviceInfo.osType) {
             LNN_LOGW(LNN_LEDGER, "osType=%{public}d->%{public}d", info->deviceInfo.osType, osType);
-            return true;
-        }
-    }
-    uint32_t authCapacity = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
-        if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
             return true;
         }
     }
@@ -141,6 +156,7 @@ static void ProcessLocalDeviceInfo(void)
         info.stateVersion++;
         LnnSaveLocalDeviceInfo(&info);
     }
+    LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
     if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set state version fail");
     }
@@ -151,6 +167,7 @@ static void ProcessLocalDeviceInfo(void)
     LnnNotifyLocalNetworkIdChanged();
     if (info.networkIdTimestamp != 0) {
         LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
+        LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
     }
 }
 
@@ -501,7 +518,7 @@ static int32_t SoftbusDumpPrintAccountId(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyAccountHash = NULL;
     Anonymize(accountHashStr, &anonyAccountHash);
-    SOFTBUS_DPRINTF(fd, "AccountHash->%s\n", anonyAccountHash);
+    SOFTBUS_DPRINTF(fd, "AccountHash->%s\n", AnonymizeWrapper(anonyAccountHash));
     AnonymizeFree(anonyAccountHash);
     return SOFTBUS_OK;
 }
@@ -522,7 +539,7 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyUdid = NULL;
     Anonymize((char *)udid, &anonyUdid);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", anonyUdid);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }
@@ -543,7 +560,7 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyUuid = NULL;
     Anonymize((char *)uuid, &anonyUuid);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", anonyUuid);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", AnonymizeWrapper(anonyUuid));
     AnonymizeFree(anonyUuid);
     return SOFTBUS_OK;
 }
@@ -675,7 +692,7 @@ static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyIrk = NULL;
     Anonymize(peerIrkStr, &anonyIrk);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", anonyIrk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyIrk);
     (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
     (void)memset_s(peerIrkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
@@ -703,7 +720,7 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyBroadcastCipher = NULL;
     Anonymize((char *)broadcastCipherStr, &anonyBroadcastCipher);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", anonyBroadcastCipher);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", AnonymizeWrapper(anonyBroadcastCipher));
     AnonymizeFree(anonyBroadcastCipher);
     (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     (void)memset_s(broadcastCipherStr, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
@@ -731,7 +748,7 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyRemotePtk = NULL;
     Anonymize(remotePtkStr, &anonyRemotePtk);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", anonyRemotePtk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", AnonymizeWrapper(anonyRemotePtk));
     AnonymizeFree(anonyRemotePtk);
     (void)memset_s(remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     (void)memset_s(remotePtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
@@ -763,7 +780,7 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyLocalPtk = NULL;
     Anonymize(localPtkStr, &anonyLocalPtk);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", anonyLocalPtk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", AnonymizeWrapper(anonyLocalPtk));
     AnonymizeFree(anonyLocalPtk);
     (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     (void)memset_s(localPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
@@ -779,7 +796,7 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyNetworkId = NULL;
     Anonymize(nodeInfo->networkId, &anonyNetworkId);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", anonyNetworkId);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUdid failed");
@@ -845,7 +862,7 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyDeviceName = NULL;
     Anonymize(nodeInfo->deviceName, &anonyDeviceName);
-    SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", anonyDeviceName);
+    SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     SoftbusDumpPrintAccountId(fd, nodeInfo);
     SoftbusDumpDeviceInfo(fd, nodeInfo);

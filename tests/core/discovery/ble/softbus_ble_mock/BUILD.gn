@@ -31,6 +31,13 @@ ohos_unittest("DiscBleTest") {
     "disc_ble_test.cpp",
   ]
   sources += test_utils_src
+  if (support_i18n && qemu_arm_disable) {
+    sources += [
+      "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
+    ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
+  }
 
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -44,6 +51,7 @@ ohos_unittest("DiscBleTest") {
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src",
+    "$dsoftbus_root_path/core/discovery/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
@@ -66,6 +74,9 @@ ohos_unittest("DiscBleTest") {
     "hilog:libhilog",
     "huks:libhukssdk",
   ]
+  if (support_i18n && qemu_arm_disable) {
+    external_deps += [ "i18n:intl_util" ]
+  }
 }
 
 group("unittest") {

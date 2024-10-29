@@ -58,7 +58,7 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     }
     uint32_t packLen = head->len + sizeof(ConnPktHead);
     if (buffer->length < packLen) {
-        CONN_LOGI(CONN_BR, "recv incomplete packet, connId=%{public}u", connectionId);
+        CONN_LOGD(CONN_BR, "recv incomplete packet, connId=%{public}u", connectionId);
         return NULL;
     }
     uint8_t *dataCopy = (uint8_t *)SoftBusCalloc(packLen);
@@ -560,15 +560,21 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
         "init br trans module failed: init br send queue failed, error=%{public}d", status);
 
     struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
-    CONN_CHECK_AND_RETURN_RET_LOGW(controller, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
-        "init br trans module failed: init flow controller failed");
+    if (controller == NULL) {
+        CONN_LOGW(CONN_INIT, "init br trans module failed: init flow controller failed");
+        ConnBrInnerQueueDeinit();
+        return SOFTBUS_CONN_BR_INTERNAL_ERR;
+    }
 
     g_sppDriver = sppDriver;
     g_transEventListener = *listener;
     g_flowController = controller;
     status = SoftBusMutexInit(&g_startBrSendLPInfo.lock, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        status == SOFTBUS_OK, status, CONN_INIT,
-        "init br trans module failed: init send lp lock failed, err=%{public}d", status);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGW(CONN_INIT, "init br trans module failed: init send lp lock failed, err=%{public}d", status);
+        ConnBrInnerQueueDeinit();
+        ConnSlideWindowControllerDelete(controller);
+        return status;
+    }
     return SOFTBUS_OK;
 }

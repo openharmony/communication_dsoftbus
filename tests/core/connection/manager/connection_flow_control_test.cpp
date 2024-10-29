@@ -62,7 +62,7 @@ HWTEST_F(ConnFlowControlTest, FlowControlWhenDefault, TestSize.Level1)
     auto controller = ConnSlideWindowControllerNew();
     EXPECT_NE(controller, nullptr);
 
-    for (int i = 0; i < 100; ++i) {
+    for (int32_t i = 0; i < 100; ++i) {
         int32_t expect = 512;
         uint64_t now = SoftBusGetSysTimeMs();
         auto value = controller->apply(controller, expect);
@@ -122,7 +122,7 @@ HWTEST_F(ConnFlowControlTest, FlowControlWhenEnable, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     applyValue = quotaInBytes + 1;
-    for (int i = 0; i < 10; ++i) {
+    for (int32_t i = 0; i < 10; ++i) {
         startTimestamp = SoftBusGetSysTimeMs();
         got = controller->apply(controller, applyValue);
         delta = SoftBusGetSysTimeMs() - startTimestamp;

@@ -51,7 +51,7 @@ static const char *PKGE_NAME = "dms";
 static const char *TEST_SESSION_KEY = "Test_OpenHarmony";
 static const char *TEST_GROUP_ID = "Test_Group_Id";
 static const char *TEST_UDID = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-// static const char *TEST_ERR_DESC = "Test_Err_Desc";
+static const char *TEST_UUID = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 
 namespace OHOS {
 
@@ -256,18 +256,18 @@ HWTEST_F(TransTcpDirectP2pMockTest, GetModuleByHmlIpTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pMockTest, StartP2pListenerTest001, TestSize.Level1)
 {
     int32_t port = TEST_PORT;
-    int32_t ret = StartP2pListener(nullptr, &port);
+    int32_t ret = StartP2pListener(nullptr, &port, TEST_UUID);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillRepeatedly(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillRepeatedly(Return(port));
-    ret = StartP2pListener(IP, &port);
+    ret = StartP2pListener(IP, &port, TEST_UUID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = StartP2pListener(IP, &port);
+    ret = StartP2pListener(IP, &port, TEST_UUID);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillRepeatedly(Return(true));
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillRepeatedly(Return(port));
-    ret = StartP2pListener(IP, &port);
+    ret = StartP2pListener(IP, &port, TEST_UUID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
