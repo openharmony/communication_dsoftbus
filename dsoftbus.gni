@@ -83,6 +83,9 @@ if (defined(ohos_lite)) {
     os_type = "standard"
   }
   defines = [ "SOFTBUS_LINUX" ]
+  if (is_standard_system) {
+    defines += [ "SOFTBUS_STANDARD_OS" ]
+  }
   import("//build/ohos.gni")
   import(
       "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
