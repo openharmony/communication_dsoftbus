@@ -187,10 +187,10 @@ HWTEST_F(AuthSessionFsmTest, CLIENT_SET_EXCHANGE_ID_TYPE_TEST_001, TestSize.Leve
     AuditReportSetPeerDevInfo(nullptr, &info);
     AuditReportSetPeerDevInfo(auditData, nullptr);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    ASSERT_TRUE(memcpy_s(info.connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
     AuditReportSetPeerDevInfo(auditData, &info);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    ASSERT_TRUE(memcpy_s(info.connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
     AuditReportSetPeerDevInfo(auditData, &info);
     info.connInfo.type = AUTH_LINK_TYPE_MAX;
     AuditReportSetPeerDevInfo(auditData, &info);

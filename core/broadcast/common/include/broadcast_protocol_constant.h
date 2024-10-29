@@ -82,6 +82,8 @@ extern "C" {
 #define BYTE_SHIFT_8BIT             8
 #define BYTE_SHIFT_13BIT            13
 
+#define DISC_MAX_NICKNAME_LEN 21
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

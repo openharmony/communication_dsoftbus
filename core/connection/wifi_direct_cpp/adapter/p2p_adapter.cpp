@@ -479,4 +479,12 @@ int P2pAdapter::GetApChannel()
     return hotspotConfig.channelNum;
 }
 
+int32_t P2pAdapter::GetP2pGroupFrequency()
+{
+    WifiP2pGroupInfo p2pGroupInfo{};
+    int32_t ret = GetCurrentGroup(&p2pGroupInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret), CONN_WIFI_DIRECT,
+        "get current group info failed, error=%{public}d", ToSoftBusErrorCode(ret));
+    return p2pGroupInfo.frequency;
+}
 } // namespace OHOS::SoftBus

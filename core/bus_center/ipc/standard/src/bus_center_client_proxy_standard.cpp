@@ -439,41 +439,41 @@ int32_t BusCenterClientProxy::OnNodeDeviceTrustedChange(const char *pkgName, int
 }
 
 int32_t BusCenterClientProxy::OnHichainProofException(
-    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    if (pkgName == nullptr || deviceId == nullptr || deviceIdLen != UDID_BUF_LEN) {
+    if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_NETWORK_REMOTE_NULL;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_NETWORK_WRITETOKEN_FAILED;
     }
     if (!data.WriteCString(pkgName)) {
         LNN_LOGE(LNN_EVENT, "write pkgName failed");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
     }
-    if (!data.WriteUint32(deviceIdLen)) {
-        LNN_LOGE(LNN_EVENT, "write deviceId length failed");
-        return SOFTBUS_IPC_ERR;
+    if (!data.WriteUint32(proofLen)) {
+        LNN_LOGE(LNN_EVENT, "write proofInfo length failed");
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
-    if (!data.WriteRawData(deviceId, deviceIdLen)) {
-        LNN_LOGE(LNN_EVENT, "write deviceId failed");
-        return SOFTBUS_IPC_ERR;
+    if (proofInfo != nullptr && proofLen != 0 && !data.WriteRawData(proofInfo, proofLen)) {
+        LNN_LOGE(LNN_EVENT, "write proofInfo failed");
+        return SOFTBUS_NETWORK_WRITERAWDATA_FAILED;
     }
     if (!data.WriteUint16(deviceTypeId)) {
         LNN_LOGE(LNN_EVENT, "write deviceTypeId failed");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_NETWORK_WRITEINT16_FAILED;
     }
     if (!data.WriteInt32(errCode)) {
         LNN_LOGE(LNN_EVENT, "write errcode failed");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };

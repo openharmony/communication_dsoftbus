@@ -1887,8 +1887,8 @@ static void ClientTransSessionTimerProc(void)
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            ClientUpdateIdleTimeout(serverNode, sessionNode, &destroyList);
             ClientCheckWaitTimeOut(serverNode, sessionNode, waitOutSocket, MAX_SESSION_ID, &waitOutNum);
+            ClientUpdateIdleTimeout(serverNode, sessionNode, &destroyList);
         }
     }
     UnlockClientSessionServerList();

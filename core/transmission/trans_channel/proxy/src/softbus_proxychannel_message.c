@@ -366,8 +366,8 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, Prox
 
 static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (appInfo->fastTransDataSize > 0) {
+        TRANS_LOGI(TRANS_CTRL, "have fast data need transport");
         if (!AddNumberToJsonObject(root, JSON_KEY_ROUTE_TYPE, appInfo->routeType)) {
             TRANS_LOGE(TRANS_CTRL, "add route type fail.");
             return SOFTBUS_PARSE_JSON_ERR;
@@ -593,10 +593,10 @@ int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode)) {
-        TRANS_LOGE(TRANS_CTRL, "get errCode failed.");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
     }
+    TRANS_LOGE(TRANS_CTRL, "remote device is faulty, errCode=%{public}d", *errCode);
 
     cJSON_Delete(root);
     return SOFTBUS_OK;
