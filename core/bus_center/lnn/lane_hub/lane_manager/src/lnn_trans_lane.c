@@ -122,7 +122,6 @@ static SoftBusMutex g_transLaneMutex;
 static TransLaneList *g_requestList = NULL;
 static SoftBusHandler g_laneLoopHandler;
 static ILaneIdStateListener *g_laneIdCallback = NULL;
-static int32_t g_powerPid = 0;
 
 static int32_t Lock(void)
 {
@@ -132,16 +131,6 @@ static int32_t Lock(void)
 static void Unlock(void)
 {
     (void)SoftBusMutexUnlock(&g_transLaneMutex);
-}
-
-static void SetPowerPidStatus(int32_t powerPid)
-{
-    if (Lock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get lock fail");
-        return;
-    }
-    g_powerPid = powerPid;
-    Unlock();
 }
 
 static int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
@@ -839,7 +828,6 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
         }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
-    SetPowerPidStatus(0);
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
 }
 
@@ -1360,20 +1348,11 @@ void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t la
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneReqId == laneReqId) {
             powerInfo.transType = item->allocInfo.transType;
-            if (g_powerPid == item->allocInfo.pid) {
-                powerInfo.isDifferentPid = false;
-            } else {
-                powerInfo.isDifferentPid = true;
-            }
-            powerInfo.powerPid = item->allocInfo.pid;
         }
     }
     Unlock();
     if (linkType == LANE_HML && IsPowerControlEnabled()) {
         DetectEnableWifiDirectApply(&powerInfo);
-    }
-    if (powerInfo.isChangedPid == true) {
-        SetPowerPidStatus(powerInfo.powerPid);
     }
 }
 

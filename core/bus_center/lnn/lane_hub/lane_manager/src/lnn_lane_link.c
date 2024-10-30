@@ -271,9 +271,6 @@ static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirect
         return;
     }
     if (powerInfo->isDisableLowPower) {
-        if (powerInfo->transType == LANE_T_BYTE || powerInfo->transType == LANE_T_MSG) {
-            powerInfo->isChangedPid = true;
-        }
         DisablePowerControl(wifiDirectInfo);
         SetLanePowerStatus(false);
     } else if ((powerInfo->activeHml >= 1) && (powerInfo->passiveHml == 0) && (powerInfo->rawHml == 0)
@@ -367,11 +364,7 @@ void DetectEnableWifiDirectApply(PowerControlInfo *powerInfo)
             powerInfo->rawHml++;
         }
     }
-    if (powerInfo->activeHml > 1 && !g_enabledLowPower) {
-        powerInfo->isDisableLowPower = true;
-    }
-    if ((powerInfo->isDifferentPid == true || powerInfo->passiveHml > 0
-        || powerInfo->rawHml > 0) && g_enabledLowPower) {
+    if (((powerInfo->passiveHml > 0 || powerInfo->rawHml > 0) && g_enabledLowPower) || (powerInfo->activeHml > 1)) {
         powerInfo->isDisableLowPower = true;
     }
     LaneUnlock();
