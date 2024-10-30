@@ -634,6 +634,7 @@ static void OnDisconnect(int32_t authId)
         return;
     }
     TRANS_LOGI(TRANS_SVC, "recv channel disconnect event. authId=%{public}d", authId);
+    TransAuthCloseChannel(authId, dstInfo.appInfo.linkType, dstInfo.isClient);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
     StopCustomListen();
     (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
