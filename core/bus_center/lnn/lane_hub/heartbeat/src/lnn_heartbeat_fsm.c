@@ -1179,7 +1179,8 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->isDirectBoardcast = msgPara->isDirectBoardcast;
     if (strcpy_s(custData->networkId, NETWORK_ID_BUF_LEN, msgPara->networkId) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "cpy networkId fail");
-        return SOFTBUS_MEM_ERR;
+        SoftBusFree(custData);
+        return SOFTBUS_STRCPY_ERR;
     }
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send begin msg to hbFsm fail");
