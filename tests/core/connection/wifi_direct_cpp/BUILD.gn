@@ -62,6 +62,7 @@ ohos_unittest("WifiDirectIpManagerTest") {
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
+  configs = [ "//build/config/compiler:exceptions" ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
