@@ -16,6 +16,7 @@
 #ifndef DISC_COAP_PARSER_H
 #define DISC_COAP_PARSER_H
 
+#include "broadcast_protocol_constant.h"
 #include "disc_manager.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
@@ -35,6 +36,7 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device);
 void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device);
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device);
 void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device);
+void DiscCoapParseNickname(const cJSON *data, char *nickname);
 int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValue, uint32_t outLen);
 
 #ifdef __cplusplus
