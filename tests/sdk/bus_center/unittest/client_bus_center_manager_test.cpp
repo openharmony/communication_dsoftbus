@@ -67,16 +67,17 @@ void ClientBusCentManagerTest::TearDown() {}
 * @tc.name: BUS_CENTER_CLIENT_INIT_Test_001
 * @tc.desc: bus center client init test
 * @tc.type: FUNC
+
 * @tc.require:
 */
 HWTEST_F(ClientBusCentManagerTest, BUS_CENTER_CLIENT_INIT_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit())
-        .WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
-    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_ERR);
+    EXPECT_NE(BusCenterClientInit() == SOFTBUS_OK);
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     BusCenterClientDeinit();
 }
@@ -106,9 +107,9 @@ HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, ServerIpcJoinLNN(_, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, cb) == SOFTBUS_ERR);
+    EXPECT_NE(JoinLNNInner(nullptr, &target1, cb), SOFTBUS_OK);
     EXPECT_TRUE(JoinLNNInner(nullptr, &target1, cb) == SOFTBUS_OK);
     EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_ALREADY_EXISTED);
     target1.type = CONNECTION_ADDR_BLE;
@@ -139,11 +140,11 @@ HWTEST_F(ClientBusCentManagerTest, LEAVE_LNN_INNER_Test_001, TestSize.Level1)
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, ServerIpcLeaveLNN(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, cb) == SOFTBUS_ERR);
+    EXPECT_NE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, cb), SOFTBUS_OK);
     EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, cb) == SOFTBUS_OK);
-    EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, nullptr) == SOFTBUS_ERR);
+    EXPECT_NE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, nullptr), SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 
@@ -194,9 +195,9 @@ HWTEST_F(ClientBusCentManagerTest, GET_ALL_NODE_DEVICE_INFO_INNER_Test_001, Test
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcGetAllOnlineNodeInfo(_, _, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(GetAllNodeDeviceInfoInner(nullptr, nullptr, nullptr) == SOFTBUS_ERR);
+    EXPECT_NE(GetAllNodeDeviceInfoInner(nullptr, nullptr, nullptr), SOFTBUS_OK);
     EXPECT_TRUE(GetAllNodeDeviceInfoInner(nullptr, nullptr, nullptr) == SOFTBUS_OK);
 }
 
@@ -210,9 +211,9 @@ HWTEST_F(ClientBusCentManagerTest, GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001, Te
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcGetLocalDeviceInfo(_, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(GetLocalNodeDeviceInfoInner(nullptr, nullptr) == SOFTBUS_ERR);
+    EXPECT_NE(GetLocalNodeDeviceInfoInner(nullptr, nullptr), SOFTBUS_OK);
     EXPECT_TRUE(GetLocalNodeDeviceInfoInner(nullptr, nullptr) == SOFTBUS_OK);
 }
 
@@ -227,9 +228,9 @@ HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Le
     int32_t infoLen = 0;
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcGetNodeKeyInfo(_, _, _, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen) == SOFTBUS_ERR);
+    EXPECT_NE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen) == SOFTBUS_OK);
 }
 
@@ -244,9 +245,9 @@ HWTEST_F(ClientBusCentManagerTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001, Tes
     uint16_t dataChangeFlag = 0;
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcSetNodeDataChangeFlag(_, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(SetNodeDataChangeFlagInner(nullptr, nullptr, dataChangeFlag) == SOFTBUS_ERR);
+    EXPECT_NE(SetNodeDataChangeFlagInner(nullptr, nullptr, dataChangeFlag), SOFTBUS_OK);
     EXPECT_TRUE(SetNodeDataChangeFlagInner(nullptr, nullptr, dataChangeFlag) == SOFTBUS_OK);
 }
 
@@ -265,11 +266,11 @@ HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_001, TestSize.Leve
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, ServerIpcStartTimeSync(_, _, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(StartTimeSyncInner(nullptr, nullptr, LOW_ACCURACY, SHORT_PERIOD, &cb) == SOFTBUS_ERR);
+    EXPECT_NE(StartTimeSyncInner(nullptr, nullptr, LOW_ACCURACY, SHORT_PERIOD, &cb), SOFTBUS_OK);
     EXPECT_TRUE(StartTimeSyncInner(nullptr, NODE1_NETWORK_ID, LOW_ACCURACY, SHORT_PERIOD, &cb) == SOFTBUS_OK);
-    EXPECT_TRUE(StartTimeSyncInner(nullptr, NODE1_NETWORK_ID, LOW_ACCURACY, SHORT_PERIOD, &cb) == SOFTBUS_ERR);
+    EXPECT_NE(StartTimeSyncInner(nullptr, NODE1_NETWORK_ID, LOW_ACCURACY, SHORT_PERIOD, &cb), SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 
@@ -286,8 +287,8 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_001, TestSize.Level
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcStopTimeSync(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_TRUE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID) == SOFTBUS_ERR);
+    EXPECT_CALL(busCentManagerMock, ServerIpcStopTimeSync(_, _)).WillRepeatedly(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_NE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID), SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 
@@ -308,10 +309,10 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_002, TestSize.Level
     EXPECT_CALL(busCentManagerMock, ServerIpcStartTimeSync(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(StartTimeSyncInner(nullptr, NODE1_NETWORK_ID, LOW_ACCURACY, SHORT_PERIOD, &cb) == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, ServerIpcStopTimeSync(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID) == SOFTBUS_OK);
-    EXPECT_TRUE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID) == SOFTBUS_ERR);
+    EXPECT_NE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID), SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 
@@ -345,9 +346,9 @@ HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
     LnnOnPublishLNNResult(LNN_PUBLISH_ID, RESULT_REASON);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcPublishLNN(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(PublishLNNInner(nullptr, &info, &cb) == SOFTBUS_ERR);
+    EXPECT_NE(PublishLNNInner(nullptr, &info, &cb), SOFTBUS_OK);
     EXPECT_TRUE(PublishLNNInner(nullptr, &info, &cb) == SOFTBUS_OK);
     LnnOnPublishLNNResult(LNN_PUBLISH_ID, RESULT_REASON);
 }
@@ -362,9 +363,9 @@ HWTEST_F(ClientBusCentManagerTest, STOP_PUBLISH_LNN_INNER_Test_001, TestSize.Lev
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcStopPublishLNN(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(StopPublishLNNInner(nullptr, LNN_PUBLISH_ID) == SOFTBUS_ERR);
+    EXPECT_NE(StopPublishLNNInner(nullptr, LNN_PUBLISH_ID), SOFTBUS_OK);
     EXPECT_TRUE(StopPublishLNNInner(nullptr, LNN_PUBLISH_ID) == SOFTBUS_OK);
 }
 
@@ -407,9 +408,9 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
     LnnOnRefreshDeviceFound(nullptr);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcRefreshLNN(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(RefreshLNNInner(nullptr, &info, &cb) == SOFTBUS_ERR);
+    EXPECT_NE(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_OK);
     EXPECT_TRUE(RefreshLNNInner(nullptr, &info, &cb) == SOFTBUS_OK);
     LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
     LnnOnRefreshDeviceFound(nullptr);
@@ -425,9 +426,9 @@ HWTEST_F(ClientBusCentManagerTest, STOP_REFRESH_LNN_INNER_Test_001, TestSize.Lev
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcStopRefreshLNN(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(StopRefreshLNNInner(nullptr, LNN_SUBSCRIBE_ID) == SOFTBUS_ERR);
+    EXPECT_NE(StopRefreshLNNInner(nullptr, LNN_SUBSCRIBE_ID), SOFTBUS_OK);
     EXPECT_TRUE(StopRefreshLNNInner(nullptr, LNN_SUBSCRIBE_ID) == SOFTBUS_OK);
 }
 

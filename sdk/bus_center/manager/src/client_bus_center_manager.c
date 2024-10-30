@@ -189,7 +189,7 @@ static int32_t AddLeaveLNNCbItem(const char *networkId, OnLeaveLNNResult cb)
     if (strncpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
         LNN_LOGE(LNN_STATE, "strcpy network id fail");
         SoftBusFree(item);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     item->cb = cb;
     ListAdd(&g_busCenterClient.leaveLNNCbList, &item->node);
@@ -222,7 +222,7 @@ static int32_t AddTimeSyncCbItem(const char *networkId, ITimeSyncCb *cb)
     if (strncpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
         LNN_LOGE(LNN_STATE, "strcpy network id fail");
         SoftBusFree(item);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     item->cb = *cb;
     ListAdd(&g_busCenterClient.timeSyncCbList, &item->node);
@@ -371,7 +371,7 @@ static int32_t BuildDiscPublishMsg(DiscPublishMsg **msgNode, const PublishInfo *
         strcpy_s((*msgNode)->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         FreeDiscPublishMsg(msgNode);
         LNN_LOGE(LNN_STATE, "copy capability or pkgName failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (info->dataLen > 0) {
         (*msgNode)->info->capabilityData = (unsigned char *)SoftBusCalloc(info->dataLen + 1);
@@ -384,7 +384,7 @@ static int32_t BuildDiscPublishMsg(DiscPublishMsg **msgNode, const PublishInfo *
             (const char *)info->capabilityData) != EOK) {
             FreeDiscPublishMsg(msgNode);
             LNN_LOGE(LNN_STATE, "copy capabilityData failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
     }
     return SOFTBUS_OK;
@@ -418,7 +418,7 @@ static int32_t BuildDiscSubscribeMsg(DiscSubscribeMsg **msgNode, const Subscribe
         strcpy_s((*msgNode)->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         FreeDiscSubscribeMsg(msgNode);
         LNN_LOGE(LNN_STATE, "copy capability or pkgName failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (info->dataLen > 0) {
         (*msgNode)->info->capabilityData = (unsigned char *)SoftBusCalloc(info->dataLen + 1);
@@ -431,7 +431,7 @@ static int32_t BuildDiscSubscribeMsg(DiscSubscribeMsg **msgNode, const Subscribe
             (const char *)info->capabilityData) != EOK) {
             FreeDiscSubscribeMsg(msgNode);
             LNN_LOGE(LNN_STATE, "copy capabilityData failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
     }
     return SOFTBUS_OK;
@@ -455,7 +455,7 @@ static int32_t AddDiscPublishMsg(const char *pkgName, const PublishInfo *info)
     if (BuildDiscPublishMsg(&msgNode, info, pkgName) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
         LNN_LOGE(LNN_STATE, "build DiscPublishMsg failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BUILD_PUBLISH_MSG_FAILED;
     }
     ListTailInsert(&(g_publishMsgList->list), &(msgNode->node));
     (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
@@ -499,7 +499,7 @@ static int32_t AddDiscSubscribeMsg(const char *pkgName, const SubscribeInfo *inf
     if (BuildDiscSubscribeMsg(&msgNode, info, pkgName) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
         LNN_LOGE(LNN_STATE, "build DiscSubscribeMsg failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BUILD_SUB_MSG_FAILED;
     }
     ListTailInsert(&(g_discoveryMsgList->list), &(msgNode->node));
     (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
@@ -547,7 +547,7 @@ static int32_t DiscoveryMsgListInit()
         g_publishMsgList = NULL;
         g_discoveryMsgList = NULL;
         (void)SoftBusMutexUnlock(&g_isInitedLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     g_isInited = true;
     (void)SoftBusMutexUnlock(&g_isInitedLock);
@@ -608,11 +608,11 @@ int32_t BusCenterClientInit(void)
 
     if (SoftBusMutexInit(&g_busCenterClient.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "g_busCenterClient.lock init failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (DiscoveryMsgListInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "DiscoveryMsgListInit fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     ListInit(&g_busCenterClient.joinLNNCbList);
@@ -623,7 +623,7 @@ int32_t BusCenterClientInit(void)
     if (BusCenterServerProxyInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "bus center server proxy init failed");
         BusCenterClientDeinit();
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     LNN_LOGI(LNN_INIT, "BusCenterClientInit init OK");
     return SOFTBUS_OK;
@@ -672,7 +672,7 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
     g_busCenterClient.dataLevelCb = *callback;
     if (strcpy_s(g_regDataLevelChangePkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         LNN_LOGE(LNN_STATE, "copy pkgName fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     int32_t ret = ServerIpcRegDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
@@ -768,7 +768,7 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
         LNN_LOGE(LNN_STATE, "lock leave lnn cb list in leave");
         return SOFTBUS_LOCK_ERR;
     }
-    rc = SOFTBUS_ERR;
+    rc = SOFTBUS_NETWORK_LEAVE_LNN_FAILED;
     do {
         if (FindLeaveLNNCbItem(networkId, cb) != NULL) {
             LNN_LOGE(LNN_STATE, "leave request already exist");
@@ -822,7 +822,7 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
         return SOFTBUS_INVALID_PARAM;
     }
     NodeStateCallbackItem *item = NULL;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_REG_CB_FAILED;
 
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
         LNN_LOGE(LNN_STATE, "Package name is empty or length exceeds");
@@ -899,7 +899,7 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb)
 {
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_START_TIME_SYNC_FAILED;
 
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
@@ -930,7 +930,7 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
 
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
 {
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_STOP_TIME_SYNC_FAILED;
     TimeSyncCallbackItem *item = NULL;
 
     if (!g_busCenterClient.isInit) {
@@ -1046,7 +1046,7 @@ NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, in
     }
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CLIENT_NOT_INIT;
     }
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -1083,7 +1083,7 @@ int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
     }
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CLIENT_NOT_INIT;
     }
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -1121,7 +1121,7 @@ int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *in
     }
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CLIENT_NOT_INIT;
     }
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -1162,7 +1162,7 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
     }
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CLIENT_NOT_INIT;
     }
 
     if ((type < 0) || (type > TYPE_NETWORK_INFO)) {
@@ -1355,7 +1355,7 @@ int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
     }
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CLIENT_NOT_INIT;
     }
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -1427,7 +1427,7 @@ int32_t DiscRecoveryPublish()
         if (ServerIpcPublishLNN(msgNode->pkgName, msgNode->info) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "recovery publish error, pkgName=%{public}s, capability=%{public}s",
                 msgNode->pkgName, msgNode->info->capability);
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_NETWORK_PUBLISH_LNN_FAILED;
         } else {
             LNN_LOGI(LNN_STATE, "recovery publish success, pkgName=%{public}s, capability=%{public}s",
                 msgNode->pkgName, msgNode->info->capability);
@@ -1453,7 +1453,7 @@ int32_t DiscRecoverySubscribe()
         if (ServerIpcRefreshLNN(msgNode->pkgName, msgNode->info) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "recovery subscribe error, pkgName=%{public}s, capability=%{public}s",
                 msgNode->pkgName, msgNode->info->capability);
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_NETWORK_REFRESH_LNN_FAILED;
         } else {
             LNN_LOGI(LNN_STATE, "recovery subscribe success, pkgName=%{public}s, capability=%{public}s",
                 msgNode->pkgName, msgNode->info->capability);

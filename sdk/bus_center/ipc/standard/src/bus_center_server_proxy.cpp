@@ -70,7 +70,7 @@ int32_t BusCenterServerProxyInit(void)
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
         LNN_LOGE(LNN_EVENT, "Get remote softbus object failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     g_serverProxy = new (std::nothrow) BusCenterServerProxy(object);
     if (g_serverProxy == nullptr) {
@@ -297,7 +297,7 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int32_t ret = g_serverProxy->ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (ret != 0) {

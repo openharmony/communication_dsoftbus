@@ -68,7 +68,7 @@ static int ClientIpcInterfaceMsgHandle(uint32_t code, IpcIo *data, IpcIo *reply,
 {
     if (data == NULL) {
         COMM_LOGE(COMM_SDK, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     COMM_LOGI(COMM_SDK, "receive ipc transact code. code=%{public}u", code);
@@ -79,7 +79,7 @@ static int ClientIpcInterfaceMsgHandle(uint32_t code, IpcIo *data, IpcIo *reply,
         }
     }
     COMM_LOGE(COMM_SDK, "not support code. code=%{public}u", code);
-    return SOFTBUS_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 static int InnerRegisterService(void)
@@ -88,7 +88,7 @@ static int InnerRegisterService(void)
     uint32_t clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
     if (clientNameNum == 0) {
         COMM_LOGE(COMM_SDK, "get client name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_NAME_FAILED;
     }
 
     struct CommonScvId svcId = {0};
@@ -97,7 +97,7 @@ static int InnerRegisterService(void)
         for (uint32_t i = 0; i < clientNameNum; i++) {
             SoftBusFree(clientName[i]);
         }
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_IDENTITY_FAILED;
     }
     for (uint32_t i = 0; i < clientNameNum; i++) {
         while (RegisterService(clientName[i], &svcId) != SOFTBUS_OK) {
@@ -177,7 +177,7 @@ static int StartDeathProcTask(void)
     ret = SoftBusThreadAttrInit(&threadAttr);
     if (ret != 0) {
         COMM_LOGE(COMM_SDK, "Thread attr init failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     threadAttr.detachState = SOFTBUS_THREAD_DETACH;
@@ -186,7 +186,7 @@ static int StartDeathProcTask(void)
     ret = SoftBusThreadCreate(&tid, &threadAttr, DeathProcTask, NULL);
     if (ret != 0) {
         COMM_LOGE(COMM_SDK, "create DeathProcTask failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     return ret;
@@ -208,7 +208,7 @@ static int RegisterServerDeathCb(void)
     g_deathCbId = INVALID_CB_ID;
     if (AddDeathRecipient(g_svcIdentity, DeathCallback, NULL, &g_deathCbId) != EC_SUCCESS) {
         COMM_LOGE(COMM_SDK, "reg death callback failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_ADD_DEATH_RECIPIENT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -217,7 +217,7 @@ int ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "server proxy init failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     static IpcObjectStub objectStub = {
@@ -234,13 +234,13 @@ int ClientStubInit(void)
     int ret = ClientContextInit();
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "client context init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     SetClientIdentity(clientIdentity.handle, clientIdentity.token, clientIdentity.cookie);
     if (RegisterServerDeathCb() != SOFTBUS_OK) {
         ClientContextDeinit();
         COMM_LOGE(COMM_SDK, "reg server death cb failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_ADD_DEATH_RECIPIENT_FAILED;
     }
 
     return SOFTBUS_OK;
@@ -251,7 +251,7 @@ int ClientRegisterService(const char *pkgName)
     struct CommonScvId svcId = {0};
     if (GetClientIdentity(&svcId.handle, &svcId.token, &svcId.cookie) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "get client identity failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_IDENTITY_FAILED;
     }
 
     while (RegisterService(pkgName, &svcId) != SOFTBUS_OK) {

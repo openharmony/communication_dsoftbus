@@ -208,7 +208,7 @@ int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
         COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_restartAuthParaCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!");

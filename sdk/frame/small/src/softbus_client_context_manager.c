@@ -66,12 +66,12 @@ int GetClientIdentity(unsigned int *handle, uintptr_t *token, uintptr_t *cookie)
 {
     if (handle == NULL || token == NULL || cookie == NULL) {
         COMM_LOGE(COMM_SDK, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientCtx == NULL) {
         COMM_LOGE(COMM_SDK, "client ctx not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_IDENTITY_FAILED;
     }
 
     *handle = g_clientCtx->handle;
