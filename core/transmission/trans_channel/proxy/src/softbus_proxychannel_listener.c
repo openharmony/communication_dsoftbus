@@ -86,7 +86,7 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
 static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appInfo, bool isServer)
 {
     ChannelInfo info = {0};
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret;
     char buf[NETWORK_ID_BUF_LEN] = {0};
 
     GetProxyChannelInfo(channelId, appInfo, isServer, &info);

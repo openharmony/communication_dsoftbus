@@ -65,10 +65,9 @@ extern "C" {
  * @param key Indicates the pointer to the buffer that stores the session key.
  * @param len Indicates the length of the buffer.
  *
- * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful;returns an error code otherwise.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
- * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
  * @return Returns <b>SOFTBUS_MEM_ERR</b> if the operation fails due to insufficient memory.
  * @since 1.0
  * @version 1.0
@@ -81,10 +80,9 @@ int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len);
  * @param sessionId Indicates the unique session ID.
  * @param handle Indicates the pointer to the buffer that stores the session handle.
  *
- * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful;returns an error code otherwise.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
- * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
  * @return Returns <b>SOFTBUS_MEM_ERR</b> if the operation fails due to insufficient memory.
  * @since 1.0
  * @version 1.0
@@ -96,10 +94,9 @@ int32_t GetSessionHandle(int32_t sessionId, int *handle);
  *
  * @param sessionId Indicates the unique session ID.
  *
- * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful;returns an error code otherwise.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
- * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
  * @since 1.0
  * @version 1.0
  */
