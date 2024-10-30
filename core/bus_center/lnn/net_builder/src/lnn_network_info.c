@@ -52,7 +52,7 @@ static bool g_isApEnable = false;
 static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, uint32_t len)
 {
     if (capability == NULL || msg == NULL || len < BITS) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
         *capability = *capability | (*(msg + i) << (BITS * i));
@@ -494,16 +494,19 @@ static void InitWifiDirectCapability(void)
 int32_t LnnInitNetworkInfo(void)
 {
     InitWifiDirectCapability();
-    if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "network info register bt state change fail");
-        return SOFTBUS_ERR;
+    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "network info register bt state change fail, ret=%{public}d", ret);
+        return ret;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail");
-        return SOFTBUS_ERR;
+    ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail, ret=%{public}d", ret);
+        return ret;
     }
-    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     LNN_LOGE(LNN_BUILDER, "lnn init network info sync done");
     return SOFTBUS_OK;

@@ -70,12 +70,12 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnSyncInfoInterfaceMock> SyncInfoMock;
     EXPECT_CALL(SyncInfoMock, LnnSendSyncInfoMsg).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_NODE_INFO_ERR, ret);
     ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

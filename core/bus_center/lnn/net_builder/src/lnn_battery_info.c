@@ -30,19 +30,19 @@ int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging)
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         LNN_LOGE(LNN_LANE, "create battery json object failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (!AddNumberToJsonObject(json, JSON_KEY_BATTERY_LEAVEL, level) ||
         !AddBoolToJsonObject(json, JSON_KEY_IS_CHARGING, isCharging)) {
         LNN_LOGE(LNN_LANE, "add elect info to json failed");
         cJSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     char *data = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
     if (data == NULL) {
         LNN_LOGE(LNN_LANE, "format elect packet fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -50,7 +50,7 @@ int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "not target node");
         cJSON_free(data);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     int32_t rc = LnnSendSyncInfoMsg(LNN_INFO_TYPE_BATTERY_INFO,
     nodeInfo.networkId, (uint8_t *)data, strlen(data) + 1, NULL);
