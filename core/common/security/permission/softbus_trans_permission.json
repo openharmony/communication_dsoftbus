@@ -466,7 +466,7 @@
     "APP_INFO": [
       {
         "PKG_NAME": "com.huawei.hmos.hiviewcare",
-        "TYPE": "native_app",
+        "TYPE": "system_app",
         "ACTIONS": "create,open"
       }
     ]
