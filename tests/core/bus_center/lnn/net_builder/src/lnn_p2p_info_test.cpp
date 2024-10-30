@@ -150,7 +150,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     char msg1[PARSE_P2P_INFO_MSG_LEN] = "{\"test\":\"192.168.12.12\"}";
     ret = LnnParseWifiDirectAddrMsg(msg1, wifiDirectAddr, strlen(msg1));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 }
 
 /*
@@ -338,30 +338,30 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_P2P_INFO_MSG_TEST_001, TestSize.Level1)
 
     (void)strcpy_s(msg, sizeof(msg), "{\"WIFI_CFG\":1234}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
     (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
     (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\"}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
     (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
     "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\"}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
     (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
         "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\", \"STA_FREQUENCY\":2008}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
     (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
         "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\", \"STA_FREQUENCY\":2008, \"P2P_MAC\":\"P2P_MAC\"}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
     (void)strcpy_s(msg, sizeof(msg),  "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
         "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\",\"STA_FREQUENCY\":2008, \"P2P_MAC\":\"P2P_MAC\", \"GO_MAC\":\"GO_MAC\"}");
