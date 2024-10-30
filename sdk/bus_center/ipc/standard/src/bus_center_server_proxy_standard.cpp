@@ -71,7 +71,7 @@ int32_t BusCenterServerProxy::BusCenterServerProxyStandardInit(void)
     g_remoteProxy = GetSystemAbility();
     if (g_remoteProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "get system ability fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -639,7 +639,7 @@ int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *tar
 int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     if (pkgName == nullptr || targetNetworkId == nullptr) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
@@ -887,7 +887,7 @@ int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, cha
     }
     if (strncpy_s(metaNodeId, NETWORK_ID_BUF_LEN, retBuf, strlen(retBuf)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy meta node id failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -980,44 +980,44 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
 
     bool targetNetworkIdIsNull = targetNetworkId == nullptr;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITETOKEN_FAILED;
     }
     if (!data.WriteCString(pkgName)) {
         LNN_LOGE(LNN_EVENT, "write pkg name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
     }
     if (!data.WriteCString(callerId)) {
         LNN_LOGE(LNN_EVENT, "write callerId failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
     }
     if (!targetNetworkIdIsNull && (!data.WriteBool(targetNetworkIdIsNull) || !data.WriteCString(targetNetworkId))) {
         LNN_LOGE(LNN_EVENT, "write target networkid failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
     } else if (targetNetworkIdIsNull && !data.WriteBool(targetNetworkIdIsNull)) {
         LNN_LOGE(LNN_EVENT, "write null target networkid failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITEBOOL_FAILED;
     }
     if (!data.WriteRawData(mode, sizeof(GearMode))) {
         LNN_LOGE(LNN_EVENT, "write gear node config failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITERAWDATA_FAILED;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_SHIFT_LNN_GEAR, data, reply, option) != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     return serverRet;
 }
@@ -1071,23 +1071,23 @@ int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_WRITETOKEN_FAILED;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GET_BUS_CENTER_EX_OBJ, data, reply, option);
     if (ret != ERR_NONE) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     if (!reply.ReadInt32(ret)) {
         LNN_LOGE(LNN_EVENT, "send ret failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     if (ret == SOFTBUS_OK) {
         object = reply.ReadRemoteObject();
