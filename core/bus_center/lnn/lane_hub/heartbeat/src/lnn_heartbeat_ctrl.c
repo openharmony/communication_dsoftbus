@@ -490,7 +490,7 @@ static void HbChangeMediumParamByState(SoftBusScreenState state)
             LNN_LOGD(LNN_HEART_BEAT, "ctrl reset ble scan medium param get invalid state");
             return;
     }
-    if (!LnnIsLocalSupportBurstFeature() && LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
+    if (!LnnIsLocalSupportBurstFeature() && (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK)) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset ble scan medium param fail");
         return;
     }

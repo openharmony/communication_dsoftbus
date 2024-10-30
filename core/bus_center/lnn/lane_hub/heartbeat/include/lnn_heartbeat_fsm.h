@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#define PKG_NAME_SIZE_MAX 65
+
 typedef enum {
     STATE_HB_INDEX_MIN = 0,
     STATE_HB_NONE_INDEX = STATE_HB_INDEX_MIN,
@@ -84,6 +86,7 @@ typedef struct {
     bool hasScanRsp;
     bool isFirstBegin;
     bool isFast;
+    char callerId[PKG_NAME_SIZE_MAX];
 } LnnProcessSendOnceMsgPara;
 
 int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
