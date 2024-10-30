@@ -284,8 +284,6 @@ static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirect
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "enable fail, ret=%{public}d", ret);
             SetLanePowerStatus(false);
-        } else {
-            powerInfo->isChangedPid = true;
         }
     }
 }
