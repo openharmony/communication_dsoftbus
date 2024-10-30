@@ -107,7 +107,7 @@ int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char 
     (void)msg;
     (void)msgLen;
     COMM_LOGE(COMM_SVC, "ipc default impl");
-    return SOFTBUS_IPC_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
