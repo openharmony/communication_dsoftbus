@@ -126,6 +126,7 @@ target(build_type, "softbus_client") {
     cflags_cc = [ "-std=c++14" ]
     if (is_standard_system) {
       external_deps += [
+        "access_token:libtokenid_sdk",
         "c_utils:utils",
         "hicollie:libhicollie",
         "hilog:libhilog",
