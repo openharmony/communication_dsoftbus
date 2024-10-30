@@ -55,7 +55,10 @@ config("wifi_direct_include_dirs") {
 
 ohos_unittest("LinkInfoTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:exceptions",
+  ]
   sources = [
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/data/link_info.cpp",
@@ -78,7 +81,10 @@ ohos_unittest("LinkInfoTest") {
 
 ohos_unittest("NegotiateMessageTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:exceptions",
+  ]
   sources = [
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
@@ -265,7 +271,10 @@ ohos_unittest("LinkManagerTest") {
 
 ohos_unittest("InterfaceInfoTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:exceptions",
+  ]
   sources = [
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
@@ -290,7 +299,10 @@ ohos_unittest("InterfaceInfoTest") {
 
 ohos_unittest("InterfaceManagerTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:exceptions",
+  ]
   sources = [
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
@@ -320,7 +332,10 @@ ohos_unittest("InterfaceManagerTest") {
 
 ohos_unittest("WifiConfigInfoTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:exceptions",
+  ]
   sources = [
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
