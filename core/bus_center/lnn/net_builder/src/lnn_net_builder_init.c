@@ -68,6 +68,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
+#include "trans_channel_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_process.h"
 
@@ -300,7 +301,7 @@ void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "disconnect all connection. fsmId=%{public}u, type=%{public}d", connFsm->id, addr1->type);
-    if (LnnConvertAddrToOption(addr1, &option)) {
+    if (LnnConvertAddrToOption(addr1, &option) && CheckAuthChannelIsExit(&option) != SOFTBUS_OK) {
         ConnDisconnectDeviceAllConn(&option);
     }
 }
