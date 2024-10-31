@@ -134,6 +134,11 @@ if (defined(ohos_lite)) {
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransProxyManagerTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_proxy_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -151,6 +156,11 @@ if (defined(ohos_lite)) {
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransUdpManagerTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "udp/common/client_trans_udp_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -204,6 +214,11 @@ if (defined(ohos_lite)) {
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransProxyFileManagerTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -262,6 +277,11 @@ if (defined(ohos_lite)) {
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransChannelManagerTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "manager/client_trans_channel_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -283,6 +303,11 @@ if (defined(ohos_lite)) {
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransChannelCallbackTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "manager/client_trans_channel_callback_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -326,6 +351,11 @@ if (defined(ohos_lite)) {
   }
 
   ohos_unittest("ClientTransUdpStreamInterfaceTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "udp/stream/client_trans_udp_stream_interface_test.cpp" ]
     include_dirs = trans_udp_channel_sdk_inc
