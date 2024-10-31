@@ -109,11 +109,11 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
     int32_t ret = LnnDBDataChangeSyncToCache(key, value, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, value, type);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     NodeInfo localCaheInfo;
     if (LnnGetLocalCacheNodeInfo(&localCaheInfo) == SOFTBUS_NOT_IMPLEMENT) {
-        EXPECT_EQ(ret, SOFTBUS_ERR);
+        EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     } else {
         EXPECT_EQ(ret, SOFTBUS_OK);
     }

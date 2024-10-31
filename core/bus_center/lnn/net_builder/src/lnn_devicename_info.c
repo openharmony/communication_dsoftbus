@@ -57,17 +57,17 @@ static int32_t LnnSyncDeviceName(const char *networkId)
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "get local node info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     deviceName = LnnGetDeviceName(&info->deviceInfo);
     if (deviceName == NULL) {
         LNN_LOGE(LNN_BUILDER, "get device name fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)deviceName,
         strlen(deviceName) + 1, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send sync device name fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -78,29 +78,29 @@ static int32_t LnnSyncDeviceNickName(const char *networkId)
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "get local nodeInfo fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     (void)GetCurrentAccount(&accountId);
     JsonObj *json = JSON_CreateObject();
     if (json == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (!JSON_AddStringToObject(json, KEY_NICK_NAME, info->deviceInfo.nickName) ||
         !JSON_AddInt64ToObject(json, KEY_ACCOUNT, accountId)) {
         LNN_LOGE(LNN_BUILDER, "sync device name fail");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     char *msg = JSON_PrintUnformatted(json);
     JSON_Delete(json);
     if (msg == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_NICK_NAME, networkId, (const uint8_t *)msg,
         strlen(msg) + 1, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send sync nickName fail");
         JSON_Free(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
     }
     JSON_Free(msg);
     return SOFTBUS_OK;
@@ -522,7 +522,7 @@ int32_t LnnInitDevicename(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, LnnAccountStateChangeHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "regist account change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_NICK_NAME, OnReceiveDeviceNickName);
 }
