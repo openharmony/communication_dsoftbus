@@ -209,7 +209,7 @@ static int32_t AddAuthSessionFlag(const char *peerIp, bool isServer)
     }
     char *anonyPeerIp = NULL;
     Anonymize(peerIp, &anonyPeerIp);
-    LNN_LOGI(LNN_LANE, "not exist peerIp flag, add new one, peerIp=%{public}s", anonyPeerIp);
+    LNN_LOGI(LNN_LANE, "not exist peerIp flag, add new one, peerIp=%{public}s", AnonymizeWrapper(anonyPeerIp));
     AnonymizeFree(anonyPeerIp);
     AuthSessionServer *sessionItem = (AuthSessionServer *)SoftBusCalloc(sizeof(AuthSessionServer));
     if (sessionItem == NULL) {
@@ -251,7 +251,7 @@ int32_t CheckIsAuthSessionServer(const char *peerIp, bool *isServer)
     SoftBusMutexUnlock(&g_AuthTagLock);
     char *anonyIp = NULL;
     Anonymize(peerIp, &anonyIp);
-    LNN_LOGW(LNN_LANE, "not find correct tag for %{public}s", anonyIp);
+    LNN_LOGW(LNN_LANE, "not find correct tag for %{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     return SOFTBUS_NOT_FIND;
 }
@@ -273,14 +273,14 @@ int32_t RemoveAuthSessionServer(const char *peerIp)
         if (strcmp(peerIp, item->peerIp) == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);
-            LNN_LOGW(LNN_LANE, "remove it peerIp=%{public}s", anonyIp);
+            LNN_LOGW(LNN_LANE, "remove it peerIp=%{public}s", AnonymizeWrapper(anonyIp));
             AnonymizeFree(anonyIp);
             SoftBusMutexUnlock(&g_AuthTagLock);
             return SOFTBUS_OK;
         }
     }
     SoftBusMutexUnlock(&g_AuthTagLock);
-    LNN_LOGW(LNN_LANE, "not find correct tag, peerIp=%{public}s", anonyIp);
+    LNN_LOGW(LNN_LANE, "not find correct tag, peerIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     return SOFTBUS_NOT_FIND;
 }

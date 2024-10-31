@@ -39,7 +39,6 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
-#include <unistd.h>
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -88,10 +87,10 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
     }
     int32_t ret = ReCreateSessionServerToServer(sessionServerInfoList);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!");
+        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed\n");
         return ret;
     }
-    COMM_LOGD(COMM_SDK, "softbus server register service success!");
+    COMM_LOGD(COMM_SDK, "softbus server register service success\n");
     return SOFTBUS_OK;
 }
 
@@ -132,18 +131,18 @@ static int32_t ServerProxyInit(void)
 
         if (g_serverProxy == g_oldServerProxy) {
             g_serverProxy = nullptr;
-            COMM_LOGE(COMM_SDK, "g_serverProxy not update");
+            COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
             return SOFTBUS_IPC_ERR;
         }
 
         g_clientDeath =
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
-            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr");
+            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
             return SOFTBUS_TRANS_DEATH_RECIPIENT_INVAILD;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
-            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed");
+            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed\n");
             return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
@@ -155,15 +154,15 @@ static RestartEventCallback g_restartAuthParaCallback = nullptr;
 static void RestartAuthParaNotify(void)
 {
     if (g_restartAuthParaCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!");
+        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!\n");
         return;
     }
     if (g_restartAuthParaCallback() != SOFTBUS_OK) {
         RestartAuthParaCallbackUnregister();
-        COMM_LOGE(COMM_SDK, "Restart AuthPara notify failed!");
+        COMM_LOGE(COMM_SDK, "Restart AuthPara notify failed!\n");\
         return;
     }
-    COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!");
+    COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!\n");
 }
 
 void ClientDeathProcTask(void)
@@ -197,22 +196,11 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
+    RestartAuthParaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
     RestartRegDataLevelChange();
-    RestartAuthParaNotify();
-}
-
-int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
-{
-    if (callback == nullptr) {
-        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!");
-        return SOFTBUS_ERR;
-    }
-    g_restartAuthParaCallback = callback;
-    COMM_LOGI(COMM_SDK, "Restart event callback register success!");
-    return SOFTBUS_OK;
 }
 
 void RestartAuthParaCallbackUnregister(void)
@@ -220,11 +208,21 @@ void RestartAuthParaCallbackUnregister(void)
     g_restartAuthParaCallback = nullptr;
 }
 
+int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!\n");
+        return SOFTBUS_ERR;
+    }
+    g_restartAuthParaCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
+    return SOFTBUS_OK;
+}
 
 int32_t ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ServerProxyInit failed");
+        COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
         return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
@@ -251,6 +249,6 @@ int ClientRegisterService(const char *pkgName)
         }
     }
 
-    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
     return SOFTBUS_OK;
 }

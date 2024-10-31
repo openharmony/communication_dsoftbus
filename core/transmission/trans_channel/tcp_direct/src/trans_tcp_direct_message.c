@@ -397,7 +397,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     char buf[NETWORK_ID_BUF_LEN] = { 0 };
     ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get info networkId failed, ret = %{public}d", ret);
+        TRANS_LOGE(TRANS_CTRL, "get networkId failed, ret = %{public}d", ret);
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         return ret;
     }

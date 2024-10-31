@@ -68,6 +68,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
+#include "trans_channel_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_process.h"
 
@@ -165,7 +166,7 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
     if (connFsm == NULL) {
         connFsm = FindConnectionFsmByAddr(&para->addr, false);
     }
-    if (connFsm == NULL || connFsm->isDead) {
+    if (connFsm == NULL || connFsm->isDead || CheckRemoteBasicInfoChanged(para->dupInfo)) {
         connFsm = StartNewConnectionFsm(&para->addr, para->pkgName, para->isNeedConnect);
         if (connFsm != NULL) {
             connFsm->connInfo.dupInfo = (para->dupInfo == NULL) ? NULL : DupNodeInfo(para->dupInfo);
@@ -300,7 +301,7 @@ void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "disconnect all connection. fsmId=%{public}u, type=%{public}d", connFsm->id, addr1->type);
-    if (LnnConvertAddrToOption(addr1, &option)) {
+    if (LnnConvertAddrToOption(addr1, &option) && CheckAuthChannelIsExit(&option) != SOFTBUS_OK) {
         ConnDisconnectDeviceAllConn(&option);
     }
 }

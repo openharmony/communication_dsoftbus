@@ -22,7 +22,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-bool CheckIsSystemService();
+bool CheckIsSystemService(void);
+bool CheckIsNormalApp(const char *sessionName);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -112,12 +112,16 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     GearMode mode;
     int32_t ret = LnnShiftLNNGear(nullptr, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
     ret = LnnShiftLNNGear(PKGNAME, nullptr, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

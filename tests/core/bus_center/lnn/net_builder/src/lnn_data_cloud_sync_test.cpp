@@ -57,12 +57,12 @@ void LNNDataCloudSyncTest::SetUp()
 void LNNDataCloudSyncTest::TearDown() {}
 
 /*
- * @tc.name: LnnLedgerAllDataSyncToDB_Test_001
- * @tc.desc: LnnLedgerAllDataSyncToDB
+ * @tc.name: LnnAsyncCallLedgerAllDataSyncToDB_Test_001
+ * @tc.desc: LnnAsyncCallLedgerAllDataSyncToDB
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnAsyncCallLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
 {
     NodeInfo *info = nullptr;
     int32_t ret = LnnAsyncCallLedgerAllDataSyncToDB(info);
