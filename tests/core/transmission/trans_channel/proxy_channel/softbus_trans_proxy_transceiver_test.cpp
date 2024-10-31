@@ -384,11 +384,13 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByReqId002, TestSize.Level1)
     int32_t ret = TransDelConnByReqId(reqId);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     ProxyConnInfo *removeNode = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, removeNode);
     removeNode->requestId = reqId;
     removeNode->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
 
     g_proxyConnectionList = CreateSoftBusList();
     ListAdd(&(g_proxyConnectionList->list), &(removeNode->node));
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     g_proxyConnectionList->cnt++;
     ret = TransDelConnByReqId(reqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -407,9 +409,11 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByConnId001, TestSize.Level1)
     TransDelConnByConnId(0);
     EXPECT_EQ(nullptr, g_proxyConnectionList);
     g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     TransDelConnByConnId(0);
     uint32_t connId = 1;
     ProxyConnInfo *removeNode = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, removeNode);
     removeNode->connId = connId;
     ListAdd(&(g_proxyConnectionList->list), &(removeNode->node));
     g_proxyConnectionList->cnt++;
@@ -427,8 +431,10 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByConnId001, TestSize.Level1)
 HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level1)
 {
     g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     uint32_t connId1 = 1;
     ProxyConnInfo *removeNode1 = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, removeNode1);
     removeNode1->connId = connId1;
     removeNode1->isServerSide = true;
     removeNode1->ref = 1;
@@ -436,6 +442,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level
     g_proxyConnectionList->cnt++;
     uint32_t connId2 = 2;
     ProxyConnInfo *removeNode2 = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, removeNode2);
     removeNode1->connId = connId1;
     removeNode1->isServerSide = false;
     removeNode1->ref = 2;
@@ -460,6 +467,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level
 HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnRefByConnId001, TestSize.Level1)
 {
     g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     uint32_t connId = 1;
     ProxyConnInfo removeNode;
     removeNode.connId = connId;
@@ -500,7 +508,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnItem001, TestSize.Level1)
     int32_t ret =  TransAddConnItem(&chan);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     ProxyConnInfo *connChan1 = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, connChan1);
     connChan1->isServerSide = false;
     ConnectOption connectOption;
     (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
@@ -542,6 +552,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransConnInfoToConnOpt001, TestSize.Level1
 HWTEST_F(SoftbusProxyTransceiverTest, TransCreateConnByConnId001, TestSize.Level1)
 {
     g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     uint32_t connId = 1;
     ProxyConnInfo proxyConnInfo;
     proxyConnInfo.connId = connId;
@@ -562,7 +573,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransCreateConnByConnId001, TestSize.Level
 HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
 {
     g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
     ProxyConnInfo *connChan1 = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, connChan1);
     connChan1->isServerSide = false;
     ConnectOption connectOption1;
     (void)memset_s(&connectOption1, sizeof(ConnectOption), 0, sizeof(ConnectOption));
@@ -571,6 +584,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
     ListAdd(&(g_proxyConnectionList->list), &(connChan1->node));
 
     ProxyConnInfo *connChan2 = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
+    EXPECT_NE(nullptr, connChan2);
     connChan2->isServerSide = false;
     ConnectOption connectOption2;
     (void)memset_s(&connectOption2, sizeof(ConnectOption), 0, sizeof(ConnectOption));
@@ -648,29 +662,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransSetConnStateByReqId001, TestSize.Leve
     proxyConnInfo.state = state;
     TransSetConnStateByReqId(requestId, connId, state);
     g_proxyConnectionList = CreateSoftBusList();
-    TransSetConnStateByReqId(requestId, connId, state);
     EXPECT_NE(nullptr, g_proxyConnectionList);
-    TransSetConnStateByReqId(requestId, connId, state);
-    DestroySoftBusList(g_proxyConnectionList);
-    g_proxyConnectionList = nullptr;
-}
-
-/**
- * @tc.name: TransSetConnStateByReqId002
- * @tc.desc: test TransSetConnStateByReqId.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyTransceiverTest, TransSetConnStateByReqId002, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-    uint32_t connId = 1;
-    uint32_t state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
-    ProxyConnInfo proxyConnInfo;
-    proxyConnInfo.requestId = requestId;
-    proxyConnInfo.state = state;
-    TransSetConnStateByReqId(requestId, connId, state);
-    g_proxyConnectionList = CreateSoftBusList();
     TransSetConnStateByReqId(requestId, connId, state);
     EXPECT_NE(nullptr, g_proxyConnectionList);
     TransSetConnStateByReqId(requestId, connId, state);
@@ -751,7 +743,6 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
     TransProxyLoopMsgHandler(msg);
     msg->what = LOOP_AUTHSTATECHECK_MSG;
     TransProxyLoopMsgHandler(msg);
-    SoftBusFree(msg);
 }
 
 } // namespace OHOS
