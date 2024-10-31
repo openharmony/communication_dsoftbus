@@ -239,7 +239,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     DfxRecordLnnServerjoinStart(&para->addr, para->pkgName, needReportFailure);
     isShort = para->isNeedConnect ? false : true;
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&para->addr, isShort);
-    if (connFsm == NULL || connFsm->isDead) {
+    if (connFsm == NULL || connFsm->isDead || CheckRemoteBasicInfoChanged(para->dupInfo)) {
         if (TryPendingJoinRequest(para, needReportFailure)) {
             LNN_LOGI(LNN_BUILDER, "join request is pending, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
             FreeJoinLnnMsgPara(para);

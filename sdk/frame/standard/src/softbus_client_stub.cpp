@@ -48,7 +48,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_NODE_STATUS_CHANGED] = &SoftBusClientStub::OnNodeStatusChangedInner;
     memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_DEVICE_NOT_TRUST] = &SoftBusClientStub::OnNodeDeviceNotTrustedInner;
-	memberFuncMap_[CLIENT_ON_HICHAIN_PROOF_EXCEPTION] = &SoftBusClientStub::OnHichainProofExceptionInner;
+    memberFuncMap_[CLIENT_ON_HICHAIN_PROOF_EXCEPTION] = &SoftBusClientStub::OnHichainProofExceptionInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;

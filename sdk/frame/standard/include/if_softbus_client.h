@@ -65,7 +65,7 @@ public:
     
     virtual int32_t OnHichainProofException(
         const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
-        
+
     virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode);
 
     virtual void OnPublishLNNResult(int32_t publishId, int32_t reason);
