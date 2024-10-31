@@ -86,7 +86,7 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
     return DUMPER_LANE_LINK_TYPE_BUTT;
 }
 
-static int32_t TransLaneChannelForEachShowInfo(int fd)
+static int32_t TransLaneChannelForEachShowInfo(int32_t fd)
 {
     if (g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
