@@ -59,12 +59,12 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
     return GetDecisionDbDepsInterface()->LnnDeleteKeyByHuks(keyAlias);
 }
 
-int32_t LnnGenerateCeKeyByHuks(const struct HksBlob *keyAlias)
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias)
 {
     return GetDecisionDbDepsInterface()->LnnGenerateCeKeyByHuks(keyAlias);
 }
 
-int32_t LnnDeleteCeKeyByHuks(const struct HksBlob *keyAlias)
+int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
 {
     return GetDecisionDbDepsInterface()->LnnDeleteCeKeyByHuks(keyAlias);
 }

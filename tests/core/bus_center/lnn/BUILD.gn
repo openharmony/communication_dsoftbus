@@ -413,7 +413,6 @@ ohos_unittest("LNNNetBuilderMockTest") {
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
