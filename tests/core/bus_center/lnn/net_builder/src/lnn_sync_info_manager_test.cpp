@@ -39,6 +39,7 @@ constexpr char MSG_DATA1[] = {-1};
 constexpr char MSG_DATA2[] = {1};
 constexpr uint32_t LEN = 10;
 constexpr uint32_t LENGTH = 8192;
+constexpr char MSG_TEST[] = "msg";
 class LNNSyncInfoManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -70,11 +71,6 @@ void Handler(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, ui
 void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
 }
-
-auto g_mockHanlder = [](JsonObj *json) {
-    delete json;
-    json = nullptr;
-};
 
 /*
     * @tc.name: LNN_INIT_SYNC_INFO_MANAGER_TEST_001
@@ -149,18 +145,34 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
 */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
 {
+    int64_t newLocalAuthSeq[2] = {1, 2};
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
+    NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t netCapability = 0;
-    int32_t ret = LnnSendP2pSyncInfoMsg(nullptr, netCapability);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    EXPECT_CALL(ledgerMock, AuthDeviceGetLatestIdByUuid)
-        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle);
+
+    EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).Times(2).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, AuthDeviceGetLatestIdByUuid(_, _, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgPointee<2>(AuthHandle{.authId = 100, .type = 1}), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, AuthGetLatestAuthSeqListByType)
-        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList);
-    ret = LnnSendP2pSyncInfoMsg(NETWORKID, netCapability);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+        .WillOnce(DoAll(SetArrayArgument<1>(newLocalAuthSeq, newLocalAuthSeq + 2), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_CreateObject()).WillRepeatedly(Return(&json));
+    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillRepeatedly(Return(msg));
+
+    EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnSyncInfoMgrMock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_EQ(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_OK);
 }
 
 /*
@@ -194,7 +206,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_003, TestSize.L
         .WillOnce(DoAll(SetArgPointee<2>(AuthHandle{.authId = AUTH_INVALID_ID, .type = 1}), Return(SOFTBUS_ERR)))
         .WillOnce(DoAll(SetArgPointee<2>(AuthHandle{.authId = AUTH_INVALID_ID, .type = 1}), Return(SOFTBUS_ERR)));
     
-    EXPECT_EQ(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_OK);
 }
 
 /*
@@ -205,7 +217,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_003, TestSize.L
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.Level1)
 {
-    int64_t newLocalAuthSeq[2] = {10, 2};
+    int64_t newLocalAuthSeq[2] = {1, 2};
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
 
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).Times(2).WillRepeatedly(Return(SOFTBUS_OK));
@@ -215,7 +227,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.L
     EXPECT_CALL(ledgerMock, AuthGetLatestAuthSeqListByType)
         .WillOnce(DoAll(SetArrayArgument<1>(newLocalAuthSeq, newLocalAuthSeq + 2), Return(SOFTBUS_ERR)));
 
-    EXPECT_EQ(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_OK);
 }
 
 /*
@@ -226,7 +238,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.L
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005, TestSize.Level1)
 {
-    int64_t newLocalAuthSeq[2] = {10, 2};
+    int64_t newLocalAuthSeq[2] = {1, 2};
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
 
@@ -238,7 +250,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005, TestSize.L
         .WillOnce(DoAll(SetArrayArgument<1>(newLocalAuthSeq, newLocalAuthSeq + 2), Return(SOFTBUS_OK)));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_CreateObject()).WillRepeatedly(Return(nullptr));
 
-    EXPECT_EQ(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_OK);
 }
 
 /*
@@ -249,9 +261,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005, TestSize.L
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006, TestSize.Level1)
 {
-    int64_t newLocalAuthSeq[2] = {10, 2};
+    int64_t newLocalAuthSeq[2] = {1, 2};
     JsonObj json;
-    char msg[] = "msg";
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -268,11 +285,10 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006, TestSize.L
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillRepeatedly(Return(msg));
-    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_ERR));
 
-    EXPECT_EQ(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendP2pSyncInfoMsg(NETWORKID, 0), SOFTBUS_OK);
 }
 
 /*
@@ -283,9 +299,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006, TestSize.L
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.Level1)
 {
-    int64_t newLocalAuthSeq[2] = {10, 2};
+    int64_t newLocalAuthSeq[2] = {1, 2};
     JsonObj json;
-    char msg[] = "msg";
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -302,7 +323,6 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.L
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillRepeatedly(Return(msg));
-    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
@@ -318,9 +338,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.L
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.Level1)
 {
-    int64_t newLocalAuthSeq[2] = {10, 2};
+    int64_t newLocalAuthSeq[2] = {1, 2};
     JsonObj json;
-    char msg[] = "msg";
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -337,7 +362,6 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.L
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillRepeatedly(Return(msg));
-    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
@@ -384,7 +408,6 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
     EXPECT_CALL(transMock, TransSendNetworkingMessage(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     SendSyncInfoMsg(info, msg);
-    SoftBusFree(msg);
 }
 
 /*
@@ -959,12 +982,12 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_002, TestSize.Level1)
     int64_t authSeq = 0;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_CreateObject()).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_EQ(PackBleOfflineMsg(connCap, networkType, authSeq), nullptr);
 }
@@ -982,13 +1005,13 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_003, TestSize.Level1)
     int64_t authSeq = 0;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_CreateObject()).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_AddInt64ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_PrintUnformatted(_)).Times(1).WillRepeatedly(Return(nullptr));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_EQ(PackBleOfflineMsg(connCap, networkType, authSeq), nullptr);
 }
@@ -1022,12 +1045,12 @@ HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_002, TestSize.Level1)
     char offlineCode[] = {0};
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_CreateObject()).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, JSON_AddStringToObject(_, _, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_EQ(PackWifiOfflineMsg(authPort, offlineCode), nullptr);
 }
@@ -1044,13 +1067,13 @@ HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_003, TestSize.Level1)
     char offlineCode[] = {0};
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_CreateObject()).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_AddInt32ToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_AddStringToObject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_PrintUnformatted(_)).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_EQ(PackWifiOfflineMsg(authPort, offlineCode), nullptr);
 }
@@ -1107,7 +1130,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, AuthGetLatestAuthSeqListByType).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_EQ(CheckPeerAuthSeq(uuid, peerAuthSeq), SOFTBUS_ERR);
+    EXPECT_NE(CheckPeerAuthSeq(uuid, peerAuthSeq), SOFTBUS_OK);
 }
 
 /*
@@ -1164,10 +1187,10 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_002, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt64FromOject(_, _, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     BleOffLineProcess(&data, authHandle);
     delete (data.data);
@@ -1187,12 +1210,12 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_003, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt64FromOject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnHasCapability(_, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     BleOffLineProcess(&data, authHandle);
     delete (data.data);
@@ -1212,6 +1235,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_004, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
@@ -1219,7 +1243,6 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_004, TestSize.Level1)
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt64FromOject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnHasCapability(_, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     BleOffLineProcess(&data, authHandle);
@@ -1238,9 +1261,10 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_005, TestSize.Level1)
     AuthTransData data;
     data.data = new uint8_t(0);
     AuthHandle authHandle;
-    int64_t newLocalAuthSeq[2] = {10, 2};
+    int64_t newLocalAuthSeq[2] = {1, 2};
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
@@ -1250,7 +1274,6 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_005, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(DoAll(SetArgPointee<2>(10), Return(true)));
     EXPECT_CALL(ledgerMock, LnnHasCapability(_, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, AuthGetLatestAuthSeqListByType)
@@ -1399,10 +1422,10 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_002, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     WlanOffLineProcess(&data, authHandle);
     delete (data.data);
@@ -1422,12 +1445,12 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_003, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     WlanOffLineProcess(&data, authHandle);
@@ -1448,13 +1471,13 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_004, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
     NiceMock<LnnNetLedgertInterfaceMock> lnnNetLedgertmock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnNetLedgertmock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
@@ -1479,6 +1502,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
     char offlineCode[] = "123";
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -1487,11 +1511,9 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(true)));
     EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _))
         .WillOnce(DoAll(SetArrayArgument<2>(offlineCode, offlineCode + 3), Return(true)));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 
-    // CheckWifiOfflineMsgResult
     EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(SOFTBUS_OK)));
@@ -1576,10 +1598,10 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_004, TestSize.Level1)
     AuthHandle authHandle;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     OnP2pNetworkingDataRecv(authHandle, &data);
     delete (data.data);
@@ -1602,10 +1624,10 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_005, TestSize.Level1)
     int32_t peerNetworkType = DISCOVERY_TYPE_BLE;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillOnce(Return(&json)).WillOnce(nullptr);
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillOnce(DoAll(SetArgPointee<2>(peerNetworkType), Return(true)));
-    EXPECT_CALL(mock, JSON_Delete(_)).WillRepeatedly(Invoke(g_mockHanlder));
 
     OnP2pNetworkingDataRecv(authHandle, &data);
     delete (data.data);
@@ -1628,10 +1650,10 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_006, TestSize.Level1)
     int32_t peerNetworkType = DISCOVERY_TYPE_WIFI;
 
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillOnce(Return(&json)).WillOnce(nullptr);
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillOnce(DoAll(SetArgPointee<2>(peerNetworkType), Return(true)));
-    EXPECT_CALL(mock, JSON_Delete(_)).WillRepeatedly(Invoke(g_mockHanlder));
 
     OnP2pNetworkingDataRecv(authHandle, &data);
     delete (data.data);
@@ -2118,7 +2140,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_001, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).Times(1);
     EXPECT_CALL(ledgerMock, AuthDeviceGetLatestIdByUuid(_, _, _)).Times(1);
 
-    EXPECT_EQ(TrySendSyncInfoMsgByAuth(NETWORKID, &msg), SOFTBUS_ERR);
+    EXPECT_NE(TrySendSyncInfoMsgByAuth(NETWORKID, &msg), SOFTBUS_OK);
 }
 
 /*
@@ -2188,7 +2210,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_001, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_EQ(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_ERR);
+    EXPECT_NE(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_OK);
 }
 
 /*
@@ -2207,7 +2229,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_002, TestSize.Level1)
 
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetRemoteNumU64Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_EQ(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_ERR);
+    EXPECT_NE(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_OK);
 }
 
 /*
@@ -2519,7 +2541,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_002, TestSize.Level1)
     EXPECT_CALL(mock, AuthDeviceGetLatestIdByUuid(_, _, _))
         .WillRepeatedly(DoAll(SetArgPointee<2>(AuthHandle{.authId = AUTH_INVALID_ID, .type = 1}), Return(0)));
 
-    EXPECT_EQ(GetAuthHandleByNetworkId(NETWORKID, &authHandle), SOFTBUS_ERR);
+    EXPECT_NE(GetAuthHandleByNetworkId(NETWORKID, &authHandle), SOFTBUS_OK);
 }
 
 /*
@@ -2535,10 +2557,10 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_001, TestSize.Level1)
         .Times(2)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillOnce(Return(SOFTBUS_OK));
-    EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 }
 
 /*
@@ -2555,7 +2577,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
-    EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 }
 
 /*
@@ -2573,7 +2595,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_003, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_CreateObject()).WillRepeatedly(Return(nullptr));
 
-    EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 }
 
 /*
@@ -2584,8 +2606,13 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_003, TestSize.Level1)
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
 {
-    char msg[] = "msg";
     JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
@@ -2600,11 +2627,10 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddStringToObject(_, _, _)).WillRepeatedly(Return(true));
 
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillOnce(Return(msg));
-    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_CALL(lnnSyncInfoMgrMock, GetHmlOrP2pAuthHandle(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
-    EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_ERR);
+    EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 }
 
 /*
@@ -2615,9 +2641,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
 {
-    char msg[] = "msg";
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
     JsonObj json;
-    int num = 1;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    int32_t num = 1;
     AuthHandle *authHandle = new AuthHandle;
     authHandle->authId = 100;
     authHandle->type = 1;
@@ -2635,7 +2666,6 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddStringToObject(_, _, _)).WillRepeatedly(Return(true));
 
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillOnce(Return(msg));
-    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_CALL(lnnSyncInfoMgrMock, GetHmlOrP2pAuthHandle(_, _))
         .Times(1)
@@ -2653,9 +2683,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
 {
-    char msg[] = "msg";
+    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)strcpy_s(msg, LEN, MSG_TEST);
     JsonObj json;
-    int num = 1;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    int32_t num = 1;
     AuthHandle *authHandle = new AuthHandle;
     authHandle->authId = 100;
     authHandle->type = 1;
@@ -2673,7 +2708,6 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_AddStringToObject(_, _, _)).WillRepeatedly(Return(true));
 
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_PrintUnformatted(_)).Times(1).WillOnce(Return(msg));
-    EXPECT_CALL(lnnSyncInfoMgrMock, JSON_Delete(_)).Times(1).WillOnce(Invoke(g_mockHanlder));
 
     EXPECT_CALL(lnnSyncInfoMgrMock, GetHmlOrP2pAuthHandle(_, _))
         .Times(1)

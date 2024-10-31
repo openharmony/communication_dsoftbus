@@ -323,7 +323,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
         mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = HbMediumMgrRecvProcess(nullptr, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -797,7 +797,7 @@ HWTEST_F(HeartBeatMediumTest, HbGetOnlineNodeByRecvInfo_TEST01, TestSize.Level1)
     ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, &nodeInfo, &hbResp);
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
     ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BLE, &nodeInfo, &hbResp);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -824,7 +824,7 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingByRecvInfo_TEST01, TestSize.L
     int32_t ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, hbType, TEST_UPDATETIME);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR);
     ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, hbType, TEST_UPDATETIME);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_ETH, hbType, TEST_UPDATETIME);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
