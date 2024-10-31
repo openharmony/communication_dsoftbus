@@ -77,6 +77,7 @@
 #define SHORT_UDID_HASH_STR_LEN          16
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define WAIT_SEND_NOT_TRUST_MSG          200
+#define PROOF_INFO_MAX_BUFFER_LEN        (2 * 1024)
 
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
@@ -238,7 +239,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     DfxRecordLnnServerjoinStart(&para->addr, para->pkgName, needReportFailure);
     isShort = para->isNeedConnect ? false : true;
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&para->addr, isShort);
-    if (connFsm == NULL || connFsm->isDead) {
+    if (connFsm == NULL || connFsm->isDead || CheckRemoteBasicInfoChanged(para->dupInfo)) {
         if (TryPendingJoinRequest(para, needReportFailure)) {
             LNN_LOGI(LNN_BUILDER, "join request is pending, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
             FreeJoinLnnMsgPara(para);

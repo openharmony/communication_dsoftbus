@@ -214,8 +214,9 @@ bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *
         LNN_LOGE(LNN_HEART_BEAT, "HB visit typeSet get invalid param");
         return false;
     }
+    LnnHeartbeatType tmp = *typeSet;
     for (i = HEARTBEAT_TYPE_MIN; i < HEARTBEAT_TYPE_MAX; i <<= 1) {
-        if ((i & *typeSet) == 0) {
+        if ((i & tmp) == 0) {
             continue;
         }
         isFinish = callback(typeSet, i, data);
@@ -409,7 +410,7 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localP2PMac, &anonyP2pMac);
     Anonymize(localInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_HEART_BEAT,
-        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=..%{public}s, brMac=::%{public}s, "
+        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=..*%{public}s, brMac=::%{public}s, "
         "p2pMac=::%{public}s, onlineNodeNum=%{public}d",
         devTypeStr, localInfo.deviceTypeId, anonyDeviceName, anonyIp, anonyBtMac, anonyP2pMac, onlineNodeNum);
     AnonymizeFree(anonyDeviceName);
