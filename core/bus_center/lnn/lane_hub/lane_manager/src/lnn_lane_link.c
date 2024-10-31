@@ -322,12 +322,12 @@ void DetectEnableWifiDirectApply(void)
         if (item->link.type == LANE_HML && (item->link.linkInfo.p2p.bw == LANE_BW_160M ||
             item->link.linkInfo.p2p.bw == LANE_BW_80P80M)) {
             if (item->clientRef > 0) {
-                powerInfo->activeHml++;
+                activeHml++;
             }
             SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
         }
         if (item->link.type == LANE_HML_RAW) {
-            powerInfo->rawHml++;
+            rawHml++;
         }
     }
     if ((g_enabledLowPower || rawHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
