@@ -307,7 +307,6 @@ void DetectDisableWifiDirectApply(void)
 void DetectEnableWifiDirectApply(void)
 {
     int32_t activeHml = 0;
-    int32_t passiveHml = 0;
     int32_t rawHml = 0;
     bool isDisableLowPower = false;
     WifiDirectLinkInfo wifiDirectInfo;
@@ -320,28 +319,23 @@ void DetectEnableWifiDirectApply(void)
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         LNN_LOGI(LNN_LANE, "link.type=%{public}d, link.bw=%{public}d", item->link.type, item->link.linkInfo.p2p.bw);
-        if (item->link.type == LANE_HML) {
+        if (item->link.type == LANE_HML && (item->link.linkInfo.p2p.bw == LANE_BW_160M ||
+            item->link.linkInfo.p2p.bw == LANE_BW_80P80M)) {
             if (item->clientRef > 0) {
                 powerInfo->activeHml++;
             }
-            if (item->isServerSide) {
-                powerInfo->passiveHml++;
-                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
-            }
-            if (item->link.linkInfo.p2p.bw == LANE_BW_160M || item->link.linkInfo.p2p.bw == LANE_BW_80P80M) {
-                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
-            }
+            SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
         }
         if (item->link.type == LANE_HML_RAW) {
             powerInfo->rawHml++;
         }
     }
-    if ((g_enabledLowPower || rawHml > 0 || passiveHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
+    if ((g_enabledLowPower || rawHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
         isDisableLowPower = true;
     }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d, isDisableLowPower=%{public}d",
-        activeHml, passiveHml, rawHml, isDisableLowPower);
+    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, rawHml=%{public}d, isDisableLowPower=%{public}d",
+        activeHml, rawHml, isDisableLowPower);
     HandleDetectWifiDirectApply(isDisableLowPower, &wifiDirectInfo);
 }
 
