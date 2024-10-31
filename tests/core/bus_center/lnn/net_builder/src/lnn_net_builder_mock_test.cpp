@@ -119,7 +119,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
-    EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_NOT_FIND);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_LOOPER_ERR);
 }
 
@@ -403,7 +403,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ProcessMasterElect(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnInitBusCenterEvent() == SOFTBUS_OK);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_OK);
-    EXPECT_TRUE(ProcessMasterElect(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessMasterElect(para) == SOFTBUS_NETWORK_NOT_FOUND);
     LnnDeinitNetBuilder();
     LnnDeinitBusCenterEvent();
 }
@@ -420,7 +420,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_001, TestSize.Le
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessNodeStateChanged(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(ProcessNodeStateChanged(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessNodeStateChanged(para) == SOFTBUS_NETWORK_NOT_FOUND);
 }
 
 /*
@@ -616,10 +616,10 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_001, TestSize.Lev
 {
     void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(NetBuilderMock, LnnNotifyLeaveResult(_, _)).WillRepeatedly(Return());
     EXPECT_TRUE(ProcessLeaveLNNRequest(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(ProcessLeaveLNNRequest(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessLeaveLNNRequest(para) == SOFTBUS_NETWORK_NOT_FOUND);
 }
 
 /*
@@ -705,7 +705,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_CLEAN_CONNECTION_FSM_TEST_001, TestSize.
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessCleanConnectionFsm(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(ProcessCleanConnectionFsm(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessCleanConnectionFsm(para) == SOFTBUS_NETWORK_FSM_CLEAN_FAILED);
 }
 
 /*
@@ -1105,7 +1105,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Le
     g_netBuilder.connCount = CURRENT_COUNT;
     g_netBuilder.maxConnCount = CONN_COUNT;
     void *para = reinterpret_cast<void *>(msgPara);
-    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_NETWORK_FSM_START_FAIL);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1135,7 +1135,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Le
     g_netBuilder.connCount = CURRENT_COUNT;
     g_netBuilder.maxConnCount = CONN_COUNT;
     void *para = reinterpret_cast<void *>(msgPara);
-    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_NETWORK_FSM_START_FAIL);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1163,7 +1163,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Le
 
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     void *para = reinterpret_cast<void *>(msgPara);
-    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceVerifyPass(para) != SOFTBUS_OK);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1211,7 +1211,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_002, TestSize.Lev
     void *para = reinterpret_cast<void *>(msgPara);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnNotifyLeaveResult(_, _)).WillRepeatedly(Return());
-    EXPECT_TRUE(ProcessLeaveLNNRequest(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessLeaveLNNRequest(para) == SOFTBUS_NETWORK_NOT_FOUND);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1236,7 +1236,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_003, TestSize.Lev
     void *para = reinterpret_cast<void *>(msgPara);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnNotifyLeaveResult(_, _)).WillRepeatedly(Return());
-    EXPECT_TRUE(ProcessLeaveLNNRequest(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessLeaveLNNRequest(para) == SOFTBUS_NETWORK_NOT_FOUND);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1440,7 +1440,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
     para->dupInfo = NULL;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(nullptr, true, false) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_ERR);
+    EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
 
     DfxRecordLnnAuthStart(nullptr, para, 0);
     ListDelete(&connFsm->node);
@@ -1824,14 +1824,14 @@ HWTEST_F(LNNNetBuilderMockTest, CREATE_PASSIVE_CONNECTION_FSM_TEST_001, TestSize
     (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE2_BR_MAC);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
     EXPECT_CALL(NetBuilderMock, LnnCreateConnectionFsm).WillRepeatedly(Return(connFsm));
-    EXPECT_CALL(NetBuilderMock, LnnStartConnectionFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnStartConnectionFsm).WillOnce(Return(SOFTBUS_NETWORK_FSM_START_FAIL));
     EXPECT_CALL(NetBuilderMock, LnnDestroyConnectionFsm).WillRepeatedly(Return());
     fsm = StartNewConnectionFsm(&addr, pkgName, false);
     EXPECT_TRUE(fsm == nullptr);
     DeviceVerifyPassMsgPara msgPara;
-    EXPECT_CALL(NetBuilderMock, LnnStartConnectionFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnStartConnectionFsm).WillOnce(Return(SOFTBUS_NETWORK_FSM_START_FAIL));
     int32_t ret = CreatePassiveConnectionFsm(&msgPara);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_FSM_START_FAIL);
     ClearNetBuilderFsmList();
 }
 

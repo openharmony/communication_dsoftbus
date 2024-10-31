@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -218,7 +218,7 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
             --LnnGetNetBuilder()->connCount;
             LnnDestroyConnectionFsm(connFsm);
         }
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_NETWORK_JOIN_REQUEST_ERR;
     }
     if (rc == SOFTBUS_OK) {
         connFsm->connInfo.infoReport = para->infoReport;
@@ -500,33 +500,40 @@ static void NetBuilderConfigInit(void)
 
 static int32_t InitNodeInfoSync(void)
 {
-    if (LnnInitP2p() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init lnn p2p fail");
-        return SOFTBUS_ERR;
+    int32_t rc = LnnInitP2p();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lnn p2p fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnInitNetworkInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnInitNetworkInfo fail");
-        return SOFTBUS_ERR;
+    rc = LnnInitNetworkInfo();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnInitNetworkInfo fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnInitDevicename() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnInitDeviceName fail");
-        return SOFTBUS_ERR;
+    rc = LnnInitDevicename();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnInitDeviceName fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnInitOffline() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnInitOffline fail");
-        return SOFTBUS_ERR;
+    rc = LnnInitOffline();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnInitOffline fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnInitBatteryInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnInitBatteryInfo fail");
-        return SOFTBUS_ERR;
+    rc = LnnInitBatteryInfo();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnInitBatteryInfo fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnInitCipherKeyManager() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnInitCipherKeyManager fail");
-        return SOFTBUS_ERR;
+    rc = LnnInitCipherKeyManager();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnInitCipherKeyManager fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnInitWifiDirect() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init lnn wifidirect addr fail");
-        return SOFTBUS_ERR;
+    rc = LnnInitWifiDirect();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lnn wifidirect addr fail, rc=%{public}d", rc);
+        return rc;
     }
     return SOFTBUS_OK;
 }
@@ -753,6 +760,21 @@ static int32_t InitNetBuilderLooper(void)
     LNN_LOGI(LNN_INIT, "init net builder looper success");
     return SOFTBUS_OK;
 }
+
+static int32_t InitSyncInfoReg(void)
+{
+    int32_t rc = LnnRegSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "register sync master elect msg fail, rc=%{public}d", rc);
+        return rc;
+    }
+    rc = LnnRegSyncInfoHandler(LNN_INFO_TYPE_NODE_ADDR, OnReceiveNodeAddrChangedMsg);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "register node addr changed msg fail, rc=%{public}d", rc);
+        return rc;
+    }
+    return SOFTBUS_OK;
+}
  
 int32_t LnnInitNetBuilder(void)
 {
@@ -760,9 +782,10 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGI(LNN_INIT, "init net builder repeatly");
         return SOFTBUS_OK;
     }
-    if (LnnInitSyncInfoManager() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init sync info manager fail");
-        return SOFTBUS_ERR;
+    int32_t rc = LnnInitSyncInfoManager();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init sync info manager fail, rc=%{public}d", rc);
+        return rc;
     }
     LnnInitTopoManager();
     UpdateLocalNetCapability();
@@ -772,29 +795,29 @@ int32_t LnnInitNetBuilder(void)
     if (LnnLinkFinderInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "link finder init fail");
     }
-    if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "register auth verify listener fail");
-        return SOFTBUS_ERR;
+    rc = RegAuthVerifyListener(&g_verifyListener);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "register auth verify listener fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "register sync master elect msg fail");
-        return SOFTBUS_ERR;
+    rc = InitSyncInfoReg();
+    if (rc != SOFTBUS_OK) {
+        return rc;
     }
-    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_NODE_ADDR, OnReceiveNodeAddrChangedMsg) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "register node addr changed msg fail");
-        return SOFTBUS_ERR;
+    rc = ConifgLocalLedger();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "config local ledger fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (ConifgLocalLedger() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "config local ledger fail");
-        return SOFTBUS_ERR;
+    rc = LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist account change evt handler fail, rc=%{public}d", rc);
+        return rc;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist account change evt handler fail!");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
-        return SOFTBUS_ERR;
+    rc = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist user switch evt handler fail, rc=%{public}d", rc);
+        return rc;
     }
     if (!LnnSubcribeKvStoreService()) {
         LNN_LOGE(LNN_INIT, "regist kv store service fail!");
@@ -814,9 +837,10 @@ int32_t LnnInitNetBuilderDelay(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);
     LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight());
-    if (LnnInitFastOffline() != SOFTBUS_OK) {
+    ret = LnnInitFastOffline();
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "fast offline init fail!");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }

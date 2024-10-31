@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,19 +203,20 @@ static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara
     connFsm = StartNewConnectionFsm(&msgPara->addr, DEFAULT_PKG_NAME, true);
     if (connFsm == NULL) {
         LNN_LOGE(LNN_BUILDER, "start new connection fsm fail, authId=%{public}" PRId64, msgPara->authHandle.authId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_FSM_START_FAIL;
     }
     connFsm->connInfo.authHandle = msgPara->authHandle;
     connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
     connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u start a passive connection fsm, type=%{public}d, authId=%{public}" PRId64,
         connFsm->id, msgPara->authHandle.type, msgPara->authHandle.authId);
-    if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
+    int32_t ret = LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK);
+    if (ret != SOFTBUS_OK) {
         connFsm->connInfo.nodeInfo = NULL;
         StopConnectionFsm(connFsm);
         LNN_LOGE(LNN_BUILDER, "fsmId=%{public}u post auth result to connection fsm fail, authId=%{public}" PRId64,
             connFsm->id, msgPara->authHandle.authId);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -260,7 +261,7 @@ static int32_t ProcessCleanConnectionFsm(const void *para)
 {
     uint16_t connFsmId;
     LnnConnectionFsm *connFsm = NULL;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_FSM_CLEAN_FAILED;
 
     if (para == NULL) {
         LNN_LOGW(LNN_BUILDER, "connFsmId is null");
@@ -309,19 +310,18 @@ static int32_t ProcessVerifyResult(const void *para)
             if (msgPara->nodeInfo == NULL) {
                 LNN_LOGE(LNN_BUILDER, "msgPara node Info is null, stop fsm [id=%{public}u]", connFsm->id);
                 StopConnectionFsm(connFsm);
-                rc = SOFTBUS_ERR;
+                rc = SOFTBUS_INVALID_PARAM;
                 break;
             }
             connFsm->connInfo.authHandle = msgPara->authHandle;
             connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
         }
-        if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
+        rc = LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "send auth result to connection failed. [id=%{public}u]", connFsm->id);
             connFsm->connInfo.nodeInfo = NULL;
-            rc = SOFTBUS_ERR;
             break;
         }
-        rc = SOFTBUS_OK;
     } while (false);
 
     if (rc != SOFTBUS_OK && msgPara->nodeInfo != NULL) {
@@ -363,7 +363,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         }
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm exist, ignore VerifyPass authId=%{public}" PRId64,
             connFsm->id, msgPara->authHandle.authId);
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_ALREADY_EXISTED;
     } while (false);
 
     if (rc != SOFTBUS_OK && msgPara->nodeInfo != NULL) {
@@ -393,12 +393,11 @@ static int32_t ProcessDeviceDisconnect(const void *para)
         }
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u device disconnect, authId=%{public}" PRId64,
             connFsm->id, authHandle->authId);
-        if (LnnSendDisconnectMsgToConnFsm(connFsm) != SOFTBUS_OK) {
+        rc = LnnSendDisconnectMsgToConnFsm(connFsm);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "send disconnect to connection failed. fsmId=%{public}u", connFsm->id);
-            rc = SOFTBUS_ERR;
             break;
         }
-        rc = SOFTBUS_OK;
     } while (false);
     SoftBusFree((void *)authHandle);
     return rc;
@@ -441,7 +440,7 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
 {
     const char *networkId = (const char *)para;
     LnnConnectionFsm *item = NULL;
-    int rc = SOFTBUS_ERR;
+    int rc = SOFTBUS_NETWORK_NOT_FOUND;
 
     if (networkId == NULL) {
         LNN_LOGW(LNN_BUILDER, "leave networkId is null");
@@ -452,10 +451,10 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
         if (strcmp(networkId, item->connInfo.peerNetworkId) != 0 || item->isDead) {
             continue;
         }
-        if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
+        rc = LnnSendLeaveRequestToConnFsm(item);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "send leave LNN msg to connection failed. fsmId=%{public}u", item->id);
         } else {
-            rc = SOFTBUS_OK;
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_REQUEST;
             LNN_LOGI(LNN_BUILDER, "send leave LNN msg to connection success. fsmId=%{public}u", item->id);
         }
@@ -514,7 +513,7 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
         if (strncpy_s(item->connInfo.cleanInfo->networkId, NETWORK_ID_BUF_LEN,
             msgPara->newNetworkId, strlen(msgPara->newNetworkId)) != EOK) {
             LNN_LOGE(LNN_BUILDER, "copy new networkId failed. fsmId=%{public}u", item->id);
-            rc = SOFTBUS_ERR;
+            rc = SOFTBUS_STRCPY_ERR;
             SoftBusFree(item->connInfo.cleanInfo);
             item->connInfo.cleanInfo = NULL;
             continue;
@@ -541,7 +540,7 @@ static int32_t ProcessNodeStateChanged(const void *para)
 {
     const ConnectionAddr *addr = (const ConnectionAddr *)para;
     LnnConnectionFsm *connFsm = NULL;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_NOT_FOUND;
     bool isOnline = false;
 
     if (addr == NULL) {
@@ -577,7 +576,7 @@ static int32_t ProcessMasterElect(const void *para)
     char localMasterUdid[UDID_BUF_LEN] = { 0 };
     int32_t localMasterWeight;
     int32_t compareRet;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_NOT_FOUND;
 
     if (msgPara == NULL) {
         LNN_LOGW(LNN_BUILDER, "elect msg para is null");
@@ -726,9 +725,9 @@ static int32_t ProcessLeaveByAuthId(const void *para)
             continue;
         }
         LNN_LOGI(LNN_BUILDER, "[id=%{public}u]leave reqeust, authId: %{public}" PRId64, item->id, *authId);
-        if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
+        rc = LnnSendLeaveRequestToConnFsm(item);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "send leaveReqeust to connection fsm[id=%{public}u] failed", item->id);
-            rc = SOFTBUS_ERR;
         }
     }
     SoftBusFree((void *) authId);
