@@ -1343,7 +1343,7 @@ void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t la
     TransReqInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneReqId == laneReqId) {
-            powerInfo.transType = item->allocInfo.transType;
+            transType = item->allocInfo.transType;
         }
     }
     Unlock();
