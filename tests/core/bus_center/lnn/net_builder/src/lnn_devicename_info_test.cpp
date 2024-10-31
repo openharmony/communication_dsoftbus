@@ -268,7 +268,7 @@ HWTEST_F(LNNDeviceNameInfoTest, NICK_NAME_MSG_PROC_TEST_001, TestSize.Level1)
     NodeInfo nodeInfo = { .accountId = ACCOUNT_ID + 1, };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-        EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr))
+    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr))
         .WillRepeatedly(Return(&nodeInfo));
     EXPECT_CALL(ledgerMock, LnnSetDLDeviceNickName).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillRepeatedly(Return(SOFTBUS_ERR));

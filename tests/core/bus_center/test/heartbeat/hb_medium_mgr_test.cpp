@@ -851,7 +851,6 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
     connectCondition.connectReason = CONNECT_INITIAL_VALUE;
     connectCondition.isConnect = false;
     EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);

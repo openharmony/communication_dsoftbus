@@ -348,7 +348,8 @@ HWTEST_F(LNNNetworkInfoTest, GET_NETWORK_CAPABILITY_TEST_001, TestSize.Level1)
     EXPECT_EQ(needSync, true);
     GetNetworkCapability(SOFTBUS_AP_DISABLED, &capability, &needSync);
     EXPECT_EQ(needSync, true);
-
+    GetNetworkCapability(SOFTBUS_WIFI_SEMI_ACTIVE, &capability, &needSync);
+    EXPECT_EQ(needSync, true);
     EXPECT_CALL(serviceMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_UNKNOWN));
     LnnSetP2pNetCapability(&capability);
     EXPECT_EQ(needSync, true);
