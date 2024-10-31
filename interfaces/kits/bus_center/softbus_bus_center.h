@@ -116,6 +116,15 @@ extern "C" {
 #define EVENT_NODE_STATE_MASK 0xF
 
 /**
+ * @brief Indicates the mask bit for a peer device hichain proof exception event.
+ * If you want to receive such events, set the mask bit in {@link INodeStateCb.events}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define EVENT_NODE_HICHAIN_PROOF_EXCEPTION 0x20
+
+/**
  * @brief The maximum length of meta node bypass info {@link MetaNodeConfigInfo.bypassInfo}.
  *
  * @since 1.0
@@ -481,6 +490,19 @@ typedef struct {
      * @version 1.0
      */
     void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status);
+    /**
+     * @brief Called when the devices have non-consistent group relationship.
+     *
+     * @param proofInfo The device proof info.
+     * @param proofLen The device proof info length.
+     * @param deviceTypeId The device type id.
+     * @param errcode Indicates the result code.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onHichainProofException)(
+        const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 } INodeStateCb;
 
 /**

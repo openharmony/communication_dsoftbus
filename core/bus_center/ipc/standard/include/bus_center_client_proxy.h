@@ -41,6 +41,8 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
 int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t ClinetOnLocalNetworkIdChanged(void);
 int32_t ClinetNotifyDeviceNotTrusted(const char *msg);
+int32_t ClientNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 int32_t ClientOnTimeSyncResult(
     const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode);
 int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason);
