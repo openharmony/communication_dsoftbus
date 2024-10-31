@@ -1340,7 +1340,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* ptr, size_t size)
         return 0;
     }
     OHOS::RunFuzzTestCase(ptr, size);
-    uint8_t *data = static<uint8_t *>(SoftBusCalloc(size + 1));
+    uint8_t *data = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
     if (data == nullptr) {
         return 0;
     }
