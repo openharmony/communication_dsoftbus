@@ -471,5 +471,4 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest07, TestSiz
     ASSERT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
 }
-
 }
