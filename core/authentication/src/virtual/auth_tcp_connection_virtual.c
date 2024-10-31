@@ -44,7 +44,6 @@ void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     (void)channelId;
     (void)moduleId;
-    return;
 }
 
 int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)

@@ -21,31 +21,30 @@
 #include "anonymizer.h"
 #include "auth_attest_interface.h"
 #include "auth_common.h"
+#include "auth_request.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_meta_manager.h"
-#include "auth_request.h"
 #include "auth_session_json.h"
+#include "auth_meta_manager.h"
 #include "bus_center_manager.h"
 #include "lnn_common_utils.h"
-#include "lnn_compress.h"
 #include "lnn_event.h"
 #include "lnn_extdata_config.h"
-#include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_config_type.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_feature_config.h"
+#include "softbus_json_utils.h"
+#include "lnn_compress.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_socket.h"
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
@@ -154,7 +153,7 @@ static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq, const AuthSessionInfo
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     DfxRecordLnnPostDeviceIdStart(authSeq, info);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     if (info->version == SOFTBUS_OLD_V1) {
         return PostDeviceIdV1(authSeq, info);
     } else {
@@ -164,8 +163,8 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && (len == DEVICE_ID_STR_LEN) && (info->isServer)) {
         info->version = SOFTBUS_OLD_V1;
         return UnPackBtDeviceIdV1(info, data, len);
@@ -236,7 +235,7 @@ static void SetIndataInfo(InDataInfo *inDataInfo, uint8_t *compressData, uint32_
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     DfxRecordLnnPostDeviceInfoStart(authSeq, info);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     char *msg = PackDeviceInfoMessage(&(info->connInfo), info->version, false, info->uuid, info);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack device info fail");
@@ -283,8 +282,8 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
     uint8_t *msg = NULL;
     uint32_t msgSize = 0;
     SessionKeyList sessionKeyList;
@@ -329,7 +328,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
 
 int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     const char *msg = "";
     AuthDataHead head = {
         .dataType = DATA_TYPE_CLOSE_ACK,
@@ -347,8 +346,8 @@ int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
     AuthDataHead head = {
         .dataType = DATA_TYPE_AUTH,
         .module = MODULE_AUTH_SDK,
@@ -535,7 +534,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
 int32_t PostDeviceMessage(
     const AuthManager *auth, int32_t flagRelay, AuthLinkType type, const DeviceMessageParse *messageParse)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(auth, SOFTBUS_INVALID_PARAM);
     if (messageParse == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;

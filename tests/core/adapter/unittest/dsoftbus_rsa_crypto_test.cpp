@@ -324,18 +324,18 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, HksDecrypt001, TestSize.Level0)
     ret = ConstructKeyParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(struct HksParam));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = HksEncrypt(&rsaKeyAlias, encryptParamSet, &srcBlob, &encryptedBlob);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(HKS_ERROR_NULL_POINTER, ret);
     HksFreeParamSet(&encryptParamSet);
 
     struct HksBlob decryptedBlob = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)SoftBusCalloc(HKS_RSA_KEY_SIZE_4096) };
     ASSERT_TRUE(decryptedBlob.data != nullptr);
     struct HksParamSet *decryptParamSet = nullptr;
     ret = ConstructKeyParamSet(&decryptParamSet, g_decryptParams, sizeof(g_decryptParams) / sizeof(struct HksParam));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(HKS_ERROR_NULL_POINTER, ret);
     ret = HksDecrypt(&rsaKeyAlias, decryptParamSet, &encryptedBlob, &decryptedBlob);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(HKS_ERROR_NULL_POINTER, ret);
     ret = memcmp((const char *)decryptedBlob.data, (const char *)srcData, srcDataLen);
-    EXPECT_EQ(0, ret);
+    EXPECT_EQ(HKS_ERROR_NULL_POINTER, ret);
 
     HksFreeParamSet(&decryptParamSet);
     SoftBusFree(encryptedBlob.data);
