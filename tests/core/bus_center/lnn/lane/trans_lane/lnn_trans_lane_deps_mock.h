@@ -80,7 +80,7 @@ public:
     MOCK_METHOD2(LaneCapCheck, int32_t (const char *networkId, LaneLinkType linkType));
     MOCK_METHOD2(GetErrCodeOfLink, int32_t (const char *networkId, LaneLinkType linkType));
     MOCK_METHOD3(CheckLaneResourceNumByLinkType, int32_t (const char *peerUdid, LaneLinkType type, int32_t *laneNum));
-    MOCK_METHOD1(DetectEnableWifiDirectApply, void (void));
+    MOCK_METHOD0(DetectEnableWifiDirectApply, void (void));
 
     static int32_t ActionOfLaneLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
     static int32_t ActionOfLaneLinkFail(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
