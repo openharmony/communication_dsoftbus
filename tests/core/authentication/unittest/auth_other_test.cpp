@@ -369,8 +369,8 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    AuthHandle errHandle = { .authId = errAuthId, .type = AUTH_LINK_TYPE_BLE};
-    AuthHandle authHandle = { .authId = authId, .type = AUTH_LINK_TYPE_BLE};
+    AuthHandle errHandle = { .authId = errAuthId, .type = AUTH_LINK_TYPE_BLE };
+    AuthHandle authHandle = { .authId = authId, .type = AUTH_LINK_TYPE_BLE };
     AuthNotifyDeviceVerifyPassed(errHandle, &nodeInfo);
     g_verifyListener.onDeviceVerifyPass = nullptr;
     AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
@@ -1026,7 +1026,7 @@ HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
     const char *networkId = "testudid";
     int32_t ret = GetPeerUdidByNetworkId(networkId, nullptr, UDID_BUF_LEN);
     char udid[UDID_BUF_LEN] = {0};
-    ret = GetPeerUdidByNetworkId(NULL, udid, UDID_BUF_LEN);
+    ret = GetPeerUdidByNetworkId(nullptr, udid, UDID_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetPeerUdidByNetworkId(networkId, udid, UDID_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
