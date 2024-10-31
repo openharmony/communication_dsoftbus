@@ -87,6 +87,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT1,
     };
+    (void)strcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1);
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
@@ -239,7 +240,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT1,
     };
-    (void)memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1, strlen(DEVICE_IP1));
+    (void)strcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1);
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
