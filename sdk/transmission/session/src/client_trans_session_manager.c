@@ -233,8 +233,6 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
         return ret;
     }
 
-    char *tmpName = NULL;
-    Anonymize(sessionName, &tmpName);
     ClientSessionServer *serverNode = NULL;
     ClientSessionServer *serverNodeNext = NULL;
     ListNode destroyList;
@@ -248,6 +246,8 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
             g_clientSessionServerList->cnt--;
             UnlockClientSessionServerList();
             // calling the ipc interface by locking here may block other threads for a long time
+            char *tmpName = NULL;
+            Anonymize(sessionName, &tmpName);
             ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
@@ -260,9 +260,6 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
         }
     }
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "not found session server or session list is not empty, sessionName=%{public}s",
-        AnonymizeWrapper(tmpName));
-    AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
