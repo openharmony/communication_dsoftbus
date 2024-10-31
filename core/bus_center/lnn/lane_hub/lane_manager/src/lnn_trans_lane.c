@@ -1334,6 +1334,7 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
 
 void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
 {
+    LaneTransType transType;
     if (laneReqId == INVALID_LANE_REQ_ID) {
         return;
     }
@@ -1352,7 +1353,12 @@ void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t la
     }
     Unlock();
     if (linkType == LANE_HML && IsPowerControlEnabled()) {
-        DetectEnableWifiDirectApply(&powerInfo);
+        LNN_LOGI(LNN_LANE, "low-power transtype = %{public}d", transType);
+        if (transType == LANE_T_BYTE || transType == LANE_T_MSG) {
+            DetectDisableWifiDirectApply();
+        } else {
+            DetectEnableWifiDirectApply();
+        }
     }
 }
 
