@@ -98,8 +98,7 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s",
-            AnonymizeWrapper(anonyUdid), anonyDeviceIdHash);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", anonyUdid, anonyDeviceIdHash);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};

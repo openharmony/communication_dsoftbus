@@ -55,4 +55,3 @@ bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit)
     LNN_LOGI(LNN_HEART_BEAT, "no support heartbeat cap");
     return false;
 }
-
