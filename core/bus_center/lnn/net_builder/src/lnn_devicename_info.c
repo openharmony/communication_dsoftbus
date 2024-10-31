@@ -420,6 +420,26 @@ static void AccountBootEventHandle(const char *key, const char *value, void *con
         LNN_LOGE(LNN_EVENT, "async call boot event fail");
     }
 }
+static void PrintLocalExtendDeviceName(const char *deviceName, const char *unifiedName,
+    const char *unifiedDefaultName, const char *nickName)
+{
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(unifiedName, &anonyUnifiedName);
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(unifiedDefaultName, &anonyUnifiedDefaultName);
+    char *anonyNickName = NULL;
+    Anonymize(nickName, &anonyNickName);
+    LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
+        "unifiedDefaultName=%{public}s, nickName=%{public}s",
+        anonyDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
+}
+
 
 static void UpdataLocalFromSetting(void *p)
 {
@@ -463,21 +483,7 @@ static void UpdataLocalFromSetting(void *p)
     RegisterNameMonitor();
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     LnnNotifyLocalNetworkIdChanged();
-    char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
-    char *anonyUnifiedName = NULL;
-    Anonymize(unifiedName, &anonyUnifiedName);
-    char *anonyUnifiedDefaultName = NULL;
-    Anonymize(unifiedDefaultName, &anonyUnifiedDefaultName);
-    char *anonyNickName = NULL;
-    Anonymize(nickName, &anonyNickName);
-    LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
-        "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        anonyDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
-    AnonymizeFree(anonyDeviceName);
-    AnonymizeFree(anonyUnifiedName);
-    AnonymizeFree(anonyUnifiedDefaultName);
-    AnonymizeFree(anonyNickName);
+    PrintLocalExtendDeviceName(deviceName, unifiedName, unifiedDefaultName, nickName);
 }
 
 static void RegisterDeviceNameHandle(void)
