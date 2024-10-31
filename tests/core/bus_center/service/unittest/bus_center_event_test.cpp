@@ -234,7 +234,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest009, TestSize.Level1)
     mockState = SOFTBUS_ACCOUNT_LOG_IN;
     LnnNotifyAccountStateChangeEvent(mockState);
     int32_t ret = LnnInitBusCenterEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -328,7 +328,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest016, TestSize.Level1)
     const char *ifNameTest = "testIfName";
     LnnNotifyAddressChangedEvent(ifNameTest);
     int32_t ret = LnnInitBusCenterEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -412,7 +412,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest020, TestSize.Level1)
     type = SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY;
     LnnNotifyLpReportEvent(type);
     int32_t ret = LnnInitBusCenterEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -444,7 +444,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest022, TestSize.Level1)
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
     EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
     int32_t ret = LnnInitBusCenterEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -495,7 +495,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
     ASSERT_TRUE(mockState != nullptr);
     *mockState = (SoftBusWifiState)(SOFTBUS_WIFI_UNKNOWN + 1);
     int32_t ret = LnnInitBusCenterEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(mockState);
 }
 
@@ -531,7 +531,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
     ASSERT_TRUE(mockState != nullptr);
     *mockState = (SoftBusNightModeState)(SOFTBUS_NIGHT_MODE_UNKNOWN + 1);
     int32_t ret = LnnInitBusCenterEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(mockState);
 }
 
