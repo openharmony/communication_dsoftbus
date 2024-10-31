@@ -191,6 +191,7 @@ public:
     virtual void LnnNotifyLocalNetworkIdChanged(void);
     virtual void RegisterOOBEMonitor(void *p);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
+    virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -325,6 +326,7 @@ public:
     MOCK_METHOD1(RegisterOOBEMonitor, void (void *p));
     MOCK_METHOD1(CheckAuthChannelIsExit, int32_t (ConnectOption *connInfo));
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
+    MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool (const NodeInfo *));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

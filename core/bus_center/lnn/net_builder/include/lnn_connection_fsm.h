@@ -102,6 +102,7 @@ int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
+bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
 
 #ifdef __cplusplus
 #if __cplusplus
