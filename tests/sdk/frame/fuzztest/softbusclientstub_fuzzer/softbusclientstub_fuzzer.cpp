@@ -68,6 +68,7 @@ enum SoftBusFuncId {
     CLIENT_ON_LEAVE_RESULT,
     CLIENT_ON_LEAVE_METANODE_RESULT,
     CLIENT_ON_NODE_DEVICE_NOT_TRUST,
+	CLIENT_ON_HICHAIN_PROOF_EXCEPTION,
     CLIENT_ON_NODE_ONLINE_STATE_CHANGED,
     CLIENT_ON_NODE_BASIC_INFO_CHANGED,
     CLIENT_ON_LOCAL_NETWORK_ID_CHANGED,
@@ -391,6 +392,22 @@ bool OnNodeDeviceNotTrustedInnerTest(const uint8_t *data, size_t size)
     return true;
 }
 
+bool OnHichainProofExceptionInnerTest(const uint8_t *data, size_t size)
+{
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteBuffer(data, size);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_HICHAIN_PROOF_EXCEPTION, datas, reply, option);
+    return true;
+}
+
 bool OnNodeOnlineStateChangedInnerTest(const uint8_t *data, size_t size)
 {
     constexpr uint32_t infoTypeLen = 10;
@@ -627,29 +644,17 @@ bool OnChannelBindInnerTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    if (data == nullptr) {
+    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return 0;
     }
-
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN) {
-        return 0;
-    }
-
     uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
     if (dataWithEndCharacter == nullptr) {
         return 0;
     }
-
     if (memcpy_s(dataWithEndCharacter, size, data, size) != EOK) {
         SoftBusFree(dataWithEndCharacter);
         return 0;
     }
-
     static OHOS::TestEnv env;
     if (!env.IsInited()) {
         return 0;
@@ -665,6 +670,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::OnJoinMetaNodeResultInnerTest(data, size);
     OHOS::OnLeaveLNNResultInnerTest(data, size);
     OHOS::OnLeaveMetaNodeResultInnerTest(data, size);
+    OHOS::OnHichainProofExceptionInnerTest(data, size);
     OHOS::OnNodeOnlineStateChangedInnerTest(data, size);
     OHOS::OnNodeBasicInfoChangedInnerTest(data, size);
     OHOS::OnTimeSyncResultInnerTest(data, size);
@@ -679,7 +685,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::OnClientTransLimitChangeInnerTest(data, size);
     OHOS::SetChannelInfoInnerTest(dataWithEndCharacter, size);
     OHOS::OnChannelBindInnerTest(data, size);
-
     SoftBusFree(dataWithEndCharacter);
     return 0;
 }

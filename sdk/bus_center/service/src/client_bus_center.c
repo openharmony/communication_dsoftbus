@@ -68,6 +68,10 @@ static bool IsValidNodeStateCb(INodeStateCb *callback)
         callback->onNodeStatusChanged == NULL) {
         return false;
     }
+    if ((callback->events & EVENT_NODE_HICHAIN_PROOF_EXCEPTION) != 0 &&
+        callback->onHichainProofException == NULL) {
+        return false;
+    }
     return true;
 }
 
