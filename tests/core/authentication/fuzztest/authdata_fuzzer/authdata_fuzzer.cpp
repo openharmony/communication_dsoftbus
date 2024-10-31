@@ -107,7 +107,8 @@ bool AuthFlushDeviceFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     const char *outData = reinterpret_cast<const char*>(data);
-    char *uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
+    char *uuid = nullptr;
+    uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
     if (uuid == nullptr) {
         COMM_LOGE(COMM_TEST, "uuid is NULL, SoftBusMalloc failed!");
         return false;
