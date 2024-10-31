@@ -65,7 +65,7 @@ public:
     MOCK_METHOD0(LnnOnOhosAccountChanged, void (void));
     MOCK_METHOD0(LnnStopDiscovery, void (void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
-    MOCK_METHOD0(SetCallLnnStatus, void (void));
+    MOCK_METHOD1(SetCallLnnStatus, void (bool));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void (void));

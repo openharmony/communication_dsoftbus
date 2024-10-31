@@ -39,3 +39,4 @@ public:
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_MOCK_H
+
