@@ -209,17 +209,14 @@ static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *p
 static bool CheckRemoveHbMsgParams(const SoftBusMessage *msg, void *args)
 {
     if (msg == NULL || args == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "msg or args is NULL");
         return false;
     }
     FsmCtrlMsgObj *ctrlMsgObj = (FsmCtrlMsgObj *)msg->obj;
     if (ctrlMsgObj == NULL || ctrlMsgObj->obj == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "ctrlMsgObj or obj is NULL");
         return false;
     }
     SoftBusMessage *delMsg = (SoftBusMessage *)args;
     if (delMsg == NULL || delMsg->obj == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "delMsg or obj is NULL");
         return false;
     }
     return true;
@@ -231,20 +228,20 @@ static int32_t RemoveCheckDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage
     LnnCheckDevStatusMsgPara *delMsgPara = (LnnCheckDevStatusMsgPara *)delMsg->obj;
 
     if (delMsgPara->hasNetworkId != msgPara->hasNetworkId) {
-        return SOFTBUS_ERR;
+        return 1;
     }
     if (!delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType) {
         SoftBusFree(msgPara);
         msgPara = NULL;
-        return SOFTBUS_OK;
+        return 0;
     }
     if (delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType &&
         strcmp(msgPara->networkId, delMsgPara->networkId) == 0) {
         SoftBusFree(msgPara);
         msgPara = NULL;
-        return SOFTBUS_OK;
+        return 0;
     }
-    return SOFTBUS_ERR;
+    return 1;
 }
 
 static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -256,9 +253,9 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
         msgPara->strategyType == delMsgPara->strategyType) {
         SoftBusFree(msgPara);
         msgPara = NULL;
-        return SOFTBUS_OK;
+        return 0;
     }
-    return SOFTBUS_ERR;
+    return 1;
 }
 
 static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -335,12 +332,12 @@ static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMess
 static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
 {
     if (!CheckRemoveHbMsgParams(msg, args)) {
-        return SOFTBUS_ERR;
+        return 1;
     }
 
     SoftBusMessage *delMsg = (SoftBusMessage *)args;
     if (msg->what != delMsg->what || msg->arg1 != delMsg->arg1) {
-        return SOFTBUS_ERR;
+        return 1;
     }
     FsmCtrlMsgObj *ctrlMsgObj = (FsmCtrlMsgObj *)msg->obj;
     switch (delMsg->arg1) {
@@ -355,7 +352,7 @@ static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
         default:
             break;
     }
-    return SOFTBUS_ERR;
+    return 1;
 }
 
 static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType, void *obj)
@@ -1058,6 +1055,8 @@ static void DeinitHbFsmCallback(FsmStateMachine *fsm)
 
 static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
+    int32_t i;
+
     if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "LnnHbFsm-%u", hbFsm->id) == -1) {
         LNN_LOGE(LNN_HEART_BEAT, "format fsm name fail");
         return SOFTBUS_ERR;
@@ -1071,7 +1070,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         LNN_LOGE(LNN_HEART_BEAT, "init lnn fsm fail");
         return SOFTBUS_ERR;
     }
-    for (int32_t i = 0; i < STATE_HB_INDEX_MAX; ++i) {
+    for (i = 0; i < STATE_HB_INDEX_MAX; ++i) {
         LnnFsmAddState(&hbFsm->fsm, &g_hbState[i]);
     }
     return SOFTBUS_OK;
@@ -1184,7 +1183,6 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
     uint64_t delayMillis)
 {
     LnnHeartbeatSendEndData *dupData = NULL;
-
     if (hbFsm == NULL || custData == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg get invalid param");
         return SOFTBUS_INVALID_PARAM;

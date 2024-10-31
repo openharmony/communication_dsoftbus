@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 int32_t LnnInitEventMonitor(void);
-void LnnDeinitEventMonitor(void);
+void LnnDeinitEventMonitor();
 
 #ifdef __cplusplus
 }
