@@ -37,14 +37,6 @@ extern "C" {
 #define BR_REUSE_LATENCY        1000
 
 typedef struct {
-    uint32_t activeHml;
-    int32_t passiveHml;
-    int32_t rawHml;
-    bool isDisableLowPower;
-    LaneTransType transType;
-} PowerControlInfo;
-
-typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     bool networkDelegate;
     bool p2pOnly;
