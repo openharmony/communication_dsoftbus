@@ -131,7 +131,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
-void DetectEnableWifiDirectApply(PowerControlInfo *powerInfo);
+void DetectEnableWifiDirectApply(void);
 void DetectDisableWifiDirectApply(void);
 
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource);
