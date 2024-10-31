@@ -57,6 +57,7 @@ void WifiDirectDfx::Clear(uint32_t requestId)
 {
     std::lock_guard lock(mutex_);
     challengeCodeMap_.erase(requestId);
+    reuseFlagMap_.erase(requestId);
 }
 
 void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &wifiDirectConnectInfo)
@@ -72,15 +73,8 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnec
     }
 
     auto requestId = wifiDirectConnectInfo.requestId;
-    std::string challengeCodeStr;
-    {
-        std::lock_guard lock(mutex_);
-        if (challengeCodeMap_.find(requestId) != challengeCodeMap_.end()) {
-            challengeCodeStr = std::to_string(challengeCodeMap_[requestId]);
-            extra.challengeCode = challengeCodeStr.c_str();
-        }
-    }
-    
+    auto challengeCodeStr = GetChallengeCode(requestId);
+    extra.challengeCode = challengeCodeStr.c_str();
     auto stateMapElement = DurationStatistic::GetInstance().GetStateTimeMapElement(requestId);
     uint64_t startTime = stateMapElement[TOTAL_START];
     uint64_t endTime = stateMapElement[TOTAL_END];
@@ -110,6 +104,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnec
     auto remoteOsVersion = WifiDirectUtils::GetRemoteOsVersion(wifiDirectConnectInfo.remoteNetworkId);
     extra.peerDevVer = remoteOsVersion.c_str();
     extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
+    extra.isReuse = IsReuse(requestId);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -123,5 +118,28 @@ void WifiDirectDfx::SetLinkType(WifiDirectConnectInfo &connectInfo)
         connectInfo.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "link type %{public}d", connectInfo.dfxInfo.linkType);
+}
+
+void WifiDirectDfx::SetReuseFlag(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    reuseFlagMap_.insert(std::make_pair(requestId, true));
+}
+
+bool WifiDirectDfx::IsReuse(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    return reuseFlagMap_.find(requestId) != reuseFlagMap_.end();
+}
+
+std::string WifiDirectDfx::GetChallengeCode(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    std::string challengeCodeStr;
+    if (challengeCodeMap_.find(requestId) != challengeCodeMap_.end()) {
+        challengeCodeStr = std::to_string(challengeCodeMap_[requestId]);
+        return challengeCodeStr;
+    }
+    return "";
 }
 } // namespace OHOS::SoftBus

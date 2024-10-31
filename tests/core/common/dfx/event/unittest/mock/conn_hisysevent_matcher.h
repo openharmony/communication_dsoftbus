@@ -63,6 +63,20 @@ static void MatchConnEventNameTypeExtraStrParamAnony(const HiSysEventParam *para
     AnonymizeFree(anonyStr);
 }
 
+static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *params, int32_t index, ConnEventExtra extra)
+{
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.osType);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.localDeviceType);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.remoteDeviceType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.p2pChannel);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.hmlChannel);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.staChannel);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.apChannel);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.peerDevVer);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.remoteScreenStatus);
+    return ++index;
+}
+
 MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
@@ -108,7 +122,8 @@ MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param arr
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isReuse);
     MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.negotiateTime);
     MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.linkTime);
-    EXPECT_EQ(++index, validSize);
+    auto ret = MatchConnEventNameTypeExtraForAddMsg(params, index, extra);
+    EXPECT_EQ(ret, validSize);
     return true;
 }
 

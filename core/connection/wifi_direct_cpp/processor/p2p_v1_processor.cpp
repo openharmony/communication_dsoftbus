@@ -31,6 +31,7 @@
 #include "wifi_direct_scheduler_factory.h"
 #include "wifi_direct_manager.h"
 #include "wifi_direct_types.h"
+#include "utils/wifi_direct_dfx.h"
 
 namespace OHOS::SoftBus {
 static constexpr int DECIMAL_BASE = 10;
@@ -260,6 +261,8 @@ void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &comm
     auto link = LinkManager::GetInstance().GetReuseLink(info.connectType, command->GetRemoteDeviceId());
     int ret = SOFTBUS_OK;
     if (link != nullptr) {
+        uint32_t requestId = connectCommand_->GetConnectInfo().info_.requestId;
+        WifiDirectDfx::GetInstance().SetReuseFlag(requestId);
         ret = ReuseLink(command, *link);
     } else {
         ret = CreateLink();
