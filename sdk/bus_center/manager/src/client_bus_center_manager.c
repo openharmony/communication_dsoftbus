@@ -719,7 +719,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
         LNN_LOGE(LNN_STATE, "join lnn not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "lock join lnn cb list in join");
         return SOFTBUS_LOCK_ERR;
     }
@@ -905,7 +905,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
     TimeSyncCallbackItem *item = NULL;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "stop time sync cb not init");
+        LNN_LOGE(LNN_STATE, "stop time sync cb list not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
@@ -921,7 +921,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
             SoftBusFree(item);
         }
     }
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "unlock time sync cb list");
     }
     return rc;

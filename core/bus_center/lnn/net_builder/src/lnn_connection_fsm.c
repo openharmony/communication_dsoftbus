@@ -78,8 +78,6 @@ typedef enum {
 
 #define CONN_CODE_SHIFT 16
 #define PC_DEV_TYPE "00C"
-#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_DONE,
@@ -1068,7 +1066,7 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
         (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
-    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
+    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
     AnonymizeFree(anonyUdidHash);
     if (ret == SOFTBUS_OK) {
         if ((dupOk || LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK) &&
@@ -1485,6 +1483,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
         Anonymize(connFsm->connInfo.nodeInfo->uuid, &anonyUuid);
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+
         LNN_LOGI(LNN_BUILDER,
             "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
             "uuid=%{public}s, deviceName=%{public}s, peer%{public}s",
