@@ -59,6 +59,8 @@ public:
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual void SetLpKeepAliveState(void *para) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
+    virtual void LnnNotifyHichainProofException(
+        const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -86,6 +88,7 @@ public:
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
     MOCK_METHOD1(SetLpKeepAliveState, void (void *));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
+    MOCK_METHOD4(LnnNotifyHichainProofException, void(const char *, uint32_t, uint16_t, int32_t));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

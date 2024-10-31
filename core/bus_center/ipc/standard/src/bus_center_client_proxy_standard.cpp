@@ -429,6 +429,52 @@ int32_t BusCenterClientProxy::OnNodeDeviceNotTrusted(const char *pkgName, const 
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterClientProxy::OnHichainProofException(
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        return SOFTBUS_NETWORK_WRITETOKEN_FAILED;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
+    }
+    if (!data.WriteUint32(proofLen)) {
+        LNN_LOGE(LNN_EVENT, "write proofInfo length failed");
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    if (proofInfo != nullptr && proofLen != 0 && !data.WriteRawData(proofInfo, proofLen)) {
+        LNN_LOGE(LNN_EVENT, "write proofInfo failed");
+        return SOFTBUS_NETWORK_WRITERAWDATA_FAILED;
+    }
+    if (!data.WriteUint16(deviceTypeId)) {
+        LNN_LOGE(LNN_EVENT, "write deviceTypeId failed");
+        return SOFTBUS_NETWORK_WRITEINT16_FAILED;
+    }
+    if (!data.WriteInt32(errCode)) {
+        LNN_LOGE(LNN_EVENT, "write errcode failed");
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (remote->SendRequest(CLIENT_ON_HICHAIN_PROOF_EXCEPTION, data, reply, option) != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     sptr<IRemoteObject> remote = Remote();

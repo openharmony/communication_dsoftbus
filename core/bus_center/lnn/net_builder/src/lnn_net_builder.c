@@ -77,6 +77,7 @@
 #define SHORT_UDID_HASH_STR_LEN          16
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define WAIT_SEND_NOT_TRUST_MSG          200
+#define PROOF_INFO_MAX_BUFFER_LEN        (2 * 1024)
 
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
@@ -1563,5 +1564,19 @@ int32_t UpdateNodeFromPcRestrictMap(const char *udidHash)
     Anonymize(udidHash, &anonyUdid);
     LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", anonyUdid, *tempCount);
     AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
+}
+
+int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen)
+{
+    if (errorReturn == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (errorReturnLen <= 1 || errorReturnLen >= PROOF_INFO_MAX_BUFFER_LEN) {
+        LNN_LOGE(LNN_BUILDER, "invalid errorReturnLen");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnNotifyHichainProofException(errorReturn, errorReturnLen, TYPE_PC_ID, errCode);
     return SOFTBUS_OK;
 }
