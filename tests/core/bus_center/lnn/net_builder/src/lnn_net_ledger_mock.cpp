@@ -579,9 +579,29 @@ bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
     return GetNetLedgerInterface()->LnnSetDLDeviceInfoName(udid, name);
 }
 
+int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info)
+{
+    return GetNetLedgerInterface()->LnnSetDLBssTransInfo(networkId, info);
+}
+
+int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info)
+{
+    return GetNetLedgerInterface()->LnnSetDLBatteryInfo(networkId, info);
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetNetLedgerInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+
+bool LnnSetDLDeviceNickName(const char *networkId, const char *name)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceNickName(networkId, name);
+}
+
 int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
 {
     return GetNetLedgerInterface()->LnnUpdateLocalScreenStatus(isScreenOn);
 }
 }
-}
+} // namespace OHOS

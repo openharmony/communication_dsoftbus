@@ -55,6 +55,25 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName(char *devic
     return SOFTBUS_OK;
 }
 
+int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    if (info == NULL || infoNum == NULL) {
+        LNN_LOGW(LNN_TEST, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    *infoNum = 1;
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
+    if (*info == NULL) {
+        LNN_LOGI(LNN_TEST, "malloc info fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
+        LNN_LOGE(LNN_TEST, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 extern "C" {
 int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
 {
@@ -667,10 +686,40 @@ void LnnNotifyLocalNetworkIdChanged(void)
     return GetNetBuilderDepsInterface()->LnnNotifyLocalNetworkIdChanged();
 }
 
+bool LnnIsDefaultOhosAccount()
+{
+    return GetNetBuilderDepsInterface()->LnnIsDefaultOhosAccount();
+}
+
+void DeleteFromProfile(const char *udid)
+{
+    return GetNetBuilderDepsInterface()->DeleteFromProfile(udid);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetNetBuilderDepsInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
+
+void UpdateProfile(const NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->UpdateProfile(info);
+}
+
 void RegisterOOBEMonitor(void *p)
 {
     (void)p;
     return GetNetBuilderDepsInterface()->RegisterOOBEMonitor(p);
+}
+
+int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
+{
+    return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
+}
+
+bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
+{
+    return GetNetBuilderDepsInterface()->CheckRemoteBasicInfoChanged(newNodeInfo);
 }
 } // extern "C"
 } // namespace OHOS

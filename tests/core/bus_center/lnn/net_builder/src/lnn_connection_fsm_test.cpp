@@ -75,6 +75,9 @@ public:
 void LNNConnectionFsmTest::SetUpTestCase()
 {
     LooperInit();
+    const char *ip = IP;
+    NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
+    EXPECT_CALL(lnnConnMock, LnnPrintConnectionAddr).WillRepeatedly(Return(ip));
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     connFsm2 = LnnCreateConnectionFsm(&target, "pkgName", true);
@@ -154,6 +157,9 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NiceMock<LnnAuthtInterfaceMock> authMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
+    const char *ip = IP;
+    NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
+    EXPECT_CALL(lnnConnMock, LnnPrintConnectionAddr).WillRepeatedly(Return(ip));
     ON_CALL(serviceMock, AuthGenRequestId).WillByDefault(Return(1));
     EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
     ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
@@ -619,6 +625,8 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<DistributeLedgerInterfaceMock> mock;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    ON_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(ledgerMock, LnnHasDiscoveryType).WillByDefault(Return(true));
     ON_CALL(mock, LnnGetRemoteStrInfo).WillByDefault(Return(SOFTBUS_OK));

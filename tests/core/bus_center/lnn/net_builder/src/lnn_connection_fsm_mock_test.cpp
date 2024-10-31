@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,7 +129,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     (void)strcpy_s(newNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -200,7 +199,6 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
 
     bool ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -259,7 +257,6 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
     (void)strcpy_s(connFsm->connInfo.nodeInfo->uuid, UUID_BUF_LEN, NODE_UDID);
     ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode3));
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -291,7 +288,6 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     OnlineStateEnter(&connFsm->fsm);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -344,7 +340,6 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
     EXPECT_TRUE(ret1 == true);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == false);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -373,7 +368,6 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
     EXPECT_TRUE(ret1 == true);
     ret1 = OnlineStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -397,7 +391,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     LeavingStateEnter(&connFsm->fsm);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -427,7 +420,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
     EXPECT_TRUE(ret1 == true);
     ret1 = LeavingStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == false);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -454,7 +446,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 } // namespace OHOS

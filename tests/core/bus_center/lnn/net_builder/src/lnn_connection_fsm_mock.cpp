@@ -106,10 +106,6 @@ int32_t LnnUpdateGroupType(const NodeInfo *info)
 {
     return GetLnnConnInterface()->LnnUpdateGroupType(info);
 }
-bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
-{
-    return GetLnnConnInterface()->IsFeatureSupport(feature, capaBit);
-}
 
 void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo)
 {
@@ -131,9 +127,30 @@ void SetLpKeepAliveState(void *para)
     return GetLnnConnInterface()->SetLpKeepAliveState(para);
 }
 
+const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
+{
+    return GetLnnConnInterface()->LnnPrintConnectionAddr(addr);
+}
+
+bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+{
+    return GetLnnConnInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);
+}
+
+DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
+{
+    return GetLnnConnInterface()->LnnConvAddrTypeToDiscType(type);
+}
+
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 {
     return GetLnnConnInterface()->LnnNotifyOOBEStateChangeEvent(state);
+}
+
+void LnnNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    return GetLnnConnInterface()->LnnNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 }
 } // namespace OHOS

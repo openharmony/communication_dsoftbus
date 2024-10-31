@@ -600,7 +600,7 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     char *anonyOldPtk = NULL;
     Anonymize(ptkStr, &anonyPtk);
     Anonymize(oldPtkStr, &anonyOldPtk);
-    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{private}s, oldPtk=%{private}s", log, anonyPtk, anonyOldPtk);
+    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s", log, anonyPtk, anonyOldPtk);
     AnonymizeFree(anonyPtk);
     AnonymizeFree(anonyOldPtk);
     (void)memset_s(&ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
