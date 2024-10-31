@@ -55,6 +55,7 @@ void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId);
 void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode);
+void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId);
 
 #ifdef __cplusplus
 }

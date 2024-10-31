@@ -37,13 +37,6 @@ extern "C" {
 #define BR_REUSE_LATENCY        1000
 
 typedef struct {
-    uint32_t activeHml;
-    int32_t passiveHml;
-    int32_t rawHml;
-    bool isDisableLowPower;
-} PowerControlInfo;
-
-typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     bool networkDelegate;
     bool p2pOnly;
@@ -130,6 +123,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
+void DetectEnableWifiDirectApply(void);
 void DetectDisableWifiDirectApply(void);
 
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource);

@@ -33,6 +33,7 @@
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -1328,6 +1329,31 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
+void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
+{
+    LaneTransType transType;
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
+    }
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneReqId == laneReqId) {
+            transType = item->allocInfo.transType;
+        }
+    }
+    Unlock();
+    if (linkType == LANE_HML && IsPowerControlEnabled()) {
+        LNN_LOGI(LNN_LANE, "low-power transtype = %{public}d", transType);
+        if (transType == LANE_T_BYTE || transType == LANE_T_MSG) {
+            DetectDisableWifiDirectApply();
+        } else {
+            DetectEnableWifiDirectApply();
+        }
+    }
+}
+
 static void NotifyLinkSucc(uint32_t laneReqId)
 {
     LaneLinkType linkType;
@@ -1362,6 +1388,7 @@ static void NotifyLinkSucc(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "add linkInfo item fail, laneReqId=%{public}u", laneReqId);
         goto FAIL;
     }
+    ProcessPowerControlInfoByLaneReqId(linkType, laneReqId);
     NotifyLaneAllocSuccess(laneReqId, laneId, &info);
     FreeLowPriorityLink(laneReqId, linkType);
     return;
