@@ -1,4 +1,12 @@
 /*
+ * @Author: weiqian1 1076618461@qq.com
+ * @Date: 2024-10-31 14:24:37
+ * @LastEditors: weiqian1 1076618461@qq.com
+ * @LastEditTime: 2024-10-31 14:28:46
+ * @FilePath: \communication_dsoftbus_6\sdk\frame\standard\include\softbus_client_stub.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+/*
  * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +84,7 @@ private:
     int32_t OnNodeStatusChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeDeviceNotTrustedInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnHichainProofExceptionInner(MessageParcel &data, MessageParcel &reply);
+	int32_t OnHichainProofExceptionInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnPublishLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply);
