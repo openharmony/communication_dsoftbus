@@ -160,5 +160,10 @@ void DetectEnableWifiDirectApply(void)
 {
     return GetTransLaneIf()->DetectEnableWifiDirectApply();
 }
+
+void DetectDisableWifiDirectApply(void)
+{
+    return GetTransLaneIf()->DetectDisableWifiDirectApply();
+}
 }
 } // namespace OHOS
