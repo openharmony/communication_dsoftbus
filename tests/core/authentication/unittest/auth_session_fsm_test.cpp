@@ -348,7 +348,7 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001, TestSize.L
     int32_t ret = RecoveryNormalizedDeviceKey(authFsm);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-    authFsm->info.normalizedKey = (SessionKey *)SoftBusMalloc(sizeof(SessionKey));
+    authFsm->info.normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
     if (authFsm->info.normalizedKey == nullptr) {
         SoftBusFree(authFsm);
     }
@@ -478,4 +478,3 @@ HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_002, TestSize.Level1
     HandleMsgRecvCloseAck(&authFsm, para1);
 }
 } // namespace OHOS
-

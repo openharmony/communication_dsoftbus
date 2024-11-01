@@ -40,7 +40,6 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_lane_vap_info.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
@@ -211,7 +210,7 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
 static int32_t HbGetOnlineNodeByRecvInfo(
     const char *recvUdidHash, const ConnectionAddrType recvAddrType, NodeInfo *nodeInfo, HbRespData *hbResp)
 {
-    int32_t infoNum = 0;
+    int32_t i, infoNum;
     NodeBasicInfo *info = NULL;
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
 
@@ -224,7 +223,7 @@ static int32_t HbGetOnlineNodeByRecvInfo(
         return SOFTBUS_ERR;
     }
     DiscoveryType discType = LnnConvAddrTypeToDiscType(recvAddrType);
-    for (int32_t i = 0; i < infoNum; ++i) {
+    for (i = 0; i < infoNum; ++i) {
         if (LnnIsLSANode(&info[i])) {
             continue;
         }
@@ -265,9 +264,9 @@ static int32_t HbGetOnlineNodeByRecvInfo(
 static int32_t HbUpdateOfflineTimingByRecvInfo(
     const char *networkId, ConnectionAddrType type, LnnHeartbeatType hbType, uint64_t updateTime)
 {
-    uint64_t oldTimestamp;
+    uint64_t oldTimeStamp;
     char *anonyNetworkId = NULL;
-    if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimestamp) != SOFTBUS_OK) {
+    if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimeStamp) != SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_HEART_BEAT, "get timestamp err, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
@@ -282,7 +281,7 @@ static int32_t HbUpdateOfflineTimingByRecvInfo(
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT,
         "recv to update timestamp, networkId=%{public}s, timestamp:%{public}" PRIu64 "->%{public}" PRIu64,
-        anonyNetworkId, oldTimestamp, updateTime);
+        anonyNetworkId, oldTimeStamp, updateTime);
     if (hbType != HEARTBEAT_TYPE_BLE_V1 && hbType != HEARTBEAT_TYPE_BLE_V0) {
         LNN_LOGD(LNN_HEART_BEAT, "only BLE_V1 and BLE_V0 support offline timing");
         AnonymizeFree(anonyNetworkId);
@@ -346,8 +345,7 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
         char *anonyUdid = NULL;
         Anonymize(storedInfo->device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
-            AnonymizeWrapper(anonyUdid));
+        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",anonyUdid);
         AnonymizeFree(anonyUdid);
         return true;
     }
@@ -836,7 +834,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    for (int32_t i = 0; i < infoNum; i++) {
+    for (int32_t i = 0; i < infoNum; ++i) {
         if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
             continue;
@@ -996,7 +994,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
 
 static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime)
 {
-    if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V0, nowTime) != SOFTBUS_OK) {
+    if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V4, nowTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
     }
 }
@@ -1013,7 +1011,7 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
     Anonymize(udidHash, &anonyUdid);
     LNN_LOGD(LNN_HEART_BEAT, "mgr relay process, udidhash=%{public}s, hbType=%{public}d", anonyUdid, hbType);
     AnonymizeFree(anonyUdid);
-    if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
+    if (LnnStartHbByTypeAndStrategy(hbType | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr relay process fail");
         return;
     }
@@ -1120,8 +1118,8 @@ void LnnDumpHbMgrRecvList(void)
 void LnnDumpHbOnlineNodeList(void)
 {
 #define HB_DUMP_ONLINE_NODE_MAX_NUM 5
-    int32_t infoNum = 0;
-    uint64_t oldTimestamp;
+    int32_t i, infoNum = 0;
+    uint64_t oldTimeStamp;
     NodeBasicInfo *info = NULL;
 
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
@@ -1134,15 +1132,15 @@ void LnnDumpHbOnlineNodeList(void)
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
-    for (int32_t i = 0; i < infoNum; ++i) {
+    for (i = 0; i < infoNum; ++i) {
         if (i > HB_DUMP_ONLINE_NODE_MAX_NUM) {
             break;
         }
         if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        if (LnnGetDLHeartbeatTimestamp(info[i].networkId, &oldTimestamp) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "get timestamp err, nodeInfo i=%{public}d", i);
+        if (LnnGetDLHeartbeatTimestamp(info[i].networkId, &oldTimeStamp) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "get timeStamp err, nodeInfo i=%{public}d", i);
             continue;
         }
         char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo.deviceInfo.deviceTypeId);
@@ -1153,7 +1151,7 @@ void LnnDumpHbOnlineNodeList(void)
             "deviceTypeStr=%{public}s, masterWeight=%{public}d, discoveryType=%{public}d, "
             "oldTimestamp=%{public}" PRIu64 "",
             infoNum, i + 1, anonyDeviceName, nodeInfo.deviceInfo.deviceTypeId,
-            deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimestamp);
+            deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimeStamp);
         AnonymizeFree(anonyDeviceName);
     }
     SoftBusFree(info);
@@ -1382,6 +1380,7 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
 
 int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
+    // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation
     if (mgr == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "regist manager get invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -1400,7 +1399,9 @@ static bool VisitUnRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartb
 {
     (void)typeSet;
     (void)data;
-    int32_t id = LnnConvertHbTypeToId(eachType);
+    int32_t id;
+    
+    id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
         LNN_LOGE(LNN_HEART_BEAT, "unregist manager convert type fail");
         return false;

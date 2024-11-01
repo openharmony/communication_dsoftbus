@@ -82,6 +82,11 @@ int32_t LnnHbMediumMgrSetParam(void *param)
     return HeartBeatCtrlDepsInterface()->LnnHbMediumMgrSetParam(param);
 }
 
+bool LnnIsLocalSupportBurstFeature(void)
+{
+    return HeartBeatCtrlDepsInterface()->LnnIsLocalSupportBurstFeature();
+}
+
 int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
 {
     return HeartBeatCtrlDepsInterface()->AuthSendKeepaliveOption(uuid, cycle);

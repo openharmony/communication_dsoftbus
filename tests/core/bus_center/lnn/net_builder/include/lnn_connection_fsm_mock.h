@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_connection_addr_utils.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
@@ -53,11 +54,13 @@ public:
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
     virtual int32_t LnnInsertLinkFinderInfo(const char *networkId) = 0;
     virtual int32_t LnnUpdateGroupType(const NodeInfo *info) = 0;
-    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo) = 0;
     virtual void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual void SetLpKeepAliveState(void *para) = 0;
+    virtual const char *LnnPrintConnectionAddr(const ConnectionAddr *addr) = 0;
+    virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo) = 0;
+    virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
     virtual void LnnNotifyHichainProofException(
         const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
@@ -82,11 +85,13 @@ public:
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
     MOCK_METHOD1(LnnInsertLinkFinderInfo, int32_t (const char *));
     MOCK_METHOD1(LnnUpdateGroupType, int32_t (const NodeInfo *));
-    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD2(LnnNotifySingleOffLineEvent, void (const ConnectionAddr *, NodeBasicInfo *));
     MOCK_METHOD2(LnnStopOfflineTimingByHeartbeat, void (const char *, ConnectionAddrType));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
     MOCK_METHOD1(SetLpKeepAliveState, void (void *));
+    MOCK_METHOD1(LnnPrintConnectionAddr, const char * (const ConnectionAddr *));
+    MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
+    MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
     MOCK_METHOD4(LnnNotifyHichainProofException, void(const char *, uint32_t, uint16_t, int32_t));
 };

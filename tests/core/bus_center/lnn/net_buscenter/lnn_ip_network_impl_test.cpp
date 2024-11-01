@@ -88,7 +88,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1
     memset_s(&self, sizeof(LnnProtocolManager), 0, sizeof(LnnProtocolManager));
     memset_s(&netifMgr, sizeof(LnnNetIfMgr), 0, sizeof(LnnNetIfMgr));
     strcpy_s(netifMgr.ifName, sizeof("name"), "name");
-    int res = LnnEnableIpProtocol(nullptr, nullptr);
+    int32_t res = LnnEnableIpProtocol(nullptr, nullptr);
     EXPECT_TRUE(res == SOFTBUS_ERR);
     res = LnnEnableIpProtocol(&self, &netifMgr);
     EXPECT_TRUE(res == SOFTBUS_ERR);
@@ -161,7 +161,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = GetAvailableIpAddr(IFNAME_TEST0, const_cast<char *>(WLAN_IP1), SIZE);
+    int32_t ret = GetAvailableIpAddr(IFNAME_TEST0, const_cast<char *>(WLAN_IP1), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = GetAvailableIpAddr(IFNAME_TEST1, const_cast<char *>(WLAN_IP2), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -195,7 +195,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2);
     EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = RequestMainPort("lo", "127.0.0.1");
+    int32_t ret = RequestMainPort("lo", "127.0.0.1");
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = RequestMainPort("lol", "127.0.0.1");
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -243,7 +243,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2);
     EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = ReleaseMainPort("deviceName");
+    int32_t ret = ReleaseMainPort("deviceName");
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = ReleaseMainPort("deviceName1");
     EXPECT_TRUE(ret == SOFTBUS_ERR);

@@ -29,6 +29,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_devicename_info.h"
+#include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
 #include "lnn_local_net_ledger.h"
@@ -38,6 +39,7 @@
 #include "lnn_net_capability.h"
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
+#include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_settingdata_event_monitor.h"
@@ -47,6 +49,7 @@
 #include "lnn_topo_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
@@ -189,9 +192,13 @@ public:
     virtual bool IsSupportLpFeature(void);
     virtual bool LnnSubcribeKvStoreService(void);
     virtual void LnnNotifyLocalNetworkIdChanged(void);
+    virtual bool LnnIsDefaultOhosAccount() = 0;
+    virtual void DeleteFromProfile(const char *udid) = 0;
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
+    virtual void UpdateProfile(const NodeInfo *info) = 0;
     virtual void RegisterOOBEMonitor(void *p);
-    virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
+    virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -323,9 +330,14 @@ public:
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool ());
     MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
+    MOCK_METHOD(bool, LnnIsDefaultOhosAccount, (), (override));
+    MOCK_METHOD1(DeleteFromProfile, void (const char *));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD1(UpdateProfile, void (const NodeInfo *));
     MOCK_METHOD1(RegisterOOBEMonitor, void (void *p));
     MOCK_METHOD1(CheckAuthChannelIsExit, int32_t (ConnectOption *connInfo));
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
+    static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool (const NodeInfo *));
 };
 } // namespace OHOS

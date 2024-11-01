@@ -27,12 +27,13 @@ namespace OHOS {
 const int32_t GRUOP_NUM1 = 10;
 const int32_t GRUOP_NUM2 = 12;
 const int32_t GRUOP_NUM3 = 100;
+
+bool g_isFlage  = false;
+bool g_isReturnDeviceNum = false;
+bool g_isReturnTrue = false;
 const int32_t GROUP_TYPE_POINT_TO_POINT = 256;
 const int32_t GROUP_VISIBILITY_INVALID = 26;
-char jsonChar = 'A';
-bool flage  = false;
-bool is_return_device_num = false;
-bool is_return_true = false;
+
 void *g_hichainInterface;
 
 LnnHichainInterfaceMock::LnnHichainInterfaceMock()
@@ -168,18 +169,19 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups(
     (void)auth_appId;
     (void)groupId;
     AUTH_LOGI(AUTH_TEST, "getRelatedGroups test");
-    if (!flage) {
+    if (!g_isFlage) {
         AUTH_LOGI(AUTH_TEST, "getRelatedGroups test return false");
-        flage = true;
+        g_isFlage = true;
         return SOFTBUS_ERR;
     }
-    if (is_return_device_num) {
-        char* testChar = &jsonChar;
+    char data = 'A';
+    if (g_isReturnDeviceNum) {
+        char* testChar = &data;
         *deviceNum = strlen(testChar) + 1;
         *returnDevInfoVec = testChar;
         return SOFTBUS_OK;
     }
-    is_return_device_num = true;
+    g_isReturnDeviceNum = true;
     return SOFTBUS_OK;
 }
 int32_t LnnHichainInterfaceMock::getRelatedGroups1(
@@ -227,8 +229,8 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
     }
     char* jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
-    if (!is_return_true) {
-        is_return_true = true;
+    if (!g_isReturnTrue) {
+        g_isReturnTrue = true;
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
@@ -247,8 +249,8 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices1(
     char* data = jsonsStr;
     *returnDevInfoVec = data;
     AUTH_LOGI(AUTH_TEST, "returnDevInfoVec is invalid");
-    if (is_return_device_num) {
-        is_return_device_num = false;
+    if (g_isReturnDeviceNum) {
+        g_isReturnDeviceNum = false;
         return SOFTBUS_OK;
     }
     *deviceNum = 1;

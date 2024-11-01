@@ -1022,7 +1022,7 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
     OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
 }
 
-static int32_t UnpackWifiInfoFromJsonObj(JsonObj *obj, AuthSessionInfo *info)
+static int32_t IsCmdMatchByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 {
     char cmd[CMD_TAG_LEN] = {0};
     if (!JSON_GetStringFromOject(obj, CMD_TAG, cmd, CMD_TAG_LEN)) {
@@ -1056,7 +1056,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "json parse fail");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = UnpackWifiInfoFromJsonObj(obj, info);
+    int32_t ret = IsCmdMatchByDeviceId(obj, info);
     if (ret != SOFTBUS_OK) {
         JSON_Delete(obj);
         return ret;
@@ -1073,8 +1073,9 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
         return SOFTBUS_ERR;
     }
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
-        char compressParse[PARSE_UNCOMPRESS_STRING_BUFF_LEN] = { 0 };
-        OptString(obj, SUPPORT_INFO_COMPRESS, compressParse, PARSE_UNCOMPRESS_STRING_BUFF_LEN, FALSE_STRING_TAG);
+        char compressParse[PARSE_UNCOMPRESS_STRING_BUFF_LEN] = {0};
+        OptString(obj, SUPPORT_INFO_COMPRESS, compressParse,
+            PARSE_UNCOMPRESS_STRING_BUFF_LEN, FALSE_STRING_TAG);
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
     OptInt(obj, AUTH_MODULE, (int32_t *)&info->module, AUTH_MODULE_LNN);
