@@ -53,23 +53,23 @@ typedef struct {
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
+    bool isSupportIpv6;
     uint32_t laneReqId;
     int32_t pid;
     LaneLinkType linkType;
     LaneLinkCb cb;
-    bool isSupportIpv6;
 } LaneLinkRequestInfo;
 
 typedef struct {
-    uint32_t p2pRequestId;
-    int32_t p2pModuleGenId;
     bool networkDelegate;
     bool p2pOnly;
+    bool reuseOnly;
+    uint32_t p2pRequestId;
+    int32_t p2pModuleGenId;
+    uint32_t actionAddr;
     uint32_t bandWidth;
     uint64_t triggerLinkTime;
     uint64_t availableLinkTime;
-    bool reuseOnly;
-    uint32_t actionAddr;
 } P2pRequestInfo;
 
 typedef struct {
@@ -86,15 +86,15 @@ typedef struct {
 } P2pLinkReqList;
 
 typedef struct {
-    ListNode node;
-    uint32_t laneReqId;
     char networkId[NETWORK_ID_BUF_LEN];
     char remoteMac[MAX_MAC_LEN];
+    uint32_t laneReqId;
     int32_t pid;
     int32_t p2pModuleLinkId;
     uint32_t p2pLinkDownReqId;
-    AuthChannel auth;
     LaneLinkType linkType;
+    AuthChannel auth;
+    ListNode node;
 } P2pLinkedList;
 
 typedef struct {
@@ -149,13 +149,13 @@ typedef enum {
 } CheckResultType;
 
 typedef struct {
-    ListNode node;
     uint32_t laneReqId;
-    LinkRequest request;
-    LaneLinkCb callback;
     WdGuideType guideList[LANE_CHANNEL_BUTT];
     uint32_t guideNum;
     uint32_t guideIdx;
+    LaneLinkCb callback;
+    ListNode node;
+    LinkRequest request;
 } WdGuideInfo;
 
 static ListNode *g_p2pLinkList = NULL; // process p2p link request

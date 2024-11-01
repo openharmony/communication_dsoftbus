@@ -52,20 +52,20 @@
 #define NETWORK_OFFLINE_CODE "offline_code"
 
 typedef struct {
-    ListNode node;
-    LnnSyncInfoMsgComplete complete;
-    uint32_t dataLen;
     uint8_t data[0];
+    uint32_t dataLen;
+    LnnSyncInfoMsgComplete complete;
+    ListNode node;
 } SyncInfoMsg;
 
 typedef struct {
-    ListNode node;
-    ListNode syncMsgList;
     char networkId[NETWORK_ID_BUF_LEN];
+    bool isClientOpened;
     int32_t clientChannelId;
     int32_t serverChannelId;
+    ListNode node;
+    ListNode syncMsgList;
     SoftBusSysTime accessTime;
-    bool isClientOpened;
 } SyncChannelInfo;
 
 typedef struct {

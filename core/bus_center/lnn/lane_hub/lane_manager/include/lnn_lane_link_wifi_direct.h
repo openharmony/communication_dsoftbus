@@ -33,15 +33,15 @@ typedef enum {
 } ForceDownType;
 
 typedef struct {
-    ListNode node;
-    uint32_t p2pRequestId;
     char forceDownDevId[NETWORK_ID_BUF_LEN];
+    uint32_t p2pRequestId;
     uint32_t forceDownReqId;
     LaneLinkType forceDownLink;
     uint32_t authRequestId;
-    AuthHandle authHandle;
     ForceDownType downType;
+    AuthHandle authHandle;
     SoftBusCond cond;
+    ListNode node;
 } ForceDownInfo;
 
 int32_t InitLinkWifiDirect(void);

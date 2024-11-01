@@ -39,16 +39,16 @@ typedef struct {
 } SoftBusMessageNode;
 
 struct SoftBusLooperContext {
-    ListNode msgHead;
     char name[LOOP_NAME_LEN];
     volatile unsigned char stop; // destroys looper, stop =1, and running =0
     volatile unsigned char running;
     SoftBusMessage *currentMsg;
     unsigned int msgSize;
-    SoftBusMutex lock;
     SoftBusMutexAttr attr;
+    SoftBusMutex lock;
     SoftBusCond cond;
     SoftBusCond condRunning;
+    ListNode msgHead;
 };
 
 static int64_t UptimeMicros(void)

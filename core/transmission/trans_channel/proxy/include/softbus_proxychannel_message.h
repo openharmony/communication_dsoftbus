@@ -74,12 +74,12 @@ typedef struct {
 } ProxyMessageHead;
 
 typedef struct {
-    ProxyMessageHead msgHead;
     int32_t dateLen;
     char *data;
     uint32_t connId;
-    AuthHandle authHandle; /* for cipher */
     int32_t keyIndex;
+    ProxyMessageHead msgHead;
+    AuthHandle authHandle; /* for cipher */
 } ProxyMessage;
 
 #define VERSION 1
@@ -114,22 +114,22 @@ typedef struct {
 } SessionKeyBase64;
 
 typedef struct {
-    ListNode node;
-    int32_t channelId;
-    int32_t reqId;
+    bool deviceTypeIsWinpc;
+    char identity[IDENTITY_LEN + 1];
     int8_t isServer;
     int8_t status;
     uint16_t timeout;
     int16_t myId;
     int16_t peerId;
-    uint32_t connId;
     ConnectType type;
     BleProtocolType bleProtocolType;
+    uint32_t connId;
+    int32_t channelId;
+    int32_t reqId;
     int32_t seq;
-    char identity[IDENTITY_LEN + 1];
-    AppInfo appInfo;
+    ListNode node;
     AuthHandle authHandle; /* for cipher */
-    bool deviceTypeIsWinpc;
+    AppInfo appInfo;
 } ProxyChannelInfo;
 
 typedef struct {

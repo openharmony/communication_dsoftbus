@@ -33,16 +33,16 @@
 const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LANE_TYPE_CTRL};
 
 typedef struct {
-    ListNode node;
+    uint32_t ref;
     LaneType laneType;
     uint64_t laneId;
-    uint32_t ref;
+    ListNode node;
 } LaneBusinessInfo;
 
 typedef struct {
+    LaneType type;
     ListNode node;
     LaneStatusListener listener;
-    LaneType type;
 } LaneListenerInfo;
 
 static SoftBusMutex g_laneStateListenerMutex;

@@ -74,6 +74,11 @@ typedef struct {
 } OnlineDeviceInfo;
 
 typedef struct {
+    bool bleBradStatus;
+    bool bleScanStatus;
+    char businessName[SOFTBUS_HISYSEVT_NAME_LEN];
+    char callerPackName[SOFTBUS_HISYSEVT_NAME_LEN];
+    char remoteBizUuid[SOFTBUS_HISYSEVT_NAME_LEN];
     uint8_t moduleType;
     uint8_t linkType;
     float channelQuality;
@@ -88,11 +93,6 @@ typedef struct {
     int32_t subErrCode;
     int32_t connBrNum;
     int32_t connBleNum;
-    bool bleBradStatus;
-    bool bleScanStatus;
-    char businessName[SOFTBUS_HISYSEVT_NAME_LEN];
-    char callerPackName[SOFTBUS_HISYSEVT_NAME_LEN];
-    char remoteBizUuid[SOFTBUS_HISYSEVT_NAME_LEN];
 } SoftBusFaultEvtInfo;
 
 typedef struct {
