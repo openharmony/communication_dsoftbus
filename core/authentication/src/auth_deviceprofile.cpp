@@ -193,13 +193,15 @@ static bool IsSameAccount(int64_t accountId)
     return false;
 }
 
-static int32_t GenerateDpAccesserAndAccessee(OHOS::DistributedDeviceProfile::Accesser &accesser,
-    OHOS::DistributedDeviceProfile::Accessee &accessee, std::string peerUdid)
+static void InsertDpSameAccount(const std::string peerUdid)
 {
+    OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
+    OHOS::DistributedDeviceProfile::Accesser accesser;
+    OHOS::DistributedDeviceProfile::Accessee accessee;
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get local udid fail");
-        return SOFTBUS_ERR;
+        return;
     }
     std::string localUdid(udid);
     accesser.SetAccesserDeviceId(localUdid);
@@ -208,44 +210,16 @@ static int32_t GenerateDpAccesserAndAccessee(OHOS::DistributedDeviceProfile::Acc
     OHOS::ErrCode ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
     if (ret != OHOS::ERR_OK || accountInfo.uid_.empty()) {
         LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return;
     }
     accesser.SetAccesserAccountId(accountInfo.uid_);
     accessee.SetAccesseeDeviceId(peerUdid);
-    return SOFTBUS_OK;
-}
-
-static void InsertDpSameAccount(const std::string udid)
-{
-    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
-    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
-    if (ret != OHOS::DistributedDeviceProfile::DP_NOT_FIND_DATA && ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "getAllAccessControlProfile failed, ret=%{public}d", ret);
-        return;
-    }
-    for (const auto &aclProfile : aclProfiles) {
-        if (aclProfile.GetDeviceIdType() == (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID &&
-            aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT &&
-            udid == aclProfile.GetTrustDeviceId()) {
-            LNN_LOGI(LNN_STATE, "dp has same account no need insert");
-            return;
-        }
-    }
-
-    OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
-    OHOS::DistributedDeviceProfile::Accesser accesser;
-    OHOS::DistributedDeviceProfile::Accessee accessee;
-    ret = GenerateDpAccesserAndAccessee(accesser, accessee, udid);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "generate accesser accessee fail");
-        return;
-    }
     accessControlProfile.SetBindType((uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT);
     accessControlProfile.SetDeviceIdType((uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID);
     accessControlProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
     accessControlProfile.SetAuthenticationType((uint32_t)OHOS::DistributedDeviceProfile::
         AuthenticationType::PERMANENT);
-    accessControlProfile.SetTrustDeviceId(udid);
+    accessControlProfile.SetTrustDeviceId(peerUdid);
     accessControlProfile.SetAccesser(accesser);
     accessControlProfile.SetAccessee(accessee);
     ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
@@ -254,7 +228,7 @@ static void InsertDpSameAccount(const std::string udid)
         return;
     }
     char *anonyUdid = nullptr;
-    Anonymize(udid.c_str(), &anonyUdid);
+    Anonymize(peerUdid.c_str(), &anonyUdid);
     LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
 }
@@ -265,9 +239,9 @@ void UpdateDpSameAccount(int64_t accountId, const char *deviceId)
         LNN_LOGE(LNN_STATE, "deviceId is null");
         return;
     }
-    std::string udid(deviceId);
+    std::string peerUdid(deviceId);
     if (IsSameAccount(accountId)) {
-        InsertDpSameAccount(udid);
+        InsertDpSameAccount(peerUdid);
     }
 }
 
