@@ -325,7 +325,7 @@ void DetectEnableWifiDirectApply(void)
             if (item->clientRef > 0) {
                 activeHml++;
             }
-            if (item->isServerSide > 0) {
+            if (item->isServerSide) {
                 passiveHml++;
             }
             SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
