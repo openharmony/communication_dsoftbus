@@ -179,6 +179,7 @@
         "LnnOnNodeStatusChanged";
         "LnnOnLocalNetworkIdChanged";
         "LnnOnNodeDeviceNotTrusted";
+        "LnnOnHichainProofException";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
