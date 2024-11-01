@@ -84,7 +84,7 @@ ohos_unittest("AuthEnhanceMockTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
@@ -511,49 +511,6 @@ ohos_unittest("AuthHichainTest") {
   }
 }
 
-ohos_unittest("DsoftbusAppBindTest") {
-  module_out_path = module_output_path
-  sources = [ "unittest/dsoftbus_app_bind_test.cpp" ]
-
-  include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/authentication/include",
-    "unittest/common/",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-  ]
-
-  if (!defined(global_parts_info) ||
-      defined(global_parts_info.deviceprofile_device_info_manager)) {
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "cJSON:cjson",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "device_info_manager:distributed_device_profile_common",
-      "device_info_manager:distributed_device_profile_sdk",
-      "googletest:gmock",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-    ]
-  } else {
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "cJSON:cjson",
-      "c_utils:utils",
-      "googletest:gmock",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-    ]
-  }
-}
-
 ohos_unittest("AuthSessionMessageTest") {
   module_out_path = module_output_path
   sources = [ "unittest/auth_session_message_test.cpp" ]
@@ -644,6 +601,7 @@ ohos_unittest("AuthManagerTest") {
       "bounds_checking_function:libsec_shared",
       "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -842,8 +800,8 @@ ohos_unittest("AuthLaneTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
@@ -890,7 +848,6 @@ group("unittest") {
     ":AuthTcpConnectionTest",
     ":AuthTest",
     ":AuthTestCallBackTest",
-    ":DsoftbusAppBindTest",
   ]
 }
 

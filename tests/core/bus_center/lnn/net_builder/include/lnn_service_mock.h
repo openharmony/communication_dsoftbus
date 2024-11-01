@@ -19,11 +19,22 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-
 #include "bus_center_event.h"
-#include "softbus_common.h"
-#include "softbus_bus_center.h"
+#include "bus_center_manager.h"
+#include "disc_interface.h"
+#include "lnn_async_callback_utils.h"
+#include "lnn_connection_addr_utils.h"
+#include "lnn_deviceinfo_to_profile.h"
+#include "lnn_feature_capability.h"
+#include "lnn_heartbeat_strategy.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "message_handler.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_bus_center.h"
+#include "softbus_common.h"
+#include "softbus_feature_config.h"
+#include "softbus_wifi_api_adapter.h"
 #include "lnn_event_monitor_impl.h"
 
 namespace OHOS {
@@ -53,6 +64,34 @@ public:
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
+    virtual int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num) = 0;
+    virtual int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig) = 0;
+    virtual int32_t SoftBusDisconnectDevice(void) = 0;
+    virtual ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type) = 0;
+    virtual void UpdateProfile(const NodeInfo *info) = 0;
+    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
+    virtual int32_t LnnStartHbByTypeAndStrategy(
+        LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategy, bool isRelay) = 0;
+    virtual bool SoftBusIsWifiTripleMode(void) = 0;
+    virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
+    virtual SoftBusWifiDetailState SoftBusGetWifiState(void) = 0;
+    virtual bool SoftBusHasWifiDirectCapability(void) = 0;
+    virtual char* SoftBusGetWifiInterfaceCoexistCap(void) = 0;
+    virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper,
+        LnnAsyncCallbackFunc callback, void *para);
+    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+        void *para, uint64_t delayMillis);
+    virtual int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len) = 0;
+    virtual int32_t LnnGetDeviceDisplayName(const char *nickName,
+        const char *defaultName, char *deviceName, uint32_t len);
+    virtual int32_t LnnGetUnifiedDeviceName(char *unifiedName, uint32_t len);
+    virtual int32_t LnnGetUnifiedDefaultDeviceName(char *unifiedDefaultName, uint32_t len);
+    virtual int32_t GetCurrentAccount(int64_t *account);
+    virtual int32_t LnnSetLocalUnifiedName(const char *unifiedName);
+    virtual void LnnNotifyLocalNetworkIdChanged(void);
+    virtual int32_t LnnGetSettingNickName(const char *defaultName,
+        const char *unifiedName, char *nickName, uint32_t len);
+    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle) = 0;
 };
 
@@ -79,6 +118,29 @@ public:
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
+    MOCK_METHOD2(SoftBusGetWifiDeviceConfig, int32_t (SoftBusWifiDevConf *, uint32_t *));
+    MOCK_METHOD1(SoftBusConnectToDevice, int32_t (const SoftBusWifiDevConf *));
+    MOCK_METHOD0(SoftBusDisconnectDevice, int32_t ());
+    MOCK_METHOD1(LnnDiscTypeToConnAddrType, ConnectionAddrType (DiscoveryType));
+    MOCK_METHOD1(UpdateProfile, void (const NodeInfo *));
+    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
+    MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t (LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
+    MOCK_METHOD0(SoftBusIsWifiTripleMode, bool ());
+    MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
+    MOCK_METHOD0(SoftBusGetWifiState, SoftBusWifiDetailState ());
+    MOCK_METHOD0(SoftBusHasWifiDirectCapability, bool ());
+    MOCK_METHOD0(SoftBusGetWifiInterfaceCoexistCap, char* ());
+    MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD2(SoftBusGenerateRandomArray, int32_t (unsigned char *, uint32_t));
+    MOCK_METHOD4(LnnGetDeviceDisplayName, int32_t (const char *, const char *, char *, uint32_t));
+    MOCK_METHOD2(LnnGetUnifiedDeviceName, int32_t (char *, uint32_t));
+    MOCK_METHOD2(LnnGetUnifiedDefaultDeviceName, int32_t (char *, uint32_t));
+    MOCK_METHOD1(GetCurrentAccount, int32_t (int64_t *));
+    MOCK_METHOD1(LnnSetLocalUnifiedName, int32_t (const char *));
+    MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
+    MOCK_METHOD4(LnnGetSettingNickName, int32_t (const char *, const char *, char *, uint32_t));
+    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t (AccountEventHandle handle));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);

@@ -42,6 +42,8 @@ public:
 
     virtual int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias);
     virtual int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias);
+    virtual int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias);
+    virtual int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias);
     virtual int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias,
         const struct HksBlob *inData, struct HksBlob *outData);
     virtual int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias,
@@ -82,6 +84,8 @@ public:
     ~DecisionDbDepsInterfaceMock() override;
     MOCK_METHOD1(LnnGenerateKeyByHuks, int32_t (struct HksBlob *));
     MOCK_METHOD1(LnnDeleteKeyByHuks, int32_t (struct HksBlob *));
+    MOCK_METHOD1(LnnGenerateCeKeyByHuks, int32_t (struct HksBlob *));
+    MOCK_METHOD1(LnnDeleteCeKeyByHuks, int32_t (struct HksBlob *));
     MOCK_METHOD3(LnnEncryptDataByHuks, int32_t (const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
     MOCK_METHOD3(LnnDecryptDataByHuks, int32_t (const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
     MOCK_METHOD2(LnnGenerateRandomByHuks, int32_t (uint8_t *, uint32_t));

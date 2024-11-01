@@ -53,8 +53,6 @@ constexpr uint64_t LANE_ID = 123456;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
-constexpr uint32_t LIST_NUM_1 = 2;
-constexpr uint32_t LIST_NUM_2 = 4;
 
 static void ConstructRemoteNode(void);
 static void ConstructLocalInfo(void);
@@ -112,7 +110,7 @@ static void ConstructRemoteNode(void)
     LnnSetNetCapability(&cap, BIT_WIFI_24G);
     LnnSetNetCapability(&cap, BIT_WIFI_5G);
     g_nodeInfo.netCapacity = cap;
-    int ret = strncpy_s(g_nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    int32_t ret = strncpy_s(g_nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
     EXPECT_TRUE(ret == EOK);
     ret = LnnSetDeviceUdid(&g_nodeInfo, NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -267,7 +265,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     selectParam.expectedBw = 0;
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, LIST_NUM_2);
+    EXPECT_EQ(listNum, 4);
 }
 
 /*
@@ -310,7 +308,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
     selectParam.list.linkType[1] = LANE_BR;
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, LIST_NUM_1);
+    EXPECT_EQ(listNum, 2);
 }
 
 /*
