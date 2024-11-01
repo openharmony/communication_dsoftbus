@@ -456,6 +456,17 @@ int32_t LnnIpcNotifyDeviceNotTrusted(const char *msg)
     return SOFTBUS_OK;
 }
 
+int32_t LnnIpcNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    (void)proofInfo;
+    (void)proofLen;
+    (void)deviceTypeId;
+    (void)errCode;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {

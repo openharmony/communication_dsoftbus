@@ -1566,3 +1566,17 @@ int32_t UpdateNodeFromPcRestrictMap(const char *udidHash)
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }
+
+int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen)
+{
+    if (errorReturn == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (errorReturnLen <= 1 || errorReturnLen >= PROOF_INFO_MAX_BUFFER_LEN) {
+        LNN_LOGE(LNN_BUILDER, "invalid errorReturnLen");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnNotifyHichainProofException(errorReturn, errorReturnLen, TYPE_PC_ID, errCode);
+    return SOFTBUS_OK;
+}

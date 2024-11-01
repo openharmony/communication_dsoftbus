@@ -186,7 +186,7 @@ bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
             break;
         case CONNECTION_ADDR_BLE:
             ret = HbHasActiveBrConnection(networkId) || HbHasActiveBleConnection(networkId) ||
-            HbHasActiveP2pConnection(networkId) || HbHasActiveHmlConnection(networkId);
+                HbHasActiveP2pConnection(networkId) || HbHasActiveHmlConnection(networkId);
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
             LNN_LOGI(LNN_HEART_BEAT, "HB has active BT/BLE/P2P/HML connection. networkId=%{public}s, ret=%{public}s",

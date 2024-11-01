@@ -457,6 +457,12 @@ void LnnNotifyDeviceNotTrusted(const char *msg)
     (void)LnnIpcNotifyDeviceNotTrusted(msg);
 }
 
+void LnnNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    (void)LnnIpcNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
+}
+
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {

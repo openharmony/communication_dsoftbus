@@ -64,6 +64,8 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
 int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type);
 int32_t LnnOnLocalNetworkIdChanged(const char *pkgName);
 int32_t LnnOnNodeDeviceNotTrusted(const char *pkgName, const char *msg);
+int32_t LnnOnHichainProofException(
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode);
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
