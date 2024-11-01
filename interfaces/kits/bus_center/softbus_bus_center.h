@@ -933,6 +933,21 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
  * @version 1.0
  */
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+
+/**
+ * @brief For dm use only. Set local device display name.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param displayName Indicates the pointer to the local device display name.
+ *
+ * @return Returns <b>0</b> if the call is success; returns any other value if it fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t SetLocalDeviceName(const char *pkgName, const char *displayName);
+
 #ifdef __cplusplus
 }
 #endif
