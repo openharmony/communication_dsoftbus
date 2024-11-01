@@ -76,10 +76,10 @@ typedef struct {
 } ProcessStepTime;
 
 typedef struct {
-    uint32_t reqId;
-    uint64_t startTime;
-    uint32_t connectTraceId;
     bool reuse;
+    uint32_t reqId;
+    uint32_t connectTraceId;
+    uint64_t startTime;
 } ConnectStatistics;
 
 int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName);

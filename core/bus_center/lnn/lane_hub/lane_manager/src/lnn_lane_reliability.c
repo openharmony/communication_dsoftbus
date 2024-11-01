@@ -30,14 +30,14 @@
 #define WLAN_DETECT_TIMEOUT 3000
 
 typedef struct {
-    ListNode node;
-    LaneLinkInfo link;
     uint32_t laneReqId;
-    LaneLinkCb cb;
     union {
         uint32_t wlanFd;
     } connId;
     uint32_t laneDetectId;
+    LaneLinkInfo link;
+    ListNode node;
+    LaneLinkCb cb;
 } LaneDetectInfo;
 
 static SoftBusList g_laneDetectList;

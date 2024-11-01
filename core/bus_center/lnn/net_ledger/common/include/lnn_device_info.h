@@ -44,10 +44,10 @@ typedef struct {
     char nickName[DEVICE_NAME_BUF_LEN];
     char unifiedDefaultName[DEVICE_NAME_BUF_LEN];
     char deviceUdid[UDID_BUF_LEN];
-    uint16_t deviceTypeId;
-    int32_t osType;
     char osVersion[OS_VERSION_BUF_LEN];
     char deviceVersion[DEVICE_VERSION_SIZE_MAX];
+    uint16_t deviceTypeId;
+    int32_t osType;
 } DeviceBasicInfo;
 
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name);

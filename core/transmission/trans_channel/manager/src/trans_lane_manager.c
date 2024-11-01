@@ -32,13 +32,13 @@
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
 typedef struct {
     ListNode node;
+    bool isQosLane;
+    char pkgName[PKG_NAME_SIZE_MAX];
     int32_t channelId;
     int32_t channelType;
-    char pkgName[PKG_NAME_SIZE_MAX];
     int32_t pid;
     uint32_t laneHandle;
     LaneConnInfo laneConnInfo;
-    bool isQosLane;
 } TransLaneInfo;
 
 typedef struct {

@@ -73,8 +73,8 @@ typedef enum {
 
 typedef struct {
     BuildLinkStatus status;
-    LaneLinkInfo linkInfo;
     int32_t result;
+    LaneLinkInfo linkInfo;
 } LinkStatusInfo;
 
 typedef struct {
