@@ -334,12 +334,12 @@ void DetectEnableWifiDirectApply(void)
             rawHml++;
         }
     }
-    if ((g_enabledLowPower || rawHml > 0 || passiveHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
+    if ((g_enabledLowPower || passiveHml > 0 || rawHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
         isDisableLowPower = true;
     }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, rawHml=%{public}d, isDisableLowPower=%{public}d",
-        activeHml, rawHml, isDisableLowPower);
+    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d, isDisableLowPower=%{public}d",
+        activeHml, passiveHml, rawHml, isDisableLowPower);
     HandleDetectWifiDirectApply(isDisableLowPower, &wifiDirectInfo);
 }
 
