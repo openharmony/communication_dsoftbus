@@ -345,7 +345,7 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
         char *anonyUdid = NULL;
         Anonymize(storedInfo->device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",anonyUdid);
+        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s", anonyUdid);
         AnonymizeFree(anonyUdid);
         return true;
     }
@@ -1380,7 +1380,7 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
 
 int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
-    // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation
+    // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation.
     if (mgr == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "regist manager get invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -1400,7 +1400,6 @@ static bool VisitUnRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartb
     (void)typeSet;
     (void)data;
     int32_t id;
-    
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
         LNN_LOGE(LNN_HEART_BEAT, "unregist manager convert type fail");
