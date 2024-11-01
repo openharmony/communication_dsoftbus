@@ -1400,7 +1400,7 @@ static bool VisitUnRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartb
     (void)typeSet;
     (void)data;
     int32_t id;
-    
+
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
         LNN_LOGE(LNN_HEART_BEAT, "unregist manager convert type fail");
