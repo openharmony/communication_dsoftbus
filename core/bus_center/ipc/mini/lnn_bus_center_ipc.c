@@ -233,3 +233,11 @@ void BusCenterServerDeathCallback(const char *pkgName)
 {
     (void)pkgName;
 }
+
+int32_t LnnIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}

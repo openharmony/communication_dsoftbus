@@ -74,6 +74,7 @@ public:
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
     virtual int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) = 0;
+    virtual int32_t SetLocalDeviceName(const char *pkgName, const char *displayName);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

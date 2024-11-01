@@ -73,6 +73,7 @@ private:
     int32_t SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetDeviceNameInner(MessageParcel &data, MessageParcel &reply);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();

@@ -318,3 +318,17 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     }
     return ret;
 }
+
+int32_t ServerIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    LNN_LOGI(LNN_EVENT, "enter");
+    if (g_serverProxy == nullptr && BusCenterServerProxyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int32_t ret = g_serverProxy->SetLocalDeviceName(pkgName, displayName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "SetLocalDeviceName failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
