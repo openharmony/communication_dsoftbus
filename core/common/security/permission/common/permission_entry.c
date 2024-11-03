@@ -400,7 +400,7 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-static bool CheckDBinder(const char *sessionName)
+bool CheckDBinder(const char *sessionName)
 {
     if (StrIsEmpty(sessionName)) {
         return false;
@@ -496,7 +496,7 @@ void DeinitPermissionJson(void)
     while (!IsListEmpty(&g_permissionEntryList->list)) {
         SoftBusPermissionEntry *item = LIST_ENTRY((&g_permissionEntryList->list)->next, SoftBusPermissionEntry, node);
         if (item == NULL) {
-            SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
             COMM_LOGE(COMM_PERM, "get item is NULL");
             return;
         }
@@ -504,7 +504,7 @@ void DeinitPermissionJson(void)
         ListDelete(&item->node);
         SoftBusFree(item);
     }
-    SoftBusMutexUnlock(&g_permissionEntryList->lock);
+    (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
     DestroySoftBusList(g_permissionEntryList);
 }
 
@@ -708,20 +708,20 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
         COMM_LOGE(COMM_PERM, "dynamic permission reach the upper limit");
-        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_NO_ENOUGH_DATA;
     }
 
     if (HaveGrantedPermission(sessionName)) {
         COMM_LOGD(COMM_PERM, "dynamic permission already granted");
-        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_OK;
     }
 
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
     if (permissionEntry == NULL) {
         COMM_LOGE(COMM_PERM, "AddDynamicPermission malloc failed!");
-        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -729,18 +729,19 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "NewDynamicPermissionEntry failed. ret=%{public}d", ret);
         SoftBusFree(permissionEntry);
-        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return ret;
     }
 
     ListNodeInsert(&g_dynamicPermissionList->list, &permissionEntry->node);
     g_dynamicPermissionList->cnt++;
-    SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
 
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    COMM_LOGD(COMM_PERM, "session dynamic permission granted. sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    COMM_LOGD(COMM_PERM, "session dynamic permission granted. sessionName=%{public}s, count=%{public}d",
+        AnonymizeWrapper(tmpName), g_dynamicPermissionList->cnt);
     AnonymizeFree(tmpName);
+    (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
     return SOFTBUS_OK;
 }
 
@@ -758,15 +759,15 @@ int32_t DeleteDynamicPermission(const char *sessionName)
             ListDelete(&pe->node);
             SoftBusFree(pe);
             g_dynamicPermissionList->cnt--;
-            SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
-            COMM_LOGI(COMM_PERM, "session dynamic permission deleted. sessionName=%{public}s",
-                AnonymizeWrapper(tmpName));
+            COMM_LOGD(COMM_PERM, "session dynamic permission granted. sessionName=%{public}s, count=%{public}d",
+                AnonymizeWrapper(tmpName), g_dynamicPermissionList->cnt);
             AnonymizeFree(tmpName);
+            (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+    (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
     return SOFTBUS_NOT_FIND;
 }
