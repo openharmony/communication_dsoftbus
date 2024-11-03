@@ -88,9 +88,10 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
-        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
+      public_deps =
+          [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
       external_deps += auth_server_ex_deps
       if (defined(global_parts_info) &&
@@ -109,8 +110,6 @@ if (defined(ohos_lite)) {
       } else {
         sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
       }
-      public_deps =
-          [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
@@ -161,7 +160,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
-        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
@@ -270,6 +268,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+      "$dsoftbus_root_path/sdk:softbus_client",
     ]
     external_deps = [ "cJSON:cjson" ]
     external_deps += auth_server_ex_deps
@@ -283,11 +282,10 @@ if (defined(ohos_lite)) {
       external_deps += [
         "access_token:libaccesstoken_sdk",
         "access_token:libprivacy_sdk",
+        "access_token:libtokenid_sdk",
         "device_auth:deviceauth_sdk",
         "hilog:libhilog",
         "ipc:ipc_core",
-        "kv_store:distributeddata_inner",
-        "netmanager_base:net_conn_manager_if",
         "safwk:system_ability_fwk",
         "samgr:samgr_proxy",
       ]
@@ -299,6 +297,12 @@ if (defined(ohos_lite)) {
         ]
       }
       if (!defined(global_parts_info) ||
+          defined(global_parts_info.communication_netmanager_base)) {
+        external_deps += [
+          "netmanager_base:net_policy_manager_if",
+          ]      
+        }
+        if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
         external_deps += [
           "bundle_framework:appexecfwk_base",
@@ -307,14 +311,10 @@ if (defined(ohos_lite)) {
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
       if (!defined(global_parts_info) ||
-          defined(global_parts_info.ability_ability_runtime)) {
-        cflags += [ "-DSUPPORT_ABILITY_RUNTIME" ]
-      }
-      if (enhanced) {
-        cflags += [ "-DENHANCED_FLAG" ]
-        external_deps += [
-          "device_certificate_manager:device_cert_mgr_sdk",
-          "zlib:libz",
+          defined(global_parts_info.ability_ability_runtime)) {    
+        cflags += [ 
+          "-DSUPPORT_ABILITY_RUNTIME",
+          "-DENHANCED_FLAG",
         ]
       }
     }
