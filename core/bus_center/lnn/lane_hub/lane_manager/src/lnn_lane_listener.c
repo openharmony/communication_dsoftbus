@@ -536,7 +536,7 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add server lane resource fail");
     }
-    ProcessPowerControlInfoByLaneReqId(laneLinkInfo.type, INVALID_LANE_REQ_ID);
+    DetectDisableWifiDirectApply();
 }
 
 static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *link)
