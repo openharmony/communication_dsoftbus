@@ -77,7 +77,7 @@ HWTEST_F(ClientBusCentManagerTest, BUS_CENTER_CLIENT_INIT_Test_001, TestSize.Lev
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit())
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
-    EXPECT_NE(BusCenterClientInit() == SOFTBUS_OK);
+    EXPECT_NE(BusCenterClientInit(), SOFTBUS_OK);
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     BusCenterClientDeinit();
 }
