@@ -1234,6 +1234,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
     option.type = CONNECT_BR;
     (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "abc");
     ListInit(&g_brManager.pendings->list);
+    ListInit(&g_brManager.connections->list);
     (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abce");
     it.pendInfo = &pendInfo;
     ListTailInsert(&g_brManager.pendings->list, &it.node);

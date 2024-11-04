@@ -119,15 +119,15 @@ typedef enum {
 
 typedef struct {
     uint8_t capabiltiy;
+    uint8_t shortUuid[HB_SHORT_UUID_LEN];
+    uint8_t hbVersion;
+    bool isScreenOn;
     int16_t stateVersion;
     uint16_t staticLength;
     uint16_t staticLevel;
     uint16_t switchLength;
     uint32_t switchLevel;
     int32_t preferChannel;
-    uint8_t shortUuid[HB_SHORT_UUID_LEN];
-    uint8_t hbVersion;
-    bool isScreenOn;
 } HbRespData;
 
 typedef enum {

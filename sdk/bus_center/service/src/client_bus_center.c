@@ -578,3 +578,17 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
     }
     return SyncTrustedRelationShipInner(pkgName, msg, msgLen);
 }
+
+int32_t SetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(displayName, DEVICE_NAME_BUF_LEN - 1)) {
+        LNN_LOGE(LNN_STATE, "invalid SetLocalDeviceName para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SetLocalDeviceNameInner(pkgName, displayName);
+}

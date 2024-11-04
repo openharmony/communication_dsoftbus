@@ -104,7 +104,7 @@ if (defined(global_parts_info) &&
   dsoftbus_feature_lnn_cloud_sync = true
 }
 
-if (defined(global_parts_info) && !defined(global_parts_info.i18n)) {
+if (defined(global_parts_info) && !defined(global_parts_info.global_i18n)) {
   support_i18n = false
 } else {
   support_i18n = true

@@ -560,7 +560,7 @@ static void OpenNetWorkingChannel(int32_t requestId, ITransProxyPipelineCallback
         g_manager.channels->cnt -= 1;
         SoftBusFree(target);
         (void)SoftBusMutexUnlock(&g_manager.channels->lock);
-        callback->onChannelOpenFailed(requestId, SOFTBUS_ERR);
+        callback->onChannelOpenFailed(requestId, SOFTBUS_TRANS_INVALID_CHANNEL_ID);
         return;
     }
     target->channelId = channelId;

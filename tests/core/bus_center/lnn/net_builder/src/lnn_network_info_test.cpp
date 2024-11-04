@@ -136,11 +136,11 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1
     uint32_t capability;
     uint32_t len = BITS - 1;
     uint32_t ret = ConvertMsgToCapability(nullptr, MSG, len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ConvertMsgToCapability(&capability, nullptr, len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ConvertMsgToCapability(&capability, MSG, len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ConvertMsgToCapability(&capability, MSG, BITS);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

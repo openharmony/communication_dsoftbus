@@ -35,19 +35,19 @@ static int32_t FillTargetWifiConfig(const unsigned char *targetBssid, const char
 {
     if (strcpy_s(targetWifiConf->ssid, sizeof(targetWifiConf->ssid), ssid) != EOK) {
         LNN_LOGE(LNN_BUILDER, "str copy ssid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     if (memcpy_s(targetWifiConf->bssid, sizeof(targetWifiConf->bssid),
         targetBssid, sizeof(targetWifiConf->bssid)) != EOK) {
         LNN_LOGE(LNN_BUILDER, "mem copy bssid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     if (strcpy_s(targetWifiConf->preSharedKey, sizeof(targetWifiConf->preSharedKey),
         conWifiConf->preSharedKey) != EOK) {
         LNN_LOGE(LNN_BUILDER, "str copy ssid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     targetWifiConf->securityType = conWifiConf->securityType;
@@ -72,7 +72,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
     result = (SoftBusWifiDevConf *)SoftBusMalloc(sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
     if (result == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc wifi device config fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
     (void)memset_s(result, sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE, 0,
@@ -81,7 +81,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
     if (retVal != SOFTBUS_OK || wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
         LNN_LOGE(LNN_BUILDER, "git config fail, retVal=%{public}d, wifiConfigSize=%{public}d", retVal, wifiConfigSize);
         ResultClean(result);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_WIFI_DEVICE_CONFIG_FAIL;
     }
 
     for (i = 0; i < wifiConfigSize; i++) {
@@ -92,22 +92,23 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
             LNN_LOGE(LNN_BUILDER, "fill device config fail");
             (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
             ResultClean(result);
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
         }
         break;
     }
-    if (SoftBusDisconnectDevice() != SOFTBUS_OK) {
+    retVal = SoftBusDisconnectDevice();
+    if (retVal != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "dis connect device fail");
         (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
         ResultClean(result);
-        return SOFTBUS_ERR;
+        return retVal;
     }
-
-    if (SoftBusConnectToDevice(&targetDeviceConf) != SOFTBUS_OK) {
+    retVal = SoftBusConnectToDevice(&targetDeviceConf);
+    if (retVal != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "connect to target ap fail");
         (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
         ResultClean(result);
-        return SOFTBUS_ERR;
+        return retVal;
     }
     (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
     ResultClean(result);
@@ -193,18 +194,20 @@ int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo
 {
     if (peerNetWorkId == NULL || transInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "para peerNetWorkId or tansInfo is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
-    if (LnnSetDLBssTransInfo(peerNetWorkId, transInfo) != SOFTBUS_OK) {
+    int32_t ret = LnnSetDLBssTransInfo(peerNetWorkId, transInfo);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "save bssTransinfo fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
-    if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_BSS_TRANS, peerNetWorkId,
-        (const uint8_t *)transInfo, sizeof(BssTransInfo), NULL) != SOFTBUS_OK) {
+    ret = LnnSendSyncInfoMsg(
+        LNN_INFO_TYPE_BSS_TRANS, peerNetWorkId, (const uint8_t *)transInfo, sizeof(BssTransInfo), NULL);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send bss info fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }

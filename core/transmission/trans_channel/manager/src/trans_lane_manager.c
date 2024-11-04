@@ -32,13 +32,13 @@
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
 typedef struct {
     ListNode node;
+    bool isQosLane;
+    char pkgName[PKG_NAME_SIZE_MAX];
     int32_t channelId;
     int32_t channelType;
-    char pkgName[PKG_NAME_SIZE_MAX];
     int32_t pid;
     uint32_t laneHandle;
     LaneConnInfo laneConnInfo;
-    bool isQosLane;
 } TransLaneInfo;
 
 typedef struct {
@@ -86,7 +86,7 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
     return DUMPER_LANE_LINK_TYPE_BUTT;
 }
 
-static int32_t TransLaneChannelForEachShowInfo(int fd)
+static int32_t TransLaneChannelForEachShowInfo(int32_t fd)
 {
     if (g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");

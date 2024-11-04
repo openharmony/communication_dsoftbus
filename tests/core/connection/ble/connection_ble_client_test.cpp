@@ -241,7 +241,8 @@ HWTEST_F(ClientConnectionTest, ConnectionStateCallback001, TestSize.Level1)
     EXPECT_CALL(bleMock, SoftbusGattcConnect).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(bleMock, SoftbusGattcSetFastestConn).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ConnGattClientConnect(connection);
-    SoftBusSleepMs(3500); // to call timeout event
+    uint64_t delta = 500;
+    SoftBusSleepMs(BLE_FAST_CONNECT_TIMEOUT + delta); // to call timeout event
     EXPECT_EQ(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR, ret);
 }
 /*
