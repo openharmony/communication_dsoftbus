@@ -410,7 +410,7 @@ static int32_t CheckNormalAppSessionName(const char *sessionName, pid_t callingU
         strName.erase(posId);
     }
     return SOFTBUS_OK;
-}   
+}
 #endif
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
