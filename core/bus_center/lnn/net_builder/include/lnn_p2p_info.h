@@ -39,9 +39,9 @@ typedef struct {
 typedef struct {
     char udid[UDID_BUF_LEN];
     char uuid[UUID_BUF_LEN];
+    char ptk[PTK_DEFAULT_LEN];
     uint64_t createTime;
     uint64_t endTime;
-    char ptk[PTK_DEFAULT_LEN];
     ListNode node;
 } LocalPtkList;
 

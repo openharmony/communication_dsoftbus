@@ -33,16 +33,16 @@
 const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LANE_TYPE_CTRL};
 
 typedef struct {
-    ListNode node;
+    uint32_t ref;
     LaneType laneType;
     uint64_t laneId;
-    uint32_t ref;
+    ListNode node;
 } LaneBusinessInfo;
 
 typedef struct {
+    LaneType type;
     ListNode node;
     LaneStatusListener listener;
-    LaneType type;
 } LaneListenerInfo;
 
 static SoftBusMutex g_laneStateListenerMutex;
@@ -534,6 +534,7 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add server lane resource fail");
     }
+    ProcessPowerControlInfoByLaneReqId(laneLinkInfo.type, INVALID_LANE_REQ_ID);
 }
 
 static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *link)

@@ -223,7 +223,7 @@ static int32_t PackCommonTopoMsg(cJSON **json, cJSON **info)
 
     if (SoftBusGenerateRandomArray((uint8_t *)&seq, sizeof(uint32_t)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "generate seq fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
     }
     if (seq < 0) {
         seq = -seq;
@@ -231,26 +231,26 @@ static int32_t PackCommonTopoMsg(cJSON **json, cJSON **info)
     *json = cJSON_CreateObject();
     if (*json == NULL) {
         LNN_LOGE(LNN_BUILDER, "create topo update json fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (!AddNumberToJsonObject(*json, JSON_KEY_TYPE, TOPO_MSG_TYPE_UPDATE) ||
         !AddNumberToJsonObject(*json, JSON_KEY_SEQ, seq) ||
         !AddNumberToJsonObject(*json, JSON_KEY_COMPLETE, TOPO_MSG_FLAG_COMPLETE)) {
         LNN_LOGE(LNN_BUILDER, "pack topo common json fail");
         cJSON_Delete(*json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     *info = cJSON_CreateArray();
     if (*info == NULL) {
         LNN_LOGE(LNN_BUILDER, "create topo info json fail");
         cJSON_Delete(*json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (!cJSON_AddItemToObject(*json, JSON_KEY_INFO, *info)) {
         LNN_LOGE(LNN_BUILDER, "pack topo info json to msg fail");
         cJSON_Delete(*info);
         cJSON_Delete(*json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -261,7 +261,7 @@ static int32_t PackTopoInfo(cJSON *info, const char *udid, const char *peerUdid,
     cJSON *item = cJSON_CreateObject();
     if (item == NULL) {
         LNN_LOGE(LNN_BUILDER, "create topo info json fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (len != CONNECTION_ADDR_MAX) {
         cJSON_Delete(item);
@@ -271,7 +271,7 @@ static int32_t PackTopoInfo(cJSON *info, const char *udid, const char *peerUdid,
         !AddStringToJsonObject(item, JSON_KEY_PEER_UDID, peerUdid)) {
         cJSON_Delete(item);
         LNN_LOGE(LNN_BUILDER, "pack topo udid json fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     if (!AddNumberToJsonObject(item, JSON_KEY_WLAN_RELATION, relation[CONNECTION_ADDR_WLAN]) ||
         !AddNumberToJsonObject(item, JSON_KEY_BR_RELATION, relation[CONNECTION_ADDR_BR]) ||
@@ -280,7 +280,7 @@ static int32_t PackTopoInfo(cJSON *info, const char *udid, const char *peerUdid,
         !cJSON_AddItemToArray(info, item)) {
         cJSON_Delete(item);
         LNN_LOGE(LNN_BUILDER, "pack topo relation json fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -626,20 +626,22 @@ int32_t LnnInitTopoManager(void)
     }
     if (!g_topoTable.isSupportTopo) {
         LNN_LOGE(LNN_BUILDER, "not Support Topo");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NOT_SUPPORT;
     }
     for (i = 0; i < TOPO_HASH_TABLE_SIZE; ++i) {
         ListInit(&g_topoTable.table[i]);
     }
     g_topoTable.totalCount = 0;
     SoftBusMutexInit(&g_topoTable.lock, NULL);
-    if (LnnRegisterEventHandler(LNN_EVENT_RELATION_CHANGED, OnLnnRelationChanged) != SOFTBUS_OK) {
+    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_RELATION_CHANGED, OnLnnRelationChanged);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "reg discovery type changed event fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, OnReceiveTopoUpdateMsg) != SOFTBUS_OK) {
+    ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, OnReceiveTopoUpdateMsg);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "reg recv topo update msg fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }

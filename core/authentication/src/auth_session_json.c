@@ -2102,7 +2102,8 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
     if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK) {
         nodeInfo->localStateVersion = stateVersion;
     }
-    if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY)) {
+    if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY) &&
+        nodeInfo->deviceInfo.osType != OH_OS_TYPE) {
         UpdatePeerDeviceName(nodeInfo);
     }
     nodeInfo->updateTimestamp = SoftBusGetSysTimeMs();

@@ -157,8 +157,8 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     (void)pkgName;
     (void)msg;
     (void)msgLen;
-    LNN_LOGI(LNN_EVENT, "not implement");
-    return SOFTBUS_OK;
+    LNN_LOGW(LNN_EVENT, "not implement");
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
@@ -232,4 +232,12 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void 
 void BusCenterServerDeathCallback(const char *pkgName)
 {
     (void)pkgName;
+}
+
+int32_t LnnIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
 }

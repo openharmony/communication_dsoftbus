@@ -175,7 +175,7 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
-    TRANS_LOGI(TRANS_CTRL, "trans loop process msgType=%{public}d", msg->what);
+    TRANS_LOGD(TRANS_CTRL, "trans loop process msgType=%{public}d", msg->what);
     int32_t channelId;
     ProxyChannelInfo *chan = NULL;
     switch (msg->what) {
@@ -777,7 +777,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret;
     ProxyConnInfo conn;
     int32_t chanNewId = GenerateChannelId(false);
     if (chanNewId <= INVALID_CHANNEL_ID) {

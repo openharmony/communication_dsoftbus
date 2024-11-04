@@ -224,7 +224,6 @@ int32_t ClientTransStatisticsInit(void)
         TRANS_LOGE(TRANS_SDK, "channel statistics list init fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    TRANS_LOGI(TRANS_SDK, "ClientTransStatisticsInit");
     return SOFTBUS_OK;
 }
 

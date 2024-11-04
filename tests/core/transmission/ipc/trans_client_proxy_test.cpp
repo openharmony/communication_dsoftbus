@@ -105,7 +105,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     ChannelInfo channel;
     char strTmp[] = "ABCDEFG";
     channel.channelId = TEST_CHANNELID;
-    channel.channelType = TEST_CHANNELTYPE;
+    channel.channelType = CHANNEL_TYPE_TCP_DIRECT;
     channel.fd = TEST_DATA_TYPE;
     channel.isServer = true;
     channel.isEnabled = true;
@@ -326,6 +326,20 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level0)
     data->msgPid = TEST_PID;
     ret = ClientIpcOnChannelBind(data);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    ASSERT_TRUE(saManager != nullptr);
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
+    ASSERT_TRUE(abilityDeath != nullptr);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    data->msgPkgName = g_pkgName;
+    ret = ClientIpcOnChannelBind(data);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(data);
 }
 
@@ -411,6 +425,19 @@ HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level0)
     transInfo->channelType = TEST_CHANNELTYPE;
     ret = ClientIpcSetChannelInfo("iShare", "HWiShare", sessionId, transInfo, pid);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
+
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    ASSERT_TRUE(saManager != nullptr);
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
+    ASSERT_TRUE(abilityDeath != nullptr);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientIpcSetChannelInfo(g_pkgName, g_sessionName, sessionId, transInfo, pid);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
     SoftBusFree(transInfo);
 }
 
@@ -454,6 +481,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Leve
     uint8_t tos = 0;
     int32_t ret = ClientIpcOnTransLimitChange(nullptr, TEST_PID, TEST_CHANNELID, tos);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnTransLimitChange(g_pkgName, 1, TEST_CHANNELID, tos);
+    EXPECT_NE(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 
     ret = ClientIpcOnTransLimitChange(g_pkgName, TEST_PID, TEST_CHANNELID, tos);
     EXPECT_NE(SOFTBUS_OK, ret);

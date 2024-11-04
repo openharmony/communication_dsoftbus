@@ -159,7 +159,9 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
  * @brief Add session.
- * @return  if session already added, return SOFTBUS_TRANS_SESSION_REPEATED, else return SOFTBUS_OK or SOFTBUS_ERR.
+ * @return if the operation is successful, return SOFTBUS_OK.
+ * @return if session already added, return SOFTBUS_TRANS_SESSION_REPEATED.
+ * @return return other error codes.
  */
 int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, SessionEnableStatus *isEnabled);
 

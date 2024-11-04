@@ -85,6 +85,7 @@ enum class NegotiateMessageType {
     CMD_V3_RSP = 101,
     CMD_V3_CUSTOM_PORT_REQ = 102,
     CMD_V3_CUSTOM_PORT_RSP = 103,
+    CMD_ERROR_NOTIFICATION = 104,
 };
 
 enum class NegotiateMessageKey {
@@ -109,6 +110,7 @@ enum class NegotiateMessageKey {
     CHANNEL_5G_SCORE = 18,
     CHALLENGE_CODE = 19,
     NEW_PTK_FRAME = 20,
+    REMOTE_NETWORK_ID = 21,
 
     /* old p2p */
     GC_CHANNEL_LIST = 200,
@@ -183,6 +185,9 @@ public:
 
     void SetRemoteDeviceId(const std::string &value);
     std::string GetRemoteDeviceId() const;
+
+    void SetRemoteNetworkId(const std::string &value);
+    std::string GetRemoteNetworkId() const;
 
     void SetExtraData(const std::vector<uint8_t> &value);
     std::vector<uint8_t> GetExtraData() const;

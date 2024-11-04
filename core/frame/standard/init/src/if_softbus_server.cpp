@@ -107,7 +107,7 @@ int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char 
     (void)msg;
     (void)msgLen;
     COMM_LOGE(COMM_SVC, "ipc default impl");
-    return SOFTBUS_IPC_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
@@ -119,6 +119,14 @@ int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 int32_t ISoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
 {
     COMM_LOGE(COMM_SVC, "GetBusCenterExObj ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::SetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 } // namespace OHOS
