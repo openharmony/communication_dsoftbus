@@ -25,6 +25,7 @@ ohos_unittest("DiscNstackxAdapterTest") {
 
   include_dirs = [
     "../../../../../adapter/common/include",
+    "../../../../../core/adapter/bus_center/include",
     "../../../../../adapter/default_config/spec_config",
     "../../../../../components/nstackx/nstackx_util/interface",
     "../../../../../components/nstackx/nstackx_ctrl/include",
@@ -32,6 +33,7 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "../../../../../core/bus_center/lnn/lane_hub/lane_manager/include",
     "../../../../../core/bus_center/lnn/net_ledger/common/include",
     "../../../../../core/bus_center/lnn/net_ledger/local_ledger/include",
+    "../../../../../core/broadcast/common/include",
     "../../../../../core/common/dfx/hidumper_adapter/include",
     "../../../../../core/common/include",
     "../../../../../core/discovery/ble/dispatcher/include",
@@ -39,6 +41,7 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "../../../../../core/discovery/coap/nstackx_coap/include",
     "../../../../../core/discovery/coap/nstackx_coap/src",
     "../../../../../core/discovery/coap/common/include",
+    "../../../../../core/discovery/common/include",
     "../../../../../core/discovery/interface",
     "../../../../../core/discovery/manager/include",
     "../../../../../interfaces/kits/common",
