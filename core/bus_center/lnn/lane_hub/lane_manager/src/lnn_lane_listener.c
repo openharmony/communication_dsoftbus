@@ -23,6 +23,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
+#include "lnn_parameter_utils.h"
 #include "lnn_trans_lane.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
@@ -413,7 +414,9 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
-    DetectDisableWifiDirectApply();
+    if(laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+        DetectDisableWifiDirectApply();
+    }
     if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post laneState linkdown msg fail");
     }
@@ -536,7 +539,9 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add server lane resource fail");
     }
-    DetectDisableWifiDirectApply();
+    if(laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+        DetectDisableWifiDirectApply();
+    }
 }
 
 static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *link)

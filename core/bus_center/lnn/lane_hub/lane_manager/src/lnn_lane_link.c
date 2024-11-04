@@ -285,6 +285,10 @@ static void HandleDetectWifiDirectApply(bool isDisableLowPower,  WifiDirectLinkI
 
 void DetectDisableWifiDirectApply(void)
 {
+    if (!g_enabledLowPower) {
+        LNN_LOGI(LNN_LANE, "low power not enabled");
+        return;
+    }
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     if (LaneLock() != SOFTBUS_OK) {
@@ -1602,10 +1606,10 @@ int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type
         LNN_LOGE(LNN_LANE, "the networkId is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (type == LANE_HML && IsPowerControlEnabled()) {
+        DetectDisableWifiDirectApply();
+    }
     if (type == LANE_P2P || type == LANE_HML || type == LANE_HML_RAW) {
-        if (IsPowerControlEnabled()) {
-            DetectDisableWifiDirectApply();
-        }
         LaneDeleteP2pAddress(networkId, false);
         int32_t errCode = LnnDisconnectP2p(networkId, laneReqId);
         if (errCode != SOFTBUS_OK) {
