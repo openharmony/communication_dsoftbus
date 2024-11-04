@@ -55,6 +55,7 @@ public:
     virtual int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, int32_t *laneNum) = 0;
     virtual void DetectEnableWifiDirectApply(void) = 0;
     virtual void DetectDisableWifiDirectApply(void) = 0;
+    virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -83,6 +84,7 @@ public:
     MOCK_METHOD3(CheckLaneResourceNumByLinkType, int32_t (const char *peerUdid, LaneLinkType type, int32_t *laneNum));
     MOCK_METHOD0(DetectEnableWifiDirectApply, void (void));
     MOCK_METHOD0(DetectDisableWifiDirectApply, void (void));
+    MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType releaseLink));
 
     static int32_t ActionOfLaneLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
     static int32_t ActionOfLaneLinkFail(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
