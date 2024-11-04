@@ -33,7 +33,6 @@
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
-#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
@@ -2284,7 +2283,6 @@ int32_t ClientWaitSyncBind(int32_t socket)
         TRANS_LOGW(TRANS_SDK, "session is cancelling socket=%{public}d", socket);
         return sessionNode->lifecycle.bindErrCode;
     }
-
     SoftBusCond *callbackCond = &(sessionNode->lifecycle.callbackCond);
     sessionNode->lifecycle.condIsWaiting = true;
     ret = SoftBusCondWait(callbackCond, &(g_clientSessionServerList->lock), NULL);

@@ -67,14 +67,14 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "reuse addr error, ret=%{public}d.", ret);
         ConnShutdownSocket(fd);
-        return SOFTBUS_SOCKET_BIND_ERR;
+        return ret;
     }
 
     ret = SetReusePort(fd, 1);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "reuse port error, ret=%{public}d.", ret);
         ConnShutdownSocket(fd);
-        return SOFTBUS_SOCKET_BIND_ERR;
+        return ret;
     }
 
     ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
@@ -83,7 +83,6 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
         ConnShutdownSocket(fd);
         return ret;
     }
-
     return fd;
 }
 
