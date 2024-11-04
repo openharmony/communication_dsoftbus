@@ -298,11 +298,9 @@ if (defined(ohos_lite)) {
       }
       if (!defined(global_parts_info) ||
           defined(global_parts_info.communication_netmanager_base)) {
-        external_deps += [
-          "netmanager_base:net_policy_manager_if",
-          ]      
-        }
-        if (!defined(global_parts_info) ||
+        external_deps += [ "netmanager_base:net_policy_manager_if" ]
+      }
+      if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
         external_deps += [
           "bundle_framework:appexecfwk_base",
@@ -311,8 +309,8 @@ if (defined(ohos_lite)) {
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
       if (!defined(global_parts_info) ||
-          defined(global_parts_info.ability_ability_runtime)) {    
-        cflags += [ 
+          defined(global_parts_info.ability_ability_runtime)) {
+        cflags += [
           "-DSUPPORT_ABILITY_RUNTIME",
           "-DENHANCED_FLAG",
         ]
