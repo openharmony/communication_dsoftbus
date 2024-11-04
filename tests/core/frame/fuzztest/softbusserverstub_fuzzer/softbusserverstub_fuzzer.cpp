@@ -205,14 +205,14 @@ bool OpenSessionFuzzTest(const uint8_t *data, size_t size)
     offset += NETWORKID_SIZE_MAX;
     bool isAsync = *reinterpret_cast<const bool *>(data + offset);
     offset += sizeof(bool);
-    int32_t sessionIdd = *reinterpret_cast<const int32_t *>(data + offset);
+    int32_t sessionId = *reinterpret_cast<const int32_t *>(data + offset);
     MessageParcel datas;
     datas.WriteCString(sesName);
     datas.WriteCString(peerSessionName);
     datas.WriteCString(peerDeviceId);
     datas.WriteCString(groupId);
     datas.WriteBool(isAsync);
-    datas.WriteInt32(sessionIdd);
+    datas.WriteInt32(sessionId);
     MessageParcel reply;
     sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     if (SoftBusServer == nullptr) {
