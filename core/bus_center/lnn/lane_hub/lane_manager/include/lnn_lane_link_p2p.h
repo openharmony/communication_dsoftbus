@@ -32,6 +32,8 @@ void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId);
 void NotifyLinkFailForForceDown(uint32_t requestId, int32_t reason);
 void RecycleP2pLinkedReqByLinkType(const char *peerNetworkId, LaneLinkType linkType);
 int32_t WifiDirectReconnectDevice(uint32_t p2pRequestId);
+int32_t LnnInitPtkSyncListener(void);
+
 #ifdef __cplusplus
 }
 #endif
