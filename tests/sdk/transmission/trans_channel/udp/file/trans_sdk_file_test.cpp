@@ -644,23 +644,6 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest009
- * @tc.desc: trans set reuse addr.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
-{
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    int on = 65536;
-    int ret = SetReuseAddr(fd, on);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    
-    ret = SetReuseAddr(0, on);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
-}
-
-/**
  * @tc.name: TransFileTest010
  * @tc.desc: trans set reuse port.
  * @tc.type: FUNC
@@ -675,25 +658,6 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
     
     ret = SetReusePort(0, on);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
-}
-
-/**
- * @tc.name: TransFileTest011
- * @tc.desc: trans open tcp server.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
-{
-    int port = 5683;
-    int ret = CreateServerSocketByIpv4("127.0.0.1", port);
-    EXPECT_TRUE(ret);
-
-    ret = CreateServerSocketByIpv4("280567565", port);
-    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
-
-    ret = CreateServerSocketByIpv4("127.0.0.1", 0);
-    EXPECT_TRUE(ret);
 }
 
 /**

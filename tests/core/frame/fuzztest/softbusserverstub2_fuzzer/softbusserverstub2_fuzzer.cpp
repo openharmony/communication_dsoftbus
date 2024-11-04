@@ -108,7 +108,7 @@ private:
 };
 } // anonymous namespace
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     static size_t codeIndex = 0;
     static TestEnv env;
