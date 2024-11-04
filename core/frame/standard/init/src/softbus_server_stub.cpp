@@ -293,9 +293,9 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
 #ifdef SUPPORT_BUNDLENAME
 static bool CheckCallingIsNormalApp(const char *sessionName)
 {
-#define DBINDER_BUS_NAME_FREFIX "DBinder"
+#define DBINDER_BUS_NAME_PREFIX "DBinder"
     // The authorization of dbind is granted throuth Samgr, and there is no control here
-    if (strncmp(sessionName, DBINDER_BUS_NAME_FREFIX, strlen(DBINDER_BUS_NAME_FREFIX)) == 0) {
+    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
         return false;
     }
     uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
