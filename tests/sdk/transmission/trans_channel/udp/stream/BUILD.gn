@@ -34,7 +34,7 @@ executable("dstream_adaptor_server_test") {
   ]
 
   deps = [
-    "${dsoftbus_root_path}/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
 }
@@ -52,7 +52,7 @@ executable("dstream_adaptor_client_test") {
   ]
 
   deps = [
-    "${dsoftbus_root_path}/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
 }
