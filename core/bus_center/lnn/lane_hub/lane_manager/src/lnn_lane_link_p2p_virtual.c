@@ -78,3 +78,8 @@ int32_t WifiDirectReconnectDevice(uint32_t p2pRequestId)
     (void)p2pRequestId;
     return SOFTBUS_P2P_NOT_SUPPORT;
 }
+
+int32_t LnnInitPtkSyncListener(void)
+{
+    return SOFTBUS_P2P_NOT_SUPPORT;
+}

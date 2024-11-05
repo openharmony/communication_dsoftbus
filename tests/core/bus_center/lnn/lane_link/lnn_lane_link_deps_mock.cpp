@@ -170,7 +170,7 @@ void DelLogicAndLaneRelationship(uint64_t laneId)
     GetLaneLinkDepsInterface()->DelLogicAndLaneRelationship(laneId);
 }
 
-int32_t LnnSyncPtk(char *networkId)
+int32_t LnnSyncPtk(const char *networkId)
 {
     return GetLaneLinkDepsInterface()->LnnSyncPtk(networkId);
 }
