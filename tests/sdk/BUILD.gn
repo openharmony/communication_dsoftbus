@@ -20,8 +20,6 @@ import("../../sdk/bus_center/bus_center_sdk.gni")
 import("../../sdk/frame/frame_sdk.gni")
 import("../../sdk/transmission/trans_sdk.gni")
 
-dsoftbus_root_path = "../.."
-
 common_client_src = bus_center_sdk_src + softbus_client_frame_src +
                     trans_session_manager_sdk_src
 common_client_inc = bus_center_sdk_inc + softbus_client_frame_inc +
@@ -29,11 +27,14 @@ common_client_inc = bus_center_sdk_inc + softbus_client_frame_inc +
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_deps += [
+  "$dsoftbus_core_path/common:softbus_utils",
+  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
   "$dsoftbus_dfx_path/log:softbus_dfx_log",
   "$dsoftbus_root_path/adapter:softbus_adapter",
-  "$dsoftbus_root_path/core/common:softbus_utils",
 ]
+
 common_client_ex_deps = []
+
 if (defined(ohos_lite)) {
   if (dsoftbus_feature_build_shared_sdk == true) {
     build_type = "shared_library"
@@ -49,15 +50,34 @@ if (defined(ohos_lite)) {
 
 config("dsoftbus_sdk_interface") {
   include_dirs = [
+    "$dsoftbus_dfx_path/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
-    "$dsoftbus_root_path/interfaces/inner_kits/transport",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_sdk_path/transmission/session/cpp/include",
   ]
+
+  if (enhanced_kits_broadcast) {
+    include_dirs +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/broadcast" ]
+  }
+
+  if (dsoftbus_feature_ex_kits) {
+    include_dirs +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
+  }
+
+  if (schema_enhanced) {
+    include_dirs += [
+      "$dsoftbus_core_path/transmission/common/include",
+      "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport",
+    ]
+  }
 }
 
 ohos_static_library("softbus_client_static") {
@@ -94,6 +114,8 @@ ohos_static_library("softbus_client_static") {
     if (is_standard_system) {
       external_deps += [
         "access_token:libaccesstoken_sdk",
+        "access_token:libprivacy_sdk",
+        "access_token:libtokenid_sdk",
         "c_utils:utils",
         "hilog:libhilog",
         "ipc:ipc_single",

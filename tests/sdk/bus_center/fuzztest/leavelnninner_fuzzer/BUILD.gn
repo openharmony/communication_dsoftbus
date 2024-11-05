@@ -25,6 +25,7 @@ ohos_fuzztest("LeaveLNNInnerFuzzTest") {
       "$dsoftbus_root_path/tests/sdk/bus_center/fuzztest/leavelnninner_fuzzer"
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/adapter/common/include",
@@ -40,7 +41,7 @@ ohos_fuzztest("LeaveLNNInnerFuzzTest") {
   ]
   sources = [ "leavelnninner_fuzzer.cpp" ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",

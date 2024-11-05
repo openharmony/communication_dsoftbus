@@ -29,7 +29,7 @@ ohos_unittest("TransQosTest") {
     "//foundation/communication/dsoftbus/sdk/transmission/session/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
@@ -48,7 +48,7 @@ ohos_unittest("TransQosStatClientTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
@@ -67,7 +67,7 @@ ohos_unittest("TransQosStatServerTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
