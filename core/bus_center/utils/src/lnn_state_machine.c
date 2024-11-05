@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,7 +226,7 @@ static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg
     msg = CreateFsmHandleMsg(fsm, what, arg1, arg2, obj);
     if (msg == NULL) {
         LNN_LOGE(LNN_STATE, "create fsm handle msg fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (fsm->looper->PostMessage == NULL) {
         LNN_LOGE(LNN_STATE, "PostMessage is null");
@@ -264,7 +264,7 @@ int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmD
     fsm->looper = looper == NULL ? GetLooper(LOOP_TYPE_DEFAULT) : looper;
     if (fsm->looper == NULL) {
         LNN_LOGE(LNN_STATE, "get looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     fsm->handler.name = name;
     fsm->handler.HandleMessage = FsmStateMsgHandler;
@@ -289,7 +289,7 @@ int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state)
 
     if (IsDuplicateState(fsm, state)) {
         LNN_LOGE(LNN_STATE, "already exist state");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ALREADY_EXISTED;
     }
     ListInit(&state->list);
     ListAdd(&fsm->stateList, &state->list);
@@ -331,7 +331,7 @@ int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
     msg = CreateFsmHandleMsg(fsm, FSM_CTRL_MSG_DATA, msgType, 0, data);
     if (msg == NULL) {
         LNN_LOGE(LNN_STATE, "create fsm handle msg fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (fsm->looper->PostMessageDelay == NULL) {
         LNN_LOGE(LNN_STATE, "PostMessageDelay is null");
@@ -380,7 +380,7 @@ int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
         LNN_LOGE(LNN_STATE, "unexpected state in change state process");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (IsDuplicateState(fsm, state)) {
