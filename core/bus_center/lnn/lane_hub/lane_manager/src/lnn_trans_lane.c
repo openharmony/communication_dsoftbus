@@ -1329,7 +1329,7 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
-void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
+static void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
 {
     LaneTransType transType;
     if (Lock() != SOFTBUS_OK) {
