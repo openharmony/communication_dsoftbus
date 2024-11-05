@@ -414,7 +414,7 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
-    if(laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
         DetectDisableWifiDirectApply();
     }
     if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
@@ -539,7 +539,7 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add server lane resource fail");
     }
-    if(laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
         DetectDisableWifiDirectApply();
     }
 }
