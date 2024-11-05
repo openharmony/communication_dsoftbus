@@ -17,6 +17,7 @@
 #define SOFTBUS_ADAPTER_TIMER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,10 @@ void SetTimerFunc(TimerFunc func);
 void *SoftBusCreateTimer(void **timerId, unsigned int type);
 int SoftBusStartTimer(void *timerId, unsigned int tickets);
 int SoftBusDeleteTimer(void *timerId);
+#ifdef SOFTBUS_STANDARD_OS
+int32_t SoftBusStartTimerWithFfrt(int32_t *timerHandle, uint64_t timeout, bool repeat);
+void SoftBusStopTimerWithFfrt(int32_t timerHandle);
+#endif
 
 /* Sleep */
 int SoftBusSleepMs(unsigned int ms);

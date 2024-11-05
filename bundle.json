@@ -87,7 +87,8 @@
         "libcoap",
         "zlib",
         "libnl",
-        "power_manager"
+        "power_manager",
+        "ffrt"
       ],
       "third_party": [
         "cJSON",
