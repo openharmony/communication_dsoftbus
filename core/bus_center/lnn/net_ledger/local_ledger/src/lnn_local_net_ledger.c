@@ -46,8 +46,8 @@
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
-#define DEFAULT_SUPPORT_HBCAPACITY 0x2
 #define DEFAULT_SUPPORT_AUTHCAPACITY 0xF
+#define DEFAULT_SUPPORT_HBCAPACITY 0x2
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
@@ -2258,9 +2258,9 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->discoveryType = 0;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     nodeInfo->authCapacity = DEFAULT_SUPPORT_AUTHCAPACITY;
-    nodeInfo->heartbeatCapacity = DEFAULT_SUPPORT_HBCAPACITY;
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
+    nodeInfo->heartbeatCapacity = DEFAULT_SUPPORT_HBCAPACITY;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
         g_localNetLedger.status = LL_INIT_FAIL;
         return SOFTBUS_ERR;

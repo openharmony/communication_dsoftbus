@@ -433,7 +433,7 @@ int32_t BusCenterClientProxy::OnHichainProofException(
     const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        LNN_LOGE(LNN_EVENT, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = Remote();
