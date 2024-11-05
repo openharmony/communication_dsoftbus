@@ -111,6 +111,7 @@ typedef enum {
     UPDATE_SCREEN_STATE_INFO,
     UPDATE_BT_STATE_OPEN_INFO,
     UPDATE_BT_STATE_CLOSE_INFO,
+    UPDATE_BR_TURN_ON_INFO,
     UPDATE_HB_MAX_INFO,
 } LnnHeartbeatUpdateInfoType;
 
@@ -123,6 +124,7 @@ typedef struct {
     uint32_t switchLevel;
     int32_t preferChannel;
     uint8_t shortUuid[HB_SHORT_UUID_LEN];
+    bool isScreenOn;
 } HbRespData;
 
 typedef enum {
