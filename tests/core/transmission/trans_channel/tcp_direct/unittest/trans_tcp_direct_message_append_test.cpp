@@ -124,7 +124,6 @@ SessionConn *TestSetSessionConn()
     conn->appInfo.myData.dataConfig = 1;
     conn->appInfo.fastTransDataSize = 1;
     conn->channelId = TEST_CHANNELID;
-    conn->channelId = 1;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = INVALID_VALUE;

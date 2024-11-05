@@ -110,17 +110,19 @@ private:
 
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    static size_t codeIndex = 0;
     static TestEnv env;
     if (!env.IsInited()) {
         return 0;
     }
 
-    SoftBusFuncId code = CODE_LIST[codeIndex++ % CODE_LIST.size()];
+    if (data == nullptr || size ==0) {
+        return 0;
+    }
+    SoftBusFuncId code = CODE_LIST[data[0] % CODE_LIST.size()];
 
     OHOS::MessageParcel parcel;
     parcel.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    parcel.WriteBuffer(data, size);
+    parcel.WriteBuffer(data + 1, size - 1);
 
     env.DoRemoteRequest(code, parcel);
     return 0;
