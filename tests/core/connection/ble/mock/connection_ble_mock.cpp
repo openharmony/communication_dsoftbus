@@ -95,5 +95,10 @@ int32_t BleGattcUnRegister(int32_t clientId)
 {
     return GetConnectionBleInterface()->BleGattcUnRegister(clientId);
 }
+
+int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority)
+{
+    return GetConnectionBleInterface()->BleGattcSetPriority(clientId, bdAddr, priority);
+}
 }
 }

@@ -23,6 +23,7 @@
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
@@ -436,6 +437,11 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     return LnnSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t LnnIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    return LnnSetLocalDeviceName(pkgName, displayName);
+}
+
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {
@@ -508,9 +514,9 @@ int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t 
 }
 
 int32_t LnnIpcNotifyHichainProofException(
-    const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    return ClientNotifyHichainProofException(deviceId, deviceIdLen, deviceTypeId, errCode);
+    return ClientNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,

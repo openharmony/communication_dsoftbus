@@ -99,7 +99,6 @@ if (defined(ohos_lite)) {
     include_dirs += trans_common_inc
     sources = [
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
-      "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/softbus_property/softbus_feature_config.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "softbus_hidumper.c",
@@ -141,6 +140,14 @@ if (defined(ohos_lite)) {
       "hisysevent:libhisysevent",
       "hisysevent:libhisyseventmanager",
     ]
+    if (is_standard_system) {
+      sources += [ "$dsoftbus_root_path/core/common/message_handler/message_handler_ffrt.cpp" ]
+      external_deps += [ "ffrt:libffrt" ]
+    } else {
+      sources += [
+        "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
+      ]
+    }
 
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

@@ -58,16 +58,16 @@ typedef struct {
 } LnnInvalidCleanInfo;
 
 typedef struct {
-    ConnectionAddr addr;
-    NodeInfo *nodeInfo;
-    NodeInfo *dupInfo;
     char peerNetworkId[NETWORK_ID_BUF_LEN];
-    LnnInvalidCleanInfo *cleanInfo;
-    AuthHandle authHandle;
     uint32_t requestId;
     uint32_t flag;
     SoftBusVersion version;
+    AuthHandle authHandle;
     LnnDfxDeviceInfoReport infoReport;
+    ConnectionAddr addr;
+    LnnInvalidCleanInfo *cleanInfo;
+    NodeInfo *nodeInfo;
+    NodeInfo *dupInfo;
 } LnnConntionInfo;
 
 struct tagLnnConnectionFsm;
@@ -75,17 +75,17 @@ struct tagLnnConnectionFsm;
 typedef void (*LnnConnectionFsmStopCallback)(struct tagLnnConnectionFsm *connFsm);
 
 typedef struct tagLnnConnectionFsm {
-    ListNode node;
-    uint16_t id;
-
     char fsmName[LNN_CONNECTION_FSM_NAME_LEN];
     char pkgName[PKG_NAME_SIZE_MAX];
-    FsmStateMachine fsm;
-    LnnConntionInfo connInfo;
-    LnnConnectionFsmStopCallback stopCallback;
     bool isDead;
     bool isNeedConnect;
+    uint16_t id;
+
+    LnnConnectionFsmStopCallback stopCallback;
+    ListNode node;
     LnnStatisticData statisticData;
+    FsmStateMachine fsm;
+    LnnConntionInfo connInfo;
 } LnnConnectionFsm;
 
 LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName, bool isNeedConnect);
@@ -103,6 +103,10 @@ int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
 bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
+
+void SetLnnTriggerInfo(uint64_t triggerTime, int32_t deviceCnt, int32_t triggerReason);
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo);
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage);
 
 #ifdef __cplusplus
 #if __cplusplus

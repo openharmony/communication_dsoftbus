@@ -459,13 +459,10 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
     (void)LnnIpcNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 
-void LnnNotifyHichainProofException(const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+void LnnNotifyHichainProofException(
+    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    if (deviceId == NULL || deviceIdLen != UDID_BUF_LEN) {
-        LNN_LOGE(LNN_EVENT, "deviceId is invalid");
-        return;
-    }
-    (void)LnnIpcNotifyHichainProofException(deviceId, deviceIdLen, deviceTypeId, errCode);
+    (void)LnnIpcNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -784,7 +781,7 @@ int32_t LnnInitBusCenterEvent(void)
     SoftBusLooper *looper = CreateNewLooper("Notify_Lp");
     if (looper == NULL) {
         LNN_LOGE(LNN_EVENT, "create notify looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     g_notifyHandler.looper = looper;
     g_notifyHandler.HandleMessage = HandleNotifyMessage;

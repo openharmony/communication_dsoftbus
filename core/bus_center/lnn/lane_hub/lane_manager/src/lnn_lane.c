@@ -326,7 +326,7 @@ static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, 
     return SOFTBUS_OK;
 }
 
-static int32_t LnnAllocRawLane(uint32_t laneHandle, const RawLaneAllocInfo* allocInfo,
+static int32_t LnnAllocRawLane(uint32_t laneHandle, const RawLaneAllocInfo *allocInfo,
     const LaneAllocListener *listener)
 {
     if (allocInfo == NULL || listener == NULL) {

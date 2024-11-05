@@ -45,7 +45,7 @@ void UpdateRemoteDeviceInfoListToMlps(void)
 
 int32_t GetBurstAdvId(void)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t SendDeviceInfoToSHByType(LpFeatureType type)

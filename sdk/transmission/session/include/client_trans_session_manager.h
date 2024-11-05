@@ -97,6 +97,7 @@ typedef struct {
     uint32_t dataConfig;
     SocketLifecycleData lifecycle;
     uint32_t actionId;
+    int32_t osType;
 } SessionInfo;
 
 typedef struct {
@@ -158,7 +159,9 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
  * @brief Add session.
- * @return  if session already added, return SOFTBUS_TRANS_SESSION_REPEATED, else return SOFTBUS_OK or SOFTBUS_ERR.
+ * @return if the operation is successful, return SOFTBUS_OK.
+ * @return if session already added, return SOFTBUS_TRANS_SESSION_REPEATED.
+ * @return return other error codes.
  */
 int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, SessionEnableStatus *isEnabled);
 
@@ -286,6 +289,8 @@ void SocketServerStateUpdate(const char *sessionName);
 int32_t ClientCancelAuthSessionTimer(int32_t sessionId);
 
 int32_t ClientSetStatusClosingBySocket(int32_t socket, bool isClosing);
+
+int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
 #ifdef __cplusplus
 }
 #endif

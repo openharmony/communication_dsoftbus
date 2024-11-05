@@ -747,7 +747,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
     (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abcde");
     ListInit(&connectingDevice->requests);
     g_brManager.connecting = connectingDevice;
+    SoftBusList *list = CreateSoftBusList();
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    connection->connectProcessStatus = list;
     ClientConnectFailed(connectionId, error);
+    ConnBrReturnConnection(&connection);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager017, TestSize.Level1)
@@ -1230,6 +1234,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
     option.type = CONNECT_BR;
     (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "abc");
     ListInit(&g_brManager.pendings->list);
+    ListInit(&g_brManager.connections->list);
     (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abce");
     it.pendInfo = &pendInfo;
     ListTailInsert(&g_brManager.pendings->list, &it.node);

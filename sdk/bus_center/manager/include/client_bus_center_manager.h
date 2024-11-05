@@ -54,6 +54,7 @@ int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_
 int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t SetLocalDeviceNameInner(const char *pkgName, const char *displayName);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
@@ -63,7 +64,7 @@ int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type);
 int32_t LnnOnLocalNetworkIdChanged(const char *pkgName);
 int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen);
 int32_t LnnOnHichainProofException(
-    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode);
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode);
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);

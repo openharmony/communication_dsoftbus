@@ -31,11 +31,16 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/touch_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/include",
+  "$dsoftbus_root_path/core/discovery/common/include",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 
 ble_discovery_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+ble_discovery_external_deps = []
+if (support_i18n && qemu_arm_disable) {
+  ble_discovery_external_deps += [ "i18n:intl_util" ]
+}
 
 if (!support_bluetooth) {
   ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
@@ -48,6 +53,11 @@ if (!support_bluetooth) {
       "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
       "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
     ]
+    if (support_i18n && qemu_arm_disable) {
+      ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp" ]
+    } else {
+      ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
+    }
   }
 }
 

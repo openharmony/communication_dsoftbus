@@ -272,7 +272,7 @@ static int32_t GetNeedUpdateAdvertiser(int32_t adv)
 
 static void UpdateScannerInfoManager(int32_t type, bool needUpdate)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (type == CON_FILTER_TYPE) {
         g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap = needUpdate;
@@ -416,7 +416,7 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
-        DISC_LOGI(DISC_BLE, "don't match passive publish capBitMap, callCount=%{public}u", callCount++);
+        DISC_LOGD(DISC_BLE, "don't match passive publish capBitMap, callCount=%{public}u", callCount++);
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
@@ -581,7 +581,7 @@ static void BleOnScanStart(int listenerId, int status)
 {
     (void)listenerId;
     (void)status;
-    DISC_LOGI(DISC_BLE, "BleOnScanStart");
+    DISC_LOGD(DISC_BLE, "BleOnScanStart");
     g_isScanning = true;
 }
 
@@ -589,7 +589,7 @@ static void BleOnScanStop(int listenerId, int status)
 {
     (void)listenerId;
     (void)status;
-    DISC_LOGI(DISC_BLE, "BleOnScanStop");
+    DISC_LOGD(DISC_BLE, "BleOnScanStop");
     g_isScanning = false;
 }
 
@@ -1103,7 +1103,7 @@ static void StartScaner(int32_t type)
     }
     UpdateScannerInfoManager(type, true);
     DfxRecordScanEnd(SOFTBUS_OK);
-    DISC_LOGI(DISC_BLE, "StartScanner success");
+    DISC_LOGD(DISC_BLE, "StartScanner success");
 }
 
 static int32_t StopScaner(void)
@@ -1115,7 +1115,7 @@ static int32_t StopScaner(void)
     int32_t ret = SchedulerStopScan(g_bleListener.scanListenerId);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL, DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
-    DISC_LOGI(DISC_BLE, "success");
+    DISC_LOGD(DISC_BLE, "success");
     return SOFTBUS_OK;
 }
 
@@ -1349,7 +1349,7 @@ static int32_t BleStartActivePublish(const PublishOption *option)
 
 static int32_t BleStartPassivePublish(const PublishOption *option)
 {
-    DISC_LOGI(DISC_BLE, "start passive publish");
+    DISC_LOGD(DISC_BLE, "start passive publish");
     return ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_PASSIVE, PUBLISH_PASSIVE_SERVICE, (void *)option);
 }
 
@@ -1361,7 +1361,7 @@ static int32_t BleStopActivePublish(const PublishOption *option)
 
 static int32_t BleStopPassivePublish(const PublishOption *option)
 {
-    DISC_LOGI(DISC_BLE, "stop passive publish");
+    DISC_LOGD(DISC_BLE, "stop passive publish");
     return ProcessBleDiscFunc(false, BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, (void *)option);
 }
 
@@ -1570,10 +1570,10 @@ static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
     DISC_LOGD(DISC_BLE, "enter");
     uintptr_t key = (uintptr_t)args;
     if (msg->what == PROCESS_TIME_OUT && msg->arg1 == key) {
-        DISC_LOGI(DISC_BLE, "find key");
+        DISC_LOGD(DISC_BLE, "find key");
         return 0;
     }
-    DISC_LOGI(DISC_BLE, "not find key");
+    DISC_LOGW(DISC_BLE, "not find key");
     return 1;
 }
 

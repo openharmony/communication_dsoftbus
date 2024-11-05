@@ -1780,13 +1780,13 @@ static int32_t ProcessCrcCheckSumData(int32_t sessionId, const FileFrame *frame)
     int32_t result = UnpackFileCrcCheckSum(recipient, (FileFrame *)frame);
     TRANS_LOGE(TRANS_FILE, "verification crc check sum, ret=%{public}d", result);
     int32_t ret = SendFileTransResult(recipient->channelId, frame->seq, result, IS_RECV_RESULT);
-    ReleaseRecipientRef(recipient);
     if (result != SOFTBUS_OK || ret != SOFTBUS_OK) {
         SetRecipientRecvState(recipient, TRANS_FILE_RECV_ERR_STATE);
         DelRecipient(sessionId);
         return SOFTBUS_FILE_ERR;
     }
     SetRecipientRecvState(recipient, TRANS_FILE_RECV_IDLE_STATE);
+    ReleaseRecipientRef(recipient);
     return SOFTBUS_OK;
 }
 

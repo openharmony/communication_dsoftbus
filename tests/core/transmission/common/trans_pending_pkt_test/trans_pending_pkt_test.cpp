@@ -191,6 +191,14 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    PendingDeinit(type);
+
+    ret = PendingInit(PENDING_TYPE_UDP);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    type = PENDING_TYPE_UDP;
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    PendingDeinit(type);
 }
 
 /**
@@ -251,4 +259,42 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+/**
+ * @tc.name: PendingPacketTestAll001
+ * @tc.desc: PendingPacketTestAll001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransPendingPktTest, PendingPacketTestAll001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t type = PENDING_TYPE_UDP;
+    int32_t seqNum = 0;
+
+    int32_t ret = PendingInit(type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ret = AddPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = AddPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_PENDING, ret);
+
+    PendingPktInfo *pkgInfo = GetPendingPacket(channelId, seqNum, PENDING_TYPE_BUTT + 1);
+    EXPECT_EQ(pkgInfo, nullptr);
+    pkgInfo = GetPendingPacket(channelId, seqNum, type);
+    EXPECT_NE(pkgInfo, nullptr);
+
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+
+    ret = SetPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+
+    ret = DelPendingPacket(channelId, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = DelPendingPacket(channelId, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 } // OHOS

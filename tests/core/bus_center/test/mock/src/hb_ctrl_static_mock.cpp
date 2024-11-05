@@ -181,5 +181,60 @@ int32_t LnnGenerateCeParams(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
 }
+
+void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
+{
+    return HeartBeatCtrlStaticInterface()->DfxRecordTriggerTime(reason, stage);
+}
+
+int32_t LnnHbMediumMgrInit(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnHbMediumMgrInit();
+}
+
+int32_t LnnStartNewHbStrategyFsm(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStartNewHbStrategyFsm();
+}
+
+int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
+{
+    return HeartBeatCtrlStaticInterface()->AuthSendKeepaliveOption(uuid, cycle);
+}
+
+int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
+{
+    return HeartBeatCtrlStaticInterface()->LnnSetGearModeBySpecificType(callerId, mode, type);
+}
+
+void LnnDumpLocalBasicInfo(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnDumpLocalBasicInfo();
+}
+
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    return HeartBeatCtrlStaticInterface()->LnnGetOnlineStateById(id, type);
+}
+
+int32_t AuthFlushDevice(const char *uuid)
+{
+    return HeartBeatCtrlStaticInterface()->AuthFlushDevice(uuid);
+}
+
+int32_t LnnHbStrategyInit(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnHbStrategyInit();
+}
+
+void LnnBleHbUnregDataLevelChangeCb(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnBleHbUnregDataLevelChangeCb();
+}
+
+int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStopOfflineTimingStrategy(networkId, addrType);
+}
 }
 } // namespace OHOS

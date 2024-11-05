@@ -58,4 +58,3 @@ int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel);
 }
 #endif
 #endif // LNN_LANE_VAP_INFO_H
-

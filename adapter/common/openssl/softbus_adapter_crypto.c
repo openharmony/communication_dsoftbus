@@ -445,12 +445,12 @@ int32_t SoftBusDecryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
 
     if (memcpy_s(cipherKey->iv, sizeof(cipherKey->iv), input, GCM_IV_LEN) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "copy iv failed.");
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     uint32_t outLen = inLen - OVERHEAD_LEN;
     int32_t result = SslAesGcmDecrypt(cipherKey, input, inLen, decryptData, outLen);
     if (result <= 0) {
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     *decryptLen = (uint32_t)result;
     return SOFTBUS_OK;

@@ -42,17 +42,17 @@ typedef enum {
 } TcpDirectChannelStatus;
 
 typedef struct {
-    ListNode node;
     bool serverSide;
-    int32_t channelId;
-    AppInfo appInfo;
-    uint32_t status;
-    uint32_t timeout;
-    int64_t req;
-    uint32_t requestId;
-    AuthHandle authHandle;
     bool isMeta;
     ListenerModule listenMod;
+    int32_t channelId;
+    uint32_t status;
+    uint32_t timeout;
+    uint32_t requestId;
+    int64_t req;
+    ListNode node;
+    AuthHandle authHandle;
+    AppInfo appInfo;
 } SessionConn;
 
 typedef struct {
@@ -129,7 +129,7 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId);
 
 void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid);
 
-int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+int32_t TransTdcGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *remoteIp, uint32_t maxIpLen,
     int32_t *connectType);
 
 int32_t TransGetPidByChanId(int32_t channelId, int32_t channelType, int32_t *pid);

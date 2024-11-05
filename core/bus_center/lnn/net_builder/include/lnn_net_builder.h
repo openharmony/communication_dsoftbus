@@ -58,23 +58,23 @@ typedef enum {
 } NetBuilderMessageType;
 
 typedef struct {
-    int32_t code;
     char nodeAddr[SHORT_ADDRESS_MAX_LEN];
+    int32_t code;
     int32_t proxyPort;
     int32_t sessionPort;
     int32_t authPort;
 } LnnNodeAddr;
 
 typedef struct {
-    ListNode node;
-    ConnectionAddr addr;
     char networkId[NETWORK_ID_BUF_LEN];
     char pkgName[PKG_NAME_SIZE_MAX];
-    int64_t authId;
+    bool needReportFailure;
     int32_t callingPid;
     uint32_t requestId;
     uint32_t flag;
-    bool needReportFailure;
+    ConnectionAddr addr;
+    int64_t authId;
+    ListNode node;
 } MetaJoinRequestNode;
 
 typedef struct {
@@ -103,14 +103,14 @@ typedef struct {
 typedef struct {
     uint32_t requestId;
     int32_t retCode;
-    AuthHandle authHandle;
     NodeInfo *nodeInfo;
+    AuthHandle authHandle;
 } VerifyResultMsgPara;
 
 typedef struct {
-    ConnectionAddr addr;
-    AuthHandle authHandle;
     NodeInfo *nodeInfo;
+    AuthHandle authHandle;
+    ConnectionAddr addr;
 } DeviceVerifyPassMsgPara;
 
 typedef struct {
@@ -121,8 +121,8 @@ typedef struct {
 
 typedef struct {
     char oldNetworkId[NETWORK_ID_BUF_LEN];
-    ConnectionAddrType addrType;
     char newNetworkId[NETWORK_ID_BUF_LEN];
+    ConnectionAddrType addrType;
 } LeaveInvalidConnMsgPara;
 
 typedef struct {
@@ -205,6 +205,7 @@ void DeleteNodeFromPcRestrictMap(const char *udidHash);
 int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
 int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
 int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info);
+int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen);
 #ifdef __cplusplus
 }
 #endif

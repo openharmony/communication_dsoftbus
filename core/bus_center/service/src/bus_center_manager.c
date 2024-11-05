@@ -142,7 +142,7 @@ static void BusCenterServerDelayInit(void *para)
         if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit &&
             g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "init delay impl failed. i=%{public}u", i);
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_NO_INIT;
         } else {
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;
         }
@@ -173,34 +173,34 @@ static int32_t BusCenterServerInitFirstStep(void)
 {
     if (LnnInitLnnLooper() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lnn looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     if (LnnInitNetLedger() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init bus center event fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CENTER_EVENT_INIT_FAILED;
     }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init event monitor fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_EVENT_MONITER_INIT_FAILED;
     }
     if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init discovery manager fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
     }
     if (LnnInitNetworkManager() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lnn network manager fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MANAGER_INIT_FAILED;
     }
     if (LnnInitNetBuilder() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init net builder fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BUILDER_INIT_FAILED;
     }
     if (LnnInitMetaNode() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init meta node fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_META_NODE_INIT_FAILED;
     }
     if (IsActiveOsAccountUnlocked()) {
         LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");
@@ -214,23 +214,23 @@ static int32_t BusCenterServerInitSecondStep(void)
     SoftBusRunPeriodicalTask(WATCHDOG_TASK_NAME, WatchdogProcess, WATCHDOG_INTERVAL_TIME, WATCHDOG_DELAY_TIME);
     if (LnnInitLaneHub() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lane hub fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (InitNodeAddrAllocator() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init nodeAddr fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (RouteLSInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init route fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (StartDelayInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "start delay init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (InitDecisionCenter() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -240,7 +240,7 @@ int32_t LnnInitLnnLooper(void)
     SoftBusLooper *looper = CreateNewLooper("Lnn_Lp");
     if (!looper) {
         LNN_LOGE(LNN_LANE, "init laneLooper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     SetLooper(LOOP_TYPE_LNN, looper);
     LNN_LOGI(LNN_LANE, "init laneLooper success");
@@ -258,11 +258,13 @@ void LnnDeinitLnnLooper(void)
 
 int32_t BusCenterServerInit(void)
 {
-    if (BusCenterServerInitFirstStep() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    int32_t ret = BusCenterServerInitFirstStep();
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
-    if (BusCenterServerInitSecondStep() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    ret = BusCenterServerInitSecondStep();
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     LNN_LOGI(LNN_INIT, "bus center server init ok");
     return SOFTBUS_OK;

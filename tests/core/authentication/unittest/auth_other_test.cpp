@@ -747,7 +747,10 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     authFsm->info = authSessionInfo;
     authFsm->authSeq = 512;
     const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
-    ASSERT_TRUE(data != nullptr);
+    if (data == NULL) {
+        SoftBusFree(authFsm);
+        return;
+    }
     MessagePara *para = NewMessagePara(data, MSG_LEN);
     HandleMsgRecvDeviceInfo(authFsm, para);
     authSessionInfo.isServer= true;
@@ -806,7 +809,10 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
     connInfo->type = AUTH_LINK_TYPE_BLE;
     uint32_t requestId = 1;
     NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
-    ASSERT_TRUE(nodeInfo != nullptr);
+    if (nodeInfo == NULL) {
+        SoftBusFree(connInfo);
+        return;
+    }
     int64_t *authId = reinterpret_cast<int64_t *>(malloc(sizeof(int64_t)));
     int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
     EXPECT_TRUE(ret == SOFTBUS_ERR);

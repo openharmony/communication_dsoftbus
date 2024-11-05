@@ -39,11 +39,11 @@
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_net_builder.h"
-#include "lnn_net_builder_process.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
+#include "lnn_connection_fsm.h"
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
@@ -983,29 +983,12 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     NotifyAuthResult(authHandle, info);
 }
 
-static void GetPeerUdid(const AuthSessionInfo *info, int32_t reason)
-{
-    if (reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP || reason == SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH) {
-        LnnConnectionFsm *connFsm = FindConnectionFsmByRequestId(info->requestId);
-        if (connFsm == NULL || connFsm->isDead) {
-            AUTH_LOGE(AUTH_FSM, "can not find connection fsm. requestId=%{public}u", info->requestId);
-            return;
-        }
-        AUTH_LOGI(AUTH_FSM, "find connFsm success");
-        if (strcpy_s(connFsm->connInfo.infoReport.peerUdid, UDID_BUF_LEN, info->udid) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "strcpy_s udid fail");
-            return;
-        }
-    }
-}
-
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "auth session info is null");
     AUTH_CHECK_AND_RETURN_LOGE(CheckAuthConnInfoType(&info->connInfo), AUTH_FSM, "connInfo type error");
     AUTH_LOGE(AUTH_FSM, "SetAuthFailed: authSeq=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d", authSeq,
         info->requestId, reason);
-    GetPeerUdid(info, reason);
     AuthManager *auth = NULL;
     if (info->isSavedSessionKey) {
         int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
@@ -1179,6 +1162,45 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
     SoftbusHitraceStop();
 }
 
+static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, const AuthDataHead *head)
+{
+    uint64_t timeStamp = 0;
+    int32_t ret = SOFTBUS_OK;
+    LnnEventExtra extra = { 0 };
+    (void)LnnEventExtraInit(&extra);
+    LnnTriggerInfo triggerInfo = { 0 };
+    GetLnnTriggerInfo(&triggerInfo);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+    extra.authSeq = head->seq;
+    char *udidHash = (char *)SoftBusCalloc(SHORT_UDID_HASH_HEX_LEN + 1);
+    if (udidHash == NULL) {
+        AUTH_LOGE(AUTH_FSM, "udidHash calloc fail");
+        return;
+    }
+    if (connInfo->type == AUTH_LINK_TYPE_BLE) {
+        ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
+                                      connInfo->info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail. ret=%{public}d", ret);
+            SoftBusFree(udidHash);
+            return;
+        }
+        extra.peerUdidHash = udidHash;
+    } else if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
+        ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
+                                      connInfo->info.ipInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail. ret=%{public}d", ret);
+            SoftBusFree(udidHash);
+            return;
+        }
+        extra.peerUdidHash = udidHash;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
+    SoftBusFree(udidHash);
+}
+
 static void HandleDeviceIdData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1211,11 +1233,8 @@ static void HandleDeviceIdData(
         }
         ReleaseAuthLock();
         AuthParam authInfo = {
-            .authSeq = head->seq,
-            .requestId = AuthGenRequestId(),
-            .connId = connId,
-            .isServer = true,
-            .isFastAuth = true,
+            .authSeq = head->seq, .requestId = AuthGenRequestId(), .connId = connId,
+            .isServer = true, .isFastAuth = true,
         };
         ret = AuthSessionStartAuth(&authInfo, connInfo);
         if (ret != SOFTBUS_OK) {
@@ -1230,6 +1249,7 @@ static void HandleDeviceIdData(
             "perform auth session recv devId fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
         return;
     }
+    DfxRecordServerRecvPassiveConnTime(connInfo, head);
 }
 
 static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)

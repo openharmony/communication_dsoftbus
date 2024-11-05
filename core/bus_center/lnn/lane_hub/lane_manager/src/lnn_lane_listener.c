@@ -23,6 +23,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
+#include "lnn_parameter_utils.h"
 #include "lnn_trans_lane.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
@@ -30,21 +31,19 @@
 #include "wifi_direct_manager.h"
 #include "softbus_socket.h"
 
-#define HML_IP_PREFIX_LEN 7
-#define HML_IP_PREFIX "172.30."
 const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LANE_TYPE_CTRL};
 
 typedef struct {
-    ListNode node;
+    uint32_t ref;
     LaneType laneType;
     uint64_t laneId;
-    uint32_t ref;
+    ListNode node;
 } LaneBusinessInfo;
 
 typedef struct {
+    LaneType type;
     ListNode node;
     LaneStatusListener listener;
-    LaneType type;
 } LaneListenerInfo;
 
 static SoftBusMutex g_laneStateListenerMutex;
@@ -359,7 +358,7 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, Lane
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    laneLinkInfo->type = (strncmp(peerIp, HML_IP_PREFIX, HML_IP_PREFIX_LEN) == 0) ? LANE_HML : LANE_P2P;
+    laneLinkInfo->type = IsHmlIpAddr(peerIp) ? LANE_HML : LANE_P2P;
     if (strncpy_s(laneLinkInfo->linkInfo.p2p.connInfo.peerIp, IP_LEN, peerIp, IP_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "strncpy peerIp fail");
         return SOFTBUS_STRCPY_ERR;
@@ -413,7 +412,9 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
-    DetectDisableWifiDirectApply();
+    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+        DetectDisableWifiDirectApply();
+    }
     if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post laneState linkdown msg fail");
     }
@@ -535,6 +536,9 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     }
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add server lane resource fail");
+    }
+    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+        DetectDisableWifiDirectApply();
     }
 }
 

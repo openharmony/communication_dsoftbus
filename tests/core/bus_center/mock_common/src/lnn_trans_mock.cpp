@@ -66,7 +66,7 @@ int32_t LnnTransInterfaceMock::ActionOfTransRegister(const INetworkingListener *
 {
     if (listener == NULL) {
         LNN_LOGE(LNN_TEST, "listener is invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_networkListener = listener;
     return SOFTBUS_OK;

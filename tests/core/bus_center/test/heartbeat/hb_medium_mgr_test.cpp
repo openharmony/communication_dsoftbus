@@ -79,7 +79,7 @@ int32_t onUpdateSendInfo1(LnnHeartbeatUpdateInfoType type)
 
 int32_t onUpdateSendInfo2(LnnHeartbeatUpdateInfoType type)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_HB_UPDATE_SEND_INFO_FAIL;
 }
 
 /*
@@ -104,7 +104,7 @@ HWTEST_F(HeartBeatMediumTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
 
     UpdateOnlineInfoNoConnection(nullptr, nullptr);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     UpdateOnlineInfoNoConnection(nullptr, &hbResp);
 
     hbResp.capabiltiy = static_cast<uint8_t>(1 << ENABLE_WIFI_CAP);
@@ -226,12 +226,12 @@ HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(ledgerMock, LnnIsLSANode).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
     ret = HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 }
 
 /*
@@ -251,32 +251,32 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, TEST_RECVTIME_LAST);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret =
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, TEST_RECVTIME_LAST);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     EXPECT_CALL(hbStrateMock, LnnStopOfflineTimingStrategy)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret =
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, TEST_RECVTIME_LAST);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_STOP_STRATEGY_FAIL);
     EXPECT_CALL(hbStrateMock, LnnStartOfflineTimingStrategy)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret =
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, TEST_RECVTIME_LAST);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ON_CALL(disLedgerMock, LnnGetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_ERR));
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
+    ON_CALL(disLedgerMock, LnnGetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_NOT_FIND));
     ret =
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, TEST_RECVTIME_LAST);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR);
     ON_CALL(disLedgerMock, LnnGetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ret =
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V3, TEST_RECVTIME_LAST);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);
 }
 
 /*
@@ -321,9 +321,9 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
     HbFirstSaveRecvTime(&storedInfo, &device,
         mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = HbMediumMgrRecvProcess(nullptr, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -364,7 +364,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level
     int32_t ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -389,7 +389,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess, TestSize.Level1)
 {
     HeartBeatStategyInterfaceMock hbStrategyMock;
     EXPECT_CALL(hbStrategyMock, LnnStartHbByTypeAndStrategy)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_POST_MSG_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
     HbMediumMgrRelayProcess(TEST_DEVID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1);
     HbMediumMgrRelayProcess(TEST_DEVID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1);
@@ -452,13 +452,13 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
     ON_CALL(distrLedgerMock, LnnGetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     LnnDumpHbOnlineNodeList();
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     LnnDumpHbOnlineNodeList();
     LnnDumpHbOnlineNodeList();
     EXPECT_CALL(distrLedgerMock, LnnGetDLHeartbeatTimestamp)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnDumpHbOnlineNodeList();
 }
@@ -480,7 +480,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
     };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_HB_MGR_REG_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
@@ -516,7 +516,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
     int32_t ret = LnnHbMediumMgrSendBegin(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnHbMediumMgrSendBegin(&data);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_SEND_BEGIN_FAILED);
 }
 
 /*
@@ -535,7 +535,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
     EXPECT_TRUE(ret);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_HB_MGR_REG_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnHbMediumMgrInit();
     int32_t id = LnnConvertHbTypeToId(HB_MAX_TYPE_COUNT + 1);
@@ -554,7 +554,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
     ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_BLE_V0, static_cast<void *>(&num));
     EXPECT_TRUE(ret);
     ret = LnnHbMediumMgrSendEnd(&custData);
-    EXPECT_TRUE(ret = SOFTBUS_ERR);
+    EXPECT_TRUE(ret);
 }
 
 /*
@@ -600,11 +600,11 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
         .type = HEARTBEAT_TYPE_MAX,
     };
     ret = LnnHbMediumMgrSetParam(&param);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     param.type = HEARTBEAT_TYPE_BLE_V1;
     g_hbMeidumMgr[id] = nullptr;
     ret = LnnHbMediumMgrSetParam(&param);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);
 }
 
 /*
@@ -617,23 +617,23 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Leve
 {
     int32_t id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
     int32_t ret = LnnHbMediumMgrUpdateSendInfo(UPDATE_HB_NETWORK_INFO);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_UPDATE_SEND_INFO_FAIL);
     LnnHeartbeatMediumMgr medMgr1 = {
         .supportType = HEARTBEAT_TYPE_BLE_V1,
     };
     g_hbMeidumMgr[id] = &medMgr1;
     ret = LnnHbMediumMgrUpdateSendInfo(UPDATE_HB_NETWORK_INFO);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_UPDATE_SEND_INFO_FAIL);
     LnnHeartbeatMediumMgr medMgr2 = {
         .supportType = HEARTBEAT_TYPE_BLE_V1,
         .onUpdateSendInfo = onUpdateSendInfo1,
     };
     g_hbMeidumMgr[id] = &medMgr2;
     ret = LnnHbMediumMgrUpdateSendInfo(UPDATE_HB_NETWORK_INFO);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_UPDATE_SEND_INFO_FAIL);
     medMgr2.onUpdateSendInfo = onUpdateSendInfo2;
     ret = LnnHbMediumMgrUpdateSendInfo(UPDATE_HB_NETWORK_INFO);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_UPDATE_SEND_INFO_FAIL);
     ret = LnnRegistHeartbeatMediumMgr(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
@@ -671,7 +671,7 @@ HWTEST_F(HeartBeatMediumTest, UnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1
     EXPECT_TRUE(ret == SOFTBUS_OK);
     mgr.supportType = HEARTBEAT_TYPE_MAX;
     ret = LnnUnRegistHeartbeatMediumMgr(&mgr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_MGR_UNREG_FAIL);
     mgr.supportType = HEARTBEAT_TYPE_BLE_V1;
     mgr.deinit = nullptr;
     ret = LnnUnRegistHeartbeatMediumMgr(&mgr);
@@ -687,7 +687,7 @@ HWTEST_F(HeartBeatMediumTest, UnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1
 HWTEST_F(HeartBeatMediumTest, IsLocalSupportBleDirectOnline_TEST01, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     bool ret = IsLocalSupportBleDirectOnline();
     EXPECT_FALSE(ret);
 
@@ -710,7 +710,7 @@ HWTEST_F(HeartBeatMediumTest, IsNeedConnectOnLine_TEST01, TestSize.Level1)
     hbResp.stateVersion = ENABLE_COC_CAP;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     bool ret = IsNeedConnectOnLine(&device, &hbResp, &connectReason);
     EXPECT_TRUE(ret);
 
@@ -761,8 +761,10 @@ HWTEST_F(HeartBeatMediumTest, UpdateOnlineInfoNoConnection_TEST01, TestSize.Leve
     };
     UpdateOnlineInfoNoConnection(TEST_NETWORK_ID, &hbResp);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(ledgerMock, LnnSetDLConnCapability).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
+    EXPECT_CALL(ledgerMock, LnnSetDLConnCapability)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
     UpdateOnlineInfoNoConnection(TEST_NETWORK_ID, &hbResp);
 }
 
@@ -784,18 +786,18 @@ HWTEST_F(HeartBeatMediumTest, HbGetOnlineNodeByRecvInfo_TEST01, TestSize.Level1)
     };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     EXPECT_CALL(ledgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
     int32_t ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BLE, &nodeInfo, &hbResp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
     ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, &nodeInfo, &hbResp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
     ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BLE, &nodeInfo, &hbResp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -810,19 +812,19 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingByRecvInfo_TEST01, TestSize.L
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
     EXPECT_CALL(disLedgerMock, LnnGetDLHeartbeatTimestamp)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(heartBeatMock, LnnStopOfflineTimingStrategy)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(heartBeatMock, LnnStartOfflineTimingStrategy)
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, hbType, TEST_UPDATETIME);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR);
     ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, hbType, TEST_UPDATETIME);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_ETH, hbType, TEST_UPDATETIME);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -846,14 +848,14 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
     NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(heartBeatMock, LnnNotifyDiscoveryDevice)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOTIFY_DISCOVERY_DEV_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     connectCondition.connectReason = CONNECT_INITIAL_VALUE;
     connectCondition.isConnect = false;
     connectCondition.isDirectlyHb = false;
     EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int32_t ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOTIFY_DISCOVERY_DEV_ERR);
     ret = SoftBusNetNodeResult(&device, &hbResp, &connectCondition, &storedInfo, nowTime);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
     connectCondition.isConnect = true;
@@ -902,10 +904,10 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrInit_TEST01, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_HB_MGR_REG_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnHbMediumMgrInit();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_MGR_REG_FAIL);
     HbDeinitRecvList();
     ret = LnnHbMediumMgrInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -944,7 +946,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
 HWTEST_F(HeartBeatMediumTest, IsLocalSupportThreeState_TEST01, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
-    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     bool ret = IsLocalSupportThreeState();
     EXPECT_TRUE(ret == false);
 
@@ -980,7 +982,7 @@ HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
     EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
-    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
     EXPECT_TRUE(ret == true);
 

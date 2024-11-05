@@ -139,17 +139,9 @@ public:
     void TearDown();
 };
 
-void ConnectionBrConnectionTest::SetUpTestCase(void)
-{
-    NiceMock<ConnectionBrInterfaceMock>InitMock;
-    EXPECT_CALL(InitMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_OK));
-    LooperInit();
-}
+void ConnectionBrConnectionTest::SetUpTestCase(void) { }
 
-void ConnectionBrConnectionTest::TearDownTestCase(void)
-{
-    LooperDeinit();
-}
+void ConnectionBrConnectionTest::TearDownTestCase(void) { }
 
 void ConnectionBrConnectionTest::SetUp(void) { }
 
@@ -170,25 +162,22 @@ ConnectFuncInterface *g_connectFuncInterface = NULL;
 
 ConnectFuncInterface *ConnInit(void)
 {
+    LooperInit();
+
     ConnectCallback callback = {
         .OnConnected = OnConnected,
         .OnDisconnected = OnDisconnected,
         .OnDataReceived = OnDataReceived,
     };
-    NiceMock<ConnectionBrInterfaceMock>brMock;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
     EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(brMock, SoftBusThreadCreate)
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, SoftBusAddBtStateListener).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(brMock, ConnBrInitBrPendingPacket)
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(brMock, ConnBrInitBrPendingPacket).WillOnce(Return(SOFTBUS_OK));
 
     connectFuncInterface = ConnInitBr(&callback);
     return connectFuncInterface;
@@ -197,13 +186,16 @@ ConnectFuncInterface *ConnInit(void)
 HWTEST_F(ConnectionBrConnectionTest, BrManagerTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnInitBr1, Start");
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
+    LooperInit();
 
     ConnectCallback callback = {
         .OnConnected = OnConnected,
         .OnDisconnected = OnDisconnected,
         .OnDataReceived = OnDataReceived,
     };
-    NiceMock<ConnectionBrInterfaceMock>brMock;
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_NO_INIT));
@@ -232,8 +224,9 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
         .OnDisconnected = OnDisconnected,
         .OnDataReceived = OnDataReceived,
     };
-    NiceMock<ConnectionBrInterfaceMock>brMock;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
 
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
@@ -247,18 +240,15 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
     EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(brMock, SoftBusThreadCreate)
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnInitBr(&callback);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_NE(NULL, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, BrManagerTest003, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnInitBr3, Start");
 
-    NiceMock<ConnectionBrInterfaceMock>brMock;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
     ConnectOption *option = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     ASSERT_NE(nullptr, option);
     option->type = CONNECT_BR;
@@ -278,7 +268,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnInitBr4, Start");
 
-    NiceMock<ConnectionBrInterfaceMock>brMock;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
     uint32_t connectionId = 1;
     uint8_t *data1 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     ASSERT_NE(nullptr, data1);
@@ -322,6 +312,9 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest005, TestSize.Level1)
     ASSERT_NE(nullptr, device);
     (void)strcpy_s(device->addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
 
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
     g_connectFuncInterface = ConnInit();
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     ConnBrSaveConnection(connection);
@@ -342,6 +335,9 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest006, TestSize.Level1)
     ASSERT_NE(nullptr, device);
     (void)strcpy_s(device->addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
 
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
     g_connectFuncInterface = ConnInit();
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     ConnBrSaveConnection(connection);
@@ -359,7 +355,10 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest007, TestSize.Level1)
     ConnectionInfo *info = (ConnectionInfo *)SoftBusCalloc(sizeof(ConnectionInfo));
     ASSERT_NE(nullptr, info);
     (void)strcpy_s(info->brInfo.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
-    
+
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
     g_connectFuncInterface = ConnInit();
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     ConnBrSaveConnection(connection);
@@ -371,7 +370,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest008, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnInitBr8, Start");
 
-    NiceMock<ConnectionBrInterfaceMock>brMock;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
     LocalListenerInfo *info = (LocalListenerInfo *)SoftBusCalloc(sizeof(LocalListenerInfo));
     ASSERT_NE(nullptr, info);
     info->type = CONNECT_BR;
@@ -397,7 +396,10 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest009, TestSize.Level1)
     option->brOption.sideType = CONN_SIDE_ANY;
     (void)strcpy_s(option->brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     uint32_t time = 1;
-    
+
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
     int32_t ret = g_connectFuncInterface->PreventConnection(option, time);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

@@ -33,6 +33,7 @@
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -72,8 +73,8 @@ typedef enum {
 
 typedef struct {
     BuildLinkStatus status;
-    LaneLinkInfo linkInfo;
     int32_t result;
+    LaneLinkInfo linkInfo;
 } LinkStatusInfo;
 
 typedef struct {
@@ -482,7 +483,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
-        LNN_LOGE(LNN_LANE, "no available link to alloc, laneReqId=%{public}u", laneReqId);
+        LNN_LOGE(LNN_LANE, "no available link resources, laneReqId=%{public}u", laneReqId);
         return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; i++) {
@@ -822,9 +823,6 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        if (resourceItem.link.type == LANE_HML_RAW) {
-            LnnDisconnectP2pWithoutLnn(laneReqId);
-        }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
@@ -856,6 +854,7 @@ static int32_t CancelLane(uint32_t laneReqId)
     LNN_LOGE(LNN_LANE, "cancel lane fail, lane reqinfo not find, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_LANE_NOT_FOUND;
 }
+
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId)
 {
     if (Lock() != SOFTBUS_OK) {
@@ -866,21 +865,20 @@ int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId)
     LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == oldLaneId) {
             item->laneId = newLaneId;
-            LNN_LOGI(LNN_LANE, "update newLaneId=%{public}" PRIu64 " oldLaneId=%{public}" PRIu64,
+            LNN_LOGI(LNN_LANE, "update newLaneId=%{public}" PRIu64 "oldLaneId=%{public}" PRIu64,
                 newLaneId, oldLaneId);
             Unlock();
             return SOFTBUS_OK;
         }
     }
     Unlock();
-    LNN_LOGI(LNN_LANE, "laneId=%{public}" PRIu64 " not found", oldLaneId);
     return SOFTBUS_NOT_FIND;
 }
 
-static bool GetAuthType(const char *peerNetworkId)
+static bool GetAuthType(const char *peerNetWorkId)
 {
     int32_t value = 0;
-    int32_t ret = LnnGetRemoteNumInfo(peerNetworkId, NUM_KEY_META_NODE, &value);
+    int32_t ret = LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_NODE, &value);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "fail, ret=%{public}d", ret);
         return false;
@@ -1331,6 +1329,31 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
+static void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
+{
+    LaneTransType transType;
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
+    }
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneReqId == laneReqId) {
+            transType = item->allocInfo.transType;
+        }
+    }
+    Unlock();
+    if (linkType == LANE_HML && IsPowerControlEnabled()) {
+        LNN_LOGI(LNN_LANE, "low-power transtype = %{public}d", transType);
+        if (transType == LANE_T_BYTE || transType == LANE_T_MSG) {
+            DetectDisableWifiDirectApply();
+        } else {
+            DetectEnableWifiDirectApply();
+        }
+    }
+}
+
 static void NotifyLinkSucc(uint32_t laneReqId)
 {
     LaneLinkType linkType;
@@ -1365,6 +1388,7 @@ static void NotifyLinkSucc(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "add linkInfo item fail, laneReqId=%{public}u", laneReqId);
         goto FAIL;
     }
+    ProcessPowerControlInfoByLaneReqId(linkType, laneReqId);
     NotifyLaneAllocSuccess(laneReqId, laneId, &info);
     FreeLowPriorityLink(laneReqId, linkType);
     return;

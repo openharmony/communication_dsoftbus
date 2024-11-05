@@ -25,6 +25,8 @@
 #include "softbus_broadcast_type.h"
 #include "disc_log.h"
 #include "lnn_device_info.h"
+#include "lnn_ohos_account.h"
+#include "locale_config_wrapper.h"
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -45,6 +47,9 @@
 #define MAC_BIT_FIVE 5
 #define TLV_MAX_DATA_LEN 15
 #define TLV_VARIABLE_DATA_LEN 0
+#define HYPHEN_ZH        "的"
+#define HYPHEN_EXCEPT_ZH "-"
+#define EMPTY_STRING     ""
 
 static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
 
@@ -267,9 +272,26 @@ static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, u
         uint32_t devNameLen = strlen((char *)data) + 1; // +1 is device name end '\0'
         *len = (devNameLen > remainLen) ? remainLen : devNameLen;
     }
-    errno_t retMem = memcpy_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN, (void *)data, *len);
+    errno_t retMem = memcpy_s(device->devName, DISC_MAX_DEVICE_NAME_LEN, (void *)data, *len);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
         DISC_BLE, "parse tlv copy device name value failed");
+
+    device->devNameLen = *len;
+    return SOFTBUS_OK;
+}
+
+static int32_t CopyNicknameValue(DeviceWrapper *device, const uint8_t *data, uint32_t *len, uint32_t remainLen)
+{
+    // TLV_VARIBALE_DATA_LEN indicate indefinite length
+    if (*len == TLV_VARIABLE_DATA_LEN) {
+        uint32_t nicknameLen = strlen((char *)data) + 1; // +1 is nick name end '\0'
+        *len = (nicknameLen > remainLen) ? remainLen : nicknameLen;
+    }
+    errno_t retMem = memcpy_s(device->nickname, DISC_MAX_NICKNAME_LEN, (void *)data, *len);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
+        DISC_BLE, "parse tlv copy nickname value failed");
+
+    device->nicknameLen = *len;
     return SOFTBUS_OK;
 }
 
@@ -338,6 +360,32 @@ static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const u
     return SOFTBUS_OK;
 }
 
+static int32_t SpliceDisplayName(DeviceWrapper *device)
+{
+    char *hyphen = NULL;
+    bool isSameAccount = false;
+    bool isZH = IsZHLanguage();
+    char accountHash[MAX_ACCOUNT_HASH_LEN];
+    if (!LnnIsDefaultOhosAccount()) {
+        DiscBleGetShortUserIdHash((uint8_t *)accountHash, SHORT_USER_ID_HASH_LEN);
+        if (memcmp(device->info->accountHash, accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
+            isSameAccount = true;
+        }
+    }
+    if (!isSameAccount && device->nicknameLen > 0) {
+        hyphen = isZH ? HYPHEN_ZH : HYPHEN_EXCEPT_ZH;
+    } else {
+        hyphen = EMPTY_STRING;
+    }
+
+    int ret = sprintf_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN, "%s%s%s",
+        isSameAccount ? EMPTY_STRING : device->nickname, hyphen, device->devName);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret >= 0, SOFTBUS_STRCPY_ERR, DISC_BLE,
+        "splice displayname failed, ret=%{public}d", ret);
+
+    return SOFTBUS_OK;
+}
+
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t curLen = 0;
@@ -369,6 +417,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 break;
             case TLV_TYPE_RANGE_POWER:
                 if (len > RANGE_POWER_TYPE_LEN) {
+                    ret = CopyNicknameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
                     break;
                 }
                 errno_t retMem = memcpy_s(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len);
@@ -385,6 +434,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         // move cursor to next TLV
         curLen += len + 1;
     }
+    ret = SpliceDisplayName(device);
     return ret;
 }
 
