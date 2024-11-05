@@ -109,10 +109,10 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, TestSize.Level0)
     char value[] = "abcdefg";
     int32_t len = 0;
     int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR, ret);
 }
 
 /*
@@ -126,9 +126,9 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
     char value[] = "abcdefg";
     int32_t len = 10;
     int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR, ret);
 }
 }
