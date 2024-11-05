@@ -106,9 +106,10 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine002, TestSize.Level1)
  */
 HWTEST_F(TransLinkListenerTest, OnWifiDirectRoleChange001, TestSize.Level1)
 {
-    int32_t ret = P2pDirectChannelInit();
+    int32_t ret = TransChannelInit();
     OnWifiDirectRoleChange(WIFI_DIRECT_ROLE_NONE, WIFI_DIRECT_ROLE_NONE);
     EXPECT_NE(SOFTBUS_OK, ret);
+    TransChannelDeinit();
 }
 
 /**

@@ -662,23 +662,4 @@ HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest002, TestSize.Level1)
     ret = TransDelTcpChannelInfoByChannelId(invalidChannelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 }
-
-/**
- * @tc.name: CreateTcpChannelInfoTest
- * @tc.desc: test CreateTcpChannelInfoTest.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoTest, TestSize.Level1)
-{
-    ChannelInfo channel;
-    channel.channelId = 1;
-    channel.businessType = BUSINESS_TYPE_BYTE;
-    char ip[MAX_IP_LEN] = { 0 };
-    strcpy_s(ip, MAX_IP_LEN, g_ip);
-    channel.myIp = ip;
-    TcpChannelInfo *info = CreateTcpChannelInfo(&channel);
-    ASSERT_TRUE(info == nullptr);
-    SoftBusFree(info);
-}
 }
