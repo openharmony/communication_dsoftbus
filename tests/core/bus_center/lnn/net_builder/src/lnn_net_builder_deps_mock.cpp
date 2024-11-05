@@ -75,11 +75,6 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicIn
 }
 
 extern "C" {
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    return GetNetBuilderDepsInterface()->LnnGetSettingDeviceName(deviceName, len);
-}
-
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);
@@ -730,6 +725,11 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
 int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
 {
     return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
+}
+
+void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
+{
+    return GetNetBuilderDepsInterface()->GetLnnTriggerInfo(triggerInfo);
 }
 } // extern "C"
 } // namespace OHOS

@@ -61,7 +61,6 @@ class NetBuilderDepsInterface {
 public:
     NetBuilderDepsInterface() {};
     virtual ~NetBuilderDepsInterface() {};
-    virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type) = 0;
     virtual int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId) = 0;
@@ -201,12 +200,12 @@ public:
     virtual void RegisterOOBEMonitor(void *p);
     virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
+    virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
     NetBuilderDepsInterfaceMock();
     ~NetBuilderDepsInterfaceMock() override;
-    MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
     MOCK_METHOD2(LnnDeleteMetaInfo, int32_t (const char *, AuthLinkType));
     MOCK_METHOD3(TransGetConnByChanId, int32_t (int32_t, int32_t, int32_t *));
@@ -343,6 +342,7 @@ public:
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool (const NodeInfo *));
+    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

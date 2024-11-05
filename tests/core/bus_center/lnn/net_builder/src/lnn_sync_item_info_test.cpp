@@ -100,9 +100,9 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
             Return(SOFTBUS_OK)));
     const unsigned char targetBssid[] = "123456";
     int32_t ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_GET_WIFI_DEVICE_CONFIG_FAIL);
     ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_GET_WIFI_DEVICE_CONFIG_FAIL);
     EXPECT_CALL(LnnServiceMock, SoftBusDisconnectDevice).WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(LnnServiceMock, SoftBusConnectToDevice).WillOnce(Return(SOFTBUS_ERR))
@@ -140,9 +140,9 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
         ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, &transInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnSendTransReq(nullptr, &transInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

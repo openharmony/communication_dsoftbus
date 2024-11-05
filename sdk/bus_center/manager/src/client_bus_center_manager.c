@@ -808,6 +808,10 @@ static bool IsSameNodeStateCb(const INodeStateCb *callback1, const INodeStateCb 
         callback1->onNodeStatusChanged != callback2->onNodeStatusChanged) {
         return false;
     }
+    if ((callback1->events & EVENT_NODE_HICHAIN_PROOF_EXCEPTION) &&
+        callback1->onHichainProofException != callback2->onHichainProofException) {
+        return false;
+    }
     return true;
 }
 
@@ -1030,6 +1034,11 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
+int32_t SetLocalDeviceNameInner(const char *pkgName, const char *displayName)
+{
+    return ServerIpcSetLocalDeviceName(pkgName, displayName);
 }
 
 NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
@@ -1297,10 +1306,8 @@ int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const ch
 }
 
 int32_t LnnOnHichainProofException(
-    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+    const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
-    (void)deviceId;
-    (void)deviceIdLen;
     NodeStateCallbackItem *item = NULL;
     ListNode dupList;
 
@@ -1321,22 +1328,22 @@ int32_t LnnOnHichainProofException(
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock auth restrict cb list in notify");
     }
-    char *anonyPkgName = NULL;
-    char *anonyDeviceId = NULL;
-    Anonymize(pkgName, &anonyPkgName);
-    Anonymize(deviceId, &anonyDeviceId);
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
-            (item->cb.onHichainProofException) != NULL) {
-            item->cb.onHichainProofException(deviceTypeId, errCode);
+            (item->cb.events & EVENT_NODE_HICHAIN_PROOF_EXCEPTION) != 0 && item->cb.onHichainProofException != NULL) {
+            item->cb.onHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
+            char *anonyPkgName = NULL;
+            char *anonyProofInfo = NULL;
+            Anonymize(pkgName, &anonyPkgName);
+            Anonymize(proofInfo, &anonyProofInfo);
             LNN_LOGI(LNN_STATE,
-                "onHichainProofException, pkgName=%{public}s, deviceId=%{public}s, errCode=%{public}d, "
+                "onHichainProofException, pkgName=%{public}s, proofInfo=%{public}s, errCode=%{public}d, "
                 "type=%{public}hu",
-                AnonymizeWrapper(anonyPkgName), AnonymizeWrapper(anonyDeviceId), errCode, deviceTypeId);
+                AnonymizeWrapper(anonyPkgName), AnonymizeWrapper(anonyProofInfo), errCode, deviceTypeId);
+            AnonymizeFree(anonyPkgName);
+            AnonymizeFree(anonyProofInfo);
         }
     }
-    AnonymizeFree(anonyPkgName);
-    AnonymizeFree(anonyDeviceId);
     ClearNodeStateCbList(&dupList);
     return SOFTBUS_OK;
 }

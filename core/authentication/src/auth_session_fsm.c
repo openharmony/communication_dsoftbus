@@ -1065,7 +1065,7 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
         LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_AUTH_DATA, lnnAuditExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
-            CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+            CompleteAuthSession(authFsm, ret);
         } else {
             AUTH_LOGD(AUTH_FSM, "auth has finished, ignore this processing failure");
         }
@@ -1396,7 +1396,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     return true;
 }
 
-static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {

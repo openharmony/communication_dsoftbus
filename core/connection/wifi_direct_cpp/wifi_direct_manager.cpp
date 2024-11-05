@@ -32,6 +32,7 @@
 #include "command/processor_selector_factory.h"
 #include "entity/entity_factory.h"
 #include "auth_interface.h"
+#include "utils/wifi_direct_dfx.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::list<WifiDirectStatusListener> g_listeners;
@@ -39,10 +40,16 @@ static std::recursive_mutex g_listenerModuleIdLock;
 static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
+static PtkMismatchListener g_ptkMismatchListener;
 
 static uint32_t GetRequestId(void)
 {
     return g_requestId++;
+}
+
+static void AddPtkMismatchListener(PtkMismatchListener listener)
+{
+    g_ptkMismatchListener = listener;
 }
 
 static void SetBootLinkTypeByAuthHandle(WifiDirectConnectInfo &info)
@@ -75,14 +82,7 @@ static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExt
     extra->peerIp = info->remoteMac;
 
     info->dfxInfo.bootLinkType = STATISTIC_NONE;
-    if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
-        info->dfxInfo.linkType = STATISTIC_P2P;
-    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
-        info->dfxInfo.linkType = STATISTIC_HML;
-    } else {
-        info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
-    }
-
+    OHOS::SoftBus::WifiDirectDfx::SetLinkType(*info);
     WifiDirectNegoChannelType type = info->negoChannel.type;
     if (type == NEGO_CHANNEL_AUTH) {
         SetBootLinkTypeByAuthHandle(*info);
@@ -556,6 +556,16 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
     g_syncPtkListener(remoteDeviceId, result);
 }
 
+static void NotifyPtkMismatch(const char *remoteNetworkId, uint32_t len, int32_t reason)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (g_ptkMismatchListener == nullptr) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "listener is null");
+        return;
+    }
+    g_ptkMismatchListener(remoteNetworkId, len, reason);
+}
+
 static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
@@ -581,6 +591,7 @@ static struct WifiDirectManager g_manager = {
     .savePTK = SavePtk,
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
+    .addPtkMismatchListener = AddPtkMismatchListener,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
@@ -602,6 +613,7 @@ static struct WifiDirectManager g_manager = {
     .notifyDisconnectedForSink = NotifyDisconnectedForSink,
     .registerEnhanceManager = RegisterEnhanceManager,
     .notifyPtkSyncResult = NotifyPtkSyncResult,
+    .notifyPtkMismatch = NotifyPtkMismatch,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

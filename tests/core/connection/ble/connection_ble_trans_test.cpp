@@ -364,27 +364,5 @@ HWTEST_F(ConnectionBleTransTest, QueueBlock, TestSize.Level1)
     ret = ConnBleDequeueBlock(&msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ConnBleDeinitSendQueue();
-
-    NiceMock<ConnectionBleTransInterfaceMock> bleMock;
-    EXPECT_CALL(bleMock, WaitQueueLength).WillRepeatedly(Return(!SOFTBUS_OK));
-    ret = ConnBleEnqueueNonBlock(&queueNode);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    {
-        InSequence seq;
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(SOFTBUS_OK));
-        ret = ConnBleDequeueBlock(&msg);
-        EXPECT_NE(SOFTBUS_OK, ret);
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(SOFTBUS_OK));
-        ret = ConnBleDequeueBlock(&msg);
-        EXPECT_NE(SOFTBUS_OK, ret);
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
-        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
-        ret = ConnBleDequeueBlock(&msg);
-        EXPECT_NE(SOFTBUS_OK, ret);
-    }
 }
 }

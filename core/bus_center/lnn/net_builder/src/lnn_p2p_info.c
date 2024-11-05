@@ -117,32 +117,32 @@ static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
     if (!JSON_GetInt32FromOject(json, JSON_KEY_P2P_ROLE, &info->p2pRole)) {
         LNN_LOGE(LNN_BUILDER, "p2p role not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     if (!JSON_GetStringFromOject(json, JSON_KEY_WIFI_CFG, info->wifiCfg, sizeof(info->wifiCfg))) {
         LNN_LOGE(LNN_BUILDER, "wifi cfg not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     if (!JSON_GetStringFromOject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g, sizeof(info->chanList5g))) {
         LNN_LOGE(LNN_BUILDER, "chan list 5g not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     if (!JSON_GetInt32FromOject(json, JSON_KEY_STA_FREQUENCY, &info->staFrequency)) {
         LNN_LOGE(LNN_BUILDER, "sta frequency not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     if (!JSON_GetStringFromOject(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
         LNN_LOGE(LNN_BUILDER, "p2p mac not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     if (!JSON_GetStringFromOject(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
         LNN_LOGE(LNN_BUILDER, "go mac not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     JSON_Delete(json);
     return SOFTBUS_OK;
@@ -158,7 +158,7 @@ static int32_t LnnParseWifiDirectAddrMsg(const char *msg, char *wifiDirectAddr, 
     if (!JSON_GetStringFromOject(json, JSON_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_LEN)) {
         LNN_LOGE(LNN_BUILDER, "wifidirect addr not found");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
     JSON_Delete(json);
     return SOFTBUS_OK;
@@ -321,7 +321,7 @@ int32_t LnnSyncP2pInfo(void)
     int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async p2p info fail, rc=%{public}d", rc);
-        return SOFTBUS_ERR;
+        return rc;
     }
     return SOFTBUS_OK;
 }
@@ -331,7 +331,7 @@ int32_t LnnSyncWifiDirectAddr(void)
     int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncWifiDirectAddr, NULL);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async wifidirect addr fail, rc=%{public}d", rc);
-        return SOFTBUS_ERR;
+        return rc;
     }
     return SOFTBUS_OK;
 }
@@ -348,7 +348,7 @@ int32_t LnnInitLocalP2pInfo(NodeInfo *info)
         LnnSetP2pGoMac(info, "") != SOFTBUS_OK ||
         LnnSetWifiDirectAddr(info, "") != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "init p2p info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SET_P2P_INFO_FAIL;
     }
     info->isBleP2p = (isSupportBle && isSupportP2p);
     return SOFTBUS_OK;

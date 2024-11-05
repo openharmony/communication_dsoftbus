@@ -50,23 +50,23 @@ int32_t LnnInitNetLedger(void)
 {
     if (LnnInitHuksInterface() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init huks interface fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_HUKS_INIT_FAILED;
     }
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local net ledger fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitDistributedLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init distributed net ledger fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ext ledger fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -219,10 +219,6 @@ int32_t LnnInitEventMoniterDelay(void)
 {
     if (LnnInitCommonEventMonitorImpl() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnInitDeviceNameMonitorImpl() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
         return SOFTBUS_ERR;
     }
     LnnInitOOBEStateMonitorImpl();

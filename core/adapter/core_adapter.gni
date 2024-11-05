@@ -96,6 +96,7 @@ if (defined(ohos_lite)) {
       "ability_runtime:dataobs_manager",
       "data_share:datashare_common",
       "data_share:datashare_consumer",
+      "i18n:intl_util",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
     ]

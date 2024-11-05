@@ -24,16 +24,19 @@
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_event.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
+#include "lnn_connection_fsm.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
 #define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
+#define PC_AUTH_ERRCODE                36870
 
 #define HICHAIN_DAS_ERRCODE_MIN    0xF0000001
 #define HICHAIN_DAS_ERRCODE_MAX    0xF00010FF
@@ -53,6 +56,12 @@ typedef struct {
     char groupId[GROUPID_BUF_LEN];
     GroupType groupType;
 } GroupInfo;
+
+typedef struct {
+    int32_t errCode;
+    uint32_t errorReturnLen;
+    uint8_t data[0];
+} ProofInfo;
 
 static TrustDataChangeListener g_dataChangeListener;
 
@@ -111,6 +120,30 @@ static void DfxRecordLnnExchangekeyEnd(int64_t authSeq, int32_t reason)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_EXCHANGE_CIPHER, extra);
 }
 
+static void DfxRecordCertEndTime(int64_t authSeq)
+{
+    uint64_t timeStamp = 0;
+    LnnEventExtra extra = { 0 };
+    (void)LnnEventExtraInit(&extra);
+    LnnTriggerInfo triggerInfo = { 0 };
+    GetLnnTriggerInfo(&triggerInfo);
+    timeStamp = SoftBusGetSysTimeMs();
+    extra.timeLatency = timeStamp - triggerInfo.triggerTime;
+    extra.authSeq = authSeq;
+    if (!RequireAuthLock()) {
+        return;
+    }
+    AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
+    if (authFsm == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "auth fsm not found");
+        ReleaseAuthLock();
+        return;
+    }
+    extra.peerUdidHash = authFsm->info.udidHash;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_EXCHANGE_CIPHER, extra);
+    ReleaseAuthLock();
+}
+
 static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnSessionKeyReturned: authSeq=%{public}" PRId64 ", len=%{public}u", authSeq,
@@ -122,6 +155,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     }
     DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_OK);
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
+    DfxRecordCertEndTime(authSeq);
 }
 
 static void DfxRecordLnnEndHichainEnd(int64_t authSeq, int32_t reason)
@@ -167,15 +201,72 @@ void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusEr
     }
 }
 
+static int32_t CheckErrReturnValidity(const char *errorReturn)
+{
+    cJSON *json = cJSON_Parse(errorReturn);
+    if (json == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    cJSON_Delete(json);
+    return SOFTBUS_OK;
+}
+
+static void ProcessAuthFailCallBack(void *para)
+{
+    if (para == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "invalid para");
+        return;
+    }
+    ProofInfo *proofInfo = (ProofInfo *)para;
+    if (AuthFailNotifyProofInfo(proofInfo->errCode, (char *)proofInfo->data, proofInfo->errorReturnLen) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "AuthFailNotifyProofInfo fail");
+        SoftBusFree(proofInfo);
+        return;
+    }
+    SoftBusFree(proofInfo);
+}
+
+static void NotifyAuthFailEvent(int32_t errCode, const char *errorReturn)
+{
+    uint32_t errorReturnLen = strlen(errorReturn) + 1;
+    char *anonyErrorReturn = NULL;
+    Anonymize(errorReturn, &anonyErrorReturn);
+    AUTH_LOGW(AUTH_HICHAIN, "errorReturn=%{public}s, errorReturnLen=%{public}u, errCode=%{public}d",
+        AnonymizeWrapper(anonyErrorReturn), errorReturnLen, errCode);
+    AnonymizeFree(anonyErrorReturn);
+
+    ProofInfo *proofInfo = (ProofInfo *)SoftBusCalloc(sizeof(ProofInfo) + errorReturnLen);
+    if (proofInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "proofInfo calloc fail");
+        return;
+    }
+    if (memcpy_s(proofInfo->data, errorReturnLen, (uint8_t *)errorReturn, errorReturnLen) != EOK) {
+        AUTH_LOGE(AUTH_HICHAIN, "memcpy_s errorReturn fail");
+        SoftBusFree(proofInfo);
+        return;
+    }
+    proofInfo->errorReturnLen = errorReturnLen;
+    proofInfo->errCode = errCode;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessAuthFailCallBack, (void *)proofInfo, 0) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "set async ProcessAuthFailCallBack callback fail");
+        SoftBusFree(proofInfo);
+        return;
+    }
+}
+
 static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
-    (void)errorReturn;
     DfxRecordLnnEndHichainEnd(authSeq, errCode);
     uint32_t authErrCode = 0;
     (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
         authSeq, errCode, authErrCode);
+    if (errCode == PC_AUTH_ERRCODE && errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
+        NotifyAuthFailEvent(errCode, errorReturn);
+    }
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
 
@@ -247,15 +338,14 @@ static void DeletePcRestrictNode(const char *udid)
 {
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     uint32_t count = 0;
-    char *anonyUdid = NULL;
-    Anonymize(udid, &anonyUdid);
 
-    if (GetUdidHash(udid, peerUdidHash) == SOFTBUS_OK &&
-        GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+    if (GetUdidHash(udid, peerUdidHash) == SOFTBUS_OK && GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
         DeleteNodeFromPcRestrictMap(peerUdidHash);
+        char *anonyUdid = NULL;
+        Anonymize(udid, &anonyUdid);
         AUTH_LOGI(AUTH_HICHAIN, "delete restrict node success. udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
     }
-    AnonymizeFree(anonyUdid);
 }
 
 static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)

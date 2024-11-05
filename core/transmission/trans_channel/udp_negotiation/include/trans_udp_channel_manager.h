@@ -31,15 +31,15 @@ typedef enum {
 } UdpChannelStatus;
 
 typedef struct {
-    ListNode node;
-    int64_t seq;
-    AppInfo info;
-    uint32_t timeOut;
+    bool isMeta;
+    uint8_t tos;
     UdpChannelStatus status;
     uint32_t requestId;
-    bool isMeta;
     int32_t errCode;
-    uint8_t tos;
+    uint32_t timeOut;
+    int64_t seq;
+    ListNode node;
+    AppInfo info;
 } UdpChannelInfo;
 
 typedef struct {
@@ -84,7 +84,7 @@ int32_t UdpChannelFileTransRecoveryLimit(uint8_t tos);
 
 bool IsUdpRecoveryTransLimit(void);
 
-int32_t TransUdpGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+int32_t TransUdpGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *remoteIp, uint32_t maxIpLen,
     int32_t *connectType);
 
 #ifdef __cplusplus

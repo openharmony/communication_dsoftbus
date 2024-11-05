@@ -32,14 +32,19 @@ public:
         static WifiDirectDfx instance;
         return instance;
     }
-    void DfxRecord(bool success, int32_t reason, const ConnectInfo &connectInfo);
+    void DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo);
     void Record(uint32_t requestId, uint16_t challengeCode);
     void Clear(uint32_t requestId);
-
+    static void SetLinkType(WifiDirectConnectInfo &info);
+    void SetReuseFlag(uint32_t requestId);
+    bool IsReuse(uint32_t requestId);
+    std::string GetChallengeCode(uint32_t requestId);
+    
 private:
-    void ReportConnEventExtra(ConnEventExtra &extra, const ConnectInfo &connectInfo);
+    void ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &connectInfo);
     
     std::map<uint32_t, uint16_t> challengeCodeMap_;
+    std::map<uint32_t, bool> reuseFlagMap_;
     std::recursive_mutex mutex_;
 };
 } // namespace OHOS::SoftBus

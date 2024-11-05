@@ -16,36 +16,34 @@
 #include "wifi_direct_dfx.h"
 #include "conn_log.h"
 #include "duration_statistic.h"
-#include "softbus_conn_interface.h"
 #include "wifi_direct_utils.h"
+#include "adapter/p2p_adapter.h"
 
 namespace OHOS::SoftBus {
 
-void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &connectInfo)
+void WifiDirectDfx::DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo)
 {
-    auto wifiDirectConnectInfo = connectInfo.info_;
     if (success) {
-        DurationStatistic::GetInstance().Record(wifiDirectConnectInfo.requestId, TOTAL_END);
-        DurationStatistic::GetInstance().End(wifiDirectConnectInfo.requestId);
-        DurationStatistic::GetInstance().Clear(wifiDirectConnectInfo.requestId);
-        WifiDirectDfx::GetInstance().Clear(wifiDirectConnectInfo.requestId);
-
+        DurationStatistic::GetInstance().Record(connectInfo.requestId, TOTAL_END);
+        DurationStatistic::GetInstance().End(connectInfo.requestId);
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_OK,
-            .requestId = static_cast<int32_t>(wifiDirectConnectInfo.requestId),
-            .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
+            .requestId = static_cast<int32_t>(connectInfo.requestId),
+            .frequency = connectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
+        DurationStatistic::GetInstance().Clear(connectInfo.requestId);
+        WifiDirectDfx::GetInstance().Clear(connectInfo.requestId);
     } else {
-        DurationStatistic::GetInstance().Clear(wifiDirectConnectInfo.requestId);
-        WifiDirectDfx::GetInstance().Clear(wifiDirectConnectInfo.requestId);
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = reason,
-            .requestId = static_cast<int32_t>(wifiDirectConnectInfo.requestId),
-            .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
+            .requestId = static_cast<int32_t>(connectInfo.requestId),
+            .frequency = connectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
+        DurationStatistic::GetInstance().Clear(connectInfo.requestId);
+        WifiDirectDfx::GetInstance().Clear(connectInfo.requestId);
     }
 }
 
@@ -59,12 +57,12 @@ void WifiDirectDfx::Clear(uint32_t requestId)
 {
     std::lock_guard lock(mutex_);
     challengeCodeMap_.erase(requestId);
+    reuseFlagMap_.erase(requestId);
 }
 
-void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInfo &info)
+void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &wifiDirectConnectInfo)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "FillConnEventExtra enter");
-    auto wifiDirectConnectInfo = info.info_;
+    SetLinkType(wifiDirectConnectInfo);
     enum StatisticLinkType type = wifiDirectConnectInfo.dfxInfo.linkType;
     if (type == STATISTIC_P2P) {
         extra.linkType = CONNECT_P2P;
@@ -75,15 +73,8 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     }
 
     auto requestId = wifiDirectConnectInfo.requestId;
-    std::string challengeCodeStr;
-    {
-        std::lock_guard lock(mutex_);
-        if (challengeCodeMap_.find(requestId) != challengeCodeMap_.end()) {
-            challengeCodeStr = std::to_string(challengeCodeMap_[requestId]);
-            extra.challengeCode = challengeCodeStr.c_str();
-        }
-    }
-    
+    auto challengeCodeStr = GetChallengeCode(requestId);
+    extra.challengeCode = challengeCodeStr.c_str();
     auto stateMapElement = DurationStatistic::GetInstance().GetStateTimeMapElement(requestId);
     uint64_t startTime = stateMapElement[TOTAL_START];
     uint64_t endTime = stateMapElement[TOTAL_END];
@@ -103,6 +94,52 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     auto remoteDeviceType = WifiDirectUtils::GetDeviceType(wifiDirectConnectInfo.remoteNetworkId);
     auto remoteDeviceTypeStr = std::to_string(remoteDeviceType);
     extra.remoteDeviceType = remoteDeviceTypeStr.c_str();
+    extra.isRenegotiate = DurationStatistic::GetInstance().ReNegotiateFlag(requestId);
+    extra.staChannel = dfxInfo.staChannel;
+    extra.hmlChannel = dfxInfo.hmlChannel;
+    extra.p2pChannel = dfxInfo.p2pChannel;
+    extra.apChannel = dfxInfo.apChannel;
+    CONN_LOGI(CONN_WIFI_DIRECT, "sta=%{public}d, p2p=%{public}d, hml=%{public}d, ap=%{public}d", extra.staChannel,
+        extra.p2pChannel, extra.hmlChannel, extra.apChannel);
+    auto remoteOsVersion = WifiDirectUtils::GetRemoteOsVersion(wifiDirectConnectInfo.remoteNetworkId);
+    extra.peerDevVer = remoteOsVersion.c_str();
+    extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
+    extra.isReuse = IsReuse(requestId);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+}
+
+void WifiDirectDfx::SetLinkType(WifiDirectConnectInfo &connectInfo)
+{
+    if (connectInfo.connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
+        connectInfo.dfxInfo.linkType = STATISTIC_P2P;
+    } else if (connectInfo.connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
+        connectInfo.dfxInfo.linkType = STATISTIC_HML;
+    } else {
+        connectInfo.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "link type %{public}d", connectInfo.dfxInfo.linkType);
+}
+
+void WifiDirectDfx::SetReuseFlag(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    reuseFlagMap_.insert(std::make_pair(requestId, true));
+}
+
+bool WifiDirectDfx::IsReuse(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    return reuseFlagMap_.find(requestId) != reuseFlagMap_.end();
+}
+
+std::string WifiDirectDfx::GetChallengeCode(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    std::string challengeCodeStr;
+    if (challengeCodeMap_.find(requestId) != challengeCodeMap_.end()) {
+        challengeCodeStr = std::to_string(challengeCodeMap_[requestId]);
+        return challengeCodeStr;
+    }
+    return "";
 }
 } // namespace OHOS::SoftBus

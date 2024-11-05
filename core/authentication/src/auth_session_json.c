@@ -1268,6 +1268,23 @@ static void DumpRpaCipherKey(char *cipherKey, char *cipherIv, const char *peerIr
     AnonymizeFree(anonyIrk);
 }
 
+static int32_t UpdateBroadcastCipherKey(const NodeInfo *info)
+{
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    if (FillBroadcastCipherKey(&broadcastKey, info) != SOFTBUS_OK) {
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+        return SOFTBUS_ERR;
+    }
+    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    return SOFTBUS_OK;
+}
+
 static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
 {
     char cipherKey[SESSION_KEY_STR_LEN] = {0};
@@ -1306,19 +1323,10 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
-
-    BroadcastCipherKey broadcastKey;
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (FillBroadcastCipherKey(&broadcastKey, info) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        return SOFTBUS_ERR;
+    int32_t ret = UpdateBroadcastCipherKey(info);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        return SOFTBUS_ERR;
-    }
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return SOFTBUS_OK;
 }
 
@@ -2094,7 +2102,8 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
     if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK) {
         nodeInfo->localStateVersion = stateVersion;
     }
-    if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY)) {
+    if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY) &&
+        nodeInfo->deviceInfo.osType != OH_OS_TYPE) {
         UpdatePeerDeviceName(nodeInfo);
     }
     nodeInfo->updateTimestamp = SoftBusGetSysTimeMs();

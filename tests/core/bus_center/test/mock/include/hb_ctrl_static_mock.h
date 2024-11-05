@@ -20,8 +20,10 @@
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
+#include "lnn_connection_fsm.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_data_cloud_sync.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_ohos_account.h"
@@ -66,6 +68,18 @@ public:
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
     virtual int32_t LnnGenerateCeParams(void) = 0;
+    virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
+    virtual int32_t LnnHbMediumMgrInit(void) = 0;
+    virtual int32_t LnnStartNewHbStrategyFsm(void) = 0;
+    virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(
+        const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual void LnnDumpLocalBasicInfo(void) = 0;
+    virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+    virtual int32_t AuthFlushDevice(const char *uuid) = 0;
+    virtual int32_t LnnHbStrategyInit(void) = 0;
+    virtual void LnnBleHbUnregDataLevelChangeCb(void) = 0;
+    virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -101,6 +115,17 @@ public:
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
     MOCK_METHOD0(AuthLoadDeviceKey, void (void));
     MOCK_METHOD0(LnnGenerateCeParams, int32_t (void));
+    MOCK_METHOD2(DfxRecordTriggerTime, void (LnnTriggerReason, LnnEventLnnStage));
+    MOCK_METHOD0(LnnHbMediumMgrInit, int32_t (void));
+    MOCK_METHOD0(LnnStartNewHbStrategyFsm, int32_t (void));
+    MOCK_METHOD2(AuthSendKeepaliveOption, int32_t (const char *, ModeCycle));
+    MOCK_METHOD3(LnnSetGearModeBySpecificType, int32_t (const char *, const GearMode *, LnnHeartbeatType));
+    MOCK_METHOD0(LnnDumpLocalBasicInfo, void (void));
+    MOCK_METHOD2(LnnGetOnlineStateById, bool (const char *, IdCategory));
+    MOCK_METHOD1(AuthFlushDevice, int32_t (const char *));
+    MOCK_METHOD0(LnnHbStrategyInit, int32_t (void));
+    MOCK_METHOD0(LnnBleHbUnregDataLevelChangeCb, void (void));
+    MOCK_METHOD2(LnnStopOfflineTimingStrategy, int32_t (const char *, ConnectionAddrType));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

@@ -259,7 +259,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1
         AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
     sessionId =

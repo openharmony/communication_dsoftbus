@@ -134,9 +134,7 @@ static int32_t TransServerOnChannelClosed(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
-    }
+    (void)TransLaneMgrDelLane(channelId, channelType, true);
     NotifyQosChannelClosed(channelId, channelType);
     ChannelMsg data = {
         .msgChannelId = channelId,

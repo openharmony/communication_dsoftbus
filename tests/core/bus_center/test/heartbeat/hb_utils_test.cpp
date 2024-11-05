@@ -201,15 +201,15 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_01, TestSize.Level1)
     char brMacHash;
 
     ret = LnnGenerateBtMacHash(nullptr, 0, nullptr, 0);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(TEST_NETWORK_ID, 0, nullptr, 0);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(TEST_NETWORK_ID, 0, &brMacHash, 0);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(TEST_NETWORK_ID, BT_MAC_LEN, &brMacHash, 0);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(TEST_NETWORK_ID, 0, &brMacHash, BT_MAC_HASH_STR_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -223,15 +223,15 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
     char brMacHash;
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     EXPECT_CALL(disLedgerMock, ConvertBtMacToBinary)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = LnnGenerateBtMacHash(nullptr, BT_MAC_LEN, nullptr, BT_MAC_HASH_STR_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_HASH_STR_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_MAC_TO_BIN_ERR);
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_HASH_STR_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_MAC_TO_BIN_ERR);
 }
 
 /*

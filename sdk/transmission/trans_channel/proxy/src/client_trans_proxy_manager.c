@@ -620,7 +620,6 @@ static ChannelSliceProcessor *ClientTransProxyGetChannelSliceProcessor(int32_t c
 static void ClientTransProxyClearProcessor(SliceProcessor *processor)
 {
     if (processor->data != NULL) {
-        TRANS_LOGE(TRANS_SDK, "slice processor data not null");
         SoftBusFree(processor->data);
         processor->data = NULL;
     }
@@ -822,7 +821,6 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
     }
 
     SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
-    TRANS_LOGI(TRANS_SDK, "Proxy SubPacket Proc end");
     if (ret != SOFTBUS_OK) {
         ClientTransProxyClearProcessor(processor);
     }

@@ -466,7 +466,7 @@
     "APP_INFO": [
       {
         "PKG_NAME": "com.huawei.hmos.hiviewcare",
-        "TYPE": "native_app",
+        "TYPE": "system_app",
         "ACTIONS": "create,open"
       }
     ]
@@ -478,6 +478,17 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.telephony.callmanager",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DBINDER",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.systemserver",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
