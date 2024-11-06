@@ -19,6 +19,11 @@ dsoftbus_root_path = "../../../../../../../.."
 
 ## UnitTest VtpInstanceTest {{{
 ohos_unittest("VtpInstanceTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "vtp_instance_test.cpp" ]
 
