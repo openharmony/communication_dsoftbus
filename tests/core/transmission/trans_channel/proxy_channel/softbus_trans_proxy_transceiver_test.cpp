@@ -727,10 +727,12 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
     TransProxyLoopMsgHandler(nullptr);
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     EXPECT_NE(nullptr, msg);
+    ProxyChannelInfo chan;
     int32_t channelId = 1;
     msg->obj = reinterpret_cast<void *>(&channelId);
     msg->what = LOOP_HANDSHAKE_MSG;
     TransProxyLoopMsgHandler(msg);
+    msg->obj = reinterpret_cast<void *>(&chan);
     msg->what = LOOP_DISCONNECT_MSG;
     TransProxyLoopMsgHandler(msg);
     msg->what = LOOP_OPENFAIL_MSG;
