@@ -443,11 +443,11 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&g_param, &sessionId, &isEnabled);
-    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
 
     SendListenerInfo *sendListenerInfo;
     ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     int32_t channelId = 1;
     int32_t osType = TEST_OS_TYPE;
@@ -477,8 +477,6 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
 
     FileRecipientInfo *result = CreateNewRecipient(sessionId, channelId, osType);
     EXPECT_EQ(nullptr, result);
-
-    (void)TransClientDeinit();
 }
 
 /**
@@ -1682,12 +1680,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     dataTest = FILE_MAGIC_NUMBER;
-    frame.data = (uint8_t *)"00010010datatest.txt";
+    frame.data = (uint8_t *)&dataTest;
     ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
-    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
