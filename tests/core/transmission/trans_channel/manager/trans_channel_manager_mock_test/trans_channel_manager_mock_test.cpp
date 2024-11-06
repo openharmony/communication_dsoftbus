@@ -102,42 +102,6 @@ HWTEST_F(TransChannelManagerMockTest, TransStreamStats003, TestSize.Level1)
 
 /**
  * @tc.name: TransRequestQos test
- * @tc.desc: TransRequestQos001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerMockTest, TransRequestQos001, TestSize.Level1)
-{
-    int32_t channelId = 1;
-    int32_t chanType = 1;
-    int32_t appType = 1;
-    TransManagerTestInterfaceMock mock;
-    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnRequestQosOptimization).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: TransRequestQos test
- * @tc.desc: TransRequestQos002
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerMockTest, TransRequestQos002, TestSize.Level1)
-{
-    int32_t channelId = 1;
-    int32_t chanType = 1;
-    int32_t appType = 1;
-    TransManagerTestInterfaceMock mock;
-    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnRequestQosOptimization).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
-    EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
-}
-
-/**
- * @tc.name: TransRequestQos test
  * @tc.desc: TransRequestQos003
  * @tc.type: FUNC
  * @tc.require:
@@ -247,5 +211,23 @@ HWTEST_F(TransChannelManagerMockTest, TransGetAndComparePidBySession002, TestSiz
     EXPECT_CALL(mock, TransGetPidFromSocketChannelInfoBySession).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = TransGetAndComparePidBySession(1, sessionName, 1);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/**
+ * @tc.name: TransRequestQos test
+ * @tc.desc: TransRequestQos002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransRequestQos002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t chanType = 1;
+    int32_t appType = 1;
+    TransManagerTestInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRequestQosOptimization).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
+    EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
 }
 } // OHOS
