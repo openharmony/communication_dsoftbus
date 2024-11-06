@@ -164,8 +164,9 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest001, TestSize.Level1)
     NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     EXPECT_CALL(softbusServerStubMock, CheckTransPermission).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(softbusServerStubMock, CheckTransSecLevel).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     DeGenerateSessionParam(sessionParam001);
 
     SessionParam *sessionParam002 = nullptr;
@@ -178,7 +179,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest001, TestSize.Level1)
     sessionParam003->peerSessionName = nullptr;
     EXPECT_CALL(softbusServerStubMock, CheckTransSecLevel).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     ret = softBusServer->CheckOpenSessionPermission(sessionParam003);
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
     DeGenerateSessionParam(sessionParam003);
 
     DeGenerateSessionServer(sessionServer);
@@ -1096,6 +1097,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest030, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     int32_t ret = softBusServer->QosReportInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
@@ -1138,6 +1141,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest031, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     int32_t ret = softBusServer->StreamStatsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
@@ -1173,6 +1178,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest032, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     int32_t ret = softBusServer->RippleStatsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
