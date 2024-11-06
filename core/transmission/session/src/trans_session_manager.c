@@ -17,6 +17,7 @@
 
 #include "anonymizer.h"
 #include "lnn_lane_link.h"
+#include "permission_entry.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -255,6 +256,10 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if ((strcmp(pos->pkgName, pkgName) == 0) && (pos->pid == pid)) {
+            if (CheckDBinder(pos->sessionName)) {
+                // Remove RPC Permission when Client Process Exit
+                (void)DeleteDynamicPermission(pos->sessionName);
+            }
             ListDelete(&pos->node);
             g_sessionServerList->cnt--;
             SoftBusFree(pos);

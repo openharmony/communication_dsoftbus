@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+
 #include "softbus_server_stub.h"
 
 #include "access_control.h"
@@ -27,6 +28,7 @@
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "tokenid_kit.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_network_statistics.h"
@@ -36,6 +38,8 @@
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
 #include "iservice_registry.h"
+#include "ohos_account_kits.h"
+#include "os_account_manager.h"
 #include "system_ability_definition.h"
 #endif
 
@@ -285,18 +289,28 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
     }
     return SOFTBUS_OK;
 }
+
 #ifdef SUPPORT_BUNDLENAME
-static bool IsObjectstoreDbSessionName(const char *sessionName)
+static bool CheckCallingIsNormalApp(const char *sessionName)
 {
-#define OBJECTSTORE_DB_SESSION_NAME "objectstoreDB-*"
-    regex_t regComp;
-    if (regcomp(&regComp, OBJECTSTORE_DB_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
-        COMM_LOGE(COMM_SVC, "regcomp failed.");
+#define DBINDER_BUS_NAME_PREFIX "DBinder"
+    // The authorization of dbind is granted throuth Samgr, and there is no control here
+    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
         return false;
     }
-    bool compare = (regexec(&regComp, sessionName, 0, NULL, 0) == 0);
-    regfree(&regComp);
-    return compare;
+    uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
+    if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+            return false;
+    } else if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        uint64_t calling64Token = OHOS::IPCSkeleton::GetCallingFullTokenID();
+        bool isSystemApp = OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(calling64Token);
+        if (isSystemApp) {
+            return false;
+        }
+    }
+    COMM_LOGI(COMM_SVC, "The caller is a normal app");
+    return true;
 }
 
 static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
@@ -305,38 +319,95 @@ static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         COMM_LOGE(COMM_SVC, "Failed to get system ability manager.");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_TRANS_SYSTEM_ABILITY_MANAGER_FAILED;
     }
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (remoteObject == nullptr) {
         COMM_LOGE(COMM_SVC, "Failed to get bundle manager service.");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_TRANS_GET_SYSTEM_ABILITY_FAILED;
     }
     sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     if (iBundleMgr == nullptr) {
         COMM_LOGE(COMM_SVC, "iface_cast failed");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_TRANS_GET_BUNDLE_MGR_FAILED;
     }
     if (iBundleMgr->GetNameForUid(callingUid, bundleName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get bundleName failed");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_TRANS_GET_BUNDLENAME_FAILED;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t CheckSessionName(const char *sessionName, pid_t callingUid)
+static int32_t GetAppId(const std::string &bunldeName, std::string &appId)
 {
-#define SESSION_NAME "objectstoreDB-"
-    if (IsObjectstoreDbSessionName(sessionName)) {
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        COMM_LOGE(COMM_SVC, "Failed to get system ability manager.");
+        return SOFTBUS_TRANS_SYSTEM_ABILITY_MANAGER_FAILED;
+    }
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        COMM_LOGE(COMM_SVC, "Failed to get bundle manager service.");
+        return SOFTBUS_TRANS_GET_SYSTEM_ABILITY_FAILED;
+    }
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
+        COMM_LOGE(COMM_SVC, "iface_cast failed");
+        return SOFTBUS_TRANS_GET_BUNDLE_MGR_FAILED;
+    }
+    int32_t userId;
+    auto result = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (result != 0) {
+        COMM_LOGE(COMM_SVC, "GetForegroundOsAccountLocalId failed result=%{public}d", result);
+        return result;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    result = iBundleMgr->GetBundleInfoV9(bunldeName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
+        bundleInfo, userId);
+    if (result != 0) {
+        COMM_LOGE(COMM_SVC, "GetBundleInfoV9 failed result=%{public}d", result);
+        return result;
+    }
+    appId = bundleInfo.appId;
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckNormalAppSessionName(const char *sessionName, pid_t callingUid, std::string &strName)
+{
+    if (CheckCallingIsNormalApp(sessionName)) {
         std::string bundleName;
-        if (GetBundleName(callingUid, bundleName) != 0) {
+        int32_t result = GetBundleName(callingUid, bundleName);
+        if (result != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "get bundle name failed");
-            return SOFTBUS_IPC_ERR;
+            return result;
         }
-        if (strcmp(bundleName.c_str(), sessionName + strlen(SESSION_NAME)) != 0) {
-            COMM_LOGE(COMM_SVC, "bundle name is different from session name");
-            return SOFTBUS_IPC_ERR;
+        std::string appId;
+        result = GetAppId(bundleName, appId);
+        if (result != SOFTBUS_OK) {
+            COMM_LOGE(COMM_SVC, "get appId failed");
+            return result;
         }
+        auto posName = strName.find("-");
+        if (posName == std::string::npos) {
+            COMM_LOGE(COMM_SVC, "not find bundleName");
+            return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
+        }
+        auto posId = strName.find("-", posName + 1);
+        if (posId == std::string::npos) {
+            COMM_LOGE(COMM_SVC, "not find appId");
+            return SOFTBUS_TRANS_NOT_FIND_APPID;
+        }
+        if (strcmp(bundleName.c_str(), strName.substr(posName + 1, posId - posName - 1).c_str()) != 0) {
+            COMM_LOGE(COMM_SVC, "bundleName is different from session name");
+            return SOFTBUS_STRCMP_ERR;
+        }
+        if (strcmp(appId.c_str(), strName.substr(posId + 1).c_str()) != 0) {
+            COMM_LOGE(COMM_SVC, "appId is different from session name");
+            return SOFTBUS_STRCMP_ERR;
+        }
+        strName.erase(posId);
     }
     return SOFTBUS_OK;
 }
@@ -355,6 +426,7 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     }
 
     const char *sessionName = data.ReadCString();
+    std::string strName(sessionName);
     uint32_t code = SERVER_CREATE_SESSION_SERVER;
     SoftbusRecordCalledApiInfo(pkgName, code);
     if (pkgName == nullptr || sessionName == nullptr) {
@@ -369,12 +441,12 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     }
 
 #ifdef SUPPORT_BUNDLENAME
-    if (CheckSessionName(sessionName, callingUid) != SOFTBUS_OK) {
+    if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
+    sessionName = strName.c_str();
 #endif
-
     retReply = CreateSessionServer(pkgName, sessionName);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
@@ -519,9 +591,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
     COMM_CHECK_AND_RETURN_RET_LOGE(ReadQosInfo(data, param), SOFTBUS_IPC_ERR, COMM_SVC, "failed to read qos info");
-#ifdef SUPPORT_BUNDLENAME
-    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-#endif
+
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
@@ -535,12 +605,6 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
-#ifdef SUPPORT_BUNDLENAME
-    if (CheckSessionName(param.sessionName, callingUid) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
-    }
-#endif
 
     timeStart = GetSoftbusRecordTimeMillis();
     retReply = OpenSession(&param, &(transSerializer.transInfo));
