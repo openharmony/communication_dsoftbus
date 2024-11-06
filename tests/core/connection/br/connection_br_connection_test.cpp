@@ -73,6 +73,12 @@ int32_t DeviceAction(ConnBrDevice *device, const char *anomizeAddress)
     return (int32_t)(device->state);
 }
 
+void OnReusedConnected(uint32_t connectionId, const ConnectionInfo *info)
+{
+    (void)connectionId;
+    (void)info;
+}
+
 void OnConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     (void)connectionId;
@@ -85,6 +91,15 @@ void OnDisconnected(uint32_t connectionId, const ConnectionInfo *info)
     (void)connectionId;
     (void)info;
     return;
+}
+
+void OnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
+{
+    (void)connectionId;
+    (void)moduleId;
+    (void)seq;
+    (void)data;
+    (void)len;
 }
 
 void MessageDelay(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t delayMillis)
@@ -1297,5 +1312,83 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager041, TestSize.Level1)
     }
     isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
     EXPECT_EQ(true, isWait);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, BrReuseConnection, TestSize.Level1)
+{
+    const char *mac = "11:22:33:44:55:66";
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_CLIENT, 1);
+    ASSERT_NE(nullptr, connection);
+    connection->state = BR_CONNECTION_STATE_CONNECTED;
+    ASSERT_EQ(SOFTBUS_OK, ConnBrSaveConnection(connection));
+    ConnectCallback callback = {
+        .OnConnected = OnConnected,
+        .OnReusedConnected = OnReusedConnected,
+        .OnDisconnected = OnDisconnected,
+        .OnDataReceived = OnDataReceived,
+    };
+    ClientConnected(1);
+    ConnectFuncInterface *bleInterface = ConnInitBle(&callback);
+    ASSERT_NE(nullptr, bleInterface);
+
+    ConnBrDevice device = {
+        .bleKeepAliveInfo.keepAliveBleConnectionId = 1,
+        .bleKeepAliveInfo.keepAliveBleRequestId = 1,
+    };
+    EXPECT_EQ(EOK, memcpy_s(device.addr, BT_MAC_LEN, mac, BT_MAC_LEN));
+    bool ret = BrReuseConnection(&device, connection);
+    EXPECT_EQ(true, ret);
+    ServerAccepted(1);
+    ConnBrDevice *device1 = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device1);
+    ClientConnectFailed(1, SOFTBUS_CONN_BR_INTERNAL_ERR);
+    EXPECT_EQ(EOK, memcpy_s(device1->addr, BT_MAC_LEN, mac, BT_MAC_LEN));
+    AttempReuseConnect(device1, ConnectDeviceDirectly);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, BrOnOccupyRelease, TestSize.Level1)
+{
+    InitBrManager();
+    const char *mac = "11:00:33:44:55:66";
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_CLIENT, 1);
+    ASSERT_NE(nullptr, connection);
+    connection->isOccupied = true;
+    int32_t ret = ConnBrSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusMessage msg = {
+        .what = MSG_CONNECTION_OCCUPY_RELEASE,
+        .arg1 = connection->connectionId,
+    };
+    BrConnectionMsgHandler(&msg);
+    msg.what = MSG_CONNECTION_UPDATE_PEER_RC + 1;
+    BrConnectionMsgHandler(&msg);
+    EXPECT_EQ(false, connection->isOccupied);
+
+    connection->state = BR_CONNECTION_STATE_EXCEPTION;
+    ret = ConnBrSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, WaitNegotiationClosingTimeoutHandler, TestSize.Level1)
+{
+    InitBrManager();
+    const char *mac = "11:00:33:44:55:77";
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_CLIENT, 0);
+    ASSERT_NE(nullptr, connection);
+    connection->state = BR_CONNECTION_STATE_EXCEPTION;
+    int32_t ret = ConnBrSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    WaitNegotiationClosingTimeoutHandler(connection->connectionId);
+
+    const char *addr = "11:00:33:44:55:22";
+    ConnBrConnection *brConnection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, 0);
+    ASSERT_NE(nullptr, brConnection);
+    brConnection->state = BR_CONNECTION_STATE_NEGOTIATION_CLOSING;
+    brConnection->socketHandle = INVALID_SOCKET_HANDLE;
+    ret = ConnBrSaveConnection(brConnection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    WaitNegotiationClosingTimeoutHandler(brConnection->connectionId);
+    EXPECT_EQ(BR_CONNECTION_STATE_CLOSED, brConnection->state);
 }
 } // namespace OHOS
