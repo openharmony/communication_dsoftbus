@@ -429,6 +429,21 @@ static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *
     LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);
 }
 
+static int32_t SetDeviceScreenStatus(NodeInfo *nodeInfo, bool isScreenOn)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "nodeInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    nodeInfo->isScreenOn = isScreenOn;
+    char *anonyDeviceUdid = NULL;
+    Anonymize(nodeInfo->deviceInfo.deviceUdid, &anonyDeviceUdid);
+    LNN_LOGI(LNN_HEART_BEAT, "udid=%{public}s, prepare to set screen status to %{public}s from hbResp",
+        AnonymizeWrapper(anonyDeviceUdid), isScreenOn ? "on" : "off");
+    AnonymizeFree(anonyDeviceUdid);
+    return SOFTBUS_OK;
+}
+
 static bool IsStateVersionChanged(
     const HbRespData *hbResp, const NodeInfo *deviceInfo, int32_t *stateVersion, ConnectOnlineReason *connectReason)
 {
@@ -494,8 +509,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because resp data");
         return true;
     }
-    int32_t ret;
-    int32_t stateVersion;
+    int32_t ret, stateVersion;
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (!IsLocalSupportBleDirectOnline()) {
@@ -523,6 +537,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
     }
     (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
+    (void)SetDeviceScreenStatus(&deviceInfo, hbResp->isScreenOn);
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         *connectReason = UPDATE_REMOTE_DEVICE_INFO_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
@@ -1118,7 +1133,7 @@ void LnnDumpHbMgrRecvList(void)
 void LnnDumpHbOnlineNodeList(void)
 {
 #define HB_DUMP_ONLINE_NODE_MAX_NUM 5
-    int32_t i, infoNum = 0;
+    int32_t i, infoNum;
     uint64_t oldTimeStamp;
     NodeBasicInfo *info = NULL;
 
