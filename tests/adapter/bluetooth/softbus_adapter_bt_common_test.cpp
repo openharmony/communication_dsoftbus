@@ -119,6 +119,9 @@ static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, in
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
 
+    int32_t ret = SoftBusBtInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
     if (MockBluetooth::btGapCallback == nullptr) {
         return testing::AssertionFailure() << "GapRegisterCallback is not invoke";
     }
