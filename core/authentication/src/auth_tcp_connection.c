@@ -34,7 +34,7 @@
 #define AUTH_PKT_HEAD_LEN 24
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
 #define TCP_KEEPALIVE_TOS_VAL 180
-#define RECV_DATA_TIMEOUT (5 * 1000 * 1000)
+#define RECV_DATA_TIMEOUT (2 * 1000 * 1000)
 
 typedef struct {
     int32_t keepaliveIdle;
@@ -184,6 +184,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
             AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
             (void)DelTrigger(module, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
+            return SOFTBUS_INVALID_DATA_HEAD;
         }
         offset += (uint32_t)recvLen;
     }
