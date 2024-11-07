@@ -30,7 +30,6 @@ ohos_unittest("DiscBleTest") {
     "bus_center_mock.cpp",
     "disc_ble_test.cpp",
   ]
-  sources += test_utils_src
   if (support_i18n && qemu_arm_disable) {
     sources += [
       "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
@@ -62,7 +61,6 @@ ohos_unittest("DiscBleTest") {
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$softbus_adapter_common/net/bluetooth/include",
   ]
-  include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",

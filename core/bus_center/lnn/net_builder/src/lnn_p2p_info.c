@@ -23,6 +23,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_link_p2p.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_secure_storage.h"
@@ -358,6 +359,9 @@ int32_t LnnInitP2p(void)
 {
     if (LnnInitPtk() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk fail");
+    }
+    if (LnnInitPtkSyncListener() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init ptk listener fail");
     }
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }

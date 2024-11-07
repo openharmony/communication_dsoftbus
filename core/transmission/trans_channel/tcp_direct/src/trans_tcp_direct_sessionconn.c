@@ -508,7 +508,6 @@ void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);
             g_tcpChannelInfoList->cnt--;
-            (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);

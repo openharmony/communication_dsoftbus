@@ -55,26 +55,26 @@
 #define MESH_MAGIC_BW 0xA5A5A5A5 // wifi and br link
 
 typedef struct {
-    ListNode node;
-    uint32_t laneHandle;
-    int32_t errCode;
-    SoftBusCond cond;
     bool bSucc;
     bool isFinished;
-    LaneConnInfo connInfo;
-    SessionParam param;
+    uint32_t laneHandle;
+    int32_t errCode;
     uint32_t callingTokenId; // used for transmission access control
     uint32_t firstTokenId; // used for dfx connection success rate
     int64_t timeStart;
+    SoftBusCond cond;
+    ListNode node;
+    SessionParam param;
+    LaneConnInfo connInfo;
 } TransReqLaneItem;
 
 typedef struct {
-    ListNode node;
+    bool isSucc;
+    bool isFinished;
     uint32_t laneHandle;
     int32_t errCode;
     SoftBusCond condVar;
-    bool isSucc;
-    bool isFinished;
+    ListNode node;
 } TransFreeLaneItem;
 
 static SoftBusList *g_reqLanePendingList = NULL;

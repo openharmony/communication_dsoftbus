@@ -296,6 +296,7 @@ if (defined(ohos_lite)) {
     public_external_deps += [ "hitrace:libhitracechain" ]
     if (is_standard_system) {
       external_deps += [
+        "ffrt:libffrt",
         "hilog:libhilog",
         "hisysevent:libhisysevent",
         "hitrace:libhitracechain",

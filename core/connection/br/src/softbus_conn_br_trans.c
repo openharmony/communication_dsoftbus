@@ -350,8 +350,7 @@ int32_t ConnBrPostBytes(
     return SOFTBUS_OK;
 }
 
-// call this method MUST wrapper connection lock
-static int32_t SendAckUnsafe(const ConnBrConnection *connection)
+static int32_t SendAck(const ConnBrConnection *connection, int32_t socketHandle)
 {
     int32_t flag = CONN_HIGH;
     BrCtlMessageSerializationContext ctx = {
@@ -367,21 +366,20 @@ static int32_t SendAckUnsafe(const ConnBrConnection *connection)
     uint32_t dataLen = 0;
     int64_t ctrlMsgSeq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     if (ctrlMsgSeq < 0) {
-        CONN_LOGW(CONN_BR,
-            "br send ack failed: pack message failed, connId=%{public}u, window=%{public}d, seq=%{public}" PRId64
-            ", error=%{public}d",
-            connection->connectionId, connection->window, connection->sequence, (int32_t)ctrlMsgSeq);
+        CONN_LOGW(CONN_BR, "br send ack failed: pack message failed, connId=%{public}u, window=%{public}d, "
+            "seq=%{public}" PRId64 ", error=%{public}d", connection->connectionId, connection->window,
+            connection->sequence, (int32_t)ctrlMsgSeq);
         return (int32_t)ctrlMsgSeq;
     }
     int32_t status = ConnBrCreateBrPendingPacket(connection->connectionId, connection->sequence);
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR,
-            "br send ack failed: create pending failed, connId=%{public}u, window=%{public}d, seq=%{public}" PRId64
-            ", error=%{public}d", connection->connectionId, connection->window, connection->sequence, status);
+        CONN_LOGW(CONN_BR, "br send ack failed: create pending failed, connId=%{public}u, window=%{public}d, "
+            "seq=%{public}" PRId64 ", error=%{public}d", connection->connectionId, connection->window,
+            connection->sequence, status);
         SoftBusFree(data);
         return status;
     }
-    status = BrTransSend(connection->connectionId, connection->socketHandle, connection->mtu, data, dataLen);
+    status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, data, dataLen);
     if (status != SOFTBUS_OK) {
         ConnBrDelBrPendingPacket(connection->connectionId, connection->sequence);
     }
@@ -469,8 +467,8 @@ void *SendHandlerLoop(void *arg)
         if (connection == NULL) {
             CONN_LOGE(CONN_BR, "br send data failed: connection is not exist, connectionId=%{public}u",
                 sendNode->connectionId);
-            g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
-                sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR);
+            g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid,
+                sendNode->flag, sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR);
             FreeSendNode(sendNode);
             sendNode = NULL;
             continue;
@@ -479,8 +477,8 @@ void *SendHandlerLoop(void *arg)
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
             CONN_LOGE(
                 CONN_BR, "br send data failed: try to lock failed, connectionId=%{public}u", sendNode->connectionId);
-            g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
-                sendNode->module, sendNode->seq, SOFTBUS_LOCK_ERR);
+            g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid,
+                sendNode->flag, sendNode->module, sendNode->seq, SOFTBUS_LOCK_ERR);
             ConnBrReturnConnection(&connection);
             FreeSendNode(sendNode);
             sendNode = NULL;
@@ -492,27 +490,28 @@ void *SendHandlerLoop(void *arg)
             CONN_LOGE(CONN_BR, "br send data failed: invalid socket, connectionId=%{public}u", sendNode->connectionId);
             (void)SoftBusMutexUnlock(&connection->lock);
             ConnBrReturnConnection(&connection);
-            g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
-                sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_INVALID_SOCKET);
+            g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid,
+                sendNode->flag, sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_INVALID_SOCKET);
             FreeSendNode(sendNode);
             sendNode = NULL;
             continue;
         }
+        (void)SoftBusMutexUnlock(&connection->lock);
 
+        // The operation of the connection variable only changes in this code block, so there is no need to lock it.
         connection->sequence += 1;
         if (connection->sequence % connection->window == 0) {
-            if (SendAckUnsafe(connection) == SOFTBUS_OK) {
+            if (SendAck(connection, socketHandle) == SOFTBUS_OK) {
                 connection->waitSequence = connection->sequence;
             }
         }
         int32_t window = connection->window;
         int64_t sequence = connection->sequence;
         int64_t waitSequence = connection->waitSequence;
-        (void)SoftBusMutexUnlock(&connection->lock);
-
         if (window > 1 && sequence % window == window - 1 && waitSequence != 0) {
             WaitAck(connection);
         }
+
         status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
         ConnBrReturnConnection(&connection);
         CONN_LOGD(CONN_BR, "br send data, connId=%{public}u, status=%{public}d, socketHandle=%{public}d",

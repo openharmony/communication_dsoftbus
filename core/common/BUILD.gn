@@ -24,7 +24,6 @@ common_utils_src = [
   "bitmap/softbus_bitmap.c",
   "network/softbus_network_utils.c",
   "json_utils/softbus_json_utils.c",
-  "message_handler/message_handler.c",
   "queue/softbus_queue.c",
   "security/sequence_verification/softbus_sequence_verification.c",
   "softbus_property/softbus_feature_config.c",
@@ -89,6 +88,7 @@ if (defined(ohos_lite)) {
     dfx_src = [ "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c" ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src + dfx_src
+    sources += [ "message_handler/message_handler.c" ]
     if (board_toolchain_type != "iccarm") {
       cflags = [
         "-Wall",
@@ -202,10 +202,14 @@ if (defined(ohos_lite)) {
       ]
     }
     if (is_standard_system) {
+      sources += [ "message_handler/message_handler_ffrt.cpp" ]
       external_deps += [
+        "ffrt:libffrt",
         "hilog:libhilog",
         "hisysevent:libhisysevent",
       ]
+    } else {
+      sources += [ "message_handler/message_handler.c" ]
     }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

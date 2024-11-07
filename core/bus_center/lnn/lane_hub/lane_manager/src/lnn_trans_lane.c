@@ -73,8 +73,8 @@ typedef enum {
 
 typedef struct {
     BuildLinkStatus status;
-    LaneLinkInfo linkInfo;
     int32_t result;
+    LaneLinkInfo linkInfo;
 } LinkStatusInfo;
 
 typedef struct {
@@ -1306,7 +1306,7 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
-void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
+static void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
 {
     LaneTransType transType;
     if (Lock() != SOFTBUS_OK) {

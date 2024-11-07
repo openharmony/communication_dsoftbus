@@ -50,7 +50,7 @@ public:
     virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
     virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
-    virtual int32_t LnnSyncPtk(char *networkId) = 0;
+    virtual int32_t LnnSyncPtk(const char *networkId) = 0;
     virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
     virtual void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType releaseLink) = 0;
 };
@@ -84,7 +84,7 @@ public:
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
     MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
-    MOCK_METHOD1(LnnSyncPtk, int32_t (char *networkId));
+    MOCK_METHOD1(LnnSyncPtk, int32_t (const char *networkId));
     MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType releaseLink));
     MOCK_METHOD2(ClearConflictInfoByLinkType, void (const char *networkId, LaneLinkType releaseLink));
 
