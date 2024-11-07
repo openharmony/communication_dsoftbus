@@ -72,6 +72,7 @@ if (dsoftbus_feature_lnn_net) {
       "$lane_src_enhance_path/lane/lnn_lane_vap_info.c",
       "$lane_src_enhance_path/lane/lnn_lane_power_control.c",
       "$lane_src_enhance_path/lane/lnn_parameter_utils.cpp",
+      "$lane_src_enhance_path/lane/src/lnn_lane_conflict_manager.c",
     ]
   } else {
     bus_center_hub_src += [
@@ -83,11 +84,7 @@ if (dsoftbus_feature_lnn_net) {
   }
   if (dsoftbus_feature_lnn_time_sync) {
     bus_center_hub_src +=
-        [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager.c" ]
-    if (!enhanced) {
-      bus_center_hub_src +=
-          [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_impl_virtual.c" ]
-    }
+        [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
   } else {
     bus_center_hub_src +=
         [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
@@ -135,9 +132,6 @@ if (dsoftbus_feature_lnn_net) {
   ]
 }
 
-if (dsoftbus_feature_lnn_net && dsoftbus_feature_lnn_time_sync && enhanced) {
-  bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
-}
 if (dsoftbus_feature_lnn_net && dsoftbus_feature_lnn_heartbeat && enhanced) {
   bus_center_hub_deps += [
     "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_ble_heartbeat",
@@ -145,8 +139,8 @@ if (dsoftbus_feature_lnn_net && dsoftbus_feature_lnn_heartbeat && enhanced) {
   ]
 }
 if (dsoftbus_feature_lnn_net && dsoftbus_feature_qos && enhanced) {
-  bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_statistics:dsoftbus_lane_statistics" ]
-  bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_qos:dsoftbus_lane_qos" ]
+  bus_center_hub_src +=
+      [ "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c" ]
 } else {
   bus_center_hub_src +=
       [ "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c" ]
