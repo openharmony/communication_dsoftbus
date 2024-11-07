@@ -20,6 +20,15 @@ dsoftbus_feature_product_config_path =
     "${dsoftbus_root_path}/adapter/default_config"
 softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+dep_feature = "dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c"
+enhance_feature = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                              [
+                                "$native_source_path",
+                                "$dep_feature",
+                              ],
+                              "value")
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dsoftbus_adapter_common_interface") {
@@ -77,8 +86,15 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
         "$softbus_adapter_common/range/softbus_adapter_range.c",
-        "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
+
+      if (enhance_feature) {
+        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
+      } else {
+        sources +=
+            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+      }
+
       if (board_name == "v200zr") {
         include_dirs += [ "//third_party/json/include" ]
         sources = []
@@ -94,8 +110,14 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
           "$softbus_adapter_common/perf/softbus_adapter_perf.c",
           "$softbus_adapter_common/range/softbus_adapter_range.c",
-          "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
         ]
+
+        if (enhance_feature) {
+          sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
+        } else {
+          sources +=
+              [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+        }
       }
 
       deps = [
@@ -141,8 +163,15 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
         "$softbus_adapter_common/perf/softbus_adapter_perf.c",
         "$softbus_adapter_common/range/softbus_adapter_range.c",
-        "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
+
+      if (enhance_feature) {
+        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
+      } else {
+        sources +=
+            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+      }
+
       deps = [
         "$dsoftbus_dfx_path/log:softbus_dfx_log",
         "$hilog_lite_deps_path",
@@ -195,7 +224,6 @@ if (defined(ohos_lite)) {
       "//third_party/json/include",
     ]
     sources = [
-      "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
       "$softbus_adapter_common/dfx/softbus_adapter_hitrace.c",
       "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
@@ -207,11 +235,18 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
       "$softbus_adapter_common/perf/softbus_adapter_perf.c",
     ]
+
+    if (enhance_feature) {
+      sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
+    } else {
+      sources +=
+          [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+    }
+
     public_deps = [
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
-    native_source_path = rebase_path("$dsoftbus_root_path")
 
     ble_enhanced_impl =
         "dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c"
