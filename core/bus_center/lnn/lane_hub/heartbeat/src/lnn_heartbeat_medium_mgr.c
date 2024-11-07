@@ -839,7 +839,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
         return;
     }
     if (info == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "online info is null");
+        LNN_LOGD(LNN_HEART_BEAT, "online info is null");
         return;
     }
     if (infoNum == 0) {
