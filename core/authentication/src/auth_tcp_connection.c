@@ -34,6 +34,7 @@
 #define AUTH_PKT_HEAD_LEN 24
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
 #define TCP_KEEPALIVE_TOS_VAL 180
+#define RECV_DATA_TIMEOUT (5 * 1000 * 1000)
 
 typedef struct {
     int32_t keepaliveIdle;
@@ -176,17 +177,17 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
 static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *head)
 {
     uint8_t buf[AUTH_PKT_HEAD_LEN] = {0};
-    ssize_t len = ConnRecvSocketData(fd, (char *)&buf[0], sizeof(buf), 0);
-    if (len < AUTH_PKT_HEAD_LEN) {
-        if (len < 0) {
+    uint32_t offset = 0;
+    while (offset < AUTH_PKT_HEAD_LEN) {
+        ssize_t recvLen = ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
+        if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
             (void)DelTrigger(module, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
         }
-        AUTH_LOGE(AUTH_CONN, "head not enough, abandon it. len=%{public}zd", len);
-        return SOFTBUS_ERR;
+        offset += (uint32_t)recvLen;
     }
-    return UnpackSocketPkt(buf, len, head);
+    return UnpackSocketPkt(buf, offset, head);
 }
 
 static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
