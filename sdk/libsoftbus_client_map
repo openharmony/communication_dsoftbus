@@ -26,6 +26,7 @@
         "SetFileSendListener";
         "ShiftLNNGear";
         "SyncTrustedRelationShip";
+        "SetLocalDeviceName";
         "GetNodeKeyInfo";
         "GetSessionKey";
         "SendFile";

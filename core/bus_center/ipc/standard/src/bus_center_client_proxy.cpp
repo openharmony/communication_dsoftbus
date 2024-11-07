@@ -131,7 +131,7 @@ int32_t ClientNotifyHichainProofException(
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     const char *dmPkgName = "ohos.distributedhardware.devicemanager";
-    for (const auto proxy : proxyMap) {
+    for (auto proxy : proxyMap) {
         if (strcmp(dmPkgName, proxy.first.c_str()) != 0) {
             continue;
         }

@@ -70,6 +70,7 @@ typedef uint32_t LnnHeartbeatType;
 #define HEARTBEAT_TYPE_BLE_V3    (0x1L << 4)
 #define HEARTBEAT_TYPE_BLE_V4    (0x1L << 5) // for heartbeat to lowpower
 #define HEARTBEAT_TYPE_MAX       (0x1L << 6)
+#define HEARTBEAT_TYPE_INVALID   0xFFFF
 
 #define NORMAL_STRATEGY               1
 #define HIGH_PERFORMANCE_STRATEGY     2
@@ -119,15 +120,15 @@ typedef enum {
 
 typedef struct {
     uint8_t capabiltiy;
+    uint8_t shortUuid[HB_SHORT_UUID_LEN];
+    uint8_t hbVersion;
+    bool isScreenOn;
     int16_t stateVersion;
     uint16_t staticLength;
     uint16_t staticLevel;
     uint16_t switchLength;
     uint32_t switchLevel;
     int32_t preferChannel;
-    uint8_t shortUuid[HB_SHORT_UUID_LEN];
-    uint8_t hbVersion;
-    bool isScreenOn;
 } HbRespData;
 
 typedef enum {

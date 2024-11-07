@@ -427,4 +427,9 @@ int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType data
     ConvertQosInfo(qos, qosCount, &qosInfo);
     return LnnQueryLaneResource(&info, &qosInfo);
 }
+
+int32_t SoftBusServer::SetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    return LnnIpcSetLocalDeviceName(pkgName, displayName);
+}
 } // namespace OHOS

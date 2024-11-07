@@ -605,8 +605,8 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
     }
     if (info != NULL) {
         LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
+        DfxRecordDeviceInfoExchangeEndTime(info);
     }
-    DfxRecordDeviceInfoExchangeEndTime(info);
 }
 
 static void OnDeviceDisconnect(AuthHandle authHandle)

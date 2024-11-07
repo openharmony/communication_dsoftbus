@@ -376,8 +376,6 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(!IsListEmpty(proxyChannelList), TRANS_CTRL, "proxyChannelList is empty");
-
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyChannelList, ProxyChannelInfo, node) {
@@ -1738,7 +1736,7 @@ static void TransWifiOnLineProc(const char *peerNetworkId)
         TRANS_LOGE(TRANS_CTRL, "invalid networkId");
         return;
     }
-    int ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
+    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
     if (ret == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "notify upgrade migrate success");
         return;
@@ -1753,7 +1751,7 @@ static void TransWifiOffLineProc(const char *peerNetworkId)
         TRANS_LOGE(TRANS_CTRL, "invalid networkId");
         return;
     }
-    int ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
+    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
     if (ret == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "notify degrade migrate success");
         return;

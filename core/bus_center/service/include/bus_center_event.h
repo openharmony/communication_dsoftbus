@@ -200,9 +200,9 @@ typedef struct {
 
 typedef struct {
     LnnEventBasicInfo basic;
-    const char* masterNodeUDID;
     int32_t weight;
     bool isMasterNode;
+    const char* masterNodeUDID;
 } LnnMasterNodeChangedEvent;
 
 typedef struct {
