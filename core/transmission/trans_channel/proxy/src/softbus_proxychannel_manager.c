@@ -1555,6 +1555,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
         return;
     }
 
+    (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
     (void)OnProxyChannelOpenFailed(channelId, &(channelInfo->appInfo), errCode);
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
