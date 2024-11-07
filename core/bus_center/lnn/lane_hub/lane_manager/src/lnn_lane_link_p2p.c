@@ -338,6 +338,36 @@ static int32_t GetPreferAuth(const char *networkId, AuthConnInfo *connInfo, bool
     return AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
 }
 
+static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remote)
+{
+    int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
+    if (ret != SOFTBUS_OK || *local == 0) {
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
+        return SOFTBUS_ERR;
+    }
+    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
+    if (ret != SOFTBUS_OK || *remote == 0) {
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool IsEnableHml(const char *networkId)
+{
+    uint64_t local;
+    uint64_t remote;
+    int32_t ret = GetFeatureCap(networkId, &local, &remote);
+    if (ret != SOFTBUS_OK) {
+        return false;
+    }
+    if (((local & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0) ||
+        ((remote & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0)) {
+        return false;
+    }
+    return true;
+}
+
 static int32_t GetP2pLinkReqParamByChannelRequetId(
     int32_t channelRequestId, int32_t channelId, int32_t p2pRequestId, struct WifiDirectConnectInfo *wifiDirectInfo)
 {
@@ -370,8 +400,10 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
         if (item->p2pInfo.isWithQos) {
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
-        } else {
+        } else if (IsEnableHml(item->laneRequestInfo.networkId)) {
             wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+        } else {
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
@@ -415,8 +447,10 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
         if (item->p2pInfo.isWithQos) {
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
-        } else {
+        } else if (IsEnableHml(item->laneRequestInfo.networkId)) {
             wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+        } else {
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
@@ -863,21 +897,6 @@ static int32_t LnnP2pInit(void)
     }
     ListInit(g_p2pLinkList);
     ListInit(g_p2pLinkedList);
-    return SOFTBUS_OK;
-}
-
-static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remote)
-{
-    int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
-    if (ret != SOFTBUS_OK || *local < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
-        return SOFTBUS_ERR;
-    }
-    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
-    if (ret != SOFTBUS_OK || *remote < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 

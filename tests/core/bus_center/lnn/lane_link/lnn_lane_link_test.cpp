@@ -211,17 +211,22 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
     request->transType = LANE_T_BYTE;
     request->linkType = LANE_BLE;
     request->acceptableProtocols = 0;
+    uint64_t local = 1;
+    uint64_t remote = 1;
 
     uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    
+
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
