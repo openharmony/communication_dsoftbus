@@ -27,6 +27,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "system_ability_definition.h"
+#include "tokenid_kit.h"
 #include "trans_session_manager.h"
 
 namespace {
@@ -67,10 +68,9 @@ static int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
     if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
         return NATIVE_APP;
     } else if (tokenType == ATokenTypeEnum::TOKEN_HAP) {
-        HapTokenInfo hapTokenInfo;
-        AccessTokenKit::GetHapTokenInfo(callingToken, hapTokenInfo);
-        if ((hapTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_CORE) ||
-            (hapTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_BASIC)) {
+        uint64_t accessTokenIDEx = OHOS::IPCSkeleton::GetCallingFullTokenID();
+        bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+        if (isSystemApp) {
             return SYSTEM_APP;
         }
     }
