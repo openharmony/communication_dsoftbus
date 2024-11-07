@@ -179,7 +179,8 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
     uint8_t buf[AUTH_PKT_HEAD_LEN] = {0};
     uint32_t offset = 0;
     while (offset < AUTH_PKT_HEAD_LEN) {
-        ssize_t recvLen = ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
+        ssize_t recvLen = ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset),
+            RECV_DATA_TIMEOUT);
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
             (void)DelTrigger(module, fd, READ_TRIGGER);
