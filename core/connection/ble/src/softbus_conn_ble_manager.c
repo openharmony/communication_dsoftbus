@@ -1456,7 +1456,7 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
 int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGD(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "connection not exist, connectionId=%{public}u", connectionId);
     bool isExist = false;
     ConnRemoveMsgFromLooper(
@@ -1673,7 +1673,8 @@ static MsgHandlerCommand g_commands[] = {
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
     CONN_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_BLE, "msg is null");
-    if (msg->what != BLE_MGR_MSG_DATA_RECEIVED) {
+    if (msg->what != BLE_MGR_MSG_DATA_RECEIVED && msg->what != BLE_MGR_MSG_NEXT_CMD &&
+        msg->what != BLE_MGR_MSG_CONNECTION_CLOSED) {
         CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
             msg->what, g_bleManager.state->name());
     }
