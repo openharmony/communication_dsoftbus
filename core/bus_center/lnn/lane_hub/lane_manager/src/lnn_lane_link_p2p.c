@@ -923,6 +923,7 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
                 "requestId=%{public}u, linkId=%{public}d",
                 reqInfo.laneRequestInfo.laneReqId, linkInfo->type, requestId, linkId);
             reqInfo.laneRequestInfo.cb.onLaneLinkSuccess(reqInfo.laneRequestInfo.laneReqId, throryLinkType, linkInfo);
+            ClearConflictInfoByLinkType(reqInfo.laneRequestInfo.networkId, linkInfo->type);
         }
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {

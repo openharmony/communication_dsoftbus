@@ -598,4 +598,104 @@ HWTEST_F(LNNLaneLinkConflictTest, LNN_UPDATE_EXISTS_LINK_CONFLICT_INFO_001, Test
     EXPECT_EQ(ret, SOFTBUS_OK);
     FreeConflictDevInfo(&inputInfo);
 }
+
+/*
+* @tc.name: LNN_CLEAR_CONFLICT_INFO_BY_RELEASE_LINK_001
+* @tc.desc: clear conflictInfo by linkType HML
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkConflictTest, LNN_CLEAR_CONFLICT_INFO_BY_RELEASE_LINK_001, TestSize.Level1)
+{
+    NiceMock<LaneLinkConflictDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString)
+        .WillRepeatedly(LaneLinkConflictDepsInterfaceMock::ActionOfConvertBytesToHexString);
+    LinkConflictInfo inputInfo;
+    (void)memset_s(&inputInfo, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    inputInfo.conflictType = CONFLICT_THREE_VAP;
+    inputInfo.identifyInfo.type = IDENTIFY_TYPE_DEV_ID;
+    EXPECT_EQ(strcpy_s(inputInfo.identifyInfo.devInfo.peerDevId, NETWORK_ID_BUF_LEN, PEER_NETWORK_ID), EOK);
+    inputInfo.releaseLink = LANE_HML;
+    int32_t ret = GenerateConflictDevInfo(&inputInfo);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = AddLinkConflictInfo(&inputInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ClearConflictInfoByLinkType(nullptr, LANE_HML);
+    ClearConflictInfoByLinkType(PEER_NETWORK_ID, LANE_LINK_TYPE_BUTT);
+    ClearConflictInfoByLinkType(PEER_NETWORK_ID, LANE_HML);
+    ClearConflictInfoByLinkType(PEER_NETWORK_ID, LANE_P2P);
+    ret = DelLinkConflictInfo(&inputInfo.identifyInfo, inputInfo.conflictType);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
+    FreeConflictDevInfo(&inputInfo);
+}
+
+/*
+* @tc.name: LNN_CLEAR_CONFLICT_INFO_BY_RELEASE_LINK_002
+* @tc.desc: clear conflictInfo by linkType P2P
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkConflictTest, LNN_CLEAR_CONFLICT_INFO_BY_RELEASE_LINK_002, TestSize.Level1)
+{
+    NiceMock<LaneLinkConflictDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString)
+        .WillRepeatedly(LaneLinkConflictDepsInterfaceMock::ActionOfConvertBytesToHexString);
+    LinkConflictInfo inputInfo;
+    (void)memset_s(&inputInfo, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    inputInfo.conflictType = CONFLICT_LINK_NUM_LIMITED;
+    inputInfo.identifyInfo.type = IDENTIFY_TYPE_DEV_ID;
+    EXPECT_EQ(strcpy_s(inputInfo.identifyInfo.devInfo.peerDevId, NETWORK_ID_BUF_LEN, PEER_NETWORK_ID), EOK);
+    inputInfo.releaseLink = LANE_HML;
+    int32_t ret = GenerateConflictDevInfo(&inputInfo);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = AddLinkConflictInfo(&inputInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ClearConflictInfoByLinkType(nullptr, LANE_HML);
+    ClearConflictInfoByLinkType(PEER_NETWORK_ID, LANE_LINK_TYPE_BUTT);
+    ClearConflictInfoByLinkType(PEER_NETWORK_ID, LANE_P2P);
+    ClearConflictInfoByLinkType(PEER_NETWORK_ID, LANE_HML);
+    ret = DelLinkConflictInfo(&inputInfo.identifyInfo, inputInfo.conflictType);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
+    FreeConflictDevInfo(&inputInfo);
+}
+
+/*
+* @tc.name: LNN_CHECK_LINK_CONFLICT_BY_RELEASE_LINK_001
+* @tc.desc: check conflictInfo by releaseLink
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkConflictTest, LNN_CHECK_LINK_CONFLICT_BY_RELEASE_LINK_001, TestSize.Level1)
+{
+    NiceMock<LaneLinkConflictDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString)
+        .WillRepeatedly(LaneLinkConflictDepsInterfaceMock::ActionOfConvertBytesToHexString);
+    LinkConflictInfo inputInfo;
+    (void)memset_s(&inputInfo, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    inputInfo.conflictType = CONFLICT_THREE_VAP;
+    inputInfo.identifyInfo.type = IDENTIFY_TYPE_DEV_ID;
+    EXPECT_EQ(strcpy_s(inputInfo.identifyInfo.devInfo.peerDevId, NETWORK_ID_BUF_LEN, PEER_NETWORK_ID), EOK);
+    inputInfo.releaseLink = LANE_HML;
+    int32_t ret = GenerateConflictDevInfo(&inputInfo);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = AddLinkConflictInfo(&inputInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RemoveConflictInfoTimelinessMsg(&inputInfo.identifyInfo, inputInfo.conflictType);
+
+    ret = CheckLinkConflictByReleaseLink(LANE_HML);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckLinkConflictByReleaseLink(LANE_P2P);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
+    ret = DelLinkConflictInfo(&inputInfo.identifyInfo, inputInfo.conflictType);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    FreeConflictDevInfo(&inputInfo);
+}
 } // namespace OHOS
