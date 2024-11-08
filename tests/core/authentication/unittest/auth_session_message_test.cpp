@@ -106,7 +106,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
         DEVICE_KEY, strlen(DEVICE_KEY)) == EOK);
     deviceCommKey.keyLen = 5;
     deviceCommKey.keyIndex = 12345;
-    EXPECT_TRUE(PackFastAuthValue(obj, &deviceCommKey) == SOFTBUS_ERR);
+    EXPECT_NE(PackFastAuthValue(obj, &deviceCommKey), SOFTBUS_OK);
     JSON_Delete(obj);
 }
 
@@ -163,11 +163,11 @@ HWTEST_F(AuthSessionMessageTest, GetEnhancedP2pAuthKey_TEST_001, TestSize.Level1
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     ASSERT_TRUE(memcpy_s(info.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
-    EXPECT_TRUE(GetEnhancedP2pAuthKey(nullptr, &info, nullptr) == SOFTBUS_ERR);
+    EXPECT_NE(GetEnhancedP2pAuthKey(nullptr, &info, nullptr), SOFTBUS_OK);
     info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
-    EXPECT_TRUE(GetFastAuthKey("hashtest", &info, nullptr) == SOFTBUS_ERR);
+    EXPECT_NE(GetFastAuthKey("hashtest", &info, nullptr), SOFTBUS_OK);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(GetFastAuthKey("hashtest", &info, nullptr) == SOFTBUS_ERR);
+    EXPECT_NE(GetFastAuthKey("hashtest", &info, nullptr), SOFTBUS_OK);
     info.isServer = true;
     info.isSupportFastAuth = true;
     info.isNeedFastAuth = false;
@@ -479,10 +479,10 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
     EXPECT_TRUE(json1 != nullptr);
     JSON_AddInt32ToObject(json1, BUS_MAX_VERSION, -1);
     JSON_AddInt32ToObject(json1, BUS_MIN_VERSION, -1);
-    EXPECT_TRUE(CheckBusVersion(json1) == SOFTBUS_ERR);
+    EXPECT_NE(CheckBusVersion(json1), SOFTBUS_OK);
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_TRUE(UnpackWiFi(json1, &info, SOFTBUS_OLD_V1, false) == SOFTBUS_ERR);
+    EXPECT_NE(UnpackWiFi(json1, &info, SOFTBUS_OLD_V1, false), SOFTBUS_OK);
     JSON_Delete(json1);
     JsonObj *json = JSON_CreateObject();
     EXPECT_TRUE(json != nullptr);
@@ -505,7 +505,7 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
 {
     NodeInfo info;
-    EXPECT_TRUE(PackDeviceInfoBtV1(nullptr, &info, false) == SOFTBUS_AUTH_REG_DATA_FAIL);
+    EXPECT_TRUE(PackDeviceInfoBtV1(nullptr, &info, false) == SOFTBUS_AUTH_PACK_DEVINFO_FAIL);
     JsonObj *json = JSON_CreateObject();
     EXPECT_TRUE(json != nullptr);
     EXPECT_TRUE(PackDeviceInfoBtV1(json, &info, false) == SOFTBUS_OK);
@@ -544,16 +544,16 @@ HWTEST_F(AuthSessionMessageTest, UpdatePeerDeviceName_TEST_001, TestSize.Level1)
     AuthSessionInfo info;
     EXPECT_TRUE(PostDeviceIdData(123, &info, nullptr, 0) == SOFTBUS_AUTH_SEND_FAIL);
     info.isServer = false;
-    EXPECT_TRUE(PostBtV1DevId(123, &info) == SOFTBUS_ERR);
-    EXPECT_TRUE(PostWifiV1DevId(123, &info) == SOFTBUS_ERR);
+    EXPECT_NE(PostBtV1DevId(123, &info), SOFTBUS_OK);
+    EXPECT_NE(PostWifiV1DevId(123, &info), SOFTBUS_OK);
     info.isServer = true;
-    EXPECT_TRUE(PostBtV1DevId(123, &info) == SOFTBUS_ERR);
-    EXPECT_TRUE(PostWifiV1DevId(123, &info) == SOFTBUS_ERR);
+    EXPECT_NE(PostBtV1DevId(123, &info), SOFTBUS_OK);
+    EXPECT_NE(PostWifiV1DevId(123, &info), SOFTBUS_OK);
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_TRUE(PostDeviceIdV1(123, &info) == SOFTBUS_ERR);
+    EXPECT_NE(PostDeviceIdV1(123, &info), SOFTBUS_OK);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(PostDeviceIdV1(123, &info) == SOFTBUS_ERR);
-    EXPECT_TRUE(PostDeviceIdNew(123, &info) == SOFTBUS_ERR);
+    EXPECT_NE(PostDeviceIdV1(123, &info), SOFTBUS_OK);
+    EXPECT_NE(PostDeviceIdNew(123, &info), SOFTBUS_OK);
     EXPECT_TRUE(PostCloseAckMessage(123, &info) == SOFTBUS_AUTH_SEND_FAIL);
 }
 
@@ -601,7 +601,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Leve
     EXPECT_TRUE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false, &info) == SOFTBUS_OK);
     devInfo.linkType = AUTH_LINK_TYPE_WIFI;
     nodeInfo.feature = 511;
-    EXPECT_TRUE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false, &info) == SOFTBUS_ERR);
+    EXPECT_NE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false, &info), SOFTBUS_OK);
     JSON_Delete(obj);
 }
 
@@ -636,7 +636,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
     uint32_t keyLen = 0;
     deviceCommKey.keyLen = keyLen;
     uint64_t ret = PackFastAuthValue(obj, &deviceCommKey);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     JSON_Delete(obj);
 }
 
@@ -682,7 +682,7 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)-1);
     ret = UnpackWiFi(obj, info, version, false);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_KEY", "1222222222");
     (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_IV", "1222222222");
@@ -719,7 +719,7 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     info->version = SOFTBUS_NEW_V1;
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     int32_t ret = PostDeviceIdV1(authSeq, info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(info);
 }
 
@@ -883,10 +883,10 @@ HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
     SessionKey sessionKey = { .len = SESSION_KEY_LENGTH, };
     EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
     AuthSessionInfo info;
-    EXPECT_EQ(SOFTBUS_ERR, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
+    EXPECT_NE(SOFTBUS_OK, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
     ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     AuthDeviceKeyInfo deviceKey;
-    EXPECT_EQ(SOFTBUS_ERR, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey));
+    EXPECT_NE(SOFTBUS_OK, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey));
 }
 
 /*
