@@ -42,6 +42,7 @@ typedef struct {
     bool isQosLane;
     bool isAsync;
     uint32_t actionId;
+    int32_t pid;
 } SessionParam;
 
 typedef struct {
