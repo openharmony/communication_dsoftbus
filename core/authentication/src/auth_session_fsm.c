@@ -220,7 +220,7 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
     if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
         if (GetAuthRequestNoLock(requestId, &request) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get auth request fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_NOT_FOUND;
         }
         char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
         int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
@@ -415,7 +415,7 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
         return;
     }
 
-    if (SoftBusRecordAuthResult(linkType, SOFTBUS_ERR, costTime, stage) != SOFTBUS_OK) {
+    if (SoftBusRecordAuthResult(linkType, result, costTime, stage) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "report static auth result fail");
     }
     SoftBusFaultEvtInfo info;
@@ -688,7 +688,7 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
 {
     if (authFsm->info.normalizedKey == NULL) {
         AUTH_LOGE(AUTH_FSM, "normalizedKey is NULL, auth fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     uint8_t hash[SHA_256_HASH_LEN] = {0};
     int32_t ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
@@ -700,7 +700,7 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
     if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
         hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     AuthUpdateNormalizeKeyIndex(udidShortHash, authFsm->info.normalizedIndex, authFsm->info.connInfo.type,
         authFsm->info.normalizedKey, authFsm->info.isServer);
@@ -711,7 +711,7 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         authFsm->info.normalizedKey->len);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
@@ -729,7 +729,7 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
     if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
         hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     AuthLinkType linkType = authFsm->info.connInfo.type;
     if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
@@ -738,7 +738,7 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
     }
     if (AuthFindDeviceKey(udidShortHash, linkType, &key) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "find key fail, fastAuth error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     AuthUpdateKeyIndex(udidShortHash, authFsm->info.connInfo.type, authFsm->authSeq, authFsm->info.isServer);
     authFsm->info.oldIndex = key.keyIndex;
@@ -898,7 +898,7 @@ static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "fsm switch to reauth due to not find networkId");
         info->idType = EXCHANGE_UDID;
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     return SOFTBUS_OK;
 }
@@ -1089,7 +1089,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
         default:
             break;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_CONN_TYPE_INVALID;
 }
 
 static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
@@ -1290,12 +1290,12 @@ static int32_t HandleCloseAckMessage(AuthFsm *authFsm, const AuthSessionInfo *in
         (info->nodeInfo.feature & 1 << BIT_SUPPORT_THREE_STATE) == 0) {
         AUTH_LOGE(AUTH_FSM, "peer not support three state");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_NOT_SUPPORT_THREE_STATE);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NOT_SUPPORT;
     }
     if (PostCloseAckMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post close ack fail");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SEND_FAIL);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SYNC_DEVINFO_ACK_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1568,7 +1568,7 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
         AUTH_LOGE(AUTH_FSM, "start auth fsm fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
         DestroyAuthFsm(authFsm);
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_START_FSM_FAIL;
     }
     SetAuthStartTime(authFsm);
     LnnFsmPostMessageDelay(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT, NULL, AUTH_TIMEOUT_MS);
