@@ -58,7 +58,7 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     }
     uint32_t packLen = head->len + sizeof(ConnPktHead);
     if (buffer->length < packLen) {
-        CONN_LOGI(CONN_BR, "recv incomplete packet, connId=%{public}u", connectionId);
+        CONN_LOGD(CONN_BR, "recv incomplete packet, connId=%{public}u", connectionId);
         return NULL;
     }
     uint8_t *dataCopy = (uint8_t *)SoftBusCalloc(packLen);
