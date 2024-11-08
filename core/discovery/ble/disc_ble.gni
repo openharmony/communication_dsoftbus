@@ -32,7 +32,7 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/include",
   "$dsoftbus_root_path/core/discovery/common/include",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_dfx_path/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/event/legacy/include",
 ]
 
 ble_discovery_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]

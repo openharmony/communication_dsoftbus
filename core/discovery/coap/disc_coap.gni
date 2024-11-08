@@ -37,7 +37,7 @@ disc_coap_inc = [
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/discovery",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_dfx_path/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/event/legacy/include",
 ]
 disc_coap_external_deps += [ "cJSON:cjson" ]
 if (dsoftbus_feature_ex_kits) {

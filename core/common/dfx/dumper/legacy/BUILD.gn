@@ -102,7 +102,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/softbus_property/softbus_feature_config.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "softbus_hidumper.c",
-
       "softbus_hidumper_alarm.c",
       "softbus_hidumper_bc_mgr.c",
       "softbus_hidumper_broadcast.c",

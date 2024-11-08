@@ -35,7 +35,7 @@ ohos_fuzztest("SoftBusNegotiateMessageFuzzTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_dfx_path/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/event/legacy/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/include",

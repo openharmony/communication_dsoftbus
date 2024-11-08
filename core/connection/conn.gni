@@ -30,7 +30,7 @@ conn_manager_inc += [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_dfx_path/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/event/legacy/include",
   "$dsoftbus_root_path/core/connection/coap/include",
 ]
 if (dsoftbus_feature_ex_kits == true) {
