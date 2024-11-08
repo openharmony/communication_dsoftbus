@@ -28,7 +28,7 @@ disc_server_src += [
 disc_server_inc += [
   "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/core/discovery/interface",
-  "$dsoftbus_dfx_path/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/event/legacy/include",
 ]
 if (!dsoftbus_feature_ex_kits) {
   DISC_SERVER_DEFINES += [ "DISC_COMMUNITY" ]

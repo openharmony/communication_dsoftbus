@@ -117,7 +117,7 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   "$dsoftbus_root_path/core/transmission/interface",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-  "$dsoftbus_dfx_path/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/event/legacy/include",
   "$dsoftbus_root_path/adapter/common/net/wifi/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",

@@ -25,11 +25,11 @@ common_utils_src = [
   "security/sequence_verification/softbus_sequence_verification.c",
   "softbus_property/softbus_feature_config.c",
   "utils/softbus_utils.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_bus_center.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_connreporter.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
+  "dfx/event/legacy/softbus_hisysevt_bus_center.c",
+  "dfx/event/legacy/softbus_hisysevt_common.c",
+  "dfx/event/legacy/softbus_hisysevt_connreporter.c",
+  "dfx/event/legacy/softbus_hisysevt_discreporter.c",
+  "dfx/event/legacy/softbus_hisysevt_transreporter.c",
 ]
 external_deps = []
 
@@ -54,7 +54,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_dfx_path/dumper/legacy/include",
-      "$dsoftbus_dfx_path/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/event/legacy/include",
       "$dsoftbus_dfx_path/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
@@ -82,7 +82,9 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
     ]
     include_dirs += conn_common_inc + trans_common_inc
-    dfx_src = [ "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c" ]
+    dfx_src = [
+      "dfx/event/legacy/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c",
+    ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src + dfx_src
     sources += [ "message_handler/message_handler.c" ]
@@ -124,7 +126,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_dfx_path/dumper/legacy/include",
-      "$dsoftbus_dfx_path/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/event/legacy/include",
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
@@ -162,7 +164,7 @@ if (defined(ohos_lite)) {
       "dfx/dumper/legacy/softbus_hidumper_nstack.c",
       "dfx/dumper/legacy/softbus_hidumper_trans.c",
       "dfx/dumper/legacy/softbus_hidumper_buscenter.c",
-      "dfx/hisysevent_adapter/softbus_hisysevt_nstack.c",
+      "dfx/event/legacy/softbus_hisysevt_nstack.c",
     ]
     sources = common_utils_src + conn_common_src + trans_common_src + dfx_source
     sources += [ "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c" ]
