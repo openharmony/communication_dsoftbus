@@ -409,4 +409,64 @@ HWTEST_F(WifiDirectManagerCppTest, NotifyPtkSyncResultTest, TestSize.Level1)
     NotifyPtkSyncResult(remoteUuid.c_str(), result);
     EXPECT_EQ(beCalled, true);
 }
+
+/*
+ * @tc.name: RefreshRelationShipTest001
+ * @tc.desc: check RefreshRelationShip method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest001, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 enter");
+    std::string remoteUuid("0123456789ABCDEF");
+    std::string remoteMac("11:11:11:11:11:11");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteMac, [&remoteMac](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        link.SetRemoteBaseMac(remoteMac);
+    });
+
+    RefreshRelationShip(remoteUuid.c_str(), remoteMac.c_str());
+    auto link = LinkManager::GetInstance().GetReuseLink(WIFI_DIRECT_LINK_TYPE_HML, remoteMac);
+
+    EXPECT_EQ(link, nullptr);
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 exit");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: RefreshRelationShipTest002
+ * @tc.desc: check RefreshRelationShip method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest002, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest002 enter");
+    std::string remoteUuid("0123456789ABCDEF");
+    std::string remoteMac("11:11:11:11:11:11");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteMac, [&remoteMac, &remoteUuid](InnerLink &link) {
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetRemoteDeviceId(remoteUuid);
+        });
+
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteUuid, [&remoteMac](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+        link.SetRemoteBaseMac(remoteMac);
+    });
+
+    RefreshRelationShip(remoteUuid.c_str(), remoteMac.c_str());
+    auto link = LinkManager::GetInstance().GetReuseLink(WIFI_DIRECT_LINK_TYPE_HML, remoteMac);
+
+    EXPECT_NE(link, nullptr);
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest002 exit");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
 } // namespace OHOS::SoftBus
