@@ -184,7 +184,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
             NotifyDisconnected(fd);
         }
         AUTH_LOGE(AUTH_CONN, "head not enough, abandon it. len=%{public}zd", len);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DATA_NOT_ENOUGH;
     }
     return UnpackSocketPkt(buf, len, head);
 }
@@ -228,29 +228,30 @@ FAIL:
     (void)DelTrigger(module, fd, READ_TRIGGER);
     ConnShutdownSocket(fd);
     NotifyDisconnected(fd);
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_SOCKET_EVENT_INVALID;
 }
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
     SocketPktHead head = {0};
-    if (RecvPacketHead(module, fd, &head) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    int32_t ret = RecvPacketHead(module, fd, &head);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     AUTH_LOGI(AUTH_CONN,
         "RecvSocketData: fd=%{public}d, module=%{public}d, seq=%{public}" PRId64 ", flag=%{public}d, len=%{public}u.",
         fd, head.module, head.seq, head.flag, head.len);
     if (head.len == 0 || head.len > AUTH_SOCKET_MAX_DATA_LEN) {
         AUTH_LOGW(AUTH_CONN, "data is out of size, abandon it.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_DATA_HEAD;
     }
     if (head.magic != (int32_t)MAGIC_NUMBER) {
         AUTH_LOGE(AUTH_CONN, "magic number not match.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_DATA_HEAD;
     }
     uint8_t *data = RecvPacketData(fd, head.len);
     if (data == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DATA_NOT_ENOUGH;
     }
     NotifyDataReceived(module, fd, &head, data);
     SoftBusFree(data);
@@ -275,7 +276,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set keepalive fail!");
         ConnShutdownSocket(cfd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL;
     }
     int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
     if (module == AUTH) {
@@ -283,13 +284,13 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
             SOFTBUS_ADAPTER_OK) {
             AUTH_LOGE(AUTH_CONN, "set option fail!");
             ConnShutdownSocket(cfd);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL;
         }
     }
     if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(cfd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_ADD_TRIGGER_FAIL;
     }
     if (module != AUTH && module != AUTH_P2P &&  module != AUTH_RAW_P2P_CLIENT &&!IsEnhanceP2pModuleId(module)) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
@@ -297,7 +298,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");
             (void)DelTrigger(module, cfd, READ_TRIGGER);
             ConnShutdownSocket(cfd);
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_MANAGER_BUILD_FAIL;
         }
         return SOFTBUS_OK;
     }
@@ -312,7 +313,7 @@ static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
     } else if (events == SOFTBUS_SOCKET_IN) {
         return ProcessSocketInEvent(module, fd);
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_SOCKET_EVENT_INVALID;
 }
 
 int32_t SetSocketCallback(const SocketCallback *cb)
@@ -339,7 +340,7 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
     int32_t port = StartBaseListener(info, &listener);
     if (port <= 0) {
         AUTH_LOGE(AUTH_CONN, "StartBaseListener fail. port=%{public}d", port);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PORT;
     }
     return port;
 }
@@ -522,7 +523,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc pkt err.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     SocketPktHead pktHead = {
         .magic = MAGIC_NUMBER,
@@ -534,7 +535,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     if (PackSocketPkt(&pktHead, data, buf, size) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "pack socket pkt fail.");
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_PACK_SOCKET_PKT_FAIL;
     }
 
     AUTH_LOGI(AUTH_CONN, "fd=%{public}d, module=%{public}d, seq=%{public}" PRId64 ", flag=%{public}d, len=%{public}u.",
@@ -543,7 +544,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     SoftBusFree(buf);
     if (ret != (ssize_t)size) {
         AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}zd", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -555,12 +556,12 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
     SocketAddr socket;
     if (ConnGetPeerSocketAddr(fd, &socket) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_PEER_SOCKET_ADDR_FAIL;
     }
     int32_t localPort = ConnGetLocalSocketPort(fd);
     if (localPort <= 0) {
         AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PORT;
     }
     connInfo->type = AUTH_LINK_TYPE_WIFI;
     if (strcpy_s(connInfo->info.ipInfo.ip, sizeof(connInfo->info.ipInfo.ip), socket.addr) != EOK) {
@@ -627,7 +628,7 @@ int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listen
         }
     }
     AUTH_LOGE(AUTH_CONN, "unknown module. module=%{public}d", module);
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 void UnregAuthChannelListener(int32_t module)
@@ -719,7 +720,7 @@ static int32_t GetTcpKeepaliveOptionByCycle(ModeCycle cycle, TcpKeepaliveOption 
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "no match cycle, cycle=%{public}d", cycle);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
     tcpKeepaliveOption->keepaliveIdle = (int32_t)cycle;
     tcpKeepaliveOption->keepaliveIntvl = TCP_KEEPALIVE_INTERVAL;
@@ -733,10 +734,10 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpKeepaliveOption tcpKeepaliveOption = { 0 };
-
-    if (GetTcpKeepaliveOptionByCycle(cycle, &tcpKeepaliveOption) != SOFTBUS_OK) {
+    int32_t ret = GetTcpKeepaliveOptionByCycle(cycle, &tcpKeepaliveOption);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get tcp keepalive option by cycle fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (ConnSetTcpUserTimeOut(fd, tcpKeepaliveOption.userTimeout) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set TCP_USER_TIMEOUT fail, fd=%{public}d", fd);
