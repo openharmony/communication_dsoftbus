@@ -185,7 +185,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
         dataShareHelper->Release();
         return ret;
     }
-    if (ret == SOFTBUS_OK) {
+    if (ret == SOFTBUS_OK && strlen(deviceName) != 0) {
         char *anonyDeviceName = NULL;
         Anonymize(deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
