@@ -246,7 +246,7 @@ int32_t P2pAdapter::GetSelfWifiConfigInfo(std::string &config)
     uint8_t wifiConfig[CFG_DATA_MAX_BYTES] = { 0 };
     int32_t wifiConfigSize = 0;
     int32_t ret = Hid2dGetSelfWifiCfgInfo(TYPE_OF_GET_SELF_CONFIG, (char *)wifiConfig, &wifiConfigSize);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+    CONN_CHECK_AND_RETURN_RET_LOGE((ret == WIFI_SUCCESS) || (ret == ERROR_WIFI_ENHANCE_SVC), ToSoftBusErrorCode(ret),
         CONN_WIFI_DIRECT, "get self wifi config failed, error=%{public}d",
         ToSoftBusErrorCode(ret));
 
