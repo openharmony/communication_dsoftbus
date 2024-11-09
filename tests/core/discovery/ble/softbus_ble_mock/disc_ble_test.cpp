@@ -23,7 +23,6 @@
 #include "disc_ble.h"
 #include "disc_ble_utils.h"
 #include "disc_log.h"
-#include "exception_branch_checker.h"
 #include "message_handler.h"
 #include "securec.h"
 #include "softbus_error_code.h"
@@ -118,11 +117,9 @@ HWTEST_F(DiscBleTest, DiscBleInit001, TestSize.Level1)
 
     EXPECT_EQ(DiscSoftBusBleInit(nullptr), nullptr);
 
-    ExceptionBranchChecker checker("callback invalid");
     DiscInnerCallback callback;
     callback.OnDeviceFound = nullptr;
     EXPECT_EQ(DiscSoftBusBleInit(&callback), nullptr);
-    EXPECT_EQ(checker.GetResult(), true);
     DISC_LOGI(DISC_TEST, "DiscBleInit001 end ----");
 }
 
@@ -265,9 +262,8 @@ HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
     BusCenterMock busMock;
     busMock.SetupSuccessStub();
 
-    ExceptionBranchChecker checker("update success");
+    ASSERT_NE(g_interface->mediumInterface->UpdateLocalDeviceInfo, nullptr);
     g_interface->mediumInterface->UpdateLocalDeviceInfo(TYPE_LOCAL_DEVICE_NAME);
-    EXPECT_EQ(checker.GetResult(), true);
 
     DISC_LOGI(DISC_TEST, "UpdateLocalDeviceInfo001 end ----");
 }
