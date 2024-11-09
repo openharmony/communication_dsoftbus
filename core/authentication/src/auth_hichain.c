@@ -273,6 +273,22 @@ static void NotifyAuthFailEvent(int32_t errCode, const char *errorReturn)
     }
 }
 
+static void NotifyPcAuthFail(int64_t authSeq, int errCode, const char *errorReturn)
+{
+    if (errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
+        if (errCode == PC_AUTH_ERRCODE) {
+            NotifyAuthFailEvent(errCode, errorReturn);
+        }
+        if (errCode == PC_PROOF_NON_CONSISTENT_ERRCODE) {
+            bool flag = false;
+            if (GetDeviceSideFlag(authSeq, &flag) == SOFTBUS_OK && flag) {
+                NotifyAuthFailEvent(errCode, errorReturn);
+            }
+        }
+    }
+    return;
+}
+
 static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
@@ -281,20 +297,7 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
         authSeq, errCode, authErrCode);
-    if (errCode == PC_AUTH_ERRCODE && errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
-        NotifyAuthFailEvent(errCode, errorReturn);
-    }
-    if (errCode == PC_META_NODE_ERRCODE) {
-        bool flag = false;
-        if (errorReturn == NULL) {
-            AUTH_LOGE(AUTH_HICHAIN, "errorReturn is null");
-        }
-        if (GetDeviceSideFlag(authSeq, &flag) == SOFTBUS_OK && flag) {
-            if (errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
-                NotifyAuthFailEvent(errCode, errorReturn);
-            }
-        }
-    }
+    NotifyPcAuthFail(authSeq, errCode, errorReturn);
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
 
