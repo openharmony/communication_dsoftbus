@@ -34,6 +34,7 @@ typedef enum {
     EVENT_SCENE_SOCKET_CONNECT = 7,
     EVENT_SCENE_SOCKET_SHUTDOWN = 8,
     EVENT_SCENE_SOCKET_CLOSE = 9,
+    EVENT_SCENE_LEGACY_CONNECT = 10,
 } ConnEventScene;
 
 typedef enum {
@@ -112,6 +113,15 @@ typedef struct {
     int32_t apChannel;            // HOTSPOT_CHAN
     const char *peerDevVer;       // REMOTE_OS_VERSION
     int32_t remoteScreenStatus;   // REMOTE_SCREEN_STATUS
+    int32_t businessType;         // BUSINESS_TYPE
+    int32_t businessId;           // BUSINESS_ID
+    int32_t timeout;              // TIME_OUT
+    int32_t fastestConnectEnable; // FASTEST_CONNECT_ENABLE
+    int32_t coapDataChannel;      // COAP_DATA_CHANNEL
+    int32_t enableWideBandwidth;  // ENABLE_WIDE_BANDWIDTH
+    int32_t p2pRole;              // P2P_ROLE
+    int32_t needHmlConnect;       // NEED_HML_CONNECT
+    const char *businessTag;      // BUSINESS_TAG
 } ConnEventExtra;
 
 typedef enum {
