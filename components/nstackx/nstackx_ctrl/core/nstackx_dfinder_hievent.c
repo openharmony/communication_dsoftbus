@@ -129,6 +129,13 @@ int SetEventFunc(void *softobj, DFinderEventFunc func)
     return NSTACKX_EOK;
 }
 
+int SetEventFuncDirectly(void *softobj, DFinderEventFunc func)
+{
+    g_softObj = softobj;
+    g_eventFunc = func;
+    return NSTACKX_EOK;
+}
+
 void ResetEventFunc(void)
 {
     g_softObj = NULL;

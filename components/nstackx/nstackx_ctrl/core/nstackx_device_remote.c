@@ -16,6 +16,7 @@
 #ifdef DFINDER_SAVE_DEVICE_LIST
 #include "nstackx_device_remote.h"
 #include <securec.h>
+#include <stdatomic.h>
 #include "nstackx_device.h"
 #include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
@@ -63,7 +64,7 @@ static List *g_remoteDeviceList;
 static List *g_remoteDeviceListBackup;
 static List *g_remoteDeviceOrderedList;
 static uint32_t g_remoteNodeCount;
-static uint32_t g_agingTime;
+static atomic_uint_fast32_t g_agingTime;
 static struct timespec g_lastReportedTime;
 int32_t RemoteDeviceListInit(void)
 {
