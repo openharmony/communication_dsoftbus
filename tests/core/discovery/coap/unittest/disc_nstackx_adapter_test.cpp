@@ -29,6 +29,8 @@
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
+
+#define NSTACKX_EFAILED (-1)
 namespace OHOS {
 
 static bool isDeviceFound = false;
@@ -85,6 +87,62 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
     // repeat init
     ret = DiscNstackxInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TestDiscCoapModifyNstackThread001
+ * @tc.desc: Test start discovery.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread001, TestSize.Level1)
+{
+    DiscCoapModifyNstackThread(LINK_STATUS_DOWN);
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapOption testCoapOption = {
+        .freq = LOW,
+        .mode = ACTIVE_PUBLISH
+    };
+    ret = DiscCoapStartDiscovery(&testCoapOption);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
+
+    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscNstackxDeinit();
+}
+
+/*
+ * @tc.name: TestDiscCoapModifyNstackThread002
+ * @tc.desc: Test send coap rsp.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread002, TestSize.Level1)
+{
+    DiscCoapModifyNstackThread(LINK_STATUS_DOWN);
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    DeviceInfo testDiscDevInfo {
+        .devId = "test",
+    };
+    uint8_t bType = 0;
+    ret = LnnInitLocalLedger();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
+    EXPECT_EQ(ret, NSTACKX_EFAILED);
+
+    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscNstackxDeinit();
 }
 
 /*
@@ -212,6 +270,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP);
 
     DiscCoapOption testCoapOption = {
         .freq = LOW,
@@ -255,6 +314,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP);
 
     DiscCoapOption testOption = { 0 };
     testOption.freq = LOW;
@@ -571,6 +631,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP);
 
     DeviceInfo testDiscDevInfo {
         .devId = "test",
@@ -581,7 +642,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = LnnInitLocalLedger();
     EXPECT_EQ(ret, SOFTBUS_OK);

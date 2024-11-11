@@ -15,6 +15,7 @@
 
 #include "coap_discover.h"
 #include <errno.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <securec.h>
 
@@ -67,7 +68,7 @@ static uint32_t g_coapDiscoverTargetCount;
 static Timer *g_recvRecountTimer = NULL;
 static uint32_t g_recvDiscoverMsgNum;
 static MsgIdList *g_msgIdList = NULL;
-static uint8_t g_subscribeCount;
+static atomic_uint_fast8_t g_subscribeCount;
 
 static uint16_t *g_notificationIntervals = NULL;
 static uint8_t g_notificationTargetCnt = 0;

@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 int SetEventFunc(void *softobj, DFinderEventFunc func);
+int SetEventFuncDirectly(void *softobj, DFinderEventFunc func);
 void ResetEventFunc(void);
 void NotifyStatisticsEvent(void);
 
