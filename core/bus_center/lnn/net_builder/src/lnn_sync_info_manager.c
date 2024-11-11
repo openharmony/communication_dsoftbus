@@ -52,10 +52,10 @@
 #define NETWORK_OFFLINE_CODE "offline_code"
 
 typedef struct {
-    uint8_t data[0];
     uint32_t dataLen;
     LnnSyncInfoMsgComplete complete;
     ListNode node;
+    uint8_t data[0];
 } SyncInfoMsg;
 
 typedef struct {
