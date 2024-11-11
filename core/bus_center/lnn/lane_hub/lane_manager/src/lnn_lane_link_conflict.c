@@ -417,6 +417,29 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
+{
+    if (releaseLink != LANE_HML) {
+        LNN_LOGE(LNN_LANE, "invalid releaseLink=%{public}d", releaseLink);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LinkConflictLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkConflict lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LinkConflictInfo *item = NULL;
+    LinkConflictInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
+        if (item->releaseLink == releaseLink) {
+            LinkConflictUnlock();
+            LNN_LOGI(LNN_LANE, "link conflict info matched by releaseLink=%{public}d", releaseLink);
+            return SOFTBUS_OK;
+        }
+    }
+    LinkConflictUnlock();
+    return SOFTBUS_LANE_NOT_FOUND;
+}
+
 static void HandleConflictInfoTimeliness(SoftBusMessage *msg)
 {
     if (msg->obj == NULL) {
