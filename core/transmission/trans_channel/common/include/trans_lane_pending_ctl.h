@@ -27,7 +27,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum{
+typedef enum {
     PARA_ACTION = 1,
     PARA_BUTT,
 }ParaType;
