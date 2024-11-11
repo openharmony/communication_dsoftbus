@@ -30,7 +30,6 @@ ohos_unittest("DiscBleTest") {
     "bus_center_mock.cpp",
     "disc_ble_test.cpp",
   ]
-  sources += test_utils_src
 
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -54,7 +53,6 @@ ohos_unittest("DiscBleTest") {
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$softbus_adapter_common/net/bluetooth/include",
   ]
-  include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
