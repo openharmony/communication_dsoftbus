@@ -591,7 +591,6 @@ EXIT_ERR:
     TransFreeLane(laneHandle, param->isQosLane, true);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
-    return;
 }
 
 static void TransAsyncSetFirstTokenInfo(uint32_t firstTokenId, AppInfo *appInfo, TransEventExtra *event)
@@ -1693,7 +1692,7 @@ int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
     TransAuthWithParaNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_authWithParaAsyncReqLaneList->list), TransAuthWithParaNode, node) {
         if (laneItem->laneReqId == laneReqId) {
-            TRANS_LOGI(TRANS_SVC, "delete laneReqId = %{public}u", laneItem->laneReqId);
+            TRANS_LOGI(TRANS_SVC, "delete laneReqId=%{public}u", laneItem->laneReqId);
             ListDelete(&(laneItem->node));
             g_authWithParaAsyncReqLaneList->cnt--;
             SoftBusFree(laneItem->sessionName);
