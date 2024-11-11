@@ -346,6 +346,10 @@ static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info
         return SOFTBUS_ERR;
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get AuthManager fail");
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
     int32_t index;
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
