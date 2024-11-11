@@ -477,11 +477,11 @@ bool JoinLNNFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    char pkgname[INPUT_NAME_SIZE_MAX] = "distribdata_test";
-    if (memcpy_s(pkgname, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
+    char pkgName[INPUT_NAME_SIZE_MAX] = "distribdata_test";
+    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
         return false;
     }
-    pkgname[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
     offset += INPUT_NAME_SIZE_MAX;
     ConnectionAddr *addr = nullptr;
     addr = (ConnectionAddr *)SoftBusCalloc(sizeof(ConnectionAddr));
@@ -495,7 +495,7 @@ bool JoinLNNFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel datas;
-    datas.WriteCString(pkgname);
+    datas.WriteCString(pkgName);
     datas.WriteUint32(sizeof(ConnectionAddr));
     datas.WriteRawData(addr, sizeof(ConnectionAddr));
     MessageParcel reply;
@@ -537,13 +537,13 @@ bool LeaveLNNFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    char pkgname[INPUT_NAME_SIZE_MAX] = "distribdata_test";
+    char pkgName[INPUT_NAME_SIZE_MAX] = "distribdata_test";
     char networkId[NETWORKID_SIZE_MAX] = "123456789asc";
 
-    if (memcpy_s(pkgname, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
+    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
         return false;
     }
-    pkgname[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
     offset += INPUT_NAME_SIZE_MAX;
     if (memcpy_s(networkId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
         NETWORKID_SIZE_MAX - 1) != EOK) {
@@ -553,7 +553,7 @@ bool LeaveLNNFuzzTest(const uint8_t *data, size_t size)
     offset += NETWORKID_SIZE_MAX;
 
     MessageParcel datas;
-    datas.WriteCString(pkgname);
+    datas.WriteCString(pkgName);
     datas.WriteCString(networkId);
     MessageParcel reply;
     sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
@@ -576,7 +576,7 @@ bool GetAllOnlineNodeInfoFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
+    char clientName[INPUT_NAME_SIZE_MAX] = "client-test";
 
     if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
         EOK) {
@@ -584,7 +584,7 @@ bool GetAllOnlineNodeInfoFuzzTest(const uint8_t *data, size_t size)
     }
     clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
     offset += INPUT_NAME_SIZE_MAX;
-    uint32_t infoTypeLen = *reinterpret_cast<const int32_t *>(data + offset);
+    uint32_t infoTypeLen = *reinterpret_cast<const uint32_t *>(data + offset);
 
     MessageParcel datas;
     datas.WriteCString(clientName);
@@ -605,7 +605,7 @@ bool GetLocalDeviceInfoFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
+    char clientName[INPUT_NAME_SIZE_MAX] = "client-test";
 
     if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
         EOK) {
@@ -613,7 +613,7 @@ bool GetLocalDeviceInfoFuzzTest(const uint8_t *data, size_t size)
     }
     clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
     offset += INPUT_NAME_SIZE_MAX;
-    uint32_t infoTypeLen = *reinterpret_cast<const int32_t *>(data + offset);
+    uint32_t infoTypeLen = *reinterpret_cast<const uint32_t *>(data + offset);
 
     MessageParcel datas;
     datas.WriteCString(clientName);
@@ -635,8 +635,8 @@ bool GetNodeKeyInfoFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
-    char networkId[NETWORKID_SIZE_MAX] = "networkid_test";
+    char clientName[INPUT_NAME_SIZE_MAX] = "client-test";
+    char networkId[NETWORKID_SIZE_MAX] = "networkid-test";
 
     if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
         EOK) {
@@ -675,8 +675,8 @@ bool SetNodeDataChangeFlagFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
-    char networkId[NETWORKID_SIZE_MAX] = "networkid_test";
+    char clientName[INPUT_NAME_SIZE_MAX] = "client-test";
+    char networkId[NETWORKID_SIZE_MAX] = "networkid-test";
 
     if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
         EOK) {
@@ -1101,9 +1101,9 @@ bool RippleStatsFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     uint32_t offset = 0;
-    int32_t channelId = *reinterpret_cast<const uint16_t *>(data);
+    int32_t channelId = *reinterpret_cast<const int32_t *>(data);
     offset = sizeof(int32_t);
-    int32_t channelType = *reinterpret_cast<const uint16_t *>(data + offset);
+    int32_t channelType = *reinterpret_cast<const int32_t *>(data + offset);
     offset += sizeof(int32_t);
 
     MessageParcel datas;
@@ -1340,7 +1340,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* ptr, size_t size)
         return 0;
     }
     OHOS::RunFuzzTestCase(ptr, size);
-    uint8_t *data = (uint8_t *)SoftBusCalloc(size + 1);
+    uint8_t *data = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
     if (data == nullptr) {
         return 0;
     }
