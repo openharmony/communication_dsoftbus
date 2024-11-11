@@ -50,6 +50,7 @@ public:
     virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
     virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
+    virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -63,7 +64,8 @@ public:
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback));
     MOCK_METHOD1(TransProxyPipelineCloseChannel, int32_t (int32_t channelId));
     MOCK_METHOD1(TransProxyPipelineCloseChannelDelay, int32_t (int32_t channelId));
-    MOCK_METHOD3(FindLaneResourceByLinkType, int32_t (const char *peerUdid, LaneLinkType type, LaneResource *resource));
+    MOCK_METHOD3(FindLaneResourceByLinkType, int32_t (const char *peerUdid, LaneLinkType type,
+        LaneResource *resource));
     MOCK_METHOD3(LaneDetectReliability, int32_t (uint32_t laneReqId, const LaneLinkInfo *linkInfo,
         const LaneLinkCb *callback));
     MOCK_METHOD2(FindLaneResourceByLaneId, int32_t (uint64_t laneId, LaneResource *resource));
@@ -72,14 +74,15 @@ public:
     MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
     MOCK_METHOD2(NotifyFreeLaneResult, void (uint32_t laneReqId, int32_t errCode));
     MOCK_METHOD1(GetConflictTypeWithErrcode, LinkConflictType (int32_t conflictErrcode));
-    MOCK_METHOD3(FindLinkConflictInfoByDevId, int32_t (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
-        LinkConflictInfo *outputInfo));
+    MOCK_METHOD3(FindLinkConflictInfoByDevId, int32_t (const DevIdentifyInfo *inputInfo,
+        LinkConflictType conflictType, LinkConflictInfo *outputInfo));
     MOCK_METHOD2(RemoveConflictInfoTimelinessMsg, void (const DevIdentifyInfo *inputInfo,
         LinkConflictType conflictType));
     MOCK_METHOD2(DelLinkConflictInfo, int32_t (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType));
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
     MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
+    MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType releaseLink));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
