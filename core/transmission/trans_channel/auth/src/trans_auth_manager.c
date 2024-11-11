@@ -563,7 +563,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         return;
     }
     TransEventExtra extra;
-    (void)memcpy_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     InitExtra(&extra, &info, authId);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
