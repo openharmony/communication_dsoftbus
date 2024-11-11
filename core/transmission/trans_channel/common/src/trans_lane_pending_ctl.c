@@ -1672,7 +1672,7 @@ int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessio
     return SOFTBUS_OK;
 ERR_EXIT:
     SoftBusFree(item->sessionName);
-    item->sessionName = NULL;   
+    item->sessionName = NULL;
     SoftBusFree(item);
     return errCode;
 }
@@ -1697,7 +1697,7 @@ int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
             ListDelete(&(laneItem->node));
             g_authWithParaAsyncReqLaneList->cnt--;
             SoftBusFree(laneItem->sessionName);
-            laneItem->sessionName = NULL;  
+            laneItem->sessionName = NULL;
             SoftBusFree(laneItem);
             laneItem = NULL;
             (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
