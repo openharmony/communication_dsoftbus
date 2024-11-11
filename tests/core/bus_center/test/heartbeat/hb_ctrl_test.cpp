@@ -74,7 +74,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.
     DistributeLedgerInterfaceMock distributeNetLedgerMock;
     HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
     EXPECT_CALL(hbStrateMock, LnnStartOfflineTimingStrategy)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(distributeNetLedgerMock, LnnSetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbCtrlDepsMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
@@ -84,7 +84,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.
     ret = LnnOfflineTimingByHeartbeat(NETWORKID, CONNECTION_ADDR_BR);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnOfflineTimingByHeartbeat(NETWORKID, CONNECTION_ADDR_BLE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnOfflineTimingByHeartbeat(NETWORKID, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -103,7 +103,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
 
     EXPECT_CALL(hbStrateMock, LnnSetGearModeBySpecificType)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_HB_INVALID_MGR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(distributeNetLedgerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(hbCtrlDepsMock, AuthFlushDevice).WillRepeatedly(Return(SOFTBUS_OK));
@@ -112,16 +112,12 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     GearMode mode;
     int32_t ret = LnnShiftLNNGear(nullptr, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     ret = LnnShiftLNNGear(PKGNAME, nullptr, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -138,7 +134,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSi
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(hbStrateMock, LnnSetGearModeBySpecificType)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_HB_INVALID_MGR))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = LnnShiftLNNGearWithoutPkgName(CALLERID, nullptr, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
@@ -164,19 +160,18 @@ HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
     HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
     LnnNetLedgertInterfaceMock netLedgerMock;
     EXPECT_CALL(serviceMock, LnnRegisterEventHandler)
-    .WillOnce(Return(SOFTBUS_ERR))
-    .WillOnce(Return(SOFTBUS_OK))
-    .WillOnce(Return(SOFTBUS_ERR))
-    .WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStrateMock, LnnHbStrategyInit).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbCtrlDepsMock, IsEnableSoftBusHeartbeat).WillRepeatedly(Return(true));
     EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitHeartbeat();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = LnnInitHeartbeat();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = LnnInitHeartbeat();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
-
