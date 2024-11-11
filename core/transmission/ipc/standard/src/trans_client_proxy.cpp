@@ -74,6 +74,9 @@ int32_t ClientIpcOnChannelBind(ChannelMsg *data)
         TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind data is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (data->msgPid == getpid()) {
+        return SOFTBUS_OK;
+    }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr, msgPkgName=%{public}s, msgPid=%{public}d",
