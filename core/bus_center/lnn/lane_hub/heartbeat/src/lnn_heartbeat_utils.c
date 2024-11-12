@@ -383,7 +383,6 @@ void LnnDumpLocalBasicInfo(void)
     (void)LnnGetLocalDeviceInfo(&localInfo);
     (void)LnnGetLocalStrInfo(STRING_KEY_UUID, localUuid, UUID_BUF_LEN);
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
-    (void)LnnGenerateHexStringHash((const unsigned char *)localUdid, udidShortHash, HB_SHORT_UDID_HASH_HEX_LEN);
     Anonymize(udidShortHash, &anonyUdidHash);
     Anonymize(localUuid, &anonyUuid);
     Anonymize(localUdid, &anonyUdid);
