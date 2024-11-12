@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,7 +169,7 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
             }
             // update k-v node
             if (memcpy_s(node->value, node->valueSize, value, valueSize) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
 
             return SOFTBUS_OK;
@@ -184,7 +184,7 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
 
     if (map->nodes == NULL) {
         LNN_LOGE(LNN_STATE, "map node is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     node = MapCreateNode(key, hash, value, valueSize);
     if (node == NULL) {
@@ -267,7 +267,7 @@ int32_t LnnMapErase(Map *map, const char *key)
         node = node->next;
     }
 
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 /**
