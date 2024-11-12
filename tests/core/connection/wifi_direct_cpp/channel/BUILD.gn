@@ -31,8 +31,8 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -55,7 +55,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
   ]
 
   sources = [
-    "$dsoftbus_root_path/core/common/dfx/anonymize/src/anonymizer.c",
+    "$dsoftbus_dfx_path/anonymize/src/anonymizer.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",
@@ -141,8 +141,8 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -165,7 +165,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
   ]
 
   sources = [
-    "$dsoftbus_root_path/core/common/dfx/anonymize/src/anonymizer.c",
+    "$dsoftbus_dfx_path/anonymize/src/anonymizer.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",

@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../../../../.."
@@ -39,7 +38,7 @@ if (defined(ohos_lite)) {
     sources = [ "disc_conn_dfx_test.cpp" ]
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/hisysevent_adapter/include",
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
@@ -57,7 +56,7 @@ if (defined(ohos_lite)) {
     sources = [ "lnn_dfx_test.cpp" ]
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/hisysevent_adapter/include",
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
@@ -75,8 +74,8 @@ if (defined(ohos_lite)) {
     sources = [ "trans_dfx_test.cpp" ]
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter",
+      "$dsoftbus_dfx_path/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter",
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",

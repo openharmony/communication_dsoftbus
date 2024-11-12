@@ -16,7 +16,6 @@ import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection/wifi_direct_cpp"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
-dsoftbus_dfx_path = "$dsoftbus_root_path/core/common/dfx"
 ohos_unittest("WifiDirectIpManagerTest") {
   module_out_path = module_output_path
 
@@ -41,7 +40,7 @@ ohos_unittest("WifiDirectIpManagerTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/interface",
@@ -58,7 +57,7 @@ ohos_unittest("WifiDirectIpManagerTest") {
     "wifi_direct_mock.cpp",
   ]
   deps = [
-    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -96,7 +95,7 @@ ohos_unittest("WifiDirectRoleOptionTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/interface",
@@ -108,7 +107,7 @@ ohos_unittest("WifiDirectRoleOptionTest") {
     "wifi_direct_role_option_test.cpp",
   ]
   deps = [
-    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -142,11 +141,11 @@ ohos_unittest("WifiDirectManagerCppTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/interface",
@@ -213,7 +212,7 @@ ohos_unittest("WifiDirectManagerCppTest") {
   ]
 
   deps = [
-    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gmock_rtti",

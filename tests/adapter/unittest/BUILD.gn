@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../core/common/dfx/dsoftbus_dfx.gni")
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
@@ -34,13 +33,13 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$dsoftbus_root_path/adapter/common/include",
         "$dsoftbus_root_path/core/common/include/",
-        "$dsoftbus_root_path/core/common/dfx/interface/include",
+        "$dsoftbus_dfx_path/interface/include",
         "$dsoftbus_root_path/interfaces/kits/common",
         "$hilog_lite_include_path",
       ]
       deps = [
+        "$dsoftbus_dfx_path:softbus_dfx",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
         "$hilog_lite_deps_path",
       ]
 
@@ -210,12 +209,12 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/adapter/common/net/wifi/common",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/interface/include",
     ]
     deps = [
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     ]
     external_deps = [
       "c_utils:utils",
@@ -259,7 +258,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/interface/include",
     ]
     deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
     external_deps = [
@@ -278,11 +277,11 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include/",
       "$dsoftbus_root_path/core/bus_center/utils/include/",
       "$dsoftbus_root_path/adapter/common/net/hdi/include/",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/interface/include",
     ]
     deps = [
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
       "$dsoftbus_root_path/core/frame:softbus_server",
     ]
     external_deps = [

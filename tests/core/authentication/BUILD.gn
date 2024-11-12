@@ -143,7 +143,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -176,9 +176,9 @@ ohos_unittest("AuthEnhanceMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 

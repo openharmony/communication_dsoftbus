@@ -11,13 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../dsoftbus.gni")
-import("../common/dfx/dsoftbus_dfx.gni")
 import("../connection/common/conn_common.gni")
 import("../transmission/common/trans_common.gni")
 
-dsoftbus_root_path = "../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 common_utils_src = [
@@ -56,9 +53,9 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
       "$utils_lite_include_path",
@@ -105,9 +102,7 @@ if (defined(ohos_lite)) {
       defines += [ "SOFTBUS_LITEOS_A" ]
     }
     deps = [
-      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-      "$dsoftbus_dfx_path/event:softbus_dfx_event",
-      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     deps += diff_deps
@@ -128,9 +123,9 @@ if (defined(ohos_lite)) {
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/hisysevent_adapter/include",
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
@@ -179,9 +174,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
-      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-      "$dsoftbus_dfx_path/event:softbus_dfx_event",
-      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     public_external_deps = [

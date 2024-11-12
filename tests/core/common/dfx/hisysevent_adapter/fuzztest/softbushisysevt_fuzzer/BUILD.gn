@@ -19,15 +19,13 @@ import("../../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../../../../.."
-
 ohos_fuzztest("SoftBusHiSysEvtFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
-  fuzz_config_file = "$dsoftbus_root_path/tests/core/common/dfx/hisysevent_adapter/fuzztest/softbushisysevt_fuzzer"
+  fuzz_config_file = "$dsoftbus_test_dfx_path/hisysevent_adapter/fuzztest/softbushisysevt_fuzzer"
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/hisysevent_adapter/include",
   ]
 
   sources = [ "softbushisysevt_fuzzer.cpp" ]

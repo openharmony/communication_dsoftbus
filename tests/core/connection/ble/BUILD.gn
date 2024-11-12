@@ -27,7 +27,7 @@ config("softbus_connection_ble_test_config") {
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
@@ -154,7 +154,7 @@ ohos_unittest("BleTransTest") {
   module_out_path = module_output_path
   include_dirs = [
     "$softbus_adapter_common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/common/include",
@@ -188,7 +188,7 @@ ohos_unittest("BleTransTest") {
 ohos_unittest("BleClientTest") {
   module_out_path = module_output_path
   include_dirs = [
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/common/include",
@@ -201,6 +201,7 @@ ohos_unittest("BleClientTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/tests/core/connection/ble/mock",

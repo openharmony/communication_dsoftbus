@@ -24,16 +24,16 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttransproxyfilemanager_fuzzer"
 
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../core/connection/interface",
-    "../../../../../core/transmission/common/include",
-    "../../../../../sdk/transmission/ipc/include",
-    "../../../../../sdk/transmission/session/include",
-    "../../../../../sdk/transmission/trans_channel/proxy/include",
-    "../../../../../sdk/transmission/trans_channel/tcp_direct/include",
-    "../../../../../sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
   ]
 
   cflags = [

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("../../dsoftbus.gni")
-import("../common/dfx/dsoftbus_dfx.gni")
+
 AUTH_SERVER_DEFINES = []
 if (dsoftbus_feature_auth_account == true) {
   AUTH_SERVER_DEFINES += [ "AUTH_ACCOUNT" ]
@@ -31,8 +31,8 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 auth_server_inc = [
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
-  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
+  "$dsoftbus_dfx_path/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/adapter/authentication/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
@@ -98,10 +98,7 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/virtual/auth_meta_ptk_proc_virtual.c",
   ]
 }
-auth_server_deps = [
-  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-  "$dsoftbus_dfx_path/log:softbus_dfx_log",
-]
+auth_server_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 auth_server_ex_deps = []
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

@@ -14,7 +14,6 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/discovery"
@@ -56,7 +55,7 @@ ohos_unittest("DiscDistributedBleTest") {
   ]
 
   deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -91,7 +90,7 @@ ohos_unittest("DiscBleUtilsTest") {
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/core/discovery/common/include",

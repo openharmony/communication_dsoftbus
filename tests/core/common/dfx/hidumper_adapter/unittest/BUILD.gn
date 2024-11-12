@@ -28,12 +28,12 @@ ohos_unittest("HidumperTest") {
     "$dsoftbus_root_path/core/transmission/common/include",
     "dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/include",
+    "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter:softbus_dfx_dump",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter:softbus_dfx_dump",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
   external_deps = [

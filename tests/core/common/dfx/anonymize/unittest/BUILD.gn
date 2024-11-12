@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/common/dfx"
@@ -21,10 +20,7 @@ ohos_unittest("SoftBusDfxAnonymizeTest") {
   module_out_path = module_output_path
   sources = [ "src/anonymizer_test.cpp" ]
   include_dirs = [ "$dsoftbus_dfx_path/interface/include" ]
-  deps = [
-    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
-  ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
