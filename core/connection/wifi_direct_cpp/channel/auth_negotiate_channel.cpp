@@ -256,13 +256,15 @@ static void OnAuthDisconnected(AuthHandle authHandle)
     InnerLink::LinkType type = InnerLink::LinkType::INVALID_TYPE;
     std::string remoteDeviceId;
     std::string remoteMac;
+    bool isLegacyReused = false;
     LinkManager::GetInstance().ForEach(
-        [&disconnectChannel, &type, &remoteDeviceId, &remoteMac] (const InnerLink &innerLink) {
+        [&disconnectChannel, &type, &remoteDeviceId, &remoteMac, &isLegacyReused] (const InnerLink &innerLink) {
             auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
             if (channel != nullptr && disconnectChannel == *channel) {
                 type = innerLink.GetLinkType();
                 remoteDeviceId= innerLink.GetRemoteDeviceId();
                 remoteMac = innerLink.GetRemoteBaseMac();
+                isLegacyReused = innerLink.GetLegacyReused();
                 return true;
             }
             return false;
@@ -273,9 +275,11 @@ static void OnAuthDisconnected(AuthHandle authHandle)
         WifiDirectAnonymizeMac(remoteMac).c_str());
     if (type != InnerLink::LinkType::INVALID_TYPE) {
         LinkManager::GetInstance().RemoveLink(type, remoteDeviceId);
-        auto &entity = EntityFactory::GetInstance().GetEntity(type);
-        entity.DisconnectLink(remoteMac);
-        entity.DestroyGroupIfNeeded();
+        if (!isLegacyReused) {
+            auto &entity = EntityFactory::GetInstance().GetEntity(type);
+            entity.DisconnectLink(remoteMac);
+            entity.DestroyGroupIfNeeded();
+        }
     }
 }
 

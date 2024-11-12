@@ -62,7 +62,8 @@ InnerLink::~InnerLink()
             }
         }
     }
-    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed) {
+    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed &&
+        !GetLegacyReused()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
         WifiDirectIpManager::GetInstance().ReleaseIpv4(
             GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
@@ -314,6 +315,17 @@ bool InnerLink::GetNewPtkFrame() const
 void InnerLink::SetNewPtkFrame(bool value)
 {
     Set(InnerLinKey::NEW_PTK_FRAME, value);
+}
+
+bool InnerLink::GetLegacyReused() const
+{
+    return Get(InnerLinKey::IS_LEGACY_REUSED, false);
+}
+
+void InnerLink::SetLegacyReused(bool value)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "set legacy reused=%{public}d", value);
+    Set(InnerLinKey::IS_LEGACY_REUSED, value);
 }
 
 void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4)
