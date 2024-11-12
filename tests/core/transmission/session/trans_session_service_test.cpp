@@ -79,9 +79,9 @@ void TransSessionServiceTest::TearDownTestCase(void)
  */
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest01, TestSize.Level1)
 {
-    int32_t ret = TransCreateSessionServer(NULL, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
+    int32_t ret = TransCreateSessionServer(NULL, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID, false);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransCreateSessionServer(g_pkgName, NULL, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
+    ret = TransCreateSessionServer(g_pkgName, NULL, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID, false);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 }
 
@@ -102,7 +102,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
+    ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);

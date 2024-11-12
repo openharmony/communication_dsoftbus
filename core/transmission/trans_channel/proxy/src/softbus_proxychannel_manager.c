@@ -1808,6 +1808,24 @@ static void TransNotifyOffLine(const LnnEventBasicInfo *info)
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_BLE);
 }
 
+static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(info != NULL, TRANS_CTRL, "invalid Lnn info");
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    switch (userSwitchState) {
+        case SOFTBUS_USER_SWITCHED: {
+            TransOnLinkDown("", "", "", "", ROUTE_TYPE_ALL | 1 << 10);
+            break;
+        }
+        case SOFTBUS_USER_SWITCH_UNKNOWN:
+        default: {
+            TRANS_LOGE(TRANS_CTRL, "recv unknow user switch event, state=%{public}u", event->status);
+            break;
+        }
+    }
+}
+
 static int32_t TransProxyManagerInitInner(const IServerChannelCallBack *cb)
 {
     int32_t ret = TransProxySetCallBack(cb);
@@ -1844,7 +1862,10 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register TransNotifyOffLine failed.");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_NODE_MIGRATE, TransWifiStateChange);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "TransWifiStateChange register fail");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "TransWifiStateChange register failed.");
+
+    ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, TransNotifyUserSwitch);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user switch event failed.");
 
     TRANS_LOGI(TRANS_INIT, "proxy channel init ok");
     return SOFTBUS_OK;
