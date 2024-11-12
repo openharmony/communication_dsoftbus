@@ -83,14 +83,14 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 HWTEST_F(LNNNodeWeightTest, LNN_GET_LOCAL_WEIGHT_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> lnnServiceMock;
-    EXPECT_CALL(lnnServiceMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(lnnServiceMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL));
     int32_t ret = LnnGetLocalWeight();
     EXPECT_EQ(ret, SOFTBUS_OK);
     unsigned char randStr = 20;
     EXPECT_CALL(lnnServiceMock, SoftBusGenerateRandomArray)
         .WillRepeatedly(DoAll(SetArgPointee<0>(randStr), Return(SOFTBUS_OK)));
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     ret = LnnGetLocalWeight();
     EXPECT_EQ(ret, 78);
     ret = LnnGetLocalWeight();

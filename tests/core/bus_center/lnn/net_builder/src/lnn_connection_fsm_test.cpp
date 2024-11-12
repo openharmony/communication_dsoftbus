@@ -517,7 +517,7 @@ HWTEST_F(LNNConnectionFsmTest, DFX_RECORD_LNN_ONLINE_TYPE_TEST_001, TestSize.Lev
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     ret = DfxRecordLnnOnlineType(&info);
     EXPECT_EQ(ret, ONLINE_TYPE_INVALID);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)

@@ -180,7 +180,7 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
         .WillRepeatedly(Return(&grounpManager));
     AuthNetLedgertInterfaceMock ledgermock;
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, false);
     EXPECT_TRUE(ret == false);

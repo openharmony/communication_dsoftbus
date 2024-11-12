@@ -122,7 +122,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnInitPhysicalSubnetManager).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnSetLocalNum64Info).WillOnce(Return(SOFTBUS_ERR)).
+    EXPECT_CALL(ledgerMock, LnnSetLocalNum64Info).WillOnce(Return(SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR)).
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitNetworkManager();
@@ -134,7 +134,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret!= SOFTBUS_OK);
     ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
 }
 
 /*
@@ -553,7 +553,7 @@ HWTEST_F(LNNNetworkManagerMockTest, CONVERT_TO_NET_IF_TYPE_001, TestSize.Level1)
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     (void)RestartCoapDiscovery();
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
