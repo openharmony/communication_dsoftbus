@@ -43,25 +43,26 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
     if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
         DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GetOhosAccount generate default str hash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     char *accountInfo = (char *)SoftBusMalloc(len * HEXIFY_UNIT_LEN);
     if (accountInfo == nullptr) {
         LNN_LOGE(LNN_STATE, "accountInfo malloc fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     (void)memset_s(accountInfo, len * HEXIFY_UNIT_LEN, '0', len * HEXIFY_UNIT_LEN);
     uint32_t size = 0;
-    if (GetOsAccountId(accountInfo, len * HEXIFY_UNIT_LEN, &size) != SOFTBUS_OK) {
+    int32_t ret = GetOsAccountId(accountInfo, len * HEXIFY_UNIT_LEN, &size);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get osAccountId fail");
         SoftBusFree(accountInfo);
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(accountInfo), size,
         reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GetOhosAccount generate str hash fail");
         SoftBusFree(accountInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     SoftBusFree(accountInfo);
     return SOFTBUS_OK;
@@ -76,7 +77,7 @@ int32_t LnnInitOhosAccount(void)
         if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
             DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "InitOhosAccount generate default str hash fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
         }
     }
     if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {

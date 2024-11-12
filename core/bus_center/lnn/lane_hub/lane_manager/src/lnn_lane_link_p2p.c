@@ -923,6 +923,7 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
                 "requestId=%{public}u, linkId=%{public}d",
                 reqInfo.laneRequestInfo.laneReqId, linkInfo->type, requestId, linkId);
             reqInfo.laneRequestInfo.cb.onLaneLinkSuccess(reqInfo.laneRequestInfo.laneReqId, throryLinkType, linkInfo);
+            ClearConflictInfoByLinkType(reqInfo.laneRequestInfo.networkId, linkInfo->type);
         }
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
@@ -3075,4 +3076,46 @@ void LnnCancelWifiDirect(uint32_t laneReqId)
         return;
     }
     NotifyLinkFail(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, SOFTBUS_LANE_BUILD_LINK_FAIL);
+}
+
+static void HandlePtkNotMatch(const char *remoteNetworkId, uint32_t len, int32_t result)
+{
+    if (remoteNetworkId == NULL || len == 0 || len > NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(remoteNetworkId, &anonyNetworkId);
+    LNN_LOGI(LNN_LANE, "handle ptk not match, networkId=%{public}s, result=%{public}d",
+        AnonymizeWrapper(anonyNetworkId), result);
+    AnonymizeFree(anonyNetworkId);
+    if (LnnSyncPtk(remoteNetworkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "sync ptk fail");
+        return;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(remoteNetworkId, STRING_KEY_DEV_UDID, peerUdid, sizeof(peerUdid)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get peer udid fail");
+        return;
+    }
+    LnnEventExtra extra = {0};
+    LnnEventExtraInit(&extra);
+    extra.result = SOFTBUS_LANE_PTK_NOT_MATCH;
+    extra.peerUdid = peerUdid;
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+}
+
+int32_t LnnInitPtkSyncListener(void)
+{
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_LANE, "get wifi direct manager fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (pManager->addPtkMismatchListener == NULL) {
+        LNN_LOGE(LNN_LANE, "addPtkMismatchListener null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    pManager->addPtkMismatchListener(HandlePtkNotMatch);
+    return SOFTBUS_OK;
 }

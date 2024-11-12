@@ -83,6 +83,9 @@ if (defined(ohos_lite)) {
     os_type = "standard"
   }
   defines = [ "SOFTBUS_LINUX" ]
+  if (is_standard_system) {
+    defines += [ "SOFTBUS_STANDARD_OS" ]
+  }
   import("//build/ohos.gni")
   import(
       "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
@@ -104,7 +107,7 @@ if (defined(global_parts_info) &&
   dsoftbus_feature_lnn_cloud_sync = true
 }
 
-if (defined(global_parts_info) && !defined(global_parts_info.global_i18n)) {
+if (defined(global_parts_info) && !defined(global_parts_info.i18n)) {
   support_i18n = false
 } else {
   support_i18n = true
