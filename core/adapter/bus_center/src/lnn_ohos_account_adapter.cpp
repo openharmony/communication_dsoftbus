@@ -56,7 +56,7 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     AnonymizeFree(anonyUid);
 
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
-        LNN_LOGE(LNN_STATE, "not login account");
+        LNN_LOGD(LNN_STATE, "not login account");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
@@ -93,7 +93,7 @@ int32_t GetCurrentAccount(int64_t *account)
     AnonymizeFree(anonyUid);
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(),
         accountInfo.second.name_.length()) == 0) {
-        LNN_LOGE(LNN_STATE, "not login account");
+        LNN_LOGD(LNN_STATE, "not login account");
         return SOFTBUS_OK;
     }
     *account = strtoll(accountInfo.second.name_.c_str(), nullptr, ACCOUNT_STRTOLL_BASE);
@@ -123,7 +123,7 @@ bool IsActiveOsAccountUnlocked(void)
         LNN_LOGE(LNN_STATE, "accountId is invalid");
         return false;
     }
-    LNN_LOGI(LNN_STATE, "current active os accountId=%{public}d", osAccountId);
+    LNN_LOGD(LNN_STATE, "current active os accountId=%{public}d", osAccountId);
     bool isUnlocked = false;
     OHOS::ErrCode res = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(osAccountId, isUnlocked);
     if (res != OHOS::ERR_OK) {
