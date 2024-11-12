@@ -75,7 +75,7 @@ int32_t ClientIpcOnChannelBind(ChannelMsg *data)
         return SOFTBUS_INVALID_PARAM;
     }
     if (data->msgPid == getpid()) {
-        TRANS_LOGE(TRANS_CTRL, "check msgPid success!");
+        TRANS_LOGI(TRANS_CTRL, "check msgPid success!");
         return SOFTBUS_OK;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
