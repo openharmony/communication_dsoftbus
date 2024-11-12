@@ -82,8 +82,17 @@ CONN_ASSIGNER(Errcode, StaChannel, staChannel)
 CONN_ASSIGNER(Errcode, ApChannel, apChannel)
 CONN_ASSIGNER(String, PeerDevVer, peerDevVer)
 CONN_ASSIGNER(Errcode, RemoteScreenStatus, remoteScreenStatus)
+CONN_ASSIGNER(Errcode, BusinessType, businessType)
+CONN_ASSIGNER(Int32, BusinessId, businessId)
+CONN_ASSIGNER(Errcode, Timeout, timeout)
+CONN_ASSIGNER(Errcode, FastestConnectEnable, fastestConnectEnable)
+CONN_ASSIGNER(Errcode, CoapDataChannel, coapDataChannel)
+CONN_ASSIGNER(Errcode, EnableWideBandwidth, enableWideBandwidth)
+CONN_ASSIGNER(Errcode, P2pRole, p2pRole)
+CONN_ASSIGNER(Errcode, NeedHmlConnect, needHmlConnect)
+CONN_ASSIGNER(String, BusinessTag, businessTag)
 
-#define CONN_ASSIGNER_SIZE 48 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 57 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -125,14 +134,23 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "NEGOTIATE_TIME",    HISYSEVENT_UINT64, ConnAssignerNegotiateTime },
     { "LINK_TIME",         HISYSEVENT_UINT64, ConnAssignerLinkTime      },
     { "OS_TYPE",           HISYSEVENT_INT32,  ConnAssignerOsType          },
-    { "LOCAL_DEVICE_TYPE", HISYSEVENT_STRING, ConnAssignerLocalDeviceType },
-    { "REMOTE_DEVICE_TYPE", HISYSEVENT_STRING, ConnAssignerRemoteDeviceType },
+    { "LOCAL_DEV_TYPE",         HISYSEVENT_STRING, ConnAssignerLocalDeviceType     },
+    { "PEER_DEV_TYPE",          HISYSEVENT_STRING, ConnAssignerRemoteDeviceType    },
     { "P2P_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerP2pChannel      },
     { "HML_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerHmlChannel      },
     { "STA_CHANNEL",       HISYSEVENT_INT32,  ConnAssignerStaChannel      },
     { "AP_CHANNEL",        HISYSEVENT_INT32,  ConnAssignerApChannel       },
     { "PEER_DEV_VER",         HISYSEVENT_STRING, ConnAssignerPeerDevVer        },
     { "REMOTE_SCREEN_STATUS", HISYSEVENT_INT32,  ConnAssignerRemoteScreenStatus},
+    { "BUSINESS_TYPE",          HISYSEVENT_INT32,  ConnAssignerBusinessType        },
+    { "BUSINESS_ID",            HISYSEVENT_INT32,  ConnAssignerBusinessId          },
+    { "TIME_OUT",               HISYSEVENT_INT32,  ConnAssignerTimeout             },
+    { "FASTEST_CONNECT_ENABLE", HISYSEVENT_INT32,  ConnAssignerFastestConnectEnable},
+    { "COAP_DATA_CHANNEL",      HISYSEVENT_INT32,  ConnAssignerCoapDataChannel     },
+    { "ENABLE_WIDE_BANDWIDTH",  HISYSEVENT_INT32,  ConnAssignerEnableWideBandwidth },
+    { "P2P_ROLE",               HISYSEVENT_INT32,  ConnAssignerP2pRole             },
+    { "NEED_HML_CONNECT",       HISYSEVENT_INT32,  ConnAssignerNeedHmlConnect      },
+    { "BUSINESS_TAG",           HISYSEVENT_STRING, ConnAssignerBusinessTag         },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
