@@ -82,7 +82,7 @@ if (defined(ohos_lite)) {
       }
       deps = dsoftbus_server_common_deps
       deps += [
-        "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter:softbus_dfx_dump",
+        "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
@@ -158,7 +158,7 @@ if (defined(ohos_lite)) {
       deps = dsoftbus_server_common_deps
       deps += [
         ":permission_json",
-        "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter:softbus_dfx_dump",
+        "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
@@ -249,7 +249,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/dumper/legacy/include",
       "$dsoftbus_dfx_path/hisysevent_adapter/include",
       "$dsoftbus_dfx_path/interface/include",
     ]
@@ -268,7 +268,7 @@ if (defined(ohos_lite)) {
     deps += [
       ":softbus_permission_json",
       ":softbus_server.rc",
-      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter:softbus_dfx_dump",
+      "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",

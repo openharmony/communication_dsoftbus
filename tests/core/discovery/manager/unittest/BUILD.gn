@@ -62,7 +62,7 @@ ohos_unittest("DiscManagerMockTest") {
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_dfx_path/hisysevent_adapter/include",
-    "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+    "$dsoftbus_dfx_path/dumper/legacy/include",
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",

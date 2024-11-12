@@ -75,7 +75,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_dfx_path/hisysevent_adapter/include",
-      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter",
+      "$dsoftbus_dfx_path/dumper/legacy",
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
