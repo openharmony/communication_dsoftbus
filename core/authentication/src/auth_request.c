@@ -15,6 +15,8 @@
 
 #include "auth_request.h"
 
+#include <securec.h>
+
 #include "auth_common.h"
 #include "auth_log.h"
 #include "softbus_adapter_mem.h"

@@ -40,6 +40,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_kv_adapter_wrapper.h"
 #include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"

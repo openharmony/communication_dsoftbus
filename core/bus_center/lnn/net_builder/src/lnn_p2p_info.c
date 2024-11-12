@@ -17,8 +17,8 @@
 
 #include <securec.h>
 
-#include "auth_device_common_key.h"
 #include "anonymizer.h"
+#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
@@ -33,6 +33,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_json_utils.h"
 #include "wifi_direct_manager.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"

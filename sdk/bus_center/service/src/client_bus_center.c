@@ -279,10 +279,7 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (memset_s(info, infoLen, 0, infoLen) != EOK) {
-        LNN_LOGE(LNN_STATE, "memset nodekey info failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    (void)memset_s(memset_s(info, infoLen, 0, infoLen));
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
@@ -305,8 +302,8 @@ int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16
 
 int32_t RegDataLevelChangeCb(const char *pkgName, IDataLevelCb *callback)
 {
-    if (pkgName == NULL) {
-        LNN_LOGE(LNN_STATE, "pkgName is null");
+    if (pkgName == NULL || callback == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName or callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcmp(g_dbPkgName, pkgName) != 0) {

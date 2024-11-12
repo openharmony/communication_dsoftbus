@@ -14,6 +14,8 @@
  */
 
 #include <securec.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "anonymizer.h"
@@ -35,8 +37,12 @@
 #include "lnn_physical_subnet_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 #include "conn_coap.h"

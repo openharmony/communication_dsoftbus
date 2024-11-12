@@ -1475,7 +1475,7 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
         return;
     }
     if (reason == SOFTBUS_CONN_HV3_WAIT_CONNECTION_TIMEOUT ||
-        reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
+        reason == SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT) {
         HandleActionTriggerError(p2pRequestId);
     }
     LinkConflictType conflictType = GetConflictTypeWithErrcode(reason);
@@ -1984,7 +1984,7 @@ static int32_t GetAuthConnInfoWithoutMeta(const LinkRequest *request, uint32_t l
     WdGuideType guideType = LANE_CHANNEL_BUTT;
     int32_t ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "get current guide channel info fail");
+        LNN_LOGE(LNN_LANE, "get current guide channel info fail");
         return ret;
     }
     if (guideType == LANE_ACTIVE_BR_NEGO || guideType == LANE_NEW_AUTH_NEGO) {
