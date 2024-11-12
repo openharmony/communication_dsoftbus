@@ -11,9 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../../../dsoftbus.gni")
-
-dsoftbus_root_path = "../../../../../.."
+import("../../../../../dsoftbus.gni")
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")

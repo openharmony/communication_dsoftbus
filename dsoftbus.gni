@@ -17,7 +17,7 @@ dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
 dsoftbus_core_path = "${dsoftbus_root_path}/core"
 dsoftbus_dfx_path = "${dsoftbus_root_path}/dfx"
 dsoftbus_test_path = "${dsoftbus_root_path}/tests"
-dsoftbus_test_dfx_path = "${dsoftbus_test_path}/core/common/dfx"
+dsoftbus_test_dfx_path = "${dsoftbus_test_path}/dfx"
 dsoftbus_fuzz_out_path = "dsoftbus/soft_bus"
 
 declare_args() {

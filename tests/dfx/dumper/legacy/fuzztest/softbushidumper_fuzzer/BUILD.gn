@@ -15,14 +15,14 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../../../dsoftbus.gni")
+import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
 ohos_fuzztest("SoftBusHiDumperFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file =
-      "$dsoftbus_test_dfx_path/hidumper_adapter/fuzztest/softbushidumper_fuzzer"
+      "$dsoftbus_test_dfx_path/dumper/legacy/fuzztest/softbushidumper_fuzzer"
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
