@@ -26,7 +26,7 @@ if (defined(ohos_lite)) {
   }
   config("dsoftbus_dump_interface_lite") {
     include_dirs = [
-      "$dsoftbus_dfx_path/dumper/legacy/include",
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
@@ -64,7 +64,7 @@ if (defined(ohos_lite)) {
   cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_dump_interface_std") {
     include_dirs = [
-      "$dsoftbus_dfx_path/dumper/legacy/include",
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
       "$softbus_adapter_common/include",

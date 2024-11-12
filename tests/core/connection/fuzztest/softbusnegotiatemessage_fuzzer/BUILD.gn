@@ -24,6 +24,7 @@ ohos_fuzztest("SoftBusNegotiateMessageFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/fuzztest/softbusnegotiatemessage_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data",
@@ -35,8 +36,6 @@ ohos_fuzztest("SoftBusNegotiateMessageFuzzTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_dfx_path/event/legacy/include",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/manager/include",

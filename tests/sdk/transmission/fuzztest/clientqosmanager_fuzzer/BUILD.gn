@@ -24,6 +24,7 @@ ohos_fuzztest("ClientQosManagerFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clientqosmanager_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/qos/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
     "$dsoftbus_root_path/sdk/transmission/common/include",
@@ -32,7 +33,6 @@ ohos_fuzztest("ClientQosManagerFuzzTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/standard/include",
   ]
 

@@ -18,8 +18,8 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_hidumper.h"
-#include "softbus_hidumper_conn.h"
+#include "legacy/softbus_hidumper.h"
+#include "legacy/softbus_hidumper_conn.h"
 
 #define SOFTBUS_CONN_MODULE_NAME "conn"
 #define SOFTBUS_CONN_MODULE_HELP "List all the dump item of conn"

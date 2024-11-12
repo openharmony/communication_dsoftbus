@@ -20,7 +20,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_hidumper_broadcast.h"
+#include "legacy/softbus_hidumper_broadcast.h"
 
 #define SOFTBUS_BROADCAST_MODULE_NAME "broadcast"
 #define SOFTBUS_BROADCAST_MODULE_HELP "List all the dump item of broadcast"

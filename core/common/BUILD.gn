@@ -51,11 +51,9 @@ if (defined(ohos_lite)) {
   }
   config("dsoftbus_utils_interface") {
     include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_dfx_path/dumper/legacy/include",
-      "$dsoftbus_dfx_path/event/legacy/include",
-      "$dsoftbus_dfx_path/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
       "$utils_lite_include_path",
@@ -124,10 +122,8 @@ if (defined(ohos_lite)) {
   cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_dfx_path/dumper/legacy/include",
-      "$dsoftbus_dfx_path/event/legacy/include",
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",

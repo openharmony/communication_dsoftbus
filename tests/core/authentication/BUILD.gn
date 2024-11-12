@@ -128,6 +128,7 @@ ohos_unittest("AuthEnhanceMockTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
@@ -143,7 +144,6 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",

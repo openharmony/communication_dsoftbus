@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "softbus_hisysevt_discreporter.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
 
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
-#include "softbus_hisysevt_common.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_common.h"
 #include "softbus_utils.h"
 
 #define MODULE_NAME_MAX_LEN 65

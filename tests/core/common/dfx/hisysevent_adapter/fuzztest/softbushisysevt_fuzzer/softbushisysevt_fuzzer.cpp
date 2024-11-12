@@ -19,11 +19,11 @@
 #include <cstdint>
 #include <securec.h>
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_bus_center.h"
-#include "softbus_hisysevt_common.h"
-#include "softbus_hisysevt_connreporter.h"
-#include "softbus_hisysevt_discreporter.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_common.h"
+#include "legacy/softbus_hisysevt_connreporter.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 
 namespace OHOS {
 static constexpr int32_t BUFF_MAX_LEN = 65;

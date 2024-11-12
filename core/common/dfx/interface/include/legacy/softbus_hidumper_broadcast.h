@@ -16,7 +16,7 @@
 #ifndef SOFTBUS_HIDUMPER_BROADCAST_H
 #define SOFTBUS_HIDUMPER_BROADCAST_H
 
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper.h"
 
 #ifdef __cplusplus
 #if __cplusplus

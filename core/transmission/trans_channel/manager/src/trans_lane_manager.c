@@ -26,7 +26,7 @@
 #include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
-#include "softbus_hidumper_trans.h"
+#include "legacy/softbus_hidumper_trans.h"
 #include "trans_session_manager.h"
 
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"

@@ -30,7 +30,6 @@ bus_center_hub_inc = [
   "$core_lane_hub_path/time_sync/include",
   "$core_lane_hub_path/heartbeat/include",
   "$core_lane_hub_path/lane_qos/include",
-  "$dsoftbus_dfx_path/event/legacy/include",
   "$dsoftbus_dfx_path/interface/include",
 ]
 bus_center_hub_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]

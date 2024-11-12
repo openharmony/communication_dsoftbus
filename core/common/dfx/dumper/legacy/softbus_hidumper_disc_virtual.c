@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "softbus_errcode.h"
-#include "softbus_hidumper_disc.h"
+#include "legacy/softbus_hidumper_disc.h"
 
 int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {

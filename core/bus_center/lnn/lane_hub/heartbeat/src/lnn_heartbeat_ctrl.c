@@ -49,7 +49,7 @@
 #include "softbus_broadcast_type.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_utils.h"
 #include "lnn_connection_fsm.h"
 

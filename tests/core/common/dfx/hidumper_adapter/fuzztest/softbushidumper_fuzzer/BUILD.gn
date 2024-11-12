@@ -25,8 +25,8 @@ ohos_fuzztest("SoftBusHiDumperFuzzTest") {
       "$dsoftbus_test_dfx_path/hidumper_adapter/fuzztest/softbushidumper_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_dfx_path/dumper/legacy/include",
     "$dsoftbus_root_path/tests/common/include",
   ]
 

@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "softbus_hisysevt_common.h"
+#include "legacy/softbus_hisysevt_common.h"
 
 #include "securec.h"
 
 #include "comm_log.h"
 #include "message_handler.h"
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_bus_center.h"
-#include "softbus_hisysevt_connreporter.h"
-#include "softbus_hisysevt_discreporter.h"
-#include "softbus_hisysevt_transreporter.h"
-#include "softbus_hisysevt_nstack.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_connreporter.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_nstack.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
 #define MSG_STATISTIC_EVT_REPORT 0

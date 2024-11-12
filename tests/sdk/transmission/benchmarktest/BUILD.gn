@@ -21,12 +21,12 @@ ohos_benchmarktest("TransTest") {
   module_out_path = module_output_path
   sources = [ "trans_test.cpp" ]
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/inner_communication",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transmission",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/transmission/session/include",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/qos/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/adapter/common/include",

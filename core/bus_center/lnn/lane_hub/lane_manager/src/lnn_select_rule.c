@@ -32,7 +32,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"

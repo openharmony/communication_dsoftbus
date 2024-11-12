@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_hidumper_util.h"
+#include "legacy/softbus_hidumper_util.h"
 
 #include "softbus_errcode.h"
 

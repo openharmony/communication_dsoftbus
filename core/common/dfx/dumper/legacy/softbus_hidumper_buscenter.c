@@ -19,8 +19,8 @@
 #include "comm_log.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_hidumper.h"
-#include "softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 
 #define SOFTBUS_BUSCENTER_MODULE_NAME  "buscenter"
 #define SOFTBUS_CONN_MODULE_HELP "List all the dump item of buscenter"

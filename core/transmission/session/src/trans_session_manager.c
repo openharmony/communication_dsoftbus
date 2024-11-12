@@ -24,7 +24,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_trans.h"
+#include "legacy/softbus_hidumper_trans.h"
 #include "trans_channel_callback.h"
 #include "trans_client_proxy.h"
 #include "trans_log.h"

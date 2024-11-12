@@ -16,7 +16,7 @@
 #define HISYSEVENT_TRANS_REPORTER_H
 
 #include <stdint.h>
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 
 #ifdef __cplusplus
 #if __cplusplus

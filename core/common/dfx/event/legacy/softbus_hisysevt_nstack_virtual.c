@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_hisysevt_nstack.h"
+#include "legacy/softbus_hisysevt_nstack.h"
 
 void NstackInitHiEvent(void)
 {

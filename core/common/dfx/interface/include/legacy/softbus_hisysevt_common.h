@@ -14,7 +14,7 @@
  */
 #ifndef SOFTBUS_HISYSEVT_COMMON_H
 #define SOFTBUS_HISYSEVT_COMMON_H
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 
 #ifdef __cplusplus
 #if __cplusplus

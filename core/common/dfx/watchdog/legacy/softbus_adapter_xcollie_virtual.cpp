@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_adapter_xcollie.h"
+#include "legacy/softbus_adapter_xcollie.h"
 
 int32_t SoftBusSetWatchdogTimer(const char *name, uint32_t timeout, void(*func)(void*), void *args)
 {

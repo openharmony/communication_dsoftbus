@@ -15,7 +15,7 @@
 
 #include "comm_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 
 int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg *reportMsg)
 {

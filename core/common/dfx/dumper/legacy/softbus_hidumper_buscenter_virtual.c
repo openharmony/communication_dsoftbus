@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 
-#include "softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "softbus_error_code.h"
 
 int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)

@@ -94,7 +94,6 @@ tests/core/common/          zhusiyuan2@huawei.com
 interfaces/kits/common/softbus_common.h     zhusiyuan2@huawei.com
 
 [DFX]
-adapter/common/dfx/         zhusiyuan2@huawei.com
 core/common/dfx/            zhusiyuan2@huawei.com
 tests/core/common/dfx       zhusiyuan2@huawei.com
 

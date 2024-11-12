@@ -32,8 +32,8 @@
 #include "softbus_socket.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_conn.h"
-#include "softbus_hisysevt_connreporter.h"
+#include "legacy/softbus_hidumper_conn.h"
+#include "legacy/softbus_hisysevt_connreporter.h"
 #include "conn_event.h"
 
 #define INVALID_DATA (-1)

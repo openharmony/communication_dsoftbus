@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include <stdio.h>
-#include "softbus_hidumper_trans.h"
+#include "legacy/softbus_hidumper_trans.h"
 #include "softbus_error_code.h"
 
 int32_t SoftBusRegTransVarDump(const char* dumpVar, SoftBusVarDumpCb cb)

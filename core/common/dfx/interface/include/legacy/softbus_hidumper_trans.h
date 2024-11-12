@@ -17,7 +17,7 @@
 #define SOFTBUS_HIDUMPER_TRANS_H
 
 #include "softbus_app_info.h"
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper.h"
 
 #ifdef __cplusplus
 #if __cplusplus
