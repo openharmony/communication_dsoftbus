@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../../dsoftbus.gni")
-import("../../../../transmission/common/trans_common.gni")
+import("../../../dsoftbus.gni")
+import("../../../core/transmission/common/trans_common.gni")
 
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 

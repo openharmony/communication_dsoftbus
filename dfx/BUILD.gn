@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../dsoftbus.gni")
+import("../dsoftbus.gni")
 
 softbus_anonymizer_src = [ "anonymize/src/anonymizer.c" ]
 softbus_log_src = [ "log/src/softbus_log.c" ]
