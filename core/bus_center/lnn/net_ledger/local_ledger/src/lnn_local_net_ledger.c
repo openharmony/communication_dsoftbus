@@ -1967,7 +1967,7 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LNN_LOGE(LNN_LEDGER, "set fail, key=%{public}d, len=%{public}zu", key, strlen(info));
+            LNN_LOGE(LNN_LEDGER, "key not support or info format error. key=%{public}d", key);
             SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_INVALID_PARAM;
         }
