@@ -20,7 +20,7 @@
 #include "lnn_log.h"
 #include "softbus_adapter_file.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 
 #define DEFAULT_STORAGE_PATH "/data/service/el1/public"

@@ -16,7 +16,7 @@
 
 #include "comm_log.h"
 #include "securec.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "legacy/softbus_hidumper_interface.h"

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "legacy/softbus_hidumper_disc.h"
 
 int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)

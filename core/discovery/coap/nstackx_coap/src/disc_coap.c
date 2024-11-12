@@ -23,7 +23,7 @@
 #include "disc_nstackx_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "legacy/softbus_hidumper_disc.h"
 #include "legacy/softbus_hisysevt_discreporter.h"
 

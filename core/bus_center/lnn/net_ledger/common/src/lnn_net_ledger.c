@@ -41,7 +41,7 @@
 #include "lnn_settingdata_event_monitor.h"
 #include "lnn_oobe_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 static bool g_isRestore = false;

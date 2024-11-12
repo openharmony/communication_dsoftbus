@@ -25,7 +25,7 @@
 #include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define DRIVER_SERVICE_NAME      "hdf_dsoftbus"
 #define NETIF_NAME_LENGTH        16

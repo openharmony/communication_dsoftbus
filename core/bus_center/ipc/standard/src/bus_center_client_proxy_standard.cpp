@@ -17,7 +17,7 @@
 
 #include "lnn_log.h"
 #include "message_parcel.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {

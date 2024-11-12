@@ -14,7 +14,7 @@
  */
 #include "legacy/softbus_hidumper_util.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
 {

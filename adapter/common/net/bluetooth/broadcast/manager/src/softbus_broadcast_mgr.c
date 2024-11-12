@@ -24,7 +24,7 @@
 #include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_manager.h"
 #include "softbus_broadcast_utils.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "legacy/softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
 

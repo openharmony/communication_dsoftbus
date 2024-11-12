@@ -20,7 +20,7 @@
 #include "softbus_client_info_manager.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_permission.h"
 
 using namespace OHOS;

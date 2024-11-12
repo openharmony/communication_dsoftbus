@@ -27,7 +27,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_datahead_transform.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_socket.h"
 #include "softbus_type_def.h"

@@ -20,7 +20,7 @@
 
 #include "comm_log.h"
 #include "common_list.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "legacy/softbus_hidumper_bc_mgr.h"
 #include "legacy/softbus_hidumper_broadcast.h"

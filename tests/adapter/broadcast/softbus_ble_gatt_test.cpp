@@ -21,7 +21,7 @@
 #include "disc_log.h"
 #include "c_header/ohos_bt_gatt.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 

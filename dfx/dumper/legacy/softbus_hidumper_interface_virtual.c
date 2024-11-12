@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include <stdint.h>
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 {

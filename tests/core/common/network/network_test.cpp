@@ -19,7 +19,7 @@
 #include "softbus_network_utils.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define TEST_2G_CHANNEL 8
 #define TEST_5G_CHANNEL 36
