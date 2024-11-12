@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../transmission/common/trans_common.gni")
-import("../dsoftbus_dfx.gni")
+import("../../../../../transmission/common/trans_common.gni")
+import("../../../dsoftbus_dfx.gni")
 
-dsoftbus_root_path = "../../../.."
+dsoftbus_root_path = "../../../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 if (defined(ohos_lite)) {
@@ -27,7 +27,7 @@ if (defined(ohos_lite)) {
   }
   config("dsoftbus_dump_interface_lite") {
     include_dirs = [
-      "$dsoftbus_dfx_path/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
@@ -65,7 +65,7 @@ if (defined(ohos_lite)) {
   cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_dump_interface_std") {
     include_dirs = [
-      "$dsoftbus_dfx_path/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
       "$softbus_adapter_common/include",
@@ -99,7 +99,6 @@ if (defined(ohos_lite)) {
     include_dirs += trans_common_inc
     sources = [
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
-      "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/softbus_property/softbus_feature_config.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "softbus_hidumper.c",
@@ -141,6 +140,14 @@ if (defined(ohos_lite)) {
       "hisysevent:libhisysevent",
       "hisysevent:libhisyseventmanager",
     ]
+    if (is_standard_system) {
+      sources += [ "$dsoftbus_root_path/core/common/message_handler/message_handler_ffrt.cpp" ]
+      external_deps += [ "ffrt:libffrt" ]
+    } else {
+      sources += [
+        "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
+      ]
+    }
 
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

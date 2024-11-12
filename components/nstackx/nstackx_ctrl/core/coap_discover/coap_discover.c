@@ -704,7 +704,6 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
         DFINDER_LOGE(TAG, "failed when posting service discover request");
         goto L_ERR_DISCOVER;
     }
-    DFINDER_LOGI(TAG, "the %u time for device discovery.", g_discoverCount + 1);
 
     /* Restart timer */
     discoverInterval = GetDiscoverInterval(g_discoverCount);
@@ -1268,6 +1267,8 @@ void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration)
     if (advCount != 0) {
         g_coapUserDiscoverInterval = advDuration / advCount;
     }
+    DFINDER_LOGD(TAG, "SetCoapUserDiscoverInfo advCount %u, interval %u",
+        g_coapUserMaxDiscoverCount, g_coapUserDiscoverInterval);
 }
 
 int32_t SetCoapDiscConfig(const DFinderDiscConfig *discConfig)

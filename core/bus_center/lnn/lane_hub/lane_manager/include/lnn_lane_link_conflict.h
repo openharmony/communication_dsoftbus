@@ -68,6 +68,8 @@ int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType c
 int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
     LinkConflictInfo *outputInfo);
 void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType);
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink);
+void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType releaseLink);
 
 #ifdef __cplusplus
 }

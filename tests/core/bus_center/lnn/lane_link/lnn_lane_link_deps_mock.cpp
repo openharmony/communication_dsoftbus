@@ -170,9 +170,19 @@ void DelLogicAndLaneRelationship(uint64_t laneId)
     GetLaneLinkDepsInterface()->DelLogicAndLaneRelationship(laneId);
 }
 
-int32_t LnnSyncPtk(char *networkId)
+int32_t LnnSyncPtk(const char *networkId)
 {
     return GetLaneLinkDepsInterface()->LnnSyncPtk(networkId);
+}
+
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
+{
+    return GetLaneLinkDepsInterface()->CheckLinkConflictByReleaseLink(releaseLink);
+}
+
+void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType releaseLink)
+{
+    GetLaneLinkDepsInterface()->ClearConflictInfoByLinkType(networkId, releaseLink);
 }
 }
 } // namespace OHOS

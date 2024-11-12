@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ static int32_t SoftBusGetBleMacAddr(char *macStr, uint32_t len)
     if (SoftbusGetConfig(SOFTBUS_INT_BLE_MAC_AUTO_REFRESH_SWITCH,
         (unsigned char *)(&bleMacRefreshSwitch), sizeof(bleMacRefreshSwitch)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get ble mac refresh switch from config file fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     /* ble mac not periodic refresh, return error if get ble mac fail */
     if (bleMacRefreshSwitch == 0) {
@@ -101,12 +101,12 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
         if (strcmp(g_typeConvertMap[id].inBuf, inBuf) == EOK) {
             if (strcpy_s(outBuf, outLen, g_typeConvertMap[id].outBuf) != EOK) {
                 LNN_LOGE(LNN_STATE, "strcpy_s fail");
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             return SOFTBUS_OK;
         }
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 static int32_t SoftBusGetOsType(void)
@@ -155,10 +155,10 @@ int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
         case COMM_DEVICE_KEY_UDID:
             if (GetDevUdid(localUdid, UDID_BUF_LEN) != 0) {
                 LNN_LOGE(LNN_STATE, "GetDevUdid failed");
-                return SOFTBUS_ERR;
+                return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
             }
             if (strncpy_s(value, len, localUdid, UDID_BUF_LEN) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_DEVTYPE:
@@ -166,22 +166,23 @@ int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
             LNN_LOGI(LNN_STATE, "get device from GetDeviceType, GetDeviceType=%{public}s", devType);
             if (devType != NULL) {
                 char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
-                if (SoftBusConvertDeviceType(devType, softBusDevType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
+                int32_t ret = SoftBusConvertDeviceType(devType, softBusDevType, DEVICE_TYPE_BUF_LEN);
+                if (ret != SOFTBUS_OK) {
                     LNN_LOGE(LNN_STATE, "convert device type fail");
-                    return SOFTBUS_ERR;
+                    return ret;
                 }
                 if (strcpy_s(value, len, softBusDevType) != EOK) {
-                    return SOFTBUS_ERR;
+                    return SOFTBUS_STRCPY_ERR;
                 }
             } else {
                 LNN_LOGE(LNN_STATE, "GetDeviceType failed");
-                return SOFTBUS_ERR;
+                return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
             }
             break;
         case COMM_DEVICE_KEY_BLE_MAC:
             if (SoftBusGetBleMacAddr(value, len) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_STATE, "get ble mac addr failed!");
-                return SOFTBUS_ERR;
+                return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
             }
             break;
         default:
@@ -196,7 +197,7 @@ int32_t GetCommonOsType(int32_t *value)
     *value = ret;
     if (*value == OHOS_TYPE_UNKNOWN) {
         LNN_LOGE(LNN_STATE, "get invalid os type, osType = %{public}d", *value);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     return SOFTBUS_OK;
 }
@@ -222,7 +223,7 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
     } else {
         LNN_LOGE(LNN_STATE, "get invalid osVersion, osVersion= %{public}s", UNDEFINED_VALUE);
         SoftBusFree(osVersion);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     SoftBusFree(osVersion);
     return SOFTBUS_OK;
@@ -249,7 +250,7 @@ int32_t GetCommonDeviceVersion(char *value, uint32_t len)
     } else {
         LNN_LOGE(LNN_STATE, "get invalid deviceVersion, deviceVersion= %{public}s", UNDEFINED_VALUE);
         SoftBusFree(deviceVersion);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     SoftBusFree(deviceVersion);
     return SOFTBUS_OK;
@@ -259,7 +260,7 @@ int32_t GetWlanIpv4Addr(char *ip, uint32_t size)
 {
     (void)ip;
     (void)size;
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
 }
 
 int32_t GetDeviceSecurityLevel(int32_t *level)
@@ -272,7 +273,7 @@ int32_t GetDeviceSecurityLevel(int32_t *level)
     LNN_LOGI(LNN_STATE, "level=%{public}d", *level);
     if (*level <= 0) {
         LNN_LOGE(LNN_STATE, "getIntParamenter fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     return SOFTBUS_OK;
 }
