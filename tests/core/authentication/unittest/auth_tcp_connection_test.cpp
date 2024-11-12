@@ -102,7 +102,7 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_001, TestSize.Level1)
     SocketPktHead pktHead;
     (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
     int32_t ret = RecvPacketHead(AUTH, fd, &pktHead);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*

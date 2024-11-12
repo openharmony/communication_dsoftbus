@@ -32,12 +32,12 @@ int32_t __attribute__ ((weak)) GetCommonDevInfo(CommonDeviceKey key, char *value
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
             if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
             if (strncpy_s(value, len, DEFAULT_UDID_NAME, strlen(DEFAULT_UDID_NAME)) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_DEVTYPE:

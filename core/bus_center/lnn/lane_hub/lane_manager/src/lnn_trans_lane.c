@@ -887,29 +887,6 @@ static bool GetAuthType(const char *peerNetWorkId)
     return ((1 << ONLINE_HICHAIN) == value);
 }
 
-static int32_t CheckLinkConflict(const char* peerUdid, LaneLinkType linkType)
-{
-    if (linkType != LANE_HML) {
-        return SOFTBUS_OK;
-    }
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get networkId by uuid fail");
-        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
-    }
-    int32_t conflictErr = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
-    if (conflictErr != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "link=%{public}d conflict=%{public}d, cancel delay free lane", LANE_HML, conflictErr);
-        return conflictErr;
-    }
-    conflictErr = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
-    if (conflictErr != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "link=%{public}d conflict=%{public}d, cancel delay free lane", LANE_P2P, conflictErr);
-        return conflictErr;
-    }
-    return SOFTBUS_OK;
-}
-
 static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDelayFree)
 {
     LaneResource resourceItem;
@@ -928,7 +905,7 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
     bool isHichain = GetAuthType(networkId);
     LNN_LOGD(LNN_LANE, "isHichain=%{public}d", isHichain);
     if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 && isHichain &&
-        CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) == SOFTBUS_OK) {
+        CheckLinkConflictByReleaseLink(resourceItem.link.type) != SOFTBUS_OK) {
         if (PostDelayDestroyMessage(laneReqId, laneId, DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
             *isDelayFree = true;
             return;

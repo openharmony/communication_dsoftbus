@@ -56,6 +56,20 @@ static void MatchLnnEventNameTypeExtraStrParamAnony(const HiSysEventParam *param
     AnonymizeFree(anonyStr);
 }
 
+static void MatchLnnEventNameTypeExtraUint64Param(const HiSysEventParam *params, int32_t index, uint64_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui64, extraParam);
+}
+
+static void MatchLnnEventNameTypeExtraInt64Param(const HiSysEventParam *params, int32_t index, int64_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.i64, extraParam);
+}
+
 MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
@@ -82,6 +96,11 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.chanReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.strategy);
+    MatchLnnEventNameTypeExtraUint64Param(params, ++index, extra.timeLatency);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.triggerReason);
+    MatchLnnEventNameTypeExtraInt64Param(params, ++index, extra.authSeq);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.onlineDevCnt);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.interval);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
