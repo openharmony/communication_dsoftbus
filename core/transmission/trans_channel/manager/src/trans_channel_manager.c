@@ -254,6 +254,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TransSetFirstTokenInfo(appInfo, &extra);
+    extra.sessionId = param->sessionId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {
         uint32_t callingTokenId = TransACLGetCallingTokenID();
