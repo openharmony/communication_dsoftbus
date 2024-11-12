@@ -171,6 +171,23 @@ void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusEr
     }
 }
 
+static int32_t GetDeviceSideFlag(int64_t authSeq, bool *flag)
+{
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
+    if (authFsm == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "auth fsm not found");
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    *flag = authFsm->info.isServer;
+    AUTH_LOGI(AUTH_HICHAIN, "find authFsm success, side=%{public}s", GetAuthSideStr(*flag));
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
 static int32_t CheckErrReturnValidity(const char *errorReturn)
 {
     cJSON *json = cJSON_Parse(errorReturn);
@@ -226,6 +243,22 @@ static void NotifyAuthFailEvent(int32_t errCode, const char *errorReturn)
     }
 }
 
+static void NotifyPcAuthFail(int64_t authSeq, int errCode, const char *errorReturn)
+{
+    if (errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
+        if (errCode == PC_AUTH_ERRCODE) {
+            NotifyAuthFailEvent(errCode, errorReturn);
+        }
+        if (errCode == PC_PROOF_NON_CONSISTENT_ERRCODE) {
+            bool flag = false;
+            if (GetDeviceSideFlag(authSeq, &flag) == SOFTBUS_OK && flag) {
+                NotifyAuthFailEvent(errCode, errorReturn);
+            }
+        }
+    }
+    return;
+}
+
 static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
@@ -234,9 +267,7 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
         authSeq, errCode, authErrCode);
-    if (errCode == PC_AUTH_ERRCODE && errorReturn != NULL && CheckErrReturnValidity(errorReturn) == SOFTBUS_OK) {
-        NotifyAuthFailEvent(errCode, errorReturn);
-    }
+    NotifyPcAuthFail(authSeq, errCode, errorReturn);
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
 
