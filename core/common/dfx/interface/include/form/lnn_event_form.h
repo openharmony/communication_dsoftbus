@@ -19,7 +19,6 @@
 #include <stdint.h>
 
 #include "event_form_enum.h"
-#include "softbus_bus_center.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
@@ -31,6 +30,7 @@ extern "C" {
 #define HB_SHORT_UDID_HASH_HEX_LEN 16
 #define BROADCAST_INTERVAL_DEFAULT 50
 #define MAX_TIME_LATENCY 30000
+#define DEVICE_NAME_BUF_LEN 128
 
 typedef enum {
     EVENT_SCENE_LNN = 1,

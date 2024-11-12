@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
-import("../../common/dfx/dsoftbus_dfx.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 disc_dep_dir = "dsoftbus_enhance/core/discovery/ble"
@@ -33,10 +32,10 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/include",
   "$dsoftbus_root_path/core/discovery/common/include",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_dfx_path/hisysevent_adapter/include",
 ]
 
-ble_discovery_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+ble_discovery_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 ble_discovery_external_deps = []
 if (support_i18n && qemu_arm_disable) {
   ble_discovery_external_deps += [ "i18n:intl_util" ]

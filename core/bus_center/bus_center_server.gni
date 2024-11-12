@@ -49,6 +49,7 @@ bus_center_server_src += [
 ]
 
 bus_center_server_inc += [
+  "$dsoftbus_root_path/interface/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/interface",
   "$dsoftbus_root_path/core/bus_center/ipc/include",
   "$dsoftbus_root_path/core/bus_center/service/include",

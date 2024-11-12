@@ -16,7 +16,6 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
-dsoftbus_root_path = "../../../../.."
 
 ohos_fuzztest("AuthDataFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
@@ -28,7 +27,7 @@ ohos_fuzztest("AuthDataFuzzTest") {
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",

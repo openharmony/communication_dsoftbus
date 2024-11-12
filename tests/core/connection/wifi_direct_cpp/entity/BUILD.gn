@@ -17,7 +17,6 @@ ut_out_path = "dsoftbus/connection/wifi_direct_cpp/entity"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_cpp_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
-dsoftbus_dfx_path = "$dsoftbus_root_path/core/common/dfx"
 ohos_unittest("P2pEntityTest") {
   module_out_path = ut_out_path
   include_dirs = [
@@ -28,8 +27,8 @@ ohos_unittest("P2pEntityTest") {
     "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -68,7 +67,7 @@ ohos_unittest("P2pEntityTest") {
   ]
 
   deps = [
-    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gmock_rtti",

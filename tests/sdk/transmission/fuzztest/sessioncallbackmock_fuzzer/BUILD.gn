@@ -23,13 +23,13 @@ ohos_fuzztest("SessionCallbackMockFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/sessioncallbackmock_fuzzer"
 
   include_dirs = [
-    "../../../../../sdk/transmission/session/cpp/src",
-    "../../../../../sdk/transmission/session/cpp/include",
-    "../../../../../interfaces/kits/transport",
-    "../../../../../interfaces/kits/common",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/src",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
   ]
   cflags = [
     "-g",

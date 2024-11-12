@@ -11,10 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../../../../../dsoftbus.gni")
 import("../../../../../transmission/common/trans_common.gni")
-import("../../../dsoftbus_dfx.gni")
 
-dsoftbus_root_path = "../../../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 if (defined(ohos_lite)) {
@@ -39,7 +38,7 @@ if (defined(ohos_lite)) {
   target(build_type, "softbus_dfx_dump") {
     include_dirs = [
       "$dsoftbus_dfx_path/event/src",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$hilog_lite_include_path",
@@ -84,6 +83,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_dfx_path/event/src",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
@@ -103,7 +103,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "softbus_hidumper.c",
 
-      # "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
       "softbus_hidumper_alarm.c",
       "softbus_hidumper_bc_mgr.c",
       "softbus_hidumper_broadcast.c",
@@ -123,9 +122,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_dump_interface_std" ]
     public_deps = [
-      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-      "$dsoftbus_dfx_path/event:softbus_dfx_event",
-      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     public_external_deps = [

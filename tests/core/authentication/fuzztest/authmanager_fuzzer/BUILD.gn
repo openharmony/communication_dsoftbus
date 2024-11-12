@@ -44,9 +44,9 @@ ohos_fuzztest("AuthManagerFuzzTest") {
   sources = fuzz_sources
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 

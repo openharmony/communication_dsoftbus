@@ -14,7 +14,6 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 import("../../../../utils/utils.gni")
 
@@ -37,7 +36,7 @@ ohos_unittest("DiscManagerTest") {
   ]
 
   deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
@@ -62,8 +61,8 @@ ohos_unittest("DiscManagerMockTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
-    "$dsoftbus_core_path/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_core_path/common/dfx/dumper/legacy/hidumper_adapter/include",
+    "$dsoftbus_dfx_path/hisysevent_adapter/include",
+    "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",

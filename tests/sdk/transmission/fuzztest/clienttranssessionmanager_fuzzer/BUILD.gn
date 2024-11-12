@@ -22,14 +22,15 @@ ohos_fuzztest("ClientTransSessionManagerFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttranssessionmanager_fuzzer"
 
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../core/common/inner_communication",
-    "../../../../../core/transmission/common/include",
-    "../../../../../interfaces/inner_kits/transport",
-    "../../../../../interfaces/kits/common",
-    "../../../../../sdk/transmission/session/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/common/inner_communication",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
   ]
   cflags = [
     "-g",

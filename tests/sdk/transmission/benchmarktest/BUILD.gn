@@ -26,7 +26,7 @@ ohos_benchmarktest("TransTest") {
     "$dsoftbus_root_path/interfaces/kits/transmission",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/transmission/session/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/qos/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/adapter/common/include",

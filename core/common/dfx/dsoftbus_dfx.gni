@@ -11,10 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../dsoftbus.gni")
-
-dsoftbus_dfx_path = "$dsoftbus_core_path/common/dfx"
-
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     hilog_lite_include_path =
@@ -44,13 +40,4 @@ if (defined(ohos_lite)) {
       ]
     }
   }
-} else {
-  if (defined(os_win)) {
-    os_type = "windows"
-  } else {
-    os_type = "standard"
-  }
-  import("//build/ohos.gni")
-  import(
-      "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
 }
