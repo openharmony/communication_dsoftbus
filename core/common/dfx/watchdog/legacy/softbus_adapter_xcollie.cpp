@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_adapter_xcollie.h"
+#include "legacy/softbus_adapter_xcollie.h"
 
 #include "comm_log.h"
 #include "softbus_errcode.h"

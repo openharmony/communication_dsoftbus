@@ -22,7 +22,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"

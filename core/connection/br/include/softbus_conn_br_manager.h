@@ -23,7 +23,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_connreporter.h"
+#include "legacy/softbus_hisysevt_connreporter.h"
 
 #ifdef __cplusplus
 extern "C" {

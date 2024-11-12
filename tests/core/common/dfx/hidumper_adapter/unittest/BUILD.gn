@@ -26,9 +26,9 @@ ohos_unittest("HidumperTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
-    "dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_dfx_path/dumper/legacy/include",
+    "$dsoftbus_dfx_path/interface/include",
   ]
 
   deps = [

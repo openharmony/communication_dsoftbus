@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 
 #include <securec.h>
 #include <sstream>

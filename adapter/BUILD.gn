@@ -77,8 +77,8 @@ if (defined(ohos_lite)) {
         cflags = [ "-Wall" ]
       }
       sources = [
-        "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
-        "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
+        "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent_mini.c",
+        "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace_virtual.c",
         "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
@@ -99,8 +99,8 @@ if (defined(ohos_lite)) {
         external_deps += [ "json:nlohmann_json_static" ]
         sources = []
         sources = [
-          "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
-          "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
+          "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent_mini.c",
+          "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace_virtual.c",
           "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
           "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
@@ -152,8 +152,8 @@ if (defined(ohos_lite)) {
       ]
       cflags_cc = [ "-fPIC" ]
       sources = [
-        "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
-        "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
+        "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent_mini.c",
+        "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace_virtual.c",
         "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
         "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
@@ -233,8 +233,8 @@ if (defined(ohos_lite)) {
       ]
     }
     sources = [
-      "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
-      "$softbus_adapter_common/dfx/softbus_adapter_hitrace.c",
+      "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent.cpp",
+      "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace.c",
       "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
       "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",

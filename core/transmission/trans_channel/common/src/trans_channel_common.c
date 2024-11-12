@@ -24,7 +24,7 @@
 #include "softbus_config_type.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_qos.h"
 #include "softbus_wifi_api_adapter.h"

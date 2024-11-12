@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 
 #include "comm_log.h"
 #include "securec.h"
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_common.h"
+#include "legacy/softbus_hisysevt_common.h"
 
 #define BUS_CENTER_PARAM_TOTAL_TIME "TOTAL_TIME"
 #define BUS_CENTER_PARAM_TOTAL_COUNT "TOTAL_COUNT"

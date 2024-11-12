@@ -24,10 +24,10 @@ ohos_fuzztest("ClientTransProxyManagerFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttransproxymanager_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",

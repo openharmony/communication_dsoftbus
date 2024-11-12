@@ -21,7 +21,7 @@
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 
 static void DeviceFound(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
 

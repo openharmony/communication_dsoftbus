@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -22,13 +22,13 @@
 #include "common_list.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_hidumper_bc_mgr.h"
-#include "softbus_hidumper_broadcast.h"
-#include "softbus_hidumper_buscenter.h"
-#include "softbus_hidumper_conn.h"
-#include "softbus_hidumper_disc.h"
-#include "softbus_hidumper_nstack.h"
-#include "softbus_hidumper_trans.h"
+#include "legacy/softbus_hidumper_bc_mgr.h"
+#include "legacy/softbus_hidumper_broadcast.h"
+#include "legacy/softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper_conn.h"
+#include "legacy/softbus_hidumper_disc.h"
+#include "legacy/softbus_hidumper_nstack.h"
+#include "legacy/softbus_hidumper_trans.h"
 
 static LIST_HEAD(g_hidumperhander_list);
 

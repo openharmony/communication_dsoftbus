@@ -54,18 +54,18 @@ bus_center_server_inc += [
   "$dsoftbus_root_path/core/bus_center/ipc/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
-  "$softbus_adapter_common/dfx/include",
 ]
 
 bus_center_server_external_deps = []
 
 if (defined(global_parts_info) && defined(global_parts_info.hicollie)) {
   bus_center_server_src +=
-      [ "$softbus_adapter_common/dfx/softbus_adapter_xcollie.cpp" ]
+      [ "$dsoftbus_dfx_path/watchdog/legacy/softbus_adapter_xcollie.cpp" ]
   bus_center_server_external_deps += [ "hicollie:libhicollie" ]
 } else {
-  bus_center_server_src +=
-      [ "$softbus_adapter_common/dfx/softbus_adapter_xcollie_virtual.cpp" ]
+  bus_center_server_src += [
+    "$dsoftbus_dfx_path/watchdog/legacy/softbus_adapter_xcollie_virtual.cpp",
+  ]
 }
 
 if (defined(ohos_lite)) {

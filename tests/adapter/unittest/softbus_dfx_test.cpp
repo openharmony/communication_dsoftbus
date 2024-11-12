@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 #include "softbus_errcode.h"
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 
 using namespace testing::ext;
 

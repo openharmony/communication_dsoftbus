@@ -44,9 +44,9 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "bus_center_event.h"
 
 DistributedNetLedger g_distributedNetLedger;

@@ -18,7 +18,7 @@
 #include <stdint.h>
 
 #include "common_list.h"
-#include "softbus_adapter_hisysevent.h"
+#include "legacy/softbus_adapter_hisysevent.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus

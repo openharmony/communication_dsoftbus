@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "softbus_errcode.h"
-#include "softbus_hidumper_broadcast.h"
+#include "legacy/softbus_hidumper_broadcast.h"
 
 int32_t SoftbusRegBroadcastDumpTask(SoftbusBroadcastDumpTask cb, uint64_t delayMillis)
 {

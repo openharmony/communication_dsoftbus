@@ -31,7 +31,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.c"
 #include "lnn_distributed_net_ledger_manager.c"

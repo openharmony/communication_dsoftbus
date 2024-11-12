@@ -20,7 +20,7 @@
 #include "auth_device_common_key.h"
 #include "lnn_device_info_recovery.h"
 #include "message_handler.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"

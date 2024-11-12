@@ -24,9 +24,9 @@ ohos_unittest("SoftbusJsonUtilsTest") {
   sources = [ "softbus_json_utils_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
   ]
 

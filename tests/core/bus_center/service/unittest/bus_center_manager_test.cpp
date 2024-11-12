@@ -31,7 +31,7 @@
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account_adapter.h"
-#include "softbus_adapter_xcollie.h"
+#include "legacy/softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"

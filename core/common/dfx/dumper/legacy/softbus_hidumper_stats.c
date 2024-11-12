@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_hidumper_stats.h"
+#include "legacy/softbus_hidumper_stats.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -21,8 +21,8 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_hidumper.h"
-#include "softbus_hidumper_util.h"
+#include "legacy/softbus_hidumper.h"
+#include "legacy/softbus_hidumper_util.h"
 
 #define SOFTBUS_FIFTEEN_MINUTES_STATS_ORDER "15min"
 #define SOFTBUS_TWENTY_FOUR_HOURS_STATS_ORDER "24h"

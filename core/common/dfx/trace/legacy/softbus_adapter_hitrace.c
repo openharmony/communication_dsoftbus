@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_HIDUMPER_DISC_H
-#define SOFTBUS_HIDUMPER_DISC_H
+#include "legacy/softbus_adapter_hitrace.h"
 
-#include "softbus_hidumper.h"
+#include "hitrace/tracechain.h"
+#include "softbus_adapter_crypto.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-int32_t SoftBusDiscHiDumperInit(void);
-int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb);
-void SoftBusHiDumperDiscDeInit(void);
-
-#ifdef __cplusplus
-#if __cplusplus
+void SoftbusHitraceStart(uint32_t flags, uint64_t chainId)
+{
+    HiTraceIdStruct pId = HiTraceChainGetId();
+    pId.valid = flags;
+    pId.chainId = chainId > 0 ? chainId : (uint64_t)SoftBusCryptoRand();
+    HiTraceChainSetId(&pId);
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif /* SOFTBUS_HIDUMPER_DISC_H */
+
+void SoftbusHitraceStop(void)
+{
+    HiTraceChainClearId();
+}

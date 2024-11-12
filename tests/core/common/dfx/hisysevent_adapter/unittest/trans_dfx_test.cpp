@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_hidumper_trans.c"
 
 using namespace std;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_HIDUMPER_BUSCENTER_H
-#define SOFTBUS_HIDUMPER_BUSCENTER_H
+#include "legacy/softbus_adapter_hitrace.h"
 
-#include "softbus_hidumper.h"
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-int32_t SoftBusHiDumperBusCenterInit(void);
-int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
-void SoftBusHiDumperBusCenterDeInit(void);
-
-#ifdef __cplusplus
-#if __cplusplus
+void SoftbusHitraceStart(uint32_t flags, uint64_t chainId)
+{
+    (void)flags;
+    (void)chainId;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif /* SOFTBUS_HIDUMPER_BUSCENTER_H */
+
+void SoftbusHitraceStop(void)
+{
+}

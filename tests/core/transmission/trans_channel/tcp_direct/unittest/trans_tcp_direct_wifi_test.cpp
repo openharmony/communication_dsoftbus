@@ -20,7 +20,7 @@
 
 #include "auth_interface.h"
 #include "lnn_network_manager.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"

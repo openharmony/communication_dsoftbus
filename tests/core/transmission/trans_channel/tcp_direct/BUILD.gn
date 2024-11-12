@@ -574,6 +574,7 @@ ohos_unittest("TransTcpDirectWifiTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",

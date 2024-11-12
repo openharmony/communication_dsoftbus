@@ -29,10 +29,9 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        "value")
 
 auth_server_inc = [
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
-  "$dsoftbus_dfx_path/event/legacy/include",
-  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/adapter/authentication/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",

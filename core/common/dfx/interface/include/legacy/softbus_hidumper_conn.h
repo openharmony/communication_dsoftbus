@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef SOFTBUS_HIDUMPER_CONN_H
+#define SOFTBUS_HIDUMPER_CONN_H
 
-#ifndef SOFTBUS_HIDUMPER_BC_MGR_H
-#define SOFTBUS_HIDUMPER_BC_MGR_H
-
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -24,13 +23,13 @@ extern "C" {
 #endif
 #endif
 
-int32_t SoftBusBcMgrHiDumperInit(void);
-int32_t SoftBusRegBcMgrVarDump(const char *dumpVar, SoftBusVarDumpCb cb);
-void SoftBusHiDumperBcMgrDeInit(void);
+int32_t SoftBusConnHiDumperInit(void);
+int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb);
+void SoftBusHiDumperConnDeInit(void);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif /* SOFTBUS_HIDUMPER_BC_MGR_H */
+#endif /* SOFTBUS_HIDUMPER_CONN_H */

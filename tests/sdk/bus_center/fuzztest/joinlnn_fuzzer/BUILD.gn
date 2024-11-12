@@ -22,8 +22,8 @@ ohos_fuzztest("JoinLNNFuzzTest") {
   fuzz_config_file =
       "$dsoftbus_root_path/tests/sdk/bus_center/fuzztest/joinlnn_fuzzer"
   include_dirs = [
-    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",

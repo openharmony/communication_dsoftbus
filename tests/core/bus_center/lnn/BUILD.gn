@@ -28,6 +28,7 @@ enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
                             "value")
 
 bus_center_unittest_dirs = [
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
@@ -41,7 +42,6 @@ bus_center_unittest_dirs = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/monitor/include",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/authentication/interface",
@@ -81,6 +81,7 @@ bus_center_unittest_deps = [
 ]
 
 lnn_mock_test_include_dirs = [
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
@@ -94,7 +95,6 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
   "$dsoftbus_root_path/core/bus_center/monitor/include",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -117,7 +117,6 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   "$dsoftbus_root_path/core/transmission/interface",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-  "$dsoftbus_dfx_path/event/legacy/include",
   "$dsoftbus_root_path/adapter/common/net/wifi/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",

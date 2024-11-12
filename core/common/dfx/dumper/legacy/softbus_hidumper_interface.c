@@ -16,10 +16,10 @@
 #include "comm_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_hidumper_alarm.h"
-#include "softbus_hidumper_stats.h"
-#include "softbus_hidumper_util.h"
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper_alarm.h"
+#include "legacy/softbus_hidumper_stats.h"
+#include "legacy/softbus_hidumper_util.h"
+#include "legacy/softbus_hidumper.h"
 
 int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 {

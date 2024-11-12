@@ -27,6 +27,7 @@ processorv1_ut_include_dirs = [
   "//third_party/googletest/googletest/src",
   "//third_party/bounds_checking_function/include",
 
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
@@ -36,8 +37,6 @@ processorv1_ut_include_dirs = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/core/bus_center/interface",
-  "$dsoftbus_dfx_path/event/legacy/include",
-  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/discovery/manager/include",

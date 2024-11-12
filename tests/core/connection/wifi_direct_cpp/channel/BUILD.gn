@@ -23,6 +23,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
   module_out_path = ut_out_path
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/processor",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/channel",
@@ -31,8 +32,6 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_dfx_path/event/legacy/include",
-    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -141,7 +140,6 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_dfx_path/event/legacy/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",

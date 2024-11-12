@@ -25,7 +25,7 @@ ohos_fuzztest("SoftBusHiSysEvtFuzzTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_dfx_path/event/legacy/include",
+    "$dsoftbus_dfx_path/interface/include",
   ]
 
   sources = [ "softbushisysevt_fuzzer.cpp" ]

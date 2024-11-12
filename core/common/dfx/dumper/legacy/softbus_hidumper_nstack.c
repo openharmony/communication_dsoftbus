@@ -16,11 +16,11 @@
 #include <string.h>
 #include "comm_log.h"
 #include "softbus_errcode.h"
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper.h"
 #include "fillpinc.h"
 #include "nstackx.h"
 #include "nstackx_dfile.h"
-#include "softbus_hidumper_nstack.h"
+#include "legacy/softbus_hidumper_nstack.h"
 
 #define SOFTBUS_DSTREAM_MODULE_NAME "dstream"
 #define SOFTBUS_DSTREAM_MODULE_HELP "List all the dump item of dstream"

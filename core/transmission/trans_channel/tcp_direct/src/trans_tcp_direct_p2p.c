@@ -21,7 +21,7 @@
 
 #include "auth_interface.h"
 #include "lnn_lane_link.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"

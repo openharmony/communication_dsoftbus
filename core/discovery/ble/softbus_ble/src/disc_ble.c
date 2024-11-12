@@ -36,8 +36,8 @@
 #include "softbus_adapter_range.h"
 #include "softbus_bitmap.h"
 #include "softbus_errcode.h"
-#include "softbus_hidumper_disc.h"
-#include "softbus_hisysevt_discreporter.h"
+#include "legacy/softbus_hidumper_disc.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 

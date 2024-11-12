@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "softbus_errcode.h"
-#include "softbus_hidumper_bc_mgr.h"
+#include "legacy/softbus_hidumper_bc_mgr.h"
 
 int32_t SoftBusRegBcMgrVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_HIDUMPER_STATS_H
-#define SOFTBUS_HIDUMPER_STATS_H
+#ifndef SOFTBUS_HIDUMPER_ALARM_H
+#define SOFTBUS_HIDUMPER_ALARM_H
 
-#include "softbus_hidumper.h"
+#include "legacy/softbus_hidumper.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -24,12 +24,12 @@ extern "C" {
 #endif
 #endif
 
-int32_t SoftBusStatsHiDumperInit(void);
-void SoftBusHiDumperStatsDeInit(void);
+int32_t SoftBusAlarmHiDumperInit(void);
+void SoftBusHiDumperAlarmDeInit(void);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif /* SOFTBUS_HIDUMPER_STATS_H */
+#endif /* SOFTBUS_HIDUMPER_ALARM_H */
