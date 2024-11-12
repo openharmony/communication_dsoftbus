@@ -168,7 +168,7 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, GetAppInfoTest001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = TransSessionMgrInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -417,7 +417,7 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest002, TestSize.Level1)
     EXPECT_TRUE(info != nullptr);
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AuthChannelInfo *newInfo = (AuthChannelInfo*)SoftBusCalloc(sizeof(AuthChannelInfo));
+    AuthChannelInfo *newInfo = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     ASSERT_TRUE(newInfo != nullptr);
     int32_t channelId = info->appInfo.myData.channelId;
     ret = GetAuthChannelInfoByChanId(channelId, newInfo);
@@ -481,7 +481,7 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest004, TestSize.Level1)
     info->authId = TRANS_TEST_AUTH_ID;
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AuthChannelInfo *newInfo = (AuthChannelInfo*)SoftBusCalloc(sizeof(AuthChannelInfo));
+    AuthChannelInfo *newInfo = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     ASSERT_TRUE(newInfo != nullptr);
     ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, newInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -505,7 +505,7 @@ HWTEST_F(TransAuthChannelTest, NotifyOpenAuthChannelSuccessTest001, TestSize.Lev
     bool isServer = true;
     int32_t ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AppInfo* appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -593,11 +593,11 @@ HWTEST_F(TransAuthChannelTest, NotifyOnDataReceivedTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, CopyPeerAppInfoTest001, TestSize.Level1)
 {
-    AppInfo *recvAppInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *recvAppInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(recvAppInfo != nullptr);
     int32_t ret = TestGenerateAppInfo(recvAppInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AppInfo *channelAppInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *channelAppInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(channelAppInfo != nullptr);
     ret = CopyPeerAppInfo(recvAppInfo, channelAppInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -617,7 +617,7 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest001, TestSize.Level
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -667,7 +667,7 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest002, TestSize.Level
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -698,7 +698,7 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest002, TestSize.Level
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -722,7 +722,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -768,7 +768,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
     ret = TransCreateSessionServer(g_pkgName, g_authSessionName, TRANS_TEST_UID, TRANS_TEST_PID);
     ASSERT_EQ(ret, SOFTBUS_OK);
     cJSON *msg = cJSON_CreateObject();
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -874,7 +874,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetNameByChanIdTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, TransPostAuthChannelMsgTest002, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -921,7 +921,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnOptionByChanIdTest002, TestSize.L
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     ASSERT_TRUE(connOpt != nullptr);
     ret = TransAuthGetConnOptionByChanId(TRANS_TEST_CHANNEL_ID, connOpt);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -961,7 +961,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnOptionByChanIdTest002, TestSize.L
  */
 HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = TransAuthGetAppInfoByChanId(TRANS_TEST_CHANNEL_ID, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -987,7 +987,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest002, TestSize.Leve
     info->authId = TRANS_TEST_AUTH_ID;
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TransAuthGetAppInfoByChanId(TRANS_TEST_CHANNEL_ID, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1005,7 +1005,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest002, TestSize.Leve
  */
 HWTEST_F(TransAuthChannelTest, TransNotifyAuthDataSuccessTest001, TestSize.Level1)
 {
-    ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     ASSERT_TRUE(connOpt != nullptr);
     int32_t ret = TransNotifyAuthDataSuccess(TRANS_TEST_CHANNEL_ID, NULL);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -1033,7 +1033,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelReply001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     OnRecvAuthChannelReply(TRANS_TEST_AUTH_ID, NULL, DEVICE_ID_SIZE_MAX);
     cJSON *msg = cJSON_CreateObject();
-    AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -1119,7 +1119,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetChannelInfo001, TestSize.Level1)
     EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID);
     ret = GetAuthIdByChannelId(newChannelId);
     EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID + 1);
-    AuthChannelInfo *destInfo = (AuthChannelInfo*)SoftBusCalloc(sizeof(AuthChannelInfo));
+    AuthChannelInfo *destInfo = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     ASSERT_TRUE(destInfo != nullptr);
     ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, destInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);

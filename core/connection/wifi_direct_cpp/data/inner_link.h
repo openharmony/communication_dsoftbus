@@ -53,6 +53,7 @@ enum class InnerLinKey {
     NEW_PTK_FRAME = 23,
     LOCAL_CUSTOM_PORT = 24,
     REMOTE_CUSTOM_PORT = 25,
+    IS_LEGACY_REUSED = 26,
 };
 
 struct LinkIdStruct {
@@ -150,6 +151,9 @@ public:
 
     bool GetNewPtkFrame() const;
     void SetNewPtkFrame(bool value);
+
+    bool GetLegacyReused() const;
+    void SetLegacyReused(bool value);
 
     void GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4);
     void RemoveId(int linkId);

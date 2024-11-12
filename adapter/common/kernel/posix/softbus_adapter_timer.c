@@ -22,6 +22,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifdef SOFTBUS_STANDARD_OS
+#include "ffrt.h"
+#endif
+
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_def.h"
@@ -48,6 +52,46 @@ __attribute__((no_sanitize("hwaddress"))) void SetTimerFunc(TimerFunc func)
 {
     g_timerFunc = func;
 }
+
+#ifdef SOFTBUS_STANDARD_OS
+static void HandleTimeoutFunWithFfrt(void *data)
+{
+    (void)data;
+    if (g_timerFunc != NULL) {
+        g_timerFunc();
+    }
+}
+
+int32_t SoftBusStartTimerWithFfrt(int32_t *timerHandle, uint64_t timeout, bool repeat)
+{
+    if (timerHandle == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "timerHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = ffrt_timer_start(ffrt_qos_default, timeout, NULL, HandleTimeoutFunWithFfrt, repeat);
+    if (ret == ffrt_error) {
+        COMM_LOGE(COMM_ADAPTER, "timer start with ffrt fail, ret=%{public}d", ret);
+        return SOFTBUS_TIMER_ERR;
+    }
+    *timerHandle = ret;
+    COMM_LOGI(COMM_ADAPTER, "timer start with ffrt succ, timerHandle=%{public}d", *timerHandle);
+    return SOFTBUS_OK;
+}
+
+void SoftBusStopTimerWithFfrt(int32_t timerHandle)
+{
+    if (timerHandle < 0) {
+        COMM_LOGE(COMM_ADAPTER, "invalid timerHandle=%{public}d", timerHandle);
+        return;
+    }
+    int32_t ret = ffrt_timer_stop(ffrt_qos_default, timerHandle);
+    if (ret != ffrt_success) {
+        COMM_LOGE(COMM_ADAPTER, "timer stop with ffrt fail, timerHandle=%{public}d, ret=%{public}d", timerHandle, ret);
+        return;
+    }
+    COMM_LOGI(COMM_ADAPTER, "timer stop with ffrt succ, timerHandle=%{public}d", timerHandle);
+}
+#endif
 
 void *SoftBusCreateTimer(void **timerId, unsigned int type)
 {

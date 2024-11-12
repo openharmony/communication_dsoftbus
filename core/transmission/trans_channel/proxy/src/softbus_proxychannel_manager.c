@@ -1555,6 +1555,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
         return;
     }
 
+    (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
     (void)OnProxyChannelOpenFailed(channelId, &(channelInfo->appInfo), errCode);
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
@@ -1736,7 +1737,7 @@ static void TransWifiOnLineProc(const char *peerNetworkId)
         TRANS_LOGE(TRANS_CTRL, "invalid networkId");
         return;
     }
-    int ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
+    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
     if (ret == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "notify upgrade migrate success");
         return;
@@ -1751,7 +1752,7 @@ static void TransWifiOffLineProc(const char *peerNetworkId)
         TRANS_LOGE(TRANS_CTRL, "invalid networkId");
         return;
     }
-    int ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
+    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
     if (ret == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "notify degrade migrate success");
         return;

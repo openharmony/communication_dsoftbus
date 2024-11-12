@@ -419,6 +419,90 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
+{
+    if (releaseLink != LANE_HML) {
+        LNN_LOGE(LNN_LANE, "invalid releaseLink=%{public}d", releaseLink);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LinkConflictLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkConflict lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LinkConflictInfo *item = NULL;
+    LinkConflictInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
+        if (item->releaseLink == releaseLink) {
+            LinkConflictUnlock();
+            LNN_LOGI(LNN_LANE, "link conflict info matched by releaseLink=%{public}d", releaseLink);
+            return SOFTBUS_OK;
+        }
+    }
+    LinkConflictUnlock();
+    return SOFTBUS_LANE_NOT_FOUND;
+}
+
+static bool GetConflictInfoWithLinkType(LaneLinkType type, const DevIdentifyInfo *identifyInfo,
+    const DevIdentifyInfo *hashInfo, LinkConflictInfo *outputInfo)
+{
+    if (LinkConflictLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkConflict lock fail");
+        return false;
+    }
+    LinkConflictInfo *item = NULL;
+    LinkConflictInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
+        bool isMatched = false;
+        if ((type == LANE_HML && item->conflictType == CONFLICT_LINK_NUM_LIMITED && item->releaseLink == LANE_HML) ||
+            (type == LANE_P2P && item->conflictType == CONFLICT_THREE_VAP && item->releaseLink == LANE_HML)) {
+            isMatched = true;
+        }
+        if (!isMatched) {
+            continue;
+        }
+        if (memcmp(&item->identifyInfo, identifyInfo, sizeof(DevIdentifyInfo)) == 0 ||
+            memcmp(&item->identifyInfo, hashInfo, sizeof(DevIdentifyInfo)) == 0) {
+            outputInfo->conflictType = item->conflictType;
+            if (memcpy_s(&outputInfo->identifyInfo, sizeof(DevIdentifyInfo), &item->identifyInfo,
+                sizeof(DevIdentifyInfo)) != EOK) {
+                LNN_LOGE(LNN_LANE, "memcpy identifyInfo fail");
+                LinkConflictUnlock();
+                return false;
+            }
+            LinkConflictUnlock();
+            return true;
+        }
+    }
+    LinkConflictUnlock();
+    return false;
+}
+
+void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType type)
+{
+    if (networkId == NULL || (type != LANE_HML && type != LANE_P2P)) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    DevIdentifyInfo identifyInfo;
+    (void)memset_s(&identifyInfo, sizeof(DevIdentifyInfo), 0, sizeof(DevIdentifyInfo));
+    identifyInfo.type = IDENTIFY_TYPE_DEV_ID;
+    if (strcpy_s(identifyInfo.devInfo.peerDevId, sizeof(identifyInfo.devInfo.peerDevId), networkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerDevId fail");
+        return;
+    }
+    DevIdentifyInfo hashInfo;
+    (void)memset_s(&hashInfo, sizeof(DevIdentifyInfo), 0, sizeof(DevIdentifyInfo));
+    hashInfo.type = IDENTIFY_TYPE_UDID_HASH;
+    GenerateConflictInfoWithDevIdHash(&identifyInfo, &hashInfo);
+    LinkConflictInfo conflictItem;
+    (void)memset_s(&conflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    if (!GetConflictInfoWithLinkType(type, &identifyInfo, &hashInfo, &conflictItem)) {
+        return;
+    }
+    RemoveConflictInfoTimelinessMsg(&(conflictItem.identifyInfo), conflictItem.conflictType);
+    (void)DelLinkConflictInfo(&(conflictItem.identifyInfo), conflictItem.conflictType);
+}
+
 static void HandleConflictInfoTimeliness(SoftBusMessage *msg)
 {
     if (msg->obj == NULL) {

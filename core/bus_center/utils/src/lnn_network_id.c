@@ -40,21 +40,23 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
     rc = LnnGetFullStoragePath(LNN_FILE_ID_UUID, uuidFilePath, SOFTBUS_MAX_PATH_LEN);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get uuid save path fail");
-        return SOFTBUS_ERR;
+        return rc;
     }
     if (SoftBusReadFullFile(uuidFilePath, id, len) != SOFTBUS_OK) {
-        if (GenerateRandomStr(id, len) != SOFTBUS_OK) {
+        rc = GenerateRandomStr(id, len);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate uuid id fail");
-            return SOFTBUS_ERR;
+            return rc;
         }
-        if (SoftBusWriteFile(uuidFilePath, id, len) != SOFTBUS_OK) {
+        rc = SoftBusWriteFile(uuidFilePath, id, len);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "write uuid to file failed");
-            return SOFTBUS_ERR;
+            return rc;
         }
     }
     if (id[len - 1] != '\0' || strlen(id) != (len - 1)) {
         LNN_LOGE(LNN_STATE, "uuid is invalid format");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_UUID_FROM_FILE_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -66,9 +68,10 @@ int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (GenerateRandomStr(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+    int32_t rc = GenerateRandomStr(networkId, NETWORK_ID_BUF_LEN);
+    if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "generate network id fail");
-        return SOFTBUS_ERR;
+        return rc;
     }
     networkId[len - 1] = '\0';
     return SOFTBUS_OK;
@@ -87,13 +90,13 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
     if (isGenerated == false) {
         if (GetUuidFromFile(localUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "get uuid from file failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_GET_UUID_FROM_FILE_FAILED;
         }
         isGenerated = true;
     }
     if (strncpy_s(uuid, len, localUuid, UUID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "copy uuid id fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -106,7 +109,7 @@ static int32_t IrkAnonymizePrint(unsigned char *irk)
     char irkStr[LFINDER_IRK_STR_LEN] = {0};
     if (ConvertBytesToHexString(irkStr, LFINDER_IRK_STR_LEN, irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "convert irk to string fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     char *anonyIrk = NULL;
     Anonymize(irkStr, &anonyIrk);
@@ -118,13 +121,15 @@ static int32_t IrkAnonymizePrint(unsigned char *irk)
 
 static int32_t EncryptSaveIrk(const char *filePath, unsigned char *irk, uint32_t len)
 {
-    if (EncryptStorageData(LNN_ENCRYPT_LEVEL_DE, (uint8_t *)irk, len) != SOFTBUS_OK) {
+    int32_t rc = EncryptStorageData(LNN_ENCRYPT_LEVEL_DE, (uint8_t *)irk, len);
+    if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "encrypt irk fail");
-        return SOFTBUS_ERR;
+        return rc;
     }
-    if (SoftBusWriteFile(filePath, (char *)irk, len) != SOFTBUS_OK) {
+    rc = SoftBusWriteFile(filePath, (char *)irk, len);
+    if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "write encrypted irk to file failed");
-        return SOFTBUS_ERR;
+        return rc;
     }
     return SOFTBUS_OK;
 }
@@ -136,21 +141,22 @@ static int32_t GetIrkFromOldFile(const char *irkFilePath, const char *encryptIrk
     if (SoftBusReadFullFile(irkFilePath, (char *)locaIrk, len) != SOFTBUS_OK) {
         if (SoftBusGenerateRandomArray(locaIrk, len) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate deviceIrk id fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
         }
     }
     if (memcpy_s(irk, len, locaIrk, LFINDER_IRK_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "copy irk id fail");
         (void)memset_s(locaIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (IrkAnonymizePrint(irk) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "print anonymize irk failed");
     }
-    if (EncryptSaveIrk(encryptIrkFilePath, locaIrk, len) != SOFTBUS_OK) {
+    int32_t rc = EncryptSaveIrk(encryptIrkFilePath, locaIrk, len);
+    if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "save deviceIrk id fail");
         (void)memset_s(locaIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
-        return SOFTBUS_ERR;
+        return rc;
     }
     if (IrkAnonymizePrint(locaIrk) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "print anonymize encrypted irk failed");
@@ -168,12 +174,13 @@ static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len)
     rc = LnnGetFullStoragePath(LNN_FILE_ID_DEVICEIRK_KEY, encryptIrkFilePath, SOFTBUS_MAX_PATH_LEN);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get deviceIrk save path fail");
-        return SOFTBUS_ERR;
+        return rc;
     }
     if (SoftBusReadFullFile(encryptIrkFilePath, (char *)irk, len) == SOFTBUS_OK) {
-        if (DecryptStorageData(LNN_ENCRYPT_LEVEL_DE, (uint8_t *)irk, len) != SOFTBUS_OK) {
+        rc = DecryptStorageData(LNN_ENCRYPT_LEVEL_DE, (uint8_t *)irk, len);
+        if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "decrypt deviceIrk fail");
-            return SOFTBUS_ERR;
+            return rc;
         }
         return SOFTBUS_OK;
     }
@@ -181,11 +188,12 @@ static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len)
     rc = LnnGetFullStoragePath(LNN_FILE_ID_IRK_KEY, irkFilePath, SOFTBUS_MAX_PATH_LEN);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get irk save path fail");
-        return SOFTBUS_ERR;
+        return rc;
     }
-    if (GetIrkFromOldFile(irkFilePath, encryptIrkFilePath, irk, len) != SOFTBUS_OK) {
+    rc = GetIrkFromOldFile(irkFilePath, encryptIrkFilePath, irk, len);
+    if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get old irk fail");
-        return SOFTBUS_ERR;
+        return rc;
     }
     SoftBusRemoveFile(irkFilePath);
     return SOFTBUS_OK;
@@ -203,7 +211,7 @@ int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
     if (!isIrkGenerated) {
         if (GetIrkFromFile((unsigned char *)locaIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "get irk from file failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_GET_IRK_FAIL;
         }
         isIrkGenerated = true;
     }
@@ -211,7 +219,7 @@ int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
         LNN_LOGE(LNN_STATE, "copy irk id fail");
         isIrkGenerated = false;
         (void)memset_s(locaIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     char irkStr[LFINDER_IRK_STR_LEN] = {0};
     if (ConvertBytesToHexString(irkStr, LFINDER_IRK_STR_LEN, irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {

@@ -73,7 +73,7 @@ int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t
     return SOFTBUS_OK;
 }
 
-int32_t LnnSyncPtk(char *networkId)
+int32_t LnnSyncPtk(const char *networkId)
 {
     (void)networkId;
     return SOFTBUS_OK;

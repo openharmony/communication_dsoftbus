@@ -73,6 +73,6 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSiz
     char deviceName[DEVICE_NAME_BUF_LEN] = {0};
     strncpy_s(deviceName, sizeof(deviceName), "TEST_DEVICE_NAME", sizeof(deviceName) - 1);
     int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, deviceName, DEVICE_NAME_BUF_LEN);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }
