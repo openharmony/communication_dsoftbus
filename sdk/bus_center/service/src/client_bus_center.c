@@ -279,7 +279,7 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    (void)memset_s(memset_s(info, infoLen, 0, infoLen));
+    (void)memset_s(info, infoLen, 0, infoLen);
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 

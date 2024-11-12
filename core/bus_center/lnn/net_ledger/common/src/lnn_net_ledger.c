@@ -222,9 +222,6 @@ int32_t LnnInitEventMoniterDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitDeviceNameMonitorImpl() != SOFTBUS_OK) {
-
-    }
     LnnInitOOBEStateMonitorImpl();
     return SOFTBUS_OK;
 }
@@ -273,7 +270,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         case NODE_KEY_DEVICE_SCREEN_STATUS:
-            return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool *)info, NODE_SCREEN_STATUS_LEN)
+            return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool *)info, NODE_SCREEN_STATUS_LEN);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;

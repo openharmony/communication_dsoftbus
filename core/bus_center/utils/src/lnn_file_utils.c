@@ -53,7 +53,7 @@ static int32_t InitStorageConfigPath(void)
             strlen(DEFAULT_STORAGE_PATH)) != EOK) {
             LNN_LOGE(LNN_STATE, "copy default storage path fail");
             g_storagePath[0] = '\0';
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
     }
     return SOFTBUS_OK;
@@ -66,15 +66,16 @@ int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (strlen(g_storagePath) == 0) {
-        if (InitStorageConfigPath() != SOFTBUS_OK) {
+        int32_t ret = InitStorageConfigPath();
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "init storage config path fail");
-            return SOFTBUS_ERR;
+            return ret;
         }
     }
     if (strncpy_s(path, len, g_storagePath, strlen(g_storagePath)) != EOK ||
         strncat_s(path, len, g_filePath[id].filePath, strlen(g_filePath[id].filePath)) != EOK) {
         LNN_LOGE(LNN_STATE, "splice full path fail. id=%{public}d", id);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     char *anonyPath = NULL;
     Anonymize(path, &anonyPath);
