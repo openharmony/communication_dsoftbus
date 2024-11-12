@@ -30,11 +30,11 @@ extern "C" {
 typedef enum {
     PARA_ACTION = 1,
     PARA_BUTT,
-}ParaType;
+} ParaType;
 
 typedef struct {
     uint32_t actionId;
-}ActionAddr;
+} ActionAddr;
 
 typedef struct {
     ParaType type;
@@ -42,7 +42,7 @@ typedef struct {
         ActionAddr action;
     };
     bool enable160M;
-}LinkPara;
+} LinkPara;
 typedef struct {
     bool bSucc;
     bool isFinished;
