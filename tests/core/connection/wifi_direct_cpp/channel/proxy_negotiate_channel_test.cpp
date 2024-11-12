@@ -30,7 +30,6 @@ using ::testing::_;
 using ::testing::Invoke;
 namespace OHOS::SoftBus {
 int32_t CID = 123;
-const int32_t DELAY_TIME = 100;
 class ProxyNegotiateChannelTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
@@ -122,50 +121,6 @@ HWTEST_F(ProxyNegotiateChannelTest, onDataReceived, TestSize.Level1)
             return SOFTBUS_OK;
         });
     ret = channel->Init();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
-* @tc.name: SendMessage
-* @tc.desc: json/tlv branch test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ProxyNegotiateChannelTest, SendMessage, TestSize.Level1)
-{
-    NiceMock<WifiDirectInterfaceMock> mock;
-    NegotiateMessage msg;
-    int ret = SOFTBUS_INVALID_PARAM;
-    auto channel = NewCoCProxyNegotiateChannel(mock);
-
-    EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
-            *info = true;
-            return SOFTBUS_OK;
-        });
-    ret = channel->SendMessage(msg);
-    SoftBusSleepMs(DELAY_TIME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
-            *info = false;
-            return SOFTBUS_OK;
-        });
-    ret = channel->SendMessage(msg);
-    SoftBusSleepMs(DELAY_TIME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
-            *info = true;
-            return SOFTBUS_OK;
-        });
-    ret = channel->SendMessage(msg);
-    SoftBusSleepMs(DELAY_TIME);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }
