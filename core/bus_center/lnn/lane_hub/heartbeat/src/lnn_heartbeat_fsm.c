@@ -889,8 +889,6 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     }
     if (ProcessLostHeartbeat(networkId, hbType, msgPara->isWakeUp) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
-        return;
     }
     AnonymizeFree(anonyNetworkId);
 }

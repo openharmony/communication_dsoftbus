@@ -54,7 +54,7 @@ int32_t DataCompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLe
         SoftBusFree(*out);
         *out = NULL;
         LNN_LOGE(LNN_STATE, "deflateInit2 fail, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DEFLATE_FAIL;
     }
 
     strm.avail_in = inLen;
@@ -67,7 +67,7 @@ int32_t DataCompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLe
         SoftBusFree(*out);
         *out = NULL;
         LNN_LOGE(LNN_STATE, "deflate fail, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DEFLATE_FAIL;
     }
     *outLen = strm.total_out;
     deflateEnd(&strm);
@@ -112,14 +112,14 @@ static int32_t PerformInflate(z_stream *strm, uint8_t *in, uint32_t inLen, uint8
         if (ret != Z_OK && ret != Z_STREAM_END) {
             SoftBusFree(buffer);
             LNN_LOGE(LNN_STATE, "inflate fail, ret=%{public}d", ret);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INFLATE_FAIL;
         }
         *outLen += chunk - strm->avail_out;
     } while (strm->avail_out == 0);
     if (ret != Z_STREAM_END) {
         SoftBusFree(buffer);
         LNN_LOGE(LNN_STATE, "performInflate fail, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INFLATE_FAIL;
     }
     *out = buffer;
     return SOFTBUS_OK;
@@ -141,7 +141,7 @@ int32_t DataDecompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *out
     int32_t ret = inflateInit2(&strm, MAX_WBITS | GZIP_ENCODING);
     if (ret != Z_OK) {
         LNN_LOGE(LNN_STATE, "inflateInit2 fail, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INFLATE_FAIL;
     }
     ret = PerformInflate(&strm, in, inLen, out, outLen);
     if (ret != SOFTBUS_OK) {

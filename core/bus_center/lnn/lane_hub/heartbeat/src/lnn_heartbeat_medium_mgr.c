@@ -343,7 +343,7 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
     }
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
         char *anonyUdid = NULL;
-        AnonymizeUdid(storedInfo->device->devId, &anonyUdid);
+        Anonymize(storedInfo->device->devId, &anonyUdid);
         LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
             AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
