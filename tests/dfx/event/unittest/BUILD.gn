@@ -12,9 +12,9 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../../../dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/common/dfx"
+module_output_path = "dsoftbus/dfx"
 
 ohos_unittest("SoftBusDfxEventTest") {
   module_out_path = module_output_path

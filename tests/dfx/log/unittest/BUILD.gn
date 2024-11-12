@@ -12,17 +12,31 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../../../dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/common/dfx"
+module_output_path = "dsoftbus/dfx"
 
-ohos_unittest("SoftBusDfxAnonymizeTest") {
+ohos_unittest("SoftBusDfxLogTest") {
   module_out_path = module_output_path
-  sources = [ "src/anonymizer_test.cpp" ]
-  include_dirs = [ "$dsoftbus_dfx_path/interface/include" ]
+  sources = [
+    "mock/hilog_mock.cpp",
+    "src/auth_log_test.cpp",
+    "src/comm_log_test.cpp",
+    "src/conn_log_test.cpp",
+    "src/disc_log_test.cpp",
+    "src/lnn_log_test.cpp",
+    "src/softbus_log_test.cpp",
+    "src/trans_log_test.cpp",
+  ]
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
+    "include",
+    "mock",
+  ]
   deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }

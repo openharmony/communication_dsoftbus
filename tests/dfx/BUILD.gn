@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,27 +12,24 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../dsoftbus.gni")
+import("../../dsoftbus.gni")
 
 group("unittest") {
   testonly = true
   deps = [
-    "bitmap:unittest",
-    "json_utils:unittest",
-    "network:unittest",
-    "queue:unittest",
-    "security/permission/common:unittest",
-    "security/permission/standard:unittest",
-    "sequence_verification:unittest",
-    "utils:unittest",
+    "anonymize:unittest",
+    "dumper/legacy/unittest:unittest",
+    "event:unittest",
+    "event/legacy/unittest:unittest",
+    "log:unittest",
+    "statistics/unittest:unittest",
   ]
 }
 
 group("fuzztest") {
   testonly = true
   deps = [
-    "json_utils:fuzztest",
-    "message_handler:fuzztest",
-    "utils/fuzztest:fuzztest",
+    "dumper/legacy/fuzztest:fuzztest",
+    "event/legacy/fuzztest:fuzztest",
   ]
 }
