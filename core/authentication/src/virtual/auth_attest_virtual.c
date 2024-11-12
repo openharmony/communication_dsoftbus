@@ -19,7 +19,7 @@
 #include "softbus_error_code.h"
 #include <stdint.h>
 
-bool IsSupportUDIDAbatement()
+bool IsSupportUDIDAbatement(void)
 {
     return false;
 }

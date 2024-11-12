@@ -36,6 +36,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_lane_vap_info.h"
@@ -341,6 +342,11 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
         return false;
     }
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
+        char *anonyUdid = NULL;
+        AnonymizeUdid(storedInfo->device->devId, &anonyUdid);
+        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
+            AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
         return true;
     }
     storedInfo->lastJoinLnnTime = nowTime;
@@ -474,7 +480,7 @@ static bool IsInvalidBrmac(const char *macAddr)
 
 static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t len)
 {
-    uint8_t zeroUuid[UUID_BUF_LEN] = { 0 };
+    char zeroUuid[UUID_BUF_LEN] = { 0 };
     uint8_t uuidHash[SHA_256_HASH_LEN] = { 0 };
 
     if (oldUuid == NULL || hbResp == NULL) {
@@ -1025,7 +1031,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
 
 static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime)
 {
-    if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V0, nowTime) != SOFTBUS_OK) {
+    if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V4, nowTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
     }
 }
@@ -1412,6 +1418,7 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
 
 int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
+    // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation.
     if (mgr == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "regist manager get invalid param");
         return SOFTBUS_INVALID_PARAM;

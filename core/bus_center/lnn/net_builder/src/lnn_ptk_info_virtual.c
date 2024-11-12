@@ -115,4 +115,3 @@ void LnnDeinitPtk(void)
 {
     return;
 }
-

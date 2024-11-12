@@ -198,7 +198,8 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         case BT_SUBNET_MANAGER_EVENT_IF_DOWN:
             if (type == LNN_NETIF_TYPE_BR) {
                 ret = DisableBrSubnet(subnet);
-            } else if (type == LNN_NETIF_TYPE_BLE) {
+            }
+            if (type == LNN_NETIF_TYPE_BLE) {
                 ret = DisableBleSubnet(subnet);
             }
             break;
