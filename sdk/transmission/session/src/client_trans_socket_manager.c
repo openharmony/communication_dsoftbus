@@ -330,6 +330,32 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
     return false;
 }
 
+void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList)
+{
+    if (server == NULL || destroyList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        if (destroyNode == NULL) {
+            continue;
+        }
+        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            ClientEmitFileEvent(sessionNode->channelId);
+        }
+        DestroySessionId();
+        ListDelete(&sessionNode->node);
+        ListAdd(destroyList, &(destroyNode->node));
+        SoftBusFree(sessionNode);
+    }
+
+}
+
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
     const char *networkId, int32_t type, ListNode *destroyList)
 {

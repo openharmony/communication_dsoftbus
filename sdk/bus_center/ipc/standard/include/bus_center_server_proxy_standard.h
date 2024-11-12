@@ -28,7 +28,7 @@ public:
 
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
-    int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;
+    int32_t CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp) override;
     int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) override;
     int32_t OpenSession(const SessionParam *param, TransInfo *info) override;
     int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) override;

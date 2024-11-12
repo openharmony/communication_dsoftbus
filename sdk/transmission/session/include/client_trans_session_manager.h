@@ -212,6 +212,8 @@ void TransClientDeinit(void);
 
 void ClientTransRegLnnOffline(void);
 
+void ClientTransOnUserSwitch(void);
+
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 
 void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList);

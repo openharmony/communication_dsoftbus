@@ -1274,6 +1274,23 @@ void ClientTransRegLnnOffline(void)
     }
 }
 
+void ClientTransOnUserSwitch(void)
+{
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    TRANS_LOGD(TRANS_SDK, "recv user switch event, clear all socket");
+    ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        DestroyAllClientSession(serverNode, &destroyList);
+    }
+    UnlockClientSessionServerList();
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_USER_SWICTH);
+}
+
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
 {
     if (networkId == NULL) {

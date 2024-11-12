@@ -47,6 +47,8 @@ ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char *sessio
 
 SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName);
 
+void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList);
+
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
     const char *networkId, int32_t type, ListNode *destroyList);
 

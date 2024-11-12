@@ -67,8 +67,9 @@ int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, cons
     return SOFTBUS_OK;
 }
 
-int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
-{
+int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp)
+{   
+    (void)isNormalApp;
     if (pkgName == nullptr || sessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
