@@ -436,7 +436,7 @@ static bool IsSupportP2pReuse(const char *networkId)
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "p2p not support reuse");
+        LNN_LOGD(LNN_LANE, "p2p not support reuse");
         return false;
     }
     return true;
@@ -521,7 +521,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         LNN_LOGI(LNN_LANE, "select lane by mesh linkList");
         ret = SelectMeshLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else if (request->qosRequire.minBW == DB_MAGIC_NUMBER) {
-        LNN_LOGI(LNN_LANE, "select lane by db linkList");
+        LNN_LOGD(LNN_LANE, "select lane by db linkList");
         ret = SelectDbLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else if (request->qosRequire.rttLevel == LANE_RTT_LEVEL_LOW) {
         LNN_LOGI(LNN_LANE, "select lane by RTT linkList");
