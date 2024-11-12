@@ -164,11 +164,11 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char
 {
     if (info == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(info, len, "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -177,11 +177,11 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1(InfoKey key, cha
 {
     if (info == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(info, len, localId.c_str(), localId.length() + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }

@@ -236,7 +236,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGetAllOnlineNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnNotifyNodeAddressChanged(_, _, _)).WillRepeatedly(Return());
@@ -525,16 +525,16 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_ONLINE_TEST_001, TestSize.Level1)
     LnnConnectionFsm connFsm;
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGetLocalNumInfo(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGetRemoteStrInfo(_, _, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGetRemoteNumInfo(_, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnCompareNodeWeight(_, _, _, _)).WillRepeatedly(Return(0));
     EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) != SOFTBUS_OK);
@@ -739,11 +739,11 @@ HWTEST_F(LNNNetBuilderMockTest, UPDATE_LOCAL_NODE_TEST_001, TestSize.Level1)
     bool isCurrentNode = false;
 
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     UpdateLocalMasterNode(isCurrentNode, NODE_UDID, LOCAL_WEIGHT);
 
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnSetLocalNumInfo(_, _)).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, LnnSetLocalNumInfo(_, _)).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(NetBuilderMock, LnnNotifyMasterNodeChanged(_, _, _)).WillOnce(Return());
     UpdateLocalMasterNode(isCurrentNode, NODE_UDID, LOCAL_WEIGHT);
 
@@ -888,7 +888,7 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_002, TestSize.Lev
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGetLocalNumInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, AddStringToJsonObject).WillOnce(Return(true)).WillRepeatedly(Return(false));
     EXPECT_CALL(NetBuilderMock, AddNumberToJsonObject).WillOnce(Return(true)).WillRepeatedly(Return(false));

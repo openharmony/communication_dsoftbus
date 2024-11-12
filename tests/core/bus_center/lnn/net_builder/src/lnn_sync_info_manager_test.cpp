@@ -2149,7 +2149,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_001, TestSize.Level1)
     uint64_t remote = 0;
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_NE(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_OK);
 }
 
@@ -2200,7 +2200,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_003, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
 
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
@@ -2241,7 +2241,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
 
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
@@ -2495,11 +2495,11 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_001, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _))
         .Times(2)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillOnce(Return(SOFTBUS_OK));
     EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 }
 
