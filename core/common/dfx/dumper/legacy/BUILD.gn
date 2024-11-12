@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../../../dsoftbus.gni")
-import("../../../../../transmission/common/trans_common.gni")
+import("../../../../../dsoftbus.gni")
+import("../../../../transmission/common/trans_common.gni")
 
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
@@ -26,7 +26,7 @@ if (defined(ohos_lite)) {
   }
   config("dsoftbus_dump_interface_lite") {
     include_dirs = [
-      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/dumper/legacy/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
@@ -64,7 +64,7 @@ if (defined(ohos_lite)) {
   cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_dump_interface_std") {
     include_dirs = [
-      "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+      "$dsoftbus_dfx_path/dumper/legacy/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
       "$softbus_adapter_common/include",

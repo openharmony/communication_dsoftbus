@@ -35,7 +35,7 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
-    "$dsoftbus_dfx_path/dumper/legacy/hidumper_adapter/include",
+    "$dsoftbus_dfx_path/dumper/legacy/include",
   ]
 
   deps = [
