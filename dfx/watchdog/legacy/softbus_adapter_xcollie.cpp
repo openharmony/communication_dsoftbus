@@ -16,7 +16,7 @@
 #include "legacy/softbus_adapter_xcollie.h"
 
 #include "comm_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "xcollie/watchdog.h"
 #include "xcollie/xcollie.h"
 

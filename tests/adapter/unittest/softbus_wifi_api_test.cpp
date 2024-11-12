@@ -16,7 +16,7 @@
 #include <securec.h>
 
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_mock.h"
 

@@ -24,7 +24,7 @@
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #include "datetime_ex.h"
 namespace OHOS {

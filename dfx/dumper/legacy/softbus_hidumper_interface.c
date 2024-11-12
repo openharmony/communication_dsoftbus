@@ -15,7 +15,7 @@
 #include <string.h>
 #include "comm_log.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "legacy/softbus_hidumper_alarm.h"
 #include "legacy/softbus_hidumper_stats.h"
 #include "legacy/softbus_hidumper_util.h"

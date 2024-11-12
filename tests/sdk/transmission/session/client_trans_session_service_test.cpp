@@ -17,7 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_trans_def.h"
 #include "softbus_app_info.h"
 #include "softbus_server_frame.h"

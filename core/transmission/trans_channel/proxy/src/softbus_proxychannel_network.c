@@ -17,7 +17,7 @@
 
 #include <securec.h>
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_transmission_interface.h"
 #include "trans_log.h"

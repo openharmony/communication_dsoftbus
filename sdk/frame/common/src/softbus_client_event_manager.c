@@ -19,7 +19,7 @@
 #include "softbus.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define MAX_OBSERVER_CNT 128

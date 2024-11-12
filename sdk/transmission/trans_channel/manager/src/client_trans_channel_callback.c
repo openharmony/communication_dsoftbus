@@ -24,7 +24,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)

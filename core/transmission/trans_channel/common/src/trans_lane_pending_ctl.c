@@ -26,7 +26,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
 #include "trans_channel_common.h"

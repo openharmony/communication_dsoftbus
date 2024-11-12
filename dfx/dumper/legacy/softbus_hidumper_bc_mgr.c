@@ -19,7 +19,7 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "legacy/softbus_hidumper_bc_mgr.h"
 
 #define SOFTBUS_BC_MGR_MODULE_NAME "broadcastMgr"

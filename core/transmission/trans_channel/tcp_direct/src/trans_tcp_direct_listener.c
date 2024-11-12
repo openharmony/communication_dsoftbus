@@ -25,7 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "trans_channel_common.h"
