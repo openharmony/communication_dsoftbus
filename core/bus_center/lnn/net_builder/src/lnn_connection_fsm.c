@@ -869,7 +869,8 @@ static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnli
 
 static void NotifyProofExceptionEvent(DeviceType type, int32_t reason, const char *peerDeviceType)
 {
-    if ((reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP || reason == SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH) &&
+    if ((reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP || reason == SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH ||
+            reason == PC_META_NODE_ERRCODE) &&
         (strncmp(peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
         LnnNotifyHichainProofException(NULL, 0, (uint16_t)type, reason);
         LNN_LOGE(LNN_BUILDER, "notify hichain proof exception event, reason=%{public}d, type=%{public}hu", reason,

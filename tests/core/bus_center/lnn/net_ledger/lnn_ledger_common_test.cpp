@@ -502,6 +502,65 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_009, TestSize.Level1)
 }
 
 /*
+* @tc.name: LNN_NODE_INFO_Test_010
+* @tc.desc: lnn node info function test, LnnSetChanList5g, LnnGetChanList5g
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_010, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    char chanList5g1[CHANNEL_LIST_STR_LEN];
+    int32_t ret = LnnSetChanList5g(nullptr, chanList5g1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetChanList5g(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    char *chanList5g2 = (char *)SoftBusCalloc((CHANNEL_LIST_STR_LEN + 1) * sizeof(char));
+    ret = LnnSetChanList5g(&nodeInfo, chanList5g2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(chanList5g2);
+
+    ret = LnnSetChanList5g(&nodeInfo, chanList5g1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    const char *chanList5g = nullptr;
+    chanList5g = LnnGetChanList5g(&nodeInfo);
+    EXPECT_EQ(chanList5g, nodeInfo.p2pInfo.chanList5g);
+
+    chanList5g = LnnGetChanList5g(nullptr);
+    EXPECT_EQ(chanList5g, nullptr);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_011
+* @tc.desc: lnn node info function test LnnSetP2pGoMac, LnnGetP2pGoMac
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_011, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t ret;
+    const char *goMac = nullptr;
+
+    ret = LnnSetP2pGoMac(nullptr, LOCAL_GO_MAC);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    goMac = LnnGetP2pGoMac(&nodeInfo);
+    EXPECT_NE(strcmp(goMac, LOCAL_GO_MAC), 0);
+
+    ret = LnnSetP2pGoMac(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    goMac = LnnGetP2pGoMac(&nodeInfo);
+    EXPECT_NE(strcmp(goMac, LOCAL_GO_MAC), 0);
+
+    ret = LnnSetP2pGoMac(&nodeInfo, LOCAL_GO_MAC);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    goMac = LnnGetP2pGoMac(&nodeInfo);
+    EXPECT_EQ(strcmp(goMac, LOCAL_GO_MAC), 0);
+}
+
+/*
 * @tc.name: LNN_NODE_INFO_Test_012
 * @tc.desc: lnn node info function test, LnnSetStaFrequency, LnnGetStaFrequency
 * @tc.type: FUNC
@@ -638,6 +697,108 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_017, TestSize.Level1)
 
     Level = LnnGetDataSwitchLength(nullptr);
     EXPECT_NE(Level, 1);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_018
+* @tc.desc: lnn node info function test LnnSetWifiDirectAddr, LnnGetWifiDirectAddr
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_018, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+
+    int32_t ret = LnnSetWifiDirectAddr(nullptr, LOCAL_WIFIDIRECT_ADDR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetWifiDirectAddr(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetWifiDirectAddr(&nodeInfo, LOCAL_GO_MAC);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    const char *wifiDirectAddr = LnnGetWifiDirectAddr(&nodeInfo);
+    EXPECT_EQ(strcmp(wifiDirectAddr, LOCAL_GO_MAC), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_019
+* @tc.desc: lnn node info function test LnnSetStaticCapability, LnnGetStaticCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_019, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    uint8_t capability = 4;
+
+    int32_t ret = LnnSetStaticCapability(nullptr, &capability, STATIC_CAP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetStaticCapability(&nodeInfo, nullptr, STATIC_CAP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetStaticCapability(&nodeInfo, &capability, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetStaticCapability(&nodeInfo, &capability, STATIC_CAP_LEN + 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetStaticCapability(&nodeInfo, &capability, STATIC_CAP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint8_t cap;
+    ret = LnnGetStaticCapability(&nodeInfo, &cap, STATIC_CAP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = LnnGetStaticCapability(nullptr, &cap, STATIC_CAP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetStaticCapability(&nodeInfo, nullptr, STATIC_CAP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetStaticCapability(&nodeInfo, &cap, STATIC_CAP_LEN + 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_020
+* @tc.desc: lnn node info function test LnnSetPtk
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_020, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    char remotePtk[PTK_DEFAULT_LEN] = {"12345567890"};
+    char remotePtk2[10] = {"12345"};
+
+    LnnDumpRemotePtk(remotePtk, remotePtk2, nullptr);
+    int32_t ret = LnnSetPtk(nullptr, remotePtk);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetPtk(&nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetPtk(&nodeInfo, remotePtk2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = LnnSetPtk(&nodeInfo, remotePtk);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(strcmp(remotePtk, nodeInfo.remotePtk), 0);
+}
+
+/*
+* @tc.name: LNN_NODE_INFO_Test_021
+* @tc.desc: lnn node info function test LnnSetScreenStatus
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_021, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+
+    int32_t ret = LnnSetScreenStatus(nullptr, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetScreenStatus(&nodeInfo, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(true, nodeInfo.isScreenOn);
+    ret = LnnSetScreenStatus(&nodeInfo, false);
+    EXPECT_EQ(false, nodeInfo.isScreenOn);
 }
 
 /*

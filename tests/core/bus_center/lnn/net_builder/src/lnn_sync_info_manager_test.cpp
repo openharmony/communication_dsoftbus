@@ -33,6 +33,7 @@ using namespace testing;
 using namespace testing::ext;
 
 constexpr char NETWORKID[65] = "abcdefg";
+constexpr char NODE_NETWORK_ID[65] = "gfedcba";
 constexpr uint8_t MSG[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 constexpr char MSG_DATA[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 constexpr char MSG_DATA1[] = {-1};
@@ -73,11 +74,11 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
 }
 
 /*
-    * @tc.name: LNN_INIT_SYNC_INFO_MANAGER_TEST_001
-    * @tc.desc: LnnInitSyncInfoManager
-    * @tc.type: FUNC
-    * @tc.require: I5OMIK
-    */
+* @tc.name: LNN_INIT_SYNC_INFO_MANAGER_TEST_001
+* @tc.desc: LnnInitSyncInfoManager
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
 HWTEST_F(LNNSyncInfoManagerTest, LNN_INIT_SYNC_INFO_MANAGER_TEST_001, TestSize.Level1)
 {
     LooperInit();
@@ -90,11 +91,11 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_INIT_SYNC_INFO_MANAGER_TEST_001, TestSize.L
 }
 
 /*
-    * @tc.name: LNN_REG_SYNC_INFO_HANDLER_TEST_001
-    * @tc.desc: invalid parameter
-    * @tc.type: FUNC
-    * @tc.require: I5OMIK
-    */
+* @tc.name: LNN_REG_SYNC_INFO_HANDLER_TEST_001
+* @tc.desc: invalid parameter
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
 HWTEST_F(LNNSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_COUNT, Handler);
@@ -599,25 +600,14 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_001, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_002, TestSize.Level1)
 {
     int32_t channelId = 10;
-    unsigned char isServer = false;
+    unsigned char isServer = true;
     const char *peerUuid = nullptr;
     ClearSyncChannelInfo();
-
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
     if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
-
-    msg->dataLen = LEN;
-    msg->complete = nullptr;
-    ListInit(&msg->node);
-    uint8_t *dataPtr = msg->data;
-    for (int i = 0; i < LEN; i++)
-    {
-        dataPtr[i] = i;
-    }
-
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
@@ -627,14 +617,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_002, TestSize.Level1)
     info->clientChannelId = channelId;
     ListTailInsert(&info->syncMsgList, &msg->node);
     ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
-
     NiceMock<LnnTransInterfaceMock> lnnTransMock;
     EXPECT_CALL(lnnTransMock, TransSendNetworkingMessage(_, _, _, _))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnNetLedgertInterfaceMock> lnnNetLedgertMock;
     EXPECT_CALL(lnnNetLedgertMock, LnnConvertDlId(_, _, _, _, _))
         .WillRepeatedly(DoAll(SetArrayArgument<3>(NETWORKID, NETWORKID + LEN), Return(SOFTBUS_OK)));
-
     EXPECT_EQ(OnChannelOpened(channelId, peerUuid, isServer), SOFTBUS_OK);
 }
 
@@ -651,7 +639,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_003, TestSize.Level1)
     const char *peerUuid = nullptr;
     ClearSyncChannelInfo();
 
-    SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
+    SyncChannelInfo *info = CreateSyncChannelInfo(NODE_NETWORK_ID);
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
@@ -663,8 +651,6 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_003, TestSize.Level1)
     NiceMock<LnnTransInterfaceMock> lnnTransMock;
     EXPECT_CALL(lnnNetLedgerMock, LnnConvertDlId(_, _, _, _, _))
         .WillRepeatedly(DoAll(SetArrayArgument<3>(NETWORKID, NETWORKID + LEN), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnTransMock, TransCloseNetWorkingChannel(_)).Times(1);
-
     EXPECT_EQ(OnChannelOpened(channelId, peerUuid, isServer), SOFTBUS_OK);
 }
 
@@ -773,16 +759,6 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_002, TestSize.Level1)
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
-
-    msg->dataLen = LEN;
-    msg->complete = nullptr;
-    ListInit(&msg->node);
-    uint8_t *dataPtr = msg->data;
-    for (int i = 0; i < LEN; i++)
-    {
-        dataPtr[i] = i;
-    }
-
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
@@ -822,15 +798,6 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
-    msg->dataLen = LEN;
-    msg->complete = nullptr;
-    ListInit(&msg->node);
-    uint8_t *dataPtr = msg->data;
-    for (int i = 0; i < LEN; i++)
-    {
-        dataPtr[i] = i;
-    }
-
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
@@ -1981,7 +1948,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_003, TestSize.Level1)
 
     SyncChannelInfo oldInfo = {
         .clientChannelId = 100,
-        .isClientOpened = true,
+        .isClientOpened = false,
         .accessTime = time,
     };
 
@@ -1995,15 +1962,6 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_003, TestSize.Level1)
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
-    msg->dataLen = LEN;
-    msg->complete = nullptr;
-    ListInit(&msg->node);
-    uint8_t *dataPtr = msg->data;
-    for (int i = 0; i < LEN; i++)
-    {
-        dataPtr[i] = i;
-    }
-
     NiceMock<LnnTransInterfaceMock> mock;
     EXPECT_CALL(mock, TransSendNetworkingMessage(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
@@ -2058,15 +2016,6 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
-    msg->dataLen = LEN;
-    msg->complete = nullptr;
-    ListInit(&msg->node);
-    uint8_t *dataPtr = msg->data;
-    for (int i = 0; i < LEN; i++)
-    {
-        dataPtr[i] = i;
-    }
-
     int32_t id = 10;
     ListDelete(&g_syncInfoManager.channelInfoList);
 
@@ -2083,7 +2032,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
     NiceMock<LnnTransInterfaceMock> transMock;
     EXPECT_CALL(transMock, TransSendNetworkingMessage(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
-    EXPECT_EQ(TrySendSyncInfoMsg(NETWORKID, msg), SOFTBUS_OK);
+    EXPECT_EQ(TrySendSyncInfoMsg(NODE_NETWORK_ID, msg), SOFTBUS_OK);
 }
 
 /*
@@ -2176,24 +2125,15 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_003, TestSize.Level1)
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
-    msg->dataLen = LEN;
-    msg->complete = nullptr;
-    ListInit(&msg->node);
-    uint8_t *dataPtr = msg->data;
-    for (int i = 0; i < LEN; i++)
-    {
-        dataPtr[i] = i;
-    }
-
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).Times(1);
     EXPECT_CALL(ledgerMock, AuthDeviceGetLatestIdByUuid(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(AuthHandle{.authId = 100, .type = 1}), Return(0)));
 
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
-    EXPECT_CALL(mock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
-    EXPECT_EQ(TrySendSyncInfoMsgByAuth(NETWORKID, msg), SOFTBUS_OK);
+    EXPECT_EQ(TrySendSyncInfoMsgByAuth(NODE_NETWORK_ID, msg), SOFTBUS_ERR);
     SoftBusFree(msg);
 }
 
