@@ -97,18 +97,17 @@ static int32_t PackFirstData(const AppInfo *appInfo, cJSON *json)
 
 static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsigned char *encodeSessionKey)
 {
-    bool addBRet = (
-        !AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
+    if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
         !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
         !AddStringToJsonObject(json, BUS_NAME, appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(json, GROUP_ID, appInfo->groupId) ||
         !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(json, SESSION_KEY, (char *)encodeSessionKey) ||
-        !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig));
-    if (addBRet) {
+        !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig)) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
+
     char *authState = (char *)appInfo->myData.authState;
     if (appInfo->myData.apiVersion != API_V1 && (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
         !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
@@ -160,12 +159,11 @@ char *PackRequest(const AppInfo *appInfo)
     (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
-        TRANS_LOGE(TRANS_CTRL, "pack jsonObj failed.");
         return NULL;
     }
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "cJSON_PrintUnformatted failed");
+        TRANS_LOGW(TRANS_CTRL, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(json);
     return data;
