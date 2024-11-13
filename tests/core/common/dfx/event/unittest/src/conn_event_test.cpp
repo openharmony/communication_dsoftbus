@@ -74,6 +74,15 @@ static ConnEventExtra g_validExtra = {
     .apChannel = 22,
     .peerDevVer = "peerDevVer",
     .remoteScreenStatus = 1,
+    .businessType = 1,
+    .businessId = 1,
+    .timeout = 1,
+    .fastestConnectEnable = 1,
+    .coapDataChannel = 1,
+    .enableWideBandwidth = 1,
+    .p2pRole = 1,
+    .needHmlConnect = 1,
+    .businessTag = "test",
 };
 
 /**
@@ -163,7 +172,7 @@ static ConnEventExtra g_invalidExtra = {
 HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
 {
     constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
-    constexpr int32_t VALID_EXTRA_SIZE = 15;
+    constexpr int32_t VALID_EXTRA_SIZE = 22;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -183,7 +192,7 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
 {
     ConnEventExtra emptyExtra = { 0 };
     constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
-    constexpr int32_t VALID_EXTRA_SIZE = 15;
+    constexpr int32_t VALID_EXTRA_SIZE = 22;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
