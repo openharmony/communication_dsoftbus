@@ -1764,6 +1764,29 @@ int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWith
     return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
 }
 
+static bool CheckLaneHandleIsExited(uint32_t laneHandle)
+{
+    if (g_freeLanePendingList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "g_freeLanePendingList is NULL.");
+        return false;
+    }
+
+    if (SoftBusMutexLock(&g_freeLanePendingList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed.");
+        return false;
+    }
+
+    TransFreeLaneItem *freeItem = NULL;
+    LIST_FOR_EACH_ENTRY(freeItem, &g_freeLanePendingList->list, TransFreeLaneItem, node) {
+        if (freeItem->laneHandle == laneHandle) {
+            (void)SoftBusMutexUnlock(&g_freeLanePendingList->lock);
+            return true;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_freeLanePendingList->lock);
+    return false;
+}
+
 static int32_t TransAddFreeLaneToPending(uint32_t laneHandle)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_freeLanePendingList != NULL,
@@ -1772,6 +1795,11 @@ static int32_t TransAddFreeLaneToPending(uint32_t laneHandle)
     TransFreeLaneItem *freeItem = (TransFreeLaneItem *)SoftBusCalloc(sizeof(TransFreeLaneItem));
     TRANS_CHECK_AND_RETURN_RET_LOGE(freeItem != NULL,
         SOFTBUS_MALLOC_ERR, TRANS_SVC, "malloc lane free item err.");
+
+    if (CheckLaneHandleIsExited(laneHandle)) {
+        SoftBusFree(freeItem);
+        return SOFTBUS_TRANS_LANE_IS_EXISTED;
+    }
 
     freeItem->errCode = SOFTBUS_OK;
     freeItem->laneHandle = laneHandle;
