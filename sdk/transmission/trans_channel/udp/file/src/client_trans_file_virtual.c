@@ -16,7 +16,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_udp_manager.h"
 #include "client_trans_file.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int TransFileInit(void)
 {

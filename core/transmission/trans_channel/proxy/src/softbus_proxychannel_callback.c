@@ -16,7 +16,7 @@
 #include "softbus_proxychannel_callback.h"
 
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static IServerChannelCallBack g_channelCb;
 

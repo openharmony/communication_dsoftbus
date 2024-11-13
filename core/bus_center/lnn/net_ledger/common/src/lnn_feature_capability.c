@@ -16,7 +16,7 @@
 #include "lnn_feature_capability.h"
 
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 
 #define DEFAUTL_LNN_FEATURE 0x3E2 // 0x3EA

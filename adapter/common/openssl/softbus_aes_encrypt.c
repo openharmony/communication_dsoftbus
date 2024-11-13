@@ -25,7 +25,7 @@
 #include "comm_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define AES_128_CFB_KEYLEN             16
 #define AES_256_CFB_KEYLEN             32

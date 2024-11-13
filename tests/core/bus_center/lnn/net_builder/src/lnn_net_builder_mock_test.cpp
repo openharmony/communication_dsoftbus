@@ -24,7 +24,7 @@
 #include "lnn_net_builder.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;

@@ -14,7 +14,7 @@
  */
 
 #include "net_ledger_mock.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing;
 using namespace testing::ext;

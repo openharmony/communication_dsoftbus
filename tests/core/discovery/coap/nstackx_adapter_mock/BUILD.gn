@@ -14,7 +14,6 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 import("../../../../utils/utils.gni")
 
@@ -50,7 +49,7 @@ ohos_unittest("NstackxAdapterTest") {
   ]
 
   deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
