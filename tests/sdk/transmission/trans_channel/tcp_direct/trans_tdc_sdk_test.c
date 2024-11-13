@@ -20,7 +20,7 @@
 #include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define TYPE_SEND_BYTE 15
 #define TYPE_SEND_MESSAGE 16

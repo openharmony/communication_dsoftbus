@@ -25,7 +25,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_datahead_transform.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_proxychannel_manager.h"

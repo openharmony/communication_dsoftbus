@@ -13,7 +13,6 @@
 
 import("//build/test.gni")
 import("../../../../core/bus_center/lnn/decision_center/decision_center.gni")
-import("../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/LNN"
@@ -29,6 +28,7 @@ enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
                             "value")
 
 bus_center_unittest_dirs = [
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
@@ -42,7 +42,6 @@ bus_center_unittest_dirs = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/monitor/include",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/authentication/interface",
@@ -75,13 +74,14 @@ bus_center_unittest_dirs = [
 ]
 
 bus_center_unittest_deps = [
+  "$dsoftbus_dfx_path:softbus_dfx",
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
-  "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   "$dsoftbus_root_path/core/frame:softbus_server",
 ]
 
 lnn_mock_test_include_dirs = [
+  "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
@@ -95,7 +95,6 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
   "$dsoftbus_root_path/core/bus_center/monitor/include",
   "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -118,7 +117,6 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   "$dsoftbus_root_path/core/transmission/interface",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
   "$dsoftbus_root_path/adapter/common/net/wifi/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -129,18 +127,16 @@ lnn_mock_test_include_dirs = [
 ]
 
 lnn_mock_test_deps = [
-  "$dsoftbus_dfx_path/log:softbus_dfx_log",
+  "$dsoftbus_dfx_path:softbus_dfx",
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
-  "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   "$dsoftbus_root_path/core/frame:softbus_server",
 ]
 
 lnn_mock_test_deps_exclude_softbus_server = [
-  "$dsoftbus_dfx_path/log:softbus_dfx_log",
+  "$dsoftbus_dfx_path:softbus_dfx",
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
-  "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
 ]
 
 ohos_unittest("LaneTest") {
@@ -311,7 +307,7 @@ ohos_unittest("LNNNetBuilderTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -334,9 +330,9 @@ ohos_unittest("LNNNetBuilderTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -388,7 +384,7 @@ ohos_unittest("LNNNetBuilderMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
@@ -423,9 +419,9 @@ ohos_unittest("LNNNetBuilderMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -474,9 +470,9 @@ ohos_unittest("LNNConnectionFsmTest") {
   include_dirs = lnn_mock_test_include_dirs
   include_dirs += [ "$dsoftbus_root_path/core/bus_center/ipc/include" ]
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -847,7 +843,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -859,6 +855,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
@@ -873,9 +870,9 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -921,7 +918,7 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/authentication/include",
@@ -934,6 +931,7 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
@@ -950,9 +948,9 @@ ohos_unittest("LNNNetworkManagerMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -992,7 +990,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -1004,6 +1002,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
@@ -1020,9 +1019,9 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -1074,7 +1073,7 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -1102,9 +1101,9 @@ ohos_unittest("LNNLedgerMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -1149,7 +1148,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -1165,15 +1164,16 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
   if (dsoftbus_feature_lnn_net) {
@@ -1222,7 +1222,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -1245,9 +1245,9 @@ ohos_unittest("LNNDisctributedLedgerTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
   if (is_standard_system) {
@@ -1291,7 +1291,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -1307,15 +1307,16 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
   if (dsoftbus_feature_lnn_net) {
@@ -1396,7 +1397,7 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/interface",
@@ -1426,9 +1427,9 @@ ohos_unittest("LNNLaneMockTest") {
   }
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -1478,7 +1479,7 @@ ohos_unittest("LNNLaneQueryTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
@@ -1495,9 +1496,9 @@ ohos_unittest("LNNLaneQueryTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -1564,7 +1565,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
@@ -1582,9 +1583,9 @@ ohos_unittest("LNNLaneLinkTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -1650,7 +1651,7 @@ ohos_unittest("LNNLaneLinkExtTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
@@ -1668,9 +1669,9 @@ ohos_unittest("LNNLaneLinkExtTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -1712,9 +1713,9 @@ ohos_unittest("LNNLaneHubTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   external_deps = [
@@ -1772,7 +1773,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -1788,9 +1789,9 @@ ohos_unittest("LNNTransLaneMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -1855,7 +1856,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
@@ -1870,9 +1871,9 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -1935,13 +1936,14 @@ ohos_unittest("LNNLaneListenerTest") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -2059,7 +2061,7 @@ ohos_unittest("LNNDataCloudSyncTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -2080,9 +2082,9 @@ ohos_unittest("LNNDataCloudSyncTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -2132,14 +2134,15 @@ ohos_unittest("LNNDataCloudSyncMockTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -2202,7 +2205,7 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
@@ -2218,9 +2221,9 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -2270,7 +2273,7 @@ ohos_unittest("LNNLaneLinkConflictTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
@@ -2283,9 +2286,9 @@ ohos_unittest("LNNLaneLinkConflictTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -2324,7 +2327,7 @@ ohos_unittest("LNNPhysicalSubnetManagerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/authentication/include",
@@ -2353,9 +2356,9 @@ ohos_unittest("LNNPhysicalSubnetManagerTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   external_deps = [
@@ -2409,7 +2412,7 @@ ohos_unittest("LNNCtrlLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -2425,9 +2428,9 @@ ohos_unittest("LNNCtrlLaneMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {

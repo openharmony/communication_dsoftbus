@@ -15,7 +15,7 @@
 
 #include "softbus_adapter_bt_common.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {

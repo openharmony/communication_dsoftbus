@@ -14,7 +14,7 @@
  */
 
 #include "softbus_adapter_wlan_extend.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
 {

@@ -22,7 +22,7 @@
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define LNN_HUKS_MAX_UPDATE_RESERVED 32
 #define LNN_HUKS_MAX_UPDATE_SIZE (8 * 1024)
