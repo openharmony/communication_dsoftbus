@@ -564,7 +564,7 @@ static void HbScreenOnChangeEventHandler(int64_t nowTime)
     HbRemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
     HbChangeMediumParamByState(g_hbConditionState.screenState);
     if (g_lastScreenOnTime - g_lastScreenOffTime >= HB_SCREEN_ON_COAP_TIME) {
-        LNN_LOGI(LNN_HEART_BEAT, "screen on start coap discovery");
+        LNN_LOGD(LNN_HEART_BEAT, "screen on start coap discovery");
         RestartCoapDiscovery();
     }
     int32_t ret = LnnStartHbByTypeAndStrategy(
