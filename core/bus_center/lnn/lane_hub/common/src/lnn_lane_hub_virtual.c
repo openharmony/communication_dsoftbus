@@ -17,7 +17,7 @@
 
 #include "lnn_log.h"
 #include "bus_center_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnInitLaneHub(void)
 {

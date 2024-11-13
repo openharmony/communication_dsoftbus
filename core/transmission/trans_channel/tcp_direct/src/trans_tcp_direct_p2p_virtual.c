@@ -17,7 +17,7 @@
 
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t P2pDirectChannelInit(void)
 {

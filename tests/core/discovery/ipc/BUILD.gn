@@ -14,7 +14,6 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../dsoftbus.gni")
 import("../../../utils/utils.gni")
 
@@ -53,7 +52,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
   ]
 
-  deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
   external_deps = [
     "c_utils:utils",

@@ -18,7 +18,7 @@
 #include "anonymizer.h"
 #include "disc_log.h"
 #include "disc_nstackx_adapter.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
     uint32_t outLen)

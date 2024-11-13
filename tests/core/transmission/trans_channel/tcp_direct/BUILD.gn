@@ -186,14 +186,15 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
-    "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
 
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
@@ -574,6 +575,7 @@ ohos_unittest("TransTcpDirectWifiTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
@@ -598,6 +600,7 @@ ohos_unittest("TransTcpDirectWifiTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/core/bus_center/service/include",

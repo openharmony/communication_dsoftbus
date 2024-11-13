@@ -25,7 +25,7 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "nstackx.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define TEST_ERRO_MOUDULE1 ((MODULE_LNN)-1)
 #define TEST_ERRO_MOUDULE2 ((MODULE_LNN)-2)

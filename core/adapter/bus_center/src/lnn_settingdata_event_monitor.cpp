@@ -23,7 +23,7 @@
 #include "lnn_log.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "locale_config.h"
 
 static constexpr const char *INTERNAL_NAME_CONCAT_STRING = "的";

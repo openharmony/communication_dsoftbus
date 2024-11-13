@@ -24,7 +24,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"

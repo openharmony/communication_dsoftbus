@@ -49,7 +49,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"

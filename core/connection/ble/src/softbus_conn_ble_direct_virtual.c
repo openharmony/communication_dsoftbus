@@ -15,7 +15,7 @@
 #include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_ble_direct.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
 {

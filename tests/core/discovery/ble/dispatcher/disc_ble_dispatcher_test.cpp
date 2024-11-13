@@ -19,7 +19,7 @@
 #include "disc_ble_dispatcher.h"
 #include "disc_interface.h"
 #include "disc_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 
