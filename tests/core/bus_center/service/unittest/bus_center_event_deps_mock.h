@@ -18,12 +18,12 @@
 
 #include <gmock/gmock.h>
 
-#include "softbus_utils.h"
 #include "bus_center_info_key.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
-#include "softbus_common.h"
 #include "message_handler.h"
+#include "softbus_common.h"
+#include "softbus_utils.h"
 
 namespace OHOS {
 class BusCenterEventDepsInterface {
