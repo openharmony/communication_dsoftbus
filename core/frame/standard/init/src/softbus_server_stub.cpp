@@ -119,7 +119,7 @@ static int32_t CheckAndRecordAccessToken(const char *permission)
     int32_t successCnt = (int32_t)(ret == Security::AccessToken::PERMISSION_GRANTED);
     int32_t failCnt = JUDG_CNT - successCnt;
     if (type == Security::AccessToken::TOKEN_HAP) {
-        Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
+        (void)Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
     }
     return ret;
 }
