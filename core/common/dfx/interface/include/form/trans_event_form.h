@@ -39,6 +39,10 @@ typedef enum {
     EVENT_SCENE_TRANS_PROXY_RESET_PEER = 12,
     EVENT_SCENE_TRANS_CHANNEL_STATISTICS = 13,
     EVENT_SCENE_TRANS_CHANNEL_INSTANT = 14,
+    EVENT_SCENE_TRANS_MESSAGE_PARSE = 15,
+    EVENT_SCENE_TRANS_RECEIVED_DATA = 16,
+    EVENT_SCENE_TRANS_SEND_DATA = 17,
+    EVENT_SCENE_CHANNEL_REQUEST = 18,
 } TransEventScene;
 
 typedef enum {
@@ -101,6 +105,7 @@ typedef struct {
     int32_t  deviceState;      // DEVICE_STATE
     int32_t businessId;        // BUSSINESS_ID
     int32_t businessType;      // BUSINESS_TYPE
+    int32_t sessionId;         // SESSION_ID
 } TransEventExtra;
 
 typedef enum {

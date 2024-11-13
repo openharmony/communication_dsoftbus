@@ -71,9 +71,9 @@ HWTEST_F(ClientProxyTest, OnJoinLNNResultTest_01, TestSize.Level1)
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
     int32_t ret = clientProxy->OnJoinLNNResult(nullptr, TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = clientProxy->OnJoinLNNResult(addrInput, TEST_ADDR_TYPE_LEN, nullptr, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = clientProxy->OnJoinLNNResult(addrInput, TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

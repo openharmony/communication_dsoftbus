@@ -61,6 +61,10 @@ static const SessionWhiteList g_sessionWhiteList[] = {
     {
         .sessionName = "com.huawei.devicemanager.dynamic",
         .regexp = false,
+    },
+    {
+        .sessionName = "ohos.distributehardware.devicemanager.pinholder",
+        .regexp = false,
     }
 };
 
