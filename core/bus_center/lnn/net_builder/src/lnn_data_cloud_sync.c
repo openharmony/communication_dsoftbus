@@ -1062,10 +1062,7 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
 static void ProcessSyncToDB(void *para)
 {
     NodeInfo *info = (NodeInfo *)para;
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid param, info is NULL");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "invalid param, info is NULL");
     if (info->accountId == 0) {
         LNN_LOGI(LNN_BUILDER, "ledger accountid is null, all data no need sync to cloud");
         SoftBusFree(info);
@@ -1088,6 +1085,12 @@ static void ProcessSyncToDB(void *para)
         return;
     }
     char *putValue = cJSON_PrintUnformatted(json);
+    if (putValue == NULL) {
+        cJSON_Delete(json);
+        SoftBusFree(info);
+        LNN_LOGE(LNN_BUILDER, "create json msg fail");
+        return;
+    }
     cJSON_Delete(json);
     int32_t dbId = g_dbId;
     LnnSetCloudAbility(true);
@@ -1103,6 +1106,7 @@ static void ProcessSyncToDB(void *para)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
     }
+    SoftBusFree(info);
 }
 
 int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
