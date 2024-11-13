@@ -1665,6 +1665,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
+        LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, msg.GetRemoteDeviceId());
         P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { IF_NAME_P2P0 });
         return result.errorCode_;
     }
@@ -2023,6 +2024,7 @@ void P2pV1Processor::CleanupIfNeed(int32_t reason, const std::string &remoteDevi
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "start cleanup ctx, reason=%{public}d", reason);
     (void)RemoveLink(remoteDeviceId);
+    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, remoteDeviceId);
 }
 
 void P2pV1Processor::Exclusive(const std::string &remoteDeviceId)
