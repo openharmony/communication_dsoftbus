@@ -455,6 +455,7 @@ static bool StringToInt(const std::string &channelString, int32_t &result)
     auto [ptr, ec] = std::from_chars(channelString.data(), channelString.data() + channelString.size(), result);
     return ec == std::errc{} && ptr == channelString.data() + channelString.size();
 }
+
 std::vector<int> WifiDirectUtils::StringToChannelList(std::string channels)
 {
     std::vector<int> vectorChannels;
