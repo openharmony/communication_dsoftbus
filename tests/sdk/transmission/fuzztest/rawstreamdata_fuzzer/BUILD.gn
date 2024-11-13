@@ -24,9 +24,9 @@ ohos_fuzztest("RawStreamDataFuzzTest") {
       "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/rawstreamdata_fuzzer"
 
   include_dirs = [
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
   ]
   cflags = [
     "-g",

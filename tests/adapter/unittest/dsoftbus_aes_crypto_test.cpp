@@ -20,7 +20,7 @@
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "gtest/gtest.h"
 
 using namespace std;

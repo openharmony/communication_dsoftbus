@@ -17,7 +17,7 @@
 #include "trans_client_proxy.h"
 #include "permission_status_change_cb.h"
 #include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include <string>
 
 #define PID 520

@@ -20,7 +20,7 @@
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
@@ -637,12 +637,16 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest001, Te
     int32_t channelId = TEST_NUMBER_25;
     uint32_t connId = TEST_NUMBER_TEN;
     char identity[TEST_ARRRY_SIZE] = {0};
-    (void)strcpy_s(identity, TEST_CHANNEL_IDENTITY_LEN, TEST_STRING_ELEVEN);
+    int32_t ret = strcpy_s(identity, TEST_CHANNEL_IDENTITY_LEN, TEST_STRING_ELEVEN);
+    if (ret != EOK) {
+        TRANS_LOGE(TRANS_TEST, "copy failed");
+        return;
+    }
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
     TransProxyChanProcessByReqId(TEST_NUMBER_26, connId);
     usleep(TEST_SLEEP_TIME);
     ProxyChannelInfo chanInfo;
-    int32_t ret = TransProxyGetSendMsgChanInfo(TEST_NUMBER_25, &chanInfo);
+    ret = TransProxyGetSendMsgChanInfo(TEST_NUMBER_25, &chanInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(PROXY_CHANNEL_STATUS_HANDSHAKEING != (uint32_t)chanInfo.status);
 }
@@ -1804,7 +1808,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
     TransWifiOnLineProc(NULL);
 
     char network[TEST_NUMBER_TWENTY]  = { TEST_ARR_INIT };
-    (void)strcpy_s(network, TEST_NUMBER_TWENTY, TEST_CHANNEL_INDENTITY);
+    ret = strcpy_s(network, TEST_NUMBER_TWENTY, TEST_CHANNEL_INDENTITY);
+    if (ret != EOK) {
+        TRANS_LOGE(TRANS_TEST, "copy failed");
+        return;
+    }
     TransWifiOffLineProc(network);
 
     char networkId = 5;

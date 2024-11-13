@@ -21,7 +21,6 @@ adapter_ble_inc = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
-  "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/include",
 ]
 adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",
@@ -30,8 +29,8 @@ adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_utils.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/manager/src/softbus_broadcast_mgr.c",
-  "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/softbus_hidumper_bc_mgr.c",
-  "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/softbus_hidumper.c",
+  "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_bc_mgr.c",
+  "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper.c",
 ]
 
 if (dsoftbus_feature_ex_kits) {

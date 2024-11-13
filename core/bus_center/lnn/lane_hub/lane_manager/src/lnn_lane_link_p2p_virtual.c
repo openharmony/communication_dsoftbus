@@ -14,7 +14,7 @@
  */
 
 #include "lnn_lane_link_p2p.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {

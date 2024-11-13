@@ -15,7 +15,7 @@
 
 #include "client_trans_auth_manager.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 

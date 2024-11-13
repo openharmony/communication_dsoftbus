@@ -15,7 +15,7 @@
 
 #include "auth_interface.h"
 #include "auth_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
 {

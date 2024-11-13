@@ -14,7 +14,7 @@
  */
 
 #include "lnn_kv_adapter_wrapper.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
 {

@@ -14,7 +14,7 @@
 */
 
 #include "lnn_kv_adapter.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "lnn_kv_data_change_listener.h"
 #include "gtest/gtest.h"
 #include <string>

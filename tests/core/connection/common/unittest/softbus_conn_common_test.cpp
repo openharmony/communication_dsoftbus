@@ -23,7 +23,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"

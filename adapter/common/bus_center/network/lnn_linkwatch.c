@@ -32,7 +32,7 @@
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define NETLINK_BUF_LEN 1024
 

@@ -15,7 +15,6 @@ import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
-import("../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../.."
@@ -29,7 +28,7 @@ if (!defined(ohos_lite)) {
   bt_test_inc += adapter_ble_inc
 
   bt_test_deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/core/common:softbus_utils",
   ]
 

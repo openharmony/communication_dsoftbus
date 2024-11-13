@@ -23,7 +23,7 @@
 #include "lnn_service_mock.h"
 #include "lnn_sync_info_mock.h"
 #include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
