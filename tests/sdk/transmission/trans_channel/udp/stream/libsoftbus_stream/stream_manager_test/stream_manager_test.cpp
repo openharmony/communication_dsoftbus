@@ -16,7 +16,7 @@
 
 #include "common_inner.h"
 #include "i_stream.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "stream_common.h"
 #include "softbus_adapter_crypto.h"

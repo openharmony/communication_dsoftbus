@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_def.h"
 #include "client_trans_udp_stream_interface.h"
 

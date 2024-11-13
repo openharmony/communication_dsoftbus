@@ -18,8 +18,6 @@ import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../../../.."
-
 ohos_fuzztest("Sqlite3UtilsFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file =

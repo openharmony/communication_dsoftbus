@@ -14,7 +14,7 @@
  */
 
 #include "softbus_qos.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 
 int32_t NotifyQosChannelOpened(const ChannelInfo *chanInfo)

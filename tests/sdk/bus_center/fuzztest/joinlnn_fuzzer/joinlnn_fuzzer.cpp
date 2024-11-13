@@ -20,7 +20,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
     void OnJoinLNNResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

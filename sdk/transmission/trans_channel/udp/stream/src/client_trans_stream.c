@@ -19,7 +19,7 @@
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"

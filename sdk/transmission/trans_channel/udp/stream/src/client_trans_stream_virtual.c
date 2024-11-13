@@ -14,7 +14,7 @@
  */
 
 #include "client_trans_stream.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 void RegisterStreamCb(const UdpChannelMgrCb *cb)
 {

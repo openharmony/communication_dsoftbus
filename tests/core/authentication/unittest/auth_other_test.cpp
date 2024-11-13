@@ -32,7 +32,7 @@
 #include "auth_session_fsm.c"
 #include "auth_session_key.h"
 #include "auth_session_key.c"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_json.h"
 #include "softbus_socket.h"
 #include "lnn_ctrl_lane.h"

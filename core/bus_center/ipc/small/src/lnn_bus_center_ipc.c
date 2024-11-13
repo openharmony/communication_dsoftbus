@@ -28,7 +28,7 @@
 #include "lnn_time_sync_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 typedef struct {

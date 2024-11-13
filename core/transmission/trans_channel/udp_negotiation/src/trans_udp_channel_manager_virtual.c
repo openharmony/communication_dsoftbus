@@ -15,7 +15,7 @@
 
 #include "trans_udp_channel_manager.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
 {

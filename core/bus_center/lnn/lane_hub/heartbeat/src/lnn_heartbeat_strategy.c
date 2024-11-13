@@ -31,7 +31,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define HB_GEARMODE_MAX_SET_CNT        100
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)

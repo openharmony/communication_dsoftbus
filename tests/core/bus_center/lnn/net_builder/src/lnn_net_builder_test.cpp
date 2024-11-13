@@ -22,7 +22,7 @@
 #include "lnn_net_builder.h"
 #include "message_handler.h"
 #include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "lnn_net_builder_process.h"
 
 constexpr char NETWORKID[] = "ABCDEFG";

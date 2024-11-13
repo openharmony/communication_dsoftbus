@@ -1,0 +1,99 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../dsoftbus.gni")
+
+softbus_anonymizer_src = [ "anonymize/src/anonymizer.c" ]
+softbus_log_src = [ "log/src/softbus_log.c" ]
+if (defined(ohos_lite)) {
+  softbus_event_src = [ "event/src/softbus_event_virtual.c" ]
+} else {
+  softbus_event_src = [
+    "event/src/conn_event.c",
+    "event/src/disc_event.c",
+    "event/src/lnn_event.c",
+    "event/src/softbus_event.c",
+    "event/src/stats_event.c",
+    "event/src/trans_event.c",
+  ]
+}
+
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    build_type = "static_library"
+    libsec_external_deps = [ "bounds_checking_function:libsec_static" ]
+  } else {
+    build_type = "shared_library"
+    libsec_external_deps = [ "bounds_checking_function:libsec_shared" ]
+  }
+  config("dsoftbus_dfx_interface_lite") {
+    include_dirs = [
+      "interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$hilog_lite_include_path",
+      "$utils_lite_include_path",
+    ]
+    cflags = ohos_lite_cflags
+    cflags_cc = ohos_lite_cflags
+  }
+
+  target(build_type, "softbus_dfx") {
+    include_dirs = [
+      "event/src",
+      "interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+    sources = softbus_anonymizer_src + softbus_log_src + softbus_event_src
+    deps = [ "$hilog_lite_deps_path" ]
+    external_deps = libsec_external_deps
+    public_configs = [ ":dsoftbus_dfx_interface_lite" ]
+  }
+} else {
+  config("dsoftbus_dfx_interface_std") {
+    include_dirs = [
+      "interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+  }
+  ohos_shared_library("softbus_dfx") {
+    sanitize = {
+      ubsan = true
+      integer_overflow = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    branch_protector_ret = "pac_ret"
+    include_dirs = [
+      "event/src",
+      "interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+    sources = softbus_anonymizer_src + softbus_log_src + softbus_event_src
+    defines += [ "__STDC_FORMAT_MACROS" ]
+    if (is_asan) {
+      defines += [ "ASAN_BUILD" ]
+    }
+
+    public_configs = [ ":dsoftbus_dfx_interface_std" ]
+    public_external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
+    ]
+    innerapi_tags = [ "platformsdk_indirect" ]
+    part_name = "dsoftbus"
+    subsystem_name = "communication"
+  }
+}

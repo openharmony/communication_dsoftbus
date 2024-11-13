@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "stream_adaptor.h"
 
 using namespace testing::ext;

@@ -26,7 +26,7 @@
 #include "softbus_client_info_manager.h"
 #include "softbus_disc_server.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"

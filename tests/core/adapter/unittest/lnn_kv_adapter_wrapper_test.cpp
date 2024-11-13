@@ -15,7 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "lnn_kv_adapter_wrapper.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include <cstdint>
 #include <string>
