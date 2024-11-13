@@ -31,6 +31,8 @@ typedef enum {
     EVENT_SCENE_SHARE_BLE = 4,
     EVENT_SCENE_APPROACH_BLE = 5,
     EVENT_SCENE_COAP = 6,
+    EVENT_SCENE_RESERVED_7 = 7,
+    EVENT_SCENE_RESERVED_8 = 8,
 } DiscEventScene;
 
 typedef enum {
@@ -77,6 +79,14 @@ typedef enum {
     EVENT_STAGE_DISCOVERY_START = 6,
     EVENT_STAGE_DISCOVERY_STOP = 7,
 } DiscEventCoapStage;
+
+typedef enum {
+    EVENT_STAGE_ADV_START = 1,
+    EVENT_STAGE_ADV_STOP = 2,
+    EVENT_STAGE_ADV_REPLACE = 3,
+    EVENT_STAGE_SCAN_START = 4,
+    EVENT_STAGE_ONLINE_STATE = 5,
+} DiscEventBroadcastStage;
 
 typedef enum {
     SERVER_PUBLISH = 1,
