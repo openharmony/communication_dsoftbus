@@ -40,7 +40,7 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
         .socketName = "testSocket",
         .dataType = 0, // invalid
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 4;  //result errcode socketName firstTokenId
+    constexpr int32_t VALID_EXTRA_SIZE = 5;  //result errcode socketName firstTokenId
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -91,6 +91,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .deviceState = 1,
         .businessId = 1,
         .businessType = 1,
+        .sessionId = 1,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
