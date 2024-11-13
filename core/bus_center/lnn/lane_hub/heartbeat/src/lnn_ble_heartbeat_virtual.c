@@ -18,7 +18,7 @@
 #include "bus_center_manager.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
 {

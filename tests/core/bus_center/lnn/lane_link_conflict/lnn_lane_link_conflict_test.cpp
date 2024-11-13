@@ -690,12 +690,14 @@ HWTEST_F(LNNLaneLinkConflictTest, LNN_CHECK_LINK_CONFLICT_BY_RELEASE_LINK_001, T
     EXPECT_EQ(ret, SOFTBUS_OK);
     RemoveConflictInfoTimelinessMsg(&inputInfo.identifyInfo, inputInfo.conflictType);
 
+    ret = CheckLinkConflictByReleaseLink(LANE_P2P);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = CheckLinkConflictByReleaseLink(LANE_HML);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = CheckLinkConflictByReleaseLink(LANE_P2P);
-    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
     ret = DelLinkConflictInfo(&inputInfo.identifyInfo, inputInfo.conflictType);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckLinkConflictByReleaseLink(LANE_HML);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
     FreeConflictDevInfo(&inputInfo);
 }
 } // namespace OHOS

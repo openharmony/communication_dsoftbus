@@ -21,7 +21,7 @@
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "trans_log.h"
 

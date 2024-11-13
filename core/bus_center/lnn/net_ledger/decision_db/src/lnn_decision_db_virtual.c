@@ -16,7 +16,7 @@
 #include "lnn_decision_db.h"
 
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
 {

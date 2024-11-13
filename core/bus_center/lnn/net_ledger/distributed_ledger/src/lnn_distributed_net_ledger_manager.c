@@ -28,7 +28,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "bus_center_manager.h"
 

@@ -20,7 +20,7 @@
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_permission.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_trans_def.h"

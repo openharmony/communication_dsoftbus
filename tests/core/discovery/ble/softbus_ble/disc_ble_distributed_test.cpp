@@ -20,7 +20,7 @@
 #include "disc_log.h"
 #include "message_handler.h"
 #include "softbus_broadcast_utils.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 namespace OHOS {

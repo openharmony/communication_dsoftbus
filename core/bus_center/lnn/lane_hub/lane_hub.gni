@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("../../../../dsoftbus.gni")
-import("../../../common/dfx/dsoftbus_dfx.gni")
 
 core_lane_hub_path = "$dsoftbus_root_path/core/bus_center/lnn/lane_hub"
 
@@ -31,11 +30,9 @@ bus_center_hub_inc = [
   "$core_lane_hub_path/time_sync/include",
   "$core_lane_hub_path/heartbeat/include",
   "$core_lane_hub_path/lane_qos/include",
-  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
+  "$dsoftbus_dfx_path/interface/include",
 ]
-bus_center_hub_deps =
-    [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+bus_center_hub_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
 if (dsoftbus_feature_lnn_net) {
   bus_center_hub_src = [
@@ -53,7 +50,9 @@ if (dsoftbus_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_reliability.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_listener.c",
-    "$dsoftbus_root_path/core/common/dfx/statistics/trans_network_statistics.c",
+    "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c",
+    "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c",
+    "$dsoftbus_dfx_path/statistics/trans_network_statistics.c",
   ]
 
   if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
@@ -67,13 +66,6 @@ if (dsoftbus_feature_lnn_net) {
   if (enhanced) {
     lane_src_enhance_path =
         "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub"
-    bus_center_hub_src += [
-      "$lane_src_enhance_path/lane/lnn_lane_score.c",
-      "$lane_src_enhance_path/lane/lnn_lane_vap_info.c",
-      "$lane_src_enhance_path/lane/lnn_lane_power_control.c",
-      "$lane_src_enhance_path/lane/lnn_parameter_utils.cpp",
-      "$lane_src_enhance_path/lane/src/lnn_lane_conflict_manager.c",
-    ]
   } else {
     bus_center_hub_src += [
       "$core_lane_hub_path/lane_manager/src/lnn_lane_score_virtual.c",
@@ -81,13 +73,6 @@ if (dsoftbus_feature_lnn_net) {
       "$core_lane_hub_path/lane_manager/src/lnn_lane_power_control_virtual.c",
       "$core_lane_hub_path/lane_manager/src/lnn_parameter_utils_virtual.c",
     ]
-  }
-  if (dsoftbus_feature_lnn_time_sync) {
-    bus_center_hub_src +=
-        [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
-  } else {
-    bus_center_hub_src +=
-        [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
   }
   if (dsoftbus_feature_lnn_heartbeat) {
     bus_center_hub_inc += [
@@ -137,13 +122,6 @@ if (dsoftbus_feature_lnn_net && dsoftbus_feature_lnn_heartbeat && enhanced) {
     "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_ble_heartbeat",
     "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_ble_lpdevice",
   ]
-}
-if (dsoftbus_feature_lnn_net && dsoftbus_feature_qos && enhanced) {
-  bus_center_hub_src +=
-      [ "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c" ]
-} else {
-  bus_center_hub_src +=
-      [ "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c" ]
 }
 
 if (enhanced) {

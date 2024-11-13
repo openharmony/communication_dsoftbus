@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_trans_def.h"
 #include "trans_client_proxy_standard.h"
 #include "trans_log.h"
@@ -73,6 +73,10 @@ int32_t ClientIpcOnChannelBind(ChannelMsg *data)
     if (data == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind data is nullptr!");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (data->msgPid == getpid()) {
+        TRANS_LOGI(TRANS_CTRL, "check msgPid success!");
+        return SOFTBUS_OK;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {

@@ -28,13 +28,13 @@
 #include "data_bus_native.h"
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
@@ -1555,6 +1555,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
         return;
     }
 
+    (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
     (void)OnProxyChannelOpenFailed(channelId, &(channelInfo->appInfo), errCode);
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
