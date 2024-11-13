@@ -204,7 +204,7 @@ int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
     }
     if (strncpy_s(info->masterUdid, UDID_BUF_LEN, udid, strlen(udid)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }

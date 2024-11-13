@@ -193,7 +193,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Lev
     }
     for (i = 0; i < sizeof(keyNumTable) / sizeof(InfoKey); i++) {
         ret = LnnGetRemoteNumInfo(NODE2_NETWORK_ID, keyNumTable[i], &len);
-        EXPECT_TRUE(ret == SOFTBUS_ERR);
+        EXPECT_TRUE(ret != SOFTBUS_OK);
     }
 }
 
@@ -271,7 +271,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Leve
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE2_UDID, strlen(NODE2_UDID));
     ret = LnnUpdateNodeInfo(&newInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_MAP_GET_FAILED);
 }
 
 /*
@@ -477,7 +477,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.
     int32_t ret = LnnGetRemoteNum16Info(NODE1_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, &info);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetRemoteNum16Info(NODE2_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = LnnGetRemoteNum16Info(NODE2_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
@@ -664,7 +664,7 @@ HWTEST_F(LNNDisctributedLedgerTest, ADD_CNN_CODE_Test_001, TestSize.Level1)
     DiscoveryType type = DISCOVERY_TYPE_WIFI;
     int64_t authSeqNum = 0;
     int32_t ret = AddCnnCode(&cnnCode, nullptr, type, authSeqNum);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
     ret = AddCnnCode(&cnnCode, uuid, type, authSeqNum);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
@@ -697,7 +697,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_GROUPTYPE_Test_001, TestSize.Leve
     char str[] = "softBus";
     strcpy_s(info.deviceInfo.deviceUdid, sizeof(str), str);
     ret = LnnUpdateGroupType(&info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_MAP_GET_FAILED);
 
     const char *udid = "softBus";
     (void)NotifyMigrateDegrade(udid);

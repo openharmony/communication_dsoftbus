@@ -387,7 +387,7 @@ HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<1>(*localUdid1), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(*localUdid2), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<1>(*localUdid3), Return(SOFTBUS_OK)));
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR));
     char *msg1 = const_cast<char *>(MSG_1);
     char *msg2 = const_cast<char *>(MSG_2);
     cJSON *json = cJSON_ParseWithLength(msg1, strlen(msg1));

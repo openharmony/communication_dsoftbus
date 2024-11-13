@@ -69,7 +69,7 @@ static int32_t DeviceDbListLock(void)
 {
     if (!g_isDbListInit) {
         if (!DeviceDbRecoveryInit()) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_DB_LOCK_INIT_FAILED;
         }
     }
     return SoftBusMutexLock(&g_deviceDbMutex);
@@ -89,7 +89,7 @@ static int32_t DbLock(void)
     if (!g_isDbListInit) {
         if (!DeviceDbRecoveryInit()) {
             LNN_LOGE(LNN_LEDGER, "g_isDbListInit init fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_DB_LOCK_INIT_FAILED;
         }
     }
     return SoftBusMutexLock(&g_dbMutex);
@@ -117,7 +117,7 @@ int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t l
     encryptData.data = (uint8_t *)SoftBusCalloc(len);
     if (encryptData.data == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc encrypt dbKey fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     LNN_LOGI(LNN_LEDGER, "Encrypt data, level=%{public}u len=%{public}u", level, len);
     plainData.size = len;
@@ -132,7 +132,7 @@ int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t l
         LNN_LOGE(LNN_LEDGER, "encrypt dbKey by huks fail, ret=%{public}d", ret);
         (void)memset_s(plainData.data, len, 0x0, len);
         SoftBusFree(encryptData.data);
-        return SOFTBUS_ERR;
+        return ret;
     }
     LNN_LOGW(LNN_LEDGER, "encrypt dbKey log for audit");
     (void)memset_s(plainData.data, len, 0x0, len);
@@ -186,36 +186,40 @@ int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t l
 static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
 {
     char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
+    int32_t ret = 0;
 
     if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get dbKey save path fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_PATH_FAILED;
     }
     do {
         if (!isUpdate && SoftBusAccessFile(dbKeyFilePath, SOFTBUS_F_OK) == SOFTBUS_OK) {
             LNN_LOGD(LNN_LEDGER, "dbKey file is exist");
             break;
         }
-        if (LnnGenerateRandomByHuks(dbKey, len) != SOFTBUS_OK) {
+        ret = LnnGenerateRandomByHuks(dbKey, len);
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "generate random dbKey fail");
-            return SOFTBUS_ERR;
+            return ret;
         }
-        if (EncryptStorageData(LNN_ENCRYPT_LEVEL_DE, dbKey, len) != SOFTBUS_OK) {
+        ret = EncryptStorageData(LNN_ENCRYPT_LEVEL_DE, dbKey, len);
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "encrypt dbKey fail");
-            return SOFTBUS_ERR;
+            return ret;
         }
         if (SoftBusWriteFile(dbKeyFilePath, (char *)dbKey, len) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "write dbKey to file fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
     } while (false);
     if (SoftBusReadFullFile(dbKeyFilePath, (char *)dbKey, len) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "read dbKey from file fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_FILE_ERR;
     }
-    if (DecryptStorageData(LNN_ENCRYPT_LEVEL_DE, dbKey, len) != SOFTBUS_OK) {
+    ret = DecryptStorageData(LNN_ENCRYPT_LEVEL_DE, dbKey, len);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "decrypt dbKey fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -223,16 +227,19 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
 static int32_t EncryptDecisionDb(DbContext *ctx)
 {
     uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
+    int32_t ret = 0;
 
-    if (GetDecisionDbKey(dbKey, sizeof(dbKey), false) != SOFTBUS_OK) {
+    ret = GetDecisionDbKey(dbKey, sizeof(dbKey), false);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get decision dbKey fail");
         (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (EncryptedDb(ctx, dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
+    ret = EncryptedDb(ctx, dbKey, sizeof(dbKey));
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "encrypt decision db fail");
         (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
-        return SOFTBUS_ERR;
+        return ret;
     }
     (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
     return SOFTBUS_OK;
@@ -244,21 +251,23 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
 
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update decision db de key fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_KEY_FAIL;
     }
     if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update decision db ce key fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_KEY_FAIL;
     }
-    if (GetDecisionDbKey(dbKey, sizeof(dbKey), true) != SOFTBUS_OK) {
+    int32_t ret = GetDecisionDbKey(dbKey, sizeof(dbKey), true);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get decision dbKey fail");
         (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (UpdateDbPassword(ctx, dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
+    ret = UpdateDbPassword(ctx, dbKey, sizeof(dbKey));  
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "encrypt decision db fail");
         (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
-        return SOFTBUS_ERR;
+        return ret;
     }
     LNN_LOGW(LNN_LEDGER, "update dbKey log for audit");
     (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
@@ -276,7 +285,7 @@ static int32_t BuildTrustedDevInfoRecord(const char *udid, TrustedDevInfoRecord 
     }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local account hash failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (memset_s(record, sizeof(TrustedDevInfoRecord), 0, sizeof(TrustedDevInfoRecord)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memset_s record failed");
@@ -284,15 +293,15 @@ static int32_t BuildTrustedDevInfoRecord(const char *udid, TrustedDevInfoRecord 
     }
     if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert accountHash failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     if (strcpy_s(record->accountHexHash, sizeof(record->accountHexHash), accountHexHash) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy_s account hash failed");
-        return SOFTBUS_MEM_ERR;
+        LNN_LOGE(LNN_LEDGER, "strcpy_s account hash failed");
+        return SOFTBUS_STRCPY_ERR;
     }
     if (strcpy_s(record->udid, sizeof(record->udid), udid) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy_s udid hash failed");
-        return SOFTBUS_MEM_ERR;
+        LNN_LOGE(LNN_LEDGER, "strcpy_s udid hash failed");
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -471,13 +480,13 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
     if (strcpy_s(dupUdid, UDID_BUF_LEN, udid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s dupUdid failed");
         SoftBusFree(dupUdid);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), InsertTrustedDevInfoRecord,
         (void *)dupUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "async call insert trusted dev info failed");
         SoftBusFree(dupUdid);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -505,24 +514,25 @@ int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
     if (strcpy_s(dupUdid, UDID_BUF_LEN, udid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s dupUdid failed");
         SoftBusFree(dupUdid);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), RemoveTrustedDevInfoRecord,
         (void *)dupUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "async call remove trusted dev info failed");
         SoftBusFree(dupUdid);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED;
     }
     return SOFTBUS_OK;
 }
 
 static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHash, char **udidArray, uint32_t *num)
 {
-    if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
+    int32_t ret = EncryptDecisionDb(ctx);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "encrypt database failed");
         *udidArray = NULL;
         *num = 0;
-        return SOFTBUS_ERR;
+        return ret;
     }
     *((int32_t *)num) = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash);
     if (*num == 0) {
@@ -535,13 +545,14 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
         *num = 0;
         return SOFTBUS_MALLOC_ERR;
     }
-    if (QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash,
-        (uint8_t **)udidArray, *((int32_t *)num)) != SOFTBUS_OK) {
+    ret = QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash,
+        (uint8_t **)udidArray, *((int32_t *)num));
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "query udidArray failed");
         SoftBusFree(*udidArray);
         *udidArray = NULL;
         *num = 0;
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -555,7 +566,7 @@ static int32_t GetLocalAccountHexHash(char *accountHexHash)
     }
     if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert accountHash failed");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -642,7 +653,7 @@ static int32_t GetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     if (OpenDatabase(&ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "open database failed");
         DbUnlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_DATABASE_FAILED;
     }
     int32_t rc = GetTrustedDevInfoRecord(ctx, accountHexHash, udidArray, num);
     if (rc != SOFTBUS_OK) {
@@ -654,7 +665,7 @@ static int32_t GetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
         SoftBusFree(*udidArray);
         *udidArray = NULL;
         *num = 0;
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_DATABASE_FAILED;
     }
     DbUnlock();
     return rc;
@@ -736,7 +747,7 @@ static int32_t InitDbList(void)
 {
     if (!DeviceDbRecoveryInit()) {
         LNN_LOGE(LNN_LEDGER, "init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_DB_LOCK_INIT_FAILED;
     }
     ClearRecoveryDeviceList();
     return RecoveryTrustedDevInfo();
@@ -745,12 +756,12 @@ static int32_t InitDbList(void)
 static int32_t InitTrustedDevInfoTable(void)
 {
     bool isExist = false;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED;
     DbContext *ctx = NULL;
-
+ 
     if (OpenDatabase(&ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "open database failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_DATABASE_FAILED;
     }
     do {
         if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
@@ -773,7 +784,7 @@ static int32_t InitTrustedDevInfoTable(void)
     } while (false);
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "close database failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_DATABASE_FAILED;
     }
     if (rc == SOFTBUS_OK) {
         rc = InitDbList();
@@ -787,7 +798,7 @@ static int32_t TryRecoveryTrustedDevInfoTable(void)
 
     if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get dbKey save path fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_PATH_FAILED;
     }
     SoftBusRemoveFile(dbKeyFilePath);
     SoftBusRemoveFile(DATABASE_NAME);
@@ -820,11 +831,11 @@ int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate decision db huks de key fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_KEY_FAIL;
     }
     if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update decision db huks ce key fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_KEY_FAIL;
     }
     if (InitTrustedDevInfoTable() != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "try init trusted dev info table again");

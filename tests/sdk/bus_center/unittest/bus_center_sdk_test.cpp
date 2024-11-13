@@ -603,7 +603,7 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_Test002, TestSize.Lev
     char networkId[] = "12313";
     uint16_t dataChangeFlag = 11;
     int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 } // namespace OHOS

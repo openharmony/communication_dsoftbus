@@ -42,7 +42,7 @@ extern "C" {
         (info) = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID));              \
         if ((info) == NULL) {                                                         \
             AONYMIZE("get node info fail. networkId=%{public}s", networkId);          \
-            return SOFTBUS_ERR;                                                       \
+            return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;                                                       \
         }                                                                             \
     } while (0)                                                                       \
 
