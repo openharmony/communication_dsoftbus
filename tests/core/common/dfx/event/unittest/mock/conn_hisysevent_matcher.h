@@ -51,6 +51,11 @@ static void MatchConnEventNameTypeExtraStrParam(const HiSysEventParam *params, i
     EXPECT_STREQ(params[index].v.s, extraParam);
 }
 
+static void MatchNotConnEventNameExtraStrParam(const HiSysEventParam *params, int32_t index, const char * extraParam)
+{
+    EXPECT_NE(params[index].name, g_connAssigners[index].name);
+}
+
 static void MatchConnEventNameTypeExtraStrParamAnony(const HiSysEventParam *params, int32_t index,
     const char * extraParam)
 {
@@ -66,14 +71,23 @@ static void MatchConnEventNameTypeExtraStrParamAnony(const HiSysEventParam *para
 static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *params, int32_t index, ConnEventExtra extra)
 {
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.osType);
-    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.localDeviceType);
-    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.remoteDeviceType);
+    MatchNotConnEventNameExtraStrParam(params, ++index, extra.localDeviceType);
+    MatchNotConnEventNameExtraStrParam(params, ++index, extra.remoteDeviceType);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.p2pChannel);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.hmlChannel);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.staChannel);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.apChannel);
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.peerDevVer);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.remoteScreenStatus);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.businessType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.businessId);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.timeout);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.fastestConnectEnable);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.coapDataChannel);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.enableWideBandwidth);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.p2pRole);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.needHmlConnect);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.businessTag);
     return ++index;
 }
 
