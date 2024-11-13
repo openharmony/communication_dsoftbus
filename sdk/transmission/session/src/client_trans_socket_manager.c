@@ -149,6 +149,9 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
             destroyNode->OnShutdown(id, reason);
             (void)TryDeleteEmptySessionServer(destroyNode->pkgName, destroyNode->sessionName);
         }
+        if ((!destroyNode->isAsync) && destroyNode->lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+            (void)SoftBusCondSignal(&(destroyNode->lifecycle.callbackCond));
+        }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
     }
@@ -313,7 +316,7 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
             return false;
         }
     } else if (sessionNode->channelType == CHANNEL_TYPE_AUTH) {
-        TRANS_LOGD(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
+        TRANS_LOGI(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
         return true;
     } else {
         TRANS_LOGW(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
