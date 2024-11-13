@@ -204,22 +204,25 @@ int32_t LnnInitNetLedgerDelay(void)
 {
     LnnLoadLocalDeviceAccountIdInfo();
     RestoreLocalDeviceInfo();
-    if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
+    int32_t ret = LnnInitLocalLedgerDelay();
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (LnnInitDecisionDbDelay() != SOFTBUS_OK) {
+    ret = LnnInitDecisionDbDelay();
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
 
 int32_t LnnInitEventMoniterDelay(void)
 {
-    if (LnnInitCommonEventMonitorImpl() != SOFTBUS_OK) {
+    int32_t ret = LnnInitCommonEventMonitorImpl();
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     LnnInitOOBEStateMonitorImpl();
     return SOFTBUS_OK;
@@ -239,7 +242,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
 {
     if (networkId == NULL || info == NULL) {
         LNN_LOGE(LNN_LEDGER, "params are null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     switch (key) {
         case NODE_KEY_UDID:
@@ -270,7 +273,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_NUM;
     }
 }
 
@@ -309,7 +312,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_NUM;
     }
 }
 
@@ -323,7 +326,7 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local network id fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR; 
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
         isLocalNetworkId = true;
@@ -409,7 +412,7 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local network id fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
         isLocalNetworkId = true;
@@ -418,14 +421,14 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
         return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, (int16_t)dataChangeFlag);
     }
     LNN_LOGE(LNN_LEDGER, "remote networkId");
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_INVALID_DEV_INFO;
 }
 
 int32_t LnnSetDataLevel(const DataLevel *dataLevel, bool *isSwitchLevelChanged)
 {
     if (dataLevel == NULL || isSwitchLevelChanged == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level or switch level change flag is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_LEDGER, "LnnSetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
         "switch: %{public}u, switchLen: %{public}hu", dataLevel->dynamicLevel, dataLevel->staticLevel,
@@ -433,27 +436,27 @@ int32_t LnnSetDataLevel(const DataLevel *dataLevel, bool *isSwitchLevelChanged)
     uint16_t dynamicLevel = dataLevel->dynamicLevel;
     if (LnnSetLocalNumU16Info(NUM_KEY_DATA_DYNAMIC_LEVEL, dynamicLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data dynamic level failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
     uint16_t staticLevel = dataLevel->staticLevel;
     if (LnnSetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, staticLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data static level failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
     uint32_t curSwitchLevel = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, &curSwitchLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Get current data switch level faield");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR;
     }
     uint32_t switchLevel = dataLevel->switchLevel;
     if (LnnSetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, switchLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data switch level faield");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
     uint16_t switchLength = dataLevel->switchLength;
     if (LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, switchLength) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
     *isSwitchLevelChanged = (curSwitchLevel != switchLevel);
     return SOFTBUS_OK;
@@ -490,7 +493,7 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return DATA_DEVICE_SCREEN_STATUS_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_NUM;
     }
 }
 

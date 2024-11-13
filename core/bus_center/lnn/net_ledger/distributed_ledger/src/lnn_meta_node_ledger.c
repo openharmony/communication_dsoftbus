@@ -84,7 +84,7 @@ static MetaNodeStorageInfo *CreateMetaNodeStorageInfo(const MetaNodeConfigInfo *
 int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {
     MetaNodeStorageInfo *storageInfo = NULL;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR;
 
     if (!CheckMetaNodeConfigInfo(info) || metaNodeId == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnActiveMetaNode: para is invalid");
@@ -153,7 +153,7 @@ int32_t LnnDeactiveMetaNode(const char *metaNodeId)
         LNN_LOGI(LNN_LEDGER, "deactive a mete node");
     } else {
         LNN_LOGE(LNN_LEDGER, "meta node not exist");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_NETWORK_NOT_FOUND;
     }
     if (SoftBusMutexUnlock(&g_metaNodeList->lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnDeactiveMetaNode: unlock failed");
@@ -193,7 +193,7 @@ int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
 {
     MetaNodeStorageInfo *item = NULL;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_NOT_FOUND;
     if (networkId == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
         return SOFTBUS_INVALID_PARAM;
@@ -224,7 +224,7 @@ int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
 int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeInfo)
 {
     MetaNodeStorageInfo *item = NULL;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_NOT_FOUND;
     if (networkId == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
         return SOFTBUS_INVALID_PARAM;
@@ -256,9 +256,9 @@ int32_t LnnInitMetaNodeLedger(void)
     if (g_metaNodeList == NULL) {
         g_metaNodeList = CreateSoftBusList();
     }
-    if (g_metaNodeList == NULL) {
+    if (g_metaNodeList == NULL) { 
         LNN_LOGE(LNN_LEDGER, "create meta node list failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_LIST_ERR;
     }
     LNN_LOGI(LNN_LEDGER, "meta node init success");
     return SOFTBUS_OK;

@@ -1281,7 +1281,8 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_002, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _))
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR));
 
     EXPECT_EQ(CheckWifiOfflineMsgResult(NETWORKID, authPort, offlineCode), false);
 }

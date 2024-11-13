@@ -288,7 +288,7 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Lev
     char networkIdSecond[NETWORK_ID_BUF_LEN] = "1234";
     uint16_t dataChangeFlag = 0;
     EXPECT_NE(LnnSetNodeDataChangeFlag(networkId, dataChangeFlag), SOFTBUS_OK);
-    EXPECT_EQ(LnnSetNodeDataChangeFlag(networkIdSecond, dataChangeFlag), SOFTBUS_ERR);
+    EXPECT_EQ(LnnSetNodeDataChangeFlag(networkIdSecond, dataChangeFlag), SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
 
     ConstructCommonLocalInfo();
     EXPECT_EQ(LnnSetNodeDataChangeFlag(LOCAL_NETWORKID, dataChangeFlag), SOFTBUS_OK);

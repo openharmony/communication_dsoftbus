@@ -280,13 +280,13 @@ static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum, bool isNeedMeta)
     MapIterator *it = LnnMapInitIterator(&map->udidMap);
 
     if (it == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
     }
     *infoNum = 0;
     while (LnnMapHasNext(it)) {
         it = LnnMapNext(it);
         if (it == NULL) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
         }
         info = (NodeInfo *)it->node->value;
         if (!isNeedMeta) {
@@ -312,13 +312,13 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum, 
 
     if (it == NULL) {
         LNN_LOGE(LNN_LEDGER, "it is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
     }
     while (LnnMapHasNext(it) && i < infoNum) {
         it = LnnMapNext(it);
         if (it == NULL) {
             LnnMapDeinitIterator(it);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
         }
         nodeInfo = (NodeInfo *)it->node->value;
         if (!isNeedMeta) {
@@ -578,12 +578,12 @@ static int32_t AddCnnCode(Map *cnnCode, const char *uuid, DiscoveryType type, in
     char *key = CreateCnnCodeKey(uuid, type);
     if (key == NULL) {
         LNN_LOGE(LNN_LEDGER, "CreateCnnCodeKey error!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (LnnMapSet(cnnCode, key, (void *)&seq, sizeof(short)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnMapSet error!");
         DestroyCnnCodeKey(key);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_SET_FAILED;
     }
     DestroyCnnCodeKey(key);
     return SOFTBUS_OK;
@@ -662,7 +662,7 @@ int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
     if (oldInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "no online node newInfo!");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_GET_FAILED;
     }
     if (strcpy_s(oldInfo->lastNetworkId, NETWORK_ID_BUF_LEN, oldInfo->networkId) != EOK) {
         LNN_LOGE(LNN_LEDGER, "old networkId cpy fail");
@@ -713,7 +713,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     if (oldInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "no online node newInfo!");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_GET_FAILED;
     }
     if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
         oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
@@ -730,13 +730,13 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy account hash failed");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
     if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy ptk failed");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     oldInfo->accountId = newInfo->accountId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -1236,7 +1236,7 @@ int32_t LnnUpdateGroupType(const NodeInfo *info)
     udid = LnnGetDeviceUdid(info);
     uint32_t groupType = AuthGetGroupType(udid, info->uuid);
     LNN_LOGI(LNN_LEDGER, "groupType=%{public}u", groupType);
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_MAP_GET_FAILED;
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
@@ -1561,7 +1561,7 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_MAP_SET_FAILED;
         }
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         LNN_LOGD(LNN_LEDGER, "DB data new device nodeinfo insert to distributed ledger success.");
@@ -1588,7 +1588,7 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     do {
         *info = NULL;
         if (GetDLOnlineNodeNumLocked(infoNum, isNeedMeta) != SOFTBUS_OK) {
@@ -1666,7 +1666,7 @@ int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int32_t fd)
     int32_t infoNum = 0;
     if (LnnGetAllOnlineNodeInfo(&remoteNodeInfo, &infoNum) != 0) {
         LNN_LOGE(LNN_LEDGER, "LnnGetAllOnlineNodeInfo failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     SOFTBUS_DPRINTF(fd, "remote device num = %d\n", infoNum);
     for (int32_t i = 0; i < infoNum; i++) {
@@ -1684,25 +1684,28 @@ int32_t LnnInitDistributedLedger(void)
         return SOFTBUS_OK;
     }
 
-    if (InitDistributedInfo(&g_distributedNetLedger.distributedInfo) != SOFTBUS_OK) {
+    int32_t ret = InitDistributedInfo(&g_distributedNetLedger.distributedInfo);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "InitDistributedInfo ERROR");
         g_distributedNetLedger.status = DL_INIT_FAIL;
-        return SOFTBUS_ERR;
+        return ret;
     }
 
-    if (InitConnectionCode(&g_distributedNetLedger.cnnCode) != SOFTBUS_OK) {
+    ret = InitConnectionCode(&g_distributedNetLedger.cnnCode);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "InitConnectionCode ERROR");
         g_distributedNetLedger.status = DL_INIT_FAIL;
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (SoftBusMutexInit(&g_distributedNetLedger.lock, NULL) != SOFTBUS_OK) {
         g_distributedNetLedger.status = DL_INIT_FAIL;
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
-    if (SoftBusRegBusCenterVarDump((char*)SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO,
-        &SoftBusDumpBusCenterRemoteDeviceInfo) != SOFTBUS_OK) {
+    ret = SoftBusRegBusCenterVarDump((char*)SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO,
+        &SoftBusDumpBusCenterRemoteDeviceInfo);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftBusRegBusCenterVarDump regist fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     g_distributedNetLedger.status = DL_INIT_SUCCESS;
     return SOFTBUS_OK;

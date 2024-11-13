@@ -240,7 +240,7 @@ HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Le
     const LnnEventBasicInfo *info5 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
     BtStateChangeEventHandler(info5);
     EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR));
     BtStateChangeEventHandler(info5);
     event.status = SOFTBUS_BR_TURN_OFF;
     const LnnEventBasicInfo *info6 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
