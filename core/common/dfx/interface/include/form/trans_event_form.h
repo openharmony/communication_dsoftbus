@@ -105,6 +105,7 @@ typedef struct {
     int32_t  deviceState;      // DEVICE_STATE
     int32_t businessId;        // BUSSINESS_ID
     int32_t businessType;      // BUSINESS_TYPE
+    int32_t sessionId;         // SESSION_ID
 } TransEventExtra;
 
 typedef enum {

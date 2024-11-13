@@ -66,8 +66,9 @@ TRANS_ASSIGNER(Int32,  OsType, osType)
 TRANS_ASSIGNER(Int32,  DeviceState, deviceState)
 TRANS_ASSIGNER(Int32,  BusinessId, businessId)
 TRANS_ASSIGNER(Int32,  BusinessType, businessType)
+TRANS_ASSIGNER(Int32,  SessionId, sessionId)
 
-#define TRANS_ASSIGNER_SIZE 32 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 33 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
@@ -101,6 +102,7 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "DEVICE_STATE",     HISYSEVENT_INT32,  TransAssignerDeviceState   },
     { "BUSINESS_ID",      HISYSEVENT_INT32,  TransAssignerBusinessId    },
     { "BUSINESS_TYPE",    HISYSEVENT_INT32,  TransAssignerBusinessType  },
+    { "SESSION_ID",       HISYSEVENT_INT32,  TransAssignerSessionId     },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
