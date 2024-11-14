@@ -923,11 +923,13 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     ret = AuthOpenConn(&auth, requestId, &cb, isMeta);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open fail: ret=%{public}d", ret);
+        TransCloseUdpChannelByRequestId(requestId);
         return ret;
     }
     ret = CheckAuthConnStatus(requestId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "status check failed: ret=%{public}d", ret);
+        TransCloseUdpChannelByRequestId(requestId);
         return ret;
     }
 
