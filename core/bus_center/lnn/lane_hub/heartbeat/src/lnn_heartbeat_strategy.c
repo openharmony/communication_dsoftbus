@@ -852,6 +852,7 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
     if (memcpy_s(paramMgr->param, sizeof(LnnHeartbeatMediumParam), param, sizeof(LnnHeartbeatMediumParam)) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB set medium param memcpy_s err");
         SoftBusFree(paramMgr->param);
+        paramMgr->param = NULL;
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_MEM_ERR;
     }
