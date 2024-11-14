@@ -1308,7 +1308,7 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
 
 static void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
 {
-    LaneTransType transType;
+    LaneTransType transType = LANE_T_BUTT;
     if (Lock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
         return;
