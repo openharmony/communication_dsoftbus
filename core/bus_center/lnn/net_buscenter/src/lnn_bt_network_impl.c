@@ -26,7 +26,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define LNN_BT_PROTOCOL_PRI 10

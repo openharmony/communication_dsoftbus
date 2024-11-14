@@ -20,8 +20,7 @@
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define MAX_SUPPORTED_PHYSICAL_SUBNET 6
 

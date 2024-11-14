@@ -17,7 +17,7 @@
 
 #include "securec.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "lnn_lane_interface.h"

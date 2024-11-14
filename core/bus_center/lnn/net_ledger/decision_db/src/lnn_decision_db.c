@@ -31,8 +31,7 @@
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 typedef struct {

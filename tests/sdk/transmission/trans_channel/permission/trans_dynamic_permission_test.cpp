@@ -17,7 +17,7 @@
 
 #include "ISessionService.h"
 #include "permission_entry.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_permission.h"
 
 using namespace testing::ext;

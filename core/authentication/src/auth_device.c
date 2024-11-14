@@ -30,7 +30,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)

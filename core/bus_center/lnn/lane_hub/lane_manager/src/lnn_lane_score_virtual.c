@@ -15,7 +15,7 @@
 
 #include "lnn_lane_score.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define VIRTUAL_DEFAULT_SCORE 60
 

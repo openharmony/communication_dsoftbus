@@ -24,7 +24,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define SESSION_KEY_MAX_NUM 10
 #define LAST_USE_THRESHOLD_MS (30 * 1000L) /* 30s */

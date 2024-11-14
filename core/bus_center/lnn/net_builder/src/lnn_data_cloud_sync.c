@@ -33,7 +33,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
@@ -1083,6 +1083,11 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
         return SOFTBUS_ERR;
     }
     char *putValue = cJSON_PrintUnformatted(json);
+    if (putValue == NULL) {
+        LNN_LOGE(LNN_BUILDER, "cJSON_PrintUnformatted fail");
+        cJSON_Delete(json);
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
     cJSON_Delete(json);
     int32_t dbId = g_dbId;
     LnnSetCloudAbility(true);

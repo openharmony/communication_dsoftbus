@@ -15,7 +15,7 @@
 
 #include "lnn_data_cloud_sync.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 void LnnInitCloudSyncModule(void)
 {

@@ -14,7 +14,7 @@
  */
 
 #include "lnn_lane_qos.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnInitQos(void)
 {

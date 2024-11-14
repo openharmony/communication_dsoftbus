@@ -15,7 +15,7 @@
 
 #include "lnn_p2p_info.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 void LnnLoadPtkInfo(void)
 {

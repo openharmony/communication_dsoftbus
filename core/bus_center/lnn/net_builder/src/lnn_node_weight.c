@@ -21,8 +21,7 @@
 #include "lnn_device_info.h"
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define MAX_WEIGHT_VALUE        1000
 #define BASE_WEIGHT_PHONE_VALUE 2000

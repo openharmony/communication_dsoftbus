@@ -18,7 +18,7 @@
 
 #include "comm_log.h"
 #include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_config_adapter.h"
 #include "softbus_feature_config.h"
 

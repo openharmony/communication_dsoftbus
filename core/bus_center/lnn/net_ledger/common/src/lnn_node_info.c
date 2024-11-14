@@ -21,8 +21,7 @@
 
 #include "anonymizer.h"
 #include "lnn_log.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define DYNAMIC_LEVEL_INVALID 0xFFFF

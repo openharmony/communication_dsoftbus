@@ -20,7 +20,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_network_id.h"
 #include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;

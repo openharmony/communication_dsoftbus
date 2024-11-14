@@ -14,7 +14,7 @@
  */
 #include "lnn_settingdata_event_monitor.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnGetUnifiedDisplayDeviceName(char *unifiedDisplayName, uint32_t len)
 {
