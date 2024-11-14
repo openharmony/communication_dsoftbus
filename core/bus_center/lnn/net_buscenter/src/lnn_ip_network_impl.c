@@ -57,19 +57,19 @@ static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     if (ifName == NULL || ip == NULL || size == 0) {
         LNN_LOGE(LNN_BUILDER, "invalid parameter");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
     if (GetWlanIpv4Addr(ip, size) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
     if (strnlen(ip, size) == 0 || strnlen(ip, size) == size) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
     if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -77,12 +77,12 @@ static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
 static int32_t GetIpAddrFromNetlink(const char *ifName, char *ip, uint32_t size)
 {
     if (GetNetworkIpByIfName(ifName, ip, NULL, size) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
 
     if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
         LNN_LOGE(LNN_BUILDER, "invalid ip addr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -126,12 +126,12 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
     if (--retryTime > 0 && LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryGetAvailableIpAddr,
         NULL, GET_IP_INTERVAL_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper get available ip fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
     }
     if (retryTime <= 0) {
         retryTime = GET_IP_RETRY_TIMES;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
 }
 
 static int32_t OpenAuthPort(void)
@@ -146,12 +146,12 @@ static int32_t OpenAuthPort(void)
 
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ip failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     int32_t port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
     if (port < 0) {
         LNN_LOGE(LNN_BUILDER, "AuthStartListening failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PORT;
     }
     char *anonyIp = NULL;
     Anonymize(localIp, &anonyIp);
@@ -189,12 +189,12 @@ static int32_t OpenSessionPort(void)
     };
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, info.socketOption.addr, sizeof(info.socketOption.addr)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ip failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
     if (port < 0) {
         LNN_LOGE(LNN_BUILDER, "open session server failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PORT;
     }
     if (sessionPort == 0) {
         return LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, port);
@@ -264,13 +264,13 @@ static int32_t OpenIpLink(void)
     int32_t ret = OpenAuthPort();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "OpenAuthPort fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_PORT_PROCESS_FAILED;
     }
     ret = OpenSessionPort();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "OpenSessionPort fail");
         CloseAuthPort();
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_PORT_PROCESS_FAILED;
     }
     OpenProxyPort();
     return SOFTBUS_OK;
@@ -288,11 +288,11 @@ static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, ui
 {
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, ipAddrLen) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ip error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, ifNameLen) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ifName error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -300,11 +300,11 @@ static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, ui
 static int32_t SetLocalIpInfo(const char *ipAddr, const char *ifName)
 {
     if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set local ifName error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -340,12 +340,12 @@ static int32_t ReleaseMainPort(const char *ifName)
         }
         if (strcmp(ifName, oldMainIf) != 0) {
             LNN_LOGE(LNN_BUILDER, "if is not main port! ifName=%{public}s", ifName);
-            return SOFTBUS_ERR;
+            return SOFTBUS_CMP_FAIL;
         }
     } while (false);
     if (SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set local ip info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -354,25 +354,25 @@ static int32_t RequestMainPort(const char *ifName, const char *address)
 {
     if (strcmp(ifName, LNN_LOOPBACK_IFNAME) == 0) {
         LNN_LOGE(LNN_BUILDER, "loopback ifName not allowed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CMP_FAIL;
     }
     if (strcmp(address, LNN_LOOPBACK_IP) == 0) {
         LNN_LOGE(LNN_BUILDER, "loopback ip not allowed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CMP_FAIL;
     }
     LNN_LOGI(LNN_BUILDER, "get local ifName begin");
     char oldMainIf[NET_IF_NAME_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, oldMainIf, sizeof(oldMainIf)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ifName error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     LNN_LOGD(LNN_BUILDER, "get local ifName end");
     if (strcmp(oldMainIf, ifName) != 0 && strcmp(oldMainIf, LNN_LOOPBACK_IFNAME) != 0) {
         LNN_LOGE(LNN_BUILDER, "Only 1 local subnet is allowed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CMP_FAIL;
     }
     if (SetLocalIpInfo(address, ifName) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -388,7 +388,7 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
     }
     if (RequestMainPort(subnet->ifName, address)) {
         LNN_LOGE(LNN_BUILDER, "request main port failed! ifName=%{public}s", subnet->ifName);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_PORT_PROCESS_FAILED;
     }
     LNN_LOGI(LNN_BUILDER, "open ip link and start discovery");
     if (OpenIpLink() != SOFTBUS_OK) {
@@ -532,7 +532,7 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         }
     }
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_NETIF_STATUS_CHANGED;
     switch (event) {
         case IP_SUBNET_MANAGER_EVENT_IF_READY: {
             ret = EnableIpSubnet(subnet);
@@ -675,11 +675,11 @@ int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
     int32_t ret = SOFTBUS_OK;
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register ip addr change event handler failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init local ip as loopback failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
     DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     g_heartbeatEnable = IsEnableSoftBusHeartbeat();
@@ -692,12 +692,12 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     (void)self;
     if (netifMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "netif mgr is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LnnPhysicalSubnet *manager = CreateIpSubnetManager(self, netifMgr->ifName);
     if (manager == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc subnet mgr fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
