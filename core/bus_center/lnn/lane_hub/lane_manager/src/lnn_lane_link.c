@@ -312,6 +312,7 @@ void DetectEnableWifiDirectApply(void)
 {
     int32_t activeHml = 0;
     int32_t rawHml = 0;
+    int32_t passiveHml = 0;
     bool isDisableLowPower = false;
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
@@ -328,13 +329,16 @@ void DetectEnableWifiDirectApply(void)
             if (item->clientRef > 0) {
                 activeHml++;
             }
+            if (item->isServerSide) {
+                passiveHml++;
+            }
             SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
         }
         if (item->link.type == LANE_HML_RAW) {
             rawHml++;
         }
     }
-    if ((g_enabledLowPower || rawHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
+    if ((g_enabledLowPower || passiveHml > 0 || rawHml > 0) || (!g_enabledLowPower && activeHml > 1)) {
         isDisableLowPower = true;
     }
     LaneUnlock();
