@@ -479,7 +479,12 @@ void LnnDeinitSyncInfoManager(void)
         g_syncInfoManager.handlers[i] = NULL;
     }
     LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange);
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        LNN_LOGE(LNN_BUILDER, "clear reg sync info lock fail");
+        return;
+    }
     ClearSyncChannelInfo();
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
 }
 
