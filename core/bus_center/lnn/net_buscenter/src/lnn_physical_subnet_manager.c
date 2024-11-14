@@ -91,14 +91,14 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
         return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_BUILDER, "subnet list is full");
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_SUBNET_LIST_FULL;
 }
 
 int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet == NULL || subnet->protocol == NULL) {
         LNN_LOGE(LNN_BUILDER, "protocol of subnet is required");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
     LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start, currTime=%{public}" PRIu64, SoftBusGetSysTimeMs());
