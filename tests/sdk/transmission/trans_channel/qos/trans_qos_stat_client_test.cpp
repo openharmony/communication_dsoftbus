@@ -20,7 +20,7 @@
 #include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define TEST_TMP_BUF "tmpBuf"
 #define TEST_TMP_BUF_LEN 10

@@ -18,7 +18,7 @@
 #include "cmsis_os2.h"
 #include "comm_log.h"
 #include "softbus_adapter_errcode.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "utils_file.h"
 
 int32_t SoftBusReadFile(int32_t fd, void *readBuf, uint32_t maxLen)

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 DSOFTBUS_ROOT_PATH = "./../../.."
-import("$DSOFTBUS_ROOT_PATH/core/common/dfx/dsoftbus_dfx.gni")
 import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
 NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"

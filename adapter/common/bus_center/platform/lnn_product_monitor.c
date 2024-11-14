@@ -17,7 +17,7 @@
 
 #include "bus_center_event.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "hdf_io_service_if.h"
 
 #define HISYSLINK_SERVICE_NAME "hisyslink_service"

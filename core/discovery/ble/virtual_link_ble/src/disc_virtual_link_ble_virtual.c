@@ -16,7 +16,7 @@
 #include "disc_virtual_link_ble.h"
 
 #include "disc_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static bool IsConcern(uint32_t capability)
 {

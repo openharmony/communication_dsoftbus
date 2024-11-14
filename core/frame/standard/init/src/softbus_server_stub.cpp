@@ -23,7 +23,7 @@
 #include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
