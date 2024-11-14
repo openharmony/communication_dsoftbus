@@ -385,7 +385,7 @@ SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *client
         return NULL;
     }
 
-    if (strcpy_s(infoNode->pkgName, SESSION_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
+    if (strcpy_s(infoNode->pkgName, PKG_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
         SoftBusFree(infoNode);
         TRANS_LOGE(TRANS_SDK, "failed to strcpy pkgName.");
         return NULL;
