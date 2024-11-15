@@ -409,7 +409,12 @@ NO_SANITIZE("cfi") void LnnDeinitSyncInfoManager(void)
     for (i = 0; i < LNN_INFO_TYPE_COUNT; ++i) {
         g_syncInfoManager.handlers[i] = NULL;
     }
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "clear reg sync info lock fail");
+        return;
+    }
     ClearSyncChannelInfo();
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
 }
 
