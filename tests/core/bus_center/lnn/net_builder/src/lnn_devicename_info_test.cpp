@@ -226,7 +226,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler).WillOnce(Return(SOFTBUS_LOCK_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitDevicename();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = LnnInitDevicename();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnInitDevicename();
