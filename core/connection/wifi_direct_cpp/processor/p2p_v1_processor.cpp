@@ -911,6 +911,7 @@ int P2pV1Processor::SendConnectResponseAsGo(const NegotiateChannel &channel, con
         InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&response](const InterfaceInfo &interface) {
             response.SetLegacyP2pMac(interface.GetBaseMac());
             response.SetLegacyP2pIp(interface.GetIpString().ToIpString());
+            response.SetLegacyP2pGoIp(interface.GetIpString().ToIpString());
             response.SetLegacyP2pGoMac(interface.GetBaseMac());
             response.SetLegacyP2pGoPort(interface.GetP2pListenPort());
             response.SetLegacyP2pGroupConfig(interface.GetP2pGroupConfig());
@@ -2064,6 +2065,7 @@ void P2pV1Processor::CleanupIfNeed(int32_t reason, const std::string &remoteDevi
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "start cleanup ctx, reason=%{public}d", reason);
     (void)RemoveLink(remoteDeviceId);
+    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, remoteDeviceId);
 }
 
 void P2pV1Processor::Exclusive(const std::string &remoteDeviceId)

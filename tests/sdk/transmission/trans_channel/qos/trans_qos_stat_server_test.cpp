@@ -17,7 +17,7 @@
 
 #include <iostream>
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 namespace OHOS {
