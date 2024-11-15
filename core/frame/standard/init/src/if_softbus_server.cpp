@@ -16,7 +16,7 @@
 #include "if_softbus_server.h"
 
 #include "comm_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionName)
@@ -119,6 +119,14 @@ int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 int32_t ISoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
 {
     COMM_LOGE(COMM_SVC, "GetBusCenterExObj ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::SetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 } // namespace OHOS

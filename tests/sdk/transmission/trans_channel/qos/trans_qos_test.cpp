@@ -18,7 +18,7 @@
 #include "client_qos_manager.h"
 #include "client_trans_session_service.h"
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 

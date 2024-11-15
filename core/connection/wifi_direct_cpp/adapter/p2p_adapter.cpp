@@ -248,7 +248,7 @@ int32_t P2pAdapter::GetSelfWifiConfigInfo(std::string &config)
     uint8_t wifiConfig[CFG_DATA_MAX_BYTES] = { 0 };
     int32_t wifiConfigSize = 0;
     int32_t ret = Hid2dGetSelfWifiCfgInfo(TYPE_OF_GET_SELF_CONFIG, (char *)wifiConfig, &wifiConfigSize);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+    CONN_CHECK_AND_RETURN_RET_LOGE((ret == WIFI_SUCCESS) || (ret == ERROR_WIFI_ENHANCE_SVC), ToSoftBusErrorCode(ret),
         CONN_WIFI_DIRECT, "get self wifi config failed, error=%{public}d",
         ToSoftBusErrorCode(ret));
 
@@ -376,7 +376,7 @@ int32_t P2pAdapter::GetIpAddress(std::string &ipString)
     CONN_LOGI(CONN_WIFI_DIRECT, "interfaceName=%{public}s", interface.c_str());
     ret = WifiDirectUtils::GetInterfaceIpString(interface, ipString);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get interfaceIp string failed, error=%d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get interfaceIp string failed, error=%{public}d", ret);
     return SOFTBUS_OK;
 }
 

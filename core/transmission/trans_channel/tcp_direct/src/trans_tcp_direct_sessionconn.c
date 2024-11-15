@@ -22,7 +22,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
 
@@ -455,6 +455,7 @@ int32_t TransTdcGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+    TRANS_LOGE(TRANS_CTRL, "TcpChannelInfo not found, channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 
@@ -508,7 +509,6 @@ void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);
             g_tcpChannelInfoList->cnt--;
-            (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);

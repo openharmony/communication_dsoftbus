@@ -59,9 +59,9 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_json_utils.h"
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
@@ -159,7 +159,8 @@ LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr, const char *
     LnnConnectionFsm *connFsm = NULL;
 
     if (LnnGetNetBuilder()->connCount >= LnnGetNetBuilder()->maxConnCount) {
-        LNN_LOGE(LNN_BUILDER, "current connection num exceeds max limit, connCount=%{public}d", LnnGetNetBuilder()->connCount);
+        LNN_LOGE(LNN_BUILDER, "current connection num exceeds max limit, connCount=%{public}d",
+            LnnGetNetBuilder()->connCount);
         return NULL;
     }
     connFsm = LnnCreateConnectionFsm(addr, pkgName, isNeedConnect);

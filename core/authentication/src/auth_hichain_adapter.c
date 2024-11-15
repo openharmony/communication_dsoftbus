@@ -26,7 +26,7 @@
 #include "device_auth_defines.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
@@ -132,8 +132,12 @@ int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, Devi
     AUTH_CHECK_AND_RETURN_RET_LOGE(g_hichain != NULL, SOFTBUS_ERR, AUTH_HICHAIN, "hichain not initialized");
 
     int32_t ret = g_hichain->processData(authSeq, data, len, cb);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, AUTH_HICHAIN,
-        "hichain processData failed. ret=%{public}d", ret);
+    if (ret != HC_SUCCESS) {
+        AUTH_LOGE(AUTH_HICHAIN, "hichain processData failed. ret=%{public}d", ret);
+        uint32_t authErrCode = 0;
+        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+        return authErrCode;
+    }
 
     return SOFTBUS_OK;
 }

@@ -23,7 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
@@ -31,7 +31,7 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName(pkgName, &svcId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get bus center callback failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     svc->handle = svcId.handle;
     svc->token = svcId.token;
@@ -54,7 +54,7 @@ static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
     if (SERVER_GetAllClientIdentity(svcId, num) != SOFTBUS_OK) {
         SoftBusFree(svcId);
         LNN_LOGE(LNN_EVENT, "get bus center callback failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_IDENTITY_FAILED;
     }
     for (int i = 0; i < num; i++) {
         svc[i].handle = svcId[i].handle;
@@ -85,7 +85,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -93,7 +93,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     int32_t ans = SendRequest(svc, CLIENT_ON_JOIN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -113,7 +113,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -121,7 +121,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     int32_t ans = SendRequest(svc, CLIENT_ON_LEAVE_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -143,11 +143,11 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc num failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_NUM_FAILED;
     }
     if (num == 0) {
         LNN_LOGE(LNN_EVENT, "svc num is 0");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_NUM_ZERO;
     }
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
     if (svc == NULL) {
@@ -157,7 +157,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc num failed");
         SoftBusFree(svc);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -167,7 +167,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
         if (ans != SOFTBUS_OK) {
             LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
             SoftBusFree(svc);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
         }
     }
     SoftBusFree(svc);
@@ -191,11 +191,11 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc num failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_NUM_FAILED;
     }
     if (num == 0) {
         LNN_LOGE(LNN_EVENT, "svc num NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_NUM_ZERO;
     }
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
     if (svc == NULL) {
@@ -205,7 +205,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc num failed.");
         SoftBusFree(svc);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_CLIENT_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -215,7 +215,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
         if (ans != SOFTBUS_OK) {
             LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
             SoftBusFree(svc);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
         }
     }
     SoftBusFree(svc);
@@ -240,7 +240,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -248,7 +248,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     int32_t ans = SendRequest(svc, CLIENT_ON_TIME_SYNC_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -270,7 +270,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -278,7 +278,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     int32_t ans = SendRequest(svc, CLIENT_ON_PUBLISH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -300,7 +300,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -308,7 +308,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -330,7 +330,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_SERVICE_IDENTITY_FAILED;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -338,7 +338,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_DEVICE_FOUND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     return SOFTBUS_OK;
 }

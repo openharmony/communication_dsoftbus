@@ -70,6 +70,7 @@
         "i18n",
         "init",
         "ipc",
+        "i18n",
         "openssl",
         "os_account",
         "relational_store",
@@ -86,7 +87,8 @@
         "libcoap",
         "zlib",
         "libnl",
-        "power_manager"
+        "power_manager",
+        "ffrt"
       ],
       "third_party": [
         "cJSON",

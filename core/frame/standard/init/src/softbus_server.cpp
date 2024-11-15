@@ -22,7 +22,7 @@
 #include "string_ex.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_disc_server.h"
-#include "softbus_hidumper_interface.h"
+#include "legacy/softbus_hidumper_interface.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
 #include "softbus_utils.h"
@@ -426,5 +426,10 @@ int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType data
     (void)memset_s(&qosInfo, sizeof(QosInfo), 0, sizeof(QosInfo));
     ConvertQosInfo(qos, qosCount, &qosInfo);
     return LnnQueryLaneResource(&info, &qosInfo);
+}
+
+int32_t SoftBusServer::SetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    return LnnIpcSetLocalDeviceName(pkgName, displayName);
 }
 } // namespace OHOS

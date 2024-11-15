@@ -24,20 +24,20 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 
 #define WLAN_DETECT_TIMEOUT 3000
 
 typedef struct {
-    ListNode node;
-    LaneLinkInfo link;
     uint32_t laneReqId;
-    LaneLinkCb cb;
     union {
         uint32_t wlanFd;
     } connId;
     uint32_t laneDetectId;
+    LaneLinkInfo link;
+    ListNode node;
+    LaneLinkCb cb;
 } LaneDetectInfo;
 
 static SoftBusList g_laneDetectList;

@@ -50,6 +50,7 @@ libsoftbus_stream_src = [
 ]
 
 libsoftbus_stream_ext_deps = []
+
 if (defined(ohos_lite)) {
   libsoftbus_stream_inc += [
     "//third_party/cJSON",

@@ -14,29 +14,7 @@
  */
 #include "lnn_settingdata_event_monitor.h"
 
-#include "softbus_errcode.h"
-
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    (void)deviceName;
-    (void)len;
-    return SOFTBUS_ERR;
-}
-
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
-{
-    (void)handler;
-    return SOFTBUS_OK;
-}
-
-int32_t LnnInitDeviceNameMonitorImpl(void)
-{
-    return SOFTBUS_OK;
-}
-
-void RegisterNameMonitor(void)
-{
-}
+#include "softbus_error_code.h"
 
 int32_t LnnGetUnifiedDisplayDeviceName(char *unifiedDisplayName, uint32_t len)
 {

@@ -423,15 +423,14 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo001, TestSize.Le
 
     NSTACKX_DeviceInfo testNstackxDevice;
     DeviceInfo testDevice;
-    char nickname[DISC_MAX_NICKNAME_LEN] = { 0 };
     ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "{\"version\":\"1.0.0\"}");
     EXPECT_EQ(ret, EOK);
-    ret = ParseReservedInfo(&testNstackxDevice, &testDevice, nickname);
+    ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "test");
     EXPECT_EQ(ret, EOK);
-    ret = ParseReservedInfo(&testNstackxDevice, &testDevice, nickname);
+    ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
@@ -448,37 +447,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo002, TestSize.Le
     
     NSTACKX_DeviceInfo testNstackxDevice;
     DeviceInfo testDevice;
-    char nickname[DISC_MAX_NICKNAME_LEN] = { 0 };
-    ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo),
-        "{\"version\":\"1.0.0\",\"bData\":{\"nickname\":\"Jane\"}}");
-    EXPECT_EQ(ret, EOK);
-    ret = ParseReservedInfo(&testNstackxDevice, &testDevice, nickname);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = ParseReservedInfo(&testNstackxDevice, &testDevice, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
- * @tc.name: TestDiscCoapAdapterParseResInfo003
- * @tc.desc: Test DiscParseReservedInfo should return SOFTBUS_OK when given nickname or not
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo003, TestSize.Level1)
-{
-    int32_t ret = DiscNstackxInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    NSTACKX_DeviceInfo testNstackxDevice;
-    DeviceInfo testDevice;
-    char nickname[DISC_MAX_NICKNAME_LEN] = { 0 };
     ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "{\"version\":\"1.0.0\"}");
     EXPECT_EQ(ret, EOK);
-    ret = ParseReservedInfo(&testNstackxDevice, nullptr, nickname);
+    ret = ParseReservedInfo(&testNstackxDevice, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = ParseReservedInfo(&testNstackxDevice, &testDevice, nickname);
+    ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -493,7 +467,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo003, TestSize.Le
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    LnnInitLocalLedger();
     ASSERT_EQ(ret, SOFTBUS_OK);
     
     NSTACKX_DeviceInfo testNstackxDevice;
@@ -508,7 +481,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Le
     EXPECT_EQ(ret, EOK);
     ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
     EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_ETH);
-    LnnDeinitLocalLedger();
 }
 
 /*
@@ -521,7 +493,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Le
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    LnnInitLocalLedger();
     ASSERT_EQ(ret, SOFTBUS_OK);
     
     NSTACKX_DeviceInfo testNstackxDevInfo {
@@ -539,7 +510,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Le
     EXPECT_EQ(ret, EOK);
     ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
-    LnnDeinitLocalLedger();
 }
 
 /*
@@ -553,7 +523,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Le
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    LnnInitLocalLedger();
     ASSERT_EQ(ret, SOFTBUS_OK);
     
     NSTACKX_DeviceInfo testNstackxDevInfo {
@@ -569,7 +538,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Le
     testNstackxDevInfo.mode = PUBLISH_MODE_PROACTIVE;
     ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    LnnDeinitLocalLedger();
 }
 
 /*

@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("../../adapter/common/net/bluetooth/net_bluetooth.gni")
-import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../dsoftbus.gni")
 
 br_adapter_src =
@@ -26,7 +25,7 @@ bus_center_core_adapter_src = [
   "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
 ]
 bus_center_core_adapter_inc = [ "$dsoftbus_root_path/adapter/common/include" ]
-bus_center_core_adapter_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+bus_center_core_adapter_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 bus_center_core_adapter_external_deps = [ "init:libbegetutil" ]
 
 if (dsoftbus_feature_lnn_cloud_sync) {
@@ -96,6 +95,7 @@ if (defined(ohos_lite)) {
       "ability_runtime:dataobs_manager",
       "data_share:datashare_common",
       "data_share:datashare_consumer",
+      "i18n:intl_util",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
     ]

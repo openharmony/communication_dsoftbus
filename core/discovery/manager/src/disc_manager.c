@@ -25,7 +25,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_discreporter.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
 #include "softbus_utils.h"
 
 #define DEVICE_TYPE_SIZE_MAX 3

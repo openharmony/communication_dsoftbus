@@ -28,7 +28,7 @@
 #include "lnn_time_sync_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -116,7 +116,7 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *ad
 
     if (list == NULL) {
         LNN_LOGE(LNN_EVENT, "request info list empty");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LIST_EMPTY;
     }
     LIST_FOR_EACH_ENTRY(info, &list->list, JoinLnnRequestInfo, node) {
         if (strncmp(pkgName, info->pkgName, strlen(pkgName)) != 0) {
@@ -390,7 +390,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
     if (list == NULL) {
         LNN_LOGE(LNN_EVENT, "request info is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LIST_EMPTY;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
@@ -416,7 +416,7 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
     if (list == NULL) {
         LNN_LOGE(LNN_EVENT, "request info is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LIST_EMPTY;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
@@ -488,4 +488,12 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void 
 void BusCenterServerDeathCallback(const char *pkgName)
 {
     (void)pkgName;
+}
+
+int32_t LnnIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
 }

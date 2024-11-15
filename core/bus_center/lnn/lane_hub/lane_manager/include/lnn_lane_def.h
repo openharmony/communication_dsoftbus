@@ -54,15 +54,15 @@ typedef enum {
 } LaneTransPriority;
 
 typedef struct {
-    uint32_t serialNum;
+    uint16_t baseProfileNum;
     LaneLinkType linkType;
-    int32_t phyChannel;
     LaneBandwidth bw;
     LaneTimeSlotPolicy ts;
     LanePowerType energy;
     LaneTransType content;
     LaneTransPriority priority;
-    uint16_t baseProfileNum;
+    uint32_t serialNum;
+    int32_t phyChannel;
     uint32_t maxSpeed;
 } LaneProfile;
 

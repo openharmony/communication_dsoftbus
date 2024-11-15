@@ -27,7 +27,7 @@
 #include "want.h"
 #include "wifi_msg.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "kits/c/wifi_p2p.h"
 #include "wifi_ap_msg.h"
 #include "softbus_wifi_api_adapter.h"

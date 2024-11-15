@@ -13,7 +13,6 @@
 
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../../core/discovery/coap/disc_coap.gni")
 import("../../../../../../dsoftbus.gni")
 
@@ -29,7 +28,7 @@ ohos_unittest("DiscCoapParserTest") {
   include_dirs = disc_coap_inc
 
   deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/core/common:softbus_utils",
   ]
 

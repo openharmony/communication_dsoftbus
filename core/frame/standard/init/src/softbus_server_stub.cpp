@@ -23,7 +23,7 @@
 #include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
@@ -56,6 +56,7 @@ namespace OHOS {
         constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
+        constexpr int32_t DEVICE_NAME_SIZE_MAX = 128;
     }
 
 
@@ -118,7 +119,7 @@ static int32_t CheckAndRecordAccessToken(const char *permission)
     int32_t successCnt = (int32_t)(ret == Security::AccessToken::PERMISSION_GRANTED);
     int32_t failCnt = JUDG_CNT - successCnt;
     if (type == Security::AccessToken::TOKEN_HAP) {
-        Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
+        (void)Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
     }
     return ret;
 }
@@ -176,6 +177,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
+    memberFuncMap_[SERVER_SET_DEV_NAME] = &SoftBusServerStub::SetDeviceNameInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -220,6 +222,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_SET_DEV_NAME] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -1641,6 +1644,32 @@ int32_t SoftBusServerStub::GetBusCenterExObjInner(MessageParcel &data, MessagePa
             COMM_LOGE(COMM_SVC, "GetBusCenterExObjInner write object failed!");
             return SOFTBUS_TRANS_PROXY_WRITEOBJECT_FAILED;
         }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SetDeviceNameInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(DM_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_SET_DEV_NAME);
+    const char *displayName = data.ReadCString();
+    if (displayName == nullptr || strnlen(displayName, DEVICE_NAME_SIZE_MAX) >= DEVICE_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read displayName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    int32_t retReply = SetLocalDeviceName(pkgName, displayName);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
 }

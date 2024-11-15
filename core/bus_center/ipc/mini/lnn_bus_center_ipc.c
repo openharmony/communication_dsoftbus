@@ -24,7 +24,7 @@
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);
@@ -232,4 +232,12 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void 
 void BusCenterServerDeathCallback(const char *pkgName)
 {
     (void)pkgName;
+}
+
+int32_t LnnIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
 }

@@ -98,11 +98,6 @@ void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32
     return GetServiceInterface()->LnnNotifyMasterNodeChanged(isMaster, masterNodeUdid, weight);
 }
 
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
-{
-    return GetServiceInterface()->LnnInitGetDeviceName(handler);
-}
-
 void RegisterNameMonitor(void)
 {
     return GetServiceInterface()->RegisterNameMonitor();
@@ -116,11 +111,6 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
     return GetServiceInterface()->LnnOfflineTimingByHeartbeat(networkId, addrType);
-}
-
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    return GetServiceInterface()->LnnGetSettingDeviceName(deviceName, len);
 }
 
 uint32_t AuthGenRequestId(void)
@@ -156,11 +146,6 @@ int32_t SoftBusDisconnectDevice(void)
 ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
 {
     return GetServiceInterface()->LnnDiscTypeToConnAddrType(type);
-}
-
-bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr)
-{
-    return GetServiceInterface()->LnnIsConnectionAddrInvalid(addr);
 }
 
 void UpdateProfile(const NodeInfo *info)
@@ -274,24 +259,15 @@ int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType e
     return SOFTBUS_OK;
 }
 
-int32_t LnnServicetInterfaceMock::ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler)
-{
-    if (handler == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    g_deviceNameHandler = handler;
-    return SOFTBUS_OK;
-}
-
 int32_t LnnServicetInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len)
 {
     if (deviceName == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }

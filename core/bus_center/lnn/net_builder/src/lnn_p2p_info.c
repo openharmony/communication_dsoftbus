@@ -17,12 +17,13 @@
 
 #include <securec.h>
 
-#include "auth_device_common_key.h"
 #include "anonymizer.h"
+#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_link_p2p.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_secure_storage.h"
@@ -31,7 +32,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "wifi_direct_manager.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"
@@ -358,6 +359,9 @@ int32_t LnnInitP2p(void)
 {
     if (LnnInitPtk() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk fail");
+    }
+    if (LnnInitPtkSyncListener() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init ptk listener fail");
     }
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }

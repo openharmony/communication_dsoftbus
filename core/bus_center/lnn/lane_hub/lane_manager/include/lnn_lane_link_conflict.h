@@ -50,14 +50,14 @@ typedef struct {
 } DevIdentifyInfo;
 
 typedef struct {
-    ListNode node;
-    DevIdentifyInfo identifyInfo;
+    uint8_t devIdCnt;
+    uint8_t devIpCnt;
     LaneLinkType releaseLink;
     LinkConflictType conflictType;
-    uint8_t devIdCnt;
+    DevIdentifyInfo identifyInfo;
     char (*devIdList)[NETWORK_ID_BUF_LEN];
-    uint8_t devIpCnt;
     char (*devIpList)[CONFLICT_DEV_IP_LEN];
+    ListNode node;
 } LinkConflictInfo;
 
 int32_t InitLaneLinkConflict(void);
@@ -68,6 +68,8 @@ int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType c
 int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
     LinkConflictInfo *outputInfo);
 void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType);
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink);
+void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType releaseLink);
 
 #ifdef __cplusplus
 }

@@ -49,22 +49,23 @@ bus_center_server_src += [
 ]
 
 bus_center_server_inc += [
+  "$dsoftbus_root_path/interface/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/interface",
   "$dsoftbus_root_path/core/bus_center/ipc/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
-  "$softbus_adapter_common/dfx/include",
 ]
 
 bus_center_server_external_deps = []
 
 if (defined(global_parts_info) && defined(global_parts_info.hicollie)) {
   bus_center_server_src +=
-      [ "$softbus_adapter_common/dfx/softbus_adapter_xcollie.cpp" ]
+      [ "$dsoftbus_dfx_path/watchdog/legacy/softbus_adapter_xcollie.cpp" ]
   bus_center_server_external_deps += [ "hicollie:libhicollie" ]
 } else {
-  bus_center_server_src +=
-      [ "$softbus_adapter_common/dfx/softbus_adapter_xcollie_virtual.cpp" ]
+  bus_center_server_src += [
+    "$dsoftbus_dfx_path/watchdog/legacy/softbus_adapter_xcollie_virtual.cpp",
+  ]
 }
 
 if (defined(ohos_lite)) {
@@ -138,9 +139,23 @@ lnn_lp_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                               "value")
 
 if (lnn_lp_enhanced) {
-  import("../../dsoftbus_enhance/adapter/common/adapter_mlps.gni")
+  import("../../dsoftbus_enhance/adapter/common/mlps/adapter_mlps.gni")
   bus_center_server_inc += adapter_mlps_inc
   bus_center_server_src += adapter_mlps_src
+}
+
+lnn_lane_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/src"
+lnn_lane_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                [
+                                  "$native_source_path",
+                                  "$lnn_lane_dir",
+                                ],
+                                "value")
+
+if (lnn_lane_enhanced) {
+  import("../../dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lane.gni")
+  bus_center_server_src += bus_center_lane_enhance_src
+  bus_center_server_external_deps += bus_center_lane_enhance_external_deps
 }
 
 route_dir = "dsoftbus_enhance/components/newip/route"

@@ -17,10 +17,12 @@ import("../../../../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 dsoftbus_root_path = "../../../../../../../.."
 
-## UnitTest VtpStreamSocketTest {{{
 ohos_unittest("VtpStreamSocketTest") {
   module_out_path = module_output_path
-  sources = [ "vtp_stream_socket_test.cpp" ]
+  sources = [
+    "softbus_stream_test_mock.cpp",
+    "vtp_stream_socket_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -61,6 +63,7 @@ ohos_unittest("VtpStreamSocketTest") {
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }

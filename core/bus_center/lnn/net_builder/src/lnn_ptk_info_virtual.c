@@ -15,7 +15,7 @@
 
 #include "lnn_p2p_info.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 void LnnLoadPtkInfo(void)
 {
@@ -73,7 +73,7 @@ int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t
     return SOFTBUS_OK;
 }
 
-int32_t LnnSyncPtk(char *networkId)
+int32_t LnnSyncPtk(const char *networkId)
 {
     (void)networkId;
     return SOFTBUS_OK;
@@ -115,4 +115,3 @@ void LnnDeinitPtk(void)
 {
     return;
 }
-

@@ -61,9 +61,9 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_json_utils.h"
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
@@ -483,13 +483,12 @@ static void DeinitNodeInfoSync(void)
 
 static void NetBuilderConfigInit(void)
 {
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT,
-        (unsigned char *)&LnnGetNetBuilder()->maxConnCount, sizeof(LnnGetNetBuilder()->maxConnCount)) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char *)&LnnGetNetBuilder()->maxConnCount,
+        sizeof(LnnGetNetBuilder()->maxConnCount)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get lnn max connection count fail, use default value");
         LnnGetNetBuilder()->maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
-    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
-        (unsigned char *)&LnnGetNetBuilder()->maxConcurrentCount,
+    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM, (unsigned char *)&LnnGetNetBuilder()->maxConcurrentCount,
         sizeof(LnnGetNetBuilder()->maxConcurrentCount)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get lnn max conncurent count fail, use default value");
         LnnGetNetBuilder()->maxConcurrentCount = 0;
@@ -612,8 +611,8 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
     }
     if (info != NULL) {
         LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
+        DfxRecordDeviceInfoExchangeEndTime(info);
     }
-    DfxRecordDeviceInfoExchangeEndTime(info);
 }
 
 static void OnDeviceDisconnect(AuthHandle authHandle)

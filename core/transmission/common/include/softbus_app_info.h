@@ -79,17 +79,17 @@ typedef enum {
 } UdpChannelOptType;
 
 typedef struct {
-    ApiVersion apiVersion;
     char deviceId[DEVICE_ID_SIZE_MAX];
     char pkgName[PKG_NAME_SIZE_MAX];
     char sessionName[SESSION_NAME_SIZE_MAX];
-    int uid;
-    int pid;
     char authState[AUTH_STATE_SIZE_MAX];
     char addr[IP_LEN];
+    int uid;
+    int pid;
     int port;
-    int64_t channelId;
+    ApiVersion apiVersion;
     uint32_t dataConfig;
+    int64_t channelId;
 } AppInfoData;
 
 typedef struct {
@@ -99,6 +99,9 @@ typedef struct {
     char peerNetWorkId[DEVICE_ID_SIZE_MAX];
     char peerUdid[DEVICE_ID_SIZE_MAX];
     char peerVersion[DEVICE_VERSION_SIZE_MAX];
+    char tokenName[PKG_NAME_SIZE_MAX];
+    bool isClient;
+    uint16_t fastTransDataSize;
     RouteType routeType;
     BusinessType businessType;
     StreamType streamType;
@@ -106,8 +109,6 @@ typedef struct {
     UdpChannelOptType udpChannelOptType;
     int fd;
     AppType appType;
-    AppInfoData myData;
-    AppInfoData peerData;
     ProtocolType protocol;
     int32_t encrypt;
     int32_t algorithm;
@@ -117,19 +118,18 @@ typedef struct {
     int myHandleId;
     int peerHandleId;
     int32_t transFlag;
-    int64_t authSeq;
     int32_t linkType;
     int32_t connectType;
     int32_t channelType;
     int32_t errorCode;
+    uint32_t callingTokenId; // for transmission access control
+    int32_t osType;
+    const uint8_t *fastTransData;
     int64_t timeStart;
     int64_t connectedStart;
-    const uint8_t *fastTransData;
-    uint16_t fastTransDataSize;
-    uint32_t callingTokenId; // for transmission access control
-    bool isClient;
-    char tokenName[PKG_NAME_SIZE_MAX];
-    int32_t osType;
+    int64_t authSeq;
+    AppInfoData myData;
+    AppInfoData peerData;
 } AppInfo;
 
 #ifdef __cplusplus

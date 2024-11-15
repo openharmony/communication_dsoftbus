@@ -98,7 +98,6 @@ ohos_unittest("BrConnectionTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    #"$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/adapter/br/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -109,6 +108,7 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/connection/br",
     "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
     "//foundation/communication/bluetooth/interfaces/inner_api/include",

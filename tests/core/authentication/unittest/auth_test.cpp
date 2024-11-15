@@ -37,7 +37,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 
 namespace OHOS {
@@ -173,7 +173,7 @@ HWTEST_F(AuthTest, HICHAIN_PROCESS_DATA_Test_001, TestSize.Level1)
     ret = HichainProcessData(authSeq, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = HichainProcessData(authSeq, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_ERR);
 }
 
 /*

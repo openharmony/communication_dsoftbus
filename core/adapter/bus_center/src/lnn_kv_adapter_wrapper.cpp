@@ -23,7 +23,7 @@
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
 #include "iservice_registry.h"

@@ -35,11 +35,10 @@
 #include "softbus_client_frame_manager.h"
 #include "softbus_client_stub_interface.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
-#include <unistd.h>
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -155,7 +154,7 @@ static RestartEventCallback g_restartAuthParaCallback = nullptr;
 static void RestartAuthParaNotify(void)
 {
     if (g_restartAuthParaCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!");
+        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used");
         return;
     }
     if (g_restartAuthParaCallback() != SOFTBUS_OK) {
@@ -197,22 +196,11 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
+    RestartAuthParaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
     RestartRegDataLevelChange();
-    RestartAuthParaNotify();
-}
-
-int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
-{
-    if (callback == nullptr) {
-        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!");
-        return SOFTBUS_ERR;
-    }
-    g_restartAuthParaCallback = callback;
-    COMM_LOGI(COMM_SDK, "Restart event callback register success!");
-    return SOFTBUS_OK;
 }
 
 void RestartAuthParaCallbackUnregister(void)
@@ -220,6 +208,16 @@ void RestartAuthParaCallbackUnregister(void)
     g_restartAuthParaCallback = nullptr;
 }
 
+int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid");
+        return SOFTBUS_ERR;
+    }
+    g_restartAuthParaCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart event callback register success!");
+    return SOFTBUS_OK;
+}
 
 int32_t ClientStubInit(void)
 {
