@@ -158,7 +158,7 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
     }
     auto ret = P2pAdapter::P2pConfigGcIp(groupInfo->interface, operation->content_.gcIp);
     P2pEntity::GetInstance().Unlock();
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "config gc ip failed, error=%d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "config gc ip failed, error=%{public}d", ret);
 }
 
 void P2pConnectState::OnP2pConnectionChangeEvent(
@@ -176,7 +176,7 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
     P2pOperationResult result;
     if (ret != SOFTBUS_OK || info.connectState == P2P_DISCONNECTED) {
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
-        CONN_LOGE(CONN_WIFI_DIRECT, "connect call event failed, error=%d", result.errorCode_);
+        CONN_LOGE(CONN_WIFI_DIRECT, "connect call event failed, error=%{public}d", result.errorCode_);
     } else {
         result.errorCode_ = SOFTBUS_OK;
     }
