@@ -230,6 +230,7 @@ static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg
     }
     if (fsm->looper->PostMessage == NULL) {
         LNN_LOGE(LNN_STATE, "PostMessage is null");
+        SoftBusFree(msg);
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->PostMessage(fsm->looper, msg);
@@ -335,6 +336,7 @@ int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
     }
     if (fsm->looper->PostMessageDelay == NULL) {
         LNN_LOGE(LNN_STATE, "PostMessageDelay is null");
+        SoftBusFree(msg);
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->PostMessageDelay(fsm->looper, msg, delayMillis);
