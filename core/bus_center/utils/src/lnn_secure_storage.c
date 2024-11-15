@@ -15,7 +15,7 @@
 
 #include "lnn_secure_storage.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnSaveDeviceData(const char *data, LnnDataType dataType)
 {

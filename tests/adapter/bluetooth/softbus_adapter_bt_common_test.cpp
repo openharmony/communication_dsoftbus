@@ -18,7 +18,7 @@
 #include "comm_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #include "assert_helper.h"
 #include "bluetooth_mock.h"

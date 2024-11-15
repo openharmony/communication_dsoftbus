@@ -41,12 +41,12 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "bus_center_event.h"
 
 DistributedNetLedger g_distributedNetLedger;
@@ -956,6 +956,16 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
         return;
     }
+        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
+        sizeof(info->cipherInfo.key)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
+        return;
+    }
+    if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
+        sizeof(info->cipherInfo.iv)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
+        return;
+    }
     LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
     if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
@@ -1285,14 +1295,6 @@ static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type
     return REPORT_OFFLINE;
 }
 
-static void LnnCleanNodeInfo(NodeInfo *info)
-{
-    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
-    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
-    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    LNN_LOGI(LNN_LEDGER, "need to report offline");
-}
-
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
@@ -1336,7 +1338,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGI(LNN_LEDGER, "the state is already offline, no need to report offline");
         return REPORT_NONE;
     }
-    LnnCleanNodeInfo(info);
+    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LNN_LOGI(LNN_LEDGER, "need to report offline");
     DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
     return REPORT_OFFLINE;
 }
@@ -1513,11 +1518,11 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
         LNN_LOGE(LNN_LEDGER, "strcpy_s p2pMac to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, (char *)newInfo->rpaInfo.peerIrk,
-            LFINDER_IRK_LEN) != EOK) {
+        LFINDER_IRK_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s peerIrk to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, (char *)newInfo->rpaInfo.publicAddress,
-            LFINDER_MAC_ADDR_LEN) != EOK) {
+        LFINDER_MAC_ADDR_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s publicAddress to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) !=

@@ -15,7 +15,7 @@
 
 #include "lnn_compress.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 /* compress data by GZIP  */
 int32_t DataCompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLen)

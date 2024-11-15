@@ -26,7 +26,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define LNN_BT_PROTOCOL_PRI 10
@@ -198,7 +198,8 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         case BT_SUBNET_MANAGER_EVENT_IF_DOWN:
             if (type == LNN_NETIF_TYPE_BR) {
                 ret = DisableBrSubnet(subnet);
-            } else if (type == LNN_NETIF_TYPE_BLE) {
+            }
+            if (type == LNN_NETIF_TYPE_BLE) {
                 ret = DisableBleSubnet(subnet);
             }
             break;
