@@ -15,6 +15,7 @@
 
 #include "lnn_net_capability.h"
 
+#include <stdint.h>
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
