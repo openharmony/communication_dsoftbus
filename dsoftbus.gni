@@ -15,7 +15,9 @@ hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 dsoftbus_root_path = rebase_path(".")
 dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
 dsoftbus_core_path = "${dsoftbus_root_path}/core"
+dsoftbus_dfx_path = "${dsoftbus_root_path}/dfx"
 dsoftbus_test_path = "${dsoftbus_root_path}/tests"
+dsoftbus_test_dfx_path = "${dsoftbus_test_path}/dfx"
 dsoftbus_fuzz_out_path = "dsoftbus/soft_bus"
 
 declare_args() {
@@ -83,6 +85,9 @@ if (defined(ohos_lite)) {
     os_type = "standard"
   }
   defines = [ "SOFTBUS_LINUX" ]
+  if (is_standard_system) {
+    defines += [ "SOFTBUS_STANDARD_OS" ]
+  }
   import("//build/ohos.gni")
   import(
       "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
@@ -104,8 +109,10 @@ if (defined(global_parts_info) &&
   dsoftbus_feature_lnn_cloud_sync = true
 }
 
-if (defined(global_parts_info) && !defined(global_parts_info.global_i18n)) {
+if (defined(global_parts_info) && !defined(global_parts_info.i18n)) {
   support_i18n = false
 } else {
   support_i18n = true
 }
+
+import("$dsoftbus_dfx_path/dsoftbus_dfx.gni")

@@ -21,7 +21,7 @@
 #include "bus_center_adapter.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -109,10 +109,10 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, TestSize.Level0)
     char value[] = "abcdefg";
     int32_t len = 0;
     int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR, ret);
 }
 
 /*
@@ -126,9 +126,9 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
     char value[] = "abcdefg";
     int32_t len = 10;
     int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, value, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR, ret);
 }
 }

@@ -21,7 +21,7 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define TEST_SESSION_NAME "com.softbus.tcpdirect.test"
 #define TEST_PKG_NAME "com.test.tcpdirect.demo.pkgname"

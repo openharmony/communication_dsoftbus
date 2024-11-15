@@ -155,5 +155,20 @@ int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, 
 {
     return GetTransLaneIf()->CheckLaneResourceNumByLinkType(peerUdid, type, laneNum);
 }
+
+void DetectEnableWifiDirectApply(void)
+{
+    GetTransLaneIf()->DetectEnableWifiDirectApply();
+}
+
+void DetectDisableWifiDirectApply(void)
+{
+    GetTransLaneIf()->DetectDisableWifiDirectApply();
+}
+
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
+{
+    return GetTransLaneIf()->CheckLinkConflictByReleaseLink(releaseLink);
+}
 }
 } // namespace OHOS

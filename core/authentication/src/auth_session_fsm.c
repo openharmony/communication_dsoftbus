@@ -33,7 +33,7 @@
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
@@ -1065,7 +1065,7 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
         LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_AUTH_DATA, lnnAuditExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
-            CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+            CompleteAuthSession(authFsm, ret);
         } else {
             AUTH_LOGD(AUTH_FSM, "auth has finished, ignore this processing failure");
         }

@@ -25,16 +25,15 @@
 #include "message_parcel.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
 sptr<IRemoteObject> g_remoteProxy = nullptr;
-namespace {
 uint32_t g_getSystemAbilityId = 2;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
-sptr<IRemoteObject> GetSystemAbility()
+static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
 
@@ -59,7 +58,6 @@ sptr<IRemoteObject> GetSystemAbility()
         return nullptr;
     }
     return reply.ReadRemoteObject();
-}
 }
 
 int32_t BusCenterServerProxy::BusCenterServerProxyStandardInit(void)
@@ -774,6 +772,7 @@ int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const SubscribeInf
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
         return SOFTBUS_IPC_ERR;
     }
+
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
@@ -983,7 +982,7 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
         return SOFTBUS_ERR;
     }
 
-    bool targetNetworkIdIsNull = targetNetworkId == nullptr;
+    bool targetNetworkIdIsNull = targetNetworkId == nullptr ? true : false;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
@@ -1075,7 +1074,7 @@ int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        LNN_LOGE(LNN_EVENT, "GetBusCenterExObj write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
@@ -1086,7 +1085,7 @@ int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
-        LNN_LOGE(LNN_EVENT, "send ret failed");
+        LNN_LOGE(LNN_EVENT, "GetBusCenterExObj send ret failed");
         return SOFTBUS_ERR;
     }
     if (ret == SOFTBUS_OK) {
@@ -1103,5 +1102,45 @@ int32_t BusCenterServerProxy::EvaluateQos(const char *peerNetworkId, TransDataTy
     (void)qos;
     (void)qosCount;
     return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::SetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    if (pkgName == nullptr || displayName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkg name failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(displayName)) {
+        LNN_LOGE(LNN_EVENT, "write displayName failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_SET_DEV_NAME, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    return serverRet;
 }
 } // namespace OHOS

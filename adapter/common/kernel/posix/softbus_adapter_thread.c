@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static pthread_mutex_t g_adapterStaticLock = PTHREAD_MUTEX_INITIALIZER;
 /* mutex */

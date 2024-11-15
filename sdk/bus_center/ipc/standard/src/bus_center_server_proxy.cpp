@@ -22,7 +22,7 @@
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 using namespace OHOS;
@@ -315,6 +315,20 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     int32_t ret = g_serverProxy->SyncTrustedRelationShip(pkgName, msg, msgLen);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "SyncTrustedRelationShip failed");
+    }
+    return ret;
+}
+
+int32_t ServerIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    LNN_LOGI(LNN_EVENT, "enter");
+    if (g_serverProxy == nullptr && BusCenterServerProxyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int32_t ret = g_serverProxy->SetLocalDeviceName(pkgName, displayName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "SetLocalDeviceName failed, ret=%{public}d", ret);
     }
     return ret;
 }

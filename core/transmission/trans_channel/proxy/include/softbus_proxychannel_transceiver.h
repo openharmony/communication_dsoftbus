@@ -28,11 +28,11 @@ extern "C" {
 typedef struct {
     ListNode node;
     uint32_t requestId;
-    ConnectOption connInfo;
     uint32_t connId;
     int32_t ref;
     uint32_t state;
     bool isServerSide;
+    ConnectOption connInfo;
 } ProxyConnInfo;
 
 void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan);

@@ -19,8 +19,6 @@ import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../../../.."
-
 ohos_fuzztest("BrConnectionFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/br/fuzztest/brconnection_fuzzer"

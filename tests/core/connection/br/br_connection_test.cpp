@@ -28,7 +28,7 @@
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "wrapper_br_interface.h"
 
 #include "softbus_conn_br_pending_packet.h"
@@ -86,9 +86,9 @@ int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t length)
     (void)clientFd;
     (void)buf;
     if (length <= 0) {
-        return BR_READ_FAILED;
+        return BR_READ_SOCKET_CLOSED;
     }
-    return SOFTBUS_OK;
+    return length;
 }
 
 int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t length)
@@ -401,6 +401,49 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest009, TestSize.Level1)
     EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = g_connectFuncInterface->PreventConnection(option, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, ConnBrTransReadOneFrame, TestSize.Level1)
+{
+    LimitedBuffer buffer = {
+        .length = sizeof(ConnPktHead) - 1,
+        .capacity = 0,
+    };
+
+    ConnPktHead head = {0};
+    head.magic = MAGIC_NUMBER + 1;
+    head.len = sizeof(ConnPktHead);
+    buffer.buffer = (uint8_t *)(&head);
+
+    uint8_t *outData = NULL;
+    uint32_t connectionId = 1;
+    int32_t socketHandle = 1;
+    int32_t ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
+    EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, BrTransSend, TestSize.Level1)
+{
+    uint32_t connectionId = 1;
+    int32_t socketHandle = 1;
+    uint8_t data = {0};
+    int32_t ret = BrTransSend(connectionId, socketHandle, 0, &data, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, ConnBrTransConfigPostLimit, TestSize.Level1)
+{
+    LimitConfiguration configuration = {
+        .type = CONNECT_BR,
+        .active = true,
+        .windowInMillis = 1,
+        .quotaInBytes = 0,
+    };
+    int32_t ret = ConnBrTransConfigPostLimit(&configuration);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    configuration.active = false;
+    ret = ConnBrTransConfigPostLimit(&configuration);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

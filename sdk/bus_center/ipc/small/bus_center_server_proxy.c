@@ -25,7 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_server_ipc_interface_code.h"
 
@@ -772,5 +772,12 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     (void)pkgName;
     (void)msg;
     (void)msgLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcSetLocalDeviceName(const char *pkgName, const char *displayName)
+{
+    (void)pkgName;
+    (void)displayName;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

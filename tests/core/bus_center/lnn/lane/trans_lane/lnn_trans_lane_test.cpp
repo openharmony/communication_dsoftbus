@@ -120,30 +120,6 @@ static LaneAllocListener g_listenerCb = {
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
-static int32_t PrejudgeAvailabilitySucc(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
-{
-    (void)remoteNetworkId;
-    (void)connectType;
-    GTEST_LOG_(INFO) << "PrejudgeAvailabilitySucc Enter";
-    return SOFTBUS_OK;
-}
-
-static int32_t PrejudgeAvailabilityErr(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
-{
-    (void)remoteNetworkId;
-    (void)connectType;
-    GTEST_LOG_(INFO) << "PrejudgeAvailabilitySucc Enter";
-    return SOFTBUS_LANE_NOT_FOUND;
-}
-
-static struct WifiDirectManager g_managerSucc = {
-    .prejudgeAvailability = PrejudgeAvailabilitySucc,
-};
-
-static struct WifiDirectManager g_managerErr = {
-    .prejudgeAvailability = PrejudgeAvailabilityErr,
-};
-
 /*
 * @tc.name: LNN_TRANS_LANE_001
 * @tc.desc: Init
@@ -567,9 +543,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_001, TestSize.Le
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetNetworkIdByUdid).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_managerSucc));
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->init(nullptr);
@@ -596,6 +570,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_001, TestSize.Le
     EXPECT_CALL(laneMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_BASE));
+    EXPECT_CALL(laneMock, CheckLinkConflictByReleaseLink).WillRepeatedly(Return(SOFTBUS_OK));
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessHml;
     uint32_t laneReqId = 11;
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
@@ -624,10 +599,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_002, TestSize.Le
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, GetWifiDirectManager).WillOnce(Return(&g_managerErr)).WillOnce(Return(&g_managerSucc))
-        .WillOnce(Return(&g_managerErr)).WillRepeatedly(Return(&g_managerSucc));
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->init(nullptr);
@@ -654,6 +626,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_002, TestSize.Le
     EXPECT_CALL(laneMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_BASE));
+    EXPECT_CALL(laneMock, CheckLinkConflictByReleaseLink).WillRepeatedly(Return(SOFTBUS_OK));
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessHml;
     uint32_t laneReqId = 21;
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
@@ -682,9 +655,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_003, TestSize.Le
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_managerSucc));
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->init(nullptr);
@@ -713,6 +684,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_003, TestSize.Le
     EXPECT_CALL(laneMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_BASE));
+    EXPECT_CALL(laneMock, CheckLinkConflictByReleaseLink).WillRepeatedly(Return(SOFTBUS_OK));
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessHml;
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);

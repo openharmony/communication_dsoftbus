@@ -18,7 +18,7 @@
 
 #include "mock/softbus_proxychannel_manager_mock_test.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_proxychannel_manager.c"
 

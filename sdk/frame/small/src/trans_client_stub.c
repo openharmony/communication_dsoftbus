@@ -17,7 +17,7 @@
 
 #include "client_trans_channel_callback.h"
 #include "ipc_skeleton.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
 

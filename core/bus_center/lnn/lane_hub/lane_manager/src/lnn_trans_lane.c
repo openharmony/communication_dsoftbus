@@ -33,10 +33,11 @@
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "wifi_direct_error_code.h"
@@ -72,8 +73,8 @@ typedef enum {
 
 typedef struct {
     BuildLinkStatus status;
-    LaneLinkInfo linkInfo;
     int32_t result;
+    LaneLinkInfo linkInfo;
 } LinkStatusInfo;
 
 typedef struct {
@@ -886,29 +887,6 @@ static bool GetAuthType(const char *peerNetWorkId)
     return ((1 << ONLINE_HICHAIN) == value);
 }
 
-static int32_t CheckLinkConflict(const char* peerUdid, LaneLinkType linkType)
-{
-    if (linkType != LANE_HML) {
-        return SOFTBUS_OK;
-    }
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get networkId by uuid fail");
-        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
-    }
-    int32_t conflictErr = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
-    if (conflictErr != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "link=%{public}d conflict=%{public}d, cancel delay free lane", LANE_HML, conflictErr);
-        return conflictErr;
-    }
-    conflictErr = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
-    if (conflictErr != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "link=%{public}d conflict=%{public}d, cancel delay free lane", LANE_P2P, conflictErr);
-        return conflictErr;
-    }
-    return SOFTBUS_OK;
-}
-
 static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDelayFree)
 {
     LaneResource resourceItem;
@@ -927,7 +905,7 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
     bool isHichain = GetAuthType(networkId);
     LNN_LOGD(LNN_LANE, "isHichain=%{public}d", isHichain);
     if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 && isHichain &&
-        CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) == SOFTBUS_OK) {
+        CheckLinkConflictByReleaseLink(resourceItem.link.type) != SOFTBUS_OK) {
         if (PostDelayDestroyMessage(laneReqId, laneId, DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
             *isDelayFree = true;
             return;
@@ -1328,6 +1306,31 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
     }
 }
 
+static void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint32_t laneReqId)
+{
+    LaneTransType transType = LANE_T_BUTT;
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
+    }
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneReqId == laneReqId) {
+            transType = item->allocInfo.transType;
+        }
+    }
+    Unlock();
+    if (linkType == LANE_HML && IsPowerControlEnabled()) {
+        LNN_LOGI(LNN_LANE, "low-power transtype = %{public}d", transType);
+        if (transType == LANE_T_BYTE || transType == LANE_T_MSG) {
+            DetectDisableWifiDirectApply();
+        } else {
+            DetectEnableWifiDirectApply();
+        }
+    }
+}
+
 static void NotifyLinkSucc(uint32_t laneReqId)
 {
     LaneLinkType linkType;
@@ -1362,6 +1365,7 @@ static void NotifyLinkSucc(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "add linkInfo item fail, laneReqId=%{public}u", laneReqId);
         goto FAIL;
     }
+    ProcessPowerControlInfoByLaneReqId(linkType, laneReqId);
     NotifyLaneAllocSuccess(laneReqId, laneId, &info);
     FreeLowPriorityLink(laneReqId, linkType);
     return;

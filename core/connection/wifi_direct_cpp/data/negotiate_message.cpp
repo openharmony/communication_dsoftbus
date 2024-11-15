@@ -71,6 +71,7 @@ InfoContainer<NegotiateMessageKey>::KeyTypeTable InfoContainer<NegotiateMessageK
     { NegotiateMessageKey::CHANNEL_5G_LIST,       Serializable::ValueType::STRING               },
     { NegotiateMessageKey::CHANNEL_5G_SCORE,      Serializable::ValueType::STRING               },
     { NegotiateMessageKey::CHALLENGE_CODE,        Serializable::ValueType::UINT                 },
+    { NegotiateMessageKey::REMOTE_NETWORK_ID,     Serializable::ValueType::STRING               },
 
     /* old p2p */
     { NegotiateMessageKey::GC_CHANNEL_LIST,       Serializable::ValueType::STRING               },
@@ -121,6 +122,7 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_V3_RSP,                  "CMD_V3_RSP"                  },
     { NegotiateMessageType::CMD_V3_CUSTOM_PORT_REQ,      "CMD_V3_CUSTOM_PORT_REQ"      },
     { NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP,      "CMD_V3_CUSTOM_PORT_RSP"      },
+    { NegotiateMessageType::CMD_ERROR_NOTIFICATION,      "CMD_ERROR_NOTIFICATION"      },
 };
 
 static std::map<LegacyCommandType, std::string> g_legacyMessageNameMap = {
@@ -478,6 +480,16 @@ void NegotiateMessage::SetRemoteDeviceId(const std::string &value)
 std::string NegotiateMessage::GetRemoteDeviceId() const
 {
     return Get(NegotiateMessageKey::REMOTE_DEVICE_ID, std::string());
+}
+
+void NegotiateMessage::SetRemoteNetworkId(const std::string &value)
+{
+    Set(NegotiateMessageKey::REMOTE_NETWORK_ID, value);
+}
+
+std::string NegotiateMessage::GetRemoteNetworkId() const
+{
+    return Get(NegotiateMessageKey::REMOTE_NETWORK_ID, std::string());
 }
 
 void NegotiateMessage::SetExtraData(const std::vector<uint8_t> &value)

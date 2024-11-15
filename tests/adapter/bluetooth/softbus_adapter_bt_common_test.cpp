@@ -18,10 +18,12 @@
 #include "comm_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
+
+#define STATE_LISTENER_MAX_NUM 18
 
 using namespace testing::ext;
 using ::testing::_;
@@ -275,6 +277,24 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
     MockBluetooth::btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
     MockBluetooth::btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftBusAddBtStateListener
+ * @tc.desc: test SoftBusAddBtStateListener
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
+{
+    int32_t ret = SoftBusAddBtStateListener(NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    for (int i = 0; i < STATE_LISTENER_MAX_NUM; ++i) {
+        ret = SoftBusAddBtStateListener(GetMockBtStateListener());
+        EXPECT_TRUE(ret >= 0);
+    }
+    ret = SoftBusAddBtStateListener(GetMockBtStateListener());
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 static void StubOnBtStateChanged(int32_t listenerId, int32_t state)

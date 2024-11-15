@@ -25,7 +25,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 
 #define MAC_BIT_ZERO 0
@@ -55,8 +55,11 @@
 
 #define ONE_BYTE_SIZE 8
 
+#ifdef SOFTBUS_STANDARD_OS
+static int32_t *g_timerHandle = NULL;
+#else
 static void *g_timerId = NULL;
-static int32_t g_handleTimes = 0;
+#endif
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 static bool g_signalingMsgSwitch = false;
 
@@ -114,22 +117,28 @@ static void HandleTimeoutFun(void)
             g_timerFunList[i]();
         }
     }
-    ++g_handleTimes;
-    if (g_handleTimes >= MAX_HANDLE_TIMES && g_timerId != NULL) {
-        (void)SoftBusDeleteTimer(g_timerId);
-        COMM_LOGI(COMM_UTILS, "update new timer");
-        g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
-        if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
-            COMM_LOGE(COMM_UTILS, "start timer failed.");
-            (void)SoftBusDeleteTimer(g_timerId);
-            g_timerId = NULL;
-        }
-        g_handleTimes = 0;
-    }
 }
 
 int32_t SoftBusTimerInit(void)
 {
+#ifdef SOFTBUS_STANDARD_OS
+    if (g_timerHandle != NULL) {
+        return SOFTBUS_OK;
+    }
+    SetTimerFunc(HandleTimeoutFun);
+    g_timerHandle = (int32_t *)SoftBusCalloc(sizeof(int32_t));
+    if (g_timerHandle == NULL) {
+        COMM_LOGE(COMM_UTILS, "timerHandle calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t ret = SoftBusStartTimerWithFfrt(g_timerHandle, TIMER_TIMEOUT, true);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(g_timerHandle);
+        g_timerHandle = NULL;
+        COMM_LOGE(COMM_UTILS, "softbus timer init fail, ret=%{public}d", ret);
+    }
+    return ret;
+#else
     if (g_timerId != NULL) {
         return SOFTBUS_OK;
     }
@@ -142,14 +151,24 @@ int32_t SoftBusTimerInit(void)
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+#endif
 }
 
 void SoftBusTimerDeInit(void)
 {
+#ifdef SOFTBUS_STANDARD_OS
+    if (g_timerHandle != NULL) {
+        SoftBusStopTimerWithFfrt(*g_timerHandle);
+        SoftBusFree(g_timerHandle);
+        g_timerHandle = NULL;
+    }
+    return;
+#else
     if (g_timerId != NULL) {
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
     }
+#endif
 }
 
 int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char * inBuf,

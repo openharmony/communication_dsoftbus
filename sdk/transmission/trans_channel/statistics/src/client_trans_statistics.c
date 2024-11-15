@@ -24,7 +24,7 @@
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
@@ -224,7 +224,6 @@ int32_t ClientTransStatisticsInit(void)
         TRANS_LOGE(TRANS_SDK, "channel statistics list init fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    TRANS_LOGI(TRANS_SDK, "ClientTransStatisticsInit");
     return SOFTBUS_OK;
 }
 

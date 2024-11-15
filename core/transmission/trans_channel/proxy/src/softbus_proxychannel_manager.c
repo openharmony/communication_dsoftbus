@@ -28,13 +28,13 @@
 #include "data_bus_native.h"
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
@@ -376,8 +376,6 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(!IsListEmpty(proxyChannelList), TRANS_CTRL, "proxyChannelList is empty");
-
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyChannelList, ProxyChannelInfo, node) {
@@ -1557,6 +1555,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
         return;
     }
 
+    (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
     (void)OnProxyChannelOpenFailed(channelId, &(channelInfo->appInfo), errCode);
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
@@ -1738,7 +1737,7 @@ static void TransWifiOnLineProc(const char *peerNetworkId)
         TRANS_LOGE(TRANS_CTRL, "invalid networkId");
         return;
     }
-    int ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
+    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
     if (ret == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "notify upgrade migrate success");
         return;
@@ -1753,7 +1752,7 @@ static void TransWifiOffLineProc(const char *peerNetworkId)
         TRANS_LOGE(TRANS_CTRL, "invalid networkId");
         return;
     }
-    int ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
+    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
     if (ret == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "notify degrade migrate success");
         return;
