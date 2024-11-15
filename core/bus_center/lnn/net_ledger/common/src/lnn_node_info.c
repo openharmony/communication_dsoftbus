@@ -21,13 +21,14 @@
 
 #include "anonymizer.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define DYNAMIC_LEVEL_INVALID 0xFFFF
 #define STATIC_LEVEL_INVALID 0xFFFF
 #define SWITCH_LEVEL_INVALID 0xFFFFFFFF
 #define SWTICH_LENGTH_INVALID 0xFFFF
+#define SWITCH_MAX_LENGTH 24
 
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
@@ -125,6 +126,7 @@ void LnnSetBtMac(NodeInfo *info, const char *mac)
     if (strncpy_s(info->connectInfo.macAddr, MAC_LEN, mac, strlen(mac)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
+    return;
 }
 
 const char *LnnGetBleMac(const NodeInfo *info)
@@ -516,6 +518,19 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
     return SOFTBUS_OK;
 }
 
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
+{
+    if (info == NULL || wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len)
 {
     if (info == NULL || cap == NULL) {
@@ -558,19 +573,6 @@ int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
     }
     if (memcpy_s(info->remotePtk, PTK_DEFAULT_LEN, remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy ptk err");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
-{
-    if (info == NULL || wifiDirectAddr == NULL) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;

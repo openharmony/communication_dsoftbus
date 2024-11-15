@@ -335,7 +335,7 @@ static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info
     /* first, reuse ble authKey */
     if (AuthFindLatestNormalizeKey(udidHash, deviceKey, true) == SOFTBUS_OK ||
         AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
-        AUTH_LOGD(AUTH_FSM, "get authKey succ");
+        AUTH_LOGD(AUTH_FSM, "get ble authKey succ");
         return SOFTBUS_OK;
     }
     /* second, reuse wifi authKey */
@@ -1029,7 +1029,7 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
     OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
 }
 
-static int32_t UnpackWifiInfoFromJsonObj(JsonObj *obj, AuthSessionInfo *info)
+static int32_t IsCmdMatchByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 {
     char cmd[CMD_TAG_LEN] = {0};
     if (!JSON_GetStringFromOject(obj, CMD_TAG, cmd, CMD_TAG_LEN)) {
@@ -1063,7 +1063,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "json parse fail");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = UnpackWifiInfoFromJsonObj(obj, info);
+    int32_t ret = IsCmdMatchByDeviceId(obj, info);
     if (ret != SOFTBUS_OK) {
         JSON_Delete(obj);
         return ret;
@@ -1075,12 +1075,12 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
     }
     UnPackVersionByDeviceId(obj, info);
     if (SetExchangeIdTypeAndValue(obj, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "set exchange id type or value failed");
+        AUTH_LOGE(AUTH_FSM, "set exchange id type or value fail");
         JSON_Delete(obj);
         return SOFTBUS_AUTH_SET_EXCHANGE_INFO_FAIL;
     }
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
-        char compressParse[PARSE_UNCOMPRESS_STRING_BUFF_LEN] = { 0 };
+        char compressParse[PARSE_UNCOMPRESS_STRING_BUFF_LEN] = {0};
         OptString(obj, SUPPORT_INFO_COMPRESS, compressParse, PARSE_UNCOMPRESS_STRING_BUFF_LEN, FALSE_STRING_TAG);
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
@@ -1307,12 +1307,14 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert peerIrk to string fail.");
         (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
         info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to string fail.");
         (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
         (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
@@ -1322,6 +1324,7 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddStringToObject(json, PUB_MAC, pubMac);
     DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+    (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
     (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
     int32_t ret = UpdateBroadcastCipherKey(info);
     if (ret != SOFTBUS_OK) {
@@ -1957,8 +1960,7 @@ static void UpdateLocalNetBrMac(void)
         SoftBusGetBtState() == BLE_ENABLE) {
         char brMac[BT_MAC_LEN] = {0};
         SoftBusBtAddr mac = {0};
-        int32_t ret = 0;
-        ret = SoftBusGetBtMacAddr(&mac);
+        int32_t ret = SoftBusGetBtMacAddr(&mac);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get bt mac addr fail, do not update local brmac");
             return;

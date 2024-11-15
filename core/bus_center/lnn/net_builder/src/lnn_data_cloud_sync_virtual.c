@@ -15,7 +15,7 @@
 
 #include "lnn_data_cloud_sync.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 void LnnInitCloudSyncModule(void)
 {
@@ -28,6 +28,12 @@ void LnnDeInitCloudSyncModule(void)
 }
 
 int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+{
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info)
 {
     (void)info;
     return SOFTBUS_NOT_IMPLEMENT;

@@ -27,7 +27,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
@@ -148,6 +148,9 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
         } else if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, reason);
             (void)TryDeleteEmptySessionServer(destroyNode->pkgName, destroyNode->sessionName);
+        }
+        if ((!destroyNode->isAsync) && destroyNode->lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+            (void)SoftBusCondSignal(&(destroyNode->lifecycle.callbackCond));
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
@@ -313,7 +316,7 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
             return false;
         }
     } else if (sessionNode->channelType == CHANNEL_TYPE_AUTH) {
-        TRANS_LOGD(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
+        TRANS_LOGI(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
         return true;
     } else {
         TRANS_LOGW(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
@@ -385,7 +388,7 @@ SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *client
         return NULL;
     }
 
-    if (strcpy_s(infoNode->pkgName, SESSION_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
+    if (strcpy_s(infoNode->pkgName, PKG_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
         SoftBusFree(infoNode);
         TRANS_LOGE(TRANS_SDK, "failed to strcpy pkgName.");
         return NULL;

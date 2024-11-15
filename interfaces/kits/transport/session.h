@@ -95,7 +95,8 @@ typedef enum  {
     LINK_TYPE_BLE_DIRECT = 7,
     LINK_TYPE_COC = 8,
     LINK_TYPE_COC_DIRECT = 9,
-    LINK_TYPE_MAX = 9,
+    LINK_TYPE_HML = 10,
+    LINK_TYPE_MAX = 10,
 } LinkType;
 
 /**

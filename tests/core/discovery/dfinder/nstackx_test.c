@@ -23,7 +23,7 @@
 #include "lwip/netifapi.h"
 #include "nstackx.h"
 #include "ohos_init.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define DEVICE_NAME "HI3861"
 #define DEVICE_ID "ABCDEFGFHIJKLMNOPQRSTVUWXYZ"

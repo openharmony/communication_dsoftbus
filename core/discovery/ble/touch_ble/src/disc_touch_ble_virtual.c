@@ -16,7 +16,7 @@
 #include "disc_touch_ble.h"
 
 #include "disc_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t TouchBleStartActivePublish(const PublishOption *option)
 {

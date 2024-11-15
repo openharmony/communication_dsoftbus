@@ -22,7 +22,7 @@
 #include "disc_share_ble.h"
 #include "disc_touch_ble.h"
 #include "disc_virtual_link_ble.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define DISPATCHER_SIZE 5
 

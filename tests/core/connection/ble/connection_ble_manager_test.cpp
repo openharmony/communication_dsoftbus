@@ -29,7 +29,7 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_trans.h"
 #include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 

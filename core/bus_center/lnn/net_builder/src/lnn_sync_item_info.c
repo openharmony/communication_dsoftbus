@@ -19,12 +19,13 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 
 #define CONN_CODE_SHIFT 16

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/lite/config/component/lite_component.gni")
-import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../../../.."

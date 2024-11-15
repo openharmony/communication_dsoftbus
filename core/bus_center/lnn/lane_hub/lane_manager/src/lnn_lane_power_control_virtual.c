@@ -14,7 +14,7 @@
  */
 
 #include "lnn_lane_power_control.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t EnablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
 {

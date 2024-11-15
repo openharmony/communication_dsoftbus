@@ -15,7 +15,7 @@
 
 #include "vtp_stream_opt.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t VtpSetSocketMultiLayer(int fd, OnFrameEvt *cb, const void *para)
 {

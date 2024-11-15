@@ -32,7 +32,7 @@
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_permission.h"
 
 struct JoinLnnRequestInfo {
@@ -261,12 +261,12 @@ int32_t LnnIpcRegDataLevelChangeCb(const char *pkgName, int32_t callingPid)
     DataLevelChangeReqInfo *info = new (std::nothrow) DataLevelChangeReqInfo();
     if (info == nullptr) {
         COMM_LOGE(COMM_SVC, "DataLevelChangeReqInfo object is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_CB_FAILED;
     }
     if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy pkgName fail");
         delete info;
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     info->pid = callingPid;
     g_dataLevelChangeRequestInfo.push_back(info);
@@ -406,7 +406,7 @@ int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t su
     if (IsRepeatRefreshLnnRequest(pkgName, callingPid, subscribeId) &&
         DeleteRefreshLnnInfo(pkgName, callingPid, subscribeId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "stop refresh lnn, clean info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_STOP_REFRESH_LNN_FAILED;
     }
     return LnnStopDiscDevice(pkgName, subscribeId, false);
 }

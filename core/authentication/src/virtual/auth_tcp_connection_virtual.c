@@ -17,7 +17,7 @@
 #include "auth_channel.h"
 #include "auth_log.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener)
 {
@@ -107,5 +107,6 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
 
 void StopSocketListening(ListenerModule moduleId)
 {
+    (void)moduleId;
     return;
 }

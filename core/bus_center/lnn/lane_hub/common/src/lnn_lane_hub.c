@@ -20,7 +20,7 @@
 #include "lnn_lane_qos.h"
 #include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 
 int32_t LnnInitLaneHub(void)

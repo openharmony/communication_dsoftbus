@@ -22,7 +22,7 @@ constexpr int INVALID_ID = -1;
 
 int SetTimer(const char *name, unsigned int timeout)
 {
-    if (name == NULL) {
+    if (name == nullptr) {
         return INVALID_ID;
     }
     std::string timerName = std::string(name);

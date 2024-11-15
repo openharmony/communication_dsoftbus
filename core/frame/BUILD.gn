@@ -16,17 +16,14 @@ import("../adapter/core_adapter.gni")
 import("../authentication/authentication.gni")
 import("../broadcast/broadcast.gni")
 import("../bus_center/bus_center_server.gni")
-import("../common/dfx/dsoftbus_dfx.gni")
 import("../common/security/permission/permission.gni")
 import("../connection/conn.gni")
 import("../discovery/disc.gni")
 import("../transmission/trans.gni")
 
-dsoftbus_root_path = "../.."
 dsoftbus_feature_product_config_path =
     "${dsoftbus_root_path}/adapter/default_config"
 softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
-dsoftbus_core_path = "${dsoftbus_root_path}/core"
 
 dsoftbus_server_common_src =
     auth_server_src + bus_center_server_src + conn_manager_src +
@@ -51,14 +48,13 @@ if (defined(ohos_lite)) {
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
+        "$dsoftbus_dfx_path/interface/include",
         "$dsoftbus_root_path/core/frame/common/include",
         "$dsoftbus_root_path/interfaces/inner_kits/lnn",
         "$dsoftbus_root_path/interfaces/kits",
         "$dsoftbus_root_path/interfaces/kits/bus_center",
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
-        "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-        "$dsoftbus_root_path/core/common/dfx/interface/include",
         "$softbus_adapter_config/spec_config",
       ]
       sources = dsoftbus_server_common_src
@@ -85,9 +81,9 @@ if (defined(ohos_lite)) {
       }
       deps = dsoftbus_server_common_deps
       deps += [
+        "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
-        "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
@@ -97,20 +93,19 @@ if (defined(ohos_lite)) {
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
         include_dirs += [
           "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
-          "$dsoftbus_root_path/core/common/dfx/statistics/include",
+          "$dsoftbus_dfx_path/statistics/include",
         ]
         sources += [
-          "$dsoftbus_root_path/core/common/dfx/statistics/instant/bt_statistic.cpp",
-          "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
-          "$dsoftbus_root_path/core/common/dfx/statistics/instant/wifi_statistic.cpp",
+          "$dsoftbus_dfx_path/statistics/instant/bt_statistic.cpp",
+          "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
+          "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
         ]
         external_deps +=
             [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
-        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
+        sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
       }
-      public_deps =
-          [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+      public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
@@ -134,9 +129,12 @@ if (defined(ohos_lite)) {
         "small/client_manager/include",
         "$softbus_adapter_common/include",
         "$softbus_adapter_config/spec_config",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_root_path/interfaces/kits/transport",
-        "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-        "$dsoftbus_root_path/core/common/dfx/interface/include",
+        "$dsoftbus_dfx_path/interface/include",
         "//commonlibrary/utils_lite/include",
       ]
       sources = dsoftbus_server_common_src
@@ -158,9 +156,9 @@ if (defined(ohos_lite)) {
       deps = dsoftbus_server_common_deps
       deps += [
         ":permission_json",
+        "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
-        "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
@@ -175,20 +173,19 @@ if (defined(ohos_lite)) {
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
         include_dirs += [
           "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
-          "$dsoftbus_root_path/core/common/dfx/statistics/include",
+          "$dsoftbus_dfx_path/statistics/include",
         ]
         sources += [
-          "$dsoftbus_root_path/core/common/dfx/statistics/instant/bt_statistic.cpp",
-          "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
-          "$dsoftbus_root_path/core/common/dfx/statistics/instant/wifi_statistic.cpp",
+          "$dsoftbus_dfx_path/statistics/instant/bt_statistic.cpp",
+          "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
+          "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
         ]
         external_deps +=
             [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
-        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
+        sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
       }
-      public_deps =
-          [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+      public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
@@ -240,16 +237,17 @@ if (defined(ohos_lite)) {
     defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
     include_dirs += [
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/core/frame/common/include",
       "$dsoftbus_root_path/core/frame/$os_type/client_manager/include",
       "$dsoftbus_root_path/core/frame/$os_type/init/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_feature_product_config_path/spec_config",
     ]
     sources = dsoftbus_server_common_src
     sources += [
@@ -266,14 +264,14 @@ if (defined(ohos_lite)) {
     deps += [
       ":softbus_permission_json",
       ":softbus_server.rc",
+      "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     ]
     external_deps = [ "cJSON:cjson" ]
     external_deps += auth_server_ex_deps
-    public_deps = [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+    public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
     dsoftbus_server_common_external_deps =
         bus_center_server_external_deps + disc_server_external_deps +
         softbus_permission_external_deps + trans_session_external_deps +
@@ -323,16 +321,18 @@ if (defined(ohos_lite)) {
         defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
       include_dirs += [
         "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
-        "$dsoftbus_root_path/core/common/dfx/statistics/include",
+        "$dsoftbus_dfx_path/statistics/include",
       ]
       sources += [
-        "$dsoftbus_root_path/core/common/dfx/statistics/instant/bt_statistic.cpp",
-        "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
-        "$dsoftbus_root_path/core/common/dfx/statistics/instant/wifi_statistic.cpp",
+        "$dsoftbus_dfx_path/statistics/instant/bt_statistic.cpp",
+        "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
+        "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
       ]
       external_deps += [ "hiview_xcommradar_plugin:communication_radar_client" ]
     } else {
-      sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
+      sources += [
+        "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp",
+      ]
     }
     part_name = "dsoftbus"
     subsystem_name = "communication"

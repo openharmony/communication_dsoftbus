@@ -26,7 +26,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_permission.h"
 #include "softbus_utils.h"
@@ -160,16 +160,15 @@ static SoftBusAppInfo *AppInfoMemoryRequest()
 {
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
     if (appInfo == NULL) {
-        COMM_LOGE(COMM_PERM, "appInfo is null");
         return NULL;
     }
+
     ListInit(&appInfo->node);
     appInfo->type = UNKNOWN_VALUE;
     appInfo->uid = UNKNOWN_VALUE;
     appInfo->pid = UNKNOWN_VALUE;
     appInfo->actions = 0;
 
-    COMM_LOGI(COMM_PERM, "appInfo malloc succ.");
     return appInfo;
 }
 
