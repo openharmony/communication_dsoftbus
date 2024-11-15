@@ -69,6 +69,7 @@ int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info);
 int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info);
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len);
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len);
+int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len);
 bool LnnIsLSANode(const NodeBasicInfo *info);
 int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
 int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum);

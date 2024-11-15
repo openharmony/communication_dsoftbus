@@ -27,6 +27,7 @@
 #include "lnn_log.h"
 #include "sqlite3_utils.h"
 
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"

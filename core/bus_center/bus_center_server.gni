@@ -139,7 +139,7 @@ lnn_lp_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                               "value")
 
 if (lnn_lp_enhanced) {
-  import("../../dsoftbus_enhance/adapter/common/adapter_mlps.gni")
+  import("../../dsoftbus_enhance/adapter/common/mlps/adapter_mlps.gni")
   bus_center_server_inc += adapter_mlps_inc
   bus_center_server_src += adapter_mlps_src
 }

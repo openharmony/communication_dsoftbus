@@ -27,6 +27,7 @@
 #include "lnn_log.h"
 
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -422,6 +423,7 @@ static int32_t RelayHeartbeatV1Split(
 {
     msgPara->isFirstBegin = true;
     msgPara->isNeedRestart = true;
+    msgPara->hasScanRsp = true;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_NETWORK_POST_MSG_FAIL;

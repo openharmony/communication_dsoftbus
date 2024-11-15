@@ -107,5 +107,6 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
 
 void StopSocketListening(ListenerModule moduleId)
 {
+    (void)moduleId;
     return;
 }
