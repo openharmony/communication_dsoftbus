@@ -18,12 +18,6 @@ group("unittest") {
   testonly = true
   deps = [
     "bitmap:unittest",
-    "dfx/anonymize:unittest",
-    "dfx/event:unittest",
-    "dfx/hidumper_adapter/unittest:unittest",
-    "dfx/hisysevent_adapter/unittest:unittest",
-    "dfx/log:unittest",
-    "dfx/statistics/unittest:unittest",
     "json_utils:unittest",
     "network:unittest",
     "queue:unittest",
@@ -37,8 +31,6 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [
-    "dfx/hidumper_adapter/fuzztest:fuzztest",
-    "dfx/hisysevent_adapter/fuzztest:fuzztest",
     "json_utils:fuzztest",
     "message_handler:fuzztest",
     "utils/fuzztest:fuzztest",

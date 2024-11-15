@@ -24,7 +24,7 @@
 #include "client_trans_proxy_manager.c"
 #include "softbus_access_token_test.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing;
 using namespace testing::ext;

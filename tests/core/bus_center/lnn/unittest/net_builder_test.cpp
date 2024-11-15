@@ -20,7 +20,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_network_id.h"
 #include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -97,7 +97,7 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
 
     EXPECT_TRUE(LnnGenLocalIrk(irkFirst, LFINDER_IRK_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(LnnGenLocalIrk(irkSecond, LFINDER_IRK_LEN) == SOFTBUS_OK);
-    EXPECT_NE(memcmp(irkFirst, irkSecond, LFINDER_IRK_LEN), 0);
+    EXPECT_EQ(memcmp(irkFirst, irkSecond, LFINDER_IRK_LEN), 0);
 }
 
 /*

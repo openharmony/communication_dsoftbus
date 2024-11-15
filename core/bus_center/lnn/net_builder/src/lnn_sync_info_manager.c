@@ -36,7 +36,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_transmission_interface.h"
 
 #define MSG_HEAD_LEN 4
@@ -281,7 +281,7 @@ static SyncInfoMsg *DumpMsgExcludeListNode(const SyncInfoMsg *msg)
 
 static int32_t DumpSyncInfoMsgList(const ListNode *srcList, ListNode *dstList)
 {
-    if (srcList == NULL || dstList ==NULL) {
+    if (srcList == NULL || dstList == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -300,7 +300,7 @@ static int32_t DumpSyncInfoMsgList(const ListNode *srcList, ListNode *dstList)
     return SOFTBUS_OK;
 }
 
-static SyncChannelInfo *DumpSyncChannelInfo(SyncChannelInfo *info)
+static SyncChannelInfo *DumpSyncChannelInfo(const SyncChannelInfo *info)
 {
     SyncChannelInfo *newInfo = (SyncChannelInfo *)SoftBusCalloc(sizeof(SyncChannelInfo));
     if (newInfo == NULL) {

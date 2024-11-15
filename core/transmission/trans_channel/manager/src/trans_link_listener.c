@@ -19,7 +19,7 @@
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_p2p.h"

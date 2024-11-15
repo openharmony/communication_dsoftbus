@@ -29,7 +29,7 @@ extern "C" {
 #define GROUP_TYPE_P2P (1 << 1)
 #define GROUP_TYPE_MESH (1 << 2)
 #define GROUP_TYPE_COMPATIBLE (1 << 3)
-#define PC_META_NODE_ERRCODE 2046820418
+#define PC_PROOF_NON_CONSISTENT_ERRCODE 2046820418
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);

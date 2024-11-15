@@ -16,7 +16,7 @@
 #include "customized_security_protocol.h"
 
 #include "auth_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t CustomizedSecurityProtocolInit(void)
 {

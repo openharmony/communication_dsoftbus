@@ -22,7 +22,7 @@
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "client_trans_udp_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 
 int32_t ClientTransChannelInit(void)

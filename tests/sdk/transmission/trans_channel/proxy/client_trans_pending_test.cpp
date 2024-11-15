@@ -21,7 +21,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define TEST_SESSION_ID 0
 #define TEST_SEQ 1

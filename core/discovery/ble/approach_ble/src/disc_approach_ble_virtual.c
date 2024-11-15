@@ -16,7 +16,7 @@
 #include "disc_approach_ble.h"
 
 #include "disc_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t ApproachBleStartActivePublish(const PublishOption *option)
 {

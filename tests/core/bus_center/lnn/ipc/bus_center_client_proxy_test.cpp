@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <securec.h>
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "bus_center_client_proxy.h"
 
 namespace OHOS {

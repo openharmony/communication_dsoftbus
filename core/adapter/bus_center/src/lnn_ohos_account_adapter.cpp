@@ -21,7 +21,7 @@
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "securec.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "auth_hichain_adapter.h"
 
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
