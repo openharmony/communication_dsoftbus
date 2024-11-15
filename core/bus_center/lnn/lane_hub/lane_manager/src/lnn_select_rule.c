@@ -112,10 +112,6 @@ static int32_t Wlan2P4GCapCheck(const char *networkId)
 {
     int32_t ret = NodeStateCheck(networkId);
     if (ret != SOFTBUS_OK) {
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "peer device wifi not online, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
         return ret;
     }
     SoftBusBand band = SoftBusGetLinkBand();
@@ -146,10 +142,6 @@ static int32_t Wlan5GCapCheck(const char *networkId)
 {
     int32_t ret = NodeStateCheck(networkId);
     if (ret != SOFTBUS_OK) {
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "peer device wifi not online, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
         return ret;
     }
     SoftBusBand band = SoftBusGetLinkBand();
