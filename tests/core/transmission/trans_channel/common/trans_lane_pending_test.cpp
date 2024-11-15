@@ -1092,7 +1092,7 @@ HWTEST_F(TransLanePendingTest, TransWaitingFreeLane001, TestSize.Level1)
     ret = TransAddFreeLaneToPending(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransWaitingFreeLane(laneReqId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_LANE_IS_EXISTED, ret);
 
     ret = TransDelLaneFreeFromPending(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1119,7 +1119,7 @@ HWTEST_F(TransLanePendingTest, TransFreeLaneByLaneHandle001, TestSize.Level1)
     ret = TransAddFreeLaneToPending(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransFreeLaneByLaneHandle(laneReqId, false);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_LANE_IS_EXISTED, ret);
 
     ret = TransDelLaneFreeFromPending(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);

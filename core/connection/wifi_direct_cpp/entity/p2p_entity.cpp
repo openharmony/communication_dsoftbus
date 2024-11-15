@@ -435,11 +435,12 @@ static void UpdateInterfaceInfo(
     std::string groupConfig;
     if (groupInfo->isGroupOwner) {
         auto ret = P2pAdapter::GetGroupConfig(groupConfig);
-        CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config failed, error=%d", ret);
+        CONN_CHECK_AND_RETURN_LOGE(
+            ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config failed, error=%{public}d", ret);
     }
     std::string dynamicMac;
     auto ret = P2pAdapter::GetDynamicMacAddress(dynamicMac);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%{public}d", ret);
     std::string ip;
     ret = P2pAdapter::GetIpAddress(ip);
     if (ret != SOFTBUS_OK) {

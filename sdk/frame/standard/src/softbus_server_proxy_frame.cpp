@@ -39,7 +39,6 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
-#include <unistd.h>
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -155,7 +154,7 @@ static RestartEventCallback g_restartAuthParaCallback = nullptr;
 static void RestartAuthParaNotify(void)
 {
     if (g_restartAuthParaCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!");
+        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used");
         return;
     }
     if (g_restartAuthParaCallback() != SOFTBUS_OK) {
@@ -197,11 +196,16 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
+    RestartAuthParaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
     RestartRegDataLevelChange();
-    RestartAuthParaNotify();
+}
+
+void RestartAuthParaCallbackUnregister(void)
+{
+    g_restartAuthParaCallback = nullptr;
 }
 
 int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
@@ -214,12 +218,6 @@ int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
     COMM_LOGI(COMM_SDK, "Restart event callback register success!");
     return SOFTBUS_OK;
 }
-
-void RestartAuthParaCallbackUnregister(void)
-{
-    g_restartAuthParaCallback = nullptr;
-}
-
 
 int32_t ClientStubInit(void)
 {

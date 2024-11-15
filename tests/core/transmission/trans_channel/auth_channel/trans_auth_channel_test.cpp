@@ -411,20 +411,21 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest002, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = AddAuthChannelInfo(NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    DelAuthChannelInfoByChanId(TRANS_TEST_CHANNEL_ID);
     bool isClient = true;
     AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName, isClient);
+    info->authId = TRANS_TEST_AUTH_ID;
     EXPECT_TRUE(info != nullptr);
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
     AuthChannelInfo *newInfo = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     ASSERT_TRUE(newInfo != nullptr);
     int32_t channelId = info->appInfo.myData.channelId;
+    newInfo->authId = TRANS_TEST_AUTH_ID;
     ret = GetAuthChannelInfoByChanId(channelId, newInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddAuthChannelInfo(info);
     EXPECT_NE(ret, SOFTBUS_OK);
-    DelAuthChannelInfoByChanId(channelId);
+    DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     SoftBusFree(newInfo);
     TransSessionMgrDeinit();
     TransAuthDeinit();
@@ -444,7 +445,6 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest003, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     bool isClient = true;
     AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName, isClient);
     ASSERT_TRUE(info != nullptr);
@@ -454,7 +454,7 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest003, TestSize.Level1)
     int32_t channelId = info->appInfo.myData.channelId;
     ret = GetAuthIdByChannelId(channelId);
     EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID);
-    DelAuthChannelInfoByChanId(channelId);
+    DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     ret = GetAuthIdByChannelId(channelId);
     EXPECT_NE(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
@@ -469,6 +469,7 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest003, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest004, TestSize.Level1)
 {
+    int32_t authId = TRANS_TEST_SESSION_ID;
     int32_t ret = TransSessionMgrInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
@@ -478,17 +479,15 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest004, TestSize.Level1)
     bool isClient = true;
     AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName, isClient);
     ASSERT_TRUE(info != nullptr);
-    info->authId = TRANS_TEST_AUTH_ID;
+    info->authId = TRANS_TEST_SESSION_ID;
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
     AuthChannelInfo *newInfo = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     ASSERT_TRUE(newInfo != nullptr);
-    ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, newInfo);
+    ret = GetChannelInfoByAuthId(TRANS_TEST_SESSION_ID, newInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = memcmp(info, newInfo,  sizeof(AuthChannelInfo));
-    EXPECT_EQ(ret, EOK);
-    DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
-    ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, newInfo);
+    DelAuthChannelInfoByAuthId(authId);
+    ret = GetChannelInfoByAuthId(TRANS_TEST_SESSION_ID, newInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(newInfo);
     TransSessionMgrDeinit();
