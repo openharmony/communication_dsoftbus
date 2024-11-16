@@ -1395,6 +1395,14 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     }
 }
 
+static uint64_t GetCostTime(uint64_t triggerLinkTime)
+{
+    if (SoftBusGetSysTimeMs() < triggerLinkTime) {
+        return 0;
+    }
+    return SoftBusGetSysTimeMs() - triggerLinkTime;
+}
+
 static bool IsNeedNotifyFail(uint32_t laneReqId)
 {
     bool notifyFail = false;
@@ -1408,7 +1416,7 @@ static bool IsNeedNotifyFail(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "get lane link node info fail, laneReqId=%{public}u", laneReqId);
         return true;
     }
-    uint64_t costTime = SoftBusGetSysTimeMs() - nodeInfo->triggerLinkTime;
+    uint64_t costTime = GetCostTime(nodeInfo->triggerLinkTime);
     if (costTime >= nodeInfo->availableLinkTime || nodeInfo->linkRetryIdx >= nodeInfo->listNum) {
         LNN_LOGE(LNN_LANE, "link retry exceed limit, laneReqId=%{public}u", laneReqId);
         notifyFail = true;
@@ -1444,7 +1452,7 @@ static void BuildLinkRetry(uint32_t laneReqId)
         NotifyLaneAllocFail(laneReqId, SOFTBUS_LANE_NOT_FOUND);
         return;
     }
-    uint64_t costTime = SoftBusGetSysTimeMs() - nodeInfo->triggerLinkTime;
+    uint64_t costTime = GetCostTime(nodeInfo->triggerLinkTime);
     if (costTime >= nodeInfo->availableLinkTime || nodeInfo->linkRetryIdx >= nodeInfo->listNum) {
         LNN_LOGE(LNN_LANE, "link retry exceed limit, laneReqId=%{public}u", laneReqId);
         Unlock();
@@ -1609,7 +1617,7 @@ static void HandleLinkTimeout(SoftBusMessage *msg)
         LNN_LOGE(LNN_LANE, "get lane link node info fail, laneReqId=%{public}u", laneReqId);
         return;
     }
-    uint64_t costTime = SoftBusGetSysTimeMs() - nodeInfo->triggerLinkTime;
+    uint64_t costTime = GetCostTime(nodeInfo->triggerLinkTime);
     if (costTime >= nodeInfo->availableLinkTime || nodeInfo->linkRetryIdx >= nodeInfo->listNum) {
         LNN_LOGE(LNN_LANE, "link retry exceed limit, laneReqId=%{public}u", laneReqId);
         Unlock();
