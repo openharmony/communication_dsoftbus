@@ -29,6 +29,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
 #include "lnn_map.h"
+#include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_lane_def.h"
 #include "lnn_deviceinfo_to_profile.h"
@@ -43,6 +44,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
@@ -694,6 +696,34 @@ static void UpdateNewNodeAccountHash(NodeInfo *info)
     }
 }
 
+static void CheckUserIdCheckSumChange(NodeInfo *oldInfo, const NodeInfo *newInfo)
+{
+    if (oldInfo == NULL || newInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return;
+    }
+    int32_t userIdCheckSum = 0;
+    int32_t ret = memcpy_s(&userIdCheckSum, sizeof(int32_t), newInfo->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy failed! userIdchecksum:%{public}d", userIdCheckSum);
+        return;
+    }
+    if (userIdCheckSum == 0) {
+        LNN_LOGW(LNN_LEDGER, "useridchecksum all zero");
+        return;
+    }
+    bool isChange = false;
+    ret = memcmp(newInfo->userIdCheckSum, oldInfo->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != 0) {
+        isChange = true;
+    }
+    NotifyForegroundUseridChange((char *)newInfo->networkId, newInfo->discoveryType, isChange);
+    if (isChange) {
+        LNN_LOGI(LNN_LEDGER, "userIdCheckSum changed!");
+        LnnSetDLConnUserIdCheckSum((char *)newInfo->networkId, userIdCheckSum);
+    }
+}
+
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 {
     const char *udid = NULL;
@@ -743,6 +773,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
     }
+    CheckUserIdCheckSumChange(oldInfo, newInfo);
     return SOFTBUS_OK;
 }
 
@@ -1190,6 +1221,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
     UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid);
+    CheckUserIdCheckSumChange(oldInfo, info);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }

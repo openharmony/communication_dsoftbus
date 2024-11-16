@@ -201,6 +201,8 @@ public:
     virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
+    virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
+    virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -343,6 +345,8 @@ public:
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool (const NodeInfo *));
     MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
+    MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
+    MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

@@ -1981,6 +1981,23 @@ static void UpdateLocalNetBrMac(void)
     }
 }
 
+#define USERID_CHECKSUM_HEXSTRING_LEN 9
+static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
+{
+    char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = {0};
+    int32_t ret = ConvertBytesToHexString(userIdCheckSumHexStr, USERID_CHECKSUM_HEXSTRING_LEN,
+        nodeInfo->userIdCheckSum, sizeof(nodeInfo->userIdCheckSum));
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "ConvertBytesToHexString failed.");
+        return ret;
+    }
+    if (!JSON_AddStringToObject(json, "useridchecksum", userIdCheckSumHexStr)) {
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info)
 {
@@ -2017,6 +2034,11 @@ char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version
 
     if (PackCertificateInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "packCertificateInfo fail");
+        JSON_Delete(json);
+        return NULL;
+    }
+    ret = PackUserIdCheckSum(json, nodeInfo);
+    if (ret != SOFTBUS_OK) {
         JSON_Delete(json);
         return NULL;
     }
@@ -2075,6 +2097,21 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
     }
 }
 
+static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
+{
+    char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = {0};
+
+    if (!JSON_GetStringFromOject(json, "useridchecksum", userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
+        AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromOject failed!");
+        return;
+    }
+    int32_t ret = ConvertHexStringToBytes(nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN,
+        userIdCheckSumHexStr, USERID_CHECKSUM_HEXSTRING_LEN);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "ConvertHexStringToBytes failed! ret:%{public}d", ret);
+    }
+}
+
 int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
     const AuthSessionInfo *info)
 {
@@ -2099,6 +2136,7 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
         JSON_Delete(json);
         return SOFTBUS_ERR;
     }
+    UnpackUserIdCheckSum(json, nodeInfo);
     JSON_Delete(json);
     int32_t stateVersion;
     if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK) {

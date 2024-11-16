@@ -17,8 +17,14 @@
 
 #include "auth_deviceprofile.h"
 #include "auth_log.h"
+#include "bus_center_manager.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
+#include "lnn_heartbeat_ctrl.h"
+#include "lnn_heartbeat_strategy.h"
+#include "lnn_network_info.h"
+#include "lnn_network_manager.h"
+#include "lnn_ohos_account.h"
 
 static const uint32_t SOFTBUS_SA_ID = 4700;
 static DeviceProfileChangeListener g_deviceProfileChange = { 0 };
@@ -72,6 +78,32 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileUpdate(
     (void)oldProfile;
     (void)newProfile;
     AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileUpdate success!");
+    return SOFTBUS_OK;
+}
+
+int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceProfile &profile)
+{
+    AUTH_LOGI(AUTH_INIT, "dp active callback enter!");
+    DelNotTrustDevice(profile.GetDeviceId().c_str());
+    if (IsHeartbeatEnable()) {
+        if (LnnStartHbByTypeAndStrategy(
+            HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_INIT, "start ble heartbeat fail");
+            }
+    }
+    RestartCoapDiscovery();
+
+    return SOFTBUS_OK;
+}
+
+int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDeviceProfile &profile)
+{
+    AUTH_LOGI(AUTH_INIT, "dp inactive callback enter!");
+    LnnUpdateOhosAccount(true);
+    int32_t userId = profile.GetPeerUserId();
+    AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);
+    NotifyRemoteDevOffLineByUserId(userId, profile.GetDeviceId().c_str());
+
     return SOFTBUS_OK;
 }
 
@@ -141,7 +173,8 @@ static void RegisterToDpHelper(void)
     uint32_t saId = SOFTBUS_SA_ID;
     std::string subscribeKey = "trust_device_profile";
     std::unordered_set<ProfileChangeType> subscribeTypes = { ProfileChangeType::TRUST_DEVICE_PROFILE_ADD,
-        ProfileChangeType::TRUST_DEVICE_PROFILE_UPDATE, ProfileChangeType::TRUST_DEVICE_PROFILE_DELETE };
+        ProfileChangeType::TRUST_DEVICE_PROFILE_UPDATE, ProfileChangeType::TRUST_DEVICE_PROFILE_DELETE,
+        ProfileChangeType::TRUST_DEVICE_PROFILE_ACTIVE, ProfileChangeType::TRUST_DEVICE_PROFILE_INACTIVE};
 
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) AuthDeviceProfileListener;
     if (subscribeDPChangeListener == nullptr) {

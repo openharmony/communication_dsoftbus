@@ -24,6 +24,7 @@ extern "C" {
 
 void LnnDeinitNetworkInfo(void);
 int32_t LnnInitNetworkInfo(void);
+void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid);
 
 #ifdef __cplusplus
 }
