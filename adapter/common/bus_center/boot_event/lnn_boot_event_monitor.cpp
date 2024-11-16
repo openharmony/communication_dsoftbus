@@ -16,10 +16,13 @@
 #include <cstring>
 
 #include "auth_interface.h"
+#include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ble_heartbeat.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_strategy.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "parameter.h"
@@ -28,8 +31,19 @@
 static void ProcessBootEvent(void *para)
 {
     (void)para;
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
     LNN_LOGI(LNN_EVENT, "start process account ready event");
     LnnUpdateOhosAccount(true);
+    int32_t userId = GetActiveOsAccountIds();
+    LNN_LOGI(LNN_EVENT, "get userId:%{public}d", userId);
+    int32_t ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_EVENT, "get userIdCheckSum failed");
+    }
+    ret = LnnSetLocalByteInfo(BYTE_KEY_USERID_CHECKSUM, userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_EVENT, "set userIdChecksum to local failed");
+    }
     if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
         LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
         return;

@@ -34,6 +34,7 @@ extern "C" {
 #define EXTDATA_LEN 8
 #define PTK_DEFAULT_LEN 32
 #define STATIC_CAP_LEN 100
+#define USERID_CHECKSUM_LEN 4
 #define STATIC_CAP_STR_LEN 201
 #define PTK_ENCODE_LEN 45
 
@@ -149,6 +150,7 @@ typedef struct {
     bool isBleP2p; // true: this device support connect p2p via ble connection
     uint8_t staticCapability[STATIC_CAP_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
     uint16_t dataChangeFlag;
     uint16_t dataDynamicLevel;
     uint16_t dataStaticLevel;
@@ -171,6 +173,7 @@ typedef struct {
     int32_t bleMacRefreshSwitch;
     int32_t bleConnCloseDelayTime;
     int32_t staticCapLen;
+    int32_t userId;
     uint32_t stateVersionReason;
     int32_t deviceSecurityLevel;
     int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
@@ -248,6 +251,8 @@ uint64_t LnnGetSupportedProtocols(const NodeInfo *info);
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
 int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
+int32_t LnnSetUserIdCheckSum(NodeInfo *info, uint8_t *data, uint32_t len);
+int32_t LnnGetUserIdCheckSum(NodeInfo *info, uint8_t *data, uint32_t len);
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
 void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
 int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);

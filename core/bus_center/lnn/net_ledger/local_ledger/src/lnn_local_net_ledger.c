@@ -25,6 +25,7 @@
 #include "auth_common.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
+#include "lnn_ble_heartbeat.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_device_info_recovery.h"
@@ -1644,6 +1645,31 @@ static int32_t LlGetStaticCapability(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlUpdateUserIdCheckSum(const void *data)
+{
+    if (data == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetUserIdCheckSum(info, (uint8_t *)data, USERID_CHECKSUM_LEN);
+}
+
+static int32_t LlGetUserIdCheckSum(void *buf, uint32_t len)
+{
+    if (buf == NULL || len > USERID_CHECKSUM_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    int32_t ret = LnnGetUserIdCheckSum(info, (uint8_t *)buf, len);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get useridchecksum fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetUdidHash(void *buf, uint32_t len)
 {
     if (buf == NULL || len < UDID_HASH_LEN) {
@@ -1802,6 +1828,24 @@ static int32_t LlUpdateLocalP2pIp(const void *p2pIp)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateLocalUserId(const void *userId)
+{
+    if (userId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.userId = *(int32_t *)userId;
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetUserId(void *userId, uint32_t len)
+{
+    if (userId == NULL || len != sizeof(int32_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)userId) = g_localNetLedger.localInfo.userId;
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -1850,6 +1894,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, -1, L1GetConnSubFeatureCapa, UpdateLocalConnSubFeatureCapability},
+    {NUM_KEY_USERID, sizeof(int32_t), L1GetUserId, UpdateLocalUserId},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
@@ -1859,6 +1904,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_NETWORK_ID_TIMESTAMP, sizeof(int64_t), LocalGetNetworkIdTimeStamp, LocalUpdateNetworkIdTimeStamp},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
     {BYTE_KEY_STATIC_CAPABILITY, STATIC_CAP_LEN, LlGetStaticCapability, LlUpdateStaticCapability},
+    {BYTE_KEY_USERID_CHECKSUM, USERID_CHECKSUM_LEN, LlGetUserIdCheckSum, LlUpdateUserIdCheckSum},
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
 };
@@ -2229,6 +2275,21 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
     return SOFTBUS_OK;
 }
 
+static void InitUserIdCheckSum(NodeInfo *nodeInfo)
+{
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
+    int32_t userId = GetActiveOsAccountIds();
+    LNN_LOGI(LNN_LEDGER, "get userId:%{public}d", userId);
+    int32_t ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_LEDGER, "get userIdCheckSum failed, ret=%{public}d", ret);
+    }
+    ret = memcpy_s(nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN, userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != EOK) {
+        LNN_LOGW(LNN_LEDGER, "memcpy_s fail, ret=%{public}d", ret);
+    }
+}
+
 static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
 {
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
@@ -2258,6 +2319,7 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "init local p2p info error");
         return SOFTBUS_ERR;
     }
+    InitUserIdCheckSum(nodeInfo);
     return SOFTBUS_OK;
 }
 

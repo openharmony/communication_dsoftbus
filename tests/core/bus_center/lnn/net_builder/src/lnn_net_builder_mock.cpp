@@ -40,5 +40,15 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
 {
     return GetLnnNetBuilderInterface()->LnnRequestLeaveSpecific(networkId, addrType);
 }
+
+int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId)
+{
+    return GetLnnNetBuilderInterface()->LnnSetDLConnUserId(networkId, userId);
+}
+
+int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
+{
+    return GetLnnNetBuilderInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
+}
 }
 } // namespace OHOS

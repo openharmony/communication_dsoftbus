@@ -100,7 +100,7 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
 static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *brMac, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, networkId, sizeof(networkId));
+    int32_t ret = LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, networkId, sizeof(networkId), true);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetNetworkIdByUdidHash fail");
 
     ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, len);

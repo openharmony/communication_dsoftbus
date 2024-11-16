@@ -28,6 +28,8 @@ public:
     virtual ~LnnNetBuilderInterface() {};
 
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId) = 0;
+    virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
 };
 
 class LnnNetBuilderInterfaceMock : public LnnNetBuilderInterface {
@@ -36,6 +38,8 @@ public:
     ~LnnNetBuilderInterfaceMock() override;
 
     MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnSetDLConnUserId, int32_t(const char *networkId, int32_t userId));
+    MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_MOCK_H

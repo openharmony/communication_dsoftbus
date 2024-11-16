@@ -565,6 +565,40 @@ int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len)
     return SOFTBUS_OK;
 }
 
+int32_t LnnSetUserIdCheckSum(NodeInfo *info, uint8_t *data, uint32_t len)
+{
+    if (info == NULL || data == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len != USERID_CHECKSUM_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(info->userIdCheckSum, USERID_CHECKSUM_LEN, data, len) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy useridchecksum err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetUserIdCheckSum(NodeInfo *info, uint8_t *data, uint32_t len)
+{
+    if (info == NULL || data == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param err");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len != USERID_CHECKSUM_LEN) {
+        LNN_LOGE(LNN_LEDGER, "param err");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(data, len, info->userIdCheckSum, len) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy useridchecksum err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
 {
     if (info == NULL || remotePtk == NULL) {
