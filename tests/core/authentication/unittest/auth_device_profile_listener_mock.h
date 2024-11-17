@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include <mutex>
+#include "lnn_heartbeat_utils.h"
 
 namespace OHOS {
 class AuthDeviceProfileListenerInterface {
@@ -25,12 +26,23 @@ public:
     AuthDeviceProfileListenerInterface() {};
     virtual ~AuthDeviceProfileListenerInterface() {};
     virtual void DelNotTrustDevice(const char *udid) = 0;
+    virtual bool IsHeartbeatEnable(void) = 0;
+    virtual void RestartCoapDiscovery(void) = 0;
+    virtual int32_t LnnStartHbByTypeAndStrategy(
+        LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
+    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
+    virtual void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid) = 0;
 };
 class AuthDeviceProfileListenerInterfaceMock : public AuthDeviceProfileListenerInterface {
 public:
     AuthDeviceProfileListenerInterfaceMock();
     ~AuthDeviceProfileListenerInterfaceMock() override;
     MOCK_METHOD1(DelNotTrustDevice, void (const char *udid));
+    MOCK_METHOD0(IsHeartbeatEnable, bool());
+    MOCK_METHOD0(RestartCoapDiscovery, void(void));
+    MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
+    MOCK_METHOD2(NotifyRemoteDevOffLineByUserId, void(int32_t, const char *));
 };
 } // namespace OHOS
 #endif // AUTH_LANE_H

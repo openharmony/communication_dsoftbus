@@ -23,6 +23,7 @@
 #include "auth_device_common_key.h"
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
@@ -505,6 +506,23 @@ static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t
     return false;
 }
 
+static void UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
+{
+    if (hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "hbResp is NULL");
+        return;
+    }
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
+    if (memcmp(hbResp->userIdCheckSum, userIdCheckSum, USERID_CHECKSUM_LEN) == 0) {
+        LNN_LOGI(LNN_HEART_BEAT, "checkSum is null no need update");
+        return;
+    }
+    int32_t ret = memcpy_s(deviceInfo->userIdCheckSum, USERID_CHECKSUM_LEN, hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_HEART_BEAT, "memcpy failed");
+    }
+}
+
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -540,6 +558,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
     (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
     (void)SetDeviceScreenStatus(&deviceInfo, hbResp->isScreenOn);
+    UpdateUserIdCheckSum(&deviceInfo, hbResp);
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         *connectReason = UPDATE_REMOTE_DEVICE_INFO_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
@@ -924,6 +943,34 @@ static int32_t CheckJoinLnnConnectResult(
     return SoftBusNetNodeResult(device, hbResp, &connectCondition, storedInfo, nowTime);
 }
 
+static void CheckUserIdCheckSumChange(HbRespData *hbResp, NodeInfo *nodeInfo)
+{
+    if (hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+    int32_t userIdCheckSum = 0;
+    int32_t ret = memcpy_s(&userIdCheckSum, sizeof(int32_t), hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_HEART_BEAT, "memcpy failed! userIdchecksum:%{public}d", userIdCheckSum);
+        return;
+    }
+    if (userIdCheckSum == 0) {
+        LNN_LOGW(LNN_HEART_BEAT, "useridchecksum all zero");
+        return;
+    }
+    bool isChange = false;
+    ret = memcmp(hbResp->userIdCheckSum, nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != 0) {
+        isChange = true;
+    }
+    if (isChange) {
+        LNN_LOGI(LNN_HEART_BEAT, "adv userIdCheckSum changed!");
+        NotifyForegroundUseridChange(nodeInfo->networkId, nodeInfo->discoveryType, isChange);
+        LnnSetDLConnUserIdCheckSum(nodeInfo->networkId, userIdCheckSum);
+    }
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -951,6 +998,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     bool isDirectlyHb = IsDirectlyHeartBeat(device, hbResp);
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
+        CheckUserIdCheckSumChange(hbResp, &nodeInfo);
         if (isDirectlyHb || (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
             !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN))) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
