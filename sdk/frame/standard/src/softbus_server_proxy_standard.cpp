@@ -78,10 +78,11 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
     return serverRet;
 }
 
-int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)isNormalApp;
     return SOFTBUS_OK;
 }
 
