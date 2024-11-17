@@ -89,6 +89,7 @@ typedef enum {
     SHUTDOWN_REASON_SERVICE_DIED,  /**< Shutdown for death service */
     SHUTDOWN_REASON_LNN_OFFLINE,   /**< Shutdown for offline */
     SHUTDOWN_REASON_LINK_DOWN,     /**< Shutdown for link down */
+    SHUTDOWN_REASON_USER_SWICTH,   /**< Shutdown for user switch */
 } ShutdownReason;
 
 /**

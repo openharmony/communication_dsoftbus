@@ -87,7 +87,8 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
     TransDelItemByPackageName(pkgName, pid);
 }
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
+int32_t TransCreateSessionServer(
+    const char *pkgName, const char *sessionName, int32_t uid, int32_t pid, bool isNormalApp)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
@@ -113,6 +114,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->type = SEC_TYPE_CIPHERTEXT;
     newNode->uid = uid;
     newNode->pid = pid;
+    newNode->callerType = isNormalApp ? CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
 
     int32_t ret = TransSessionServerAddItem(newNode);
     TransEventExtra extra = {
