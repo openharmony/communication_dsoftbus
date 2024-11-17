@@ -241,13 +241,28 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t TransProxyParseMessageNoDecrypt(ProxyMessage *msg)
+{
+    uint8_t *allocData = (uint8_t *)SoftBusCalloc((uint32_t)msg->dateLen);
+    if (allocData == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc data fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(allocData, msg->dateLen, msg->data, msg->dateLen) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy data fail");
+        SoftBusFree(allocData);
+        return SOFTBUS_MEM_ERR;
+    }
+    msg->data = (char *)allocData;
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(len > PROXY_CHANNEL_HEAD_LEN,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "parseMessage: invalid message len!");
     int32_t ret = TransProxyParseMessageHead(data, len, msg);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
-
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
         if (msg->dateLen <= 0 || (uint32_t)msg->dateLen < sizeof(uint32_t)) {
             TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
@@ -281,15 +296,11 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
         msg->data = (char *)decData;
         msg->dateLen = (int32_t)decDataLen;
     } else {
-        uint8_t *allocData = (uint8_t *)SoftBusCalloc((uint32_t)msg->dateLen);
-        if (allocData == NULL) {
-            return SOFTBUS_MALLOC_ERR;
+        ret = TransProxyParseMessageNoDecrypt(msg);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "trans not need decrypt msg fail, ret=%{public}d", ret);
+            return ret;
         }
-        if (memcpy_s(allocData, msg->dateLen, msg->data, msg->dateLen) != EOK) {
-            SoftBusFree(allocData);
-            return SOFTBUS_MEM_ERR;
-        }
-        msg->data = (char *)allocData;
     }
     return SOFTBUS_OK;
 }
