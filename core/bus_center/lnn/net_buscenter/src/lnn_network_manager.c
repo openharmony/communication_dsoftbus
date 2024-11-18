@@ -119,11 +119,11 @@ static int32_t RegistNetIfMgr(LnnNetIfNameType type, LnnNetIfManagerBuilder buil
 {
     if (type >= LNN_MAX_NUM_TYPE) {
         LNN_LOGE(LNN_BUILDER, "type too big");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_netifBuilders[type] != NULL && g_netifBuilders[type] != builder) {
         LNN_LOGE(LNN_BUILDER, "type already registed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ALREADY_EXISTED;
     }
     g_netifBuilders[type] = builder;
     return SOFTBUS_OK;
@@ -182,25 +182,25 @@ static int32_t SetIfNameDefaultVal(void)
     LnnNetIfMgr *netIfMgr = NetifMgrFactory(LNN_ETH_TYPE, LNN_DEFAULT_IF_NAME_ETH);
     if (netIfMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     netIfMgr = NetifMgrFactory(LNN_WLAN_TYPE, LNN_DEFAULT_IF_NAME_WLAN);
     if (netIfMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     netIfMgr = NetifMgrFactory(LNN_BR_TYPE, LNN_DEFAULT_IF_NAME_BR);
     if (netIfMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "add default BR netIfMgr failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
     if (netIfMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "add default BLE netIfMgr failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     return SOFTBUS_OK;
@@ -213,7 +213,7 @@ static int32_t LnnInitManagerByConfig(void)
         LNN_LOGE(LNN_BUILDER, "get lnn net ifName fail, use default value");
         if (SetIfNameDefaultVal() != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "default value set fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
         }
         return SOFTBUS_OK;
     }
@@ -375,7 +375,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
         }
     }
     LNN_LOGE(LNN_BUILDER, "no such protocol!");
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_NOT_SUPPORT;
 }
 
 bool LnnVisitNetif(VisitNetifCallback callback, void *data)
@@ -685,7 +685,7 @@ int32_t LnnInitNetworkManager(void)
     ProtocolType type = 0;
     if (!LnnVisitProtocol(GetAllProtocols, &type)) {
         LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MANAGER_INIT_FAILED;
     }
     LNN_LOGI(LNN_BUILDER, "set supported protocol type. type=%{public}u", type);
     ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
@@ -809,7 +809,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
             return SOFTBUS_OK;
         }
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_NOT_FOUND;
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
@@ -837,7 +837,7 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
             *type = CONNECTION_ADDR_BLE;
             break;
         default:
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_NETWORK_NOT_SUPPORT;
     }
     return ret;
 }

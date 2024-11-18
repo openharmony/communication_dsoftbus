@@ -1585,3 +1585,29 @@ int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32
     LnnNotifyHichainProofException(errorReturn, errorReturnLen, TYPE_PC_ID, errCode);
     return SOFTBUS_OK;
 }
+
+void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange)
+{
+    cJSON *json = cJSON_CreateObject();
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "json is null!");
+        return;
+    }
+
+    if (!AddStringToJsonObject(json, "networkId", networkId) ||
+        !AddNumberToJsonObject(json, "discoverType", discoveryType) ||
+        !AddBoolToJsonObject(json, "ischange", isChange)) {
+        LNN_LOGE(LNN_BUILDER, "add json failed");
+        cJSON_Delete(json);
+        return;
+    }
+    char *msg = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    if(msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "msg is null!");
+        return;
+    }
+    LnnNotifyDeviceTrustedChange(DEVICE_FOREGROUND_USERID_CHANGE, msg, strlen(msg));
+    cJSON_free(msg);
+    LNN_LOGI(LNN_BUILDER, "notify change to service! isChange:%{public}s", isChange ? "true":"false");
+}

@@ -90,7 +90,12 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
         TRANS_LOGE(TRANS_SDK, "[client] network id is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    bool isUserSwitchEvent = (bool)((routeType >> 10) & 0xff);
+    if (isUserSwitchEvent) {
+        TRANS_LOGI(TRANS_SDK, "[client] user switch event.");
+        ClientTransOnUserSwitch();
+        return SOFTBUS_OK;
+    }
     ClientTransOnLinkDown(networkId, routeType);
     return SOFTBUS_OK;
 }

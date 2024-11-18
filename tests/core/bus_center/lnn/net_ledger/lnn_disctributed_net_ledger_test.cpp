@@ -739,9 +739,9 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETNETWORKID_BYUDIDHASH_Test_001, TestSi
     uint8_t udidHash[UDID_HASH_LEN] = {0};
     char buf = '0';
     uint32_t len = 0;
-    int32_t ret = LnnGetNetworkIdByUdidHash(nullptr, len, nullptr, len);
+    int32_t ret = LnnGetNetworkIdByUdidHash(nullptr, len, nullptr, len, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnGetNetworkIdByUdidHash(udidHash, UDID_HASH_LEN, &buf, len);
+    ret = LnnGetNetworkIdByUdidHash(udidHash, UDID_HASH_LEN, &buf, len, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 

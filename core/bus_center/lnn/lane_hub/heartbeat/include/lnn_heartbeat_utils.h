@@ -28,6 +28,7 @@ extern "C" {
 
 #define HB_INVALID_TYPE_ID         (-1)
 #define HB_SHORT_UUID_LEN          2
+#define USERID_CHECKSUM_LEN        4
 #define HB_SHORT_UDID_HASH_LEN     8
 #define HB_SHORT_UDID_HASH_HEX_LEN 16
 #define HB_SHORT_ACCOUNT_HASH_LEN  2
@@ -121,6 +122,7 @@ typedef enum {
 typedef struct {
     uint8_t capabiltiy;
     uint8_t shortUuid[HB_SHORT_UUID_LEN];
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
     uint8_t hbVersion;
     bool isScreenOn;
     int16_t stateVersion;

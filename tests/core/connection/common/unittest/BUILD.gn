@@ -27,10 +27,10 @@ ohos_unittest("SoftbusConnCommonTest") {
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/common/include",
-    "$dsoftbus_root_path/tests/core/connection/common/unittest",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock",
   ]
   sources = [
-    "softbus_adapter_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock/softbus_adapter_mock.cpp",
     "softbus_conn_common_test.cpp",
   ]
   deps = [
