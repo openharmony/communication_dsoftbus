@@ -600,7 +600,7 @@ static int32_t HandleDBUpdateInternal(
     return SOFTBUS_OK;
 }
 
-static void AnonymizeDeviceUdidAndTrueValue(char *deviceUdid, char *fieldName, char *trueValue, int32_t stateVersion)
+static void DumpDeviceUdidAndTrueValue(char *deviceUdid, char *fieldName, char *trueValue, int32_t stateVersion)
 {
     char *anonyDeviceUdid = NULL;
     Anonymize(deviceUdid, &anonyDeviceUdid);
@@ -655,7 +655,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
         return ret;
     }
-    AnonymizeDeviceUdidAndTrueValue(deviceUdid, fieldName, trueValue, parseValue.stateVersion);
+    DumpDeviceUdidAndTrueValue(deviceUdid, fieldName, trueValue, parseValue.stateVersion);
     (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
     return SOFTBUS_OK;
 }
