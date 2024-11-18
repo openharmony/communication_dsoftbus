@@ -384,12 +384,13 @@ static int32_t TransListCopy(ListNode *sessionServerList)
 
 void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
 {
+    #define USER_SWITCH_OFFSET 10
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
     int32_t routeType = (int32_t)GET_ROUTE_TYPE(type);
     int32_t connType = (int32_t)GET_CONN_TYPE(type);
-    bool isUserSwitchEvent = (bool)((routeType >> 10) & 0xff);
+    bool isUserSwitchEvent = (bool)((type >> USER_SWITCH_OFFSET) & 0xff);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     TRANS_LOGI(TRANS_CTRL,
