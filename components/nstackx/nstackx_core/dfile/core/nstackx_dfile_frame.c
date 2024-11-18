@@ -554,10 +554,6 @@ static uint8_t IsSettingFrameLengthValid(const SettingFrame *hostSettingFrame, u
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->capsCheck))) {
-        return NSTACKX_TRUE;
-    }
-
     if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->productVersion))) {
         return NSTACKX_TRUE;
     }
