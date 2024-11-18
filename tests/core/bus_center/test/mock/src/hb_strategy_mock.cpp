@@ -189,5 +189,20 @@ int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count)
 {
     return HeartBeatStrategyInterface()->GetNodeFromPcRestrictMap(udidHash, count);
 }
+
+int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
+{
+    return HeartBeatStrategyInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
+}
+
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
+{
+    return HeartBeatStrategyInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
+}
+
+void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange)
+{
+    return HeartBeatStrategyInterface()->NotifyForegroundUseridChange(networkId, discoveryType, isChange);
+}
 }
 } // namespace OHOS

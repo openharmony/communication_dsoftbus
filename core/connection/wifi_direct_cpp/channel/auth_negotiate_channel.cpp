@@ -29,6 +29,7 @@
 #include "protocol/wifi_direct_protocol_factory.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "utils/wifi_direct_dfx.h"
 
 namespace OHOS::SoftBus {
 static constexpr int TIMER_TIMEOUT = 50;
@@ -223,6 +224,9 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
+
+    WifiDirectDfx::ReportReceiveAuthLinkMsg(msg, channel->GetRemoteDeviceId());
+
     bool sameAccount = CheckSameAccount(msg);
     CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
     if (!sameAccount) {

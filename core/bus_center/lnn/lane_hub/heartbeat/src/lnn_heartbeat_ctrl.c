@@ -40,6 +40,7 @@
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_net_builder.h"
+#include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
@@ -847,18 +848,30 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
     SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
     switch (userSwitchState) {
         case SOFTBUS_USER_SWITCHED:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
-            LnnUpdateOhosAccount(true);
-            HbConditionChanged(false);
-            if (IsHeartbeatEnable()) {
-                if (LnnStartHbByTypeAndStrategy(
-                    HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-                    LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+            {
+                LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
+                uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
+                int32_t userId = GetActiveOsAccountIds();
+                LNN_LOGI(LNN_HEART_BEAT, "userswitch userId:%{public}d", userId);
+                int32_t ret = LnnSetLocalNumInfo(NUM_KEY_USERID, userId);
+                if (ret != SOFTBUS_OK) {
+                    LNN_LOGW(LNN_EVENT, "set userId to local failed! userId:%{public}d", userId);
                 }
-                DfxRecordTriggerTime(USER_SWITCHED, EVENT_STAGE_LNN_USER_SWITCHED);
+                ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+                if (ret != SOFTBUS_OK) {
+                    LNN_LOGW(LNN_EVENT, "construct useridchecksum failed! userId:%{public}d", userId);
+                }
+                ret = LnnSetLocalByteInfo(BYTE_KEY_USERID_CHECKSUM, userIdCheckSum, USERID_CHECKSUM_LEN);
+                if (ret != SOFTBUS_OK) {
+                    LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
+                }
+                LnnUpdateOhosAccount(true);
+                HbConditionChanged(false);
+                if (IsHeartbeatEnable()) {
+                    DfxRecordTriggerTime(USER_SWITCHED, EVENT_STAGE_LNN_USER_SWITCHED);
+                }
+                break;
             }
-            RestartCoapDiscovery();
-            break;
         default:
             return;
     }
