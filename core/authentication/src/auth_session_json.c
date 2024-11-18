@@ -343,7 +343,7 @@ static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info
     AuthGetLatestIdByUuid(info->uuid, AUTH_LINK_TYPE_WIFI, false, &authHandle);
     if (authHandle.authId == AUTH_INVALID_ID) {
         AUTH_LOGE(AUTH_FSM, "get wifi authKey fail");
-        return SOFTBUS_INVALID_NUM;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
     if (auth == NULL) {
@@ -574,7 +574,7 @@ static int32_t ParseNormalizedKeyValue(AuthSessionInfo *info, const char *encNor
     if (strncmp((char *)data, TRUE_STRING_TAG, strlen(TRUE_STRING_TAG)) != 0) {
         AUTH_LOGE(AUTH_FSM, "normalized key error");
         SoftBusFree(data);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
     AUTH_LOGI(AUTH_FSM, "parse normalized key succ");
     SoftBusFree(data);
