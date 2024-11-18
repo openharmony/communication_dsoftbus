@@ -699,10 +699,10 @@ bool IsUdpRecoveryTransLimit(void)
     return true;
 }
 
-int32_t TransUdpGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+int32_t TransUdpGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *remoteIp, uint32_t maxIpLen,
     int32_t *connectType)
 {
-    if (localIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
+    if (localIp == NULL || remoteIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -723,7 +723,12 @@ int32_t TransUdpGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, u
             if (strcpy_s(localIp, maxIpLen, udpChannelNode->info.myData.addr) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "failed to strcpy localIp, channelId=%{public}d", channelId);
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-                return SOFTBUS_MEM_ERR;
+                return SOFTBUS_STRCPY_ERR;
+            }
+            if (strcpy_s(remoteIp, maxIpLen, udpChannelNode->info.peerData.addr) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "failed to strcpy remoteIp, channelId=%{public}d", channelId);
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+                return SOFTBUS_STRCPY_ERR;
             }
             *connectType = udpChannelNode->info.connectType;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
