@@ -342,6 +342,9 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        if (strcmp(sessionNode->info.peerDeviceId, "") == 0) {
+            continue;  
+        }
         TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
