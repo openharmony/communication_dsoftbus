@@ -142,4 +142,22 @@ std::string WifiDirectDfx::GetChallengeCode(uint32_t requestId)
     }
     return "";
 }
+
+void WifiDirectDfx::ReportReceiveAuthLinkMsg(const NegotiateMessage &msg, const std::string &remoteDeviceId)
+{
+    if (msg.GetMessageType() == NegotiateMessageType::CMD_TRIGGER_REQ ||
+        msg.GetMessageType() == NegotiateMessageType::CMD_CONN_V2_REQ_3 ||
+        msg.GetMessageType() == NegotiateMessageType::CMD_CONN_V2_REQ_1) {
+        auto challengeCodeStr = std::to_string(msg.GetChallengeCode());
+        auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
+        auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteDeviceId);
+        ConnEventExtra extra = {
+            .requestId = (int32_t)msg.GetSessionId(),
+            .challengeCode = challengeCodeStr.c_str(),
+            .peerNetworkId = remoteNetworkId.c_str(),
+            .localNetworkId = localNetworkId.c_str(),
+        };
+        CONN_EVENT(EVENT_SCENE_PASSIVE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
+    }
+}
 } // namespace OHOS::SoftBus
