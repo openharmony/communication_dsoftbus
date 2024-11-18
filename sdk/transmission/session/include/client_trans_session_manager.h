@@ -96,6 +96,7 @@ typedef struct {
     bool isAsync;
     SocketLifecycleData lifecycle;
     uint32_t actionId;
+    int32_t osType;
 } SessionInfo;
 
 typedef struct {
@@ -285,6 +286,8 @@ int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
 void SocketServerStateUpdate(const char *sessionName);
 
 int32_t ClientCancelAuthSessionTimer(int32_t sessionId);
+
+int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
 #ifdef __cplusplus
 }
 #endif
