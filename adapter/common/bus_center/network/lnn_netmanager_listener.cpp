@@ -31,7 +31,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_config_type.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 namespace LnnNetManager {

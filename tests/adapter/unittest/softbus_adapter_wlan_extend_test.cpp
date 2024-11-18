@@ -21,7 +21,7 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define WLAN_SERVICE_NAME "wlan_interface_service"
 #define WLAN_IFNAME "wlan0"

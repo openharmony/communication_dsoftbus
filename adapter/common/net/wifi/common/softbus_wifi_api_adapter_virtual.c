@@ -14,7 +14,7 @@
  */
 
 #include <stdlib.h>
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)

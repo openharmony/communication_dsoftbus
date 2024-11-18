@@ -24,8 +24,8 @@
 #include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_manager.h"
 #include "softbus_broadcast_utils.h"
-#include "softbus_errcode.h"
-#include "softbus_hidumper_bc_mgr.h"
+#include "softbus_error_code.h"
+#include "legacy/softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
 
 #define BC_WAIT_TIME_MS 50
@@ -1629,8 +1629,8 @@ static int32_t StartScanSub(int32_t listenerId)
 
     DISC_LOGI(DISC_BROADCAST, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d,"
         "interval=%{public}hu, window=%{public}hu, callCount=%{public}u",
-        GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId,
-        adapterParam.scanInterval, adapterParam.scanWindow, callCount++);
+        GetSrvType(g_scanManager[listenerId].srvType), listenerId,
+        g_scanManager[listenerId].adapterScanId, adapterParam.scanInterval, adapterParam.scanWindow, callCount++);
     int32_t ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
         adapterFilter, filterSize);
     g_scanManager[listenerId].isNeedReset = false;

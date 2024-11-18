@@ -1,0 +1,152 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../core/transmission/common/trans_common.gni")
+import("../../../dsoftbus.gni")
+
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
+
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    build_type = "static_library"
+    libsec_external_deps = [ "bounds_checking_function:libsec_static" ]
+  } else {
+    build_type = "shared_library"
+    libsec_external_deps = [ "bounds_checking_function:libsec_shared" ]
+  }
+  config("dsoftbus_dump_interface_lite") {
+    include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/core/common/include",
+      "$softbus_adapter_common/include",
+    ]
+    cflags = ohos_lite_cflags
+    cflags_cc = ohos_lite_cflags
+  }
+
+  target(build_type, "softbus_dfx_dump") {
+    include_dirs = [
+      "$dsoftbus_dfx_path/event/src",
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$hilog_lite_include_path",
+    ]
+    sources = [
+      "softbus_hidumper.c",
+      "softbus_hidumper_alarm_virtual.c",
+      "softbus_hidumper_bc_mgr_virtual.c",
+      "softbus_hidumper_broadcast_virtual.c",
+      "softbus_hidumper_buscenter_virtual.c",
+      "softbus_hidumper_conn_virtual.c",
+      "softbus_hidumper_disc_virtual.c",
+      "softbus_hidumper_interface_virtual.c",
+      "softbus_hidumper_nstack_virtual.c",
+      "softbus_hidumper_stats_virtual.c",
+      "softbus_hidumper_trans_virtual.c",
+      "softbus_hidumper_util_virtual.c",
+    ]
+    external_deps = libsec_external_deps
+    public_configs = [ ":dsoftbus_dump_interface_lite" ]
+  }
+} else {
+  cflags = [ "-DFILLP_LINUX" ]
+  config("dsoftbus_dump_interface_std") {
+    include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$softbus_adapter_common/include",
+    ]
+  }
+  ohos_shared_library("softbus_dfx_dump") {
+    sanitize = {
+      ubsan = true
+      integer_overflow = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    branch_protector_ret = "pac_ret"
+    include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_dfx_path/event/src",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+      "$dsoftbus_root_path/core/bus_center/utils/include",
+      "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    ]
+    include_dirs += trans_common_inc
+    sources = [
+      "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
+      "$dsoftbus_root_path/core/common/softbus_property/softbus_feature_config.c",
+      "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
+      "softbus_hidumper.c",
+      "softbus_hidumper_alarm.c",
+      "softbus_hidumper_bc_mgr.c",
+      "softbus_hidumper_broadcast.c",
+      "softbus_hidumper_buscenter.c",
+      "softbus_hidumper_conn.c",
+      "softbus_hidumper_disc.c",
+      "softbus_hidumper_interface.c",
+      "softbus_hidumper_nstack.c",
+      "softbus_hidumper_stats.c",
+      "softbus_hidumper_trans.c",
+      "softbus_hidumper_util.c",
+    ]
+    defines += [ "__STDC_FORMAT_MACROS" ]
+    if (is_asan) {
+      defines += [ "ASAN_BUILD" ]
+    }
+
+    public_configs = [ ":dsoftbus_dump_interface_std" ]
+    public_deps = [
+      "$dsoftbus_dfx_path:softbus_dfx",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+    ]
+    public_external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "sqlite:sqlite",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
+      "hisysevent:libhisyseventmanager",
+    ]
+    if (is_standard_system) {
+      sources += [ "$dsoftbus_root_path/core/common/message_handler/message_handler_ffrt.cpp" ]
+      external_deps += [ "ffrt:libffrt" ]
+    } else {
+      sources += [
+        "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
+      ]
+    }
+
+    innerapi_tags = [ "platformsdk_indirect" ]
+    part_name = "dsoftbus"
+    subsystem_name = "communication"
+  }
+}

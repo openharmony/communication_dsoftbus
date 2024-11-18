@@ -25,7 +25,7 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_type_def.h"
 #include "conn_event.h"
 #include "softbus_utils.h"

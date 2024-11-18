@@ -26,7 +26,7 @@
 #include "client_trans_session_callback.h"
 #include "session.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_app_info.h"
 #include "softbus_feature_config.h"
 #include "softbus_access_token_test.h"

@@ -18,7 +18,7 @@
 #include "permission_utils.h"
 #include "softbus_permission.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "permission_entry.h"

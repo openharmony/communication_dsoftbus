@@ -20,12 +20,12 @@
 #include "auth_device_common_key.h"
 #include "lnn_device_info_recovery.h"
 #include "message_handler.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_manager.h"
@@ -657,20 +657,28 @@ int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyConnExistProc(ProxyConnInfo *conn, ProxyChannelInfo *chan, int32_t chanNewId)
+static int32_t TransProxyConnExistProc(ProxyChannelInfo *chan, int32_t chanNewId, const ConnectOption *connInfo)
 {
-    if (conn == NULL || chan == NULL) {
+    if (chan == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(chanNewId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
         "SoftBusHiTraceChainBegin: set hiTraceId=%{public}" PRIu64, (uint64_t)(chanNewId + ID_OFFSET));
-    ConnectType type = conn->connInfo.type;
-    if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
+    int32_t ret = GetProxyChannelLock();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "lock mutex fail!");
+    ProxyConnInfo conn;
+    if (TransGetConn(connInfo, &conn, false) != SOFTBUS_OK) {
+        ReleaseProxyChannelLock();
+        TRANS_LOGE(TRANS_CTRL, "get connectInfo failed, channelId=%{public}d", chanNewId);
+        return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
+    }
+    ConnectType type = conn.connInfo.type;
+    if (conn.state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
         ProxyChannelInfo channelInfo = {
             .channelId = chanNewId,
-            .reqId = (int32_t)conn->requestId,
+            .reqId = (int32_t)conn.requestId,
             .isServer = -1,
             .type = type,
             .status = PROXY_CHANNEL_STATUS_PYH_CONNECTING,
@@ -678,19 +686,21 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, ProxyChannelInfo *chan, int
         };
 
         TransProxySpecialUpdateChanInfo(&channelInfo);
+        ReleaseProxyChannelLock();
         TRANS_LOGI(TRANS_CTRL, "reuse connection requestId=%{public}d", chan->reqId);
     } else {
+        ReleaseProxyChannelLock();
         ProxyChannelInfo channelInfo = {
             .channelId = chanNewId,
             .reqId = -1,
             .isServer = -1,
             .type = type,
             .status = PROXY_CHANNEL_STATUS_HANDSHAKEING,
-            .connId = conn->connId
+            .connId = conn.connId
         };
         TransProxySpecialUpdateChanInfo(&channelInfo);
-        if (TransAddConnRefByConnId(conn->connId, (bool)chan->isServer) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "TransAddConnRefByConnId: connId=%{public}u err", conn->connId);
+        if (TransAddConnRefByConnId(conn.connId, (bool)chan->isServer) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "TransAddConnRefByConnId: connId=%{public}u err", conn.connId);
             return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
         }
         TransProxyPostHandshakeMsgToLoop(chanNewId);
@@ -799,14 +809,14 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED;
     }
     if (TransGetConn(connInfo, &conn, false) == SOFTBUS_OK) {
-        ret = TransProxyConnExistProc(&conn, chan, chanNewId);
+        ret = TransProxyConnExistProc(chan, chanNewId, connInfo);
         if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED) {
             ret = TransProxyOpenNewConnChannel(PROXY, connInfo, chanNewId);
         }
     } else {
         ret = TransProxyOpenNewConnChannel(PROXY, connInfo, chanNewId);
         if ((ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) && (TransGetConn(connInfo, &conn, false) == SOFTBUS_OK)) {
-            ret = TransProxyConnExistProc(&conn, chan, chanNewId);
+            ret = TransProxyConnExistProc(chan, chanNewId, connInfo);
         }
     }
     if (ret == SOFTBUS_OK) {

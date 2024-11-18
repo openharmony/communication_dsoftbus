@@ -17,7 +17,7 @@
 #include <securec.h>
 
 #include "lnn_net_ledger_mock.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "lnn_battery_info.c"
 #include "lnn_battery_info.h"
 #include "lnn_sync_info_mock.h"

@@ -15,7 +15,7 @@
 #include <securec.h>
 #include "gtest/gtest.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_range.h"
 
 using namespace std;

@@ -16,7 +16,7 @@
 #include "lnn_distributed_net_ledger.h"
 
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnInitDistributedLedger(void)
 {
@@ -73,12 +73,14 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len)
+int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len,
+    bool needOnline)
 {
     (void)udidHash;
     (void)udidHashLen;
     (void)buf;
     (void)len;
+    (void)needOnline;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

@@ -18,8 +18,6 @@ import("../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../.."
-
 ohos_fuzztest("SoftBusBroadcastFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
@@ -37,7 +35,7 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
-    "$dsoftbus_root_path/core/common/dfx/dumper/legacy/hidumper_adapter/include",
+    "$dsoftbus_dfx_path/interface/include",
   ]
 
   deps = [

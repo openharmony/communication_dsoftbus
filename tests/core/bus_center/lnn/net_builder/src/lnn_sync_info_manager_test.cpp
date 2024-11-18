@@ -22,7 +22,7 @@
 #include "lnn_trans_mock.h"
 #include "lnn_service_mock.h"
 #include "message_handler.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "lnn_sync_info_manager.c"
 #include "lnn_net_builder.c"
 #include "lnn_sync_info_manager_mock.h"

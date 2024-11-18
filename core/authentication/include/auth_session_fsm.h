@@ -27,7 +27,7 @@
 #include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 
 #ifdef __cplusplus
 #if __cplusplus

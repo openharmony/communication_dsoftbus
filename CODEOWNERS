@@ -94,14 +94,12 @@ tests/core/common/          zhusiyuan2@huawei.com
 interfaces/kits/common/softbus_common.h     zhusiyuan2@huawei.com
 
 [DFX]
-adapter/common/dfx/         zhusiyuan2@huawei.com
-core/common/dfx/            zhusiyuan2@huawei.com
-tests/core/common/dfx       zhusiyuan2@huawei.com
+dfx/            zhusiyuan2@huawei.com
+tests/dfx       zhusiyuan2@huawei.com
 
 [DFXInterface]
 hisysevent.yaml             litongxin3@huawei.com
 interfaces/kits/common/softbus_error_code.h     litongxin3@huawei.com
-core/common/dfx/interface   litongxin3@huawei.com
 
 [Framework]
 core/frame/                 zhangfengxi@huawei.com

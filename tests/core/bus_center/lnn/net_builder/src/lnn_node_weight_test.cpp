@@ -20,7 +20,7 @@
 #include "lnn_net_ledger_mock.h"
 #include "lnn_node_weight.c"
 #include "lnn_service_mock.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing;

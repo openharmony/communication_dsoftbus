@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_def.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"

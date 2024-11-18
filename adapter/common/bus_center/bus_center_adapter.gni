@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../dsoftbus.gni")
 
 adapter_bus_center_path = "$softbus_adapter_common/bus_center"
@@ -19,10 +18,9 @@ adapter_bus_center_path = "$softbus_adapter_common/bus_center"
 bus_center_adapter_src = []
 bus_center_adapter_inc = [
   "$softbus_adapter_common/bus_center/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
+  "$dsoftbus_dfx_path/interface/include",
 ]
-bus_center_adapter_deps =
-    [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+bus_center_adapter_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
 if (!defined(global_parts_info) ||
     defined(global_parts_info.notification_common_event_service)) {
@@ -146,11 +144,10 @@ if (dsoftbus_feature_lnn_net) {
         [ "$adapter_bus_center_path/network/lnn_bt_monitor.c" ]
     bus_center_adapter_inc += [
       "$softbus_adapter_common/net/bluetooth/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_dfx_path/interface/include",
     ]
     bus_center_adapter_external_deps += [ "wifi:wifi_sdk" ]
-    bus_center_adapter_deps +=
-        [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+    bus_center_adapter_deps += [ "$dsoftbus_dfx_path:softbus_dfx" ]
   } else {
     bus_center_adapter_src +=
         [ "$adapter_bus_center_path/network/lnn_bt_monitor_virtual.c" ]

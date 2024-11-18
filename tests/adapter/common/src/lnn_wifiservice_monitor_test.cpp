@@ -21,7 +21,7 @@
 #include "lnn_wifiservice_monitor.cpp"
 #include "lnn_wifiservice_monitor_mock.cpp"
 #include "softbus_wifi_api_adapter.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing;

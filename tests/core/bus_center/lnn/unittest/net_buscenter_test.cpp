@@ -43,7 +43,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;

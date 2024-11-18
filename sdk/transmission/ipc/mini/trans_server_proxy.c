@@ -17,7 +17,7 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
@@ -34,7 +34,7 @@ void TransServerProxyDeInit(void)
 
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
-    return TransCreateSessionServer(pkgName, sessionName, 0, 0);
+    return TransCreateSessionServer(pkgName, sessionName, 0, 0, false);
 }
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)

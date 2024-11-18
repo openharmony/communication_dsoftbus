@@ -22,7 +22,7 @@
 #include "string_ex.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_disc_server.h"
-#include "softbus_hidumper_interface.h"
+#include "legacy/softbus_hidumper_interface.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
 #include "softbus_utils.h"
@@ -88,11 +88,11 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp)
 {
     pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    return TransCreateSessionServer(pkgName, sessionName, (int32_t)callingUid, (int32_t)callingPid);
+    return TransCreateSessionServer(pkgName, sessionName, (int32_t)callingUid, (int32_t)callingPid, isNormalApp);
 }
 
 int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName)

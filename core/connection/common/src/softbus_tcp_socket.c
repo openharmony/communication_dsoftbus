@@ -19,7 +19,7 @@
 #include "conn_log.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_conn_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 
 #define M_BYTES                     0x100000

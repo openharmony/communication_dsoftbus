@@ -14,7 +14,7 @@
  */
 
 #include "auth_device_common_key.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 
 void AuthLoadDeviceKey(void)
@@ -53,14 +53,6 @@ void AuthClearDeviceKey(void)
 {
 }
 
-int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey)
-{
-    (void)udidHash;
-    (void)isServer;
-    (void)deviceKey;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey)
 {
     (void)udidHash;
@@ -85,4 +77,12 @@ void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bo
     (void)keyType;
     (void)index;
     (void)isServer;
+}
+
+int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey)
+{
+    (void)udidHash;
+    (void)isServer;
+    (void)deviceKey;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

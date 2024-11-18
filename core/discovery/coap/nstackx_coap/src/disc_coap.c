@@ -23,9 +23,9 @@
 #include "disc_nstackx_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_errcode.h"
-#include "softbus_hidumper_disc.h"
-#include "softbus_hisysevt_discreporter.h"
+#include "softbus_error_code.h"
+#include "legacy/softbus_hidumper_disc.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
 
 #define INT32_MAX_BIT_NUM 32
 #define MAX_CAP_NUM (CAPABILITY_NUM * INT32_MAX_BIT_NUM)

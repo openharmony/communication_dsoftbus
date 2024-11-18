@@ -42,7 +42,7 @@
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"

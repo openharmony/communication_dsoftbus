@@ -16,7 +16,6 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
-dsoftbus_root_path = "../../../../.."
 
 ohos_fuzztest("LnnSyncInfoMsgFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
@@ -30,7 +29,7 @@ ohos_fuzztest("LnnSyncInfoMsgFuzzTest") {
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
   ]
 
   cflags = [

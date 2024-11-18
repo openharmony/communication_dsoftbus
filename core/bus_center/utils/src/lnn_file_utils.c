@@ -20,7 +20,7 @@
 #include "lnn_log.h"
 #include "softbus_adapter_file.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 
 #define DEFAULT_STORAGE_PATH "/data/service/el1/public"
@@ -41,7 +41,6 @@ static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
     { LNN_FILE_ID_BROADCAST_KEY, "/dsoftbus/broadcastkey" },
     { LNN_FILE_ID_PTK_KEY, "/dsoftbus/ptkkey" },
     { LNN_FILE_ID_IRK_KEY, "/dsoftbus/irk" },
-    { LNN_FILE_ID_DEVICEIRK_KEY, "/dsoftbus/deviceirk" },
     { LNN_FILE_ID_BROADCAST_CIPHER, "/dsoftbus/cipher" },
 };
 

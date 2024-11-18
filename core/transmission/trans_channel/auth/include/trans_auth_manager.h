@@ -16,10 +16,10 @@
 #ifndef TRANS_AUTH_MANAGER_H
 #define TRANS_AUTH_MANAGER_H
 
-#include "lnn_lane_interface.h"
-#include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
+#include "softbus_app_info.h"
+#include "lnn_lane_interface.h"
 
 #ifdef __cplusplus
 #if __cplusplus

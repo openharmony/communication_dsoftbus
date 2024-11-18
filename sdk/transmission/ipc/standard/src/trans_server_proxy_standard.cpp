@@ -19,7 +19,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
 
@@ -67,8 +67,9 @@ int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, cons
     return SOFTBUS_OK;
 }
 
-int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
-{
+int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp)
+{   
+    (void)isNormalApp;
     if (pkgName == nullptr || sessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }

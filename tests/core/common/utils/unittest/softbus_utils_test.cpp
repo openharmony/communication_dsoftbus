@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 using namespace testing::ext;

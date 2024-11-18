@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../core/transmission/trans_channel/trans_channel.gni")
 import("../../dsoftbus.gni")
 
@@ -35,7 +34,7 @@ enhanced_qos_info = exec_script("$dsoftbus_root_path/check_sub_module.py",
 trans_session_src = trans_channel_src
 trans_session_inc = trans_channel_inc
 trans_session_deps = trans_channel_deps
-trans_session_deps += [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+trans_session_deps += [ "$dsoftbus_dfx_path:softbus_dfx" ]
 trans_session_external_deps = []
 
 trans_session_src += [

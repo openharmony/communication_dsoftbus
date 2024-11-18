@@ -29,6 +29,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
 #include "lnn_map.h"
+#include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_lane_def.h"
 #include "lnn_deviceinfo_to_profile.h"
@@ -41,12 +42,13 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_buscenter.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 #include "bus_center_event.h"
 
 DistributedNetLedger g_distributedNetLedger;
@@ -694,6 +696,34 @@ static void UpdateNewNodeAccountHash(NodeInfo *info)
     }
 }
 
+static void CheckUserIdCheckSumChange(NodeInfo *oldInfo, const NodeInfo *newInfo)
+{
+    if (oldInfo == NULL || newInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return;
+    }
+    int32_t userIdCheckSum = 0;
+    int32_t ret = memcpy_s(&userIdCheckSum, sizeof(int32_t), newInfo->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy failed! userIdchecksum:%{public}d", userIdCheckSum);
+        return;
+    }
+    if (userIdCheckSum == 0) {
+        LNN_LOGW(LNN_LEDGER, "useridchecksum all zero");
+        return;
+    }
+    bool isChange = false;
+    ret = memcmp(newInfo->userIdCheckSum, oldInfo->userIdCheckSum, USERID_CHECKSUM_LEN);
+    if (ret != 0) {
+        isChange = true;
+    }
+    NotifyForegroundUseridChange((char *)newInfo->networkId, newInfo->discoveryType, isChange);
+    if (isChange) {
+        LNN_LOGI(LNN_LEDGER, "userIdCheckSum changed!");
+        LnnSetDLConnUserIdCheckSum((char *)newInfo->networkId, userIdCheckSum);
+    }
+}
+
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 {
     const char *udid = NULL;
@@ -743,6 +773,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
     }
+    CheckUserIdCheckSumChange(oldInfo, newInfo);
     return SOFTBUS_OK;
 }
 
@@ -954,6 +985,16 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
         sizeof(info->rpaInfo.peerIrk)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
+        return;
+    }
+        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
+        sizeof(info->cipherInfo.key)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
+        return;
+    }
+    if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
+        sizeof(info->cipherInfo.iv)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
         return;
     }
     LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
@@ -1180,6 +1221,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
     UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid);
+    CheckUserIdCheckSumChange(oldInfo, info);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }
@@ -1285,14 +1327,6 @@ static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type
     return REPORT_OFFLINE;
 }
 
-static void LnnCleanNodeInfo(NodeInfo *info)
-{
-    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
-    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
-    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    LNN_LOGI(LNN_LEDGER, "need to report offline");
-}
-
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
@@ -1336,7 +1370,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGI(LNN_LEDGER, "the state is already offline, no need to report offline");
         return REPORT_NONE;
     }
-    LnnCleanNodeInfo(info);
+    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LNN_LOGI(LNN_LEDGER, "need to report offline");
     DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
     return REPORT_OFFLINE;
 }
@@ -1513,11 +1550,11 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
         LNN_LOGE(LNN_LEDGER, "strcpy_s p2pMac to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, (char *)newInfo->rpaInfo.peerIrk,
-            LFINDER_IRK_LEN) != EOK) {
+        LFINDER_IRK_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s peerIrk to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, (char *)newInfo->rpaInfo.publicAddress,
-            LFINDER_MAC_ADDR_LEN) != EOK) {
+        LFINDER_MAC_ADDR_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s publicAddress to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) !=

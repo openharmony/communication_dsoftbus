@@ -32,4 +32,4 @@ void ClearMetaNodeRequestByPid(const char *pkgName, int32_t pid);
 #ifdef __cplusplus
 }
 #endif
-#endif //LNN_META_NODE_INTERFACE_H
+#endif // LNN_META_NODE_INTERFACE_H

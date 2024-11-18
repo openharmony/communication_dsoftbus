@@ -15,7 +15,7 @@
 
 #include "lnn_heartbeat_strategy.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {

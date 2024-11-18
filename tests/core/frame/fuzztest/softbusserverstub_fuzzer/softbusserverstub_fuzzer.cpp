@@ -22,7 +22,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_server_frame.h"
 #include "system_ability_definition.h"
 #include "securec.h"

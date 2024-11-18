@@ -911,6 +911,7 @@ int P2pV1Processor::SendConnectResponseAsGo(const NegotiateChannel &channel, con
         InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&response](const InterfaceInfo &interface) {
             response.SetLegacyP2pMac(interface.GetBaseMac());
             response.SetLegacyP2pIp(interface.GetIpString().ToIpString());
+            response.SetLegacyP2pGoIp(interface.GetIpString().ToIpString());
             response.SetLegacyP2pGoMac(interface.GetBaseMac());
             response.SetLegacyP2pGoPort(interface.GetP2pListenPort());
             response.SetLegacyP2pGroupConfig(interface.GetP2pGroupConfig());

@@ -34,8 +34,8 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "softbus_error_code.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
 
@@ -728,7 +728,7 @@ static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *pa
             break;
         default:
             LNN_LOGE(LNN_HEART_BEAT, "process transact state get invalid msgType");
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NETWORK_HB_TRANSACT_PROCESS_FAIL;
     }
     hbFsm = TO_HEARTBEAT_FSM(fsm);
     if (hbFsm->state == nextState) {
@@ -848,7 +848,6 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     LnnHeartbeatType hbType = msgPara->hbType;
     NodeInfo nodeInfo;
     SoftBusSysTime times = {0};
-    uint64_t nowTime;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "check dev status get nodeInfo fail");
@@ -858,7 +857,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     if (!LnnHasDiscoveryType(&nodeInfo, discType)) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_HEART_BEAT,
-            "check dev status node doesn't have discType. networkId=%{public}s, discType=%{public}d",
+            "check dev status doesn't have discType. networkId=%{public}s, discType=%{public}d",
             AnonymizeWrapper(anonyNetworkId), discType);
         AnonymizeFree(anonyNetworkId);
         return;
@@ -870,7 +869,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         return;
     }
     SoftBusGetTime(&times);
-    nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+    uint64_t nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType, msgPara->checkDelay)) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "receive heartbeat in time, networkId=%{public}s, nowTime=%{public}" PRIu64 ", "
@@ -1194,7 +1193,6 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
     uint64_t delayMillis)
 {
     LnnHeartbeatSendEndData *dupData = NULL;
-
     if (hbFsm == NULL || custData == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg get invalid param");
         return SOFTBUS_INVALID_PARAM;

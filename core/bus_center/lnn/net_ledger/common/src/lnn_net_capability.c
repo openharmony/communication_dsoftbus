@@ -15,8 +15,9 @@
 
 #include "lnn_net_capability.h"
 
+#include <stdint.h>
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */

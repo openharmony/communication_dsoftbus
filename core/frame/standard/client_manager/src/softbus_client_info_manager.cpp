@@ -94,14 +94,14 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
             break;
         }
     }
-    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgname=%{public}s", (*pid), pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgName=%{public}s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName, ISessionListener *listener)
 {
     if (listener == nullptr) {
-        COMM_LOGE(COMM_SVC, "listener is nullptr");
+        COMM_LOGE(COMM_SVC, "listener is nullptr\n");
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
