@@ -1810,7 +1810,7 @@ static void TransNotifyOffLine(const LnnEventBasicInfo *info)
 
 static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)
 {
-    #define USER_SWITCH_OFFSET 10
+#define USER_SWITCH_OFFSET 10
     TRANS_CHECK_AND_RETURN_LOGE(info != NULL, TRANS_CTRL, "invalid Lnn info");
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;

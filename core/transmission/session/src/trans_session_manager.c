@@ -384,7 +384,7 @@ static int32_t TransListCopy(ListNode *sessionServerList)
 
 void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
 {
-    #define USER_SWITCH_OFFSET 10
+#define USER_SWITCH_OFFSET 10
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }

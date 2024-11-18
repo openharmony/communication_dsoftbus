@@ -386,5 +386,6 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransNotifyUserSwitchTest001, Test
     TransNotifyUserSwitch(event);
     info->status = SOFTBUS_USER_SWITCH_UNKNOWN;
     TransNotifyUserSwitch(event);
+    SoftBusFree(info);
 }
 } // namespace OHOS
