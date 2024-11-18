@@ -338,7 +338,7 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     LnnPhysicalSubnet *manager = CreateBtSubnetManager(self, netifMgr->ifName);
     if (manager == NULL) {
         LNN_LOGE(LNN_BUILDER, "create bt subnet mgr fail");
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_NETWORK_CREATE_SUBNET_MANAGER_FAILED;
     }
 
     int ret = LnnRegistPhysicalSubnet(manager);
