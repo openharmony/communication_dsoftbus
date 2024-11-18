@@ -428,6 +428,7 @@ typedef struct {
 typedef enum {
     DEVICE_NOT_TRUSTED = 0,               /**< device not trusted */
     DEVICE_TRUST_RELATIONSHIP_CHANGE = 1, /**< device trust relationship change */
+    DEVICE_FOREGROUND_USERID_CHANGE = 2,     /**< device useridchecksum change*/
 } TrustChangeType;
 
 /**

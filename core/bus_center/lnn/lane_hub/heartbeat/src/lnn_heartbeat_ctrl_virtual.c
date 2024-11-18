@@ -120,3 +120,8 @@ bool LnnIsCloudSyncEnd(void)
 {
     return true;
 }
+
+bool IsHeartbeatEnable(void)
+{
+    return false;
+}

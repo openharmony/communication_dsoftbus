@@ -236,5 +236,15 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
 {
     return HeartBeatCtrlStaticInterface()->LnnStopOfflineTimingStrategy(networkId, addrType);
 }
+
+int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len)
+{
+    return HeartBeatCtrlStaticInterface()->HbBuildUserIdCheckSum(userIdArray, num, custData, len);
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return HeartBeatCtrlStaticInterface()->LnnSetLocalByteInfo(key, info, len);
+}
 }
 } // namespace OHOS

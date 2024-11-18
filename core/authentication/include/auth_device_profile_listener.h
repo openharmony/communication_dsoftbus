@@ -34,6 +34,8 @@ public:
     int32_t OnTrustDeviceProfileAdd(const TrustDeviceProfile &profile);
     int32_t OnTrustDeviceProfileDelete(const TrustDeviceProfile &profile);
     int32_t OnTrustDeviceProfileUpdate(const TrustDeviceProfile &oldProfile, const TrustDeviceProfile &newProfile);
+    int32_t OnTrustDeviceProfileActive(const TrustDeviceProfile &profile);
+    int32_t OnTrustDeviceProfileInactive(const TrustDeviceProfile &profile);
     int32_t OnDeviceProfileAdd(const DeviceProfile &profile);
     int32_t OnDeviceProfileDelete(const DeviceProfile &profile);
     int32_t OnDeviceProfileUpdate(const DeviceProfile &oldProfile, const DeviceProfile &newProfile);
