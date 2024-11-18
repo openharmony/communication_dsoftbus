@@ -88,7 +88,6 @@ void TransClientSessionManagerTest::TearDownTestCase(void)
     ConnServerDeinit();
     AuthDeinit();
     BusCenterServerDeinit();
-    TransServerDeinit();
 }
 
 static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
@@ -1551,5 +1550,8 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest51, TestSiz
 
     ret = ClientSignalSyncBind(1, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    ClientTransOnUserSwitch();
+    TransServerDeinit();
+    ClientTransOnUserSwitch();
 }
 }
