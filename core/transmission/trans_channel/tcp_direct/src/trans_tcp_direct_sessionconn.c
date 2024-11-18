@@ -417,10 +417,10 @@ int32_t TransAddTcpChannelInfo(TcpChannelInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+int32_t TransTdcGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *remoteIp, uint32_t maxIpLen,
     int32_t *connectType)
 {
-    if (localIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
+    if (localIp == NULL || remoteIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -442,7 +442,12 @@ int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, u
             if (strcpy_s(localIp, maxIpLen, item->myIp) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "failed to strcpy localIp. channelId=%{public}d", channelId);
                 (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
-                return SOFTBUS_MEM_ERR;
+                return SOFTBUS_STRCPY_ERR;
+            }
+            if (strcpy_s(remoteIp, maxIpLen, item->peerIp) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "failed to strcpy remoteIp. channelId=%{public}d", channelId);
+                (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+                return SOFTBUS_STRCPY_ERR;
             }
             *connectType = item->connectType;
             (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
