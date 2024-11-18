@@ -17,7 +17,7 @@
 
 #include "lnn_log.h"
 #include "message_parcel.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
@@ -442,7 +442,7 @@ int32_t BusCenterClientProxy::OnHichainProofException(
     const char *pkgName, const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        LNN_LOGE(LNN_EVENT, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = Remote();

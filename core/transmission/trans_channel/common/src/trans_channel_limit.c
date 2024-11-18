@@ -21,7 +21,7 @@
 #include "permission_entry.h"
 #include "regex.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 
 typedef struct {
@@ -60,6 +60,10 @@ static const SessionWhiteList g_sessionWhiteList[] = {
     },
     {
         .sessionName = "com.huawei.devicemanager.dynamic",
+        .regexp = false,
+    },
+    {
+        .sessionName = "ohos.distributehardware.devicemanager.pinholder",
         .regexp = false,
     }
 };

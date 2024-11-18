@@ -33,7 +33,7 @@
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 

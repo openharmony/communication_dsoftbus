@@ -17,7 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
 #include "auth_interface.h"

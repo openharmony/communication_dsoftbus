@@ -22,7 +22,7 @@
 #include "session_service_impl.h"
 #include "ISessionListener.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_access_token_test.h"
 
 #define TEST_DATA_LENGTH 1024

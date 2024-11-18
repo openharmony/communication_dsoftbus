@@ -18,7 +18,7 @@
 #include "bus_center_manager.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
 {
@@ -114,4 +114,13 @@ int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
     (void)networkId;
     (void)timeout;
     return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len)
+{
+    (void)userIdArray;
+    (void)num;
+    (void)custData;
+    (void)len;
+    return SOFTBUS_OK;
 }

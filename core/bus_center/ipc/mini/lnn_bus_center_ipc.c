@@ -24,7 +24,7 @@
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);

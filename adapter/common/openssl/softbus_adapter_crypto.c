@@ -23,7 +23,7 @@
 #include "comm_log.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static SoftBusMutex g_randomLock;
 
@@ -61,10 +61,6 @@ static EVP_CIPHER *GetCtrAlgorithmByKeyLen(uint32_t keyLen)
 
 static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *cipherkey, bool mode)
 {
-    if (cipherkey == NULL) {
-        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para.");
-        return SOFTBUS_INVALID_PARAM;
-    }
     EVP_CIPHER *cipher = GetGcmAlgorithmByKeyLen(cipherkey->keyLen);
     if (cipher == NULL) {
         COMM_LOGE(COMM_ADAPTER, "get cipher fail.");

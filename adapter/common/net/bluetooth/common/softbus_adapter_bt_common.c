@@ -22,7 +22,7 @@
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define STATE_LISTENER_MAX_NUM 18
 #define BR_STATE_CB_TRANSPORT 1

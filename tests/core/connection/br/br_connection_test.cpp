@@ -28,7 +28,7 @@
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "wrapper_br_interface.h"
 
 #include "softbus_conn_br_pending_packet.h"

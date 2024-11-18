@@ -24,7 +24,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -90,7 +90,12 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
         TRANS_LOGE(TRANS_SDK, "[client] network id is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    bool isUserSwitchEvent = (bool)((routeType >> 10) & 0xff);
+    if (isUserSwitchEvent) {
+        TRANS_LOGI(TRANS_SDK, "[client] user switch event.");
+        ClientTransOnUserSwitch();
+        return SOFTBUS_OK;
+    }
     ClientTransOnLinkDown(networkId, routeType);
     return SOFTBUS_OK;
 }

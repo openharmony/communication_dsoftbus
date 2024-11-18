@@ -20,8 +20,8 @@
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "softbus_error_code.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_socket.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"
@@ -68,7 +68,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
     if (node->serverSide == false) {
         if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->appInfo.myData.pid,
             node->channelId, errCode) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "notify channel open fail err");
+            TRANS_LOGW(TRANS_CTRL, "notify channel open fail err");
         }
     }
 
@@ -86,6 +86,7 @@ static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
+
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
@@ -149,8 +150,10 @@ static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
 void TransTdcStopSessionProc(ListenerModule listenMod)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
+
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
+
     SoftBusList *sessionList = GetSessionConnList();
     if (sessionList == NULL) {
         TRANS_LOGE(TRANS_INIT, "get session conn list failed");
@@ -160,6 +163,7 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
         TRANS_LOGE(TRANS_INIT, "get session conn lock failed");
         return;
     }
+
     ListNode tempTdcChannelList;
     ListInit(&tempTdcChannelList);
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
@@ -179,7 +183,6 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid");
-
     int32_t ret = P2pDirectChannelInit();
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
@@ -293,11 +296,9 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
     } else if (connInfo->type == CONNECT_P2P_REUSE) {
         appInfo->routeType = WIFI_P2P_REUSE;
-        TRANS_LOGI(TRANS_CTRL, "goto WIFI_P2P_REUSE");
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     } else {
         appInfo->routeType = WIFI_STA;
-        TRANS_LOGI(TRANS_CTRL, "goto WIFI_STA");
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
 

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../dsoftbus.gni")
 
 if (defined(ohos_lite)) {
