@@ -20,7 +20,7 @@ using namespace testing::ext;
 using namespace testing;
 
 namespace OHOS {
-void *g_busCenterEventDepsInterface;
+void *g_busCenterEventDepsInterface = nullptr;
 BusCenterEventDepsInterfaceMock::BusCenterEventDepsInterfaceMock()
 {
     g_busCenterEventDepsInterface = reinterpret_cast<void *>(this);

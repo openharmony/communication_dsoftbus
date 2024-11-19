@@ -50,7 +50,7 @@ static void RemoveOldKey(SessionKeyList *list)
     if (num <= SESSION_KEY_MAX_NUM) {
         return;
     }
-    
+
     SessionKeyItem *oldKey = NULL;
     uint64_t oldKeyUseTime = UINT64_MAX;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
@@ -427,6 +427,7 @@ int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataI
     SessionKey sessionKey;
     if (GetLatestSessionKey(list, type, &index, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get key fail");
+        AUTH_LOGD(AUTH_FSM, "keyLen=%{public}d", sessionKey.len);
         return SOFTBUS_ENCRYPT_ERR;
     }
     /* pack key index */

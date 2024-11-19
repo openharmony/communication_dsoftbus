@@ -115,3 +115,12 @@ int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
     (void)timeout;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len)
+{
+    (void)userIdArray;
+    (void)num;
+    (void)custData;
+    (void)len;
+    return SOFTBUS_OK;
+}

@@ -284,6 +284,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
         return ret;
     }
+    param.isAsync = false;
     param.sessionId = sessionId;
     TransInfo transInfo = { 0 };
     ret = ServerIpcOpenSession(&param, &transInfo);
@@ -1148,6 +1149,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     }
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
+
     if (!isAsync) {
         (void)ClientGetChannelBySessionId(socket, &(transInfo.channelId), &(transInfo.channelType), NULL);
         TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
@@ -1234,7 +1236,6 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         } else {
             AddSessionStateClosing();
         }
-        
         ret = ClientTransCloseChannel(channelId, type);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,

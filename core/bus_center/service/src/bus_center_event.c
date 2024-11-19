@@ -753,7 +753,7 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
 void LnnNotifyLpReportEvent(SoftBusLpEventType type)
 {
     if (type < SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY || type >= SOFTBUS_LP_EVENT_UNKNOWN) {
-        LNN_LOGW(LNN_EVENT, "bad lp event type = %{public}d", type);
+        LNN_LOGW(LNN_EVENT, "bad lp event type=%{public}d", type);
         return;
     }
     LnnLpReportEvent event = {.basic.event = LNN_EVENT_LP_EVENT_REPORT, .type = type};

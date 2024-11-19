@@ -405,7 +405,7 @@ static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
             return;
         }
         uint64_t constTime =
-           (uint64_t)(connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime);
+            (uint64_t)(connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime);
         if (SoftBusRecordBusCenterResult(linkType, constTime) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "report static lnn duration fail");
         }
@@ -859,7 +859,7 @@ static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnli
     } else {
         peerReason = (uint8_t)connInfo->nodeInfo->stateVersionReason;
     }
-    
+
     *connOnlineReason =
         ((connectReason << BLE_CONNECT_ONLINE_REASON) | (peerReason << PEER_DEVICE_STATE_VERSION_CHANGE) | localReason);
     LNN_LOGI(LNN_BUILDER,
@@ -1504,8 +1504,8 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     int32_t ret = LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
-    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(nodeInfo)) {
-        LNN_LOGW(LNN_BUILDER, "device is node online");
+    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(&oldNodeInfo)) {
+        LNN_LOGW(LNN_BUILDER, "device is not online, ret=%{public}d", ret);
         return false;
     }
     if (IsBasicNodeInfoChanged(&oldNodeInfo, nodeInfo, false)) {
@@ -1607,7 +1607,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     LNN_LOGI(LNN_BUILDER,
         "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
         "uuid=%{public}s, deviceName=%{public}s, peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
+        connFsm->id, AnonymizeWrapper(anonyNetworkId), isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
         isNodeInfoValid ? AnonymizeWrapper(anonyUuid) : "",
         isNodeInfoValid ? AnonymizeWrapper(anonyDeviceName) : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
@@ -1615,6 +1615,10 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
         AnonymizeFree(anonyUdid);
         AnonymizeFree(anonyUuid);
         AnonymizeFree(anonyDeviceName);
+    } else {
+        LNN_LOGI(LNN_BUILDER,
+            "online state enter. [id=%{public}u], networkId=%{public}s, peer%{public}s",
+            connFsm->id, AnonymizeWrapper(anonyNetworkId), LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     }
     AnonymizeFree(anonyNetworkId);
     LnnNotifyOOBEStateChangeEvent(SOFTBUS_FACK_OOBE_END);
@@ -1724,12 +1728,16 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     LNN_LOGI(LNN_BUILDER,
         "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
         "peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
+        connFsm->id, AnonymizeWrapper(anonyNetworkId), isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
         isNodeInfoValid ? AnonymizeWrapper(anonyDeviceName) : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     if (isNodeInfoValid) {
         AnonymizeFree(anonyUdid);
         AnonymizeFree(anonyDeviceName);
+    } else {
+        LNN_LOGI(LNN_BUILDER,
+            "leaving state enter. [id=%{public}u], networkId=%{public}s, peer%{public}s",
+            connFsm->id, AnonymizeWrapper(anonyNetworkId), LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     }
     AnonymizeFree(anonyNetworkId);
     if (CheckDeadFlag(connFsm, true)) {

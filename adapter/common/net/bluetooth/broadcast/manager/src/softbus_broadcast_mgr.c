@@ -1629,8 +1629,8 @@ static int32_t StartScanSub(int32_t listenerId)
 
     DISC_LOGI(DISC_BROADCAST, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d,"
         "interval=%{public}hu, window=%{public}hu, callCount=%{public}u",
-        GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId,
-        adapterParam.scanInterval, adapterParam.scanWindow, callCount++);
+        GetSrvType(g_scanManager[listenerId].srvType), listenerId,
+        g_scanManager[listenerId].adapterScanId, adapterParam.scanInterval, adapterParam.scanWindow, callCount++);
     int32_t ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
         adapterFilter, filterSize);
     g_scanManager[listenerId].isNeedReset = false;

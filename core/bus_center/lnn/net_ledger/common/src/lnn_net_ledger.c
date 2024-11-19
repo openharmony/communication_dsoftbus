@@ -40,6 +40,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "lnn_oobe_manager.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
@@ -268,6 +269,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_P2P_IP, (char *)info, infoLen);
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool *)info, NODE_SCREEN_STATUS_LEN);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -710,8 +713,8 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
     char broadcastCipherStr[SESSION_KEY_STR_LEN] = {0};
     if (ConvertBytesToHexString(broadcastCipherStr, SESSION_KEY_STR_LEN,
         broadcastCipher, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         LNN_LOGE(LNN_LEDGER, "convert broadcastCipher to string fail.");
+        (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyBroadcastCipher = NULL;

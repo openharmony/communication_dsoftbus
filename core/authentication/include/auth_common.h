@@ -83,6 +83,7 @@ if (expression) { \
 #define MASK_UINT64_L32 0x00000000FFFFFFFF
 #define MASK_UINT64_H32 0xFFFFFFFF00000000
 #define AUTH_REQUEST_TIMTOUR 30000
+/* ble network advdata take 8 bytes of UDID hash */
 #define SHORT_HASH_LEN 8
 
 #define SOFTBUS_SUB_SYSTEM 203

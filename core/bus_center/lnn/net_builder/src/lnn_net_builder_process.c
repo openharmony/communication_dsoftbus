@@ -159,7 +159,8 @@ LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr, const char *
     LnnConnectionFsm *connFsm = NULL;
 
     if (LnnGetNetBuilder()->connCount >= LnnGetNetBuilder()->maxConnCount) {
-        LNN_LOGE(LNN_BUILDER, "current connection num exceeds max limit, connCount=%{public}d", LnnGetNetBuilder()->connCount);
+        LNN_LOGE(LNN_BUILDER, "current connection num exceeds max limit, connCount=%{public}d",
+            LnnGetNetBuilder()->connCount);
         return NULL;
     }
     connFsm = LnnCreateConnectionFsm(addr, pkgName, isNeedConnect);

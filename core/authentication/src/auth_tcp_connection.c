@@ -294,7 +294,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (module != AUTH && module != AUTH_P2P &&  module != AUTH_RAW_P2P_CLIENT &&!IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_CLIENT && !IsEnhanceP2pModuleId(module)) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");
@@ -396,7 +396,7 @@ static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32
     }
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
-    if (AuthTcpCreateListener(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+    if (AuthTcpCreateListener(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
@@ -404,7 +404,7 @@ static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32
     if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(AUTH, fd, triggerMode);
+        (void)DelTrigger(module, fd, triggerMode);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }

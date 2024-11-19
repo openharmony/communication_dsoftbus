@@ -67,14 +67,14 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "reuse addr error, ret=%{public}d.", ret);
         ConnShutdownSocket(fd);
-        return SOFTBUS_SOCKET_BIND_ERR;
+        return ret;
     }
 
     ret = SetReusePort(fd, 1);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "reuse port error, ret=%{public}d.", ret);
         ConnShutdownSocket(fd);
-        return SOFTBUS_SOCKET_BIND_ERR;
+        return ret;
     }
 
     ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
@@ -170,6 +170,8 @@ static int32_t InitSockAddrInByIpPort(const char *ip, int32_t port, struct socka
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    (void)memset_s(addr, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;
     addr->sin_port = port;
     addr->sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(ip));
@@ -190,6 +192,8 @@ static int32_t InitSockAddrIn6ByIpPort(const char *ip, int32_t port, struct sock
         TRANS_LOGE(TRANS_FILE, "init addr error, ret=%{public}d", ret);
         return ret;
     }
+
+    (void)memset_s(addr, sizeof(struct sockaddr_in6), 0, sizeof(struct sockaddr_in6));
     addr->sin6_family = AF_INET6;
     addr->sin6_port = addrIn6.sin6Port;
     addr->sin6_scope_id = addrIn6.sin6ScopeId;
