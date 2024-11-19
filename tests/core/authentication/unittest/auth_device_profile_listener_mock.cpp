@@ -41,11 +41,6 @@ void DelNotTrustDevice(const char *udid)
     return GetInterface()->DelNotTrustDevice(udid);
 }
 
-bool IsHeartbeatEnable(void)
-{
-    return GetInterface()->IsHeartbeatEnable();
-}
-
 void RestartCoapDiscovery(void)
 {
     return GetInterface()->RestartCoapDiscovery();
