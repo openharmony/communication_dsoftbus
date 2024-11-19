@@ -1054,7 +1054,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
     uint64_t nowTime = SoftBusGetSysTimeMs();
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%s", localCacheInfo.accountId, localCacheInfo.deviceInfo.deviceUdid,
-            key) < 0) {
+        key) < 0) {
         LNN_LOGE(LNN_BUILDER, "sprintf_s key fail");
         return SOFTBUS_SPRINTF_ERR;
     }
