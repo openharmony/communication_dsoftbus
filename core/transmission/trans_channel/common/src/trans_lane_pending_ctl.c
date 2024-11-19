@@ -550,7 +550,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     appInfo->connectType = connOpt.type;
     extra->linkType = connOpt.type;
-    extra->deviceState = TransGetDeviceState(param->peerDeviceId);
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
     TransOpenChannelSetModule(transInfo.channelType, &connOpt);
     TRANS_LOGI(TRANS_SVC, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo.channelType);

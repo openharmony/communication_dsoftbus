@@ -1334,22 +1334,6 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     return SOFTBUS_OK;
 }
 
-static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *isConnected)
-{
-    LnnWlanLinkedInfo info;
-    int32_t ret = LnnGetWlanLinkedInfo(&info);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetWlanLinkedInfo fail, ret=%{public}d", ret);
-        return ret;
-    }
-    *isConnected = info.isConnected;
-    *is5GBand = (info.band != 1);
-
-    *channel = SoftBusFrequencyToChannel(info.frequency);
-    LNN_LOGI(LNN_LANE, "wlan current channel=%{public}d", *channel);
-    return SOFTBUS_OK;
-}
-
 struct SelectProtocolReq {
     LnnNetIfType localIfType;
     ProtocolType selectedProtocol;
@@ -1429,18 +1413,9 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    int32_t channel = -1;
-    bool is5GBand = false;
-    bool isConnected = false;
-    if (GetWlanLinkedAttribute(&channel, &is5GBand, &isConnected) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get wlan attr info fail");
-    }
-    if (!isConnected) {
-        LNN_LOGE(LNN_LANE, "wlan is disconnected");
-    }
     linkInfo->type = reqInfo->linkType;
     WlanLinkInfo *wlan = &(linkInfo->linkInfo.wlan);
-    wlan->channel = channel;
+    wlan->channel = -1;
     wlan->bw = LANE_BW_RANDOM;
     wlan->connInfo.protocol = protocol;
     wlan->connInfo.port = port;
