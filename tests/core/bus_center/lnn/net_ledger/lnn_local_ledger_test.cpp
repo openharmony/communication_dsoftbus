@@ -225,7 +225,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
-    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_MEM_ERR);
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_NETWORK_LEDGER_INIT_FAILED);
 }
 
 /*
