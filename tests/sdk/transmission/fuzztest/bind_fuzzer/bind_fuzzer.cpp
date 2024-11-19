@@ -83,12 +83,12 @@ static bool OnNegotiateFuzzTest(int32_t socket, PeerSocketInfo info)
 
 void BindTestWithSocketId(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
 
     int32_t socketId = -1;
-    if (memcpy_s(&socketId, sizeof(int32_t), data, sizeof(size)) != EOK) {
+    if (memcpy_s(&socketId, sizeof(int32_t), data, sizeof(int32_t)) != EOK) {
         return;
     }
 

@@ -20,7 +20,7 @@
 
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,11 +46,11 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName(char *devic
 {
     if (deviceName == NULL) {
         LNN_LOGE(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -730,6 +730,16 @@ int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
 void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
 {
     return GetNetBuilderDepsInterface()->GetLnnTriggerInfo(triggerInfo);
+}
+
+int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
+{
+    return GetNetBuilderDepsInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
+}
+
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
+{
+    return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 } // extern "C"
 } // namespace OHOS

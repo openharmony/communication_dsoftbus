@@ -11,13 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../dsoftbus.gni")
-import("../common/dfx/dsoftbus_dfx.gni")
 import("../connection/common/conn_common.gni")
 import("../transmission/common/trans_common.gni")
 
-dsoftbus_root_path = "../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 common_utils_src = [
@@ -28,11 +25,11 @@ common_utils_src = [
   "security/sequence_verification/softbus_sequence_verification.c",
   "softbus_property/softbus_feature_config.c",
   "utils/softbus_utils.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_bus_center.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_connreporter.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
+  "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_bus_center.c",
+  "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_common.c",
+  "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_connreporter.c",
+  "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_discreporter.c",
+  "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_transreporter.c",
 ]
 external_deps = []
 
@@ -54,11 +51,9 @@ if (defined(ohos_lite)) {
   }
   config("dsoftbus_utils_interface") {
     include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
       "$utils_lite_include_path",
@@ -85,7 +80,8 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
     ]
     include_dirs += conn_common_inc + trans_common_inc
-    dfx_src = [ "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c" ]
+    dfx_src =
+        [ "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_nstack_virtual.c" ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src + dfx_src
     sources += [ "message_handler/message_handler.c" ]
@@ -105,9 +101,7 @@ if (defined(ohos_lite)) {
       defines += [ "SOFTBUS_LITEOS_A" ]
     }
     deps = [
-      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-      "$dsoftbus_dfx_path/event:softbus_dfx_event",
-      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     deps += diff_deps
@@ -127,10 +121,8 @@ if (defined(ohos_lite)) {
   cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
@@ -159,15 +151,15 @@ if (defined(ohos_lite)) {
     ]
     include_dirs += conn_common_inc + trans_common_inc
     dfx_source = [
-      "dfx/hidumper_adapter/softbus_hidumper.c",
-      "dfx/hidumper_adapter/softbus_hidumper_bc_mgr.c",
-      "dfx/hidumper_adapter/softbus_hidumper_broadcast.c",
-      "dfx/hidumper_adapter/softbus_hidumper_disc.c",
-      "dfx/hidumper_adapter/softbus_hidumper_conn.c",
-      "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
-      "dfx/hidumper_adapter/softbus_hidumper_trans.c",
-      "dfx/hidumper_adapter/softbus_hidumper_buscenter.c",
-      "dfx/hisysevent_adapter/softbus_hisysevt_nstack.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_bc_mgr.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_broadcast.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_disc.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_conn.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_nstack.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_trans.c",
+      "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_buscenter.c",
+      "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_nstack.c",
     ]
     sources = common_utils_src + conn_common_src + trans_common_src + dfx_source
     sources += [ "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c" ]
@@ -179,9 +171,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
-      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-      "$dsoftbus_dfx_path/event:softbus_dfx_event",
-      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     public_external_deps = [

@@ -18,7 +18,7 @@
 #include <securec.h>
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 
@@ -51,12 +51,8 @@ namespace OHOS {
         return true;
     }
 
-    void FreeNodeInfoTest(const uint8_t* data, size_t size)
+    void FreeNodeInfoTest()
     {
-        if (data == nullptr || size == 0) {
-            return;
-        }
-
         NodeBasicInfo *info = nullptr;
         FreeNodeInfo(info);
     }
@@ -67,6 +63,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::GetAllNodeDeviceInfoTest(data, size);
-    OHOS::FreeNodeInfoTest(data, size);
+    OHOS::FreeNodeInfoTest();
     return 0;
 }

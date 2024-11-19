@@ -14,7 +14,7 @@
  */
 
 #include "lnn_ble_lpdevice.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 
 int32_t LnnRegisterBleLpDeviceMediumMgr(void)

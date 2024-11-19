@@ -14,7 +14,6 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../dsoftbus.gni")
 import("../../sdk/bus_center/bus_center_sdk.gni")
 import("../../sdk/frame/frame_sdk.gni")
@@ -28,8 +27,7 @@ common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_deps += [
   "$dsoftbus_core_path/common:softbus_utils",
-  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
-  "$dsoftbus_dfx_path/log:softbus_dfx_log",
+  "$dsoftbus_dfx_path:softbus_dfx",
   "$dsoftbus_root_path/adapter:softbus_adapter",
 ]
 
@@ -50,7 +48,6 @@ if (defined(ohos_lite)) {
 
 config("dsoftbus_sdk_interface") {
   include_dirs = [
-    "$dsoftbus_dfx_path/hisysevent_adapter/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",

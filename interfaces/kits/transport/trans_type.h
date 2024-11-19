@@ -89,6 +89,7 @@ typedef enum {
     SHUTDOWN_REASON_SERVICE_DIED,  /**< Shutdown for death service */
     SHUTDOWN_REASON_LNN_OFFLINE,   /**< Shutdown for offline */
     SHUTDOWN_REASON_LINK_DOWN,     /**< Shutdown for link down */
+    SHUTDOWN_REASON_USER_SWICTH,   /**< Shutdown for user switch */
 } ShutdownReason;
 
 /**
@@ -264,6 +265,14 @@ typedef enum {
     OPT_LEVEL_BUTT,
 } OptLevel;
 
+typedef struct {
+    int32_t socket;                 /**< Socket fd */
+    const char *initFileName;       /**< Init file name */
+    char newFileName[MAX_PATH_LEN]; /**< New file name */
+} RenameParam;
+
+typedef void (*OnRenameFileCallback)(RenameParam *renameParam);
+
 /**
  * @brief Enumerate frame event status.
  *
@@ -290,14 +299,6 @@ typedef struct {
 } FrameEvtCbInfo;
 
 typedef int (*OnFrameEvt)(int fd, const FrameEvtCbInfo *info);
-
-typedef struct {
-    int32_t socket;                 /**< Socket fd */
-    const char *initFileName;       /**< Init file name */
-    char newFileName[MAX_PATH_LEN]; /**< New file name */
-} RenameParam;
-
-typedef void (*OnRenameFileCallback)(RenameParam *renameParam);
 #ifdef __cplusplus
 }
 #endif

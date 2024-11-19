@@ -23,11 +23,11 @@ ohos_fuzztest("StreamMsgManagerFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/streammsgmanager_fuzzer"
 
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
   ]
   cflags = [
     "-g",

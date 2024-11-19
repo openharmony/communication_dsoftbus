@@ -18,7 +18,7 @@
 #include "conn_log.h"
 #include <gtest/gtest.h>
 #include <securec.h>
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_conn_ble_trans.h"
 #include "connection_ble_trans_mock.h"
 #include "softbus_conn_ble_send_queue.h"

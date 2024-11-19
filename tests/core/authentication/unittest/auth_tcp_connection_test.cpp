@@ -21,7 +21,7 @@
 #include "auth_log.h"
 #include "auth_tcp_connection.h"
 #include "auth_tcp_connection.c"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 
 namespace OHOS {

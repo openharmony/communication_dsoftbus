@@ -19,7 +19,7 @@
 #include "softbus_bitmap.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define BITNUM 32
 #define TEST_POS 1

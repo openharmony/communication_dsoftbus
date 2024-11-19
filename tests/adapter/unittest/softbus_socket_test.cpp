@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_errcode.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace std;
 using namespace testing::ext;

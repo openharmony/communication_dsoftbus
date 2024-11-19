@@ -25,7 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 
@@ -668,7 +668,7 @@ int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, u
 
 int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
 {
-    LNN_LOGI(LNN_STATE, "RegDataLevelChangeCbInner enter");
+    LNN_LOGI(LNN_STATE, "enter");
     g_busCenterClient.dataLevelCb = *callback;
     if (strcpy_s(g_regDataLevelChangePkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         LNN_LOGE(LNN_STATE, "copy pkgName fail");
@@ -725,7 +725,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     int32_t rc;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "join lnn not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -761,7 +761,7 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
     int32_t rc;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "leave lnn not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -829,7 +829,7 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "reg node state cb not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -875,7 +875,7 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
     NodeStateCallbackItem *next = NULL;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "unreg node state cb not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -902,7 +902,7 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
     int32_t rc = SOFTBUS_ERR;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "start time sync not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -934,7 +934,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
     TimeSyncCallbackItem *item = NULL;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "stop time sync cb list not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -1041,7 +1041,7 @@ int32_t SetLocalDeviceNameInner(const char *pkgName, const char *displayName)
     return ServerIpcSetLocalDeviceName(pkgName, displayName);
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
+int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
@@ -1087,7 +1087,7 @@ int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "leave cb not init");
         return SOFTBUS_ERR;
     }
 
@@ -1359,7 +1359,7 @@ int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        LNN_LOGE(LNN_STATE, "time sync cb not init");
         return SOFTBUS_ERR;
     }
 

@@ -20,7 +20,7 @@
 #include "lnn_event.h"
 #include "lnn_log.h"
 #include "softbus_adapter_perf.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 static void DfxRecordLnnDiscServiceEnd(int32_t serverType, const char *packageName, int32_t reason)
@@ -69,7 +69,7 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     if (!isInnerRequest) {
         if ((ret = DiscUnPublishService(pkgName, publishId)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
-            LNN_LOGE(LNN_BUILDER, "DiscUnPublishService failed\n");
+            LNN_LOGD(LNN_BUILDER, "DiscUnPublishService failed\n");
             return SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL;
         }
         return SOFTBUS_OK;

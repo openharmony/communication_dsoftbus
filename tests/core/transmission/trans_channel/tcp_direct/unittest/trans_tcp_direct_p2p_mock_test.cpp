@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "trans_auth_message.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_p2p.h"

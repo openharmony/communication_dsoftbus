@@ -23,6 +23,7 @@
 #include "command/connect_command.h"
 #include "conn_event.h"
 #include "wifi_direct_types.h"
+#include "data/negotiate_message.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectDfx {
@@ -39,7 +40,8 @@ public:
     void SetReuseFlag(uint32_t requestId);
     bool IsReuse(uint32_t requestId);
     std::string GetChallengeCode(uint32_t requestId);
-    
+    static void ReportReceiveAuthLinkMsg(const NegotiateMessage &msg, const std::string &remoteDeviceId);
+
 private:
     void ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &connectInfo);
     

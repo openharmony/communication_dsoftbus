@@ -25,7 +25,7 @@
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "system_ability_definition.h"
 #include "tokenid_kit.h"
 #include "trans_session_manager.h"

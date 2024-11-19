@@ -16,7 +16,7 @@
 #include <math.h>
 #include "comm_log.h"
 #include "softbus_adapter_range.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define MOCK_POWER (-17)
 #define DB_BASE (10.0)

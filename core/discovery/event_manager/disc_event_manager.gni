@@ -12,11 +12,10 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
-import("../../common/dfx/dsoftbus_dfx.gni")
 
 disc_event_manager_src = [
   "$dsoftbus_root_path/core/discovery/event_manager/src/disc_event_manager.c",
 ]
 disc_event_manager_inc =
     [ "$dsoftbus_root_path/core/discovery/event_manager/include" ]
-disc_event_manager_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+disc_event_manager_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]

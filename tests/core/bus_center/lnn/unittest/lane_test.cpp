@@ -27,7 +27,7 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "lnn_parameter_utils.h"
 
@@ -67,13 +67,13 @@ public:
 
 void LaneTest::SetUpTestCase()
 {
-    int32_t ret = LnnInitLnnLooper();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LooperInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnInitDistributedLedger();
+    int32_t ret = LnnInitDistributedLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLocalLedger();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnInitLnnLooper();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LooperInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = InitLane();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -85,10 +85,10 @@ void LaneTest::SetUpTestCase()
 void LaneTest::TearDownTestCase()
 {
     DeinitLane();
-    LnnDeinitLocalLedger();
-    LnnDeinitDistributedLedger();
     LooperDeinit();
     LnnDeinitLnnLooper();
+    LnnDeinitLocalLedger();
+    LnnDeinitDistributedLedger();
     (void)memset_s(&g_nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     GTEST_LOG_(INFO) << "LaneTest end";
 }

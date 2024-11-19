@@ -29,7 +29,7 @@
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define MS_PER_SECOND 1000
 #define US_PER_MSECOND 1000

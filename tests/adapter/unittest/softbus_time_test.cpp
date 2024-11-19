@@ -17,7 +17,7 @@
 
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 using namespace std;
 using namespace testing::ext;

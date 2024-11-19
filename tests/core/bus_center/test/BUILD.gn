@@ -69,6 +69,7 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
@@ -78,9 +79,9 @@ ohos_unittest("HeartBeatMediumTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -154,13 +155,14 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -211,13 +213,14 @@ ohos_unittest("HeartBeatStrategyTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -284,13 +287,14 @@ ohos_unittest("HeartBeatUtilsTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -364,13 +368,14 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -414,9 +419,9 @@ ohos_unittest("ClientProxyTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
@@ -472,13 +477,14 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -550,6 +556,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
@@ -561,9 +568,9 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {
@@ -646,9 +653,9 @@ ohos_unittest("BusCenterDecisionCenterTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   ]
 
   if (is_standard_system) {

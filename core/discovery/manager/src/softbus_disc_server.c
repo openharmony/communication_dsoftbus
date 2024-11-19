@@ -17,7 +17,7 @@
 
 #include "disc_log.h"
 #include "softbus_error_code.h"
-#include "softbus_hisysevt_discreporter.h"
+#include "legacy/softbus_hisysevt_discreporter.h"
 
 int32_t DiscServerInit(void)
 {

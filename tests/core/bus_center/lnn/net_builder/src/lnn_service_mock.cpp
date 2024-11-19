@@ -263,11 +263,11 @@ int32_t LnnServicetInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceNa
 {
     if (deviceName == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }

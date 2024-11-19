@@ -19,7 +19,7 @@
 #include <time.h>
 #include "cmsis_os2.h"
 #include "comm_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define MS_PER_SECOND  1000
 #define US_PER_MSECOND 1000

@@ -24,7 +24,7 @@
 
 #include "comm_log.h"
 #include "softbus_adapter_errcode.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 static int32_t SoftBusCreateFile(const char *fileName)
 {

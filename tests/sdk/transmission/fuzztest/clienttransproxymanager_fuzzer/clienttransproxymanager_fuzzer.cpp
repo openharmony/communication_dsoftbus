@@ -34,7 +34,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"

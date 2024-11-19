@@ -16,7 +16,7 @@
 #include "if_softbus_server.h"
 
 #include "comm_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionName)

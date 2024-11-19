@@ -21,7 +21,7 @@
 #include "client_trans_socket_manager.h"
 #include "session.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_access_token_test.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_proxy_manager.c"

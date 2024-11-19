@@ -24,10 +24,10 @@ ohos_fuzztest("ClientTransPendingFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttranspending_fuzzer"
 
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../sdk/transmission/trans_channel/proxy/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
   ]
 
   cflags = [

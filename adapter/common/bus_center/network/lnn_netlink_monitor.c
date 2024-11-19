@@ -40,7 +40,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_socket.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \

@@ -14,7 +14,7 @@
  */
 
 #include "softbus_rsa_encrypt.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 {

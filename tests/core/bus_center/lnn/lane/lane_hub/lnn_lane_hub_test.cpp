@@ -20,7 +20,7 @@
 
 #include "lnn_lane_hub_deps_mock.h"
 #include "lnn_lane_hub.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
