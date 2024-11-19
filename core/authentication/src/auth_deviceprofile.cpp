@@ -92,7 +92,8 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
     for (const auto &trustDevice : trustDevices) {
         if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
-            trustDevice.GetTrustDeviceId().empty()) {
+            trustDevice.GetTrustDeviceId().empty() ||
+            trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE) {
             continue;
         }
         char *anonyUdid = nullptr;
@@ -214,6 +215,7 @@ static void InsertDpSameAccount(const std::string peerUdid)
     }
     accesser.SetAccesserAccountId(accountInfo.uid_);
     accessee.SetAccesseeDeviceId(peerUdid);
+    accessee.SetAccesseeAccountId(accountInfo.uid_);
     accessControlProfile.SetBindType((uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT);
     accessControlProfile.SetDeviceIdType((uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID);
     accessControlProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);

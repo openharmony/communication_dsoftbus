@@ -137,6 +137,14 @@ void DestroyRemoteDevice(RemoteDevice *device)
     free(device);
 }
 
+static void DestroyRemoteNodeAndDevice(RxIface *rxIface, RemoteNode *node)
+{
+    DestroyRemoteNode(rxIface, node);
+    if (rxIface->remoteNodeCnt == 0) {
+        DestroyRemoteDevice(rxIface->device);
+    }
+}
+
 static void ClearRemoteDeviceList(List *list)
 {
     if (list == NULL) {
@@ -516,7 +524,7 @@ static void DestroyOldestRemoteNode(RxIface *rxIface)
     }
 
     if (oldestNode != NULL) {
-        DestroyRemoteNode(rxIface, oldestNode);
+        DestroyRemoteNodeAndDevice(rxIface, oldestNode);
     }
 }
 
@@ -569,7 +577,7 @@ static int32_t CheckAndRemoveAgingNode(void)
         return NSTACKX_EFAILED;
     }
     RxIface *rxIface = (RxIface *)oldestNode->rxIface;
-    DestroyRemoteNode(rxIface, oldestNode);
+    DestroyRemoteNodeAndDevice(rxIface, oldestNode);
     return NSTACKX_EOK;
 }
 
@@ -580,7 +588,7 @@ void RemoveOldestNodesWithCount(uint32_t diffNum)
     for (uint32_t i = 0; i < diffNum; i++) {
         oldestNode = OrderedNodeEntry(ListGetFront(g_remoteDeviceOrderedList));
         rxIface = (RxIface *)oldestNode->rxIface;
-        DestroyRemoteNode(rxIface, oldestNode);
+        DestroyRemoteNodeAndDevice(rxIface, oldestNode);
     }
 }
 
@@ -596,12 +604,6 @@ static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface,
         DestroyOldestRemoteNode(rxIface);
     }
 
-    if (g_remoteNodeCount == GetMaxDeviceNum() && CheckAndRemoveAgingNode() != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "remote node count %u reach the max device num", g_remoteNodeCount);
-        IncStatistics(STATS_OVER_DEVICE_LIMIT);
-        return NULL;
-    }
-
     RemoteNode *remoteNode = CreateRemoteNode(rxIface, remoteIp, deviceInfo);
     if (remoteNode == NULL) {
         return NULL;
@@ -612,9 +614,23 @@ static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface,
     return remoteNode;
 }
 
+static bool UpdateOldRemoteNode(void)
+{
+    if (g_remoteNodeCount == GetMaxDeviceNum() && CheckAndRemoveAgingNode() != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "remote node count %u reach the max device num", g_remoteNodeCount);
+        IncStatistics(STATS_OVER_DEVICE_LIMIT);
+        return false;
+    }
+    return true;
+}
+
 int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_InterfaceInfo *interfaceInfo,
     const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, int8_t *updated)
 {
+    if (!UpdateOldRemoteNode()) {
+        return NSTACKX_EFAILED;
+    }
+
     RemoteDevice *device = FindRemoteDevice(g_remoteDeviceList, deviceId);
     if (device == NULL) {
         device = CreateRemoteDevice(deviceId);
