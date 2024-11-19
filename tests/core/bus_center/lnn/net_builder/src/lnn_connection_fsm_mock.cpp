@@ -76,6 +76,11 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
     return GetLnnConnInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
 }
 
+int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info)
+{
+    return GetLnnConnInterface()->LnnRetrieveDeviceInfo(networkId, info);
+}
+
 int32_t AuthRestoreAuthManager(const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId,
     NodeInfo *nodeInfo, int64_t *authId)
 {
@@ -151,6 +156,11 @@ void LnnNotifyHichainProofException(
     const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
     return GetLnnConnInterface()->LnnNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
+}
+
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
+{
+    return GetLnnConnInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 }
 } // namespace OHOS
