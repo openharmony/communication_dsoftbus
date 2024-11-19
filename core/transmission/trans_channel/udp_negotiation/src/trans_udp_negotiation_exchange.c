@@ -20,7 +20,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "trans_log.h"
 #include "trans_udp_channel_manager.h"

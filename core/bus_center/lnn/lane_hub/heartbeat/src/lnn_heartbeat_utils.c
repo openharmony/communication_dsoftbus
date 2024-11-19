@@ -30,7 +30,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "wifi_direct_manager.h"
 
@@ -172,33 +172,27 @@ static bool HbHasActiveHmlConnection(const char *networkId)
 
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
 {
-    bool hasBrConn = false;
-    bool hasBleConn = false;
-    bool hasP2pConn = false;
-    bool hasHmlConn = false;
+    bool ret = false;
 
     if (networkId == NULL || addrType >= CONNECTION_ADDR_MAX) {
         LNN_LOGE(LNN_HEART_BEAT, "HB check active connection get invalid param");
-        return false;
+        return ret;
     }
+
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
         case CONNECTION_ADDR_ETH:
         case CONNECTION_ADDR_BR:
             break;
         case CONNECTION_ADDR_BLE:
-            hasBrConn = HbHasActiveBrConnection(networkId);
-            hasBleConn = HbHasActiveBleConnection(networkId);
-            hasP2pConn = HbHasActiveP2pConnection(networkId);
-            hasHmlConn = HbHasActiveHmlConnection(networkId);
+            ret = HbHasActiveBrConnection(networkId) || HbHasActiveBleConnection(networkId) ||
+                HbHasActiveP2pConnection(networkId) || HbHasActiveHmlConnection(networkId);
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_HEART_BEAT,
-                "HB check active connection networkId=%{public}s, "
-                "BR=%{public}d, BLE=%{public}d, P2P=%{public}d, HML=%{public}d",
-                AnonymizeWrapper(anonyNetworkId), hasBrConn, hasBleConn, hasP2pConn, hasHmlConn);
+            LNN_LOGI(LNN_HEART_BEAT, "HB has active BT/BLE/P2P/HML connection. networkId=%{public}s, ret=%{public}s",
+                AnonymizeWrapper(anonyNetworkId), ret ? "true" : "false");
             AnonymizeFree(anonyNetworkId);
-            return hasBrConn || hasBleConn || hasP2pConn || hasHmlConn;
+            return ret;
         default:
             break;
     }
@@ -214,8 +208,9 @@ bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *
         LNN_LOGE(LNN_HEART_BEAT, "HB visit typeSet get invalid param");
         return false;
     }
+    LnnHeartbeatType tmp = *typeSet;
     for (i = HEARTBEAT_TYPE_MIN; i < HEARTBEAT_TYPE_MAX; i <<= 1) {
-        if ((i & *typeSet) == 0) {
+        if ((i & tmp) == 0) {
             continue;
         }
         isFinish = callback(typeSet, i, data);

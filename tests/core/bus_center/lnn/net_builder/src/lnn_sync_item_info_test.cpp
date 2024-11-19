@@ -19,7 +19,7 @@
 #include "lnn_service_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_sync_item_info.c"
 #include "lnn_net_ledger_mock.h"

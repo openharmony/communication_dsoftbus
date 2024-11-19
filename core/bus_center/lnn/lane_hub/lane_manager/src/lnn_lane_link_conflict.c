@@ -421,6 +421,10 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
 
 int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
 {
+    if (releaseLink != LANE_HML) {
+        LNN_LOGE(LNN_LANE, "invalid releaseLink=%{public}d", releaseLink);
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (LinkConflictLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "linkConflict lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -448,8 +452,12 @@ static bool GetConflictInfoWithLinkType(LaneLinkType type, const DevIdentifyInfo
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
-        if ((type == LANE_HML && (item->conflictType != CONFLICT_LINK_NUM_LIMITED || item->releaseLink != LANE_HML)) ||
-            (type == LANE_P2P && (item->conflictType != CONFLICT_THREE_VAP || item->releaseLink != LANE_HML))) {
+        bool isMatched = false;
+        if ((type == LANE_HML && item->conflictType == CONFLICT_LINK_NUM_LIMITED && item->releaseLink == LANE_HML) ||
+            (type == LANE_P2P && item->conflictType == CONFLICT_THREE_VAP && item->releaseLink == LANE_HML)) {
+            isMatched = true;
+        }
+        if (!isMatched) {
             continue;
         }
         if (memcmp(&item->identifyInfo, identifyInfo, sizeof(DevIdentifyInfo)) == 0 ||

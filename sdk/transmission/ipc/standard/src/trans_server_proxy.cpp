@@ -24,7 +24,7 @@
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
 
@@ -120,7 +120,7 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return proxy->CreateSessionServer(pkgName, sessionName);
+    return proxy->CreateSessionServer(pkgName, sessionName, false);
 }
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)

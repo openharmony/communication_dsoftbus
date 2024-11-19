@@ -19,7 +19,7 @@
 #include <securec.h>
 
 #include "bus_center_adapter.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define DEFAULT_DEVICE_NAME "UNKNOWN"
 #define DEFAULT_UDID_NAME "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
@@ -32,12 +32,12 @@ int32_t __attribute__ ((weak)) GetCommonDevInfo(CommonDeviceKey key, char *value
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
             if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
             if (strncpy_s(value, len, DEFAULT_UDID_NAME, strlen(DEFAULT_UDID_NAME)) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_DEVTYPE:

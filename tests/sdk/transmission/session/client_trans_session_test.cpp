@@ -17,7 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_trans_def.h"
 #include "softbus_json_utils.h"
 #include "softbus_app_info.h"
@@ -970,6 +970,9 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
 {
     ClientSessionServer *server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, g_pkgName, &g_sessionlistener);
     ASSERT_TRUE(server != NULL);
+    ListNode destroyList;
+    DestroyAllClientSession(nullptr, &destroyList);
+    DestroyAllClientSession(server, nullptr);
     SoftBusFree(server);
     char sessionName[SESSION_NAME_SIZE_MAX + 2] = {0};
     memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);

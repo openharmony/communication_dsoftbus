@@ -20,28 +20,27 @@ import("../../../../../dsoftbus.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("VtpStreamSocketFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
-  fuzz_config_file =
-      "../../../../../tests/sdk/transmission/fuzztest/vtpstreamsocket_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/vtpstreamsocket_fuzzer"
   include_dirs = [
-    "../../../../../core/common/inner_communication",
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../interfaces/kits/common",
-    "../../../../../interfaces/kits/transport",
-    "../../../../../interfaces/inner_kits/transport",
-    "../../../../../sdk/transmission/trans_channel/udp/file/include",
-    "../../../../../sdk/transmission/trans_channel/udp/common/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
-    "../../../../../components/nstackx/nstackx_core/dfile/interface/",
-    "../../../../../components/nstackx/nstackx_util/interface",
-    "../../../../../sdk/transmission/session/include",
-    "../../../../../sdk/transmission/session/cpp/src",
-    "../../../../../components/nstackx/fillp/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/include",
-    "../../../../../core/transmission/common/include",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/common/inner_communication",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface/",
+    "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/src",
+    "$dsoftbus_root_path/components/nstackx/fillp/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
   ]
   cflags = [
     "-g",

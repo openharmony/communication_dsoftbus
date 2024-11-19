@@ -26,7 +26,7 @@
 #include "lnn_local_net_ledger.h"
 #include "session.h"
 #include "softbus_base_listener.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_protocol_def.h"

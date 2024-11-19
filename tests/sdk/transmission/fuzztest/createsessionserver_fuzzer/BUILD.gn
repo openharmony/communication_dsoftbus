@@ -22,12 +22,12 @@ ohos_fuzztest("CreateSessionServerFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/createsessionserver_fuzzer"
   include_dirs = [
-    "../../../../../core/common/inner_communication",
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../interfaces/kits/common",
-    "../../../../../interfaces/inner_kits/transport",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/common/inner_communication",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
   ]
   cflags = [
     "-g",

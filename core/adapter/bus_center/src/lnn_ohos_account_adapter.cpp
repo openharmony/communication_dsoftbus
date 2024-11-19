@@ -21,7 +21,7 @@
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "securec.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "auth_hichain_adapter.h"
 
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
@@ -42,12 +42,12 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();
     if (!accountInfo.first) {
         LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
     }
 
     if (accountInfo.second.name_.empty()) {
         LNN_LOGE(LNN_STATE, "accountInfo uid is empty");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
     }
 
     *len = accountInfo.second.name_.length();
@@ -58,11 +58,11 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
         LNN_LOGD(LNN_STATE, "not login account");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
         LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%{public}d, len=%{public}d", idLen, *len);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -81,7 +81,7 @@ int32_t GetCurrentAccount(int64_t *account)
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();
     if (!accountInfo.first) {
         LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
     }
 
     if (accountInfo.second.name_.empty()) {
