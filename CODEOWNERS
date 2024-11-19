@@ -84,6 +84,7 @@ core/bus_center/lnn/net_ledger/            fengyonghui@huawei.com
 core/bus_center/monitor/                   fengyonghui@huawei.com
 core/bus_center/service/                   zhangshaojie3@huawei.com fengyonghui@huawei.com
 core/bus_center/utils/                     zhangshaojie3@huawei.com fengyonghui@huawei.com
+sdk/bus_center/                            fengyonghui@huawei.com
 tests/adapter/unittest/                    fengyonghui@huawei.com
 tests/core/adapter/unittest/dsoftbus_rsa_crypto_test.cpp           liubao6@huawei.com
 tests/core/adapter/unittest/lnn_kv_adapter_test.cpp                liubao6@huawei.com
