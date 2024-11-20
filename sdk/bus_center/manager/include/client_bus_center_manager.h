@@ -16,6 +16,9 @@
 #ifndef CLIENT_BUS_CENTER_MANAGER_H
 #define CLIENT_BUS_CENTER_MANAGER_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "data_level.h"
 #include "data_level_inner.h"
 #include "softbus_bus_center.h"

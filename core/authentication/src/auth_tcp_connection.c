@@ -34,6 +34,7 @@
 #define AUTH_PKT_HEAD_LEN 24
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
 #define TCP_KEEPALIVE_TOS_VAL 180
+#define RECV_DATA_TIMEOUT (2 * 1000 * 1000)
 
 typedef struct {
     int32_t keepaliveIdle;
@@ -176,17 +177,19 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
 static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *head)
 {
     uint8_t buf[AUTH_PKT_HEAD_LEN] = {0};
-    ssize_t len = ConnRecvSocketData(fd, (char *)&buf[0], sizeof(buf), 0);
-    if (len < AUTH_PKT_HEAD_LEN) {
-        if (len < 0) {
+    uint32_t offset = 0;
+    while (offset < AUTH_PKT_HEAD_LEN) {
+        ssize_t recvLen = ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset),
+            RECV_DATA_TIMEOUT);
+        if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
             (void)DelTrigger(module, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
+            return SOFTBUS_INVALID_DATA_HEAD;
         }
-        AUTH_LOGE(AUTH_CONN, "head not enough, abandon it. len=%{public}zd", len);
-        return SOFTBUS_ERR;
+        offset += (uint32_t)recvLen;
     }
-    return UnpackSocketPkt(buf, len, head);
+    return UnpackSocketPkt(buf, offset, head);
 }
 
 static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
@@ -291,7 +294,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (module != AUTH && module != AUTH_P2P &&  module != AUTH_RAW_P2P_CLIENT &&!IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_CLIENT && !IsEnhanceP2pModuleId(module)) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");
@@ -393,7 +396,7 @@ static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32
     }
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
-    if (AuthTcpCreateListener(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+    if (AuthTcpCreateListener(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
@@ -401,7 +404,7 @@ static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32
     if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(AUTH, fd, triggerMode);
+        (void)DelTrigger(module, fd, triggerMode);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }

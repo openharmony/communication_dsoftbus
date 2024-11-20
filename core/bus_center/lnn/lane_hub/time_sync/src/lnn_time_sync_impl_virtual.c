@@ -16,7 +16,7 @@
 #include "lnn_time_sync_impl.h"
 
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnTimeSyncImplInit(void)
 {

@@ -22,14 +22,14 @@ ohos_fuzztest("ClientTransStreamFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttransstream_fuzzer"
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../interfaces/kits/transport",
-    "../../../../../sdk/transmission/trans_channel/udp/stream/include",
-    "../../../../../sdk/transmission/trans_channel/udp/common/include",
-    "../../../../../sdk/transmission/session/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../core/transmission/common/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
   ]
   cflags = [
     "-g",

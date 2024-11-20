@@ -300,7 +300,11 @@ void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const s
     links_.erase(it);
 
     link->SetRemoteDeviceId(remoteDeviceId);
-    links_.insert({{ InnerLink::LinkType::HML, remoteDeviceId }, link });
+    auto result = links_.insert({{ InnerLink::LinkType::HML, remoteDeviceId }, link });
+    if (!result.second) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "insert by remoteDeviceId failed, use remoteMac");
+        links_.insert({{ InnerLink::LinkType::HML, remoteMac }, link });
+    }
 }
 
 void LinkManager::Dump() const

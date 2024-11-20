@@ -104,7 +104,7 @@ void P2pDestroyGroupState::OnP2pConnectionChangeEvent(
         result.errorCode_ = SOFTBUS_OK;
     } else {
         result.errorCode_ = SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED;
-        CONN_LOGE(CONN_WIFI_DIRECT, "destroy group call event failed, error=%d", result.errorCode_);
+        CONN_LOGE(CONN_WIFI_DIRECT, "destroy group call event failed, error=%{public}d", result.errorCode_);
     }
     ChangeState(P2pAvailableState::Instance(), nullptr);
     operation_->promise_.set_value(result);

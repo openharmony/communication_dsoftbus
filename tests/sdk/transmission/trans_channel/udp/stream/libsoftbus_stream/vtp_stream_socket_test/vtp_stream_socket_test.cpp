@@ -16,7 +16,7 @@
 #include <securec.h>
 
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define protected public
 #define private public
@@ -815,7 +815,7 @@ HWTEST_F(VtpStreamSocketTest, GetVtpStackConfig001, TestSize.Level1)
     StreamAttr *value = (StreamAttr *)SoftBusCalloc(sizeof(StreamAttr));
     ASSERT_TRUE(value != nullptr);
     SoftBusStreamTestInterfaceMock streamMock;
-    EXPECT_CALL(streamMock, FtConfigGet).WillOnce(testing::Return(SOFTBUS_ERR));
+    EXPECT_CALL(streamMock, FtConfigGet).WillOnce(testing::Return(ERR_NULLPTR));
     int32_t type = STREAM_TYPE_INT + 1;
     *value = vtpStreamSocket->GetVtpStackConfig(type);
     SoftBusFree(value);
@@ -1217,12 +1217,12 @@ HWTEST_F(VtpStreamSocketTest, SetVtpStackConfig001, TestSize.Level1)
     EXPECT_CALL(streamMock, FtConfigSet).WillOnce(testing::Return(SOFTBUS_OK));
     bool res = vtpStreamSocket->SetVtpStackConfig(fd, *values);
     EXPECT_EQ(true, res);
-    EXPECT_CALL(streamMock, FtConfigSet).WillOnce(testing::Return(SOFTBUS_ERR));
+    EXPECT_CALL(streamMock, FtConfigSet).WillOnce(testing::Return(ERR_NULLPTR));
     res = vtpStreamSocket->SetVtpStackConfig(fd, *values);
     EXPECT_EQ(false, res);
 
     values->type_ = INT_TYPE;
-    EXPECT_CALL(streamMock, FtConfigSet).WillOnce(testing::Return(SOFTBUS_ERR));
+    EXPECT_CALL(streamMock, FtConfigSet).WillOnce(testing::Return(ERR_NULLPTR));
     res = vtpStreamSocket->SetVtpStackConfig(fd, *values);
     EXPECT_EQ(false, res);
     SoftBusFree(values);

@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <securec.h>
 #include "softbus_error_code.h"
-#include "softbus_adapter_hisysevent.h"
-#include "softbus_hisysevt_connreporter.h"
+#include "legacy/softbus_adapter_hisysevent.h"
+#include "legacy/softbus_hisysevt_connreporter.h"
 
 namespace OHOS {
 static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)

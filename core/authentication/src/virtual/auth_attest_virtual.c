@@ -15,11 +15,11 @@
 
 #include "auth_attest_interface.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_error_code.h"
 #include <stdint.h>
 
-bool IsSupportUDIDAbatement()
+bool IsSupportUDIDAbatement(void)
 {
     return false;
 }

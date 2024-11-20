@@ -22,7 +22,7 @@
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 using namespace OHOS;

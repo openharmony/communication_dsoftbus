@@ -28,7 +28,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "bus_center_manager.h"
 
@@ -209,28 +209,6 @@ static int32_t DlGetMasterUdid(const char *networkId, bool checkOnline, void *bu
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeBleMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
-{
-    (void)checkOnline;
-    NodeInfo *info = NULL;
-
-    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (strlen(info->connectInfo.bleMacAddr) == 0) {
-        LNN_LOGE(LNN_LEDGER, "ble mac is invalid.");
-        return SOFTBUS_ERR;
-    }
-    if (info->bleMacRefreshSwitch != 0) {
-        uint64_t currentTimeMs = GetCurrentTime();
-        LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
-            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64,
-            info->connectInfo.latestTime, currentTimeMs);
-    }
-    if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t DlGetRemotePtk(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     (void)checkOnline;
@@ -288,6 +266,28 @@ static int32_t DlGetStaticCap(const char *networkId, bool checkOnline, void *buf
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->staticCapability, STATIC_CAP_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetNodeBleMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (strlen(info->connectInfo.bleMacAddr) == 0) {
+        LNN_LOGE(LNN_LEDGER, "ble mac is invalid.");
+        return SOFTBUS_ERR;
+    }
+    if (info->bleMacRefreshSwitch != 0) {
+        uint64_t currentTimeMs = GetCurrentTime();
+        LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
+            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64,
+            info->connectInfo.latestTime, currentTimeMs);
+    }
+    if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -814,12 +814,12 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BOOL_KEY_SCREEN_STATUS, DlGetNodeScreenOnFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
-    {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
-    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap},
     {BYTE_KEY_IRK, DlGetDeviceIrk},
     {BYTE_KEY_PUB_MAC, DlGetDevicePubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, DlGetDeviceCipherInfoKey},
     {BYTE_KEY_BROADCAST_CIPHER_IV, DlGetDeviceCipherInfoIv},
+    {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
+    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap}
 };
 
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
@@ -1430,7 +1430,8 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len)
+int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len,
+    bool needOnline)
 {
     if (udidHash == NULL || buf == NULL || udidHashLen == 0) {
         LNN_LOGE(LNN_LEDGER, "udidHash is empty");
@@ -1454,7 +1455,7 @@ int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen,
             return SOFTBUS_ERR;
         }
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
-        if (LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) {
+        if (!needOnline || LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) {
             if (SoftBusGenerateStrHash((uint8_t*)nodeInfo->deviceInfo.deviceUdid,
                 strlen(nodeInfo->deviceInfo.deviceUdid), nodeUdidHash) != SOFTBUS_OK) {
                 continue;
@@ -1717,6 +1718,64 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         LNN_LOGE(LNN_LEDGER, "save remote netCapacity fail");
         return SOFTBUS_ERR;
+    }
+    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
+{
+    if (networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    int32_t ret = memcpy_s(nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN, &userIdCheckSum, sizeof(int32_t));
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return ret;
+    }
+    ret = LnnSaveRemoteDeviceInfo(nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        LNN_LOGE(LNN_LEDGER, "save remote useridchecksum faile");
+        return ret;
+    }
+    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId)
+{
+    if (networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    nodeInfo->userId = userId;
+    int32_t ret = LnnSaveRemoteDeviceInfo(nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        LNN_LOGE(LNN_LEDGER, "save remote userid faile");
+        return ret;
     }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;

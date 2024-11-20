@@ -15,7 +15,7 @@
 
 #include "lnn_driver_request.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen,
     uint8_t *reply, uint32_t replyLen)

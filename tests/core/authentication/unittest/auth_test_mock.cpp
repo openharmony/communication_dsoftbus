@@ -34,7 +34,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "auth_session_message.h"
 

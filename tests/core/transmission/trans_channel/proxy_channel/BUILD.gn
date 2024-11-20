@@ -471,6 +471,8 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel/softbus_trans_proxy_channel_manager_test.cpp",
   ]
 
+  use_exceptions = true
+
   include_dirs = [
     "$softbus_adapter_common/include",
 

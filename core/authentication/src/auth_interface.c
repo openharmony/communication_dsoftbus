@@ -224,6 +224,10 @@ int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
         AUTH_LOGE(AUTH_CONN, "param is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (authHandle->type < AUTH_LINK_TYPE_WIFI || authHandle->type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth == NULL) {
         AUTH_LOGE(AUTH_CONN, "not found auth manager, type=%{public}d, authId=%{public}" PRId64,
@@ -384,7 +388,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
             break;
         case AUTH_LINK_TYPE_BLE:
             if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId,
-                sizeof(networkId)) != SOFTBUS_OK) {
+                sizeof(networkId), true) != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "get networkId fail");
                 return SOFTBUS_NOT_FIND;
             }

@@ -22,7 +22,7 @@
 #include "lnn_local_net_ledger.h"
 #include "softbus_common.h"
 #include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 constexpr char PKG_NAME[] = "com.softbus.test";
 constexpr char NETWORK_ID[] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

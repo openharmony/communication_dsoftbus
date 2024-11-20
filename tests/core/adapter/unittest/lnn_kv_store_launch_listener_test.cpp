@@ -18,7 +18,7 @@
 #include "lnn_kv_store_launch_listener.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "system_ability_definition.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "lnn_log.h"
 
 using namespace std;

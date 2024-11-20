@@ -14,7 +14,7 @@
  */
 
 #include "softbus_aes_encrypt.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t SoftBusGenerateHmacHash(
     const EncryptKey *randomKey, const uint8_t *rootKey, uint32_t rootKeyLen, uint8_t *hash, uint32_t hashLen)

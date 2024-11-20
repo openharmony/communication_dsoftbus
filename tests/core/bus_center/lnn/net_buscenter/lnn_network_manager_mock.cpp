@@ -142,4 +142,4 @@ void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
     return GetNetworkManagerInterface()->DfxRecordTriggerTime(reason, stage);
 }
 }
-}
+} // namespace OHOS

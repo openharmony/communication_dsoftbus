@@ -16,7 +16,6 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
-dsoftbus_root_path = "../../../../.."
 
 ohos_fuzztest("UnpackAuthDataFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path

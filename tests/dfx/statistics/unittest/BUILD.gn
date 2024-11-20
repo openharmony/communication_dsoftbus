@@ -1,0 +1,48 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("../../../../dsoftbus.gni")
+
+module_output_path = "dsoftbus/common"
+
+ohos_unittest("TransNetworkStatisticsTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_network_statistics_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_dfx_path/statistics",
+    "$dsoftbus_dfx_path/statistics/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+group("unittest") {
+  testonly = true
+  deps = [ ":TransNetworkStatisticsTest" ]
+}

@@ -22,9 +22,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_trans.h"
+#include "legacy/softbus_hidumper_trans.h"
 #include "trans_channel_callback.h"
 #include "trans_client_proxy.h"
 #include "trans_log.h"
@@ -384,11 +384,13 @@ static int32_t TransListCopy(ListNode *sessionServerList)
 
 void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
 {
+#define USER_SWITCH_OFFSET 10
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
     int32_t routeType = (int32_t)GET_ROUTE_TYPE(type);
     int32_t connType = (int32_t)GET_CONN_TYPE(type);
+    bool isUserSwitchEvent = (bool)((type >> USER_SWITCH_OFFSET) & 0xff);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     TRANS_LOGI(TRANS_CTRL,
@@ -415,6 +417,9 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     };
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
+        if (isUserSwitchEvent && pos->callerType != CALLER_TYPE_FEATURE_ABILITY) {
+            continue;
+        }
         (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
     }
 

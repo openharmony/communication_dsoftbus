@@ -21,7 +21,7 @@
 #include "lnn_log.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 
 typedef enum {

@@ -376,7 +376,7 @@ int32_t P2pAdapter::GetIpAddress(std::string &ipString)
     CONN_LOGI(CONN_WIFI_DIRECT, "interfaceName=%{public}s", interface.c_str());
     ret = WifiDirectUtils::GetInterfaceIpString(interface, ipString);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get interfaceIp string failed, error=%d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get interfaceIp string failed, error=%{public}d", ret);
     return SOFTBUS_OK;
 }
 

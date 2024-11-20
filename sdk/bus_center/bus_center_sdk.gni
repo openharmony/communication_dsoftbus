@@ -11,14 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../dsoftbus.gni")
 
 bus_center_service_sdk_src =
     [ "$dsoftbus_root_path/sdk/bus_center/service/src/client_bus_center.c" ]
 bus_center_service_sdk_inc = [
   "$dsoftbus_root_path/sdk/bus_center/service/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
+  "$dsoftbus_dfx_path/interface/include",
 ]
 
 bus_center_manager_sdk_src = []

@@ -25,7 +25,7 @@ ohos_fuzztest("SoftbusClientStub2FuzzTest") {
   sources = [ "softbusclientstub2_fuzzer.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_core_path/common/dfx/interface/include",
+    "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
 

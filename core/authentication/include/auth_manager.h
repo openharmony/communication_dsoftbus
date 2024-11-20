@@ -38,20 +38,20 @@ extern "C" {
 typedef struct {
     int64_t authId;
     bool isServer;
-    /* 连接信息 */
+    /* connInfo */
     uint64_t connId[AUTH_LINK_TYPE_MAX];
     AuthConnInfo connInfo[AUTH_LINK_TYPE_MAX];
     uint64_t lastActiveTime;
-    /* 密钥信息 */
+    /* sessionKeyInfo */
     int64_t lastAuthSeq[AUTH_LINK_TYPE_MAX];
     uint64_t lastVerifyTime;
     SessionKeyList sessionKeyList;
-    /* 设备信息 */
+    /* deviceInfo */
     char p2pMac[MAC_LEN];
     char udid[UDID_BUF_LEN];
     char uuid[UUID_BUF_LEN];
     SoftBusVersion version;
-    /* 认证状态 */
+    /* authState */
     bool hasAuthPassed[AUTH_LINK_TYPE_MAX];
     ListNode node;
 } AuthManager;

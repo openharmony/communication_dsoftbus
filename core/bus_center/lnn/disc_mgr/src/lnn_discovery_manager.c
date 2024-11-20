@@ -20,8 +20,8 @@
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
+#include "softbus_error_code.h"
+#include "legacy/softbus_hisysevt_bus_center.h"
 
 static void DeviceFound(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
 

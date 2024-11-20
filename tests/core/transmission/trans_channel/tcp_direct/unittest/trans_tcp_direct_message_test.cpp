@@ -32,6 +32,7 @@ namespace OHOS {
 #define PID 2024
 #define UID 4000
 
+static int32_t g_port = 6000;
 static const char *g_pkgName = "dms";
 static const char *g_ip = "192.168.8.1";
 static int32_t g_netWorkId = 100;
@@ -527,6 +528,49 @@ HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSi
     channelId = 0;
     ret = TcpTranGetAppInfobyChannelId(channelId, appInfo);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/**
+ * @tc.name: OpenTcpDirectChannelTest0018
+ * @tc.desc: OpenTcpDirectChannel, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    AppInfo *appInfo = TestSetAppInfo();
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
+        0, sizeof(connInfo.socketOption.addr));
+    connInfo.socketOption.port = g_port;
+    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
+    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), g_ip) != EOK) {
+        return;
+    }
+    int32_t ret = AuthInit();
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int64_t authSeq = 0;
+    AuthSessionInfo info;
+    SessionKey sessionKey;
+
+    ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false, false);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenTcpDirectChannel(nullptr, &connInfo, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenTcpDirectChannel(appInfo, nullptr, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenTcpDirectChannel(appInfo, &connInfo, nullptr);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenTcpDirectChannel(appInfo, &connInfo, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    AuthDeinit();
 }
 
 /**

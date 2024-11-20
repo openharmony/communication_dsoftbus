@@ -14,14 +14,13 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../.."
 module_output_path = "dsoftbus/adapter"
 
 test_deps = [
-  "$dsoftbus_dfx_path/log:softbus_dfx_log",
+  "$dsoftbus_dfx_path:softbus_dfx",
   "$dsoftbus_root_path/core/common:softbus_utils",
 ]
 
