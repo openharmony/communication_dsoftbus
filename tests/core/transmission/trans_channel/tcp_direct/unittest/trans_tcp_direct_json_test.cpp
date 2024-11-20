@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_message.h"
 #include "trans_log.h"

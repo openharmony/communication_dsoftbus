@@ -18,7 +18,7 @@
 #include "message_handler.h"
 #include "session.h"
 #include "softbus_conn_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
@@ -289,20 +289,15 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOption001, TestSize.Level1)
  */
 HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnExistProc001, TestSize.Level1)
 {
-    ProxyConnInfo conn;
     ProxyChannelInfo chan;
+    ConnectOption connInfo;
+    (void)memset_s(&connInfo, sizeof(ConnectOption), 1, sizeof(ConnectOption));
     int32_t chanNewId = 1;
     bool isServer = false;
     TransCreateConnByConnId(1, isServer);
-    conn.connInfo.type = CONNECT_BR;
-    conn.state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
     chan.isServer = false;
-    int32_t ret = TransProxyConnExistProc(&conn, &chan, chanNewId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    conn.state = PROXY_CHANNEL_STATUS_HANDSHAKEING;
-    ret = TransProxyConnExistProc(&conn, &chan, chanNewId);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    int32_t ret = TransProxyConnExistProc(&chan, chanNewId, &connInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED, ret);
 }
 
 /**

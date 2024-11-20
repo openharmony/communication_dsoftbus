@@ -40,5 +40,31 @@ void DelNotTrustDevice(const char *udid)
 {
     return GetInterface()->DelNotTrustDevice(udid);
 }
+
+bool IsHeartbeatEnable(void)
+{
+    return GetInterface()->IsHeartbeatEnable();
+}
+
+void RestartCoapDiscovery(void)
+{
+    return GetInterface()->RestartCoapDiscovery();
+}
+
+int32_t LnnStartHbByTypeAndStrategy(
+    LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+{
+    return GetInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
+}
+
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
+{
+    return GetInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
+}
+
+void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
+{
+    return GetInterface()->NotifyRemoteDevOffLineByUserId(userId, udid);
+}
 }
 } // namespace OHOS

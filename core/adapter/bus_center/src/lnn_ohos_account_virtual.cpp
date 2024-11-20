@@ -14,7 +14,7 @@
  */
 #include "lnn_ohos_account.h"
 
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {

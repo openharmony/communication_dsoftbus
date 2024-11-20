@@ -18,7 +18,7 @@
 #include "bus_center_event.h"
 #include "lnn_log.h"
 #include "lwip/netif.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #define LWIP_NSC_IPSTATUS_CHANGE 0xf0
 

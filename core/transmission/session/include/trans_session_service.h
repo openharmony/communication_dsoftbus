@@ -23,7 +23,8 @@
 extern "C" {
 #endif
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid);
+int32_t TransCreateSessionServer(
+    const char *pkgName, const char *sessionName, int32_t uid, int32_t pid, bool isNormalApp);
 
 int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName);
 

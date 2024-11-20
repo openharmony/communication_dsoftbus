@@ -25,7 +25,7 @@
 #include "auth_net_ledger_mock.h"
 #include "softbus_app_info.h"
 #include "lnn_hichain_mock.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "auth_common_mock.h"
 

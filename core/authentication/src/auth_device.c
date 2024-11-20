@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "auth_device.h"
 
 #include <securec.h>
-
+#include "anonymizer.h"
 #include "auth_connection.h"
 #include "auth_hichain.h"
 #include "auth_log.h"
@@ -30,7 +30,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
-#include "softbus_adapter_hitrace.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)

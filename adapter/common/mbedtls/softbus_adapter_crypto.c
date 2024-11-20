@@ -26,7 +26,7 @@
 #include "mbedtls/md.h"
 #include "mbedtls/platform.h"
 #include "softbus_adapter_file.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 
 #ifndef MBEDTLS_CTR_DRBG_C
 #define MBEDTLS_CTR_DRBG_C

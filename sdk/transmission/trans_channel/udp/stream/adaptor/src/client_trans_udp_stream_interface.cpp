@@ -20,7 +20,7 @@
 #include <string>
 
 #include "securec.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "stream_adaptor.h"
 #include "stream_adaptor_listener.h"
 #include "stream_common.h"
@@ -46,13 +46,15 @@ static inline void ConvertStreamFrameInfo(const StreamFrameInfo *inFrameInfo,
     outFrameInfo->bitrate = 0;
 }
 
-static int32_t CreateRawStream(const std::shared_ptr<StreamAdaptor> &adaptor, const char *buf, ssize_t bufLen,
-    std::unique_ptr<IStream> &stream)
+static int32_t CreateRawStream(const StreamFrameInfo *param, const std::shared_ptr<StreamAdaptor> &adaptor,
+    const char *buf, ssize_t bufLen, std::unique_ptr<IStream> &stream)
 {
     bool isEncrypt = adaptor->IsEncryptedRawStream();
+    Communication::SoftBus::StreamFrameInfo outFrameInfo;
+    ConvertStreamFrameInfo(param, &outFrameInfo);
     if (!isEncrypt) {
-        TRANS_LOGD(TRANS_STREAM, "isEncrypt=%{public}d, bufLen=%{public}zd", isEncrypt, bufLen);
-        stream = IStream::MakeRawStream(buf, bufLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
+        TRANS_LOGI(TRANS_STREAM, "isEncrypt=%{public}d, bufLen=%{public}zd", isEncrypt, bufLen);
+        stream = IStream::MakeRawStream(buf, bufLen, outFrameInfo, Communication::SoftBus::Scene::SOFTBUS_SCENE);
         return SOFTBUS_OK;
     }
 
@@ -65,7 +67,7 @@ static int32_t CreateRawStream(const std::shared_ptr<StreamAdaptor> &adaptor, co
         TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", dataLen, encLen);
         return SOFTBUS_TRANS_ENCRYPT_ERR;
     }
-    stream = IStream::MakeRawStream(data.get(), dataLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
+    stream = IStream::MakeRawStream(data.get(), dataLen, outFrameInfo, Communication::SoftBus::Scene::SOFTBUS_SCENE);
     return SOFTBUS_OK;
 }
 
@@ -73,7 +75,7 @@ static int32_t ProcessAdaptorAndEncrypt(const StreamFrameInfo *param, const Stre
     std::shared_ptr<StreamAdaptor> &adaptor, std::unique_ptr<IStream> &stream, const StreamData *ext)
 {
     if (adaptor->GetStreamType() == RAW_STREAM) {
-        int32_t ret = CreateRawStream(adaptor, inData->buf, inData->bufLen, stream);
+        int32_t ret = CreateRawStream(param, adaptor, inData->buf, inData->bufLen, stream);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_STREAM, "failed to create raw stream, ret=%{public}d", ret);
             return ret;
