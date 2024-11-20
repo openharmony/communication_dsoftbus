@@ -72,6 +72,8 @@ static uint32_t g_filterCapabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM] = {0};
 static NetworkInterfaceInfo g_interfaceList[NSTACKX_MAX_INTERFACE_NUM];
 static SeqAll g_seqAll = {0, 0, 0};
 static uint32_t g_notifyTimeoutMs = 0;
+static pthread_mutex_t g_filterCapabilityLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_maxDeviceNumLock = PTHREAD_MUTEX_INITIALIZER;
 
 #ifndef DFINDER_USE_MINI_NSTACKX
 /*
@@ -387,7 +389,15 @@ int32_t DiscConfigInner(const DFinderDiscConfig *discConfig)
 
 int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
+    if (PthreadMutexLock(&g_filterCapabilityLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     if (!memcmp(capabilityBitmap, g_filterCapabilityBitmap, sizeof(uint32_t) * capabilityBitmapNum)) {
+        if (PthreadMutexUnlock(&g_filterCapabilityLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+            return NSTACKX_EFAILED;
+        }
         return NSTACKX_EOK;
     }
     (void)memset_s(g_filterCapabilityBitmap, sizeof(g_filterCapabilityBitmap),
@@ -396,10 +406,17 @@ int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBit
         if (memcpy_s(g_filterCapabilityBitmap, sizeof(g_filterCapabilityBitmap),
             capabilityBitmap, sizeof(uint32_t) * capabilityBitmapNum) != EOK) {
             DFINDER_LOGE(TAG, "FilterCapabilityBitmap copy error");
+            if (PthreadMutexUnlock(&g_filterCapabilityLock) != 0) {
+                DFINDER_LOGE(TAG, "failed to unlock");
+            }
             return NSTACKX_EFAILED;
         }
     }
     g_filterCapabilityBitmapNum = capabilityBitmapNum;
+    if (PthreadMutexUnlock(&g_filterCapabilityLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
+        return NSTACKX_EFAILED;
+    }
     return NSTACKX_EOK;
 }
 
@@ -464,6 +481,10 @@ static void GlobalInterfaceListInit()
 
 void SetMaxDeviceNum(uint32_t maxDeviceNum)
 {
+    if (PthreadMutexLock(&g_maxDeviceNumLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return;
+    }
 #ifdef DFINDER_SAVE_DEVICE_LIST
     if (maxDeviceNum < NSTACKX_MIN_DEVICE_NUM || maxDeviceNum > NSTACKX_MAX_DEVICE_NUM) {
         DFINDER_LOGE(TAG, "illegal device num passed in, set device num to default value");
@@ -480,6 +501,9 @@ void SetMaxDeviceNum(uint32_t maxDeviceNum)
 #endif
     g_maxDeviceNum = maxDeviceNum;
     DFINDER_LOGD(TAG, "the maxDeviceNum is set to: %u", g_maxDeviceNum);
+    if (PthreadMutexUnlock(&g_maxDeviceNumLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
+    }
 }
 
 uint32_t GetMaxDeviceNum(void)

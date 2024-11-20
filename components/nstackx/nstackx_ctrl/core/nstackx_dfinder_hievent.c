@@ -19,6 +19,7 @@
 #include "nstackx_error.h"
 #include "nstackx_common.h"
 #include "nstackx_event.h"
+#include "nstackx_util.h"
 #include "securec.h"
 
 #define TAG "nStackXDFinder"
@@ -27,6 +28,7 @@
 
 static void *g_softObj;
 static DFinderEventFunc g_eventFunc;
+static pthread_mutex_t g_eventFuncLock = PTHREAD_MUTEX_INITIALIZER;
 
 static int g_statisticsIdx[STAT_EVT_PARA_NUM] = {
     STATS_INVALID_OPT_AND_PAYLOAD,
@@ -131,13 +133,28 @@ int SetEventFunc(void *softobj, DFinderEventFunc func)
 
 int SetEventFuncDirectly(void *softobj, DFinderEventFunc func)
 {
+    if (PthreadMutexLock(&g_eventFuncLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     g_softObj = softobj;
     g_eventFunc = func;
+    if (PthreadMutexUnlock(&g_eventFuncLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
+        return NSTACKX_EFAILED;
+    }
     return NSTACKX_EOK;
 }
 
 void ResetEventFunc(void)
 {
+    if (PthreadMutexLock(&g_eventFuncLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return;
+    }
     g_softObj = NULL;
     g_eventFunc = NULL;
+    if (PthreadMutexUnlock(&g_eventFuncLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
+    }
 }

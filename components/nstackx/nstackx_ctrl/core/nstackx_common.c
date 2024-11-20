@@ -79,29 +79,6 @@ static atomic_uint_fast8_t g_nstackInitState = NSTACKX_INIT_STATE_START;
 static atomic_uint_fast8_t g_nstackThreadInitState = NSTACKX_INIT_STATE_START;
 static bool g_isNotifyPerDevice;
 
-enum {
-    REGISTER_LOCAL_DEVICE = 0,
-    REGISTER_CAPABILITY,
-    SET_FILTER_CAPABILITY,
-    SET_MAX_DEVICENUM,
-    REGISTER_SERVICE_DATA,
-    REGISTER_BUSINESS_DATA,
-    REGISTER_EXTEND_SERVICEDATA,
-    SET_EVENT_FUNC,
-    GLOBAL_LOCK_MAX,
-};
-
-static pthread_mutex_t g_lockList[GLOBAL_LOCK_MAX] = {
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER
-};
-
 #define EVENT_COUNT_RATE_INTERVAL 2000 /* 2 SECONDS */
 #define MAX_EVENT_PROCESS_NUM_PER_INTERVAL 700
 #define MAX_CONTINUOUS_BUSY_INTERVAL_NUM 20
@@ -1088,13 +1065,7 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
     }
 
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        if (PthreadMutexLock(&g_lockList[REGISTER_LOCAL_DEVICE]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int32_t ret = (int32_t)RegisterLocalDeviceV2(localDeviceInfo, registerType);
-        (void)PthreadMutexUnlock(&g_lockList[REGISTER_LOCAL_DEVICE]);
-        return ret;
+        return (int32_t)RegisterLocalDeviceV2(localDeviceInfo, registerType);
     }
 
     struct RegDeviceInfo regInfo;
@@ -1151,30 +1122,6 @@ static void SetFilterCapabilityInner(void *argument)
     free(capabilityData);
 }
 
-static int32_t RegisterCapabilityDirectlyHandle(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[],
-    EventHandle handle)
-{
-    if (handle == RegisterCapabilityInner) {
-        if (PthreadMutexLock(&g_lockList[REGISTER_CAPABILITY]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int32_t ret = (int32_t)SetLocalDeviceCapability(capabilityBitmapNum, capabilityBitmap);
-        (void)PthreadMutexUnlock(&g_lockList[REGISTER_CAPABILITY]);
-        return ret;
-    }
-    if (handle == SetFilterCapabilityInner) {
-        if (PthreadMutexLock(&g_lockList[SET_FILTER_CAPABILITY]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int32_t ret = SetFilterCapability(capabilityBitmapNum, capabilityBitmap);
-        (void)PthreadMutexUnlock(&g_lockList[SET_FILTER_CAPABILITY]);
-        return ret;
-    }
-    return NSTACKX_EFAILED;
-}
-
 static int32_t NSTACKX_CapabilityHandle(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[], EventHandle handle)
 {
     Coverity_Tainted_Set((void *)&capabilityBitmapNum);
@@ -1198,7 +1145,12 @@ static int32_t NSTACKX_CapabilityHandle(uint32_t capabilityBitmapNum, uint32_t c
     }
 
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        return RegisterCapabilityDirectlyHandle(capabilityBitmapNum, capabilityBitmap, handle);
+        if (handle == RegisterCapabilityInner) {
+            return (int32_t)SetLocalDeviceCapability(capabilityBitmapNum, capabilityBitmap);
+        }
+        if (handle == SetFilterCapabilityInner) {
+            return SetFilterCapability(capabilityBitmapNum, capabilityBitmap);
+        }
     }
 
     capabilityData = calloc(1U, sizeof(CapabilityProcessData));
@@ -1254,12 +1206,7 @@ int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
         return NSTACKX_EFAILED;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        if (PthreadMutexLock(&g_lockList[SET_MAX_DEVICENUM]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
         SetMaxDeviceNum(maxDeviceNum);
-        (void)PthreadMutexUnlock(&g_lockList[SET_MAX_DEVICENUM]);
         return NSTACKX_EOK;
     }
     if (SemInit(&msg.wait, 0, 0)) {
@@ -1335,13 +1282,7 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
         return NSTACKX_EINVAL;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        if (PthreadMutexLock(&g_lockList[REGISTER_SERVICE_DATA]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int32_t ret = SetLocalDeviceServiceData(serviceData);
-        (void)PthreadMutexUnlock(&g_lockList[REGISTER_SERVICE_DATA]);
-        return ret;
+        return SetLocalDeviceServiceData(serviceData);
     }
 
     serviceDataTmp = calloc(1U, NSTACKX_MAX_SERVICE_DATA_LEN);
@@ -1390,13 +1331,7 @@ int32_t NSTACKX_RegisterBusinessData(const char *businessData)
         return NSTACKX_EINVAL;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        if (PthreadMutexLock(&g_lockList[REGISTER_BUSINESS_DATA]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int32_t ret = (int32_t)SetLocalDeviceBusinessData(businessData, NSTACKX_TRUE);
-        (void)PthreadMutexUnlock(&g_lockList[REGISTER_BUSINESS_DATA]);
-        return ret;
+        return (int32_t)SetLocalDeviceBusinessData(businessData, NSTACKX_TRUE);
     }
 
     businessDataTmp = calloc(1, NSTACKX_MAX_BUSINESS_DATA_LEN);
@@ -1448,13 +1383,7 @@ int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
         return NSTACKX_EINVAL;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        if (PthreadMutexLock(&g_lockList[REGISTER_EXTEND_SERVICEDATA]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int32_t ret = SetLocalDeviceExtendServiceData(extendServiceData);
-        (void)PthreadMutexUnlock(&g_lockList[REGISTER_EXTEND_SERVICEDATA]);
-        return ret;
+        return SetLocalDeviceExtendServiceData(extendServiceData);
     }
 
     extendServiceDataTmp = calloc(1, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN);
@@ -1944,13 +1873,7 @@ int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func)
         return NSTACKX_EFAILED;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        if (PthreadMutexLock(&g_lockList[SET_EVENT_FUNC]) != 0) {
-            DFINDER_LOGE(TAG, "Failed to lock");
-            return NSTACKX_EFAILED;
-        }
-        int ret = SetEventFuncDirectly(softobj, func);
-        (void)PthreadMutexUnlock(&g_lockList[SET_EVENT_FUNC]);
-        return ret;
+        return SetEventFuncDirectly(softobj, func);
     }
 
     return SetEventFunc(softobj, func);
