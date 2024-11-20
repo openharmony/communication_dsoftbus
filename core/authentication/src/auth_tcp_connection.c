@@ -547,7 +547,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     SoftBusFree(buf);
     if (ret != (ssize_t)size) {
         AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}zd", ret);
-        return SOFTBUS_AUTH_SEND_FAIL;
+        return SOFTBUS_TCP_SOCKET_ERR;
     }
     return SOFTBUS_OK;
 }
