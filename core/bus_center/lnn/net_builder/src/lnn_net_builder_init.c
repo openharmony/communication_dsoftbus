@@ -724,10 +724,14 @@ static void UserSwitchedHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    bool isDataShareInit = true;
     switch (userSwitchState) {
         case SOFTBUS_USER_SWITCHED:
             LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
-            RegisterOOBEMonitor(NULL);
+            LnnGetDataShareInitResult(&isDataShareInit);
+            if (isDataShareInit) {
+                RegisterOOBEMonitor(NULL);
+            }
             LnnSetUnlockState();
             break;
         default:

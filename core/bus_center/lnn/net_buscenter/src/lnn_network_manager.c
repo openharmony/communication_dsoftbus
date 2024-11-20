@@ -15,7 +15,9 @@
 
 #include "lnn_network_manager.h"
 
+#include <pthread.h>
 #include <securec.h>
+#include <unistd.h>
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
@@ -30,6 +32,7 @@
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
+#include "lnn_oobe_manager.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -47,6 +50,9 @@
 #define LNN_DEFAULT_IF_NAME_BLE  "ble0"
 
 #define LNN_CHECK_OOBE_DELAY_LEN (5 * 60 * 1000LL)
+
+static pthread_mutex_t g_dataShareMutex;
+static bool g_isDataShareInit = false;
 
 typedef enum {
     LNN_ETH_TYPE = 0,
@@ -314,6 +320,68 @@ static void NetOOBEStateEventHandler(const LnnEventBasicInfo *info)
         default:
             return;
     }
+}
+
+static void RetryCheckOOBEState(void *para)
+{
+    (void)para;
+
+    if (!IsOOBEState()) {
+        LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
+        LnnNotifyOOBEStateChangeEvent(SOFTBUS_OOBE_END);
+    } else {
+        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay. delay=%{public}" PRIu64 "ms",
+            (uint64_t)LNN_CHECK_OOBE_DELAY_LEN);
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, LNN_CHECK_OOBE_DELAY_LEN);
+    }
+}
+
+static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_DATA_SHARE_STATE_CHANGE) {
+        LNN_LOGE(LNN_BUILDER, "Data share get invalid param");
+        return;
+    }
+    
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusDataShareState state = (SoftBusDataShareState)event->status;
+    switch (state) {
+        case SOFTBUS_DATA_SHARE_READY:
+            LNN_LOGI(LNN_BUILDER, "data share state is=%{public}d", g_isDataShareInit);
+            if (g_isDataShareInit != true) {
+                if (pthread_mutex_lock(&g_dataShareMutex) != 0) {
+                    LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
+                    return;
+                }
+                g_isDataShareInit = true;
+                (void)pthread_mutex_unlock(&g_dataShareMutex);
+                LnnInitOOBEStateMonitorImpl();
+                RetryCheckOOBEState(NULL);
+            }
+            break;
+        default:
+            if (pthread_mutex_lock(&g_dataShareMutex) != 0) {
+                LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
+                return;
+            }
+            g_isDataShareInit = false;
+            (void)pthread_mutex_unlock(&g_dataShareMutex);
+            return;
+    }
+}
+
+void LnnGetDataShareInitResult(bool *isDataShareInit)
+{
+    if (isDataShareInit == NULL) {
+        LNN_LOGE(LNN_BUILDER, "Data share get invalid param");
+        return;
+    }
+    if (pthread_mutex_lock(&g_dataShareMutex) != 0) {
+        LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
+        return;
+    }
+    *isDataShareInit = g_isDataShareInit;
+    (void)pthread_mutex_unlock(&g_dataShareMutex);
 }
 
 int32_t LnnClearNetConfigList(void)
@@ -651,6 +719,10 @@ static int32_t LnnRegisterEvent(void)
         LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist data share evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -696,20 +768,6 @@ int32_t LnnInitNetworkManager(void)
     return LnnRegisterEvent();
 }
 
-static void RetryCheckOOBEState(void *para)
-{
-    (void)para;
-
-    if (!IsOOBEState()) {
-        LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
-        LnnNotifyOOBEStateChangeEvent(SOFTBUS_OOBE_END);
-    } else {
-        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay. delay=%{public}" PRIu64 "ms",
-            (uint64_t)LNN_CHECK_OOBE_DELAY_LEN);
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, LNN_CHECK_OOBE_DELAY_LEN);
-    }
-}
-
 void LnnSetUnlockState(void)
 {
     if (IsActiveOsAccountUnlocked()) {
@@ -742,7 +800,6 @@ int32_t LnnInitNetworkManagerDelay(void)
             }
         }
     }
-    RetryCheckOOBEState(NULL);
     return SOFTBUS_OK;
 }
 
@@ -794,6 +851,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
 }
 
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
