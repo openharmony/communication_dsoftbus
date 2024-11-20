@@ -280,7 +280,7 @@ int32_t P2pAdapter::SetPeerWifiConfigInfo(const std::string &config)
     }
     ret = Hid2dSetPeerWifiCfgInfo(TYPE_OF_SET_PEER_CONFIG, (char *)decodeCfg, (int32_t)decodeLen);
     delete[] decodeCfg;
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+    CONN_CHECK_AND_RETURN_RET_LOGE((ret == WIFI_SUCCESS) || (ret == ERROR_WIFI_ENHANCE_SVC), ToSoftBusErrorCode(ret),
         CONN_WIFI_DIRECT, "set wifi cfg failed, error=%{public}d",
         ToSoftBusErrorCode(ret));
     CONN_LOGI(CONN_WIFI_DIRECT, "set success");
