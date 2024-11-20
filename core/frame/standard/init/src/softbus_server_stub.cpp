@@ -124,7 +124,7 @@ static int32_t CheckAndRecordAccessToken(const char *permission)
         if (tmp != Security::AccessToken::RET_SUCCESS) {
             COMM_LOGW(COMM_SVC,
                 "AddPermissionUsedRecord failed, permissionName=%{public}s, successCnt=%{public}d, failCnt=%{public}d, "
-                "tmp=%{public}d", permission, successCnt, failCnt, tmp)
+                "tmp=%{public}d", permission, successCnt, failCnt, tmp);
         }
     }
     return ret;
