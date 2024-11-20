@@ -87,7 +87,7 @@ static int32_t PostBtV1DevId(int64_t authSeq, const AuthSessionInfo *info)
 {
     if (!info->isServer) {
         AUTH_LOGE(AUTH_FSM, "client don't send Bt-v1 devId");
-        return SOFTBUS_NETWORK_NOT_SUPPORT;
+        return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
     char uuid[UUID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
@@ -101,7 +101,7 @@ static int32_t PostWifiV1DevId(int64_t authSeq, const AuthSessionInfo *info)
 {
     if (!info->isServer) {
         AUTH_LOGE(AUTH_FSM, "client don't send wifi-v1 devId");
-        return SOFTBUS_NETWORK_NOT_SUPPORT;
+        return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
     char *msg = PackDeviceIdJson(info);
     if (msg == NULL) {
