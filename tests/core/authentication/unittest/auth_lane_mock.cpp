@@ -42,4 +42,3 @@ int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint
 }
 }
 } // namespace OHOS
-
