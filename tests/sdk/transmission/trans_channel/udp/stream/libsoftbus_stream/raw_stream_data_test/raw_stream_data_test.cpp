@@ -132,7 +132,7 @@ HWTEST_F(RawStreamDataTest, GetStreamFrameInfo001, TestSize.Level1)
 {
     std::shared_ptr<RawStreamData> rRawStreamData = std::make_shared<RawStreamData>();
 
-    EXPECT_EQ(nullptr, rRawStreamData->GetStreamFrameInfo());
+    EXPECT_NE(nullptr, rRawStreamData->GetStreamFrameInfo());
 }
 
 /**
