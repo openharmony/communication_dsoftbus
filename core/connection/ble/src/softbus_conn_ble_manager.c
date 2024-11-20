@@ -355,13 +355,6 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
         }
         return;
     }
-    UpdateOption option = {
-        .type = CONNECT_BLE,
-        .bleOption = {
-            .priority = CONN_BLE_PRIORITY_BALANCED,
-        }
-    };
-    BleUpdateConnection(connection->connectionId, &option);
 
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
@@ -686,6 +679,13 @@ static void BleClientConnected(uint32_t connectionId)
         return;
     }
     ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
+    UpdateOption option = {
+        .type = CONNECT_BLE,
+        .bleOption = {
+            .priority = CONN_BLE_PRIORITY_BALANCED,
+        }
+    };
+    BleUpdateConnection(connectionId, &option);
     CONN_LOGI(
         CONN_BLE, "ble client connect success, clientId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
     connection->underlayerFastConnectFailedScanFailure = false;
@@ -1594,6 +1594,7 @@ static void DataReceivedFunc(SoftBusMessage *msg)
 {
     CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
+    CONN_CHECK_AND_RETURN_LOGW(ctx->data != NULL, CONN_BLE, "data is null");
     if (g_bleManager.state->dataReceived == NULL) {
         SoftBusFree(ctx->data);
         return;
