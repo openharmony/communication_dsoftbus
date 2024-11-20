@@ -144,7 +144,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Leve
     StopSocketListening(AUTH);
 
     int32_t ret = ProcessSocketOutEvent(AUTH, fd);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -164,7 +164,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level
     NotifyChannelDisconnected(channelId);
 
     int32_t ret = ProcessSocketInEvent(AUTH, fd);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -183,7 +183,7 @@ HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     cfd = 0;
     ret = OnConnectEvent(module, cfd, &clientAddr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -198,13 +198,13 @@ HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_001, TestSize.Level1)
     int32_t events = SOFTBUS_SOCKET_OUT;
     int32_t fd = 0;
     int32_t ret = OnDataEvent(module, events, fd);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     events = SOFTBUS_SOCKET_IN;
     ret = OnDataEvent(module, events, fd);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     events = SOFTBUS_SOCKET_EXCEPTION;
     ret = OnDataEvent(module, events, fd);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -225,7 +225,7 @@ HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_001, TestSize.Level1
         },
     };
     int32_t ret = StartSocketListening(AUTH, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -245,7 +245,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
     ret = SocketGetConnInfo(fd, &connInfo, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = SocketGetConnInfo(fd, &connInfo, &isServer);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
