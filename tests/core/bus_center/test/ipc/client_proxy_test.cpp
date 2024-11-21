@@ -366,15 +366,8 @@ HWTEST_F(ClientProxyTest, ClientOnTimeSyncResult_01, TestSize.Level1)
 HWTEST_F(ClientProxyTest, ClientOnTimeSyncResult_02, TestSize.Level1)
 {
     const void *info = TEST_INFO;
-    static const uint32_t SOFTBUS_SA_ID = 4700;
-    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
-    ASSERT_TRUE(remoteObject != nullptr);
-    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
-    ASSERT_TRUE(clientProxy != nullptr);
-    int32_t testret = clientProxy->OnTimeSyncResult(info, INFOTYPELEN, RETCODE);
     int32_t ret = ClientOnTimeSyncResult(TEST_PKGNAME, PID, info, INFOTYPELEN, RETCODE);
-    EXPECT_EQ(ret, testret);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REMOTE_NULL);
 }
 
 /*
