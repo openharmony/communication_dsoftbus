@@ -32,7 +32,7 @@ namespace OHOS {
             return;
         }
         unsigned int len = SESSION_KEY_LENGTH;
-        int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+        int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
         char tmp[SESSION_KEY_LENGTH + 1] = {0};
         if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
             return;
@@ -46,7 +46,7 @@ namespace OHOS {
             return;
         }
         int32_t handle = 1;
-        int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+        int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
         GetSessionHandle(sessionId, &handle);
     }
 
@@ -55,7 +55,7 @@ namespace OHOS {
         if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
-        int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+        int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
         DisableSessionListener(sessionId);
     }
 
@@ -64,16 +64,34 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
+        char *charParam = const_cast<char *>(reinterpret_cast<const char *>(data));
         #define SESSION_NAME_SIZE_MAX 256
         #define DEVICE_ID_SIZE_MAX 65
         #define GROUP_ID_SIZE_MAX 65
+        char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
         char peerSessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
         char peerNetworkId[DEVICE_ID_SIZE_MAX] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
         SessionAttribute attr = {
             .dataType = TYPE_BYTES,
         };
         char groupId[GROUP_ID_SIZE_MAX] = "TEST_GROUP_ID";
-        OpenSessionSync(nullptr, peerSessionName, peerNetworkId, groupId, &attr);
+        if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, charParam, SESSION_NAME_SIZE_MAX - 1) != EOK) {
+            return;
+        }
+        if (memcpy_s(peerSessionName, SESSION_NAME_SIZE_MAX, charParam, SESSION_NAME_SIZE_MAX - 1) != EOK) {
+            return;
+        }
+        if (memcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, charParam, DEVICE_ID_SIZE_MAX - 1) != EOK) {
+            return;
+        }
+        if (memcpy_s(groupId, GROUP_ID_SIZE_MAX, charParam, GROUP_ID_SIZE_MAX - 1) != EOK) {
+            return;
+        }
+        mySessionName[SESSION_NAME_SIZE_MAX - 1] = '\0';
+        peerSessionName[SESSION_NAME_SIZE_MAX - 1] = '\0';
+        peerNetworkId[DEVICE_ID_SIZE_MAX - 1] = '\0';
+        groupId[GROUP_ID_SIZE_MAX - 1] = '\0';
+        OpenSessionSync(mySessionName, peerSessionName, peerNetworkId, groupId, &attr);
     }
 } // namespace OHOS
 

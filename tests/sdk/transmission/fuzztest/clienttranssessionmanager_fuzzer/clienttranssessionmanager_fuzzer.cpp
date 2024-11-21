@@ -43,7 +43,7 @@ void ClientAddNewSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size == 0)) {
         return;
     }
-    const char* testSessionName = reinterpret_cast<const char*>(data);
+    const char* testSessionName = reinterpret_cast<const char *>(data);
     SessionInfo session;
     ClientAddNewSession(testSessionName, &session);
 }
@@ -54,7 +54,7 @@ void ClientAddAuthSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
         return;
     }
-    int32_t sessionId;
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
     ClientAddAuthSession(nullptr, &sessionId);
 }
 
@@ -63,7 +63,7 @@ void ClientDeleteSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
     ClientDeleteSession(sessionId);
 }
 
@@ -72,9 +72,9 @@ void ClientGetSessionDataTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    char* testData = const_cast<char*>(reinterpret_cast<const char*>(data));
-    int* testInt = const_cast<int*>(reinterpret_cast<const int*>(data));
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    char* testData = const_cast<char*>(reinterpret_cast<const char *>(data));
+    int* testInt = const_cast<int*>(reinterpret_cast<const int *>(data));
     ClientGetSessionDataById(sessionId, testData, size, KEY_SESSION_NAME);
     ClientGetSessionIntegerDataById(sessionId, testInt, KEY_SESSION_NAME);
     ClientGetSessionSide(sessionId);
@@ -85,7 +85,7 @@ void ClientSetChannelBySessionIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
     TransInfo transInfo = {
         .channelId = 0,
         .channelType = 0,
@@ -99,8 +99,8 @@ void ClientGetSessionCallbackTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    const char* testSessionName = reinterpret_cast<const char*>(data);
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    const char* testSessionName = reinterpret_cast<const char *>(data);
 
     ClientGetSessionCallbackById(sessionId, &g_sessionlistener);
     ClientGetSessionCallbackByName(testSessionName, &g_sessionlistener);
@@ -111,17 +111,16 @@ void ClientTransOnLinkDownTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    const char* netWorkId = reinterpret_cast<const char*>(data);
-    int32_t routeType = *(reinterpret_cast<const int32_t*>(data));
+    const char* netWorkId = reinterpret_cast<const char *>(data);
+    int32_t routeType = *(reinterpret_cast<const int32_t *>(data));
 
     ClientTransOnLinkDown(netWorkId, routeType);
 }
 
 void ClientRemovePermissionTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
+    (void)data;
+    (void)size;
     ClientRemovePermission(nullptr);
 }
 
@@ -130,8 +129,8 @@ void ClientGetFileConfigInfoByIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t* fileEncrypt = const_cast<int32_t*>(reinterpret_cast<const int32_t*>(data));
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t* fileEncrypt = const_cast<int32_t*>(reinterpret_cast<const int32_t *>(data));
     ClientGetFileConfigInfoById(sessionId, fileEncrypt, fileEncrypt, fileEncrypt);
 }
 
@@ -140,8 +139,8 @@ void GetEncryptByChannelIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t*>(data));
+    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
     int32_t encryp = 0;
     GetEncryptByChannelId(channelId, channelType, &encryp);
 }
@@ -151,8 +150,8 @@ void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t*>(data));
+    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
     int32_t sessionId;
     bool isClosing = false;
     ClientGetSessionIdByChannelId(channelId, channelType, &sessionId, isClosing);
@@ -164,7 +163,7 @@ void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
         return;
     }
     ChannelInfo channel;
-    int32_t sessionId;
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
     ClientEnableSessionByChannelId(&channel, &sessionId);
 }
 
