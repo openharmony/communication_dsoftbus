@@ -94,6 +94,7 @@ bool LnnVisitNetif(VisitNetifCallback callback, void *data);
 bool LnnVisitProtocol(VisitProtocolCallback callback, void *data);
 int32_t RegistIPProtocolManager(void);
 void LnnSetUnlockState(void);
+void LnnGetDataShareInitResult(bool *isDataShareInit);
 
 #ifdef __cplusplus
 #if __cplusplus
