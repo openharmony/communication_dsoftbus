@@ -149,12 +149,12 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
 {
     StartTimeSyncReq *item = NULL;
 
-    char *anonyPkgName = NULL;
-    Anonymize(startReq->pkgName, &anonyPkgName);
     if (SoftBusMutexLock(&g_startReqListLock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "lock list err");
         return SOFTBUS_LOCK_ERR;
     }
+    char *anonyPkgName = NULL;
+    Anonymize(startReq->pkgName, &anonyPkgName);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         if (strcmp(startReq->pkgName, item->pkgName) != 0 || item->pid != startReq->pid) {
             continue;
