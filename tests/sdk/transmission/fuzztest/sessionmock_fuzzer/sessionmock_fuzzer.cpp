@@ -15,6 +15,7 @@
 
 #include "sessionmock_fuzzer.h"
 
+#include "securec.h"
 #include "session.h"
 #include "session_mock.h"
 #include <cstddef>
@@ -26,8 +27,13 @@ void CreateSessionServerInnerTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
+    char *charParam = const_cast<char *>(reinterpret_cast<const char *>(data));
 #define SESSION_NAME_SIZE_MAX 256
     char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
+    if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, charParam, SESSION_NAME_SIZE_MAX - 1) != EOK) {
+        return;
+    }
+    mySessionName[SESSION_NAME_SIZE_MAX - 1] = '\0';
     CreateSessionServerInner(nullptr, mySessionName);
 }
 
@@ -36,8 +42,13 @@ void RemoveSessionServerInnerTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
+    char *charParam = const_cast<char *>(reinterpret_cast<const char *>(data));
 #define SESSION_NAME_SIZE_MAX 256
     char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
+    if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, charParam, SESSION_NAME_SIZE_MAX - 1) != EOK) {
+        return;
+    }
+    mySessionName[SESSION_NAME_SIZE_MAX - 1] = '\0';
     RemoveSessionServerInner(nullptr, mySessionName);
 }
 
@@ -47,6 +58,7 @@ void OpenSessionInnerTest(const uint8_t *data, size_t size)
         return;
     }
 
+    char *charParam = const_cast<char *>(reinterpret_cast<const char *>(data));
 #define SESSION_NAME_SIZE_MAX 256
 #define DEVICE_ID_SIZE_MAX    65
 #define GROUP_ID_SIZE_MAX     65
@@ -54,6 +66,22 @@ void OpenSessionInnerTest(const uint8_t *data, size_t size)
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
     char groupId[GROUP_ID_SIZE_MAX] = "TEST_GROUP_ID";
+    if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, charParam, SESSION_NAME_SIZE_MAX - 1) != EOK) {
+        return;
+    }
+    if (memcpy_s(peerSessionName, SESSION_NAME_SIZE_MAX, charParam, SESSION_NAME_SIZE_MAX - 1) != EOK) {
+        return;
+    }
+    if (memcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, charParam, DEVICE_ID_SIZE_MAX - 1) != EOK) {
+        return;
+    }
+    if (memcpy_s(groupId, GROUP_ID_SIZE_MAX, charParam, GROUP_ID_SIZE_MAX - 1) != EOK) {
+        return;
+    }
+    mySessionName[SESSION_NAME_SIZE_MAX - 1] = '\0';
+    peerSessionName[SESSION_NAME_SIZE_MAX - 1] = '\0';
+    peerNetworkId[DEVICE_ID_SIZE_MAX - 1] = '\0';
+    groupId[GROUP_ID_SIZE_MAX - 1] = '\0';
     OpenSessionInner(mySessionName, peerSessionName, peerNetworkId, groupId, size);
 }
 
@@ -80,9 +108,8 @@ void GrantPermissionInnerTest(const uint8_t *data, size_t size)
 
 void RemovePermissionInnerTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size == 0) {
-        return;
-    }
+    (void)data;
+    (void)size;
 
     RemovePermissionInner(nullptr);
 }
