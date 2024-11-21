@@ -52,7 +52,7 @@ void NotifyDFinderMsgRecver(DFinderMsgType msgType);
 EpollDesc GetMainLoopEpollFd(void);
 List *GetMainLoopEvendChain(void);
 uint32_t GetDefaultDiscoverInterval(uint32_t discoverCount);
-int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType);
+int32_t ShouldAutoReplyUnicast(uint8_t businessType);
 int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 int32_t GetServiceNotificationInfo(const uint8_t *buf, size_t size, NSTACKX_NotificationConfig *notification);
 List *GetEventNodeChain(void);
