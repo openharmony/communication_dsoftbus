@@ -590,6 +590,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.isAsync = data.ReadBool();
     param.sessionId = data.ReadInt32();
     param.actionId = data.ReadUint32();
+    param.pid = OHOS::IPCSkeleton::GetCallingPid();
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
