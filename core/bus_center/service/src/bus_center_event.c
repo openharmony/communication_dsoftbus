@@ -566,6 +566,16 @@ void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state)
+{
+    if (state < SOFTBUS_DATA_SHARE_READY || state >= SOFTBUS_DATA_SHARE_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad lockState=%{public}d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_DATA_SHARE_STATE_CHANGE, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
 {
     if (state < SOFTBUS_ACCOUNT_LOG_IN || state >= SOFTBUS_ACCOUNT_UNKNOWN) {
