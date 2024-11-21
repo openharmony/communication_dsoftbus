@@ -146,6 +146,11 @@ BUSCENTER_BEHAVIOR:
   AUTH_SEQ: { type: INT64, desc: auth seq }
   ONLINE_DEV_CNT: { type: INT32, desc: current online device num for time latency }
   INTERVAL: { type: INT32, desc: broadcast interval }
+  LANE_LINK_TYPE: { type: INT32, desc: lane link type }
+  HML_CHANNEL_ID: { type: INT32, desc: hml channel id }
+  P2P_CHANNEL_ID: { type: INT32, desc: p2p channel id }
+  STA_CHANNEL_ID: { type: INT32, desc: sta channel id }
+  AP_CHANNEL_ID: { type: INT32, desc: ap channel id }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }

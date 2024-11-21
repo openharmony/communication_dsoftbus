@@ -54,6 +54,7 @@ typedef enum {
     LNN_EVENT_NETWORKID_CHANGED,
     LNN_EVENT_LP_EVENT_REPORT,
     LNN_EVENT_LANE_VAP_CHANGE,
+    LNN_EVENT_DATA_SHARE_STATE_CHANGE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -111,6 +112,11 @@ typedef enum {
     SOFTBUS_USER_SWITCHED,
     SOFTBUS_USER_SWITCH_UNKNOWN,
 } SoftBusUserSwitchState;
+
+typedef enum {
+    SOFTBUS_DATA_SHARE_READY,
+    SOFTBUS_DATA_SHARE_UNKNOWN,
+} SoftBusDataShareState;
 
 typedef enum {
     SOFTBUS_DIF_ACCOUNT_DEV_CHANGE,
@@ -289,6 +295,8 @@ void LnnNotifyLpReportEvent(SoftBusLpEventType type);
 void LnnNotifyHBRepeat(void);
 
 void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
+
+void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
 
 void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
 
