@@ -22,13 +22,14 @@
 namespace OHOS {
 void SendFileTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
     const char *sfileList[] = {};
     const char *dFileList[] = {};
-    uint32_t fileCnt = 0;
-    SendFile(size, sfileList, dFileList, fileCnt);
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t fileCnt = *(reinterpret_cast<const int32_t *>(data));
+    SendFile(sessionId, sfileList, dFileList, fileCnt);
 }
 } // namespace OHOS
 
