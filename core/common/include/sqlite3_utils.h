@@ -35,6 +35,8 @@ extern "C" {
 #endif
 
 #define DATABASE_NAME DEFAULT_STORAGE_PATH"/dsoftbus/dsoftbus.db3"
+#define LNN_DEFAULT_USERID 100
+#define LNN_INT32_NUM_STR_MAX_LEN 11
 
 typedef struct {
     sqlite3 *db;
@@ -48,8 +50,9 @@ typedef enum {
 } TableNameID;
 
 typedef struct {
-    char accountHexHash[SHA_256_HEX_HASH_LEN];
+    char accountHexHash[SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1];
     char udid[UDID_BUF_LEN];
+    int32_t userId;
 } TrustedDevInfoRecord;
 
 typedef enum {
