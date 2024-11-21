@@ -27,11 +27,11 @@ namespace OHOS {
 
     void VtpCreateClientTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size < sizeof(int))) {
+        if (data == nullptr || size < sizeof(int)) {
             return;
         }
 
-        int32_t streamType = *(reinterpret_cast<const int*>(data));
+        int32_t streamType = *(reinterpret_cast<const int *>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
@@ -41,11 +41,11 @@ namespace OHOS {
 
     void VtpCreateServerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size < sizeof(int))) {
+        if (data == nullptr || size < sizeof(int)) {
             return;
         }
 
-        int32_t streamType = *(reinterpret_cast<const int*>(data));
+        int32_t streamType = *(reinterpret_cast<const int *>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
@@ -54,30 +54,31 @@ namespace OHOS {
 
     void VtpDestroyStreamSocketTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
-            return;
-        }
+        (void)data;
+        (void)size;
 
         vtpStreamSocket.DestroyStreamSocket();
     }
 
     void VtpConnectTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
 
         Communication::SoftBus::IpAndPort ipPort;
+        ipPort.ip = const_cast<char *>(reinterpret_cast<const char *>(data));
+        ipPort.port = *(reinterpret_cast<const int32_t *>(data));
         vtpStreamSocket.Connect(ipPort);
     }
 
     void VtpSetOptionTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size < sizeof(int))) {
+        if (data == nullptr || size < sizeof(int)) {
             return;
         }
 
-        int32_t type = *(reinterpret_cast<const int*>(data));
+        int32_t type = *(reinterpret_cast<const int *>(data));
         Communication::SoftBus::StreamAttr tmp;
 
         vtpStreamSocket.SetOption(type, tmp);
@@ -85,20 +86,19 @@ namespace OHOS {
 
     void VtpGetOptionTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size < sizeof(int))) {
+        if (data == nullptr || size < sizeof(int)) {
             return;
         }
 
-        int32_t type = *(reinterpret_cast<const int*>(data));
+        int32_t type = *(reinterpret_cast<const int *>(data));
 
         vtpStreamSocket.GetOption(type);
     }
 
     void VtpSetStreamListenerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
-            return;
-        }
+        (void)data;
+        (void)size;
 
         std::shared_ptr<Communication::SoftBus::IStreamSocketListener> receiver = nullptr;
 
@@ -107,9 +107,8 @@ namespace OHOS {
 
     void VtpGetEncryptOverheadTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
-            return;
-        }
+        (void)data;
+        (void)size;
 
         vtpStreamSocket.GetEncryptOverhead();
     }
@@ -119,8 +118,10 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
+        const void *in = reinterpret_cast<const void *>(data);
+        void *out = const_cast<void *>(reinterpret_cast<const void *>(data));
 
-        vtpStreamSocket.Encrypt(nullptr, size, nullptr, size);
+        vtpStreamSocket.Encrypt(in, size, out, size);
     }
 
     void VtpDecrypt(const uint8_t* data, size_t size)
@@ -128,8 +129,10 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
+        const void *in = reinterpret_cast<const void *>(data);
+        void *out = const_cast<void *>(reinterpret_cast<const void *>(data));
 
-        vtpStreamSocket.Decrypt(nullptr, size, nullptr, size);
+        vtpStreamSocket.Decrypt(in, size, out, size);
     }
 }
 
