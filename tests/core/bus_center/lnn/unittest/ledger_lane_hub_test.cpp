@@ -26,9 +26,9 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
-#include "lnn_network_id.h"
-#include "lnn_net_ledger.h"
 #include "lnn_net_ledger.c"
+#include "lnn_net_ledger.h"
+#include "lnn_network_id.h"
 #include "lnn_node_info.h"
 #include "lnn_sync_item_info.h"
 #include "message_handler.h"
@@ -99,13 +99,9 @@ void LedgerLaneHubTest::TearDownTestCase()
     GTEST_LOG_(INFO) << "LaneHubTest end.";
 }
 
-void LedgerLaneHubTest::SetUp()
-{
-}
+void LedgerLaneHubTest::SetUp() { }
 
-void LedgerLaneHubTest::TearDown()
-{
-}
+void LedgerLaneHubTest::TearDown() { }
 
 static void ConstructBRNode(void)
 {
@@ -197,7 +193,7 @@ static void ConstructWiFiLocalInfo(bool is5G)
 static void GetCommonLocalInfo(void)
 {
     int32_t ret;
-    char des[LOCAL_MAX_SIZE] = {0};
+    char des[LOCAL_MAX_SIZE] = { 0 };
     ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, des, LOCAL_MAX_SIZE);
     EXPECT_TRUE((ret == SOFTBUS_OK) && (strcmp(des, LOCAL_UDID) == 0));
     ret = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, des, LOCAL_MAX_SIZE);
@@ -213,7 +209,7 @@ static void GetCommonLocalInfo(void)
 static void GetBTLocalInfo(void)
 {
     int32_t ret;
-    char des[LOCAL_MAX_SIZE] = {0};
+    char des[LOCAL_MAX_SIZE] = { 0 };
     ret = LnnGetLocalStrInfo(STRING_KEY_BT_MAC, des, LOCAL_MAX_SIZE);
     EXPECT_TRUE((ret == SOFTBUS_OK) && (strcmp(des, LOCAL_BT_MAC) == 0));
 }
@@ -231,11 +227,11 @@ static void GetWiFiLocalInfo(void)
 }
 
 /*
-* @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
-* @tc.desc: SoftbusDumpPrintNetCapacity test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
+ * @tc.desc: SoftbusDumpPrintNetCapacity test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
@@ -254,11 +250,11 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.L
 }
 
 /*
-* @tc.name: SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001
-* @tc.desc: SoftbusDumpPrintNetType test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001
+ * @tc.desc: SoftbusDumpPrintNetType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
@@ -277,11 +273,11 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001
-* @tc.desc: Lnn Set Node Data Change Flag test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001
+ * @tc.desc: Lnn Set Node Data Change Flag test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 {
     char *networkId = nullptr;
@@ -295,11 +291,11 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_SET_DATA_CHANGE_FLAG_Test_001
-* @tc.desc: Lnn Set Data Change Flag test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DATA_CHANGE_FLAG_Test_001
+ * @tc.desc: Lnn Set Data Change Flag test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, LNN_SET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 {
     NodeInfo info;
@@ -312,11 +308,11 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
-* @tc.desc: Lnn Get Data Change Flag test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
+ * @tc.desc: Lnn Get Data Change Flag test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 {
     NodeInfo info;
@@ -328,16 +324,16 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_GET_LOCAL_STR_INFO_Test_001
-* @tc.desc: Lnn Get Local Str Info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_LOCAL_STR_INFO_Test_001
+ * @tc.desc: Lnn Get Local Str Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
 {
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    char *nodeInfo = reinterpret_cast<char*>(&info);
+    char *nodeInfo = reinterpret_cast<char *>(&info);
     uint32_t len = 0;
     EXPECT_TRUE(LnnSetLocalStrInfo(NUM_KEY_DATA_CHANGE_FLAG, nodeInfo) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_AUTH_PORT, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
@@ -352,22 +348,22 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_Test_001
-* @tc.desc: Lnn Init Local Ledger Delay test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_Test_001
+ * @tc.desc: Lnn Init Local Ledger Delay test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
 }
 
 /*
-* @tc.name: LEDGER_GetDistributedLedgerNode_Test_001
-* @tc.desc: Get distributed ledger node info.
-* @tc.type: FUNC
-* @tc.require: AR000FK6J0
-*/
+ * @tc.name: LEDGER_GetDistributedLedgerNode_Test_001
+ * @tc.desc: Get distributed ledger node info.
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J0
+ */
 HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.Level1)
 {
     ConstructBRNode();
@@ -379,15 +375,15 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.L
 }
 
 /*
-* @tc.name: LEDGER_GetDistributedLedgerInfo_Test_001
-* @tc.desc:  test of the LnnGetRemoteStrInfo LnnGetDLNumInfo function
-* @tc.type: FUNC
-* @tc.require: AR000FK6J0
-*/
+ * @tc.name: LEDGER_GetDistributedLedgerInfo_Test_001
+ * @tc.desc:  test of the LnnGetRemoteStrInfo LnnGetDLNumInfo function
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J0
+ */
 HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.Level1)
 {
-    char deviceName[DEVICE_NAME_BUF_LEN] = {0};
-    char macAddr[MAC_LEN] = {0};
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
+    char macAddr[MAC_LEN] = { 0 };
     int32_t ret;
     uint32_t cap = 0;
     ConstructBRNode();
@@ -412,14 +408,14 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.L
 }
 
 /*
-* @tc.name: LEDGER_DistributedLedgerChangeName_Test_001
-* @tc.desc:  test of the LnnGetRemoteStrInfo LnnSetDLDeviceInfoName function
-* @tc.type: FUNC
-* @tc.require: AR000FK6J0
-*/
+ * @tc.name: LEDGER_DistributedLedgerChangeName_Test_001
+ * @tc.desc:  test of the LnnGetRemoteStrInfo LnnSetDLDeviceInfoName function
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J0
+ */
 HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSize.Level1)
 {
-    char deviceName[DEVICE_NAME_BUF_LEN] = {0};
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
 
@@ -434,14 +430,14 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSiz
 }
 
 /*
-* @tc.name: LEDGER_LocalLedgerGetInfo_Test_001
-* @tc.desc: Performance test of the LnnGetLocalLedgerStrInfo and NumInfo function.
-* @tc.type: FUNC
-* @tc.require: AR000FK6J0
-*/
+ * @tc.name: LEDGER_LocalLedgerGetInfo_Test_001
+ * @tc.desc: Performance test of the LnnGetLocalLedgerStrInfo and NumInfo function.
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J0
+ */
 HWTEST_F(LedgerLaneHubTest, LEDGER_LocalLedgerGetInfo_Test_001, TestSize.Level1)
 {
-    char des[LOCAL_MAX_SIZE] = {0};
+    char des[LOCAL_MAX_SIZE] = { 0 };
     int32_t ret;
     ConstructCommonLocalInfo();
     ConstructBtLocalInfo();
