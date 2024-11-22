@@ -24,7 +24,7 @@ class LnnKvStoreLaunchListenerInterface {
 public:
     LnnKvStoreLaunchListenerInterface() {};
     virtual ~LnnKvStoreLaunchListenerInterface() {};
-    
+
     virtual void LnnInitCloudSyncModule(void) = 0;
 };
 
@@ -33,7 +33,7 @@ public:
     LnnKvStoreLaunchListenerInterfaceMock();
     ~LnnKvStoreLaunchListenerInterfaceMock() override;
 
-    MOCK_METHOD0(LnnInitCloudSyncModule, void (void));
+    MOCK_METHOD0(LnnInitCloudSyncModule, void(void));
 };
 } // namespace OHOS
 #endif
