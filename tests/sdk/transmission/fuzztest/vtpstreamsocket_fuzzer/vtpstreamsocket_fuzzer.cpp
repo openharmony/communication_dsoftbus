@@ -27,11 +27,11 @@ namespace OHOS {
 
     void VtpCreateClientTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
 
-        int32_t streamType = *(reinterpret_cast<const int *>(data));
+        int32_t streamType = *(reinterpret_cast<const int32_t *>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
@@ -41,11 +41,11 @@ namespace OHOS {
 
     void VtpCreateServerTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
 
-        int32_t streamType = *(reinterpret_cast<const int *>(data));
+        int32_t streamType = *(reinterpret_cast<const int32_t *>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
@@ -67,18 +67,18 @@ namespace OHOS {
         }
 
         Communication::SoftBus::IpAndPort ipPort;
-        ipPort.ip = const_cast<char *>(reinterpret_cast<const char *>(data));
+        ipPort.ip = {0};
         ipPort.port = *(reinterpret_cast<const int32_t *>(data));
         vtpStreamSocket.Connect(ipPort);
     }
 
     void VtpSetOptionTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
 
-        int32_t type = *(reinterpret_cast<const int *>(data));
+        int32_t type = *(reinterpret_cast<const int32_t *>(data));
         Communication::SoftBus::StreamAttr tmp;
 
         vtpStreamSocket.SetOption(type, tmp);
@@ -86,11 +86,11 @@ namespace OHOS {
 
     void VtpGetOptionTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
 
-        int32_t type = *(reinterpret_cast<const int *>(data));
+        int32_t type = *(reinterpret_cast<const int32_t *>(data));
 
         vtpStreamSocket.GetOption(type);
     }
@@ -115,24 +115,28 @@ namespace OHOS {
 
     void VtpEncrypt(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(size_t)) {
             return;
         }
+        size_t inlen = *(reinterpret_cast<const size_t *>(data));
+        size_t outlen = *(reinterpret_cast<const size_t *>(data));
         const void *in = reinterpret_cast<const void *>(data);
         void *out = const_cast<void *>(reinterpret_cast<const void *>(data));
 
-        vtpStreamSocket.Encrypt(in, size, out, size);
+        vtpStreamSocket.Encrypt(in, inlen, out, outlen);
     }
 
     void VtpDecrypt(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(size_t)) {
             return;
         }
+        size_t inlen = *(reinterpret_cast<const size_t *>(data));
+        size_t outlen = *(reinterpret_cast<const size_t *>(data));
         const void *in = reinterpret_cast<const void *>(data);
         void *out = const_cast<void *>(reinterpret_cast<const void *>(data));
 
-        vtpStreamSocket.Decrypt(in, size, out, size);
+        vtpStreamSocket.Decrypt(in, inlen, out, outlen);
     }
 }
 
