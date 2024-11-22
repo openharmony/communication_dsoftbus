@@ -52,7 +52,6 @@ public:
     virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
     virtual int32_t LnnSyncPtk(const char *networkId) = 0;
     virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
-    virtual void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType releaseLink) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -86,7 +85,6 @@ public:
     MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
     MOCK_METHOD1(LnnSyncPtk, int32_t (const char *networkId));
     MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType releaseLink));
-    MOCK_METHOD2(ClearConflictInfoByLinkType, void (const char *networkId, LaneLinkType releaseLink));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);

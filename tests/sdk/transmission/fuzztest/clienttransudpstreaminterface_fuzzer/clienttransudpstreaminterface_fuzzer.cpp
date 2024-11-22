@@ -18,46 +18,114 @@
 #include <securec.h>
 
 #include "client_trans_udp_stream_interface.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
 namespace OHOS {
     void SendVtpStreamTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        StreamData *indata = nullptr;
-        StreamData *ext = nullptr;
-        StreamFrameInfo *param = nullptr;
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        if (ptr == nullptr) {
+            return;
+        }
+        if (memcpy_s(ptr, size, data, size) != EOK) {
+            SoftBusFree(ptr);
+            return;
+        }
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
+        StreamData streamdata = {
+            .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .bufLen = size,
+        };
+        StreamData ext = {
+            .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .bufLen = size,
+        };
+        TV tv = {
+            .type = *(reinterpret_cast<const int32_t *>(ptr)),
+            .value = *(reinterpret_cast<const int64_t *>(ptr)),
+        };
+        StreamFrameInfo param = {
+            .frameType = *(reinterpret_cast<const int32_t *>(ptr)),
+            .timeStamp = *(reinterpret_cast<const int32_t *>(ptr)),
+            .seqNum = *(reinterpret_cast<const int32_t *>(ptr)),
+            .seqSubNum = *(reinterpret_cast<const int32_t *>(ptr)),
+            .level = *(reinterpret_cast<const int32_t *>(ptr)),
+            .bitMap = *(reinterpret_cast<const int32_t *>(ptr)),
+            .tvCount = 1,
+            .tvList = &tv,
+        };
 
-        SendVtpStream(size, indata, ext, param);
+        SendVtpStream(channelId, &streamdata, &ext, &param);
+        SoftBusFree(ptr);
     }
 
     void StartVtpStreamChannelServerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        VtpStreamOpenParam *param = nullptr;
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        if (ptr == nullptr) {
+            return;
+        }
+        if (memcpy_s(ptr, size, data, size) != EOK) {
+            SoftBusFree(ptr);
+            return;
+        }
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
+        VtpStreamOpenParam param  = {
+            .pkgName = reinterpret_cast<const char *>(ptr),
+            .myIp = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .peerIp = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .peerPort = *(reinterpret_cast<const int32_t *>(ptr)),
+            .type = *(reinterpret_cast<const StreamType *>(ptr)),
+            .sessionKey = const_cast<uint8_t *>(ptr),
+            .keyLen = *(reinterpret_cast<const uint32_t *>(ptr)),
+            .isRawStreamEncrypt = size % 2,
+        };
         IStreamListener *callback = nullptr;
 
-        StartVtpStreamChannelServer(size, param, callback);
+        StartVtpStreamChannelServer(channelId, &param, callback);
+        SoftBusFree(ptr);
     }
 
     void StartVtpStreamChannelClientTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        VtpStreamOpenParam *param = nullptr;
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        if (ptr == nullptr) {
+            return;
+        }
+        if (memcpy_s(ptr, size, data, size) != EOK) {
+            SoftBusFree(ptr);
+            return;
+        }
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
+        VtpStreamOpenParam param  = {
+            .pkgName = reinterpret_cast<const char *>(ptr),
+            .myIp = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .peerIp = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .peerPort = *(reinterpret_cast<const int32_t *>(ptr)),
+            .type = *(reinterpret_cast<const StreamType *>(ptr)),
+            .sessionKey = const_cast<uint8_t *>(ptr),
+            .keyLen = *(reinterpret_cast<const uint32_t *>(ptr)),
+            .isRawStreamEncrypt = size % 2,
+        };
         IStreamListener *callback = nullptr;
 
-        StartVtpStreamChannelClient(size, param, callback);
+        StartVtpStreamChannelClient(channelId, &param, callback);
+        SoftBusFree(ptr);
     }
 
     void CloseVtpStreamChannelTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size < PKG_NAME_SIZE_MAX)) {
+        if (data == nullptr || size < PKG_NAME_SIZE_MAX) {
             return;
         }
         char tmp[PKG_NAME_SIZE_MAX + 1] = {0};

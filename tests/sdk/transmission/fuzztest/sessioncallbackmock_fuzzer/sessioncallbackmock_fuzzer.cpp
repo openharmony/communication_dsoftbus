@@ -26,26 +26,28 @@
 namespace OHOS {
     void InnerOnSessionOpenedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int)) {
             return;
         }
-        int32_t result = SOFTBUS_OK;
+        int sessionId = *(reinterpret_cast<const int *>(data));
+        int result = *(reinterpret_cast<const int *>(data));
 
-        InnerOnSessionOpened(size, result);
+        InnerOnSessionOpened(sessionId, result);
     }
 
     void InnerOnSessionClosedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int)) {
             return;
         }
+        int sessionId = *(reinterpret_cast<const int *>(data));
 
-        InnerOnSessionClosed(size);
+        InnerOnSessionClosed(sessionId);
     }
 
     void InnerOnBytesReceivedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size == 0) {
             return;
         }
         int32_t sessionId = SESSION_ID;
@@ -55,7 +57,7 @@ namespace OHOS {
 
     void InnerOnMessageReceivedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size == 0) {
             return;
         }
         int32_t sessionId = SESSION_ID;

@@ -2106,7 +2106,7 @@ static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
         return;
     }
     int32_t ret = ConvertHexStringToBytes(nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN,
-        userIdCheckSumHexStr, USERID_CHECKSUM_HEXSTRING_LEN);
+        userIdCheckSumHexStr, strlen(userIdCheckSumHexStr));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "ConvertHexStringToBytes failed! ret:%{public}d", ret);
     }

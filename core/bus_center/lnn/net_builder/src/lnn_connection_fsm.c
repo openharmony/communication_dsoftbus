@@ -489,6 +489,20 @@ static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool i
     }
 }
 
+static void NotifyUserChange(bool isChange, NodeInfo *oldInfo, NodeInfo *newInfo)
+{
+    uint8_t defaultUserIdCheckSum[USERID_CHECKSUM_LEN] = {0};
+    if (memcmp(newInfo->userIdCheckSum, defaultUserIdCheckSum, USERID_CHECKSUM_LEN) == 0) {
+        return;
+    }
+    if (isChange || memcmp(oldInfo->userIdCheckSum, newInfo->userIdCheckSum, USERID_CHECKSUM_LEN) != 0) {
+        isChange = true;
+    } else {
+        isChange = false;
+    }
+    NotifyForegroundUseridChange(newInfo->networkId, newInfo->discoveryType, isChange);
+}
+
 static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
@@ -496,6 +510,9 @@ static void SetLnnConnNodeInfo(
     uint64_t localFeature;
     (void)LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
     uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnRetrieveDeviceInfoByNetworkId(networkId, &oldInfo);
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
@@ -515,6 +532,9 @@ static void SetLnnConnNodeInfo(
     }
     NotifyJoinResult(connFsm, networkId, retCode);
     ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
+    if (report == REPORT_ONLINE) {
+        NotifyUserChange(ret != SOFTBUS_OK, &oldInfo, connInfo->nodeInfo);
+    }
     connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
     LnnNotifyNodeStateChanged(&connInfo->addr);
     LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
