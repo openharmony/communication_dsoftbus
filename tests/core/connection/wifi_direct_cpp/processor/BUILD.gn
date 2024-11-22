@@ -46,12 +46,12 @@ ohos_unittest("P2pv1ProcessorTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_rtti",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",

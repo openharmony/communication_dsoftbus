@@ -20,11 +20,6 @@ wifi_direct_cpp_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
 config("wifi_direct_include_dirs") {
   include_dirs = [
-    "//third_party/cJSON",
-    "//third_party/json/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/authentication/include",
@@ -64,15 +59,15 @@ ohos_unittest("LinkInfoTest") {
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "link_info_test.cpp",
   ]
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
@@ -93,15 +88,15 @@ ohos_unittest("NegotiateMessageTest") {
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "negotiate_message_test.cpp",
   ]
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
@@ -164,15 +159,17 @@ ohos_unittest("InnerLinkTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_main",
-    "//third_party/googletest:gtest_rtti",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 
@@ -244,15 +241,17 @@ ohos_unittest("LinkManagerTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_main",
-    "//third_party/googletest:gtest_rtti",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 
@@ -281,16 +280,16 @@ ohos_unittest("InterfaceInfoTest") {
     "interface_info_test.cpp",
   ]
 
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
@@ -314,16 +313,16 @@ ohos_unittest("InterfaceManagerTest") {
     "interface_manager_test.cpp",
   ]
 
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
@@ -345,16 +344,16 @@ ohos_unittest("WifiConfigInfoTest") {
     "wifi_config_info_test.cpp",
   ]
 
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }

@@ -16,7 +16,7 @@
 #define protected public
 
 #include <gtest/gtest.h>
-#include "../wifi_direct_mock.h"
+#include "wifi_direct_mock.h"
 #include "data/interface_info.h"
 #include "data/interface_manager.h"
 
