@@ -18,16 +18,17 @@
 
 #include <gmock/gmock.h>
 #include <mutex>
-#include "softbus_adapter_crypto.h"
+
 #include "bus_center_info_key.h"
 #include "lnn_ohos_account_adapter.h"
+#include "softbus_adapter_crypto.h"
 
 namespace OHOS {
 class LnnOhosAccountInterface {
 public:
     LnnOhosAccountInterface() {};
     virtual ~LnnOhosAccountInterface() {};
-    
+
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
@@ -39,10 +40,10 @@ public:
     LnnOhosAccountInterfaceMock();
     ~LnnOhosAccountInterfaceMock() override;
 
-    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *str, uint32_t len, unsigned char *hash));
-    MOCK_METHOD3(GetOsAccountId, int32_t (char *id, uint32_t idLen, uint32_t *len));
-    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey key, uint8_t *info, uint32_t len));
-    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t (void));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *str, uint32_t len, unsigned char *hash));
+    MOCK_METHOD3(GetOsAccountId, int32_t(char *id, uint32_t idLen, uint32_t *len));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t(void));
 };
 } // namespace OHOS
 #endif

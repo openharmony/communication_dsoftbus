@@ -1,23 +1,24 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <string>
 
 #include "lnn_kv_adapter.h"
-#include "softbus_error_code.h"
 #include "lnn_kv_data_change_listener.h"
+#include "softbus_error_code.h"
 #include "gtest/gtest.h"
-#include <string>
 
 using namespace std;
 using namespace testing::ext;
@@ -32,7 +33,7 @@ shared_ptr<DistributedKv::KvStoreObserver> kvStoreObserver = nullptr;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
-}
+} // namespace
 
 class KVAdapterTest : public testing::Test {
 protected:
@@ -47,9 +48,7 @@ void KVAdapterTest::SetUpTestCase(void)
     kvStore = make_shared<KVAdapter>(APP_ID, STORE_ID);
 }
 
-void KVAdapterTest::TearDownTestCase(void)
-{
-}
+void KVAdapterTest::TearDownTestCase(void) { }
 
 void KVAdapterTest::SetUp()
 {
@@ -130,12 +129,12 @@ HWTEST_F(KVAdapterTest, Put004, TestSize.Level1)
     string key = "key";
     string value = "value";
     EXPECT_EQ(SOFTBUS_OK, kvStore->Put(key, value));
-    
+
     for (int32_t i = 0; i < MAX_STRING_LEN + 5; i++) {
         value += 'a';
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
-    
+
     value = "";
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
 
@@ -143,7 +142,7 @@ HWTEST_F(KVAdapterTest, Put004, TestSize.Level1)
         key += 'a';
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
-    
+
     key = "";
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
 }
@@ -172,8 +171,8 @@ HWTEST_F(KVAdapterTest, PutBatch002, TestSize.Level1)
 {
     map<string, string> values;
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->PutBatch(values));
-    
-    for (int32_t i = 0; i< MAX_MAP_SIZE + 5; i++) {
+
+    for (int32_t i = 0; i < MAX_MAP_SIZE + 5; i++) {
         values[to_string(i)] = "value";
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->PutBatch(values));
@@ -382,4 +381,4 @@ HWTEST_F(KVAdapterTest, CloudSyncCallback002, TestSize.Level1)
     detail.progress = DistributedKv::Progress::SYNC_FINISH;
     kvStore->CloudSyncCallback(std::move(detail));
 }
-}
+} // namespace OHOS
