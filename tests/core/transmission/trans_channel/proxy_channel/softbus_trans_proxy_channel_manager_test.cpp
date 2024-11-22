@@ -367,4 +367,25 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo004, Test
     int32_t ret = TransProxyFillChannelInfo(&msg, &chan);
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_ACL_FAILED);
 }
+
+/**
+ * @tc.name: TransNotifyUserSwitchTest001
+ * @tc.desc: client send file crc check sum, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTransProxyChannelManagerTest, TransNotifyUserSwitchTest001, TestSize.Level0)
+{
+    LnnMonitorHbStateChangedEvent *info = (LnnMonitorHbStateChangedEvent *)SoftBusCalloc(
+        sizeof(LnnMonitorHbStateChangedEvent));
+    ASSERT_TRUE(info != nullptr);
+    info->basic.event = LNN_EVENT_BT_STATE_CHANGED;
+    info->status = SOFTBUS_USER_SWITCHED;
+    TransNotifyUserSwitch(nullptr);
+    const LnnEventBasicInfo *event = (const LnnEventBasicInfo *)info;
+    TransNotifyUserSwitch(event);
+    info->status = SOFTBUS_USER_SWITCH_UNKNOWN;
+    TransNotifyUserSwitch(event);
+    SoftBusFree(info);
+}
 } // namespace OHOS

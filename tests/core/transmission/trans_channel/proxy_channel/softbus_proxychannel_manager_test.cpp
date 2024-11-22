@@ -1057,7 +1057,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyNegoSessionKeySuccTest001, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyNegoSessionKeySucc(TEST_VALID_CHANNEL_ID);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**@

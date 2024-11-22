@@ -64,6 +64,8 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         LnnNotifyScreenLockStateChangeEvent(SOFTBUS_USER_UNLOCK);
     } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
         LnnNotifyScreenLockStateChangeEvent(SOFTBUS_SCREEN_UNLOCK);
+    } else if (action == CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY) {
+        LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
     }
     if (screenState != SOFTBUS_SCREEN_UNKNOWN) {
         LnnNotifyScreenStateChangeEvent(screenState);
@@ -101,6 +103,7 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {

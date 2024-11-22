@@ -388,7 +388,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
             break;
         case AUTH_LINK_TYPE_BLE:
             if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId,
-                sizeof(networkId)) != SOFTBUS_OK) {
+                sizeof(networkId), true) != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "get networkId fail");
                 return SOFTBUS_NOT_FIND;
             }

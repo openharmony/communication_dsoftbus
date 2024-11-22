@@ -369,7 +369,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_ERR);
-    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_ERR);
+    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -381,13 +381,13 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.
 HWTEST_F(LNNDataCloudSyncMockTest, SetDBNameDataToDLedger_Test_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> NetLedgerMock;
-    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceInfoName).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceInfoName).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetLedgerMock, LnnSetDLUnifiedDeviceName).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLUnifiedDeviceName).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetLedgerMock, LnnSetDLUnifiedDefaultDeviceName).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLUnifiedDefaultDeviceName).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceNickNameByUdid).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceNickNameByUdid).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -395,15 +395,15 @@ HWTEST_F(LNNDataCloudSyncMockTest, SetDBNameDataToDLedger_Test_001, TestSize.Lev
     char fieldName[FIELDNAME_MAX_LEN] = { 0 };
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DEVICE_NAME));
     EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_OK);
-    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_UNIFIED_DEVICE_NAME));
-    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_UNIFIED_DEFAULT_DEVICE_NAME));
-    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_SETTINGS_NICK_NAME));
-    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DISTRIBUTED_SWITCH));
     EXPECT_EQ(SetDBNameDataToDLedger(&cacheInfo, deviceUdid, fieldName), SOFTBUS_OK);
@@ -418,30 +418,30 @@ HWTEST_F(LNNDataCloudSyncMockTest, SetDBNameDataToDLedger_Test_001, TestSize.Lev
 HWTEST_F(LNNDataCloudSyncMockTest, SetDBDataToDistributedLedger_Test_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> NetLedgerMock;
-    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceBroadcastCipherKey).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceBroadcastCipherKey).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceBroadcastCipherIv).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceBroadcastCipherIv).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceStateVersion).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceStateVersion).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
-    EXPECT_CALL(DataCloudSyncMock, LnnUpdateNetworkId).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(DataCloudSyncMock, LnnUpdateNetworkId).WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     char deviceUdid[UDID_BUF_LEN] = { 0 };
     char fieldName[FIELDNAME_MAX_LEN] = { 0 };
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_BROADCAST_CIPHER_KEY));
-    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_NOT_FIND);
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_BROADCAST_CIPHER_IV));
-    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_NOT_FIND);
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_NETWORK_ID));
-    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_MEM_ERR);
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_STATE_VERSION));
-    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_ERR);
+    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_NOT_FIND);
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DISTRIBUTED_SWITCH));
     const char *value = "value";
@@ -486,7 +486,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, IsIgnoreUpdate_Test_001, TestSize.Level1)
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Level1)
 {
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
-    EXPECT_CALL(DataCloudSyncMock, LnnGenerateHexStringHash).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(DataCloudSyncMock, LnnGenerateHexStringHash).WillOnce(Return(SOFTBUS_ENCRYPT_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(DataCloudSyncMock, LnnRetrieveDeviceInfo).WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -496,7 +496,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Lev
     CloudSyncValue parseValue;
     char trueValue[SPLIT_MAX_LEN] = { 0 };
     int32_t localStateVersion = 0;
-    EXPECT_EQ(HandleDBUpdateInternal(deviceUdid, fieldName, trueValue, &parseValue, localStateVersion), SOFTBUS_ERR);
+    EXPECT_EQ(HandleDBUpdateInternal(deviceUdid, fieldName, trueValue, &parseValue, localStateVersion),
+        SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
     EXPECT_EQ(HandleDBUpdateInternal(deviceUdid, fieldName, trueValue, &parseValue, localStateVersion), SOFTBUS_OK);
     EXPECT_EQ(HandleDBUpdateInternal(deviceUdid, fieldName, trueValue, &parseValue, localStateVersion), SOFTBUS_OK);
     EXPECT_EQ(HandleDBUpdateInternal(nullptr, fieldName, trueValue, &parseValue, localStateVersion),
@@ -552,7 +553,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     const char *key = "key";
     const char *value = TMPMSG;
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_ERR);
-    EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_ERR);
+    EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_ERR);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_OK);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_OK);

@@ -731,5 +731,20 @@ void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
 {
     return GetNetBuilderDepsInterface()->GetLnnTriggerInfo(triggerInfo);
 }
+
+int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
+{
+    return GetNetBuilderDepsInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
+}
+
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
+{
+    return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
+}
+
+void LnnGetDataShareInitResult(bool *isDataShareInit)
+{
+    return GetNetBuilderDepsInterface()->LnnGetDataShareInitResult(isDataShareInit);
+}
 } // extern "C"
 } // namespace OHOS

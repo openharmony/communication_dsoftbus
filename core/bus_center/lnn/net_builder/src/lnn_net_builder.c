@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,7 +128,7 @@ int32_t PostBuildMessageToHandler(int32_t msgType, void *para)
     SoftBusMessage *msg = CreateNetBuilderMessage(msgType, para);
     if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "create softbus message failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     g_netBuilder.looper->PostMessage(g_netBuilder.looper, msg);
     return SOFTBUS_OK;
@@ -192,13 +192,13 @@ int32_t SyncElectMessage(const char *networkId)
         !AddNumberToJsonObject(json, JSON_KEY_MASTER_WEIGHT, masterWeight)) {
         LNN_LOGE(LNN_BUILDER, "add elect info to json failed");
         cJSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
     data = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
     if (data == NULL) {
         LNN_LOGE(LNN_BUILDER, "format elect packet fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     rc = LnnSendSyncInfoMsg(LNN_INFO_TYPE_MASTER_ELECT, networkId, (uint8_t *)data, strlen(data) + 1, NULL);
     cJSON_free(data);
@@ -279,7 +279,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     FreeJoinLnnMsgPara(para);
     if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_START_VERIFY_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -978,13 +978,13 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
     if (para->dupInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "join with nodeinfo dup node info fail");
         SoftBusFree(para);
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (PostBuildMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
         SoftBusFree(para->dupInfo);
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1062,7 +1062,7 @@ int32_t LnnNotifyDiscoveryDevice(
     if (PostBuildMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1090,7 +1090,7 @@ int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType 
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_INVALID_CONN, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave invalid connection message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1101,7 +1101,7 @@ int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
 
     if (g_netBuilder.isInit == false) {
         LNN_LOGE(LNN_BUILDER, "no init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     para = (uint16_t *)SoftBusMalloc(sizeof(uint16_t));
     if (para == NULL) {
@@ -1112,7 +1112,7 @@ int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
     if (PostBuildMessageToHandler(MSG_TYPE_CLEAN_CONN_FSM, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post request clean connectionlnn message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1155,7 +1155,7 @@ int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr)
     if (PostBuildMessageToHandler(MSG_TYPE_NODE_STATE_CHANGED, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post node state changed message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1181,13 +1181,13 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
         strncpy_s(para->masterUdid, UDID_BUF_LEN, masterUdid, strlen(masterUdid)) != EOK) {
         LNN_LOGE(LNN_BUILDER, "copy udid and maser udid failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     para->masterWeight = masterWeight;
     if (PostBuildMessageToHandler(MSG_TYPE_MASTER_ELECT, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post elect message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1227,7 +1227,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     bool *para = NULL;
     if (typeLen != CONNECTION_ADDR_MAX) {
         LNN_LOGE(LNN_BUILDER, "invalid typeLen");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGD(LNN_BUILDER, "wlan=%{public}d, br=%{public}d, ble=%{public}d, eth=%{public}d", type[CONNECTION_ADDR_WLAN],
         type[CONNECTION_ADDR_BR], type[CONNECTION_ADDR_BLE], type[CONNECTION_ADDR_ETH]);
@@ -1248,7 +1248,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_BY_ADDR_TYPE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave by addr type message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1278,7 +1278,7 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_SPECIFIC, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave specific msg failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1295,7 +1295,7 @@ int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle)
     if (PostBuildMessageToHandler(MSG_TYPE_DEVICE_DISCONNECT, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post device disconnect fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1312,7 +1312,7 @@ int32_t LnnNotifyEmptySessionKey(int64_t authId)
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_BY_AUTH_ID, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post empty sessionKey msg fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1584,4 +1584,30 @@ int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32
     }
     LnnNotifyHichainProofException(errorReturn, errorReturnLen, TYPE_PC_ID, errCode);
     return SOFTBUS_OK;
+}
+
+void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange)
+{
+    cJSON *json = cJSON_CreateObject();
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "json is null!");
+        return;
+    }
+
+    if (!AddStringToJsonObject(json, "networkId", networkId) ||
+        !AddNumberToJsonObject(json, "discoverType", discoveryType) ||
+        !AddBoolToJsonObject(json, "ischange", isChange)) {
+        LNN_LOGE(LNN_BUILDER, "add json failed");
+        cJSON_Delete(json);
+        return;
+    }
+    char *msg = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    if(msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "msg is null!");
+        return;
+    }
+    LnnNotifyDeviceTrustedChange(DEVICE_FOREGROUND_USERID_CHANGE, msg, strlen(msg));
+    cJSON_free(msg);
+    LNN_LOGI(LNN_BUILDER, "notify change to service! isChange:%{public}s", isChange ? "true":"false");
 }
