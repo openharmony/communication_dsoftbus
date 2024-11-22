@@ -45,8 +45,7 @@ static LocalLedgerDepsInterfaceMock *GetLocalLedgerDepsInterface()
     return reinterpret_cast<LocalLedgerDepsInterfaceMock *>(g_localLedgerDepsInterface);
 }
 
-int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceKey key,
-    char *value, uint32_t len)
+int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == nullptr) {
         return SOFTBUS_ERR;
