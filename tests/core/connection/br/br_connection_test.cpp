@@ -374,9 +374,9 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest008, TestSize.Level1)
     LocalListenerInfo *info = (LocalListenerInfo *)SoftBusCalloc(sizeof(LocalListenerInfo));
     ASSERT_NE(nullptr, info);
     info->type = CONNECT_BR;
-    EXPECT_CALL(brMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = g_connectFuncInterface->StartLocalListening(info);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     EXPECT_CALL(brMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_OK));
     ret = g_connectFuncInterface->StartLocalListening(info);
