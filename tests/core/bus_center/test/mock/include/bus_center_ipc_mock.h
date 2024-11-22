@@ -16,12 +16,13 @@
 #ifndef BUS_CENTER_IPC_H
 #define BUS_CENTER_IPC_H
 
+#include <gmock/gmock.h>
+#include <mutex>
+
+#include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_local_net_ledger.h"
-#include "bus_center_client_proxy.h"
-#include <gmock/gmock.h>
-#include <mutex>
 
 namespace OHOS {
 class BusCenterIpcInterface {
@@ -49,8 +50,8 @@ public:
     virtual int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) = 0;
     virtual int32_t LnnShiftLNNGear(
         const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode) = 0;
-    virtual int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
-        const char *networkId, int32_t retCode) = 0;
+    virtual int32_t ClientOnJoinLNNResult(
+        PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode) = 0;
     virtual int32_t ClientOnLeaveLNNResult(
         const char *pkgName, int32_t pid, const char *networkId, int32_t retCode) = 0;
     virtual int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;
