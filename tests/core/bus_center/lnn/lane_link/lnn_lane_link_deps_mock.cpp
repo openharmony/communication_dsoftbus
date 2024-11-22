@@ -179,10 +179,5 @@ int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
 {
     return GetLaneLinkDepsInterface()->CheckLinkConflictByReleaseLink(releaseLink);
 }
-
-void ClearConflictInfoByLinkType(const char *networkId, LaneLinkType releaseLink)
-{
-    GetLaneLinkDepsInterface()->ClearConflictInfoByLinkType(networkId, releaseLink);
-}
 }
 } // namespace OHOS

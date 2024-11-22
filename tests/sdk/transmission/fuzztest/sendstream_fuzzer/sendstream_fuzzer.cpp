@@ -17,25 +17,56 @@
 
 #include <cstddef>
 
+#include "securec.h"
 #include "session.h"
+#include "softbus_adapter_mem.h"
 
 namespace OHOS {
 void SendStreamTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
-    StreamData streamData = {0};
-    StreamData ext = {0};
-    StreamFrameInfo param = {0};
-    SendStream(size, &streamData, &ext, &param);
+    uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+    if (ptr == nullptr) {
+        return;
+    }
+    if (memcpy_s(ptr, size, data, size) != EOK) {
+        SoftBusFree(ptr);
+        return;
+    }
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(ptr));
+    StreamData streamdata = {
+        .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+        .bufLen = size,
+    };
+    StreamData ext = {
+        .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+        .bufLen = size,
+    };
+    TV tv = {
+        .type = *(reinterpret_cast<const int32_t *>(ptr)),
+        .value = *(reinterpret_cast<const int64_t *>(ptr)),
+    };
+    StreamFrameInfo param = {
+        .frameType = *(reinterpret_cast<const int32_t *>(ptr)),
+        .timeStamp = *(reinterpret_cast<const int32_t *>(ptr)),
+        .seqNum = *(reinterpret_cast<const int32_t *>(ptr)),
+        .seqSubNum = *(reinterpret_cast<const int32_t *>(ptr)),
+        .level = *(reinterpret_cast<const int32_t *>(ptr)),
+        .bitMap = *(reinterpret_cast<const int32_t *>(ptr)),
+        .tvCount = 1,
+        .tvList = &tv,
+    };
+    SendStream(sessionId, &streamdata, &ext, &param);
+    SoftBusFree(ptr);
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    /* Run your code on data */
     OHOS::SendStreamTest(data, size);
-
     return 0;
 }

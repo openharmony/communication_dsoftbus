@@ -1141,6 +1141,7 @@ static void DataReceivedFunc(SoftBusMessage *msg)
 {
     CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)msg->obj;
+    CONN_CHECK_AND_RETURN_LOGW(ctx->data != NULL, CONN_BR, "data is null");
     if (g_brManager.state->dataReceived == NULL) {
         SoftBusFree(ctx->data);
         return;
