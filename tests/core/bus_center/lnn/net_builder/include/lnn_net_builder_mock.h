@@ -37,10 +37,9 @@ public:
     LnnNetBuilderInterfaceMock();
     ~LnnNetBuilderInterfaceMock() override;
 
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnSetDLConnUserId, int32_t(const char *networkId, int32_t userId));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_MOCK_H
-

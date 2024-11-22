@@ -16,14 +16,14 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_net_ledger_mock.h"
-#include "softbus_error_code.h"
 #include "lnn_battery_info.c"
 #include "lnn_battery_info.h"
+#include "lnn_net_ledger_mock.h"
 #include "lnn_sync_info_mock.h"
+#include "softbus_error_code.h"
 
 #define TEST_VALID_PEER_NETWORKID "12345678"
-#define TEST_VALID_UDID_LEN 32
+#define TEST_VALID_UDID_LEN       32
 
 constexpr int32_t LEVEL = 10;
 constexpr char UDID1[] = "123456789AB";
@@ -44,28 +44,20 @@ public:
     void TearDown();
 };
 
-void LNNBatteryInfoTest::SetUpTestCase()
-{
-}
+void LNNBatteryInfoTest::SetUpTestCase() { }
 
-void LNNBatteryInfoTest::TearDownTestCase()
-{
-}
+void LNNBatteryInfoTest::TearDownTestCase() { }
 
-void LNNBatteryInfoTest::SetUp()
-{
-}
+void LNNBatteryInfoTest::SetUp() { }
 
-void LNNBatteryInfoTest::TearDown()
-{
-}
+void LNNBatteryInfoTest::TearDown() { }
 
 /*
-* @tc.name: LNN_SYNC_BATTERY_INFO_TEST_001
-* @tc.desc: test LnnSyncBatteryInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SYNC_BATTERY_INFO_TEST_001
+ * @tc.desc: test LnnSyncBatteryInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -81,11 +73,11 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ON_RECEIVE_BATTERY_INFO_TEST_001
-* @tc.desc: test OnReceiveBatteryInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ON_RECEIVE_BATTERY_INFO_TEST_001
+ * @tc.desc: test OnReceiveBatteryInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNBatteryInfoTest, ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -104,4 +96,3 @@ HWTEST_F(LNNBatteryInfoTest, ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)
     EXPECT_NE(nodeInfo.batteryInfo.isCharging, true);
 }
 } // namespace OHOS
-
