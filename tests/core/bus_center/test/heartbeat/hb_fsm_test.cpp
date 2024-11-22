@@ -145,8 +145,7 @@ HWTEST_F(HeartBeatFSMTest, LnnRemoveSendEndMsgTest_01, TestSize.Level1)
     EXPECT_TRUE(hbFsm != nullptr);
     HbMasterNodeStateExit(&hbFsm->fsm);
     HbNormalNodeStateEnter(nullptr);
-    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrStop)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_HB_STOP_PROCESS_FAIL));
+    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrStop).WillRepeatedly(Return(SOFTBUS_NETWORK_HB_STOP_PROCESS_FAIL));
     HbNoneStateEnter(&hbFsm->fsm);
     HbNoneStateEnter(nullptr);
     EXPECT_TRUE(hbFsm != nullptr);
@@ -307,8 +306,7 @@ HWTEST_F(HeartBeatFSMTest, OnSendOneHbBeginTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, OnSendOneHbEndTest_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSendEnd)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_HB_SEND_END_FAILED));
+    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSendEnd).WillRepeatedly(Return(SOFTBUS_NETWORK_HB_SEND_END_FAILED));
     void *para = SoftBusCalloc(sizeof(LnnHeartbeatType));
     int32_t ret = OnSendOneHbEnd(nullptr, TEST_ARGS, nullptr);
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
@@ -339,8 +337,7 @@ HWTEST_F(HeartBeatFSMTest, OnSendOneHbEndTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, OnStopHbByTypeTest_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrStop)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_HB_STOP_PROCESS_FAIL));
+    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrStop).WillRepeatedly(Return(SOFTBUS_NETWORK_HB_STOP_PROCESS_FAIL));
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     void *para = SoftBusCalloc(sizeof(LnnHeartbeatType));
     int32_t ret = OnStopHbByType(nullptr, TEST_ARGS, nullptr);
@@ -352,8 +349,7 @@ HWTEST_F(HeartBeatFSMTest, OnStopHbByTypeTest_01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_STOP_PROCESS_FAIL);
     ret = OnSetMediumParam(nullptr, TEST_ARGS, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSetParam)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_SUPPORT));
+    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSetParam).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_SUPPORT));
     void *para3 = SoftBusCalloc(sizeof(LnnHeartbeatType));
     ret = OnSetMediumParam(nullptr, TEST_ARGS, para3);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);
@@ -370,8 +366,7 @@ HWTEST_F(HeartBeatFSMTest, OnStopHbByTypeTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, OnTransHbFsmStateTest_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    ON_CALL(heartbeatFsmMock, LnnGetGearModeBySpecificType)
-        .WillByDefault(Return(SOFTBUS_NETWORK_HB_INVALID_MGR));
+    ON_CALL(heartbeatFsmMock, LnnGetGearModeBySpecificType).WillByDefault(Return(SOFTBUS_NETWORK_HB_INVALID_MGR));
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     TryAsMasterNodeNextLoop(&hbFsm->fsm);
     SoftBusSleepMs(20);
@@ -657,7 +652,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
     msgPara->wakeupFlag = true;
     msgPara->isRelay = false;
     delMsgPara.wakeupFlag = true;
-    delMsgPara.isRelay =false;
+    delMsgPara.isRelay = false;
     delMsgPara.isRemoved = &isRemoved;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
@@ -671,7 +666,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
     msgPara1->wakeupFlag = true;
     msgPara1->isRelay = false;
     delMsgPara.wakeupFlag = true;
-    delMsgPara.isRelay =false;
+    delMsgPara.isRelay = false;
     delMsgPara.isRemoved = &isRemoved;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara1);
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
@@ -698,7 +693,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_04, TestSize.Level1)
     msgPara->wakeupFlag = true;
     msgPara->isRelay = false;
     delMsgPara.wakeupFlag = true;
-    delMsgPara.isRelay =false;
+    delMsgPara.isRelay = false;
     delMsgPara.isRemoved = &isRemoved;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
@@ -712,7 +707,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_04, TestSize.Level1)
     msgPara1->wakeupFlag = true;
     msgPara1->isRelay = false;
     delMsgPara.wakeupFlag = true;
-    delMsgPara.isRelay =false;
+    delMsgPara.isRelay = false;
     delMsgPara.isRemoved = &isRemoved;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara1);
     msgPara1->hbType = HEARTBEAT_TYPE_BLE_V1;
@@ -738,7 +733,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_05, TestSize.Level1)
     msgPara->wakeupFlag = true;
     msgPara->isRelay = false;
     delMsgPara.wakeupFlag = true;
-    delMsgPara.isRelay =false;
+    delMsgPara.isRelay = false;
     delMsgPara.isRemoved = &isRemoved;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
