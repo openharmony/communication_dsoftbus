@@ -297,7 +297,7 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     uint8_t btMacBin[BT_ADDR_LEN] = { 0 };
     char btMacStr[BT_MAC_NO_COLON_LEN] = { 0 };
     char hashLower[BT_MAC_HASH_STR_LEN] = { 0 };
-    char hash[BT_MAC_HASH_LEN] = { 0 };
+    char hash[SHA_256_HASH_LEN] = { 0 };
     if (ConvertBtMacToBinary(btMac, BT_MAC_LEN, btMacBin, BT_ADDR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "convert br mac to bin fail");
         return SOFTBUS_NETWORK_MAC_TO_BIN_ERR;

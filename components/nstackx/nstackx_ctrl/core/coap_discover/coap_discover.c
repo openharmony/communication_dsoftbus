@@ -224,7 +224,11 @@ static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint
         return NSTACKX_EFAILED;
     }
 
-    int ret = CoapSendRequest(ctx, COAP_MESSAGE_CON, remoteUrl, data, strlen(data) + 1);
+    // for internal auto-reply unicast, make its type to NON-confirmable
+    // reliablity depends on the number of broadcast
+    uint8_t coapMsgType = (ShouldAutoReplyUnicast(businessType) == NSTACKX_TRUE) ? COAP_MESSAGE_NON : COAP_MESSAGE_CON;
+    int32_t ret = CoapSendRequest(ctx, coapMsgType, remoteUrl, data, strlen(data) + 1);
+
     cJSON_free(data);
     return ret;
 }
@@ -274,7 +278,7 @@ static void CoapResponseServiceDiscovery(const char *remoteUrl, const coap_conte
     coap_pdu_t *response, uint8_t businessType)
 {
     if (remoteUrl != NULL) {
-        if (CheckBusinessTypeReplyUnicast(businessType) == NSTACKX_EOK) {
+        if (ShouldAutoReplyUnicast(businessType) == NSTACKX_TRUE) {
             CoapCtxType *ctx = CoapGetCoapCtxType(currCtx);
             if (ctx != NULL) {
                 (void)CoapResponseService(ctx, remoteUrl, businessType);

@@ -885,6 +885,7 @@ ohos_unittest("AuthDeviceProfileListenerTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener.cpp",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
     "unittest/auth_device_profile_listener_mock.cpp",
     "unittest/auth_device_profile_listener_test.cpp",
   ]

@@ -27,6 +27,7 @@ namespace SoftBus {
 class RawStreamData : public IStream {
 public:
     RawStreamData() = default;
+    explicit RawStreamData(const StreamFrameInfo &frameInfo);
     ~RawStreamData() override = default;
     static constexpr int BYTE_TO_BIT = 8;
     static constexpr int INT_TO_BYTE = 0xff;
@@ -72,11 +73,12 @@ private:
 
     const StreamFrameInfo* GetStreamFrameInfo() const override
     {
-        return nullptr;
+        return &streamFrameInfo_;
     }
 
     std::unique_ptr<char[]> streamData_ = nullptr;
     ssize_t streamLen_ = 0;
+    StreamFrameInfo streamFrameInfo_;
 };
 } // namespace SoftBus
 } // namespace Communication

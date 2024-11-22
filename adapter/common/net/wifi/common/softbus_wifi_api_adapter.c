@@ -343,7 +343,6 @@ int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
 SoftBusBand SoftBusGetLinkBand(void)
 {
     WifiLinkedInfo result;
-    GetLinkedInfo(&result);
     if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
         LNN_LOGE(LNN_STATE, "get SoftBusGetLinkBand failed");
         return BAND_UNKNOWN;

@@ -47,6 +47,7 @@ public:
     virtual int32_t LnnUpdateNetworkId(const NodeInfo *newInfo) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info) = 0;
     virtual int32_t AuthRestoreAuthManager(const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId,
         NodeInfo *nodeInfo, int64_t *authId) = 0;
     virtual int32_t LnnLoadLocalBroadcastCipherKey(void) = 0;
@@ -64,6 +65,7 @@ public:
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
     virtual void LnnNotifyHichainProofException(
         const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
+    virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -78,6 +80,7 @@ public:
     MOCK_METHOD1(LnnUpdateNetworkId, int32_t (const NodeInfo *));
     MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t, bool *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkId, int32_t (const char *, NodeInfo *));
     MOCK_METHOD5(AuthRestoreAuthManager, int32_t (const char *, const AuthConnInfo *, uint32_t, NodeInfo *,
         int64_t *));
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKey, int32_t (void));
@@ -94,6 +97,7 @@ public:
     MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
     MOCK_METHOD4(LnnNotifyHichainProofException, void(const char *, uint32_t, uint16_t, int32_t));
+    MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

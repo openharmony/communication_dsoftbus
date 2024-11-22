@@ -26,7 +26,6 @@ public:
     AuthDeviceProfileListenerInterface() {};
     virtual ~AuthDeviceProfileListenerInterface() {};
     virtual void DelNotTrustDevice(const char *udid) = 0;
-    virtual bool IsHeartbeatEnable(void) = 0;
     virtual void RestartCoapDiscovery(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategy(
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
@@ -38,7 +37,6 @@ public:
     AuthDeviceProfileListenerInterfaceMock();
     ~AuthDeviceProfileListenerInterfaceMock() override;
     MOCK_METHOD1(DelNotTrustDevice, void (const char *udid));
-    MOCK_METHOD0(IsHeartbeatEnable, bool());
     MOCK_METHOD0(RestartCoapDiscovery, void(void));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
     MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
