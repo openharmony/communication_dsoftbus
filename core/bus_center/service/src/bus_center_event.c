@@ -55,6 +55,7 @@ typedef enum {
     NOTIFY_NODE_STATUS_CHANGED,
     NOTIFY_NETWORKID_UPDATE,
     NOTIFY_LOCAL_NETWORKID_UPDATE,
+    NOTIFY_DEVICE_TRUSTED_CHANGED,
 } NotifyType;
 
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
@@ -106,6 +107,17 @@ static void HandleOnlineStateChangedMessage(SoftBusMessage *msg)
     bool isOnline = (bool)msg->arg1;
     LnnIpcNotifyOnlineState(isOnline, msg->obj, sizeof(NodeBasicInfo));
     LnnDCProcessOnlineState(isOnline, (NodeBasicInfo *)msg->obj);
+}
+
+static void HandleDeviceTrustedChangedMessage(SoftBusMessage *msg)
+{
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid online state message");
+        return;
+    }
+    int32_t type = (int32_t)msg->arg1;
+    uint32_t msgLen = (uint32_t)msg->arg2;
+    (void)LnnIpcNotifyDeviceTrustedChange(type, (const char*)msg->obj, msgLen);
 }
 
 static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
@@ -170,6 +182,9 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             break;
         case NOTIFY_NETWORKID_UPDATE:
             HandleNetworkUpdateMessage(msg);
+            break;
+        case NOTIFY_DEVICE_TRUSTED_CHANGED:
+            HandleDeviceTrustedChangedMessage(msg);
             break;
         default:
             LNN_LOGE(LNN_EVENT, "unknown notify msgType=%{public}d", msg->what);
@@ -259,6 +274,47 @@ static int32_t PostNotifyNodeStatusMessage(int32_t what, uint64_t arg, const Nod
     msg->obj = DupNodeStatus(info);
     if (msg->obj == NULL) {
         LNN_LOGE(LNN_EVENT, "dup NodeStatus err");
+        SoftBusFree(msg);
+        return SOFTBUS_MEM_ERR;
+    }
+    msg->handler = &g_notifyHandler;
+    msg->FreeMessage = FreeNotifyMessage;
+    return PostMessageToHandlerDelay(msg, 0);
+}
+
+static char *DupDeviceTrustedChangeMsg(const char *msg)
+{
+    if (msg == NULL) {
+        LNN_LOGW(LNN_EVENT, "msg is null");
+        return NULL;
+    }
+    int32_t len = strlen(msg) + 1;
+    char *dupMsg = SoftBusCalloc(len);
+    if (dupMsg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc dupMsg err");
+        return NULL;
+    }
+    if (strcpy_s(dupMsg, len, msg) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy dupMsg fail");
+        SoftBusFree(dupMsg);
+        return NULL;
+    }
+    return dupMsg;
+}
+
+static int32_t PostNotifyDeviceTrustedChangeMessage(int32_t what, int32_t type, const char *notifyMsg, uint32_t msgLen)
+{
+    SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc msg err");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = what;
+    msg->arg1 = (uint64_t)type;
+    msg->arg2 = (uint64_t)msgLen;
+    msg->obj = DupDeviceTrustedChangeMsg(notifyMsg);
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_EVENT, "dup notifyMsg err");
         SoftBusFree(msg);
         return SOFTBUS_MEM_ERR;
     }
@@ -452,11 +508,11 @@ void LnnNotifyLocalNetworkIdChanged(void)
 
 void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
-    if (msg == NULL) {
+    if (msg == NULL || msgLen == 0) {
         LNN_LOGE(LNN_EVENT, "msg is null");
         return;
     }
-    (void)LnnIpcNotifyDeviceTrustedChange(type, msg, msgLen);
+    PostNotifyDeviceTrustedChangeMessage(NOTIFY_DEVICE_TRUSTED_CHANGED, type, msg, msgLen);
 }
 
 void LnnNotifyHichainProofException(
@@ -563,6 +619,16 @@ void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_LOCK_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state)
+{
+    if (state < SOFTBUS_DATA_SHARE_READY || state >= SOFTBUS_DATA_SHARE_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad lockState=%{public}d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_DATA_SHARE_STATE_CHANGE, .status = state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 

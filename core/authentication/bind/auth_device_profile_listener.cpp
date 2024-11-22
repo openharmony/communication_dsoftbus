@@ -85,6 +85,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
 {
     AUTH_LOGI(AUTH_INIT, "dp active callback enter!");
     DelNotTrustDevice(profile.GetDeviceId().c_str());
+    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     if (IsHeartbeatEnable()) {
         if (LnnStartHbByTypeAndStrategy(
             HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
@@ -100,6 +101,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
 {
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter!");
     LnnUpdateOhosAccount(true);
+    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     int32_t userId = profile.GetPeerUserId();
     AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);
     NotifyRemoteDevOffLineByUserId(userId, profile.GetDeviceId().c_str());

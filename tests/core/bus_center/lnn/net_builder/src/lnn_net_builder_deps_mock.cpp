@@ -741,5 +741,10 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
 {
     return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
 }
+
+void LnnGetDataShareInitResult(bool *isDataShareInit)
+{
+    return GetNetBuilderDepsInterface()->LnnGetDataShareInitResult(isDataShareInit);
+}
 } // extern "C"
 } // namespace OHOS

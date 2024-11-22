@@ -26,11 +26,12 @@ using namespace std;
 namespace OHOS {
     void SetAliveStateDataTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
+        int32_t cnt = *(reinterpret_cast<const int32_t *>(data));
         bool state;
-        if (size % STANDARD_NUMBER == 0) {
+        if (cnt % STANDARD_NUMBER == 0) {
             state = true;
         } else {
             state = false;
@@ -43,15 +44,26 @@ namespace OHOS {
 
     void InitAdaptorTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(uint32_t)) {
             return;
         }
-        VtpStreamOpenParam *param = nullptr;
+        VtpStreamOpenParam param  = {
+            .pkgName = reinterpret_cast<const char *>(data),
+            .myIp = const_cast<char *>(reinterpret_cast<const char *>(data)),
+            .peerIp = const_cast<char *>(reinterpret_cast<const char *>(data)),
+            .peerPort = *(reinterpret_cast<const int32_t *>(data)),
+            .type = *(reinterpret_cast<const StreamType *>(data)),
+            .sessionKey = const_cast<uint8_t *>(data),
+            .keyLen = *(reinterpret_cast<const uint32_t *>(data)),
+            .isRawStreamEncrypt = size % 2,
+        };
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
         IStreamListener *callback = nullptr;
         const std::string &pkgName = "ohos.msdp.spatialawareness";
+        bool isServerSide = size % 2;
 
         OHOS::StreamAdaptor streamadaptor(pkgName);
-        streamadaptor.InitAdaptor(size, param, true, callback);
+        streamadaptor.InitAdaptor(channelId, &param, isServerSide, callback);
     }
 } // namespace OHOS
 

@@ -120,18 +120,18 @@ void NotifyDFinderMsgRecver(DFinderMsgType msgType)
     }
 }
 
-int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType)
+int32_t ShouldAutoReplyUnicast(uint8_t businessType)
 {
     switch (businessType) {
         case NSTACKX_BUSINESS_TYPE_SOFTBUS:
         case NSTACKX_BUSINESS_TYPE_AUTONET:
         case NSTACKX_BUSINESS_TYPE_STRATEGY:
-            return NSTACKX_EFAILED;
+            return NSTACKX_FALSE;
         case NSTACKX_BUSINESS_TYPE_NULL:
         case NSTACKX_BUSINESS_TYPE_HICOM:
         case NSTACKX_BUSINESS_TYPE_NEARBY:
         default:
-            return NSTACKX_EOK;
+            return NSTACKX_TRUE;
     }
 }
 

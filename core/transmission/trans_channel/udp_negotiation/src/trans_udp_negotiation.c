@@ -322,6 +322,11 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
         ReleaseUdpChannelId(appInfo->myData.channelId);
         return udpPort;
     }
+    int32_t ret = LnnGetNetworkIdByUuid(
+        (const char *)appInfo->peerData.deviceId, appInfo->peerNetWorkId, DEVICE_ID_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get network id by uuid failed.");
+    }
     appInfo->myData.port = udpPort;
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
@@ -923,11 +928,13 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     ret = AuthOpenConn(&auth, requestId, &cb, isMeta);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open fail: ret=%{public}d", ret);
+        TransCloseUdpChannelByRequestId(requestId);
         return ret;
     }
     ret = CheckAuthConnStatus(requestId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "status check failed: ret=%{public}d", ret);
+        TransCloseUdpChannelByRequestId(requestId);
         return ret;
     }
 
