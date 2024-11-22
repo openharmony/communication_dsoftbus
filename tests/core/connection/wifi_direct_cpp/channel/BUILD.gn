@@ -112,15 +112,13 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "-frtti",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_rtti",
-  ]
+  deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",
@@ -221,15 +219,13 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "-frtti",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_rtti",
-  ]
+  deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",

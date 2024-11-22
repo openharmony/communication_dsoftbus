@@ -20,9 +20,6 @@ ohos_unittest("WifiDirectUtilsTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "//third_party/cJSON",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -111,14 +108,14 @@ ohos_unittest("WifiDirectUtilsTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_main",
-    "//third_party/googletest:gtest_rtti",
   ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
     "wifi:wifi_sdk",
