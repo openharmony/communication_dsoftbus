@@ -14,14 +14,15 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
+
+#include "permission_entry.h"
 #include "permission_utils.h"
-#include "softbus_permission.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
+#include "securec.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
-#include "permission_entry.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
+#include "softbus_permission.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -32,16 +33,16 @@ const char *g_sessionName = "ohos.distributedschedule.dms.test";
 
 class SoftbusPermissionTest : public testing::Test {
 public:
-    SoftbusPermissionTest() {}
-    ~SoftbusPermissionTest() {}
+    SoftbusPermissionTest() { }
+    ~SoftbusPermissionTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void SoftbusPermissionTest::SetUpTestCase(void) {}
-void SoftbusPermissionTest::TearDownTestCase(void) {}
+void SoftbusPermissionTest::SetUpTestCase(void) { }
+void SoftbusPermissionTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: IsValidPkgNameTest001

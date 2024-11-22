@@ -47,8 +47,8 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
     return HeartBeatStrategyInterface()->LnnStopOfflineTimingStrategy(networkId, addrType);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
 {
     return HeartBeatStrategyInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
@@ -123,8 +123,8 @@ int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
     return HeartBeatStrategyInterface()->LnnStopHeartBeatAdvByTypeNow(registedHbType);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return HeartBeatStrategyInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
