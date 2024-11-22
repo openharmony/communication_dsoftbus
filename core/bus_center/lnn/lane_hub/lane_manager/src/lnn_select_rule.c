@@ -359,15 +359,7 @@ static int32_t GetHmlScore(const char *networkId, uint32_t expectedBw)
 
 static int32_t GetLinkedChannelScore(void)
 {
-    int32_t frequency = GetWlanLinkedFrequency();
-    if (frequency <= 0) {
-        return LNN_LINK_DEFAULT_SCORE;
-    }
-    int32_t channel = SoftBusFrequencyToChannel(frequency);
-    if (channel < 0) {
-        LNN_LOGE(LNN_LANE, "get curr channel fail");
-        return LNN_LINK_DEFAULT_SCORE;
-    }
+    int32_t channel = 0;
     int32_t score = LnnGetCurrChannelScore(channel);
     LNN_LOGI(LNN_LANE, "current channel=%{public}d, score=%{public}d", channel, score);
     if (score <= 0) {
@@ -529,8 +521,8 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
         if (g_retryLaneList[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if ((CheckLaneValid(networkId, g_retryLaneList[bandWidthType][i], request->transType) == SOFTBUS_OK) &&
-            !IsLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
+        if (!IsLaneExist(linkList, g_retryLaneList[bandWidthType][i]) &&
+            (CheckLaneValid(networkId, g_retryLaneList[bandWidthType][i], request->transType) == SOFTBUS_OK)) {
             linkList[(*linksNum)++] = g_retryLaneList[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
         }

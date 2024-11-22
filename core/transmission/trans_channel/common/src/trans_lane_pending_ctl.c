@@ -301,7 +301,7 @@ static void CallbackOpenChannelFailed(const SessionParam *param, const AppInfo *
         .msgChannelId = param->sessionId,
         .msgChannelType = CHANNEL_TYPE_UNDEFINED,
         .msgPkgName = appInfo->myData.pkgName,
-        .msgPid = appInfo->myData.pid,
+        .msgPid = param->pid,
     };
     (void)ClientIpcOnChannelOpenFailed(&data, errCode);
 }
@@ -550,7 +550,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     appInfo->connectType = connOpt.type;
     extra->linkType = connOpt.type;
-    extra->deviceState = TransGetDeviceState(param->peerDeviceId);
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
     TransOpenChannelSetModule(transInfo.channelType, &connOpt);
     TRANS_LOGI(TRANS_SVC, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo.channelType);
@@ -718,28 +717,21 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     if (reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
         SoftbusReportTransErrorEvt(SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT);
     }
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_SVC, "malloc appInfo failed");
-        (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
-        (void)TransDelLaneReqFromPendingList(laneHandle, true);
-        return;
-    }
-    ret = CreateAppInfoByParam(laneHandle, &param, appInfo);
+    AppInfo appInfo;
+    ret = CreateAppInfoByParam(laneHandle, &param, &appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CreateAppInfoByParam failed");
-        TransFreeAppInfo(appInfo);
+        CallbackOpenChannelFailed(&param, &appInfo, reason);
         return;
     }
-    appInfo->callingTokenId = callingTokenId;
-    appInfo->timeStart = timeStart;
-    CallbackOpenChannelFailed(&param, appInfo, reason);
+    appInfo.callingTokenId = callingTokenId;
+    appInfo.timeStart = timeStart;
+    CallbackOpenChannelFailed(&param, &appInfo, reason);
     char localUdid[UDID_BUF_LEN] = { 0 };
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
     extra.localUdid = localUdid;
-    TransBuildLaneAllocFailEvent(&extra, &transInfo, appInfo, &param, reason);
+    TransBuildLaneAllocFailEvent(&extra, &transInfo, &appInfo, &param, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
-    TransFreeAppInfo(appInfo);
     (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
     (void)TransDelLaneReqFromPendingList(laneHandle, true);
 }
