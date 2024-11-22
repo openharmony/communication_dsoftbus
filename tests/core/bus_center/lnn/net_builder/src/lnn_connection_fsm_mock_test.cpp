@@ -142,6 +142,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
 */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnConnectionFsm *connFsm = nullptr;
     connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(connFsm != nullptr);
@@ -152,6 +153,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
     para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
     EXPECT_TRUE(para1 != nullptr);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
+    EXPECT_CALL(serviceMock, LnnNotifyJoinResult).WillRepeatedly(Return());
     bool ret = AuthStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, para);

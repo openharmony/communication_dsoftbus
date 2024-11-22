@@ -51,17 +51,17 @@ static int32_t LnnSyncDeviceName(const char *networkId)
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "get local node info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     deviceName = LnnGetDeviceName(&info->deviceInfo);
     if (deviceName == NULL) {
         LNN_LOGE(LNN_BUILDER, "get device name fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)deviceName,
         strlen(deviceName) + 1, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send sync device name fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
     }
     return SOFTBUS_OK;
 }

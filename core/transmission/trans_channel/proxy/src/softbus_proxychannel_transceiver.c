@@ -113,6 +113,7 @@ int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer)
 {
     ProxyConnInfo *removeNode = NULL;
     ProxyConnInfo *tmpNode = NULL;
+
     if ((g_proxyConnectionList == NULL) || (connId == 0)) {
         TRANS_LOGE(TRANS_MSG, "g_proxyConnectionList or connId is null");
         return SOFTBUS_NO_INIT;
@@ -843,10 +844,9 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
     } else {
         msg->msgHead.cipher |= BAD_CIPHER;
     }
-
     TRANS_LOGW(TRANS_MSG, "send msg is bad key myChannelId=%{public}d, peerChannelId=%{public}d",
         msg->msgHead.myId, msg->msgHead.peerId);
-    
+
     int32_t ret = PackPlaintextMessage(&msg->msgHead, &dataInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "PackPlaintextMessage fail");
 
@@ -858,10 +858,11 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
 
 static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
-    ProxyMessage msg;
     TRANS_LOGI(TRANS_CTRL, "recv data connId=%{public}u, moduleId=%{public}d, seq=%{public}" PRId64 ", len=%{public}d",
         connectionId, moduleId, seq, len);
     TRANS_CHECK_AND_RETURN_LOGE(data != NULL && moduleId == MODULE_PROXY_CHANNEL, TRANS_CTRL, "invalid param");
+
+    ProxyMessage msg;
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
 

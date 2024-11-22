@@ -206,6 +206,7 @@ int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
 int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
 int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info);
 int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen);
+void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange);
 #ifdef __cplusplus
 }
 #endif

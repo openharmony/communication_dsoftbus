@@ -628,20 +628,20 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
     std::unique_ptr<char[]> data = nullptr;
     ssize_t len = 0;
 
+    const Communication::SoftBus::StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
+    if (streamFrameInfo == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "streamFrameInfo is null");
+        return false;
+    }
+    FrameInfo frameInfo;
+    ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
+
     if (streamType_ == RAW_STREAM) {
         data = stream->GetBuffer();
         len = stream->GetBufferLen();
 
-        ret = FtSend(streamFd_, data.get(), len, 0);
+        ret = FtSendFrame(streamFd_, data.get(), len, 0, &frameInfo);
     } else if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
-        const Communication::SoftBus::StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
-        if (streamFrameInfo == nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "streamFrameInfo is null");
-            return false;
-        }
-
-        FrameInfo frameInfo;
-        ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
         if (!EncryptStreamPacket(std::move(stream), data, len)) {
             return false;
         }

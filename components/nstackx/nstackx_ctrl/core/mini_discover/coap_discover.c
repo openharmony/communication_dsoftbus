@@ -133,7 +133,7 @@ static void CoapResponseServiceDiscovery(const char *remoteUrl, const CoapPacket
     (void)inet_ntop(AF_INET, ip, wifiIpAddr, sizeof(wifiIpAddr));
     GetBuildCoapParam(pkt, remoteUrl, wifiIpAddr, &param);
     if (remoteUrl != NULL) {
-        if (CheckBusinessTypeReplyUnicast(businessType) == NSTACKX_EOK) {
+        if (ShouldAutoReplyUnicast(businessType) == NSTACKX_TRUE) {
             (void)CoapSendMessage(&param, NSTACKX_FALSE, businessType, false);
         }
     } else {

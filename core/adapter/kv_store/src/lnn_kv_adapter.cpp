@@ -89,7 +89,7 @@ int32_t KVAdapter::RegisterDataChangeListener(
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     if (dataChangeListener == nullptr) {
         LNN_LOGE(LNN_LEDGER, "dataChangeListener is null");
@@ -117,7 +117,7 @@ int32_t KVAdapter::UnRegisterDataChangeListener()
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
@@ -344,7 +344,7 @@ int32_t KVAdapter::CloudSync()
     LNN_LOGI(LNN_LEDGER, "call!");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     std::function<void(DistributedKv::ProgressDetail &&)> callback = CloudSyncCallback;
     DistributedKv::Status status;

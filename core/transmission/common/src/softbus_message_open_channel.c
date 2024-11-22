@@ -27,7 +27,7 @@
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
 
-char *PackError(int errCode, const char *errDesc)
+char *PackError(int32_t errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param");

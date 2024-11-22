@@ -23,12 +23,13 @@
 namespace OHOS {
 void QosReportTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t appType = 1;
-    int32_t quality = QOS_RECOVER;
-    QosReport(size, appType, quality);
+    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t appType = *(reinterpret_cast<const int32_t *>(data));
+    int32_t quality = *(reinterpret_cast<const int32_t *>(data));
+    QosReport(channelId, appType, quality);
 }
 } // namespace OHOS
 

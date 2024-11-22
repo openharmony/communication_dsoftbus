@@ -23,6 +23,10 @@
 #endif
 #include "cJSON.h"
 
+#ifndef DFINDER_USE_MINI_NSTACKX
+#include <coap3/coap.h>
+#endif
+
 #include "coap_app.h"
 #include "coap_discover.h"
 #include "nstackx.h"
@@ -116,18 +120,18 @@ void NotifyDFinderMsgRecver(DFinderMsgType msgType)
     }
 }
 
-int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType)
+int32_t ShouldAutoReplyUnicast(uint8_t businessType)
 {
     switch (businessType) {
         case NSTACKX_BUSINESS_TYPE_SOFTBUS:
         case NSTACKX_BUSINESS_TYPE_AUTONET:
         case NSTACKX_BUSINESS_TYPE_STRATEGY:
-            return NSTACKX_EFAILED;
+            return NSTACKX_FALSE;
         case NSTACKX_BUSINESS_TYPE_NULL:
         case NSTACKX_BUSINESS_TYPE_HICOM:
         case NSTACKX_BUSINESS_TYPE_NEARBY:
         default:
-            return NSTACKX_EOK;
+            return NSTACKX_TRUE;
     }
 }
 
@@ -380,6 +384,34 @@ static int32_t NstackxInitInner(uint32_t maxDeviceNum)
     return ret;
 }
 
+#if !defined(DFINDER_USE_MINI_NSTACKX) && !defined(DFINDER_ENABLE_COAP_LOG)
+static void CoapLogHandler(coap_log_t level, const char *message)
+{
+    (void)level;
+    (void)message;
+}
+#endif
+
+static void InitLogLevel(void)
+{
+    // default log
+    SetLogLevel(NSTACKX_LOG_LEVEL_DEBUG);
+
+    // user defined log
+#ifdef ENABLE_USER_LOG
+    SetDFinderLogLevel(DFINDER_LOG_LEVEL_DEBUG);
+#endif
+
+#ifndef DFINDER_USE_MINI_NSTACKX
+    // opensource libcoap log
+#ifdef DFINDER_ENABLE_COAP_LOG
+    coap_set_log_level(COAP_LOG_DEBUG);
+#else
+    coap_set_log_handler(CoapLogHandler);
+#endif
+#endif
+}
+
 static int32_t NstackxInitEx(const NSTACKX_Parameter *parameter, bool isNotifyPerDevice)
 {
     Coverity_Tainted_Set((void *)parameter);
@@ -392,10 +424,8 @@ static int32_t NstackxInitEx(const NSTACKX_Parameter *parameter, bool isNotifyPe
 
     g_nstackInitState = NSTACKX_INIT_STATE_ONGOING;
     cJSON_InitHooks(NULL);
-#ifdef ENABLE_USER_LOG
-    SetDFinderLogLevel(DFINDER_LOG_LEVEL_DEBUG);
-#endif
-    SetLogLevel(NSTACKX_LOG_LEVEL_DEBUG);
+
+    InitLogLevel();
 
 #ifdef NSTACKX_WITH_LITEOS
     EpollEventPtrInit(); /* init g_epollEventPtrMutex g_epollEventPtrArray */

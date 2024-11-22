@@ -19,6 +19,7 @@
 
 #include "session.h"
 #include "client_trans_udp_manager.h"
+#include "softbus_adapter_mem.h"
 
 #define STR_LEN 100000
 #define TEST_TMP_STR_LEN 50
@@ -26,71 +27,99 @@
 namespace OHOS {
     void TransOnUdpChannelOpenedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
         ChannelInfo channel = {0};
         channel.channelType = CHANNEL_TYPE_UDP;
         channel.businessType = BUSINESS_TYPE_STREAM;
-        int32_t udpPort = size;
+        int32_t udpPort = *(reinterpret_cast<const int32_t *>(data));
         TransOnUdpChannelOpened((char *)data, &channel, &udpPort);
     }
 
     void TransOnUdpChannelOpenFailedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        TransOnUdpChannelOpenFailed((int32_t)size, (int32_t)size);
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+        TransOnUdpChannelOpenFailed(channelId, errCode);
     }
 
     void TransOnUdpChannelClosedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        TransOnUdpChannelClosed((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        TransOnUdpChannelClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
     }
 
     void TransOnUdpChannelQosEventTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        int32_t eventId = *(reinterpret_cast<const int32_t *>(data));
+        int32_t tvCount = *(reinterpret_cast<const int32_t *>(data));
         QosTv tvList;
-        TransOnUdpChannelQosEvent((int32_t)size, (int32_t)size, (int32_t)size, &tvList);
+        TransOnUdpChannelQosEvent(channelId, eventId, tvCount, &tvList);
     }
 
     void ClientTransCloseUdpChannelTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        ClientTransCloseUdpChannel((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        ClientTransCloseUdpChannel(channelId, SHUTDOWN_REASON_UNKNOWN);
     }
 
     void TransUdpChannelSendStreamTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        char sendStringData[STR_LEN] = {0};
-        StreamData streamdata1 = {
-            sendStringData,
-            100000,
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        if (ptr == nullptr) {
+            return;
+        }
+        if (memcpy_s(ptr, size, data, size) != EOK) {
+            SoftBusFree(ptr);
+            return;
+        }
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
+        StreamData streamdata = {
+            .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .bufLen = size,
         };
-        char str[TEST_TMP_STR_LEN] = TEST_TMP_STR;
-        StreamData streamdata2 = {
-            str,
-            10,
+        StreamData ext = {
+            .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
+            .bufLen = size,
         };
-        StreamFrameInfo ext = {};
-        TransUdpChannelSendStream((int32_t)size, &streamdata1, &streamdata2, &ext);
+        TV tv = {
+            .type = *(reinterpret_cast<const int32_t *>(ptr)),
+            .value = *(reinterpret_cast<const int64_t *>(ptr)),
+        };
+        StreamFrameInfo param = {
+            .frameType = *(reinterpret_cast<const int32_t *>(ptr)),
+            .timeStamp = *(reinterpret_cast<const int32_t *>(ptr)),
+            .seqNum = *(reinterpret_cast<const int32_t *>(ptr)),
+            .seqSubNum = *(reinterpret_cast<const int32_t *>(ptr)),
+            .level = *(reinterpret_cast<const int32_t *>(ptr)),
+            .bitMap = *(reinterpret_cast<const int32_t *>(ptr)),
+            .tvCount = 1,
+            .tvList = &tv,
+        };
+        TransUdpChannelSendStream(channelId, &streamdata, &ext, &param);
+        SoftBusFree(ptr);
     }
 
     void TransUdpChannelSendFileTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
         const char *sfileList[] = {
@@ -99,21 +128,24 @@ namespace OHOS {
             "/data/richu-002.jpg",
             "/data/richu-003.jpg",
         };
-        TransUdpChannelSendFile((int32_t)size, sfileList, NULL, (uint32_t)size);
+        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        int32_t fileCnt = *(reinterpret_cast<const int32_t *>(data));
+        TransUdpChannelSendFile(channelId, sfileList, NULL, fileCnt);
     }
 
     void TransGetUdpChannelByFileIdTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
+        int32_t dfileId = *(reinterpret_cast<const int32_t *>(data));
         UdpChannel udpChannel;
-        TransGetUdpChannelByFileId((int32_t)size, &udpChannel);
+        TransGetUdpChannelByFileId(dfileId, &udpChannel);
     }
 
     void TransUdpDeleteFileListenerlTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
+        if (data == nullptr || size < SESSION_NAME_SIZE_MAX) {
             return;
         }
         char tmp[SESSION_NAME_SIZE_MAX + 1] = {0};
@@ -127,6 +159,7 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    /* Run your code on data */
     OHOS::TransOnUdpChannelOpenedTest(data, size);
     OHOS::TransOnUdpChannelOpenFailedTest(data, size);
     OHOS::TransOnUdpChannelClosedTest(data, size);
