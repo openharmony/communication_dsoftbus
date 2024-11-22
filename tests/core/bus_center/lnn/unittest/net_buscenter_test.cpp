@@ -22,23 +22,23 @@
 #endif
 
 #include <arpa/inet.h>
-#include <net/if.h>
+#include <cerrno>
 #include <cstdint>
 #include <cstdlib>
+#include <net/if.h>
 #include <string>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <cerrno>
 
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "lnn_network_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_network_manager.h"
 #include "lnn_sync_item_info.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
@@ -101,17 +101,13 @@ void NetBusCenterTest::TearDownTestCase()
     LnnDeinitNetworkManager();
 }
 
-void NetBusCenterTest::SetUp()
-{
-}
+void NetBusCenterTest::SetUp() { }
 
-void NetBusCenterTest::TearDown()
-{
-}
+void NetBusCenterTest::TearDown() { }
 
 static int32_t SetIpaddr(const std::string &ip)
 {
-    int32_t sockFd  = -1;
+    int32_t sockFd = -1;
     struct sockaddr_in addr;
     struct ifreq ifr;
     if (memset_s((void *)&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
@@ -159,7 +155,7 @@ static int32_t SetIpaddr(const std::string &ip)
 
 static int32_t SetIpDown()
 {
-    int32_t sockFd  = -1;
+    int32_t sockFd = -1;
     struct ifreq ifr;
     if (memset_s((void *)&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
         printf("memset_s 1 fail\n");
@@ -194,14 +190,14 @@ static int32_t SetIpDown()
 }
 
 /*
-* @tc.name: NET_BusCenter_IP_Change_Monitor_Test_001
-* @tc.desc: IP change monitor test
-* @tc.type: FUNC
-* @tc.require: AR000FK6J3
-*/
+ * @tc.name: NET_BusCenter_IP_Change_Monitor_Test_001
+ * @tc.desc: IP change monitor test
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J3
+ */
 HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_001, TestSize.Level0)
 {
-    char ipAddr[IP_LEN] = {0};
+    char ipAddr[IP_LEN] = { 0 };
     char ip[IP_LEN] = "192.168.50.10";
 
     EXPECT_TRUE(SetIpaddr(ip) == SOFTBUS_OK);
@@ -211,14 +207,14 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: NET_BusCenter_IP_Change_Monitor_Test_002
-* @tc.desc: IP change monitor test
-* @tc.type: FUNC
-* @tc.require: AR000FK6J3
-*/
+ * @tc.name: NET_BusCenter_IP_Change_Monitor_Test_002
+ * @tc.desc: IP change monitor test
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J3
+ */
 HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_002, TestSize.Level0)
 {
-    char ipAddr[IP_LEN] = {0};
+    char ipAddr[IP_LEN] = { 0 };
     char ip[IP_LEN] = "0.0.0.0";
     EXPECT_TRUE(SetIpaddr(ip) == SOFTBUS_OK);
     sleep(2);
@@ -227,14 +223,14 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_002, TestSize.Le
 }
 
 /*
-* @tc.name: NET_BusCenter_IP_Change_Monitor_Test_003
-* @tc.desc: IP change monitor test
-* @tc.type: FUNC
-* @tc.require: AR000FK6J3
-*/
+ * @tc.name: NET_BusCenter_IP_Change_Monitor_Test_003
+ * @tc.desc: IP change monitor test
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J3
+ */
 HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_003, TestSize.Level0)
 {
-    char ipAddr[IP_LEN] = {0};
+    char ipAddr[IP_LEN] = { 0 };
     EXPECT_TRUE(SetIpDown() == SOFTBUS_OK);
     sleep(2);
     EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
