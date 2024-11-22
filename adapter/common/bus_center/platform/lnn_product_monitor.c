@@ -30,7 +30,7 @@ static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
     (void)data;
     if (id == IP_READY) {
         if (priv != NULL) {
-            LNN_LOGI(LNN_STATE, "dev event received, event=%{public}s, id=%{public}u", static_cast<char*>priv, id);
+            LNN_LOGI(LNN_STATE, "dev event received, event=%{public}s, id=%{public}u", (char*)priv, id);
         }
         LnnNotifyAddressChangedEvent(NULL);
     }
