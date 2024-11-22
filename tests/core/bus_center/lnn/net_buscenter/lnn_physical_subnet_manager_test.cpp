@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <securec.h>
-#include <gmock/gmock.h>
 
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
@@ -47,11 +47,11 @@ void LNNPhysicalSubnetManagerTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_REGIST_PHYSICAL_SUBNET_001
-* @tc.desc: test subnet null or subnet->protocol null
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_REGIST_PHYSICAL_SUBNET_001
+ * @tc.desc: test subnet null or subnet->protocol null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
@@ -59,26 +59,25 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_001, TestSize.
     EXPECT_NE(ret, SOFTBUS_OK);
 
     LnnPhysicalSubnet subnet = {
-            .protocol = NULL,
-            .status = LNN_SUBNET_RUNNING,
-        };
+        .protocol = NULL,
+        .status = LNN_SUBNET_RUNNING,
+    };
     ret = LnnRegistPhysicalSubnet(&subnet);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
-* @tc.name: LNN_REGIST_PHYSICAL_SUBNET_002
-* @tc.desc: test subnet is full
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_REGIST_PHYSICAL_SUBNET_002
+ * @tc.desc: test subnet is full
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_002, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
-    for (int32_t i = 0; i <= 6; i++)
-    {
+    for (int32_t i = 0; i <= 6; i++) {
         LnnProtocolManager lnnProtocolManager = {
-        .id = LNN_PROTOCOL_IP,
+            .id = LNN_PROTOCOL_IP,
         };
         LnnPhysicalSubnet subnet = {
             .protocol = &lnnProtocolManager,
@@ -90,21 +89,21 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_002, TestSize.
 }
 
 /*
-* @tc.name: LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE
-* @tc.desc: test LnnUnregistPhysicalSubnetByType
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE
+ * @tc.desc: test LnnUnregistPhysicalSubnetByType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
     LnnProtocolManager lnnProtocolManager = {
         .id = LNN_PROTOCOL_IP,
-        };
+    };
     LnnPhysicalSubnet subnet = {
-            .protocol = &lnnProtocolManager,
-            .status = LNN_SUBNET_RUNNING,
-        };
+        .protocol = &lnnProtocolManager,
+        .status = LNN_SUBNET_RUNNING,
+    };
     ret = LnnRegistPhysicalSubnet(&subnet);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -113,22 +112,22 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE, Tes
 }
 
 /*
-* @tc.name: LNN_VISIT_PHYSICAL_SUBNET
-* @tc.desc: test LnnVisitPhysicalSubnet
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_VISIT_PHYSICAL_SUBNET
+ * @tc.desc: test LnnVisitPhysicalSubnet
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_VISIT_PHYSICAL_SUBNET, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
 
     LnnProtocolManager lnnProtocolManager = {
         .id = LNN_PROTOCOL_IP,
-        };
+    };
     LnnPhysicalSubnet subnet = {
-            .protocol = &lnnProtocolManager,
-            .status = LNN_SUBNET_RUNNING,
-        };
+        .protocol = &lnnProtocolManager,
+        .status = LNN_SUBNET_RUNNING,
+    };
     ret = LnnRegistPhysicalSubnet(&subnet);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -143,4 +142,4 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_VISIT_PHYSICAL_SUBNET, TestSize.Level
     ret = LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-}
+} // namespace OHOS
