@@ -105,7 +105,7 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {
         LNN_LOGE(LNN_EVENT, "subscribe common event err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
     return SOFTBUS_OK;
 }

@@ -112,7 +112,7 @@ int32_t LnnInitBtStateMonitorImpl(void)
     g_btStateListenerId = SoftBusAddBtStateListener(&g_btStateListener);
     if (g_btStateListenerId < 0) {
         LNN_LOGE(LNN_INIT, "monitor add bt state listener fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR;
     }
     LNN_LOGI(LNN_INIT, "lnn bt state monitor impl start success");
     return SOFTBUS_OK;

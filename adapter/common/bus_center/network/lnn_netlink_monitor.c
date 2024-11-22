@@ -61,18 +61,18 @@ static int32_t CreateNetlinkSocket(void)
         NETLINK_ROUTE, &sockFd);
     if (ret != SOFTBUS_ADAPTER_OK) {
         LNN_LOGE(LNN_BUILDER, "open netlink socket failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CREATE_SOCKET_FAILED;
     }
     if (SoftBusSocketSetOpt(sockFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0 &&
         SoftBusSocketSetOpt(sockFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &sz, sizeof(sz)) < 0) {
-        LNN_LOGE(LNN_BUILDER, "set uevent socket SO_RCVBUF option failed");
+        LNN_LOGE(LNN_BUILDER, "set socket SO_RCVBUF option failed");
         SoftBusSocketClose(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SET_SOCKET_OPTION_FAILED;
     }
     if (memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr)) != EOK) {
         LNN_LOGE(LNN_BUILDER, "init sockaddr_nl failed");
         SoftBusSocketClose(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     nladdr.nl_family = SOFTBUS_AF_NETLINK;
     // Kernel will assign a unique nl_pid if set to zero.
@@ -81,7 +81,7 @@ static int32_t CreateNetlinkSocket(void)
     if (SoftBusSocketBind(sockFd, (SoftBusSockAddr *)&nladdr, sizeof(nladdr)) < 0) {
         LNN_LOGE(LNN_BUILDER, "bind netlink socket failed");
         SoftBusSocketClose(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BIND_SOCKET_FAILED;
     }
     return sockFd;
 }
@@ -202,20 +202,22 @@ int32_t LnnInitNetlinkMonitorImpl(void)
         .onConnectEvent = NetlinkOnConnectEvent,
         .onDataEvent = NetlinkOnDataEvent,
     };
-    if (StartBaseClient(NETLINK, &listener) != SOFTBUS_OK) {
+    int32_t ret = StartBaseClient(NETLINK, &listener);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "listening fail, moudle=%{public}d ", NETLINK);
-        return SOFTBUS_ERR;
+        return ret;
     }
     int32_t sockFd = CreateNetlinkSocket();
     if (sockFd < 0) {
         LNN_LOGE(LNN_BUILDER, "create netlink socket failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CREATE_SOCKET_FAILED;
     }
     g_netlinkFd = sockFd;
-    if (AddTrigger(NETLINK, sockFd, READ_TRIGGER) != SOFTBUS_OK) {
+    ret = AddTrigger(NETLINK, sockFd, READ_TRIGGER);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "AddTrigger fail.");
         SoftBusSocketClose(sockFd);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
