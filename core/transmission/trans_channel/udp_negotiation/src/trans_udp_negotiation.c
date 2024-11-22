@@ -322,6 +322,11 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
         ReleaseUdpChannelId(appInfo->myData.channelId);
         return udpPort;
     }
+    int32_t ret = LnnGetNetworkIdByUuid(
+        (const char *)appInfo->peerData.deviceId, appInfo->peerNetWorkId, DEVICE_ID_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get network id by uuid failed.");
+    }
     appInfo->myData.port = udpPort;
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
