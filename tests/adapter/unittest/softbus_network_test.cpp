@@ -15,11 +15,11 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "lnn_bt_monitor.c"
+#include "lnn_event_monitor_impl.h"
+#include "lnn_netlink_monitor.c"
 #include "network_mock.h"
 #include "softbus_error_code.h"
-#include "lnn_event_monitor_impl.h"
-#include "lnn_bt_monitor.c"
-#include "lnn_netlink_monitor.c"
 
 namespace OHOS {
 #define TEST_LEN          5

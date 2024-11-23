@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <securec.h>
 #include "gtest/gtest.h"
+#include <securec.h>
 
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
@@ -33,21 +33,13 @@ protected:
     void TearDown();
 };
 
-void SoftbusTimeTest::SetUpTestCase(void)
-{
-}
+void SoftbusTimeTest::SetUpTestCase(void) { }
 
-void SoftbusTimeTest::TearDownTestCase(void)
-{
-}
+void SoftbusTimeTest::TearDownTestCase(void) { }
 
-void SoftbusTimeTest::SetUp()
-{
-}
+void SoftbusTimeTest::SetUp() { }
 
-void SoftbusTimeTest::TearDown()
-{
-}
+void SoftbusTimeTest::TearDown() { }
 
 /*
  * @tc.name: SoftBusTimerTest001
@@ -58,7 +50,7 @@ void SoftbusTimeTest::TearDown()
 HWTEST_F(SoftbusTimeTest, SoftBusTimerTest001, TestSize.Level1)
 {
     void *timerId = NULL;
-    SoftBusSysTime times = {0};
+    SoftBusSysTime times = { 0 };
     int32_t ret;
 
     ret = SoftBusStartTimer(NULL, TIMER_TIMEOUT);
