@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -27,8 +27,8 @@
 #include "lnn_node_info.h"
 #include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_common.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -45,16 +45,16 @@ public:
     void TearDown();
 };
 
-void LNNDataCloudSyncTest::SetUpTestCase() {}
+void LNNDataCloudSyncTest::SetUpTestCase() { }
 
-void LNNDataCloudSyncTest::TearDownTestCase() {}
+void LNNDataCloudSyncTest::TearDownTestCase() { }
 
 void LNNDataCloudSyncTest::SetUp()
 {
     LNN_LOGI(LNN_TEST, "LNNDataCloudSyncTest start");
 }
 
-void LNNDataCloudSyncTest::TearDown() {}
+void LNNDataCloudSyncTest::TearDown() { }
 
 /*
  * @tc.name: LnnLedgerAllDataSyncToDB_Test_001
