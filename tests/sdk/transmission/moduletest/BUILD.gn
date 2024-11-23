@@ -22,6 +22,9 @@ if (defined(ohos_lite)) {
 } else {
   group("moduletest") {
     testonly = true
-    deps = [ "socket/stream_encrypt_test:TransSocketStreamEncryptMt" ]
+    deps = []
+    if (dsoftbus_access_token_feature) {
+      deps += [ "socket/stream_encrypt_test:TransSocketStreamEncryptMt" ]
+    }
   }
 }
