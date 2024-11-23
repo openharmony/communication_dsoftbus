@@ -46,6 +46,7 @@ int32_t ClientIpcSetChannelInfo(
     const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid);
 int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t channelId, uint8_t tos);
 int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid);
+void RegisterPermissionChangeCallback(void);
 
 #ifdef __cplusplus
 }
