@@ -20,19 +20,19 @@
 #include "sqlite3_utils.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-    {
-        if (data == nullptr || size == 0) {
-            return true;
-        }
-
-        DbContext *ctx = nullptr;
-        RemoveAllRecord(ctx, TABLE_TRUSTED_DEV_INFO);
-        RemoveAllRecord(ctx, TABLE_NAME_ID_MAX);
-
+bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
         return true;
     }
+
+    DbContext *ctx = nullptr;
+    RemoveAllRecord(ctx, TABLE_TRUSTED_DEV_INFO);
+    RemoveAllRecord(ctx, TABLE_NAME_ID_MAX);
+
+    return true;
 }
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
