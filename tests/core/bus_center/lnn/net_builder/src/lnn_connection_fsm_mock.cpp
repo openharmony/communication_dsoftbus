@@ -81,8 +81,8 @@ int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info)
     return GetLnnConnInterface()->LnnRetrieveDeviceInfo(networkId, info);
 }
 
-int32_t AuthRestoreAuthManager(const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId,
-    NodeInfo *nodeInfo, int64_t *authId)
+int32_t AuthRestoreAuthManager(
+    const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
     return GetLnnConnInterface()->AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
 }
@@ -152,8 +152,7 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
     return GetLnnConnInterface()->LnnNotifyOOBEStateChangeEvent(state);
 }
 
-void LnnNotifyHichainProofException(
-    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
+void LnnNotifyHichainProofException(const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode)
 {
     return GetLnnConnInterface()->LnnNotifyHichainProofException(proofInfo, proofLen, deviceTypeId, errCode);
 }

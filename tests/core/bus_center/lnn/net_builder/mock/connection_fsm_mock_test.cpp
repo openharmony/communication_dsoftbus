@@ -49,13 +49,9 @@ void ConnFsmMockTest::TearDownTestCase()
     LooperDeinit();
 }
 
-void ConnFsmMockTest::SetUp()
-{
-}
+void ConnFsmMockTest::SetUp() { }
 
-void ConnFsmMockTest::TearDown()
-{
-}
+void ConnFsmMockTest::TearDown() { }
 
 static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 {
@@ -64,11 +60,11 @@ static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 }
 
 /*
-* @tc.name: CONN_FSM_MOCK_TEST_001
-* @tc.desc: test LnnCreateConnectionFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONN_FSM_MOCK_TEST_001
+ * @tc.desc: test LnnCreateConnectionFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -84,11 +80,11 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONN_FSM_MOCK_TEST_002
-* @tc.desc: test LnnStartConnectionFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONN_FSM_MOCK_TEST_002
+ * @tc.desc: test LnnStartConnectionFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_002, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -109,11 +105,11 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONN_FSM_MOCK_TEST_003
-* @tc.desc: test process joinLnn msg
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONN_FSM_MOCK_TEST_003
+ * @tc.desc: test process joinLnn msg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_003, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -144,11 +140,11 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONN_FSM_MOCK_TEST_004
-* @tc.desc: test process authDone msg
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONN_FSM_MOCK_TEST_004
+ * @tc.desc: test process authDone msg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_004, TestSize.Level1)
 {
     ConnectionAddr addr;
