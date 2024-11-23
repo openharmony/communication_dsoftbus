@@ -18,16 +18,16 @@
 #include "softbus_utils.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *rawData, size_t size)
-    {
-        if (rawData == nullptr) {
-            return false;
-        }
-        char binMac[64] = {0};
-        ConvertBtMacToStr(binMac, size, rawData, size);
-        return true;
+bool DoSomethingInterestingWithMyAPI(const uint8_t *rawData, size_t size)
+{
+    if (rawData == nullptr) {
+        return false;
     }
+    char binMac[64] = { 0 };
+    ConvertBtMacToStr(binMac, size, rawData, size);
+    return true;
 }
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
