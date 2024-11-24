@@ -35,8 +35,8 @@ struct PermissionParam {
 
 static int32_t TestCheckPermissionEntry(const PermissionParam &param)
 {
-    SoftBusPermissionItem *permItem = CreatePermissionItem(param.permType, param.uid, param.pid, param.pkgName,
-        param.actions);
+    SoftBusPermissionItem *permItem =
+        CreatePermissionItem(param.permType, param.uid, param.pid, param.pkgName, param.actions);
     COMM_CHECK_AND_RETURN_RET_LOGE(permItem != nullptr, SOFTBUS_MALLOC_ERR, COMM_TEST, "create perm item failed");
 
     int32_t ret = CheckPermissionEntry(param.sessionName, permItem);
@@ -60,29 +60,17 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
 namespace OHOS {
 class PermissionEntryMockTest : public testing::Test {
 public:
-    PermissionEntryMockTest()
-    {
-    }
+    PermissionEntryMockTest() { }
 
-    ~PermissionEntryMockTest()
-    {
-    }
+    ~PermissionEntryMockTest() { }
 
-    static void SetUpTestCase(void)
-    {
-    }
+    static void SetUpTestCase(void) { }
 
-    static void TearDownTestCase(void)
-    {
-    }
+    static void TearDownTestCase(void) { }
 
-    void SetUp() override
-    {
-    }
+    void SetUp() override { }
 
-    void TearDown() override
-    {
-    }
+    void TearDown() override { }
 };
 
 /**
