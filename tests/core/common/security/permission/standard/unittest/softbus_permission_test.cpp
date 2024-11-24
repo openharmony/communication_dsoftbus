@@ -32,16 +32,16 @@ const char *g_sessionName = "ohos.distributedschedule.dms.test";
 
 class SoftbusPermissionTest : public testing::Test {
 public:
-    SoftbusPermissionTest() {}
-    ~SoftbusPermissionTest() {}
+    SoftbusPermissionTest() { }
+    ~SoftbusPermissionTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void SoftbusPermissionTest::SetUpTestCase(void) {}
-void SoftbusPermissionTest::TearDownTestCase(void) {}
+void SoftbusPermissionTest::SetUpTestCase(void) { }
+void SoftbusPermissionTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: IsValidPkgNameTest001
@@ -104,7 +104,7 @@ HWTEST_F(SoftbusPermissionTest, CheckTransSecLevelTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusPermissionTest, CheckDiscPermissionTest001, TestSize.Level0)
 {
-    #define SYSTEM_UID 1000
+#define SYSTEM_UID 1000
     bool ret;
 
     ret = CheckDiscPermission(0, nullptr);
