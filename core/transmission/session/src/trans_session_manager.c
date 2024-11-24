@@ -97,11 +97,11 @@ bool TransSessionServerIsExist(const char *sessionName)
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
-            char *tmpName = NULL;
-            Anonymize(sessionName, &tmpName);
-            TRANS_LOGW(TRANS_CTRL, "session server is exist. sessionName=%{public}s", tmpName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-            AnonymizeFree(tmpName);
+            char *tmpSessionName = NULL;
+            Anonymize(sessionName, &tmpSessionName);
+            TRANS_LOGW(TRANS_CTRL, "session server is exist. sessionName=%{public}s", AnonymizeWrapper(tmpSessionName));
+            AnonymizeFree(tmpSessionName);
             return true;
         }
     }

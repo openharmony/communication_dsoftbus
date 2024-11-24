@@ -110,7 +110,6 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "NotifyQosChannelOpened failed.");
     int32_t sceneCommand = channel->isServer ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
-
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
@@ -133,9 +132,7 @@ static int32_t TransServerOnChannelClosed(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
-    }
+    (void)TransLaneMgrDelLane(channelId, channelType, true);
     NotifyQosChannelClosed(channelId, channelType);
     ChannelMsg data = {
         .msgChannelId = channelId,

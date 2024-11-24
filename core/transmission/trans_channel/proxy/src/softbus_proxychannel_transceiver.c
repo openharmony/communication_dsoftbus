@@ -179,7 +179,7 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
-    TRANS_LOGI(TRANS_CTRL, "trans loop process msgType=%{public}d", msg->what);
+    TRANS_LOGD(TRANS_CTRL, "trans loop process msgType=%{public}d", msg->what);
     int32_t channelId;
     ProxyChannelInfo *chan = NULL;
     switch (msg->what) {
@@ -969,7 +969,7 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo)
             return SOFTBUS_OK;
         } else if (memcmp(item->connInfo.brOption.brMac, connInfo->brOption.brMac,
             sizeof(connInfo->brOption.brMac)) == 0) {
-            TRANS_LOGI(TRANS_CTRL, "auth channel typ is br");
+            TRANS_LOGI(TRANS_CTRL, "auth channel type is br");
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
         }

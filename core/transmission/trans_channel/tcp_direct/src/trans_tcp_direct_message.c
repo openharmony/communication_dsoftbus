@@ -23,11 +23,15 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "cJSON.h"
-#include "softbus_app_info.h"
+#include "data_bus_native.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
+#include "lnn_net_builder.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_app_info.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
@@ -42,10 +46,7 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
-#include "data_bus_native.h"
-#include "lnn_distributed_net_ledger.h"
-#include "lnn_lane_link.h"
-#include "lnn_net_builder.h"
+
 
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6
@@ -890,8 +891,8 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
 
     errCode = NotifyChannelOpened(channelId);
     if (errCode != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Notify APP Channel Opened Failed");
-        ret = (char *)"Notify APP Channel Opened Failed";
+        TRANS_LOGE(TRANS_CTRL, "Notify App Channel Opened Failed");
+        ret = (char *)"Notify App Channel Opened Failed";
         goto ERR_EXIT;
     }
 
@@ -1019,7 +1020,7 @@ static ServerDataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "srv tcp direct channel id not exist.");
+    TRANS_LOGE(TRANS_CTRL, "srv tcp direct channelId=%{public}d not exist.", channelId);
     return NULL;
 }
 
@@ -1292,46 +1293,93 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
         ret == SOFTBUS_OK, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL, "get info failed, ret=%{public}d", ret);
     TRANS_CHECK_AND_RETURN_RET_LOGE(len >= (size_t)bufferSize, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL,
         "freeBufferLen=%{public}zu less than bufferSize=%{public}d. channelId=%{public}d", len, bufferSize, channelId);
-    int32_t recvLen = ConnRecvSocketData(fd, buffer, bufferSize, 0);
-    if (recvLen < 0) {
-        TRANS_LOGE(TRANS_CTRL, " recv tcp data fail, channelId=%{public}d, retLen=%{public}d.", channelId, recvLen);
-        return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
-    } else if (recvLen == 0) {
-        TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d", channelId);
-        return SOFTBUS_DATA_NOT_ENOUGH;
+
+    int32_t totalRecvLen = 0;
+    while (totalRecvLen  < bufferSize) {
+        int32_t recvLen = ConnRecvSocketData(fd, buffer, bufferSize - totalRecvLen, 0);
+        if (recvLen < 0) {
+            TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, channelId=%{public}d, retLen=%{public}d, total=%{public}d, "
+                "totalRecv=%{public}d", channelId, recvLen, bufferSize, totalRecvLen);
+            return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
+        } else if (recvLen == 0) {
+            TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d, total=%{public}d, "
+                "totalRecv=%{public}d", channelId, bufferSize, totalRecvLen);
+            return SOFTBUS_DATA_NOT_ENOUGH;
+        }
+    
+        if (TransTdcUpdateDataBufWInfo(channelId, buffer, recvLen) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "update channel data buf failed, channelId=%{public}d", channelId);
+            return SOFTBUS_TRANS_UPDATE_DATA_BUF_FAILED;
+        }
+        buffer += recvLen;
+        totalRecvLen += recvLen;
     }
-    if (TransTdcUpdateDataBufWInfo(channelId, buffer, bufferSize) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "update channel data buf failed. channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_UPDATE_DATA_BUF_FAILED;
+ 
+    return SOFTBUS_OK;
+}
+
+/*
+ *The negotiation message may be unpacked, and when obtaining the message,
+ *it is necessary to first check whether the buffer of the channel already has data.
+ */
+static int32_t TransReadDataLen(int32_t channelId, int32_t *pktDataLen, int32_t module, int32_t type)
+{
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp srv data list empty channelId=%{public}d %{public}d.", channelId, module);
+        return SOFTBUS_NO_INIT;
     }
+
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed channelId=%{public}d %{public}d.", channelId, module);
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ServerDataBuf *dataBuf = TransSrvGetDataBufNodeById(channelId);
+    if (dataBuf == NULL) {
+        (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_TRANS_TCP_DATABUF_NOT_FOUND;
+    }
+
+    const uint32_t headSize = sizeof(TdcPacketHead);
+    uint32_t bufDataLen = dataBuf->w - dataBuf->data;
+    const uint32_t maxDataLen = dataBuf->size - headSize;
+
+    TdcPacketHead *pktHeadPtr = NULL;
+    //channel buffer already has header data
+    if (bufDataLen >= headSize) {
+        bufDataLen -= headSize;
+        pktHeadPtr = (TdcPacketHead *)(dataBuf->data);
+        // obtain the remaining length of data to be read
+        *pktDataLen = pktHeadPtr->dataLen - bufDataLen;
+        (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+
+    TdcPacketHead pktHead;
+    (void)memset_s(&pktHead, sizeof(pktHead), 0, sizeof(pktHead));
+    int32_t ret = TransRecvTdcSocketData(channelId, (char *)&pktHead, headSize);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+
+    UnpackTdcPacketHead(&pktHead);
+    if (pktHead.magicNumber != MAGIC_NUMBER || pktHead.dataLen > maxDataLen || pktHead.dataLen == 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid packet head module=%{public}d, channelId=%{public}d, type=%{public}d, "
+        "magic=%{public}x, len=%{public}d", module, channelId, type, pktHead.magicNumber, pktHead.dataLen);
+        return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
+    }
+    *pktDataLen = pktHead.dataLen;
 
     return SOFTBUS_OK;
 }
 
 int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type)
 {
-    int32_t headSize = sizeof(TdcPacketHead);
-    char *headBuf = (char *)SoftBusCalloc(headSize);
-    if (headBuf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc failed. channelId=%{public}d, len=%{public}d", channelId, headSize);
-        return SOFTBUS_MALLOC_ERR;
-    }
-    int32_t ret = TransRecvTdcSocketData(channelId, headBuf, headSize);
-    if (ret != SOFTBUS_OK) {
-        SoftBusFree(headBuf);
-        return ret;
-    }
-    TdcPacketHead *pktHead = (TdcPacketHead *)headBuf;
-    UnpackTdcPacketHead(pktHead);
-    if (pktHead->magicNumber != MAGIC_NUMBER) {
-        TRANS_LOGE(TRANS_CTRL,
-            "srv recv invalid packet head listenerModule=%{public}d, channelId=%{public}d, type=%{public}d",
-            (int32_t)module, channelId, type);
-        SoftBusFree(headBuf);
-        return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
-    }
-    int32_t dataSize = (int32_t)pktHead->dataLen;
-    SoftBusFree(headBuf);
+    int32_t dataSize = 0;
+    int32_t ret = TransReadDataLen(channelId, &dataSize, (int32_t)module, type);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED,
+        TRANS_CTRL, "read dataLen failed, ret=%{public}d", ret);
 
     char *dataBuffer = (char *)SoftBusCalloc(dataSize);
     if (dataBuffer == NULL) {
