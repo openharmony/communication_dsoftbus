@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "softbus_server_stub.h"
 
 #include "access_control.h"
@@ -294,14 +293,14 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
 static bool CheckCallingIsNormalApp(const char *sessionName)
 {
 #define DBINDER_BUS_NAME_PREFIX "DBinder"
-    // The authorization of dbind is granted throuth Samgr, and there is no control here
+    // The authorization of dbind is granted through Samgr, and there is no control here
     if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
         return false;
     }
     uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
     auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
     if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-            return false;
+        return false;
     } else if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
         uint64_t calling64Token = OHOS::IPCSkeleton::GetCallingFullTokenID();
         bool isSystemApp = OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(calling64Token);
@@ -338,7 +337,7 @@ static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
     return SOFTBUS_OK;
 }
 
-static int32_t GetAppId(const std::string &bunldeName, std::string &appId)
+static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -363,7 +362,7 @@ static int32_t GetAppId(const std::string &bunldeName, std::string &appId)
         return result;
     }
     AppExecFwk::BundleInfo bundleInfo;
-    result = iBundleMgr->GetBundleInfoV9(bunldeName,
+    result = iBundleMgr->GetBundleInfoV9(bundleName,
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
         bundleInfo, userId);
     if (result != 0) {
@@ -1115,7 +1114,7 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
         return SOFTBUS_IPC_ERR;
     }
     if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
-        COMM_LOGE(COMM_SVC, "UnreDataLevelChangeCbInner read pkgName invalid!");
+        COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = UnregDataLevelChangeCb(pkgName);
