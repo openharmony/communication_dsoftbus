@@ -646,19 +646,17 @@ int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo,
     appInfo->myData.apiVersion = API_V2;
     appInfo->peerData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
-    if (!IsNoPkgNameSession(sessionName) || isClient) {
-        int32_t ret = TransGetUidAndPid(sessionName, &appInfo->myData.uid, &appInfo->myData.pid);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "TransGetUidAndPid failed");
-            return ret;
-        }
-        ret = TransGetPkgNameBySessionName(sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "TransGetPkgNameBySessionName failed");
-            return ret;
-        }
+    int32_t ret = TransGetUidAndPid(sessionName, &appInfo->myData.uid, &appInfo->myData.pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "TransGetUidAndPid failed");
+        return ret;
     }
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
+    ret = TransGetPkgNameBySessionName(sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "TransGetPkgNameBySessionName failed");
+        return ret;
+    }
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "LnnGetLocalStrInfo failed");
         return ret;
