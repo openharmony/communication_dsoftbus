@@ -225,7 +225,7 @@ HWTEST_F(AuthLaneTest, GET_AUTH_LINK_TYPE_LIST_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     ret = GetAuthLinkTypeList(NETWORK_ID, &linkTypeList);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -252,7 +252,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteStrInfo)
         .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -289,7 +289,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     LaneConnInfo laneConnInfo;
@@ -333,7 +333,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     LaneConnInfo laneConnInfo;
@@ -377,10 +377,10 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
-    AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);
+    AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
     DupAuthManager(auth);
     DestroyAuthManagerList();
@@ -419,7 +419,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     LaneConnInfo laneConnInfo;
@@ -465,7 +465,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     LaneConnInfo laneConnInfo;
@@ -512,10 +512,10 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
-    AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);
+    AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
     DupAuthManager(auth);
     DestroyAuthManagerList();
@@ -555,10 +555,10 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
-    AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);
+    AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
     DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();

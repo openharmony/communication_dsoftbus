@@ -192,7 +192,7 @@ bool WaitForSignal()
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_TEST, "BrSoftBusCondWait SoftBusGetTime failed");
-        return SOFTBUS_ERR;
+        return false;
     }
     int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + DELAY_TIME * USECTONSEC;
     SoftBusSysTime tv;

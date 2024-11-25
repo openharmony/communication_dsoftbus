@@ -69,7 +69,7 @@ int32_t GetAuthConn(const char *uuid, LaneLinkType laneType, AuthConnInfo *connI
             authType = AUTH_LINK_TYPE_WIFI;
             break;
         default:
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_CONN_TYPE_INVALID;
     }
     AUTH_LOGI(AUTH_CONN, "convert authType=%{public}d", authType);
     return GetAuthConnInfoByUuid(uuid, authType, connInfo);
@@ -84,7 +84,7 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
     char uuid[UUID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get peer uuid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     AuthLinkType linkList[] = {AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_LINK_TYPE_WIFI,
         AUTH_LINK_TYPE_P2P, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE};
@@ -114,7 +114,7 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
             return SOFTBUS_OK;
         }
         AUTH_LOGE(AUTH_CONN, "no available auth link");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_LINK_NOT_EXIST;
     }
     return SOFTBUS_OK;
 }
@@ -399,7 +399,7 @@ static int32_t AuthGetLaneAllocInfo(const char *networkId, LaneAllocInfo *allocI
     char uuid[UUID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get peer uuid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     AuthConnInfo connInfo;
     if (memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo)) != EOK) {
@@ -426,7 +426,7 @@ int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCal
     if (AddAuthReqNode(networkId, laneHandle, authRequestId, callback) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "add auth request node fail");
         GetLaneManager()->lnnFreeLane(laneHandle);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_ALLOC_LANE_FAIL;
     }
 
     LaneAllocInfo allocInfo;
@@ -439,7 +439,7 @@ int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCal
     if (AuthGetLaneAllocInfo(networkId, &allocInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth get requestOption fail");
         GetLaneManager()->lnnFreeLane(laneHandle);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_ALLOC_LANE_FAIL;
     }
 
     LaneAllocListener listener;
@@ -448,7 +448,7 @@ int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCal
     AUTH_LOGI(AUTH_CONN, "auth alloc lane, laneHandle=%{public}u, authRequestId=%{public}u", laneHandle, authRequestId);
     if (GetLaneManager()->lnnAllocLane(laneHandle, &allocInfo, &listener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth alloc lane fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_ALLOC_LANE_FAIL;
     }
     return SOFTBUS_OK;
 }

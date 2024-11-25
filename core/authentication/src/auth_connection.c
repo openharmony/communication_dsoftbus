@@ -289,9 +289,9 @@ static void PostConnConnectTimeout(uint32_t requestId, AuthLinkType type)
 
 static int32_t RemoveFunc(const void *obj, void *param)
 {
-    CHECK_NULL_PTR_RETURN_VALUE(obj, SOFTBUS_ERR);
-    CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);
-    return ((*(uint32_t *)(obj) == *(uint32_t *)(param)) ? SOFTBUS_OK : SOFTBUS_ERR);
+    CHECK_NULL_PTR_RETURN_VALUE(obj, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_INVALID_PARAM);
+    return ((*(uint32_t *)(obj) == *(uint32_t *)(param)) ? SOFTBUS_OK : SOFTBUS_INVALID_PARAM);
 }
 
 static void RemoveConnConnectTimeout(uint32_t requestId)
@@ -832,8 +832,8 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
         local.socketOption.moduleId = AUTH_P2P;
     } else if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
         local.socketOption.moduleId = (ListenerModule)(GetWifiDirectManager()->allocateListenerModuleId());
-        AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId < UNUSE_BUTT, SOFTBUS_ERR, AUTH_CONN,
-                                       "alloc listener module id failed");
+        AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId < UNUSE_BUTT,
+            SOFTBUS_AUTH_LISTENER_MODULE_INVALID, AUTH_CONN, "alloc listener module id failed");
     } else {
         AUTH_LOGE(AUTH_CONN, "invalid type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;
