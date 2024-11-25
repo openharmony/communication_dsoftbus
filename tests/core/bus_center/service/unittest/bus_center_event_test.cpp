@@ -175,7 +175,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest004, TestSize.Level1)
     int32_t retCode = SOFTBUS_ERR;
     LnnEventType event = LNN_EVENT_NETWORK_STATE_CHANGED;
     LnnEventHandler handler = OnNetworkStateChange;
-    
+
     LnnNotifyTimeSyncResult(pkgName, pid, info, retCode);
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
     EXPECT_CALL(BusCenterEventMock, LnnIpcNotifyTimeSyncResult(_, _, _, _, _)).WillOnce(Return(SOFTBUS_OK));
@@ -508,7 +508,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest024, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
     LnnEventHandler handler = NULL;
-    
+
     int32_t ret = LnnRegisterEventHandler(event, handler);
     LnnUnregisterEventHandler(event, handler);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
