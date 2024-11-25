@@ -73,7 +73,6 @@ public:
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) override;
-    int32_t SetLocalDeviceName(const char *pkgName, const char *displayName) override;
 
 protected:
     void OnStart() override;
