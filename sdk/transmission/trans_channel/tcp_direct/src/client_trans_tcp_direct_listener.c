@@ -129,6 +129,10 @@ void TransTdcCloseFd(int32_t fd)
         return;
     }
     DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
+    if (ConnGetSocketError(fd) == SOFTBUS_CONN_BAD_FD) {
+        TRANS_LOGI(TRANS_SDK, "fd is bad fd=%{public}d", fd);
+        return;
+    }
     ConnCloseSocket(fd);
 }
 
@@ -139,6 +143,10 @@ void TransTdcReleaseFd(int32_t fd)
         return;
     }
     DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
+    if (ConnGetSocketError(fd) == SOFTBUS_CONN_BAD_FD) {
+        TRANS_LOGI(TRANS_SDK, "fd is bad fd=%{public}d", fd);
+        return;
+    }
     ConnShutdownSocket(fd);
 }
 
