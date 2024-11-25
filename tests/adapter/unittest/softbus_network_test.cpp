@@ -61,7 +61,9 @@ HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1
     ON_CALL(networkMock, SoftBusSocketBind).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = CreateNetlinkSocket();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_CALL(networkMock, SoftBusSocketCreate).WillOnce(Return(SOFTBUS_ADAPTER_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkMock, SoftBusSocketCreate)
+        .WillOnce(Return(SOFTBUS_ADAPTER_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = CreateNetlinkSocket();
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_CREATE_SOCKET_FAILED);
     EXPECT_CALL(networkMock, SoftBusSocketSetOpt)
@@ -70,7 +72,9 @@ HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = CreateNetlinkSocket();
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_SET_SOCKET_OPTION_FAILED);
-    EXPECT_CALL(networkMock, SoftBusSocketBind).WillOnce(Return(SOFTBUS_ADAPTER_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkMock, SoftBusSocketBind)
+        .WillOnce(Return(SOFTBUS_ADAPTER_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = CreateNetlinkSocket();
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_BIND_SOCKET_FAILED);
 }
