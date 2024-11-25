@@ -20,18 +20,20 @@
 #include "sqlite3_utils.h"
 
 namespace OHOS {
-bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size == 0) {
+    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+    {
+        if (data == nullptr || size == 0) {
+            return true;
+        }
+
+        uint8_t *numData = const_cast<uint8_t *>(data);
+        uint8_t index = *numData % 2;
+        TableNameID tableNameID = static_cast<TableNameID>(index);
+        DbContext *ctx = nullptr;
+        RemoveAllRecord(ctx, tableNameID);
+
         return true;
     }
-
-    DbContext *ctx = nullptr;
-    RemoveAllRecord(ctx, TABLE_TRUSTED_DEV_INFO);
-    RemoveAllRecord(ctx, TABLE_NAME_ID_MAX);
-
-    return true;
-}
 } // namespace OHOS
 
 /* Fuzzer entry point */
