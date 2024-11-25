@@ -52,7 +52,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProf
     }
     if (g_deviceProfileChange.onDeviceProfileAdd == NULL) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileAdd failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
     DelNotTrustDevice(profile.GetDeviceId().c_str());
     g_deviceProfileChange.onDeviceProfileAdd(profile.GetDeviceId().c_str(), NULL);
@@ -65,7 +65,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
     AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete start!");
     if (g_deviceProfileChange.onDeviceProfileDeleted == NULL) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
     g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str());
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");

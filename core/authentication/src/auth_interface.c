@@ -90,7 +90,7 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
         }
     }
     AUTH_LOGE(AUTH_CONN, "Trans: unknown module=%{public}d", module);
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_LISTENER_MODULE_INVALID;
 }
 
 void UnregAuthTransListener(int32_t module)
@@ -422,7 +422,7 @@ static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeIn
     uint8_t localUdidHash[UDID_HASH_LEN] = {0};
     if (LnnGetLocalByteInfo(BYTE_KEY_UDID_HASH, localUdidHash, UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "get local udid hash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
     if (!hasDeviceKey) {
@@ -438,7 +438,7 @@ static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeIn
     if (strcpy_s(info->uuid, sizeof(info->uuid), nodeInfo->uuid) != EOK ||
         strcpy_s(info->udid, sizeof(info->udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
         AUTH_LOGE(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -455,13 +455,13 @@ static int32_t AuthDirectOnlineProcessSessionKey(AuthSessionInfo *info, AuthDevi
     if (AuthManagerSetSessionKey(keyInfo->keyIndex, info, &sessionKey, false, keyInfo->isOldKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "set sessionkey fail, index=%{public}" PRId64, keyInfo->keyIndex);
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SESSION_KEY_PROC_ERR;
     }
     AuthManager *auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth == NULL) {
         AUTH_LOGE(AUTH_KEY, "authManager is null");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     *authId = auth->authId;
     DelDupAuthManager(auth);
@@ -471,14 +471,15 @@ static int32_t AuthDirectOnlineProcessSessionKey(AuthSessionInfo *info, AuthDevi
 
 static int32_t AuthDirectOnlineWithoutSessionKey(AuthSessionInfo *info, AuthDeviceKeyInfo *keyInfo, int64_t *authId)
 {
-    if (AuthDirectOnlineCreateAuthManager(keyInfo->keyIndex, info) != SOFTBUS_OK) {
+    int32_t ret = AuthDirectOnlineCreateAuthManager(keyInfo->keyIndex, info);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "create auth manager fail, index=%{public}" PRId64, keyInfo->keyIndex);
-        return SOFTBUS_ERR;
+        return ret;
     }
     AuthManager *auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth == NULL) {
         AUTH_LOGE(AUTH_KEY, "authManager is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     *authId = auth->authId;
     DelDupAuthManager(auth);
@@ -490,7 +491,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
 {
     if (udidHash == NULL || connInfo == NULL || nodeInfo == NULL || authId == NULL) {
         AUTH_LOGE(AUTH_CONN, "restore manager fail because para error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     // get device key
     bool hasDeviceKey = false;
@@ -503,25 +504,26 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     if (!isSupportCloud && (!hasDeviceKey || keyInfo.isOldKey)) {
         AUTH_LOGE(AUTH_KEY, "restore manager fail because device key not exist");
         (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_MANAGER_RESTORE_FAIL;
     }
     if (SoftBusGenerateStrHash((unsigned char *)nodeInfo->deviceInfo.deviceUdid,
         strlen(nodeInfo->deviceInfo.deviceUdid), (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "restore manager fail because generate strhash");
         (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.requestId = requestId;
     info.connInfo = *connInfo;
     info.isOldKey = keyInfo.isOldKey;
-    if (FillAuthSessionInfo(&info, nodeInfo, &keyInfo, hasDeviceKey) != SOFTBUS_OK) {
+    int32_t ret = FillAuthSessionInfo(&info, nodeInfo, &keyInfo, hasDeviceKey);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "fill authSessionInfo fail");
         (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-        return SOFTBUS_ERR;
+        return ret;
     }
-    int32_t ret = hasDeviceKey ? AuthDirectOnlineProcessSessionKey(&info, &keyInfo, authId) :
+    ret = hasDeviceKey ? AuthDirectOnlineProcessSessionKey(&info, &keyInfo, authId) :
         AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, authId);
     (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     return ret;
@@ -737,14 +739,14 @@ int32_t AuthInit(void)
         .onException = NotifyTransException,
     };
     int32_t ret = AuthDeviceInit(&callBack);
-    if (ret == SOFTBUS_ERR || ret == SOFTBUS_INVALID_PARAM) {
+    if (ret == SOFTBUS_AUTH_COMM_INIT_FAIL || ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_AUTH_CONN_INIT_FAIL) {
         AUTH_LOGE(AUTH_INIT, "auth device init failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_INIT_FAIL;
     }
     ret = RegHichainSaStatusListener();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
         AUTH_LOGE(AUTH_INIT, "regHichainSaStatusListener failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_HICHAIN_SA_PROC_ERR;
     }
     ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {

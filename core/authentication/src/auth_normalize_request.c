@@ -93,7 +93,7 @@ static int32_t FindAndDelNormalizeRequest(int64_t authSeq, NormalizeRequest *req
             return SOFTBUS_OK;
         }
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_NOT_FOUND;
 }
 
 static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, NormalizeRequest *request,
@@ -104,7 +104,7 @@ static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, Normal
     }
     if (!RequireAuthLock()) {
         AUTH_LOGE(AUTH_HICHAIN, "RequireAuthLock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (FindAndDelNormalizeRequest(authSeq, request) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "not found normalize request");

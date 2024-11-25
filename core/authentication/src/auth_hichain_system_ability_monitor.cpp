@@ -94,14 +94,14 @@ int32_t RegHichainSaStatusListener(void)
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
         AUTH_LOGE(AUTH_INIT, "get samgr failed, samgr is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_SA_MANAGER_FAIL;
     }
 
     int32_t ret = samgrProxy->SubscribeSystemAbility(OHOS::DEVICE_AUTH_SERVICE_ID,
         OHOS::SaEventFwk::SystemAbilityListener::GetInstance());
     if (ret != OHOS::ERR_OK) {
         AUTH_LOGE(AUTH_INIT, "subscribe hichain sa failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SUBSCRIBE_HICHAIN_SA_FAIL;
     }
     AUTH_LOGI(AUTH_INIT, "subscribe hichain sa succ");
     OHOS::SaEventFwk::SystemAbilityListener::isReg = true;
@@ -112,20 +112,20 @@ int32_t UnRegHichainSaStatusListener(void)
 {
     if (!(OHOS::SaEventFwk::SystemAbilityListener::isReg)) {
         AUTH_LOGI(AUTH_INIT, "hichain sa is not subscribe");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_HICHAIN_SA_NOT_SUBSCRIBE;
     }
     OHOS::sptr<OHOS::ISystemAbilityManager> samgrProxy =
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
         AUTH_LOGE(AUTH_INIT, "get samgr failed, samgr is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_SA_MANAGER_FAIL;
     }
 
     int32_t ret = samgrProxy->UnSubscribeSystemAbility(OHOS::DEVICE_AUTH_SERVICE_ID,
         OHOS::SaEventFwk::SystemAbilityListener::GetInstance());
     if (ret != OHOS::ERR_OK) {
         AUTH_LOGE(AUTH_INIT, "unsubscribe hichain sa failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_UNSUBSCRIBE_HICHAIN_SA_FAIL;
     }
     AUTH_LOGI(AUTH_INIT, "unsubscribe hichain sa succ");
     OHOS::SaEventFwk::SystemAbilityListener::isReg = false;

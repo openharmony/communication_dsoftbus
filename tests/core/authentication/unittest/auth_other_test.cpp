@@ -156,9 +156,9 @@ HWTEST_F(AuthOtherTest, REMOVE_FUNC_TEST_001, TestSize.Level1)
     uint32_t param = 1;
 
     int32_t ret = RemoveFunc(nullptr, static_cast<void *>(&param));
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveFunc(static_cast<void *>(&obj), nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveFunc(static_cast<void *>(&obj), static_cast<void *>(&param));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -458,11 +458,11 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
     int64_t authId = 1;
     int64_t para = 0;
     int32_t ret = RemoveUpdateSessionKeyFunc(nullptr, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveUpdateSessionKeyFunc(&authId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveUpdateSessionKeyFunc(&authId, &para);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveUpdateSessionKeyFunc(&authId, &authId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -815,19 +815,19 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
     }
     int64_t *authId = reinterpret_cast<int64_t *>(malloc(sizeof(int64_t)));
     int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     const char *udidHash = "1234uuid";
     ret = AuthRestoreAuthManager(udidHash, NULL, requestId, nodeInfo, authId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, NULL, authId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, NULL);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     const char *udidHash1 = "testudidhashpass";
     ret = AuthRestoreAuthManager(udidHash1, connInfo, requestId, nodeInfo, authId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(connInfo);
     SoftBusFree(nodeInfo);
 }
@@ -1092,8 +1092,8 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
     ASSERT_TRUE(memcpy_s(keyInfo.deviceKey, SESSION_KEY_LENGTH, "testKey", strlen("testKey")) == EOK);
     AuthSessionInfo info = { .connInfo.type = AUTH_LINK_TYPE_BR, };
     int64_t authId;
-    EXPECT_TRUE(AuthDirectOnlineProcessSessionKey(&info, &keyInfo, &authId) == SOFTBUS_ERR);
-    EXPECT_TRUE(AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, &authId) == SOFTBUS_ERR);
+    EXPECT_NE(AuthDirectOnlineProcessSessionKey(&info, &keyInfo, &authId), SOFTBUS_OK);
+    EXPECT_NE(AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, &authId), SOFTBUS_OK);
     EXPECT_TRUE(AuthEncrypt(nullptr, nullptr, 0, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDecrypt(nullptr, nullptr, 0, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
