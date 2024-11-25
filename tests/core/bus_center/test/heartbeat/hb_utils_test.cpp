@@ -32,7 +32,7 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
-#define TEST_NETWORK_ID  "6542316a57d"
+#define TEST_NETWORK_ID "6542316a57d"
 
 constexpr char BT_MAC[] = "11:22";
 
@@ -162,7 +162,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnCheckSupportedHbTypeTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_01, TestSize.Level1)
 {
     uint32_t ret;
-    uint8_t str[SHA_256_HASH_LEN] = {0};
+    uint8_t str[SHA_256_HASH_LEN] = { 0 };
 
     ret = LnnGenerateHexStringHash(nullptr, nullptr, 0);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -222,8 +222,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
 {
     char brMacHash;
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
-    EXPECT_CALL(disLedgerMock, ConvertBtMacToBinary)
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(disLedgerMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = LnnGenerateBtMacHash(nullptr, BT_MAC_LEN, nullptr, BT_MAC_HASH_STR_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_LEN);
