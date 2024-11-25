@@ -65,8 +65,8 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
     return GetBusCenterManagerInterface()->ServerIpcGetLocalDeviceInfo(pkgName, info, infoTypeLen);
 }
 
-int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId,
-                                int32_t key, unsigned char *buf, uint32_t len)
+int32_t ServerIpcGetNodeKeyInfo(
+    const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len)
 {
     return GetBusCenterManagerInterface()->ServerIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }

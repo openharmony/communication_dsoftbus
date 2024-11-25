@@ -34,28 +34,20 @@ public:
     void TearDown();
 };
 
-void BusCenterServerProxyTest::SetUpTestCase()
-{
-}
+void BusCenterServerProxyTest::SetUpTestCase() { }
 
-void BusCenterServerProxyTest::TearDownTestCase()
-{
-}
+void BusCenterServerProxyTest::TearDownTestCase() { }
 
-void BusCenterServerProxyTest::SetUp()
-{
-}
+void BusCenterServerProxyTest::SetUp() { }
 
-void BusCenterServerProxyTest::TearDown()
-{
-}
+void BusCenterServerProxyTest::TearDown() { }
 
 /*
-* @tc.name: ServerIpcGetAllOnlineNodeInfo_TEST_001
-* @tc.desc: ServerIpcGetAllOnlineNodeInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcGetAllOnlineNodeInfo_TEST_001
+ * @tc.desc: ServerIpcGetAllOnlineNodeInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllOnlineNodeInfo_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -67,11 +59,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllOnlineNodeInfo_TEST_001, TestS
 }
 
 /*
-* @tc.name: ServerIpcGetLocalDeviceInfo_TEST_001
-* @tc.desc: ServerIpcGetLocalDeviceInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcGetLocalDeviceInfo_TEST_001
+ * @tc.desc: ServerIpcGetLocalDeviceInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetLocalDeviceInfo_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -82,17 +74,17 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetLocalDeviceInfo_TEST_001, TestSiz
 }
 
 /*
-* @tc.name: ServerIpcGetNodeKeyInfo_TEST_001
-* @tc.desc: ServerIpcGetNodeKeyInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcGetNodeKeyInfo_TEST_001
+ * @tc.desc: ServerIpcGetNodeKeyInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetNodeKeyInfo_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
     const char *networkId = "123";
     int32_t key = 1;
-    unsigned char array[10] = {0};
+    unsigned char array[10] = { 0 };
     unsigned char *buf = array;
     uint32_t len = 0;
     int32_t ret = ServerIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
@@ -100,11 +92,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetNodeKeyInfo_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: ServerIpcSetNodeDataChangeFlag_TEST_001
-* @tc.desc: ServerIpcSetNodeDataChangeFlag return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcSetNodeDataChangeFlag_TEST_001
+ * @tc.desc: ServerIpcSetNodeDataChangeFlag return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcSetNodeDataChangeFlag_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -115,11 +107,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSetNodeDataChangeFlag_TEST_001, Test
 }
 
 /*
-* @tc.name: ServerIpcRegDataLevelChangeCb_TEST_001
-* @tc.desc: ServerIpcRegDataLevelChangeCb return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcRegDataLevelChangeCb_TEST_001
+ * @tc.desc: ServerIpcRegDataLevelChangeCb return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcRegDataLevelChangeCb_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -128,11 +120,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcRegDataLevelChangeCb_TEST_001, TestS
 }
 
 /*
-* @tc.name: ServerIpcUnregDataLevelChangeCb_TEST_001
-* @tc.desc: ServerIpcUnregDataLevelChangeCb return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcUnregDataLevelChangeCb_TEST_001
+ * @tc.desc: ServerIpcUnregDataLevelChangeCb return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcUnregDataLevelChangeCb_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -141,11 +133,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcUnregDataLevelChangeCb_TEST_001, Tes
 }
 
 /*
-* @tc.name: ServerIpcJoinLNN_TEST_001
-* @tc.desc: ServerIpcJoinLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcJoinLNN_TEST_001
+ * @tc.desc: ServerIpcJoinLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcJoinLNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -156,11 +148,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcJoinLNN_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ServerIpcLeaveLNN_TEST_001
-* @tc.desc: ServerIpcLeaveLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcLeaveLNN_TEST_001
+ * @tc.desc: ServerIpcLeaveLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcLeaveLNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -170,11 +162,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcLeaveLNN_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ServerIpcStartTimeSync_TEST_001
-* @tc.desc: ServerIpcStartTimeSync return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcStartTimeSync_TEST_001
+ * @tc.desc: ServerIpcStartTimeSync return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStartTimeSync_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -186,11 +178,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStartTimeSync_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: ServerIpcStopTimeSync_TEST_001
-* @tc.desc: ServerIpcStopTimeSync return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcStopTimeSync_TEST_001
+ * @tc.desc: ServerIpcStopTimeSync return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStopTimeSync_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -200,11 +192,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopTimeSync_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: ServerIpcPublishLNN_TEST_001
-* @tc.desc: ServerIpcPublishLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcPublishLNN_TEST_001
+ * @tc.desc: ServerIpcPublishLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcPublishLNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -214,11 +206,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcPublishLNN_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: ServerIpcStopPublishLNN_TEST_001
-* @tc.desc: ServerIpcStopPublishLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcStopPublishLNN_TEST_001
+ * @tc.desc: ServerIpcStopPublishLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStopPublishLNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -228,11 +220,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopPublishLNN_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: ServerIpcRefreshLNN_TEST_001
-* @tc.desc: ServerIpcRefreshLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcRefreshLNN_TEST_001
+ * @tc.desc: ServerIpcRefreshLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcRefreshLNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -242,11 +234,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcRefreshLNN_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: ServerIpcStopRefreshLNN_TEST_001
-* @tc.desc: ServerIpcStopRefreshLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcStopRefreshLNN_TEST_001
+ * @tc.desc: ServerIpcStopRefreshLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStopRefreshLNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -256,11 +248,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopRefreshLNN_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: ServerIpcActiveMetaNode_TEST_001
-* @tc.desc: ServerIpcActiveMetaNode return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcActiveMetaNode_TEST_001
+ * @tc.desc: ServerIpcActiveMetaNode return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcActiveMetaNode_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -272,11 +264,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcActiveMetaNode_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: ServerIpcDeactiveMetaNode_TEST_001
-* @tc.desc: ServerIpcDeactiveMetaNode return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcDeactiveMetaNode_TEST_001
+ * @tc.desc: ServerIpcDeactiveMetaNode return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcDeactiveMetaNode_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -286,11 +278,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcDeactiveMetaNode_TEST_001, TestSize.
 }
 
 /*
-* @tc.name: ServerIpcGetAllMetaNodeInfo_TEST_001
-* @tc.desc: ServerIpcGetAllMetaNodeInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcGetAllMetaNodeInfo_TEST_001
+ * @tc.desc: ServerIpcGetAllMetaNodeInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -302,11 +294,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSiz
 }
 
 /*
-* @tc.name: ServerIpcShiftLNNGear_TEST_001
-* @tc.desc: ServerIpcShiftLNNGear return value is equal to SOFTBUS_ERR
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcShiftLNNGear_TEST_001
+ * @tc.desc: ServerIpcShiftLNNGear return value is equal to SOFTBUS_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
@@ -318,11 +310,11 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: ServerIpcSyncTrustedRelationShip_TEST_001
-* @tc.desc: ServerIpcSyncTrustedRelationShip return value is equal to SOFTBUS_TRANS_PROXY_REMOTE_NULL
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ServerIpcSyncTrustedRelationShip_TEST_001
+ * @tc.desc: ServerIpcSyncTrustedRelationShip return value is equal to SOFTBUS_TRANS_PROXY_REMOTE_NULL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcSyncTrustedRelationShip_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "001";
