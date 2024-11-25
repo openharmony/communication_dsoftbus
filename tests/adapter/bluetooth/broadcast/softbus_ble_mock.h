@@ -32,7 +32,7 @@ public:
 
 class ManagerMock : public BleGattInterface {
 public:
-    static ManagerMock* GetMock();
+    static ManagerMock *GetMock();
 
     ManagerMock();
     ~ManagerMock();

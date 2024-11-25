@@ -458,11 +458,11 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesGcmEncrypt004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusAesCfbEncrypt001
-* @tc.desc: parameters are Legal
-* @tc.type: FUNC
-* @tc.require: I5OHDE
-*/
+ * @tc.name: SoftBusAesCfbEncrypt001
+ * @tc.desc: parameters are Legal
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
 HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt001, TestSize.Level0)
 {
     uint32_t randKeyLen = 32;
@@ -502,10 +502,10 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusAesCfbEncrypt002
-* @tc.desc: encrypt parameter is nullptr
-* @tc.require: I5OHDE
-*/
+ * @tc.name: SoftBusAesCfbEncrypt002
+ * @tc.desc: encrypt parameter is nullptr
+ * @tc.require: I5OHDE
+ */
 HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt002, TestSize.Level0)
 {
     uint32_t randKeyLen = 32;
@@ -549,11 +549,11 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusAesCfbEncrypt003
-* @tc.desc: decrypt parameter is nullptr
-* @tc.type: FUNC
-* @tc.require: I5OHDE
-*/
+ * @tc.name: SoftBusAesCfbEncrypt003
+ * @tc.desc: decrypt parameter is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
 HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt003, TestSize.Level0)
 {
     uint32_t randKeyLen = 32;
@@ -594,11 +594,11 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusAesCfbEncrypt004
-* @tc.desc: encMode is illegal
-* @tc.type: FUNC
-* @tc.require: I5OHDE
-*/
+ * @tc.name: SoftBusAesCfbEncrypt004
+ * @tc.desc: encMode is illegal
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
 HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt004, TestSize.Level0)
 {
     uint32_t randKeyLen = 32;
@@ -639,4 +639,3 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt004, TestSize.Level0)
     SoftBusFree(encryptOutData.data);
 }
 } // namespace OHOS
-
