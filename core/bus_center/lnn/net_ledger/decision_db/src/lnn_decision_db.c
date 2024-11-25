@@ -190,7 +190,7 @@ int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t l
 static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
 {
     char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
 
     if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get dbKey save path fail");
@@ -231,7 +231,7 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
 static int32_t EncryptDecisionDb(DbContext *ctx)
 {
     uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
 
     ret = GetDecisionDbKey(dbKey, sizeof(dbKey), false);
     if (ret != SOFTBUS_OK) {
