@@ -19,8 +19,8 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "lnn_local_net_ledger.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_local_net_ledger.h"
 
 namespace OHOS {
 class AuthLaneInterface {
@@ -38,4 +38,3 @@ public:
 };
 } // namespace OHOS
 #endif // AUTH_LANE_H
-
