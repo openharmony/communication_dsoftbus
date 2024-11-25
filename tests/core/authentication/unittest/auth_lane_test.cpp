@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include <thread>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <securec.h>
+#include <thread>
 
 #include "auth_device.c"
-#include "auth_interface.h"
 #include "auth_interface.c"
+#include "auth_interface.h"
 #include "auth_lane.c"
-#include "auth_manager.h"
-#include "auth_manager.c"
-#include "auth_log.h"
 #include "auth_lane_mock.h"
+#include "auth_log.h"
+#include "auth_manager.c"
+#include "auth_manager.h"
 #include "lnn_lane_common.h"
 #include "lnn_trans_lane.h"
 
@@ -50,8 +50,8 @@ static void OnConnOpenedTest(uint32_t requestId, AuthHandle authHandle)
 {
     (void)requestId;
     (void)authHandle;
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenedTest: requestId=%{public}d, authId=%{public}" PRId64 "",
-        requestId, authHandle.authId);
+    AUTH_LOGI(
+        AUTH_TEST, "OnConnOpenedTest: requestId=%{public}d, authId=%{public}" PRId64 "", requestId, authHandle.authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
@@ -68,16 +68,12 @@ static AuthConnCallback authConnCb = {
 
 class AuthLaneTest : public testing::Test {
 public:
-    AuthLaneTest()
-    {}
-    ~AuthLaneTest()
-    {}
+    AuthLaneTest() { }
+    ~AuthLaneTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 void AuthLaneTest::SetUpTestCase()
@@ -117,8 +113,8 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
             break;
         case AUTH_LINK_TYPE_BLE:
             ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
-            ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.deviceIdHash,
-                UDID_HASH_LEN, DEVICE_ID_HASH, DEVICE_ID_HASH_LEN) == EOK);
+            ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN,
+                DEVICE_ID_HASH, DEVICE_ID_HASH_LEN) == EOK);
             break;
         case AUTH_LINK_TYPE_BR:
             ASSERT_TRUE(memcpy_s(info->connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
@@ -134,11 +130,11 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
 }
 
 /*
-* @tc.name: ADD_AUTH_REQUEST_NODE_TEST_001
-* @tc.desc: add auth request node test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ADD_AUTH_REQUEST_NODE_TEST_001
+ * @tc.desc: add auth request node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, ADD_AUTH_REQUEST_NODE_TEST_001, TestSize.Level1)
 {
     uint32_t laneReqId = 1;
@@ -181,11 +177,11 @@ HWTEST_F(AuthLaneTest, ADD_AUTH_REQUEST_NODE_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_REQUEST_OPTION_TEST_001
-* @tc.desc: auth get request option test test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_REQUEST_OPTION_TEST_001
+ * @tc.desc: auth get request option test test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_GET_REQUEST_OPTION_TEST_001, TestSize.Level1)
 {
     AuthLaneInterfaceMock mock;
@@ -259,11 +255,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_WLAN_001
-* @tc.desc: auth alloc lane wlan test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_WLAN_001
+ * @tc.desc: auth alloc lane wlan test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
 {
     InitAuthReqInfo();
@@ -305,11 +301,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_WLAN_002
-* @tc.desc: AuthDeviceOpenConn return SOFTBUS_AUTH_NOT_FOUND
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_WLAN_002
+ * @tc.desc: AuthDeviceOpenConn return SOFTBUS_AUTH_NOT_FOUND
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
 {
     InitAuthReqInfo();
@@ -349,11 +345,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_WLAN_003
-* @tc.desc: AuthOnLaneAllocFail
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_WLAN_003
+ * @tc.desc: AuthOnLaneAllocFail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
 {
     InitAuthReqInfo();
@@ -389,11 +385,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_BLE_001
-* @tc.desc: auth alloc lane ble test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_BLE_001
+ * @tc.desc: auth alloc lane ble test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
 {
     InitAuthReqInfo();
@@ -435,11 +431,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_BR_001
-* @tc.desc: auth alloc lane br test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_BR_001
+ * @tc.desc: auth alloc lane br test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
 {
     InitAuthReqInfo();
@@ -481,11 +477,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_P2P_001
-* @tc.desc: IsReuseP2p return false
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_P2P_001
+ * @tc.desc: IsReuseP2p return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
 {
     InitAuthReqInfo();
@@ -524,11 +520,11 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ALLOC_LANE_ENHANCED_P2P_001
-* @tc.desc: IsReuseP2p return false
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ALLOC_LANE_ENHANCED_P2P_001
+ * @tc.desc: IsReuseP2p return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
 {
     InitAuthReqInfo();
