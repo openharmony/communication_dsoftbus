@@ -19,16 +19,16 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "bus_center_adapter.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_device_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_net_capability.h"
-#include "softbus_adapter_crypto.h"
-#include "bus_center_adapter.h"
+#include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
-#include "legacy/softbus_hidumper_buscenter.h"
-#include "lnn_ohos_account.h"
 
 namespace OHOS {
 class LocalLedgerDepsInterface {
@@ -55,20 +55,20 @@ class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
     LocalLedgerDepsInterfaceMock();
     ~LocalLedgerDepsInterfaceMock() override;
-    MOCK_METHOD0(LnnGetNetCapabilty, uint32_t ());
-    MOCK_METHOD2(SoftBusGenerateRandomArray, int32_t (unsigned char *, uint32_t));
-    MOCK_METHOD3(GetCommonDevInfo, int32_t (const CommonDeviceKey, char *, uint32_t));
-    MOCK_METHOD1(LnnInitLocalP2pInfo, int32_t (NodeInfo *info));
-    MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t (char *, SoftBusVarDumpCb));
-    MOCK_METHOD0(LnnInitOhosAccount, int32_t ());
-    MOCK_METHOD0(LnnGetFeatureCapabilty, uint64_t ());
-    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
-    MOCK_METHOD1(GetCommonOsType, int32_t (int32_t *));
-    MOCK_METHOD2(GetCommonOsVersion, int32_t (char *, uint32_t));
-    MOCK_METHOD2(GetCommonDeviceVersion, int32_t (char *, uint32_t));
-    MOCK_METHOD1(GetDeviceSecurityLevel, int32_t (int32_t *));
-    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
-    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
+    MOCK_METHOD0(LnnGetNetCapabilty, uint32_t());
+    MOCK_METHOD2(SoftBusGenerateRandomArray, int32_t(unsigned char *, uint32_t));
+    MOCK_METHOD3(GetCommonDevInfo, int32_t(const CommonDeviceKey, char *, uint32_t));
+    MOCK_METHOD1(LnnInitLocalP2pInfo, int32_t(NodeInfo *info));
+    MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t(char *, SoftBusVarDumpCb));
+    MOCK_METHOD0(LnnInitOhosAccount, int32_t());
+    MOCK_METHOD0(LnnGetFeatureCapabilty, uint64_t());
+    MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
+    MOCK_METHOD1(GetCommonOsType, int32_t(int32_t *));
+    MOCK_METHOD2(GetCommonOsVersion, int32_t(char *, uint32_t));
+    MOCK_METHOD2(GetCommonDeviceVersion, int32_t(char *, uint32_t));
+    MOCK_METHOD1(GetDeviceSecurityLevel, int32_t(int32_t *));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t(SoftBusBtAddr *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);

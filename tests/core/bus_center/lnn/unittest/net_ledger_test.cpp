@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "lnn_decision_db.h"
 #include "lnn_decision_db.c"
+#include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
 #include "lnn_local_net_ledger.h"
@@ -31,8 +31,8 @@
 #include "lnn_node_info.h"
 
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_conn_interface.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 namespace OHOS {
@@ -50,13 +50,9 @@ public:
     void TearDown();
 };
 
-void NetLedgerTest::SetUpTestCase()
-{
-}
+void NetLedgerTest::SetUpTestCase() { }
 
-void NetLedgerTest::TearDownTestCase()
-{
-}
+void NetLedgerTest::TearDownTestCase() { }
 
 void NetLedgerTest::SetUp()
 {
@@ -74,11 +70,11 @@ void NetLedgerTest::TearDown()
 }
 
 /*
-* @tc.name: AUTH_TYPE_VALUE_SET_CLEAR_Test_001
-* @tc.desc: auth type value set and clear test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_TYPE_VALUE_SET_CLEAR_Test_001
+ * @tc.desc: auth type value set and clear test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, AUTH_TYPE_VALUE_SET_CLEAR_Test_001, TestSize.Level1)
 {
     int32_t ret;
@@ -103,11 +99,11 @@ HWTEST_F(NetLedgerTest, AUTH_TYPE_VALUE_SET_CLEAR_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: BUILD_TRUSTED_DEV_INFO_RECORD_Test_001
-* @tc.desc: build trusted dev info record test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BUILD_TRUSTED_DEV_INFO_RECORD_Test_001
+ * @tc.desc: build trusted dev info record test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, BUILD_TRUSTED_DEV_INFO_RECORD_Test_001, TestSize.Level1)
 {
     int32_t ret;
@@ -124,11 +120,11 @@ HWTEST_F(NetLedgerTest, BUILD_TRUSTED_DEV_INFO_RECORD_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001
-* @tc.desc: lnn get trusted dev info from db test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001
+ * @tc.desc: lnn get trusted dev info from db test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001, TestSize.Level1)
 {
     uint32_t num = 0;
@@ -142,11 +138,11 @@ HWTEST_F(NetLedgerTest, LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: DL_GET_Test_001
-* @tc.desc: Dl Get Auth test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DL_GET_Test_001
+ * @tc.desc: Dl Get Auth test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, DL_GET_Test_001, TestSize.Level1)
 {
     char networkId[DEFAULT_SIZE] = "1234";
@@ -159,11 +155,11 @@ HWTEST_F(NetLedgerTest, DL_GET_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_ADD_META_INFO_Test_001
-* @tc.desc: Lnn Add Meta Info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ADD_META_INFO_Test_001
+ * @tc.desc: Lnn Add Meta Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, LNN_ADD_META_INFO_Test_001, TestSize.Level1)
 {
     NodeInfo info;
@@ -172,11 +168,11 @@ HWTEST_F(NetLedgerTest, LNN_ADD_META_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_DELETE_META_INFO_Test_001
-* @tc.desc: Lnn Delete Meta Info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_DELETE_META_INFO_Test_001
+ * @tc.desc: Lnn Delete Meta Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 {
     char udid[DEFAULT_SIZE] = "1234";
@@ -185,11 +181,11 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001
-* @tc.desc: Get All Online And Meta Node Info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001
+ * @tc.desc: Get All Online And Meta Node Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001, TestSize.Level1)
 {
     NodeBasicInfo base;
@@ -208,11 +204,11 @@ HWTEST_F(NetLedgerTest, GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_META_INFO_ADD_DEL_Test_001
-* @tc.desc: lnn add and del meta info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_META_INFO_ADD_DEL_Test_001
+ * @tc.desc: lnn add and del meta info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, LNN_META_INFO_ADD_DEL_Test_001, TestSize.Level1)
 {
     int32_t ret;
@@ -234,11 +230,11 @@ HWTEST_F(NetLedgerTest, LNN_META_INFO_ADD_DEL_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_GET_REMOTE_NUM16_INFO_Test_001
-* @tc.desc: lnn get remote num16 info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_REMOTE_NUM16_INFO_Test_001
+ * @tc.desc: lnn get remote num16 info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetLedgerTest, LNN_GET_REMOTE_NUM16_INFO_Test_001, TestSize.Level1)
 {
     int32_t ret;
