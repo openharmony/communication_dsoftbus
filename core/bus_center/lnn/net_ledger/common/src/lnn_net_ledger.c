@@ -327,7 +327,7 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local network id fail");
-        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR; 
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
         isLocalNetworkId = true;
