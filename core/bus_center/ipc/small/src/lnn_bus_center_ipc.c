@@ -394,6 +394,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     while ((info = FindJoinLNNRequest(connAddr)) != NULL) {
         ListDelete(&info->node);
@@ -403,6 +404,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     }
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "release lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -420,6 +422,7 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
 
     while ((info = FindLeaveLNNRequest(networkId)) != NULL) {
@@ -430,6 +433,7 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
     }
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "release lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
