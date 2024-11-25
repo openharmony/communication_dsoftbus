@@ -267,7 +267,7 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
         (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
         return ret;
     }
-    ret = UpdateDbPassword(ctx, dbKey, sizeof(dbKey));  
+    ret = UpdateDbPassword(ctx, dbKey, sizeof(dbKey));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "encrypt decision db fail");
         (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
