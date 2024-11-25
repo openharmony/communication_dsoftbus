@@ -28,13 +28,11 @@ constexpr uint32_t ERROR_CODE_MODULE_AND = 0x1F0000;
 
 class SoftBusUtilsTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {}
-    static void TearDownTestCase(void) {}
+    static void SetUpTestCase(void) { }
+    static void TearDownTestCase(void) { }
 };
 
-void MockSoftBusTimer(void)
-{
-}
+void MockSoftBusTimer(void) { }
 
 /**
  * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001

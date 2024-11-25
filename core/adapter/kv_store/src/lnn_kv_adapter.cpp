@@ -22,7 +22,6 @@
 #include "anonymizer.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
-#include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
 #include "softbus_error_code.h"
 
@@ -90,7 +89,7 @@ int32_t KVAdapter::RegisterDataChangeListener(
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     if (dataChangeListener == nullptr) {
         LNN_LOGE(LNN_LEDGER, "dataChangeListener is null");
@@ -118,7 +117,7 @@ int32_t KVAdapter::UnRegisterDataChangeListener()
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
@@ -301,14 +300,6 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
 DistributedKv::Status KVAdapter::GetKvStorePtr()
 {
     LNN_LOGI(LNN_LEDGER, "called");
-    bool isLogIn = false;
-    if (LnnIsDefaultOhosAccount()) {
-        LNN_LOGI(LNN_LEDGER, "no account log in, enableCloud=false");
-        isLogIn = false;
-    } else {
-        LNN_LOGI(LNN_LEDGER, "account already log in, enableCloud=true");
-        isLogIn = true;
-    }
     DistributedKv::Options options = {
         .encrypt = true,
         .autoSync = false,
@@ -317,7 +308,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .cloudConfig = { .enableCloud = isLogIn, .autoSync = true }
+        .cloudConfig = { .enableCloud = false, .autoSync = true }
     };
     DistributedKv::Status status;
     {
@@ -353,7 +344,7 @@ int32_t KVAdapter::CloudSync()
     LNN_LOGI(LNN_LEDGER, "call!");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     std::function<void(DistributedKv::ProgressDetail &&)> callback = CloudSyncCallback;
     DistributedKv::Status status;

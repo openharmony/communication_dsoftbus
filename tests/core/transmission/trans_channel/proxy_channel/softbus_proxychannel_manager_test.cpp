@@ -295,7 +295,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNewChanSeqTest002, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyGetNewChanSeq(TEST_VALID_CHANNEL_ID);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**
@@ -363,7 +363,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAuthIdTest002, TestSize.Le
     ret = TransProxyGetAuthId(channelId, handle);
     EXPECT_EQ(TEST_VALID_AUTH_ID, handle->authId);
     SoftBusFree(handle);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**
@@ -453,7 +453,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest003,
 
     ret = TransProxyGetSessionKeyByChanId(TEST_VALID_CHANNEL_ID, sessionKey, sessionKeySize);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**
@@ -546,7 +546,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest003, Tes
     int32_t connId = TEST_VALID_CONN_ID;
     ret = TransProxyGetConnIdByChanId(TEST_INVALID_CHANNEL_ID, &connId);
     EXPECT_NE(SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID, ret);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**
@@ -581,7 +581,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest001,
 
     ret = TransProxyGetConnOptionByChanId(chan->channelId, &connOpt);
     EXPECT_NE(SOFTBUS_OK, ret);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_NUMBER_TWENTY);
 }
 
 /**
@@ -981,7 +981,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransGetRemoteDeviceIdByReqIdTest001, T
 
     ret = TransGetRemoteDeviceIdByReqId(TEST_INVALID_REQ, peerNetworkId);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**@
@@ -1057,7 +1057,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyNegoSessionKeySuccTest001, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyNegoSessionKeySucc(TEST_VALID_CHANNEL_ID);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**@
@@ -1077,7 +1077,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyNegoSessionKeyFailTest001, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyNegoSessionKeyFail(TEST_VALID_CHANNEL_ID, SOFTBUS_OK);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**@
@@ -1097,7 +1097,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest00
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyOpenProxyChannelSuccess(TEST_VALID_CHANNEL_ID);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**@
@@ -1141,21 +1141,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyTimerItemProcTest001, TestSiz
     TransProxyTimerItemProc(&proxyProcList);
     TransProxyTimerProc();
     ListDelInit(&proxyProcList);
-}
-
-/**@
- * @tc.name: TransWifiStateChangeTest001
- * @tc.desc: test trans wifi state change
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransWifiStateChangeTest001, TestSize.Level1)
-{
-    LnnEventBasicInfo *info = reinterpret_cast<LnnEventBasicInfo *>(SoftBusCalloc(sizeof(LnnEventBasicInfo)));
-    ASSERT_TRUE(nullptr != info);
-    info->event = LNN_EVENT_NODE_MIGRATE;
-    TransWifiStateChange(info);
-    SoftBusFree(info);
 }
 
 /**@
@@ -1288,7 +1273,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelChanByReqIdTest002, TestSi
     TransProxyAddChanItem(chan);
 
     TransProxyDelChanByReqId(TEST_VALID_REQ, SOFTBUS_OK);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
 }
 
 /**@
@@ -1548,7 +1533,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest004, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyDelByConnId(TEST_VALID_CONN_ID);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_PARSE_MESSAGE_CHANNEL);
 }
 
 /**@
@@ -1599,7 +1584,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyResetChanTest001, TestSize.Le
 
     ret = TransProxyResetChan(chanRes);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_PARSE_MESSAGE_CHANNEL);
     SoftBusFree(chanRes);
 }
 
@@ -1629,7 +1614,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetRecvMsgChanInfoTest001, Te
     ret = TransProxyGetRecvMsgChanInfo(TEST_NUMBER_ZERO, TEST_NUMBER_ONE, chanRes);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(PROXY_CHANNEL_STATUS_COMPLETED, chanRes->status);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_PARSE_MESSAGE_CHANNEL);
     SoftBusFree(chanRes);
 }
 
@@ -1661,7 +1646,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAliveChanTest001, TestSiz
     ret = TransProxyKeepAliveChan(chanRes);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(PROXY_CHANNEL_STATUS_COMPLETED, chanRes->status);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_PARSE_MESSAGE_CHANNEL);
     SoftBusFree(chanRes);
 }
 
@@ -2059,7 +2044,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySetAuthHandleByChanId002, Tes
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     ret = TransProxySetAuthHandleByChanId(TEST_MESSAGE_CHANNEL_ID, authHandle);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransProxyDelChanByChanId(chan->channelId);
+    TransProxyDelChanByChanId(TEST_MESSAGE_CHANNEL_ID);
 }
 
 /**

@@ -1,25 +1,26 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-#include "lnn_kv_adapter_wrapper.h"
-#include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 #include <cstdint>
-#include <string>
 #include <cstring>
+#include <string>
+
+#include "lnn_kv_adapter_wrapper.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
+#include "gtest/gtest.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -33,7 +34,7 @@ constexpr int32_t STORE_ID_LEN = 19;
 constexpr int32_t MIN_DBID_COUNT = 1;
 const std::string APP_ID = "dsoftbus";
 const std::string STORE_ID = "dsoftbus_kv_db_test";
-}
+} // namespace
 static int32_t g_dbId = 1;
 class KVAdapterWrapperTest : public testing::Test {
 protected:
@@ -55,16 +56,12 @@ void KVAdapterWrapperTest::TearDownTestCase(void)
 {
     LnnDestroyKvAdapter(g_dbId + 1);
 
-    LnnDestroyKvAdapter(g_dbId);  // g_dbId = 1
+    LnnDestroyKvAdapter(g_dbId); // g_dbId = 1
 }
 
-void KVAdapterWrapperTest::SetUp()
-{
-}
+void KVAdapterWrapperTest::SetUp() { }
 
-void KVAdapterWrapperTest::TearDown()
-{
-}
+void KVAdapterWrapperTest::TearDown() { }
 
 /**
  * @tc.name: LnnPutDBData
@@ -79,22 +76,21 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData001, TestSize.Level1)
     string valueStr = "aaa";
     EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), 3, valueStr.c_str(), 3), SOFTBUS_OK);
     dbId++;
-    EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valueStr.c_str(), MAX_STRING_LEN),
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(
+        LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valueStr.c_str(), MAX_STRING_LEN), SOFTBUS_INVALID_PARAM);
     dbId = 0;
-    EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valueStr.c_str(), MAX_STRING_LEN),
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(
+        LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valueStr.c_str(), MAX_STRING_LEN), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valueStr.c_str(), MAX_STRING_LEN + 1),
         SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valueStr.c_str(), MIN_STRING_LEN - 1),
         SOFTBUS_INVALID_PARAM);
     char *valuePtr = nullptr;
-    EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valuePtr, MIN_STRING_LEN - 1),
-        SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN + 1, valuePtr, MIN_STRING_LEN - 1),
-        SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MIN_STRING_LEN - 1, valuePtr, MIN_STRING_LEN - 1),
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, valuePtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(
+        LnnPutDBData(dbId, keyStr.c_str(), MAX_STRING_LEN + 1, valuePtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(
+        LnnPutDBData(dbId, keyStr.c_str(), MIN_STRING_LEN - 1, valuePtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
     char *keyPtr = nullptr;
     EXPECT_EQ(LnnPutDBData(dbId, keyPtr, MIN_STRING_LEN - 1, valuePtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
 }
@@ -529,7 +525,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_KeyLen_GreaterThanMax, TestSize.L
  */
 HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_Dbid_LessThanMin, TestSize.Level1)
 {
-    int32_t dbId = MIN_DBID_COUNT-1;
+    int32_t dbId = MIN_DBID_COUNT - 1;
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
     int32_t ret = LnnDeleteDBData(dbId, key, keyLen);

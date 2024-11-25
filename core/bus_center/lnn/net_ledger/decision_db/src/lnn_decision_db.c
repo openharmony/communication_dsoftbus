@@ -21,12 +21,14 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ohos_account.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_huks_utils.h"
 #include "lnn_log.h"
 #include "sqlite3_utils.h"
 
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -49,6 +51,8 @@ static bool g_isDbListInit = false;
 
 static struct HksBlob g_keyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
 static struct HksBlob g_ceKeyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
+
+static int32_t GetLocalAccountHexHash(char *accountHexHash);
 
 static bool DeviceDbRecoveryInit(void)
 {
@@ -278,7 +282,7 @@ static int32_t BuildTrustedDevInfoRecord(const char *udid, TrustedDevInfoRecord 
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
-
+    int32_t userId = GetActiveOsAccountIds();
     if (udid == NULL || record == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -295,14 +299,16 @@ static int32_t BuildTrustedDevInfoRecord(const char *udid, TrustedDevInfoRecord 
         LNN_LOGE(LNN_LEDGER, "convert accountHash failed");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
-    if (strcpy_s(record->accountHexHash, sizeof(record->accountHexHash), accountHexHash) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s account hash failed");
-        return SOFTBUS_STRCPY_ERR;
+    if (sprintf_s(record->accountHexHash, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+        "%s-%d", accountHexHash, userId) < 0) {
+        LNN_LOGE(LNN_LEDGER, "sprintf_s fail");
+        return SOFTBUS_SPRINTF_ERR;
     }
     if (strcpy_s(record->udid, sizeof(record->udid), udid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s udid hash failed");
         return SOFTBUS_STRCPY_ERR;
     }
+    record->userId = userId;
     return SOFTBUS_OK;
 }
 
@@ -394,6 +400,12 @@ static void RemoveTrustedDevInfoRecord(void *param)
             LNN_LOGE(LNN_LEDGER, "encrypt database failed");
             break;
         }
+        // delete oldRecord
+        TrustedDevInfoRecord oldRecord = record;
+        (void)memset_s(oldRecord.accountHexHash, sizeof(oldRecord.accountHexHash), 0, sizeof(oldRecord.accountHexHash));
+        if (GetLocalAccountHexHash(oldRecord.accountHexHash) == SOFTBUS_OK) {
+            (void)RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&oldRecord);
+        }
         if (RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
             (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
         }
@@ -419,7 +431,8 @@ static void DeleteDeviceFromList(TrustedDevInfoRecord *record)
     DeviceDbInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_deviceInfoList, DeviceDbInfo, node) {
         if (strcmp(item->infoRecord.accountHexHash, record->accountHexHash) == 0 &&
-            strcmp(item->infoRecord.udid, record->udid) == 0) {
+            strcmp(item->infoRecord.udid, record->udid) == 0 &&
+            item->infoRecord.userId == record->userId) {
             char *anonyUdid = NULL;
             Anonymize(record->udid, &anonyUdid);
             LNN_LOGI(LNN_LEDGER, "delete device db from list. udid=%{public}s", AnonymizeWrapper(anonyUdid));
@@ -441,7 +454,8 @@ static void InsertDeviceToList(TrustedDevInfoRecord *record)
     DeviceDbInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
         if (strcmp(item->infoRecord.accountHexHash, record->accountHexHash) == 0 &&
-            strcmp(item->infoRecord.udid, record->udid) == 0) {
+            strcmp(item->infoRecord.udid, record->udid) == 0 &&
+            item->infoRecord.userId == record->userId) {
             DeviceDbListUnlock();
             return;
         }
@@ -571,32 +585,48 @@ static int32_t GetLocalAccountHexHash(char *accountHexHash)
     return SOFTBUS_OK;
 }
 
-static int32_t GetAllDevNums(char *accountHexHash, uint32_t *num)
+static int32_t GetAllDevNums(char *accountHexHash, uint32_t *num, int32_t userId)
 {
     DeviceDbInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
-        if (strcmp(accountHexHash, item->infoRecord.accountHexHash) == 0) {
+        if (strcmp(accountHexHash, item->infoRecord.accountHexHash) == 0 && item->infoRecord.userId == userId) {
             (*num)++;
         }
     }
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+static int32_t GenerateAccountHexHashWithUserId(char *accountHexHashAndUserId, int32_t *userId)
 {
     char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
-    if (udidArray == NULL || num == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
+    *userId = GetActiveOsAccountIds();
     if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local account hash failed");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
+    if (sprintf_s(accountHexHashAndUserId, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+        "%s-%d", accountHexHash, *userId) < 0) {
+        LNN_LOGE(LNN_LEDGER, "sprintf_s fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+{
+    char accountHexHashAndUserId[SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1] = {0};
+    int32_t userId = 0;
+    LNN_CHECK_AND_RETURN_RET_LOGE((udidArray != NULL) && (num != NULL), SOFTBUS_INVALID_PARAM, LNN_LEDGER,
+        "invalid param");
+    if (GenerateAccountHexHashWithUserId(accountHexHashAndUserId, &userId) != SOFTBUS_OK) {
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+
     if (DeviceDbListLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t ret = GetAllDevNums(accountHexHash, num);
+    int32_t ret = GetAllDevNums(accountHexHashAndUserId, num, userId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get all dev num fail");
         DeviceDbListUnlock();
@@ -621,7 +651,8 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
         if (cur >= *num) {
             break;
         }
-        if (strcmp(accountHexHash, item->infoRecord.accountHexHash) != 0) {
+        if (strcmp(accountHexHashAndUserId, item->infoRecord.accountHexHash) != 0 ||
+            item->infoRecord.userId != userId) {
             continue;
         }
         if (strcpy_s(*udidArray + cur * UDID_BUF_LEN, UDID_BUF_LEN, item->infoRecord.udid) != EOK) {
@@ -634,17 +665,12 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return SOFTBUS_OK;
 }
 
-static int32_t GetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+static int32_t GetTrustedDevInfoFromDb(char **udidArray, uint32_t *num, char *accountHexHash)
 {
-    char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
     DbContext *ctx = NULL;
 
     if (udidArray == NULL || num == NULL) {
         return SOFTBUS_INVALID_PARAM;
-    }
-    if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
-        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     if (DbLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
@@ -671,12 +697,11 @@ static int32_t GetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return rc;
 }
 
-static int32_t RecoveryTrustedDevInfo(void)
+static int32_t RecoveryTrustedDevInfoProcess(char *accountHexHash, int32_t activeUserId, bool oldData)
 {
     uint32_t num = 0;
     char *udidArray = NULL;
-    char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
-    if (GetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
+    if (GetTrustedDevInfoFromDb(&udidArray, &num, accountHexHash) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get trusted dev info fail");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
@@ -685,10 +710,10 @@ static int32_t RecoveryTrustedDevInfo(void)
         LNN_LOGE(LNN_LEDGER, "get none trusted dev info");
         return SOFTBUS_OK;
     }
-    if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
-        SoftBusFree(udidArray);
-        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    if (oldData && sprintf_s(accountHexHash, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+        "%s-%d", accountHexHash, activeUserId) < 0) {
+        LNN_LOGE(LNN_LEDGER, "sprintf_s fail");
+        return SOFTBUS_STRCPY_ERR;
     }
     if (DeviceDbListLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "db lock fail");
@@ -704,18 +729,46 @@ static int32_t RecoveryTrustedDevInfo(void)
         }
         if (memcpy_s(udidStr, UDID_BUF_LEN, udidArray + i * UDID_BUF_LEN, UDID_BUF_LEN) != EOK ||
             memcpy_s(info->infoRecord.udid, UDID_BUF_LEN, udidStr, UDID_BUF_LEN) != EOK ||
-            memcpy_s(info->infoRecord.accountHexHash, SHA_256_HEX_HASH_LEN, accountHexHash,
-                SHA_256_HEX_HASH_LEN) != EOK) {
+            memcpy_s(info->infoRecord.accountHexHash, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+                accountHexHash, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1) != EOK) {
             LNN_LOGE(LNN_LEDGER, "udid str cpy fail.");
             DeviceDbListUnlock();
             SoftBusFree(info);
             SoftBusFree(udidArray);
             return SOFTBUS_MEM_ERR;
         }
+        info->infoRecord.userId = activeUserId;
         ListNodeInsert(&g_deviceInfoList, &info->node);
     }
     DeviceDbListUnlock();
     SoftBusFree(udidArray);
+    return SOFTBUS_OK;
+}
+
+static int32_t RecoveryTrustedDevInfo(void)
+{
+    char accountHexHash[SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1] = {0};
+    char tempAccountAccountHexHash[SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1] = {0};
+    if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (strcpy_s(tempAccountAccountHexHash, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+        accountHexHash)!= EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    RecoveryTrustedDevInfoProcess(accountHexHash, LNN_DEFAULT_USERID, true);
+
+    char accountHexHashAndUserId[SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1] = {0};
+    int32_t userId = GetActiveOsAccountIds();
+    LNN_LOGI(LNN_LEDGER, "activeUserId=%{public}d", userId);
+    if (sprintf_s(accountHexHashAndUserId, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+        "%s-%d", tempAccountAccountHexHash, userId) < 0) {
+        LNN_LOGE(LNN_LEDGER, "sprintf_s fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    RecoveryTrustedDevInfoProcess(accountHexHashAndUserId, userId, false);
     return SOFTBUS_OK;
 }
 

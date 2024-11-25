@@ -121,6 +121,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
         "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
+    LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
     if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "update db recovery fail");

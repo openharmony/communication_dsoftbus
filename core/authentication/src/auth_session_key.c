@@ -50,7 +50,7 @@ static void RemoveOldKey(SessionKeyList *list)
     if (num <= SESSION_KEY_MAX_NUM) {
         return;
     }
-    
+
     SessionKeyItem *oldKey = NULL;
     uint64_t oldKeyUseTime = UINT64_MAX;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
@@ -244,7 +244,7 @@ int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index)
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "can't find sessionKey, index=%{public}d", index);
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_SESSION_KEY_NOT_FOUND;
 }
 
 int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type, bool isOldKey)
@@ -288,7 +288,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32
     }
     if (IsListEmpty((const ListNode *)list)) {
         AUTH_LOGE(AUTH_FSM, "session key list is empty");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LIST_EMPTY;
     }
     SessionKeyItem *item = NULL;
     SessionKeyItem *latestKey = NULL;
@@ -305,7 +305,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32
     if (latestKey == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid session key item, type=%{public}d", type);
         DumpSessionkeyList(list);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SESSION_KEY_INVALID;
     }
     if (memcpy_s(key, sizeof(SessionKey), &latestKey->key, sizeof(latestKey->key)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy session key fail.");
@@ -339,7 +339,7 @@ int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, Aut
         return SOFTBUS_OK;
     }
     AUTH_LOGI(AUTH_FSM, "not found sessionKey, index=%{public}d", index);
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_SESSION_KEY_NOT_FOUND;
 }
 
 int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLinkType type, SessionKey *key)
@@ -365,7 +365,7 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLink
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d", index);
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_NOT_FOUND;
 }
 
 void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index, AuthLinkType type)
@@ -427,6 +427,7 @@ int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataI
     SessionKey sessionKey;
     if (GetLatestSessionKey(list, type, &index, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get key fail");
+        AUTH_LOGD(AUTH_FSM, "keyLen=%{public}d", sessionKey.len);
         return SOFTBUS_ENCRYPT_ERR;
     }
     /* pack key index */
@@ -573,14 +574,14 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
 
 static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(obj != NULL, SOFTBUS_ERR, AUTH_FSM, "obj is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(para != NULL, SOFTBUS_ERR, AUTH_FSM, "para is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(obj != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "obj is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(para != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "para is NULL");
     int64_t authId = *(int64_t *)(obj);
     if (authId == *(int64_t *)(para)) {
         AUTH_LOGI(AUTH_FSM, "remove update session key event, authId=%{public}" PRId64, authId);
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 void ScheduleUpdateSessionKey(AuthHandle authHandle, uint64_t delayMs)

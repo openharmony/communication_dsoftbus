@@ -23,8 +23,8 @@
 
 using namespace std;
 using namespace testing::ext;
-#define NUM 50
-#define DBINDER_SERVICE_NAME "DBinderService"
+#define NUM                     50
+#define DBINDER_SERVICE_NAME    "DBinderService"
 #define DBINDER_BUS_NAME_PREFIX "DBinder"
 
 namespace OHOS {
@@ -35,16 +35,16 @@ const char *g_errPkgName = "abc";
 
 class PermissionEntryTest : public testing::Test {
 public:
-    PermissionEntryTest() {}
-    ~PermissionEntryTest() {}
+    PermissionEntryTest() { }
+    ~PermissionEntryTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void PermissionEntryTest::SetUpTestCase(void) {}
-void PermissionEntryTest::TearDownTestCase(void) {}
+void PermissionEntryTest::SetUpTestCase(void) { }
+void PermissionEntryTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: StrIsEmptyTest001

@@ -76,6 +76,8 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability);
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
+int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum);
+int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId);
 int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info);
 int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info);
 const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
@@ -93,8 +95,8 @@ int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort
 int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
 int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
-bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr);
+bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType);
 int32_t LnnSetDLUnifiedDeviceName(const char *udid, const char *name);
 int32_t LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name);

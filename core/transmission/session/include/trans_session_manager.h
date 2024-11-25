@@ -22,6 +22,15 @@
 extern "C" {
 #endif
 
+typedef enum {
+    CALLER_TYPE_BEGIN,
+    CALLER_TYPE_SERVICE_ABILITY = CALLER_TYPE_BEGIN,
+    CALLER_TYPE_FEATURE_ABILITY,
+    CALLER_TYPE_PARTICAL_ABILITY,
+    CALLER_TYPE_DATA_ABILITY,
+    CALLER_TYPE_END,
+} CallerType;
+
 typedef struct {
     ListNode node;
     SoftBusSecType type;
@@ -29,6 +38,7 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     int32_t uid;
     int32_t pid;
+    CallerType callerType;
 } SessionServer;
 
 int32_t TransSessionMgrInit(void);

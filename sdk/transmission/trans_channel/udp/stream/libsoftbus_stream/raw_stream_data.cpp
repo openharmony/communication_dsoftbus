@@ -23,10 +23,14 @@
 
 namespace Communication {
 namespace SoftBus {
+RawStreamData::RawStreamData(const StreamFrameInfo& frameInfo)
+{
+    streamFrameInfo_ = frameInfo;
+}
+
 std::unique_ptr<IStream> IStream::MakeRawStream(StreamData &data, const StreamFrameInfo &info)
 {
-    static_cast<void>(info);
-    auto raw = std::make_unique<RawStreamData>();
+    auto raw = std::make_unique<RawStreamData>(info);
     raw->InitStreamData(std::move(data.buffer), data.bufLen, std::move(data.extBuffer), data.extLen);
 
     return raw;
@@ -44,8 +48,7 @@ std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen,
         return nullptr;
     }
 
-    static_cast<void>(info);
-    auto raw = std::make_unique<RawStreamData>();
+    auto raw = std::make_unique<RawStreamData>(info);
     if (scene == COMPATIBLE_SCENE) {
         auto buffer = std::make_unique<char[]>(bufLen);
         auto ret = memcpy_s(buffer.get(), bufLen, buf, bufLen);

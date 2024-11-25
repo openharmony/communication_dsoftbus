@@ -67,7 +67,7 @@ void AuthTest::SetUpTestCase()
     SetAceessTokenPermission("AuthTest");
 }
 
-void AuthTest::TearDownTestCase() {}
+void AuthTest::TearDownTestCase() { }
 
 void AuthTest::SetUp()
 {
@@ -101,7 +101,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     return;
 }
 
-void AuthTest::TearDown() {}
+void AuthTest::TearDown() { }
 
 /*
  * @tc.name: AUTH_COMMON_Test_001
@@ -173,7 +173,7 @@ HWTEST_F(AuthTest, HICHAIN_PROCESS_DATA_Test_001, TestSize.Level1)
     ret = HichainProcessData(authSeq, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = HichainProcessData(authSeq, data, len);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -604,10 +604,10 @@ HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_002, TestSize.Level1)
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     type = LINK_TYPE;
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -628,7 +628,7 @@ HWTEST_F(AuthTest, START_SOCKET_LISTENING_Test_001, TestSize.Level1)
         },
     };
     int32_t ret = StartSocketListening(AUTH, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -660,7 +660,7 @@ HWTEST_F(AuthTest, SOCKER_POST_BYTES_Test_001, TestSize.Level1)
     const uint8_t data[TEST_DATA_LEN] = { 0 };
 
     int32_t ret = SocketPostBytes(fd, &head, data);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -677,7 +677,7 @@ HWTEST_F(AuthTest, SOCKER_GET_CONN_INFO_Test_001, TestSize.Level1)
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -856,7 +856,7 @@ HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
     ret = AuthFlushDevice(const_cast<const char *>(uuid));
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -880,7 +880,7 @@ HWTEST_F(AuthTest, AUTH_SEND_KEEPALIVE_OPTION_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
     ret = AuthSendKeepaliveOption(const_cast<const char *>(uuid), HIGH_FREQ_CYCLE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1389,7 +1389,7 @@ HWTEST_F(AuthTest, AUTH_INIT_Test_001, TestSize.Level1)
     int32_t ret;
 
     ret = AuthInit();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     AuthDeinit();
 }
 
@@ -1421,7 +1421,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
         .onException = NULL,
     };
     ret = AuthDeviceInit(&callBack);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = AuthDeviceInit(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
@@ -1521,7 +1521,7 @@ HWTEST_F(AuthTest, CONVERT_TO_AUTH_CONNINFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     info.socketInfo.protocol = LNN_PROTOCOL_BR;
     ret = ConvertToAuthConnInfo(&info, &connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     info.type = CONNECT_BR;
     ret = ConvertToAuthConnInfo(&info, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -1670,7 +1670,7 @@ HWTEST_F(AuthTest, CHECK_AUTH_CONN_CALLBACK_Test_001, TestSize.Level1)
     ret = CheckAuthConnCallback(&cb);
     EXPECT_TRUE(ret == true);
 
-    AuthRequest request = {0};
+    AuthRequest request = { 0 };
     uint32_t requestId = 0;
     int64_t authId = 0;
     PerformAuthConnCallback(requestId, SOFTBUS_OK, authId);
@@ -1890,9 +1890,9 @@ HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     bool isMetaAuth = false;
-    DevInfoData devInfo = {msg, 0, linkType, version};
+    DevInfoData devInfo = { msg, 0, linkType, version };
     int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1960,7 +1960,7 @@ HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
     uint8_t dataValue[TEST_DATA_LEN] = "123";
     (void)memset_s(&headValue, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
     ret = SocketPostBytes(fd, &headValue, dataValue);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1979,7 +1979,7 @@ HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
     AuthConnInfo connInfoValue;
     (void)memset_s(&connInfoValue, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = SocketGetConnInfo(fd, &connInfoValue, &isServer);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -2074,7 +2074,7 @@ HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = OnConnectEvent(module, cfd, &option);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -2182,7 +2182,7 @@ HWTEST_F(AuthTest, GET_TCP_KEEPALIVE_OPTION_BY_CYCLE_Test_001, TestSize.Level1)
     int32_t ret = GetTcpKeepaliveOptionByCycle(HIGH_FREQ_CYCLE, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = GetTcpKeepaliveOptionByCycle((ModeCycle)tcpKeepaliveOption.keepaliveIdle, &tcpKeepaliveOption);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     ret = GetTcpKeepaliveOptionByCycle(HIGH_FREQ_CYCLE, &tcpKeepaliveOption);
     EXPECT_TRUE(ret == SOFTBUS_OK);

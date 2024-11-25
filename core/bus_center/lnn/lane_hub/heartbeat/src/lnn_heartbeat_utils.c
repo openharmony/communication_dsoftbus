@@ -172,33 +172,27 @@ static bool HbHasActiveHmlConnection(const char *networkId)
 
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
 {
-    bool hasBrConn = false;
-    bool hasBleConn = false;
-    bool hasP2pConn = false;
-    bool hasHmlConn = false;
+    bool ret = false;
 
     if (networkId == NULL || addrType >= CONNECTION_ADDR_MAX) {
         LNN_LOGE(LNN_HEART_BEAT, "HB check active connection get invalid param");
-        return false;
+        return ret;
     }
+
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
         case CONNECTION_ADDR_ETH:
         case CONNECTION_ADDR_BR:
             break;
         case CONNECTION_ADDR_BLE:
-            hasBrConn = HbHasActiveBrConnection(networkId);
-            hasBleConn = HbHasActiveBleConnection(networkId);
-            hasP2pConn = HbHasActiveP2pConnection(networkId);
-            hasHmlConn = HbHasActiveHmlConnection(networkId);
+            ret = HbHasActiveBrConnection(networkId) || HbHasActiveBleConnection(networkId) ||
+                HbHasActiveP2pConnection(networkId) || HbHasActiveHmlConnection(networkId);
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_HEART_BEAT,
-                "HB check active connection networkId=%{public}s, "
-                "BR=%{public}d, BLE=%{public}d, P2P=%{public}d, HML=%{public}d",
-                AnonymizeWrapper(anonyNetworkId), hasBrConn, hasBleConn, hasP2pConn, hasHmlConn);
+            LNN_LOGI(LNN_HEART_BEAT, "HB has active BT/BLE/P2P/HML connection. networkId=%{public}s, ret=%{public}s",
+                AnonymizeWrapper(anonyNetworkId), ret ? "true" : "false");
             AnonymizeFree(anonyNetworkId);
-            return hasBrConn || hasBleConn || hasP2pConn || hasHmlConn;
+            return ret;
         default:
             break;
     }
@@ -214,8 +208,9 @@ bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *
         LNN_LOGE(LNN_HEART_BEAT, "HB visit typeSet get invalid param");
         return false;
     }
+    LnnHeartbeatType tmp = *typeSet;
     for (i = HEARTBEAT_TYPE_MIN; i < HEARTBEAT_TYPE_MAX; i <<= 1) {
-        if ((i & *typeSet) == 0) {
+        if ((i & tmp) == 0) {
             continue;
         }
         isFinish = callback(typeSet, i, data);
@@ -302,7 +297,7 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     uint8_t btMacBin[BT_ADDR_LEN] = { 0 };
     char btMacStr[BT_MAC_NO_COLON_LEN] = { 0 };
     char hashLower[BT_MAC_HASH_STR_LEN] = { 0 };
-    char hash[BT_MAC_HASH_LEN] = { 0 };
+    char hash[SHA_256_HASH_LEN] = { 0 };
     if (ConvertBtMacToBinary(btMac, BT_MAC_LEN, btMacBin, BT_ADDR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "convert br mac to bin fail");
         return SOFTBUS_NETWORK_MAC_TO_BIN_ERR;

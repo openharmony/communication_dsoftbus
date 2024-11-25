@@ -23,9 +23,9 @@
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
 #include "cJSON.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_hichain_mock.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
 #include "softbus_conn_manager.h"
 #include "softbus_json_utils.h"
@@ -60,8 +60,8 @@ public:
     virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual void RouteBuildClientAuthManager(int32_t cfd) = 0;
     virtual void RouteClearAuthChannelId(int32_t cfd) = 0;
-    virtual bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
-                                         uint32_t targetLen) = 0;
+    virtual bool GetJsonObjectStringItem(
+        const cJSON *json, const char * const string, char *target, uint32_t targetLen) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual bool LnnSetDlPtk(const char *networkId, const char *remotePtk) = 0;
     virtual void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log) = 0;
@@ -94,15 +94,15 @@ public:
     MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
     MOCK_METHOD2(LnnHasSupportDiscoveryType, bool(const char *, const char *));
     MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
-    MOCK_METHOD1(RouteBuildClientAuthManager, void (int32_t));
-    MOCK_METHOD1(RouteClearAuthChannelId, void (int32_t));
-    MOCK_METHOD(bool, GetJsonObjectStringItem, (const cJSON *json, const char * const string, char *target,
-                uint32_t targetLen), (override));
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
-    MOCK_METHOD2(LnnSetDlPtk, bool (const char *, const char *));
-    MOCK_METHOD3(LnnDumpRemotePtk, void (const char *, const char *, const char *));
+    MOCK_METHOD1(RouteBuildClientAuthManager, void(int32_t));
+    MOCK_METHOD1(RouteClearAuthChannelId, void(int32_t));
+    MOCK_METHOD(bool, GetJsonObjectStringItem,
+        (const cJSON *json, const char * const string, char *target, uint32_t targetLen), (override));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD2(LnnSetDlPtk, bool(const char *, const char *));
+    MOCK_METHOD3(LnnDumpRemotePtk, void(const char *, const char *, const char *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
-    MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
+    MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

@@ -26,6 +26,7 @@
 #include "lnn_log.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
