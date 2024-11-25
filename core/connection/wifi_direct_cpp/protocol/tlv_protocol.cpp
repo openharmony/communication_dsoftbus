@@ -29,6 +29,7 @@ ProtocolFormat TlvProtocol::GetFormat() const
 
 void TlvProtocol::Write(int key, Serializable::ValueType type, const uint8_t *value, size_t size)
 {
+    CONN_CHECK_AND_RETURN_LOGW(value != nullptr, CONN_WIFI_DIRECT, "invalid param, value is null");
     if (size == 0) {
         return;
     }
