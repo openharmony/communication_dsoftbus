@@ -91,8 +91,8 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
     return GetDataCloudSyncInterface()->ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetDataCloudSyncInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }

@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_node_weight.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_node_weight.c"
+#include "lnn_node_weight.h"
 #include "lnn_service_mock.h"
 #include "softbus_error_code.h"
 
@@ -40,28 +40,20 @@ public:
     void TearDown();
 };
 
-void LNNNodeWeightTest::SetUpTestCase()
-{
-}
+void LNNNodeWeightTest::SetUpTestCase() { }
 
-void LNNNodeWeightTest::TearDownTestCase()
-{
-}
+void LNNNodeWeightTest::TearDownTestCase() { }
 
-void LNNNodeWeightTest::SetUp()
-{
-}
+void LNNNodeWeightTest::SetUp() { }
 
-void LNNNodeWeightTest::TearDown()
-{
-}
+void LNNNodeWeightTest::TearDown() { }
 
 /*
-* @tc.name: LNN_COMPARE_NODE_WEIGHT_TEST_001
-* @tc.desc: test LnnCompareNodeWeight
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
+ * @tc.name: LNN_COMPARE_NODE_WEIGHT_TEST_001
+ * @tc.desc: test LnnCompareNodeWeight
+ * @tc.type: FUNC
+ * @tc.require: I5OMIK
+ */
 HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, UDID2);
@@ -75,11 +67,11 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_GET_LOCAL_WEIGHT_TEST_001
-* @tc.desc: test LnnGetLocalWeight
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_LOCAL_WEIGHT_TEST_001
+ * @tc.desc: test LnnGetLocalWeight
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNodeWeightTest, LNN_GET_LOCAL_WEIGHT_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> lnnServiceMock;

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
 #include <cstring>
+#include <fcntl.h>
 
-#include "gtest/gtest.h"
-#include "lnn_ip_utils_adapter.h"
 #include "bus_center_adapter.h"
+#include "lnn_ip_utils_adapter.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "gtest/gtest.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -36,9 +36,7 @@ protected:
     void SetUp();
     void TearDown();
 };
-void DsoftbusOtherTest::SetUpTestCase(void)
-{
-}
+void DsoftbusOtherTest::SetUpTestCase(void) { }
 void DsoftbusOtherTest::TearDownTestCase(void)
 {
     int32_t ret = remove(g_FileName);
@@ -46,19 +44,15 @@ void DsoftbusOtherTest::TearDownTestCase(void)
         return;
     }
 }
-void DsoftbusOtherTest::SetUp(void)
-{
-}
-void DsoftbusOtherTest::TearDown(void)
-{
-}
+void DsoftbusOtherTest::SetUp(void) { }
+void DsoftbusOtherTest::TearDown(void) { }
 
 /*
-* @tc.name: GetCommonDevInfoTest001
-* @tc.desc: value is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetCommonDevInfoTest001
+ * @tc.desc: value is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, TestSize.Level0)
 {
     char value[] = "abcdefg";
@@ -74,11 +68,11 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, TestSize.Level0)
 }
 
 /*
-* @tc.name: GetCommonDevInfoTest002
-* @tc.desc: value is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetCommonDevInfoTest002
+ * @tc.desc: value is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, TestSize.Level0)
 {
     int32_t len = 10;
@@ -99,11 +93,11 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, TestSize.Level0)
 }
 
 /*
-* @tc.name: GetCommonDevInfoTest003
-* @tc.desc: len is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetCommonDevInfoTest003
+ * @tc.desc: len is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, TestSize.Level0)
 {
     char value[] = "abcdefg";
@@ -116,11 +110,11 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, TestSize.Level0)
 }
 
 /*
-* @tc.name: GetCommonDevInfoTest004
-* @tc.desc: value is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetCommonDevInfoTest004
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
 {
     char value[] = "abcdefg";
@@ -131,4 +125,4 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
     ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, value, len);
     EXPECT_EQ(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR, ret);
 }
-}
+} // namespace OHOS

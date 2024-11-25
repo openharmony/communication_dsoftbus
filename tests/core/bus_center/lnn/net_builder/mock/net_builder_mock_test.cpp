@@ -47,20 +47,16 @@ void NetBuilderMockTest::TearDownTestCase()
     LooperDeinit();
 }
 
-void NetBuilderMockTest::SetUp()
-{
-}
+void NetBuilderMockTest::SetUp() { }
 
-void NetBuilderMockTest::TearDown()
-{
-}
+void NetBuilderMockTest::TearDown() { }
 
 /*
-* @tc.name: NET_BUILDER_TEST_001
-* @tc.desc: test LnnNotifyDiscoveryDevice
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NET_BUILDER_TEST_001
+ * @tc.desc: test LnnNotifyDiscoveryDevice
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnInitNetBuilder();
@@ -81,11 +77,11 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: NET_BUILDER_TEST_002
-* @tc.desc: test LnnServerJoin
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NET_BUILDER_TEST_002
+ * @tc.desc: test LnnServerJoin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_002, TestSize.Level1)
 {
     int32_t ret = LnnInitNetBuilder();
@@ -104,11 +100,11 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: NET_BUILDER_TEST_003
-* @tc.desc: test LnnSyncOfflineComplete
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NET_BUILDER_TEST_003
+ * @tc.desc: test LnnSyncOfflineComplete
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_003, TestSize.Level1)
 {
     LnnSyncInfoType type = LNN_INFO_TYPE_DEVICE_NAME;
@@ -124,11 +120,11 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: NET_BUILDER_TEST_004
-* @tc.desc: test LnnServerLeave
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NET_BUILDER_TEST_004
+ * @tc.desc: test LnnServerLeave
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_004, TestSize.Level1)
 {
     const char *networkId = "123456xxx";
@@ -144,11 +140,11 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: NET_BUILDER_TEST_004
-* @tc.desc: test LnnNotifyAuthHandleLeaveLNN
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NET_BUILDER_TEST_004
+ * @tc.desc: test LnnNotifyAuthHandleLeaveLNN
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_005, TestSize.Level1)
 {
     AuthInterfaceMock authMock;

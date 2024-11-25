@@ -880,8 +880,7 @@ EXIT:
 
 static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 {
-    bool noNeedGetPkg = (chan->appInfo.appType == APP_TYPE_INNER) ||
-        ((chan->appInfo.appType == APP_TYPE_AUTH) && (IsNoPkgNameSession(chan->appInfo.myData.sessionName)));
+    bool noNeedGetPkg = (chan->appInfo.appType == APP_TYPE_INNER);
     if (!noNeedGetPkg) {
         if (TransProxyGetPkgName(chan->appInfo.myData.sessionName,
             chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {

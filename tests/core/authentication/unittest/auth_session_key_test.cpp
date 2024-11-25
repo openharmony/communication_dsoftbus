@@ -46,9 +46,9 @@ void AuthSessionKeyTest::TearDownTestCase()
     AuthCommonDeinit();
 }
 
-void AuthSessionKeyTest::SetUp() {}
+void AuthSessionKeyTest::SetUp() { }
 
-void AuthSessionKeyTest::TearDown() {}
+void AuthSessionKeyTest::TearDown() { }
 
 /*
  * @tc.name: SESSIONKEY_USE_TIME_TEST_001
@@ -88,9 +88,9 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddSessionKey(&clientList, SESSIONKEY_INDEX2, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX2);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX2);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int32_t index = -1;
@@ -123,9 +123,9 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_003, TestSize.Level1)
     SoftBusSleepMs(100);
     ret = AddSessionKey(&serverList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&serverList, SESSIONKEY_INDEX);
+    ret = SetSessionKeyAvailable(&serverList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(100);
     ret = SetSessionKeyAuthLinkType(&clientList, SESSIONKEY_INDEX, AUTH_LINK_TYPE_BR);
@@ -153,12 +153,12 @@ HWTEST_F(AuthSessionKeyTest, UPDATE_LATEST_USE_TIME_TEST_001, TestSize.Level1)
     ListInit(&clientList);
     int32_t ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(100);
     ret = AddSessionKey(&clientList, SESSIONKEY_INDEX2, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX2);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX2);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(100);
     ret = SetSessionKeyAuthLinkType(&clientList, SESSIONKEY_INDEX, AUTH_LINK_TYPE_WIFI);
@@ -189,12 +189,12 @@ HWTEST_F(AuthSessionKeyTest, UPDATE_LATEST_USE_TIME_TEST_002, TestSize.Level1)
     ListInit(&clientList);
     int32_t ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(100);
     ret = AddSessionKey(&clientList, SESSIONKEY_INDEX2, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret  = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX2);
+    ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX2);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(100);
     ret = SetSessionKeyAuthLinkType(&clientList, SESSIONKEY_INDEX2, AUTH_LINK_TYPE_WIFI);
@@ -231,4 +231,3 @@ HWTEST_F(AuthSessionKeyTest, OLD_SESSION_KEY_TEST_001, TestSize.Level1)
     DestroySessionKeyList(&clientList);
 }
 } // namespace OHOS
-

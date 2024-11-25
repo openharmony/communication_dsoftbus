@@ -13,32 +13,9 @@
  * limitations under the License.
  */
 
-#include "softbusproxychannelmanagermock_fuzzer.h"
+#ifndef TEST_FUZZTEST_AUTHMANAGER_FUZZER_H
+#define TEST_FUZZTEST_AUTHMANAGER_FUZZER_H
 
-#include <cstddef>
+#define FUZZ_PROJECT_NAME "authmanager_fuzzer"
 
-#include "gtest/gtest.h"
-
-namespace OHOS {
-void TransRunAllTest(const uint8_t *data, size_t size)
-{
-    (void)data;
-    (void)size;
-    (void)RUN_ALL_TESTS();
-}
-} // namespace OHOS
-
-/* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-{
-    /* Run your code on data */
-    static bool isFirst = true;
-
-    if (isFirst) {
-        testing::InitGoogleTest();
-        OHOS::TransRunAllTest(data, size);
-        isFirst = false;
-    }
-
-    return 0;
-}
+#endif /* TEST_FUZZTEST_AUTHMANAGER_FUZZER_H */
