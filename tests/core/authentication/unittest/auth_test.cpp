@@ -67,7 +67,7 @@ void AuthTest::SetUpTestCase()
     SetAceessTokenPermission("AuthTest");
 }
 
-void AuthTest::TearDownTestCase() {}
+void AuthTest::TearDownTestCase() { }
 
 void AuthTest::SetUp()
 {
@@ -101,7 +101,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     return;
 }
 
-void AuthTest::TearDown() {}
+void AuthTest::TearDown() { }
 
 /*
  * @tc.name: AUTH_COMMON_Test_001
@@ -1670,7 +1670,7 @@ HWTEST_F(AuthTest, CHECK_AUTH_CONN_CALLBACK_Test_001, TestSize.Level1)
     ret = CheckAuthConnCallback(&cb);
     EXPECT_TRUE(ret == true);
 
-    AuthRequest request = {0};
+    AuthRequest request = { 0 };
     uint32_t requestId = 0;
     int64_t authId = 0;
     PerformAuthConnCallback(requestId, SOFTBUS_OK, authId);
@@ -1890,7 +1890,7 @@ HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     bool isMetaAuth = false;
-    DevInfoData devInfo = {msg, 0, linkType, version};
+    DevInfoData devInfo = { msg, 0, linkType, version };
     int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
 }

@@ -1,0 +1,59 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("../../unittest/authmanager.gni")
+
+##############################fuzztest##########################################
+
+ohos_fuzztest("AuthManagerFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/authentication/fuzztest/authmanager_fuzzer"
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fexceptions",
+    "-frtti",
+  ]
+  include_dirs = auth_manager_include
+  include_dirs += [
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/tests/common/include",
+  ]
+
+  sources = [ "authmanager_fuzzer.cpp" ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "googletest:gtest_rtti",
+    "hilog:libhilog",
+    "hitrace:libhitracechain",
+    "init:libbegetutil",
+  ]
+}
