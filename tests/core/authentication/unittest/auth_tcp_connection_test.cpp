@@ -19,8 +19,8 @@
 #include <sys/time.h>
 
 #include "auth_log.h"
-#include "auth_tcp_connection.h"
 #include "auth_tcp_connection.c"
+#include "auth_tcp_connection.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 
@@ -36,18 +36,16 @@ public:
     void TearDown();
 };
 
-void AuthTcpConnectionTest::SetUpTestCase()
-{
-}
+void AuthTcpConnectionTest::SetUpTestCase() { }
 
-void AuthTcpConnectionTest::TearDownTestCase() {}
+void AuthTcpConnectionTest::TearDownTestCase() { }
 
 void AuthTcpConnectionTest::SetUp()
 {
     AUTH_LOGI(AUTH_TEST, "AuthTcpConnectionTest start.");
 }
 
-void AuthTcpConnectionTest::TearDown() {}
+void AuthTcpConnectionTest::TearDown() { }
 
 /*
  * @tc.name: UNPACK_SOCKET_PKT_TEST_001

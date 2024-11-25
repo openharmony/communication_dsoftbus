@@ -26,6 +26,7 @@
 #include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
+#include "auth_session_message.h"
 #include "bus_center_adapter.h"
 #include "lnn_connection_mock.h"
 #include "lnn_hichain_mock.h"
@@ -36,16 +37,15 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "auth_session_message.h"
 
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
-#define TEST_UDID "123456ABCDEF"
-#define TEST_UUID "6984321642"
-#define DEV_NAME "DEVTEST"
-#define TEST_MAC "11:22:33:44:55:66"
-#define TEST_NETWORKID "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
+#define TEST_UDID         "123456ABCDEF"
+#define TEST_UUID         "6984321642"
+#define DEV_NAME          "DEVTEST"
+#define TEST_MAC          "11:22:33:44:55:66"
+#define TEST_NETWORKID    "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
 #define VERSION_TYPE_LITE "LITE"
 static const uint32_t REQUEST_ID = 88;
 static const bool TEST_IS_P2P = false;
@@ -310,12 +310,12 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
     LnnHichainInterfaceMock::g_devAuthCb.onFinish(SEQ_SERVER, OPER_CODE, g_retData);
     WaitForSignal();
-    EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal,
-        LnnConnectInterfaceMock::ActionOfConnPostBytes));
+    EXPECT_CALL(connMock, ConnPostBytes)
+        .WillRepeatedly(DoAll(SendSignal, LnnConnectInterfaceMock::ActionOfConnPostBytes));
     PostDeviceInfoMessage(SEQ_SERVER, &info2);
     WaitForSignal();
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER,
-        LnnConnectInterfaceMock::g_encryptData, TEST_DATA_LEN);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(
+        g_connId, MODULE_ID, SEQ_SERVER, LnnConnectInterfaceMock::g_encryptData, TEST_DATA_LEN);
     WaitForSignal();
     char *data4 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, closeAckHead);
     LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);

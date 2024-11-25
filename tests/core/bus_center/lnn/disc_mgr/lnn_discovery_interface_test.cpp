@@ -18,10 +18,10 @@
 #include "bus_center_manager.h"
 #include "bus_center_mock.h"
 #include "disc_manager_mock.h"
-#include "lnn_coap_discovery_impl.h"
 #include "lnn_coap_discovery_impl.c"
-#include "lnn_discovery_manager.h"
+#include "lnn_coap_discovery_impl.h"
 #include "lnn_discovery_manager.c"
+#include "lnn_discovery_manager.h"
 #include "lnn_hichain_mock.h"
 #include "softbus_error_code.h"
 
@@ -38,24 +38,16 @@ public:
     void TearDown();
 };
 
-void LNNDiscoveryInterfaceTest::SetUpTestCase()
-{
-}
+void LNNDiscoveryInterfaceTest::SetUpTestCase() { }
 
-void LNNDiscoveryInterfaceTest::TearDownTestCase()
-{
-}
+void LNNDiscoveryInterfaceTest::TearDownTestCase() { }
 
-void LNNDiscoveryInterfaceTest::SetUp()
-{
-}
+void LNNDiscoveryInterfaceTest::SetUp() { }
 
-void LNNDiscoveryInterfaceTest::TearDown()
-{
-}
+void LNNDiscoveryInterfaceTest::TearDown() { }
 
-static int32_t OnRefreshDeviceFoundTest(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions)
+static int32_t OnRefreshDeviceFoundTest(
+    const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     return SOFTBUS_OK;
 }
@@ -75,11 +67,11 @@ static int32_t LnnCoapFuncTest(void)
 }
 
 /*
-* @tc.name: LNN_PUBLISH_SERVICE_TEST_001
-* @tc.desc: device found test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_PUBLISH_SERVICE_TEST_001
+ * @tc.desc: device found test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level1)
 {
     DeviceInfo device;
@@ -111,11 +103,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_PUBLISH_SERVICE_TEST_002
-* @tc.desc: lnn publish service test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_PUBLISH_SERVICE_TEST_002
+ * @tc.desc: lnn publish service test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
@@ -141,11 +133,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_UNPUBLISH_SERVICE_TEST_001
-* @tc.desc: lnn unpublish service test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_UNPUBLISH_SERVICE_TEST_001
+ * @tc.desc: lnn unpublish service test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
@@ -170,11 +162,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_START_DISC_DEVICE_TEST_001
-* @tc.desc: lnn start disc device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_START_DISC_DEVICE_TEST_001
+ * @tc.desc: lnn start disc device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
@@ -208,11 +200,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_STOP_DISC_DEVICE_TEST_001
-* @tc.desc: lnn stop disc device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_STOP_DISC_DEVICE_TEST_001
+ * @tc.desc: lnn stop disc device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
@@ -237,11 +229,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_START_PUBLISH_TEST_001
-* @tc.desc: lnn start publish test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_START_PUBLISH_TEST_001
+ * @tc.desc: lnn start publish test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
 {
     g_discoveryImpl[0].StopPublishImpl = nullptr;
@@ -263,11 +255,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_START_DISCOVERY_TEST_001
-* @tc.desc: lnn start discovery test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_START_DISCOVERY_TEST_001
+ * @tc.desc: lnn start discovery test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level1)
 {
     g_discoveryImpl[0].StopDiscoveryImpl = nullptr;
@@ -289,11 +281,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_INIT_COAP_DISCOVERY_TEST_001
-* @tc.desc: lnn init coap discovery test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_INIT_COAP_DISCOVERY_TEST_001
+ * @tc.desc: lnn init coap discovery test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnInitCoapDiscovery(nullptr);
@@ -301,11 +293,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: LNN_INIT_COAP_DISCOVERY_TEST_002
-* @tc.desc: lnn init coap discovery test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_INIT_COAP_DISCOVERY_TEST_002
+ * @tc.desc: lnn init coap discovery test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_002, TestSize.Level1)
 {
     LnnDiscoveryImplCallback callback;
@@ -314,11 +306,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_002, TestSize.L
 }
 
 /*
-* @tc.name: LNN_START_COAP_DISCOVERY_TEST_001
-* @tc.desc: lnn start coap discovery test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_START_COAP_DISCOVERY_TEST_001
+ * @tc.desc: lnn start coap discovery test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.Level1)
 {
     DiscManagerInterfaceMock discMock;
@@ -343,11 +335,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.
 }
 
 /*
-* @tc.name: LNN_START_COAP_PUBLISH_TEST_001
-* @tc.desc: lnn start coap publish test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_START_COAP_PUBLISH_TEST_001
+ * @tc.desc: lnn start coap publish test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Level1)
 {
     DiscManagerInterfaceMock discMock;
@@ -367,11 +359,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: GET_CONNECT_DEVICE_INFO_TEST_001
-* @tc.desc: get connect device info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_CONNECT_DEVICE_INFO_TEST_001
+ * @tc.desc: get connect device info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, GET_CONNECT_DEVICE_INFO_TEST_001, TestSize.Level1)
 {
     DeviceInfo devInfo;
@@ -381,11 +373,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, GET_CONNECT_DEVICE_INFO_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: LNN_CHECK_DISCOVERY_DEVICE_TEST_001
-* @tc.desc: lnn check discovery device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CHECK_DISCOVERY_DEVICE_TEST_001
+ * @tc.desc: lnn check discovery device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_CHECK_DISCOVERY_DEVICE_TEST_001, TestSize.Level1)
 {
     DeviceInfo devInfo;
@@ -412,11 +404,11 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_CHECK_DISCOVERY_DEVICE_TEST_001, TestSiz
 }
 
 /*
-* @tc.name: LNN_CHECK_DISCOVERY_DEVICE_TEST_002
-* @tc.desc: lnn check discovery device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CHECK_DISCOVERY_DEVICE_TEST_002
+ * @tc.desc: lnn check discovery device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_CHECK_DISCOVERY_DEVICE_TEST_002, TestSize.Level1)
 {
     DeviceInfo devInfo;

@@ -17,9 +17,9 @@
 #include "auth_deviceprofile.h"
 #include <gtest/gtest.h>
 
+#include "auth_log.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
-#include "auth_log.h"
 #include "softbus_error_code.h"
 #include "trust_device_profile.h"
 
