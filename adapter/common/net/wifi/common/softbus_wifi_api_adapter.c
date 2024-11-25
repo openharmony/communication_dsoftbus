@@ -267,7 +267,7 @@ int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
         sizeof(WifiScanInfo)*WIFI_MAX_SCAN_HOTSPOT_LIMIT);
     *size = WIFI_MAX_SCAN_HOTSPOT_LIMIT;
     int32_t ret = GetScanInfoList(info, (unsigned int *)size);
-    if (ret != WIFI_SUCCESS || size == 0) {
+    if (ret != WIFI_SUCCESS || *size == 0) {
         LNN_LOGE(LNN_STATE, "softbus get wifi scan list failed");
         SoftBusFree(info);
         return SOFTBUS_ERR;

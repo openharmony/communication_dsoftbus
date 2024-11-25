@@ -21,8 +21,8 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
-#define TEST_2G_CHANNEL 8
-#define TEST_5G_CHANNEL 36
+#define TEST_2G_CHANNEL   8
+#define TEST_5G_CHANNEL   36
 #define TEST_2G_FREQUENCY 2424
 #define TEST_5G_FREQUENCY 5248
 
@@ -32,16 +32,16 @@ using namespace testing::ext;
 namespace OHOS {
 class CommonCoreNetworkTest : public testing::Test {
 public:
-    CommonCoreNetworkTest() {}
-    ~CommonCoreNetworkTest() {}
+    CommonCoreNetworkTest() { }
+    ~CommonCoreNetworkTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void CommonCoreNetworkTest::SetUpTestCase(void) {}
-void CommonCoreNetworkTest::TearDownTestCase(void) {}
+void CommonCoreNetworkTest::SetUpTestCase(void) { }
+void CommonCoreNetworkTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: SoftBusChannelToFrequencyTest001
