@@ -55,7 +55,7 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
         WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = TransCreateSessionServer(pkgName, sessionName, callingUid, callingPid);
+    int32_t ret = TransCreateSessionServer(pkgName, sessionName, callingUid, callingPid, false);
     (void)WriteInt32(reply, ret);
     return ret;
 }

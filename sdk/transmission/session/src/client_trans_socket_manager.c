@@ -149,6 +149,9 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
             destroyNode->OnShutdown(id, reason);
             (void)TryDeleteEmptySessionServer(destroyNode->pkgName, destroyNode->sessionName);
         }
+        if ((!destroyNode->isAsync) && destroyNode->lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+            (void)SoftBusCondSignal(&(destroyNode->lifecycle.callbackCond));
+        }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
     }
@@ -313,7 +316,7 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
             return false;
         }
     } else if (sessionNode->channelType == CHANNEL_TYPE_AUTH) {
-        TRANS_LOGD(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
+        TRANS_LOGI(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
         return true;
     } else {
         TRANS_LOGW(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
@@ -328,6 +331,32 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
     }
 
     return false;
+}
+
+void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList)
+{
+    if (server == NULL || destroyList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        if (destroyNode == NULL) {
+            continue;
+        }
+        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            ClientEmitFileEvent(sessionNode->channelId);
+        }
+        DestroySessionId();
+        ListDelete(&sessionNode->node);
+        ListAdd(destroyList, &(destroyNode->node));
+        SoftBusFree(sessionNode);
+    }
+
 }
 
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
@@ -385,7 +414,7 @@ SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *client
         return NULL;
     }
 
-    if (strcpy_s(infoNode->pkgName, SESSION_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
+    if (strcpy_s(infoNode->pkgName, PKG_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
         SoftBusFree(infoNode);
         TRANS_LOGE(TRANS_SDK, "failed to strcpy pkgName.");
         return NULL;

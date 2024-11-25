@@ -87,9 +87,10 @@ static int32_t EnableBtSubnet(LnnPhysicalSubnet *subnet)
         LNN_LOGI(LNN_BUILDER, "bt running return ok");
         return SOFTBUS_OK;
     }
-    if (GetAvailableBtMac(macStr, sizeof(macStr)) != SOFTBUS_OK) {
+    int32_t ret = GetAvailableBtMac(macStr, sizeof(macStr));
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get available bt mac fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     char *anonyMac = NULL;
     Anonymize(macStr, &anonyMac);
@@ -105,7 +106,7 @@ static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
     };
 
     if (subnet->status != LNN_SUBNET_RUNNING) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBNET_STATUS_ERR;
     }
     LNN_LOGI(LNN_BUILDER, "br subnet is disable, start leave br network");
     int32_t ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
@@ -124,7 +125,7 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
     };
 
     if (subnet->status != LNN_SUBNET_RUNNING) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBNET_STATUS_ERR;
     }
     LNN_LOGI(LNN_BUILDER, "ble subnet is disable, start leave ble network");
     ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
@@ -186,7 +187,7 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         event = GetBtStatusChangedEvent(btState);
     }
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NETWORK_NETIF_STATUS_CHANGED;
     LnnNetIfType type;
     LnnGetNetIfTypeByName(subnet->ifName, &type);
     switch (event) {
@@ -198,7 +199,8 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         case BT_SUBNET_MANAGER_EVENT_IF_DOWN:
             if (type == LNN_NETIF_TYPE_BR) {
                 ret = DisableBrSubnet(subnet);
-            } else if (type == LNN_NETIF_TYPE_BLE) {
+            }
+            if (type == LNN_NETIF_TYPE_BLE) {
                 ret = DisableBleSubnet(subnet);
             }
             break;
@@ -317,11 +319,11 @@ int32_t LnnInitBtProtocol(struct LnnProtocolManager *self)
     (void)self;
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangedEvtHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register bt state change event handler failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_BT_ACL_STATE_CHANGED, BtAclStateChangedEvtHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register bt acl state change event handler failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -337,7 +339,7 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     LnnPhysicalSubnet *manager = CreateBtSubnetManager(self, netifMgr->ifName);
     if (manager == NULL) {
         LNN_LOGE(LNN_BUILDER, "create bt subnet mgr fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CREATE_SUBNET_MANAGER_FAILED;
     }
 
     int ret = LnnRegistPhysicalSubnet(manager);

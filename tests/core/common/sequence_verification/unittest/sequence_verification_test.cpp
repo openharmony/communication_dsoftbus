@@ -26,8 +26,8 @@ const int32_t MAX_RECEIVE_SEQUENCE = 5;
 namespace OHOS {
 class SequenceVerificationTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {}
-    static void TearDownTestCase(void) {}
+    static void SetUpTestCase(void) { }
+    static void TearDownTestCase(void) { }
 };
 
 /**
@@ -38,7 +38,7 @@ public:
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_001, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     for (int32_t recvSeq = 0; recvSeq < MAX_RECEIVE_SEQUENCE; recvSeq++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq);
         EXPECT_EQ(ret, true);
@@ -53,7 +53,7 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_001, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_002, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     /* 2: offset */
     seqInfo.minSeq = INT32_MIN + 1;
     seqInfo.maxSeq = INT32_MIN + 1;
@@ -72,7 +72,7 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_002, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_003, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     /* 2: offset */
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MAX - 2;
@@ -92,7 +92,7 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_003, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_004, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     /* -2: offset */
     seqInfo.minSeq = -2;
     seqInfo.maxSeq = -2;
@@ -111,8 +111,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_004, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_001, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 1, 4, 3, 2};
+    SeqVerifyInfo seqInfo = { 0 };
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { 0, 1, 4, 3, 2 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         EXPECT_EQ(ret, true);
@@ -127,8 +127,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_001, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_002, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 1, 11, 8, 7};
+    SeqVerifyInfo seqInfo = { 0 };
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { 0, 1, 11, 8, 7 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         EXPECT_EQ(ret, true);
@@ -143,8 +143,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_002, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_003, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 1, 62, 8, 7};
+    SeqVerifyInfo seqInfo = { 0 };
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { 0, 1, 62, 8, 7 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2) {
@@ -165,10 +165,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_003, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_004, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -100;
     seqInfo.maxSeq = -100;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-100, -99, -39, -56, -50};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -100, -99, -39, -56, -50 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         EXPECT_EQ(ret, true);
@@ -183,10 +183,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_004, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_005, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -100;
     seqInfo.maxSeq = -100;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-100, -99, -38, -96, -90};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -100, -99, -38, -96, -90 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2) {
@@ -208,10 +208,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_005, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_006, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MAX - 2;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {INT32_MAX - 2, INT32_MAX - 1, 58, 0, 7};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { INT32_MAX - 2, INT32_MAX - 1, 58, 0, 7 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2) {
@@ -231,10 +231,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_006, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_007, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MAX - 2;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {INT32_MAX - 2, INT32_MAX - 1, 59, 0, 7};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { INT32_MAX - 2, INT32_MAX - 1, 59, 0, 7 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2) {
@@ -254,10 +254,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_007, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_008, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -30;
     seqInfo.maxSeq = -30;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-30, -29, 31, 10, 5};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -30, -29, 31, 10, 5 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         EXPECT_EQ(ret, true);
@@ -273,10 +273,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_008, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_009, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -30;
     seqInfo.maxSeq = -30;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-30, -29, 32, 0, -3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -30, -29, 32, 0, -3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2) {
@@ -297,8 +297,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_009, 
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_001, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {2, 10, 2, 3, 3};
+    SeqVerifyInfo seqInfo = { 0 };
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { 2, 10, 2, 3, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2 || i == 3) {
@@ -317,8 +317,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_001, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_002, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 10, 1, 5, 5};
+    SeqVerifyInfo seqInfo = { 0 };
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { 0, 10, 1, 5, 5 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 4) {
@@ -337,10 +337,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_002, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_003, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MAX - 2;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {INT32_MAX - 2, INT32_MAX - 1, 5, INT32_MAX - 1, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { INT32_MAX - 2, INT32_MAX - 1, 5, INT32_MAX - 1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 2) {
@@ -359,10 +359,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_003, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_004, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MAX - 2;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {INT32_MAX - 2, 0, 5, 0, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { INT32_MAX - 2, 0, 5, 0, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 1) {
@@ -381,10 +381,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_004, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_005, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -10;
     seqInfo.maxSeq = -10;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-10, -1, 10, -1, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -10, -1, 10, -1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 3 || i == 4) {
@@ -403,10 +403,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_005, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_006, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -10;
     seqInfo.maxSeq = -10;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-10, 1, 10, 1, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -10, 1, 10, 1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 3 || i == 4) {
@@ -425,10 +425,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_006, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_007, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = 0;
     seqInfo.maxSeq = 0;
-    int32_t recvSeq[12] = {0, 1, 2, 3, 4, 3, 3, 10, 5, 5, 5, 5};
+    int32_t recvSeq[12] = { 0, 1, 2, 3, 4, 3, 3, 10, 5, 5, 5, 5 };
     for (int32_t i = 0; i < 12; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i < 5 || i == 7 || i == 8) {
@@ -447,8 +447,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_007, Te
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_001, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-10, -2, 10, 1, 3};
+    SeqVerifyInfo seqInfo = { 0 };
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -10, -2, 10, 1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i >= 2) {
@@ -467,10 +467,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_002, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -10;
     seqInfo.maxSeq = -10;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-15, -12, 10, 1, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -15, -12, 10, 1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i >= 2) {
@@ -489,10 +489,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_003, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = -10;
     seqInfo.maxSeq = 10;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-15, -12, 10, 1, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { -15, -12, 10, 1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         if (i >= 2) {
@@ -511,10 +511,10 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
  */
 HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_004, TestSize.Level0)
 {
-    SeqVerifyInfo seqInfo = {0};
+    SeqVerifyInfo seqInfo = { 0 };
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MIN + 10;
-    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {INT32_MAX - 10, INT32_MAX - 5, 0, 1, 3};
+    int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = { INT32_MAX - 10, INT32_MAX - 5, 0, 1, 3 };
     for (int32_t i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq[i]);
         EXPECT_EQ(ret, false);

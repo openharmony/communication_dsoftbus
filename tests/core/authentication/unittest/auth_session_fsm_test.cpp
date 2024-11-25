@@ -19,8 +19,8 @@
 #include <sys/time.h>
 
 #include "auth_request.h"
-#include "auth_session_fsm.h"
 #include "auth_session_fsm.c"
+#include "auth_session_fsm.h"
 #include "ble_mock.h"
 #include "softbus_adapter_mem.h"
 
@@ -63,9 +63,9 @@ void AuthSessionFsmTest::TearDownTestCase()
     GTEST_LOG_(INFO) << "AuthSessionFsmTest end";
 }
 
-void AuthSessionFsmTest::SetUp() {}
+void AuthSessionFsmTest::SetUp() { }
 
-void AuthSessionFsmTest::TearDown() {}
+void AuthSessionFsmTest::TearDown() { }
 
 /*
  * @tc.name: TRANSLATE_TO_AUTH_FSM_TEST_001
@@ -108,8 +108,8 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.authId = REQUEST_ID;
     request.type = REQUEST_TYPE_RECONNECT;
-    EXPECT_TRUE(SoftBusGenerateStrHash(DEVICE_ID_HASH, DEVICE_ID_HASH_LEN,
-        request.connInfo.info.bleInfo.deviceIdHash) == SOFTBUS_OK);
+    EXPECT_TRUE(SoftBusGenerateStrHash(
+                    DEVICE_ID_HASH, DEVICE_ID_HASH_LEN, request.connInfo.info.bleInfo.deviceIdHash) == SOFTBUS_OK);
     EXPECT_TRUE(AddAuthRequest(&request) == 0);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -127,8 +127,8 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(ProcAuthFsm(REQUEST_ID_1, true, &authFsm) == SOFTBUS_ERR);
-    EXPECT_TRUE(ProcAuthFsm(REQUEST_ID, true, &authFsm) == SOFTBUS_ERR);
+    EXPECT_NE(ProcAuthFsm(REQUEST_ID_1, true, &authFsm), SOFTBUS_OK);
+    EXPECT_NE(ProcAuthFsm(REQUEST_ID, true, &authFsm), SOFTBUS_OK);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     EXPECT_TRUE(ProcAuthFsm(REQUEST_ID, true, &authFsm) == SOFTBUS_OK);
     authFsm.authSeq = AUTH_SEQ_1;
@@ -165,9 +165,9 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_DEVICE_KEY_TEST_001, TestSize.Level1)
     HandleCommonMsg(&authFsm, SOFTBUS_AUTH_INNER_ERR, nullptr);
     ASSERT_TRUE(memcpy_s(authFsm.info.udid, UDID_BUF_LEN, UDID_TEST, strlen(UDID_TEST)) == EOK);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
-    EXPECT_TRUE(RecoveryFastAuthKey(&authFsm) == SOFTBUS_ERR);
+    EXPECT_NE(RecoveryFastAuthKey(&authFsm), SOFTBUS_OK);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_TRUE(RecoveryFastAuthKey(&authFsm) == SOFTBUS_ERR);
+    EXPECT_NE(RecoveryFastAuthKey(&authFsm), SOFTBUS_OK);
     SyncDevIdStateEnter(nullptr);
 }
 
@@ -201,14 +201,14 @@ HWTEST_F(AuthSessionFsmTest, CLIENT_SET_EXCHANGE_ID_TYPE_TEST_001, TestSize.Leve
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     authFsm.info.idType = EXCHANGE_FAIL;
-    EXPECT_TRUE(ClientSetExchangeIdType(&authFsm) == SOFTBUS_ERR);
+    EXPECT_NE(ClientSetExchangeIdType(&authFsm), SOFTBUS_OK);
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
     EXPECT_TRUE(TrySyncDeviceInfo(AUTH_SEQ_1, &info) == SOFTBUS_OK);
     info.isServer = false;
     EXPECT_TRUE(TrySyncDeviceInfo(AUTH_SEQ_1, &info) == SOFTBUS_ENCRYPT_ERR);
     info.connInfo.type = AUTH_LINK_TYPE_MAX;
-    EXPECT_TRUE(TrySyncDeviceInfo(AUTH_SEQ_1, &info) == SOFTBUS_ERR);
+    EXPECT_NE(TrySyncDeviceInfo(AUTH_SEQ_1, &info), SOFTBUS_OK);
 }
 
 /*
@@ -276,7 +276,7 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
 {
-    AuthSessionInfo info = {0};
+    AuthSessionInfo info = { 0 };
     info.nodeInfo.feature = 0xF7CA;
     BleMock bleMock;
     AuthFsm authFsm;
@@ -284,20 +284,20 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
 
     EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_ENABLE));
     int32_t ret = HandleCloseAckMessage(&authFsm, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
     ret = HandleCloseAckMessage(&authFsm, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     info.nodeInfo.feature = 0;
     ret = HandleCloseAckMessage(&authFsm, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     info.nodeInfo.feature = 0x1F7CA;
     ret = HandleCloseAckMessage(&authFsm, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -346,7 +346,7 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001, TestSize.L
     (void)memset_s(authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     authFsm->info.normalizedKey = nullptr;
     int32_t ret = RecoveryNormalizedDeviceKey(authFsm);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     authFsm->info.normalizedKey = (SessionKey *)SoftBusMalloc(sizeof(SessionKey));
     if (authFsm->info.normalizedKey == nullptr) {
@@ -479,4 +479,3 @@ HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_002, TestSize.Level1
     HandleMsgRecvCloseAck(&authFsm, para1);
 }
 } // namespace OHOS
-

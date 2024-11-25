@@ -87,13 +87,12 @@ void LnnNotifyBtStateChangeEvent(void *state)
     return GetServiceInterface()->LnnNotifyBtStateChangeEvent(state);
 }
 
-void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type,
-    uint8_t relation, bool isJoin)
+void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin)
 {
     return GetServiceInterface()->LnnNotifyLnnRelationChanged(udid, type, relation, isJoin);
 }
 
-void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight)
+void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight)
 {
     return GetServiceInterface()->LnnNotifyMasterNodeChanged(isMaster, masterNodeUdid, weight);
 }
@@ -158,8 +157,7 @@ bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
     return GetServiceInterface()->IsFeatureSupport(feature, capaBit);
 }
 
-int32_t LnnStartHbByTypeAndStrategy(
-    LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategy, bool isRelay)
+int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategy, bool isRelay)
 {
     return GetServiceInterface()->LnnStartHbByTypeAndStrategy(hbType, strategy, isRelay);
 }
@@ -184,7 +182,7 @@ bool SoftBusHasWifiDirectCapability(void)
     return GetServiceInterface()->SoftBusHasWifiDirectCapability();
 }
 
-char* SoftBusGetWifiInterfaceCoexistCap(void)
+char *SoftBusGetWifiInterfaceCoexistCap(void)
 {
     return GetServiceInterface()->SoftBusGetWifiInterfaceCoexistCap();
 }
@@ -194,8 +192,8 @@ int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callb
     return GetServiceInterface()->LnnAsyncCallbackHelper(looper, callback, para);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetServiceInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }

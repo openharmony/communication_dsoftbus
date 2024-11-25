@@ -17,8 +17,8 @@
 #include <securec.h>
 
 #include "lnn_auth_mock.h"
-#include "lnn_connection_fsm.h"
 #include "lnn_connection_fsm.c"
+#include "lnn_connection_fsm.h"
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
@@ -60,13 +60,9 @@ void LNNConnectionFsmMockTest::TearDownTestCase()
     LooperDeinit();
 }
 
-void LNNConnectionFsmMockTest::SetUp()
-{
-}
+void LNNConnectionFsmMockTest::SetUp() { }
 
-void LNNConnectionFsmMockTest::TearDown()
-{
-}
+void LNNConnectionFsmMockTest::TearDown() { }
 
 static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 {
@@ -75,11 +71,11 @@ static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 }
 
 /*
-* @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
-* @tc.desc: is node info changed test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
+ * @tc.desc: is node info changed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -135,13 +131,14 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: AUTH_STATE_PROCESS_TEST_001
-* @tc.desc: auth state process test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_STATE_PROCESS_TEST_001
+ * @tc.desc: auth state process test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnConnectionFsm *connFsm = nullptr;
     connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(connFsm != nullptr);
@@ -152,6 +149,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
     para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
     EXPECT_TRUE(para1 != nullptr);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
+    EXPECT_CALL(serviceMock, LnnNotifyJoinResult).WillRepeatedly(Return());
     bool ret = AuthStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, para);
@@ -171,11 +169,11 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_STATE_PROCESS_TEST_002
-* @tc.desc: auth state process on join lnn test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_STATE_PROCESS_TEST_002
+ * @tc.desc: auth state process on join lnn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -206,11 +204,11 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_STATE_PROCESS_TEST_003
-* @tc.desc: auth state process on auth done test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_STATE_PROCESS_TEST_003
+ * @tc.desc: auth state process on auth done test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
@@ -265,11 +263,11 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: ONLINE_STATE_ENTER_TEST_001
-* @tc.desc: online state enter test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ONLINE_STATE_ENTER_TEST_001
+ * @tc.desc: online state enter test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -284,9 +282,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(netLedgerMock, LnnAddOnlineNode)
-        .WillOnce(Return(REPORT_CHANGE))
-        .WillRepeatedly(Return(REPORT_ONLINE));
+    EXPECT_CALL(netLedgerMock, LnnAddOnlineNode).WillOnce(Return(REPORT_CHANGE)).WillRepeatedly(Return(REPORT_ONLINE));
 
     OnlineStateEnter(nullptr);
     OnlineStateEnter(&connFsm->fsm);
@@ -298,11 +294,11 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001
-* @tc.desc: clean invalid connstate process test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001
+ * @tc.desc: clean invalid connstate process test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -325,24 +321,23 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(netLedgerMock, LnnIsNodeOnline).WillRepeatedly(Return(SOFTBUS_ERR));
-    bool ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN,
-        reinterpret_cast<void *>(retCode));
+    bool ret1 =
+        CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-    ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN,
-        reinterpret_cast<void *>(retCode));
+    ret1 =
+        CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-    ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN,
-        reinterpret_cast<void *>(retCode));
+    ret1 =
+        CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_NOT_TRUSTED, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_DISCONNECT, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-    ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_INITIATE_ONLINE,
-        reinterpret_cast<void *>(retCode));
+    ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_INITIATE_ONLINE, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-    ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT,
-        reinterpret_cast<void *>(retCode));
+    ret1 =
+        CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == false);
@@ -351,11 +346,11 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
 }
 
 /*
-* @tc.name: ONLINE_STATE_PROCESS_TEST_001
-* @tc.desc: online state process test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ONLINE_STATE_PROCESS_TEST_001
+ * @tc.desc: online state process test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
@@ -380,11 +375,11 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LEAVING_STATE_ENTER_TEST_001
-* @tc.desc: leaving state enter test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LEAVING_STATE_ENTER_TEST_001
+ * @tc.desc: leaving state enter test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -405,11 +400,11 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: LEAVING_STATE_PROCESS_TEST_001
-* @tc.desc: leaving state process test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LEAVING_STATE_PROCESS_TEST_001
+ * @tc.desc: leaving state process test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
@@ -435,11 +430,11 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_STOP_CONNECTION_FSM_TEST_001
-* @tc.desc: lnn stop connection fsm test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_STOP_CONNECTION_FSM_TEST_001
+ * @tc.desc: lnn stop connection fsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;

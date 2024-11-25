@@ -47,11 +47,11 @@ int32_t LnnIpNetworkImplInterfaceMock::ActionOfGetNetworkIpByIfName(
 {
     if (ifName == nullptr || netmask == nullptr || len == 0) {
         LNN_LOGI(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(ip, strlen("127.0.0.2") + 1, "127.0.0.2", strlen("127.0.0.2") + 1) != EOK) {
         LNN_LOGI(LNN_TEST, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }

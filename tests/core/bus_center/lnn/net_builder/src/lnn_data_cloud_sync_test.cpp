@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -27,8 +27,8 @@
 #include "lnn_node_info.h"
 #include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_common.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -45,16 +45,16 @@ public:
     void TearDown();
 };
 
-void LNNDataCloudSyncTest::SetUpTestCase() {}
+void LNNDataCloudSyncTest::SetUpTestCase() { }
 
-void LNNDataCloudSyncTest::TearDownTestCase() {}
+void LNNDataCloudSyncTest::TearDownTestCase() { }
 
 void LNNDataCloudSyncTest::SetUp()
 {
     LNN_LOGI(LNN_TEST, "LNNDataCloudSyncTest start");
 }
 
-void LNNDataCloudSyncTest::TearDown() {}
+void LNNDataCloudSyncTest::TearDown() { }
 
 /*
  * @tc.name: LnnLedgerAllDataSyncToDB_Test_001
@@ -62,21 +62,22 @@ void LNNDataCloudSyncTest::TearDown() {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnAsyncCallLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
 {
     NodeInfo *info = nullptr;
-    int32_t ret = LnnLedgerAllDataSyncToDB(info);
+    int32_t ret = LnnAsyncCallLedgerAllDataSyncToDB(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    ASSERT_NE(info, nullptr);
     info->accountId = 0;
     ret = LnnLedgerAllDataSyncToDB(info);
     if (ret != SOFTBUS_NOT_IMPLEMENT) {
-        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+        EXPECT_EQ(ret, SOFTBUS_KV_CLOUD_DISABLED);
     } else {
         EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     }
     info->accountId = 18390933952;
-    ret = LnnLedgerAllDataSyncToDB(info);
+    ret = LnnAsyncCallLedgerAllDataSyncToDB(info);
     EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(info);
 }
@@ -109,11 +110,11 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
     int32_t ret = LnnDBDataChangeSyncToCache(key, value, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, value, type);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     NodeInfo localCaheInfo;
     if (LnnGetLocalCacheNodeInfo(&localCaheInfo) == SOFTBUS_NOT_IMPLEMENT) {
-        EXPECT_EQ(ret, SOFTBUS_ERR);
+        EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     } else {
         EXPECT_EQ(ret, SOFTBUS_OK);
     }

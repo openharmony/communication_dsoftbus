@@ -142,6 +142,53 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     HandlePeerNetCapchanged(networkId, capability);
 }
 
+static uint32_t ConvertMsgToUserId(int32_t *userId, const uint8_t *msg, uint32_t len)
+{
+    if (userId == NULL || msg == NULL || len < BITLEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    for (uint32_t i = 0; i < BITLEN; i++) {
+        *userId = *userId | (*(msg + i) << (BITS * i));
+    }
+    return SOFTBUS_OK;
+}
+
+static void OnReceiveUserIdSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
+{
+    LNN_LOGI(LNN_BUILDER, "Recv userId info. type=%{public}d, len=%{public}d", type, len);
+    if (type != LNN_INFO_TYPE_USERID) {
+        return;
+    }
+    if (networkId == NULL) {
+        return;
+    }
+    if (msg == NULL || len == 0) {
+        return;
+    }
+    int32_t userId = 0;
+    if (ConvertMsgToUserId(&userId, msg, len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert msg to userId fail");
+        return;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "recv userId =%{public}d, networkId=%{public}s",
+        userId, AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    // update ledger
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return;
+    }
+    if (LnnSetDLConnUserId(networkId, userId)) {
+        LNN_LOGE(LNN_BUILDER, "update conn userId fail.");
+        return;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+}
+
 static uint8_t *ConvertCapabilityToMsg(uint32_t localCapability)
 {
     LNN_LOGD(LNN_BUILDER, "convert capability to msg enter");
@@ -508,6 +555,10 @@ int32_t LnnInitNetworkInfo(void)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_USERID, OnReceiveUserIdSyncInfoMsg);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
     LNN_LOGE(LNN_BUILDER, "lnn init network info sync done");
     return SOFTBUS_OK;
 }
@@ -515,4 +566,86 @@ int32_t LnnInitNetworkInfo(void)
 void LnnDeinitNetworkInfo(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
+    (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_USERID, OnReceiveUserIdSyncInfoMsg);
+}
+
+static void LnnProcessUserChangeMsg(LnnSyncInfoType syncType, const char *networkId, const uint8_t *msg, uint32_t len)
+{
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+}
+
+void OnLnnProcessUserChangeMsgDelay(void *para)
+{
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+
+    LnnRequestLeaveSpecific((char *)para, CONNECTION_ADDR_MAX);
+    SoftBusFree(para);
+}
+
+static void DoSendUserId(const char *udid, uint8_t *msg)
+{
+    #define USER_CHANGE_DELAY_TIME 5
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "LnnGetRemoteNodeInfoById failed! ret:%{public}d", ret);
+        return;
+    }
+    if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BLE)) {
+        LNN_LOGI(LNN_BUILDER, "ble online, no need notify offline by adv");
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        return;
+    }
+
+    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_BUILDER, "sync info msg failed! ret:%{public}d", ret);
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        return;
+    }
+
+    char *networkId = (char *)SoftBusCalloc(NETWORK_ID_BUF_LEN);
+    if (networkId == NULL) {
+        LNN_LOGI(LNN_BUILDER, "malloc fail");
+        return;
+    }
+    ret = memcpy_s(networkId, NETWORK_ID_BUF_LEN, nodeInfo.networkId, NETWORK_ID_BUF_LEN);
+    if (ret != EOK) {
+        LNN_LOGI(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
+        return;
+    }
+
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnProcessUserChangeMsgDelay,
+        (void *)networkId, USER_CHANGE_DELAY_TIME) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async userid to peer delay fail");
+        SoftBusFree(networkId);
+    }
+}
+
+static uint8_t *ConvertUserIdToMsg(int32_t userId)
+{
+    LNN_LOGD(LNN_BUILDER, "convert userId to msg enter");
+    uint8_t *arr = (uint8_t *)SoftBusCalloc(MSG_LEN);
+    if (arr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "convert userId to msg calloc msg fail");
+        return NULL;
+    }
+    for (uint32_t i = 0; i < BITLEN; i++) {
+        *(arr + i) = (userId >> (i * BITS)) & 0xFF;
+    }
+    return arr;
+}
+
+void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
+{
+    uint8_t *msg = ConvertUserIdToMsg(userId);
+    if (msg == NULL) {
+        return;
+    }
+    DoSendUserId(udid, msg);
+    SoftBusFree(msg);
 }

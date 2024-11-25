@@ -37,6 +37,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
+#include "lnn_node_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -45,6 +46,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
+#include "softbus_json_utils.h"
 #include "softbus_socket.h"
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
@@ -85,12 +87,12 @@ static int32_t PostBtV1DevId(int64_t authSeq, const AuthSessionInfo *info)
 {
     if (!info->isServer) {
         AUTH_LOGE(AUTH_FSM, "client don't send Bt-v1 devId");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
     char uuid[UUID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get uuid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     return PostDeviceIdData(authSeq, info, (uint8_t *)uuid, strlen(uuid));
 }
@@ -99,16 +101,16 @@ static int32_t PostWifiV1DevId(int64_t authSeq, const AuthSessionInfo *info)
 {
     if (!info->isServer) {
         AUTH_LOGE(AUTH_FSM, "client don't send wifi-v1 devId");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
     char *msg = PackDeviceIdJson(info);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack devId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_PACK_DEV_ID_FAIL;
     }
     if (PostDeviceIdData(authSeq, info, (uint8_t *)msg, strlen(msg) + 1) != SOFTBUS_OK) {
         JSON_Free(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     JSON_Free(msg);
     return SOFTBUS_OK;
@@ -129,7 +131,7 @@ static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
     char *msg = PackDeviceIdJson(info);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack devId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_PACK_DEV_ID_FAIL;
     }
     if (PostDeviceIdData(authSeq, info, (uint8_t *)msg, strlen(msg) + 1) != SOFTBUS_OK) {
         JSON_Free(msg);
@@ -239,7 +241,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     char *msg = PackDeviceInfoMessage(&(info->connInfo), info->version, false, info->uuid, info);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack device info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     int32_t compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
     uint8_t *compressData = NULL;
@@ -301,7 +303,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         if (DataDecompress((uint8_t *)msg, msgSize, &decompressData, &decompressLen) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "data decompress fail");
             SoftBusFree(msg);
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
         } else {
             AUTH_LOGI(AUTH_FSM, "deviceInfo deCompress finish, decompress=%{public}d", decompressLen);
         }
@@ -472,11 +474,11 @@ static int32_t GetLocalUdidHash(char *udid, char *udidHash, uint32_t len)
     uint8_t hash[UDID_HASH_LEN] = {0};
     if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid), (unsigned char *)hash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "restore manager fail because generate strhash");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     if (ConvertBytesToHexString(udidHash, len, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -509,7 +511,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
     char udidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     if (GetLocalUdidHash(udid, localUdidHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid hash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (!GetUdidShortHash(info, udidHash, SHA_256_HEX_HASH_LEN) ||
         IsEmptyShortHashStr(udidHash)) {
@@ -541,7 +543,7 @@ int32_t PostDeviceMessage(
     }
     if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error, type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_CONN_TYPE_INVALID;
     }
     char *msg = NULL;
     if (messageParse->messageType == CODE_VERIFY_DEVICE) {
@@ -551,7 +553,7 @@ int32_t PostDeviceMessage(
     }
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack verify device msg fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_PACK_VERIFY_MSG_FAIL;
     }
 
     uint8_t *data = NULL;

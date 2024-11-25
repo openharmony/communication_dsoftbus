@@ -19,9 +19,9 @@
 #include <gmock/gmock.h>
 #include <securec.h>
 
-#include "softbus_utils.h"
-#include "message_handler.h"
 #include "lnn_async_callback_utils.h"
+#include "message_handler.h"
+#include "softbus_utils.h"
 
 namespace OHOS {
 class SettingDataEventMonitorDepsInterface {
@@ -39,9 +39,9 @@ public:
     SettingDataEventMonitorDepsInterfaceMock();
     ~SettingDataEventMonitorDepsInterfaceMock() override;
 
-    MOCK_METHOD1(GetLooper, SoftBusLooper * (int));
-    MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *));
-    MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
+    MOCK_METHOD1(GetLooper, SoftBusLooper *(int));
+    MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *));
+    MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
 };
 } // namespace OHOS
 #endif // LNN_SETTINGDATA_EVENT_MONITOR_DEPS_MOCK_H

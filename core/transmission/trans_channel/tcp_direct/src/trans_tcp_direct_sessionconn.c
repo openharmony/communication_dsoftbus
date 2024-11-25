@@ -455,6 +455,7 @@ int32_t TransTdcGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+    TRANS_LOGE(TRANS_CTRL, "TcpChannelInfo not found, channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 

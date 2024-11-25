@@ -37,14 +37,12 @@ ohos_fuzztest("AuthManagerFuzzTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
-  fuzz_sources = [ "authmanager_fuzzer.cpp" ]
-  fuzz_sources += auth_manager_source
-  sources = fuzz_sources
+  sources = [ "authmanager_fuzzer.cpp" ]
 
   deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
@@ -53,7 +51,6 @@ ohos_fuzztest("AuthManagerFuzzTest") {
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
-    "device_auth:deviceauth_sdk",
     "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",

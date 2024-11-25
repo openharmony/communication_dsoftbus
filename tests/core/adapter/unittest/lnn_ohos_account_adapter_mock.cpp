@@ -41,27 +41,26 @@ bool OHOS::AccountSA::OhosAccountKits::IsSameAccountGroupDevice()
 }
 
 namespace OHOS::AccountSA {
-    OhosAccountKitsMock::OhosAccountKitsMock()
-    {
-        mock.store(this);
-    }
+OhosAccountKitsMock::OhosAccountKitsMock()
+{
+    mock.store(this);
+}
 
-    OhosAccountKitsMock::~OhosAccountKitsMock()
-    {
-        mock.store(nullptr);
-    }
+OhosAccountKitsMock::~OhosAccountKitsMock()
+{
+    mock.store(nullptr);
+}
 
-    extern "C"
-    {
-        bool IsSameAccountGroupDevice(void)
-        {
-            auto mock = OHOS::AccountSA::OhosAccountKitsMock::GetMock();
-            if (mock == nullptr) {
-                return false;
-            }
-            return mock->IsSameAccountGroupDevice();
-        }
+extern "C" {
+bool IsSameAccountGroupDevice(void)
+{
+    auto mock = OHOS::AccountSA::OhosAccountKitsMock::GetMock();
+    if (mock == nullptr) {
+        return false;
     }
+    return mock->IsSameAccountGroupDevice();
+}
+}
 
 } // namespace OHOS::AccountSA
 
@@ -84,13 +83,13 @@ OHOS::ErrCode OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(const int32
 }
 
 namespace OHOS::AccountSA {
-    OsAccountManagerMock::OsAccountManagerMock()
-    {
-        mock.store(this);
-    }
+OsAccountManagerMock::OsAccountManagerMock()
+{
+    mock.store(this);
+}
 
-    OsAccountManagerMock::~OsAccountManagerMock()
-    {
-        mock.store(nullptr);
-    }
+OsAccountManagerMock::~OsAccountManagerMock()
+{
+    mock.store(nullptr);
+}
 } // namespace OHOS::AccountSA

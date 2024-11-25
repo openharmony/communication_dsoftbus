@@ -23,6 +23,8 @@
 #include "softbus_json_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_br_connection.h"
+#include "foundation/communication/dsoftbus/tests/common/include/fuzz_data_generator.h"
+#include "foundation/communication/dsoftbus/tests/common/include/fuzz_environment.h"
 
 namespace OHOS {
 const uint8_t *g_baseFuzzData = nullptr;
@@ -50,6 +52,8 @@ template <class T> T GetData()
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    DataGenerator::Write(data, size);
+    DataGenerator::Clear();
     /* Run your code on data */
     return 0;
 }

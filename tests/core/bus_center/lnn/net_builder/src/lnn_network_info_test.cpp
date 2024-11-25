@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_network_info.c"
-#include "lnn_network_info.h"
 #include "lnn_net_builder_mock.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_network_info.c"
+#include "lnn_network_info.h"
 #include "lnn_service_mock.h"
 #include "lnn_sync_info_mock.h"
 #include "softbus_common.h"
@@ -54,28 +54,20 @@ public:
     void TearDown();
 };
 
-void LNNNetworkInfoTest::SetUpTestCase()
-{
-}
+void LNNNetworkInfoTest::SetUpTestCase() { }
 
-void LNNNetworkInfoTest::TearDownTestCase()
-{
-}
+void LNNNetworkInfoTest::TearDownTestCase() { }
 
-void LNNNetworkInfoTest::SetUp()
-{
-}
+void LNNNetworkInfoTest::SetUp() { }
 
-void LNNNetworkInfoTest::TearDown()
-{
-}
+void LNNNetworkInfoTest::TearDown() { }
 
 /*
-* @tc.name: LNN_INIT_NETWORK_INFO_TEST_001
-* @tc.desc: test LnnInitNetworkInfo
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_INIT_NETWORK_INFO_TEST_001
+ * @tc.desc: test LnnInitNetworkInfo
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -87,11 +79,11 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnSyncInfoInterfaceMock> syncInfoMock;
-    EXPECT_CALL(syncInfoMock, LnnRegSyncInfoHandler).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(syncInfoMock, LnnRegSyncInfoHandler).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnHasCapability).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *networkId = NETWORKID;
     uint32_t capability = TYPE_128;
@@ -109,8 +101,7 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
     EXPECT_CALL(netLedgerMock, LnnHasCapability).WillOnce(Return(true)).WillRepeatedly(Return(false));
     HandlePeerNetCapchanged(networkId, capability);
-    EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, LnnNotifyBasicInfoChanged).WillRepeatedly(Return());
     UpdateNetworkInfo(UUID);
     UpdateNetworkInfo(UUID);
@@ -121,15 +112,16 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONVERT_MSG_TO_CAPABILITY_TEST_001
-* @tc.desc: test ConvertMsgToCapability
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONVERT_MSG_TO_CAPABILITY_TEST_001
+ * @tc.desc: test ConvertMsgToCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
+        .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     PostNetchangedInfo(nullptr, CONNECTION_ADDR_ETH);
     PostNetchangedInfo(nullptr, CONNECTION_ADDR_ETH);
@@ -146,11 +138,11 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: IS_P2P_AVAILABLE_TEST_001
-* @tc.desc: test IsP2pAvailable
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_P2P_AVAILABLE_TEST_001
+ * @tc.desc: test IsP2pAvailable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
 {
     const char *networkId = NETWORKID;
@@ -159,8 +151,11 @@ HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
     OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, networkId, nullptr, BITS);
     OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, networkId, MSG, 0);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    NodeInfo info = { .discoveryType = DISCOVERY_TYPE, };
-    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR))
+    NodeInfo info = {
+        .discoveryType = DISCOVERY_TYPE,
+    };
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
     EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(netLedgerMock, LnnSetDLConnCapability).WillRepeatedly(Return(SOFTBUS_OK));
@@ -177,17 +172,15 @@ HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: WIFI_STATE_EVENT_HANDLER_TEST_002
-* @tc.desc: test WifiStateEventHandler
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: WIFI_STATE_EVENT_HANDLER_TEST_002
+ * @tc.desc: test WifiStateEventHandler
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_002, TestSize.Level1)
 {
-    LnnMonitorWlanStateChangedEvent event = {
-        .basic.event = LNN_EVENT_IP_ADDR_CHANGED,
-        .status = SOFTBUS_WIFI_UNKNOWN
-    };
+    LnnMonitorWlanStateChangedEvent event = { .basic.event = LNN_EVENT_IP_ADDR_CHANGED,
+        .status = SOFTBUS_WIFI_UNKNOWN };
     const LnnEventBasicInfo *info = reinterpret_cast<const LnnEventBasicInfo *>(&event);
     WifiStateEventHandler(nullptr);
     WifiStateEventHandler(info);
@@ -204,11 +197,11 @@ HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: BT_STATE_CHANGE_EVENT_HANDLER_TEST_001
-* @tc.desc: test BtStateChangeEventHandler
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BT_STATE_CHANGE_EVENT_HANDLER_TEST_001
+ * @tc.desc: test BtStateChangeEventHandler
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Level1)
 {
     LnnMonitorHbStateChangedEvent event = {
@@ -250,19 +243,18 @@ HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: CONVERT_CAPABILITY_TO_MSG_TEST_001
-* @tc.desc: test ConvertCapabilityToMsg
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONVERT_CAPABILITY_TO_MSG_TEST_001
+ * @tc.desc: test ConvertCapabilityToMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(
-        LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo);
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo);
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     WifiStateProcess(TYPE_63, true);
     WifiStateProcess(TYPE_63, false);
     SendNetCapabilityToRemote(TYPE_63, TYPE_1);
@@ -272,11 +264,11 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: IS_NEED_TO_SEND_TEST_001
-* @tc.desc: test IsNeedToSend
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_NEED_TO_SEND_TEST_001
+ * @tc.desc: test IsNeedToSend
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, IS_NEED_TO_SEND_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
@@ -318,11 +310,11 @@ HWTEST_F(LNNNetworkInfoTest, IS_NEED_TO_SEND_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_NETWORK_CAPABILITY_TEST_001
-* @tc.desc: test GetNetworkCapability
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_NETWORK_CAPABILITY_TEST_001
+ * @tc.desc: test GetNetworkCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, GET_NETWORK_CAPABILITY_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
@@ -356,11 +348,11 @@ HWTEST_F(LNNNetworkInfoTest, GET_NETWORK_CAPABILITY_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: IS_SUPPORT_AP_COEXIST_TEST_001
-* @tc.desc: test IsSupportApCoexist
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_SUPPORT_AP_COEXIST_TEST_001
+ * @tc.desc: test IsSupportApCoexist
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_001, TestSize.Level1)
 {
     const char *coexistCap3 = COEXISTCAP3;

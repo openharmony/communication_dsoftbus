@@ -19,8 +19,8 @@
 
 #include "distribute_net_ledger_mock.h"
 #include "lnn_auth_mock.h"
-#include "lnn_connection_fsm.h"
 #include "lnn_connection_fsm.c"
+#include "lnn_connection_fsm.h"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
 #include "lnn_map.h"
@@ -104,24 +104,18 @@ void LNNConnectionFsmTest::TearDownTestCase()
     LnnDestroyConnectionFsm(connFsm4);
 }
 
-void LNNConnectionFsmTest::SetUp()
-{
-}
+void LNNConnectionFsmTest::SetUp() { }
 
-void LNNConnectionFsmTest::TearDown()
-{
-}
+void LNNConnectionFsmTest::TearDown() { }
 
-void FsmStopCallback(struct tagLnnConnectionFsm *connFsm)
-{
-}
+void FsmStopCallback(struct tagLnnConnectionFsm *connFsm) { }
 
 /*
-* @tc.name: LNN_CREATE_CONNECTION_FSM_TEST_001
-* @tc.desc: para is null
-* @tc.type: FUNC
-* @tc.require:I5PRUD
-*/
+ * @tc.name: LNN_CREATE_CONNECTION_FSM_TEST_001
+ * @tc.desc: para is null
+ * @tc.type: FUNC
+ * @tc.require:I5PRUD
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     ConnectionAddr *target1 = nullptr;
@@ -132,11 +126,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_START_CONNECTION_FSM_TEST_001
-* @tc.desc: test LnnStartConnectionFsm
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_START_CONNECTION_FSM_TEST_001
+ * @tc.desc: test LnnStartConnectionFsm
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm);
@@ -148,11 +142,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendJoinRequestToConnFsm
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendJoinRequestToConnFsm
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
@@ -171,11 +165,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
 }
 
 /*
-* @tc.name: LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendAuthResultMsgToConnFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendAuthResultMsgToConnFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t retCode = 0;
@@ -194,11 +188,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
 }
 
 /*
-* @tc.name: LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendNotTrustedToConnFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendNotTrustedToConnFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnSendNotTrustedToConnFsm(connFsm);
@@ -209,11 +203,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001, TestSiz
 }
 
 /*
-* @tc.name: LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendDisconnectMsgToConnFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendDisconnectMsgToConnFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnSendDisconnectMsgToConnFsm(connFsm);
@@ -222,11 +216,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, Test
 }
 
 /*
-* @tc.name: LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendLeaveRequestToConnFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendLeaveRequestToConnFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
@@ -238,11 +232,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 }
 
 /*
-* @tc.name: LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendSyncOfflineFinishToConnFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendSyncOfflineFinishToConnFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
@@ -255,11 +249,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
 }
 
 /*
-* @tc.name: LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001
-* @tc.desc: test LnnSendNewNetworkOnlineToConnFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001
+ * @tc.desc: test LnnSendNewNetworkOnlineToConnFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnSendNewNetworkOnlineToConnFsm(connFsm);
@@ -270,11 +264,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001, 
 }
 
 /*
-* @tc.name: LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001
-* @tc.desc: test CheckStateMsgCommonArgs
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001
+ * @tc.desc: test CheckStateMsgCommonArgs
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001, TestSize.Level1)
 {
     bool ret = CheckStateMsgCommonArgs(nullptr);
@@ -287,11 +281,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001, TestSiz
 }
 
 /*
-* @tc.name: LNN_REPORT_LNN_RESULT_EVT_TEST_001
-* @tc.desc: test OnlineTrustGroupProc
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_REPORT_LNN_RESULT_EVT_TEST_001
+ * @tc.desc: test OnlineTrustGroupProc
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_REPORT_LNN_RESULT_EVT_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm4);
@@ -304,18 +298,16 @@ HWTEST_F(LNNConnectionFsmTest, LNN_REPORT_LNN_RESULT_EVT_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_POST_PC_ONLINE_UNIQUELY_TEST_001
-* @tc.desc: test PostPcOnlineUniquely
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_POST_PC_ONLINE_UNIQUELY_TEST_001
+ * @tc.desc: test PostPcOnlineUniquely
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
-    EXPECT_CALL(lnnConnMock, LnnGenerateBtMacHash)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnConnMock, LnnGenerateBtMacHash).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
     PostPcOnlineUniquely(nullptr);
     NodeInfo *info = nullptr;
@@ -334,11 +326,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
-* @tc.desc: test IsNodeInfoChanged
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
+ * @tc.desc: test IsNodeInfoChanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
@@ -362,11 +354,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001
-* @tc.desc: test CleanInvalidConnStateProcess
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001
+ * @tc.desc: test CleanInvalidConnStateProcess
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm4);
@@ -381,11 +373,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001, Te
 }
 
 /*
-* @tc.name: LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002
-* @tc.desc: test CleanInvalidConnStateProcess
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002
+ * @tc.desc: test CleanInvalidConnStateProcess
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm4);
@@ -400,11 +392,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002, Te
 }
 
 /*
-* @tc.name: LNN_LEAVE_LNN_IN_ONLINE_TEST_001
-* @tc.desc: test LeaveLNNInOnline
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LEAVE_LNN_IN_ONLINE_TEST_001
+ * @tc.desc: test LeaveLNNInOnline
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_LEAVE_LNN_IN_ONLINE_TEST_001, TestSize.Level1)
 {
     const char *ip = IP;
@@ -424,11 +416,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_LEAVE_LNN_IN_ONLINE_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: LNN_ONLINE_STATE_PROCESS_TEST_001
-* @tc.desc: test OnlineStateProcess
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ONLINE_STATE_PROCESS_TEST_001
+ * @tc.desc: test OnlineStateProcess
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm4);
@@ -441,11 +433,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_ONLINE_STATE_PROCESS_TEST_002
-* @tc.desc: test OnlineStateProcess
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ONLINE_STATE_PROCESS_TEST_002
+ * @tc.desc: test OnlineStateProcess
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_002, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm4);
@@ -458,11 +450,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_002, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_LEAVING_STATE_PROCESS_TEST_001
-* @tc.desc: test LeavingStateProcess
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LEAVING_STATE_PROCESS_TEST_001
+ * @tc.desc: test LeavingStateProcess
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_LEAVING_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     void *para = nullptr;
@@ -473,11 +465,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_INIT_CONNECTION_STATE_MACHINE_TEST_001
-* @tc.desc: test InitConnectionStateMachine
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_INIT_CONNECTION_STATE_MACHINE_TEST_001
+ * @tc.desc: test InitConnectionStateMachine
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_INIT_CONNECTION_STATE_MACHINE_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm4);
@@ -488,14 +480,16 @@ HWTEST_F(LNNConnectionFsmTest, LNN_INIT_CONNECTION_STATE_MACHINE_TEST_001, TestS
 }
 
 /*
-* @tc.name: DFX_RECORD_LNN_ONLINE_TYPE_TEST_001
-* @tc.desc: test DfxRecordLnnOnlineType
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DFX_RECORD_LNN_ONLINE_TYPE_TEST_001
+ * @tc.desc: test DfxRecordLnnOnlineType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, DFX_RECORD_LNN_ONLINE_TYPE_TEST_001, TestSize.Level1)
 {
-    NodeInfo info = { .netCapacity = 15, };
+    NodeInfo info = {
+        .netCapacity = 15,
+    };
     uint32_t local1 = 1;
     uint32_t local2 = 15;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -504,9 +498,7 @@ HWTEST_F(LNNConnectionFsmTest, DFX_RECORD_LNN_ONLINE_TYPE_TEST_001, TestSize.Lev
     EXPECT_EQ(ret, ONLINE_TYPE_WIFI);
     ret = DfxRecordLnnOnlineType(nullptr);
     EXPECT_EQ(ret, ONLINE_TYPE_INVALID);
-    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
     ret = DfxRecordLnnOnlineType(&info);
     EXPECT_EQ(ret, ONLINE_TYPE_BR);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
@@ -516,47 +508,40 @@ HWTEST_F(LNNConnectionFsmTest, DFX_RECORD_LNN_ONLINE_TYPE_TEST_001, TestSize.Lev
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = DfxRecordLnnOnlineType(&info);
     EXPECT_EQ(ret, ONLINE_TYPE_INVALID);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info).WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
     ret = DfxRecordLnnOnlineType(&info);
     EXPECT_EQ(ret, ONLINE_TYPE_BLE_THREE_STATE);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info).WillRepeatedly(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
     ret = DfxRecordLnnOnlineType(&info);
     EXPECT_EQ(ret, ONLINE_TYPE_BLE);
 }
 
 /*
-* @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
-* @tc.desc: test IsEmptyShortHashStr
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
+ * @tc.desc: test IsEmptyShortHashStr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1)
 {
     const char *udid = "testuuid";
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     ReportResult(udid, REPORT_CHANGE);
     ReportResult(udid, REPORT_OFFLINE);
     ReportResult(udid, REPORT_NONE);
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     OnlineTrustGroupProc(udid);
     const char *udidHash = "testuuid";
     bool ret = IsEmptyShortHashStr(const_cast<char *>(udidHash));
@@ -567,24 +552,24 @@ HWTEST_F(LNNConnectionFsmTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: GET_UDID_HASH_FOR_DFX_TEST_001
-* @tc.desc: test GetUdidHashForDfx
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_UDID_HASH_FOR_DFX_TEST_001
+ * @tc.desc: test GetUdidHashForDfx
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, GET_UDID_HASH_FOR_DFX_TEST_001, TestSize.Level1)
 {
     NodeInfo localInfo;
     (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(EOK, memcpy_s(localInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID, strlen(PEERUDID)));
-    LnnConntionInfo connInfo = { .addr.type = CONNECTION_ADDR_WLAN, };
+    LnnConntionInfo connInfo = {
+        .addr.type = CONNECTION_ADDR_WLAN,
+    };
     EXPECT_EQ(EOK, memcpy_s(connInfo.addr.info.ip.udidHash, UDID_BUF_LEN, PEERUDID, strlen(PEERUDID)));
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo)
-        .WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(&localInfo));
-    char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr)).WillRepeatedly(Return(&localInfo));
+    char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     int32_t ret = GetUdidHashForDfx(localUdidHash, peerUdidHash, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
     ret = GetUdidHashForDfx(localUdidHash, peerUdidHash, &connInfo);
@@ -596,14 +581,16 @@ HWTEST_F(LNNConnectionFsmTest, GET_UDID_HASH_FOR_DFX_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_PEER_UDID_HASH_TEST_001
-* @tc.desc: test GetPeerUdidHash
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_PEER_UDID_HASH_TEST_001
+ * @tc.desc: test GetPeerUdidHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
 {
-    NodeBasicInfo peerDevInfo = { .deviceTypeId = 1, };
+    NodeBasicInfo peerDevInfo = {
+        .deviceTypeId = 1,
+    };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<DistributeLedgerInterfaceMock> mock;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
@@ -615,7 +602,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
     ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     ON_CALL(lnnConnMock, SendDeviceStateToMlps).WillByDefault(Return());
     const char *udid = "testuuid";
-    char udidData[UDID_BUF_LEN] = {0};
+    char udidData[UDID_BUF_LEN] = { 0 };
     ReportDeviceOnlineEvt(udid, &peerDevInfo);
     DeviceStateChangeProcess(udidData, CONNECTION_ADDR_BLE, false);
     DeviceStateChangeProcess(nullptr, CONNECTION_ADDR_BLE, false);
@@ -623,7 +610,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(EOK, memcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID, strlen(PEERUDID)));
-    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     int32_t ret = GetPeerUdidHash(&nodeInfo, peerUdidHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetPeerUdidHash(nullptr, peerUdidHash);
@@ -633,11 +620,11 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_DEV_TYPE_FOR_DFX_TEST_001
-* @tc.desc: test GetDevTypeForDfx
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_DEV_TYPE_FOR_DFX_TEST_001
+ * @tc.desc: test GetDevTypeForDfx
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, GET_DEV_TYPE_FOR_DFX_TEST_001, TestSize.Level1)
 {
     NodeInfo localInfo;
@@ -646,9 +633,12 @@ HWTEST_F(LNNConnectionFsmTest, GET_DEV_TYPE_FOR_DFX_TEST_001, TestSize.Level1)
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<0>(localInfo), Return(SOFTBUS_OK)));
-    LnnConntionInfo connInfo = { .nodeInfo = nullptr, .infoReport.type = DESKTOP_PC, };
-    char localDeviceType[DEVICE_TYPE_SIZE_LEN + 1] = {0};
-    char peerDeviceType[DEVICE_TYPE_SIZE_LEN + 1] = {0};
+    LnnConntionInfo connInfo = {
+        .nodeInfo = nullptr,
+        .infoReport.type = DESKTOP_PC,
+    };
+    char localDeviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
+    char peerDeviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
     int32_t ret = GetDevTypeForDfx(localDeviceType, peerDeviceType, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
     ret = GetDevTypeForDfx(localDeviceType, peerDeviceType, &connInfo);
@@ -656,11 +646,11 @@ HWTEST_F(LNNConnectionFsmTest, GET_DEV_TYPE_FOR_DFX_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_PEER_UDID_INFO_TEST_001
-* @tc.desc: test GetPeerUdidInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_PEER_UDID_INFO_TEST_001
+ * @tc.desc: test GetPeerUdidInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -671,21 +661,24 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_INFO_TEST_001, TestSize.Level1)
     LnnEventExtra extra;
     SetOnlineType(SOFTBUS_OK, &nodeInfo, extra);
     SetOnlineType(SOFTBUS_ERR, &nodeInfo, extra);
-    char udidData[UDID_BUF_LEN] = {0};
-    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    char udidData[UDID_BUF_LEN] = { 0 };
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     int32_t ret = GetPeerUdidInfo(&nodeInfo, udidData, peerUdidHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
-* @tc.name: FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001
-* @tc.desc: test FillDeviceBleReportExtra
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001
+ * @tc.desc: test FillDeviceBleReportExtra
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001, TestSize.Level1)
 {
-    LnnEventExtra extra = { .onlineType = 0, .errcode = SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP, };
+    LnnEventExtra extra = {
+        .onlineType = 0,
+        .errcode = SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP,
+    };
     extra.peerNetworkId = NETWORKID1;
     extra.peerUdid = PEERUDID;
     extra.peerUdidHash = PEERUDID;
@@ -694,7 +687,10 @@ HWTEST_F(LNNConnectionFsmTest, FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001, TestSize.L
     (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
     int32_t ret = FillDeviceBleReportExtra(&extra, &bleExtra);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    LnnConntionInfo connInfo = { .nodeInfo = nullptr, .infoReport.type = DESKTOP_PC, };
+    LnnConntionInfo connInfo = {
+        .nodeInfo = nullptr,
+        .infoReport.type = DESKTOP_PC,
+    };
     extra.localUdidHash = PEERUDID;
     extra.localDeviceType = PC_DEV_TYPE;
     extra.peerDeviceType = PC_DEV_TYPE;
@@ -715,11 +711,11 @@ HWTEST_F(LNNConnectionFsmTest, FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: UPDATE_LEAVE_TO_LEDGER_TEST_001
-* @tc.desc: test UpdateLeaveToLedger
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: UPDATE_LEAVE_TO_LEDGER_TEST_001
+ * @tc.desc: test UpdateLeaveToLedger
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -727,7 +723,10 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     ON_CALL(serviceMock, LnnNotifyLnnRelationChanged).WillByDefault(Return());
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_ERR));
-    LnnConntionInfo connInfo = { .infoReport.bleConnectReason = FIND_REMOTE_CIPHERKEY_FAILED, .nodeInfo = nullptr, };
+    LnnConntionInfo connInfo = {
+        .infoReport.bleConnectReason = FIND_REMOTE_CIPHERKEY_FAILED,
+        .nodeInfo = nullptr,
+    };
     uint32_t connOnlineReason = 0;
     GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_OK);
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_OK));
@@ -738,16 +737,14 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_OK));
     GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_OK);
     GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_ERR);
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetDeviceUdid).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(ledgerMock, LnnSetNodeOffline).WillRepeatedly(Return(REPORT_OFFLINE));
     EXPECT_CALL(lnnConnMock, DeleteFromProfile).WillRepeatedly(Return());
-    LnnConnectionFsm connFsm = { .connInfo.cleanInfo = nullptr, };
+    LnnConnectionFsm connFsm = {
+        .connInfo.cleanInfo = nullptr,
+    };
     const char *networkId = "networkIdTest";
     NodeBasicInfo basic;
     (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -760,11 +757,11 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_RECOVERY_BROADCAST_KEY_TEST_001
-* @tc.desc: test LnnRecoveryBroadcastKey
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_RECOVERY_BROADCAST_KEY_TEST_001
+ * @tc.desc: test LnnRecoveryBroadcastKey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
@@ -785,17 +782,15 @@ HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: IS_WIFI_CONNECT_INFO_CHANGED_TEST_001
-* @tc.desc: test IsWifiConnectInfoChanged
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_WIFI_CONNECT_INFO_CHANGED_TEST_001
+ * @tc.desc: test IsWifiConnectInfoChanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
     NodeInfo oldNodeInfo = {
         .connectInfo.authPort = PORT,
         .connectInfo.proxyPort = PORT,
@@ -815,10 +810,10 @@ HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.L
     oldNodeInfo.connectInfo.sessionPort = PORT + 1;
     ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
     EXPECT_EQ(ret, true);
-    oldNodeInfo.connectInfo.proxyPort =  PORT + 1;
+    oldNodeInfo.connectInfo.proxyPort = PORT + 1;
     ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
     EXPECT_EQ(ret, true);
-    oldNodeInfo.connectInfo.authPort =  PORT + 1;
+    oldNodeInfo.connectInfo.authPort = PORT + 1;
     ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
     EXPECT_EQ(ret, true);
     EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
@@ -827,11 +822,11 @@ HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001
-* @tc.desc: test LnnIsNeedCleanConnectionFsm
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001
+ * @tc.desc: test LnnIsNeedCleanConnectionFsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     NodeInfo node;
@@ -846,9 +841,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001, TestSi
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<2>(node), Return(SOFTBUS_OK)));
-    EXPECT_CALL(ledgerMock, LnnIsNodeOnline)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, LnnIsNodeOnline).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
     bool ret = LnnIsNeedCleanConnectionFsm(&nodeInfo, CONNECTION_ADDR_ETH);
     EXPECT_EQ(ret, false);
@@ -866,11 +859,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001, TestSi
 }
 
 /*
-* @tc.name: SYNC_BR_OFFLINE_TEST_001
-* @tc.desc: test SyncBrOffline
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SYNC_BR_OFFLINE_TEST_001
+ * @tc.desc: test SyncBrOffline
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnectionFsmTest, SYNC_BR_OFFLINE_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
