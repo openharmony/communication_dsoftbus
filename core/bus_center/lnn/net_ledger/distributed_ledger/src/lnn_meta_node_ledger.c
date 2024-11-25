@@ -256,7 +256,7 @@ int32_t LnnInitMetaNodeLedger(void)
     if (g_metaNodeList == NULL) {
         g_metaNodeList = CreateSoftBusList();
     }
-    if (g_metaNodeList == NULL) { 
+    if (g_metaNodeList == NULL) {
         LNN_LOGE(LNN_LEDGER, "create meta node list failed");
         return SOFTBUS_CREATE_LIST_ERR;
     }
