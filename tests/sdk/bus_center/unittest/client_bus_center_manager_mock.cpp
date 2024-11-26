@@ -116,5 +116,29 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
     return GetBusCenterManagerInterface()->ServerIpcStopRefreshLNN(pkgName, refreshId);
 }
 
+int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->ServerIpcRegDataLevelChangeCb(pkgName);
+}
+
+int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->ServerIpcUnregDataLevelChangeCb(pkgName);
+}
+
+int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
+{
+    return GetBusCenterManagerInterface()->ServerIpcSetDataLevel(dataLevel);
+}
+
+int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
+{
+    return GetBusCenterManagerInterface()->SoftBusMutexLockInner(mutex);
+}
+
+int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex)
+{
+    return GetBusCenterManagerInterface()->SoftBusMutexUnlockInner(mutex);
+}
 } // extern "C"
 } // namespace OHOS

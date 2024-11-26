@@ -20,6 +20,7 @@
 #include <securec.h>
 
 #include "bus_center_server_proxy.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_config_type.h"
 #include "softbus_feature_config.h"
@@ -48,6 +49,11 @@ public:
     virtual int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);
     virtual int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info);
     virtual int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
+    virtual int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName);
+    virtual int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName);
+    virtual int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel);
+    virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex);
+    virtual int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex);
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
 public:
@@ -69,6 +75,11 @@ public:
     MOCK_METHOD2(ServerIpcStopPublishLNN, int32_t(const char *, int32_t));
     MOCK_METHOD2(ServerIpcRefreshLNN, int32_t(const char *, const SubscribeInfo *));
     MOCK_METHOD2(ServerIpcStopRefreshLNN, int32_t(const char *, int32_t));
+    MOCK_METHOD1(ServerIpcRegDataLevelChangeCb, int32_t (const char *));
+    MOCK_METHOD1(ServerIpcUnregDataLevelChangeCb, int32_t (const char *));
+    MOCK_METHOD1(ServerIpcSetDataLevel, int32_t (const DataLevel *));
+    MOCK_METHOD1(SoftBusMutexLockInner, int32_t (SoftBusMutex *));
+    MOCK_METHOD1(SoftBusMutexUnlockInner, int32_t (SoftBusMutex *));
 };
 } // namespace OHOS
 #endif // CLIENT_BUS_CENTER_MANAGER_MOCK_H
