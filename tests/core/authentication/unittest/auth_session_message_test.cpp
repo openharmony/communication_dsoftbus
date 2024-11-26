@@ -19,8 +19,8 @@
 #include <sys/time.h>
 
 #include "auth_session_json.c"
-#include "auth_session_message.h"
 #include "auth_session_message.c"
+#include "auth_session_message.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_error_code.h"
@@ -58,7 +58,7 @@ public:
 
 void AuthSessionMessageTest::SetUpTestCase()
 {
-    int32_t ret =  AuthCommonInit();
+    int32_t ret = AuthCommonInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -67,9 +67,9 @@ void AuthSessionMessageTest::TearDownTestCase()
     AuthCommonDeinit();
 }
 
-void AuthSessionMessageTest::SetUp() {}
+void AuthSessionMessageTest::SetUp() { }
 
-void AuthSessionMessageTest::TearDown() {}
+void AuthSessionMessageTest::TearDown() { }
 
 /*
  * @tc.name: PackFastAuthValue_TEST_001
@@ -81,7 +81,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
 {
     JsonObj *json = JSON_CreateObject();
     EXPECT_TRUE(json != nullptr);
-    char target[10] = {0};
+    char target[10] = { 0 };
     JSON_AddStringToObject(json, FAST_AUTH, "jsontest");
     OptString(json, DEVICE_ID, target, 10, "");
     OptString(json, FAST_AUTH, target, 10, "");
@@ -102,8 +102,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
     EXPECT_TRUE(obj != nullptr);
     AuthDeviceKeyInfo deviceCommKey;
     (void)memset_s(&deviceCommKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    EXPECT_TRUE(memcpy_s(deviceCommKey.deviceKey, SESSION_KEY_LENGTH,
-        DEVICE_KEY, strlen(DEVICE_KEY)) == EOK);
+    EXPECT_TRUE(memcpy_s(deviceCommKey.deviceKey, SESSION_KEY_LENGTH, DEVICE_KEY, strlen(DEVICE_KEY)) == EOK);
     deviceCommKey.keyLen = 5;
     deviceCommKey.keyIndex = 12345;
     EXPECT_NE(PackFastAuthValue(obj, &deviceCommKey), SOFTBUS_OK);
@@ -119,7 +118,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, GenerateUdidShortHash_TEST_001, TestSize.Level1)
 {
     const char *udid = "123456";
-    char udidHashHexStr[SHA_256_HEX_HASH_LEN] = {0};
+    char udidHashHexStr[SHA_256_HEX_HASH_LEN] = { 0 };
     EXPECT_TRUE(GenerateUdidShortHash(udid, udidHashHexStr, SHA_256_HEX_HASH_LEN));
     EXPECT_TRUE(!GenerateUdidShortHash(udid, udidHashHexStr, 10));
 }
@@ -137,7 +136,7 @@ HWTEST_F(AuthSessionMessageTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
     info.isServer = false;
     info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
     ASSERT_TRUE(memcpy_s(info.connInfo.info.ipInfo.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
-    char udidHashHexStr[SHA_256_HEX_HASH_LEN] = {0};
+    char udidHashHexStr[SHA_256_HEX_HASH_LEN] = { 0 };
     EXPECT_TRUE(GetUdidOrShortHash(&info, udidHashHexStr, SHA_256_HEX_HASH_LEN));
     info.isServer = true;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
@@ -193,8 +192,7 @@ HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Leve
     const char *encryptedFastAuth = "encryptedFastAuth";
     AuthDeviceKeyInfo deviceKey;
     (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    ASSERT_TRUE(memcpy_s(deviceKey.deviceKey, SESSION_KEY_LENGTH,
-        DEVICE_KEY, strlen(DEVICE_KEY)) == EOK);
+    ASSERT_TRUE(memcpy_s(deviceKey.deviceKey, SESSION_KEY_LENGTH, DEVICE_KEY, strlen(DEVICE_KEY)) == EOK);
     deviceKey.keyLen = 5;
     deviceKey.keyIndex = 12345;
     ParseFastAuthValue(&info, encryptedFastAuth, &deviceKey);
@@ -216,11 +214,9 @@ HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Leve
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     PackWifiSinglePassInfo(obj, &info);
     info.idType = EXCHANGE_NETWORKID;
-    EXPECT_TRUE(VerifySessionInfoIdType(&info, obj,
-        const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
+    EXPECT_TRUE(VerifySessionInfoIdType(&info, obj, const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
     info.idType = EXCHANGE_UDID;
-    EXPECT_TRUE(VerifySessionInfoIdType(&info, obj,
-        const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
+    EXPECT_TRUE(VerifySessionInfoIdType(&info, obj, const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
     JSON_Delete(obj);
 }
 
@@ -376,17 +372,15 @@ HWTEST_F(AuthSessionMessageTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
     EXPECT_TRUE(json != nullptr);
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN,
-        INVALID_UNIFIED_NAME, strlen(INVALID_UNIFIED_NAME)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, INVALID_UNIFIED_NAME,
+                    strlen(INVALID_UNIFIED_NAME)) == EOK);
     EXPECT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, INVALID_UDID, strlen(INVALID_UDID)) == EOK);
     EXPECT_TRUE(PackCommonDevInfo(json, &info, true) == SOFTBUS_OK);
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN,
-        UNIFIED_NAME, strlen(UNIFIED_NAME)) == EOK);
-    EXPECT_TRUE(memcpy_s(info.networkId, NETWORK_ID_BUF_LEN,
-        NETWORK_ID_TEST, strlen(NETWORK_ID_TEST)) == EOK);
-    EXPECT_TRUE(memcpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN,
-        DEVICE_NAME_TEST, strlen(DEVICE_NAME_TEST)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, UNIFIED_NAME, strlen(UNIFIED_NAME)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORK_ID_TEST, strlen(NETWORK_ID_TEST)) == EOK);
+    EXPECT_TRUE(
+        memcpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, DEVICE_NAME_TEST, strlen(DEVICE_NAME_TEST)) == EOK);
     info.deviceInfo.deviceTypeId = 12;
     EXPECT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     EXPECT_TRUE(PackCommonDevInfo(json, &info, false) == SOFTBUS_OK);
@@ -412,8 +406,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
     EXPECT_TRUE(memcpy_s(info.cipherInfo.key, SESSION_KEY_LENGTH, KEY_TEST, strlen(KEY_TEST)) == EOK);
     EXPECT_TRUE(memcpy_s(info.cipherInfo.iv, BROADCAST_IV_LEN, IV_TEST, strlen(IV_TEST)) == EOK);
     EXPECT_TRUE(memcpy_s(info.rpaInfo.peerIrk, LFINDER_IRK_LEN, PEER_IRK, PEER_IRK_LEN) == EOK);
-    EXPECT_TRUE(memcpy_s(info.rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN,
-        PUBLIC_ADDRESS, PUBLIC_ADDRESS_LEN) == EOK);
+    EXPECT_TRUE(memcpy_s(info.rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, PUBLIC_ADDRESS, PUBLIC_ADDRESS_LEN) == EOK);
     UnpackCipherRpaInfo(json, &info);
     JSON_Delete(json);
     JsonObj *json1 = JSON_CreateObject();
@@ -455,7 +448,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
     UnpackCommon(json, &info, SOFTBUS_NEW_V1, false);
     JSON_AddStringToObject(json, NODE_ADDR, "127.0.0.0");
     UnpackCommon(json, &info, SOFTBUS_NEW_V1, false);
-    char buf[10] = {0};
+    char buf[10] = { 0 };
     EXPECT_TRUE(GetBtDiscTypeString(nullptr, buf, 10) == SOFTBUS_OK);
     info.discoveryType = 11;
     EXPECT_TRUE(GetBtDiscTypeString(&info, buf, 10) == SOFTBUS_OK);
@@ -487,7 +480,8 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
     JsonObj *json = JSON_CreateObject();
     EXPECT_TRUE(json != nullptr);
     JSON_AddInt32ToObject(json, BUS_MAX_VERSION, 3);
-    JSON_AddInt32ToObject(json, BUS_MIN_VERSION, 0);;
+    JSON_AddInt32ToObject(json, BUS_MIN_VERSION, 0);
+    ;
     EXPECT_TRUE(CheckBusVersion(json) == 2);
     EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false) == SOFTBUS_OK);
     JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, 63);
@@ -533,13 +527,13 @@ HWTEST_F(AuthSessionMessageTest, UpdatePeerDeviceName_TEST_001, TestSize.Level1)
     NodeInfo peerNodeInfo;
     (void)memset_s(&peerNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     UpdatePeerDeviceName(&peerNodeInfo);
-    ASSERT_TRUE(memcpy_s(peerNodeInfo.deviceInfo.unifiedName,
-        DEVICE_NAME_BUF_LEN, UNIFIED_NAME, strlen(UNIFIED_NAME)) == EOK);
-    ASSERT_TRUE(memcpy_s(peerNodeInfo.deviceInfo.unifiedDefaultName,
-        DEVICE_NAME_BUF_LEN, DEVICE_NAME_TEST, strlen(DEVICE_NAME_TEST)) == EOK);
+    ASSERT_TRUE(
+        memcpy_s(peerNodeInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, UNIFIED_NAME, strlen(UNIFIED_NAME)) == EOK);
+    ASSERT_TRUE(memcpy_s(peerNodeInfo.deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, DEVICE_NAME_TEST,
+                    strlen(DEVICE_NAME_TEST)) == EOK);
     UpdatePeerDeviceName(&peerNodeInfo);
-    ASSERT_TRUE(memcpy_s(peerNodeInfo.deviceInfo.unifiedDefaultName,
-        DEVICE_NAME_BUF_LEN, UNIFIED_NAME, strlen(UNIFIED_NAME)) == EOK);
+    ASSERT_TRUE(memcpy_s(peerNodeInfo.deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, UNIFIED_NAME,
+                    strlen(UNIFIED_NAME)) == EOK);
     UpdatePeerDeviceName(&peerNodeInfo);
     AuthSessionInfo info;
     EXPECT_TRUE(PostDeviceIdData(123, &info, nullptr, 0) == SOFTBUS_AUTH_SEND_FAIL);
@@ -630,7 +624,7 @@ HWTEST_F(AuthSessionMessageTest, IsDeviceMessagePacket_TEST_001, TestSize.Level1
  */
 HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
 {
-    AuthDeviceKeyInfo deviceCommKey = {0};
+    AuthDeviceKeyInfo deviceCommKey = { 0 };
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(obj, nullptr);
     uint32_t keyLen = 0;
@@ -653,7 +647,7 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
         return;
     }
 
-    NodeInfo *info = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
+    NodeInfo *info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     if (info == NULL) {
         JSON_Delete(obj);
         return;
@@ -661,13 +655,11 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     SoftBusVersion version = SOFTBUS_NEW_V1;
-    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) ||
-        !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
+    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) || !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
         !JSON_AddInt32ToObject(obj, "BUS_MIN_VERSION", (int32_t)1) ||
         !JSON_AddInt32ToObject(obj, "AUTH_PORT", (int32_t)8710) ||
         !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
-        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
-        !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) || !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
         JSON_Delete(obj);
         return;
     }
@@ -677,7 +669,7 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     info->connectInfo.sessionPort = 26;
     info->connectInfo.proxyPort = 80;
     info->supportedProtocols = LNN_PROTOCOL_BR;
-    
+
     int32_t ret = UnpackWiFi(obj, info, version, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)-1);
@@ -709,7 +701,7 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
+    AuthSessionInfo *info = (AuthSessionInfo *)SoftBusCalloc(sizeof(AuthSessionInfo));
     if (info == NULL) {
         return;
     }
@@ -814,7 +806,10 @@ HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
  */
 HWTEST_F(AuthSessionMessageTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
 {
-    AuthSessionInfo info = { .connInfo.type = AUTH_LINK_TYPE_BR, .isServer = true, };
+    AuthSessionInfo info = {
+        .connInfo.type = AUTH_LINK_TYPE_BR,
+        .isServer = true,
+    };
     uint32_t bufLen = UDID_SHORT_HASH_HEX_STR;
     char udidHash[SHORT_UDID_HASH_HEX_LEN + 1];
     EXPECT_EQ(false, GetUdidShortHash(nullptr, nullptr, bufLen));
@@ -842,7 +837,9 @@ HWTEST_F(AuthSessionMessageTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
-    SessionKey sessionKey = { .len = SESSION_KEY_LENGTH, };
+    SessionKey sessionKey = {
+        .len = SESSION_KEY_LENGTH,
+    };
     EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
     JsonObj *obj = JSON_CreateObject();
     EXPECT_TRUE(obj != nullptr);
@@ -853,7 +850,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
         .localState = AUTH_STATE_WAIT,
         .connInfo.type = AUTH_LINK_TYPE_WIFI,
         .normalizedKey = nullptr,
-        };
+    };
     PackNormalizedKey(obj, &info);
     info.isNeedFastAuth = true;
     PackNormalizedKey(obj, &info);
@@ -864,8 +861,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
     PackNormalizedKey(obj, &info);
     info.normalizedKey = &sessionKey;
     PackNormalizedKey(obj, &info);
-    EXPECT_TRUE(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN,
-        UUID_TEST, strlen(UUID_TEST)) == EOK);
+    EXPECT_TRUE(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     PackNormalizedKey(obj, &info);
     EXPECT_EQ(SOFTBUS_OK, PackNormalizedKeyValue(obj, &sessionKey));
     JSON_Delete(obj);
@@ -880,7 +876,9 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
 HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
     const char *encNormalizedKey = "encnormalizedkeytest";
-    SessionKey sessionKey = { .len = SESSION_KEY_LENGTH, };
+    SessionKey sessionKey = {
+        .len = SESSION_KEY_LENGTH,
+    };
     EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
     AuthSessionInfo info;
     EXPECT_NE(SOFTBUS_OK, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
@@ -970,9 +968,9 @@ HWTEST_F(AuthSessionMessageTest, GET_DUMP_SESSIONKEY_LIST_TEST_001, TestSize.Lev
 
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isSupportCompress = true;
-    uint8_t compressData[TEST_DATA_LEN] = {0};
+    uint8_t compressData[TEST_DATA_LEN] = { 0 };
     uint32_t compressLen = TEST_DATA_LEN;
-    char data[TEST_DATA_LEN] = {0};
+    char data[TEST_DATA_LEN] = { 0 };
     InDataInfo inDataInfo;
     (void)memset_s(&inDataInfo, sizeof(InDataInfo), 0, sizeof(InDataInfo));
     SetIndataInfo(&inDataInfo, nullptr, 0, data);
@@ -980,4 +978,3 @@ HWTEST_F(AuthSessionMessageTest, GET_DUMP_SESSIONKEY_LIST_TEST_001, TestSize.Lev
     SetIndataInfo(&inDataInfo, compressData, 0, data);
 }
 } // namespace OHOS
-

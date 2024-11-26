@@ -42,31 +42,22 @@ void BusCenterServerTest::SetUpTestCase()
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-void BusCenterServerTest::TearDownTestCase()
-{
-}
+void BusCenterServerTest::TearDownTestCase() { }
 
-void BusCenterServerTest::SetUp()
-{
-}
+void BusCenterServerTest::SetUp() { }
 
-void BusCenterServerTest::TearDown()
-{
-}
+void BusCenterServerTest::TearDown() { }
 
 /*
-* @tc.name: SERVER_IPC_JOIN_LNN_TEST_001
-* @tc.desc: server ipc join lnn test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_JOIN_LNN_TEST_001
+ * @tc.desc: server ipc join lnn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_LNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";
-    ConnectionAddr addr  = {
-        .type = CONNECTION_ADDR_BR,
-        .peerUid = "001"
-    };
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_BR, .peerUid = "001" };
 
     EXPECT_TRUE(strncpy_s(addr.info.br.brMac, BT_MAC_LEN, BR_MAC, BT_MAC_LEN) == EOK);
     int32_t ret = ServerIpcJoinLNN(pkgName, static_cast<void *>(&addr), sizeof(ConnectionAddr));
@@ -74,11 +65,11 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_LNN_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SERVER_IPC_LEAVE_LNN_TEST_001
-* @tc.desc: server ipc leave lnn test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_LEAVE_LNN_TEST_001
+ * @tc.desc: server ipc leave lnn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";
@@ -89,11 +80,11 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SERVER_IPC_STOP_TIME_SYNC_TEST_001
-* @tc.desc: server ipc stop time sync test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_STOP_TIME_SYNC_TEST_001
+ * @tc.desc: server ipc stop time sync test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_STOP_TIME_SYNC_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";
@@ -106,17 +97,17 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_STOP_TIME_SYNC_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: SERVER_IPC_ACTIVE_META_NODE_TEST_001
-* @tc.desc: server ipc active meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_ACTIVE_META_NODE_TEST_001
+ * @tc.desc: server ipc active meta node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_ACTIVE_META_NODE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";
     char udid[] = "123456789987654321001234567899876543210012345678998765432100123";
     MetaNodeConfigInfo info;
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
 
     (void)memset_s(&info, sizeof(MetaNodeConfigInfo), 0, sizeof(MetaNodeConfigInfo));
     info.addrNum = 1;
@@ -126,26 +117,26 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_ACTIVE_META_NODE_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: SERVER_IPC_DEACTIVE_META_NODE_TEST_001
-* @tc.desc: server ipc deactive meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_DEACTIVE_META_NODE_TEST_001
+ * @tc.desc: server ipc deactive meta node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_DEACTIVE_META_NODE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
 
     int32_t ret = ServerIpcDeactiveMetaNode(pkgName, metaNodeId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
-* @tc.name: SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001
-* @tc.desc: server ipc get all meta node info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001
+ * @tc.desc: server ipc get all meta node info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";
@@ -158,11 +149,11 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001, TestSi
 }
 
 /*
-* @tc.name: SERVER_IPC_SHIFT_LNN_GEAR_TEST_001
-* @tc.desc: server ipc shift lnn gear test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SERVER_IPC_SHIFT_LNN_GEAR_TEST_001
+ * @tc.desc: server ipc shift lnn gear test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "000";

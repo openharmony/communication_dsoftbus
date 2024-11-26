@@ -67,8 +67,8 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType,
-    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(
+    const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
     if (srcId == NULL || dstIdBuf == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
@@ -81,8 +81,8 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, Id
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(const char *srcId, IdCategory srcIdType,
-    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(
+    const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
     if (srcId == NULL || dstIdBuf == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
@@ -137,8 +137,8 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1(NodeBasicIn
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation(const char *id, IdCategory type,
-    uint8_t *relation, uint32_t len)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation(
+    const char *id, IdCategory type, uint8_t *relation, uint32_t len)
 {
     if (len <= CONNECTION_ADDR_BR) {
         LNN_LOGW(LNN_TEST, "set relation fail");
@@ -148,8 +148,8 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation(const char *id, Id
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1(const char *id, IdCategory type,
-    uint8_t *relation, uint32_t len)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1(
+    const char *id, IdCategory type, uint8_t *relation, uint32_t len)
 {
     if (len <= CONNECTION_ADDR_BR) {
         LNN_LOGW(LNN_TEST, "set relation fail");
@@ -203,8 +203,8 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, cha
     return SOFTBUS_ERR;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(const char *uuid, AuthLinkType type,
-    AuthHandle *authHandle)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(
+    const char *uuid, AuthLinkType type, AuthHandle *authHandle)
 {
     (void)uuid;
     if (authHandle == NULL) {
@@ -216,8 +216,8 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(const char *uuid, A
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList(const char *udid, int64_t *seqList,
-    uint64_t *authVerifyTime, DiscoveryType type)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList(
+    const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
 {
     (void)udid;
     (void)type;
@@ -306,11 +306,10 @@ int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
     return GetNetLedgerInterface()->LnnGetLocalNumU32Info(key, info);
 }
 
-int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
-    char *dstIdBuf, uint32_t dstIdBufLen)
+int32_t LnnConvertDlId(
+    const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
-    return GetNetLedgerInterface()->LnnConvertDlId(srcId, srcIdType,
-        dstIdType, dstIdBuf, dstIdBufLen);
+    return GetNetLedgerInterface()->LnnConvertDlId(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
 }
 
 bool LnnHasCapability(uint32_t capability, NetCapability type)
@@ -533,8 +532,8 @@ int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHan
     return GetNetLedgerInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
-int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
-    DiscoveryType type)
+int32_t AuthGetLatestAuthSeqListByType(
+    const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
 {
     return GetNetLedgerInterface()->AuthGetLatestAuthSeqListByType(udid, seqList, authVerifyTime, type);
 }

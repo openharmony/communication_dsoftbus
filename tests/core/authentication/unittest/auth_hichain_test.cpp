@@ -18,16 +18,16 @@
 #include <securec.h>
 #include <sys/time.h>
 
-#include "auth_hichain.h"
+#include "auth_common_mock.h"
 #include "auth_hichain.c"
+#include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_net_ledger_mock.h"
-#include "softbus_app_info.h"
 #include "lnn_hichain_mock.h"
+#include "softbus_app_info.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
-#include "auth_common_mock.h"
 
 namespace OHOS {
 using namespace testing;
@@ -41,18 +41,16 @@ public:
     void TearDown();
 };
 
-void AuthHichainTest::SetUpTestCase()
-{
-}
+void AuthHichainTest::SetUpTestCase() { }
 
-void AuthHichainTest::TearDownTestCase() {}
+void AuthHichainTest::TearDownTestCase() { }
 
 void AuthHichainTest::SetUp()
 {
     AUTH_LOGI(AUTH_TEST, "AuthHichainTest start");
 }
 
-void AuthHichainTest::TearDown() {}
+void AuthHichainTest::TearDown() { }
 
 void OnDeviceNotTrustedTest(const char *peerUdid)
 {
@@ -89,9 +87,7 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     const char *udid = "000";
     GroupInfo info;
     AuthNetLedgertInterfaceMock ledgermock;
-    EXPECT_CALL(ledgermock, GetJsonObjectStringItem)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgermock, GetJsonObjectStringItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
     OnGroupCreated(nullptr);
     OnGroupCreated(groupInfo);
     g_dataChangeListener.onGroupCreated = nullptr;
@@ -121,7 +117,7 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     int64_t authSeq = 0;
-    uint8_t sessionKey[SESSION_KEY_LENGTH] = {0};
+    uint8_t sessionKey[SESSION_KEY_LENGTH] = { 0 };
     OnSessionKeyReturned(authSeq, nullptr, SESSION_KEY_LENGTH + 1);
     OnSessionKeyReturned(authSeq, nullptr, SESSION_KEY_LENGTH);
     OnSessionKeyReturned(authSeq, sessionKey, SESSION_KEY_LENGTH + 1);
@@ -175,13 +171,9 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
     grounpManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
     grounpManager.getRelatedGroups = LnnHichainInterfaceMock::getRelatedGroups;
     grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
-    EXPECT_CALL(hichainMock, GetGmInstance)
-        .WillOnce(Return(NULL))
-        .WillRepeatedly(Return(&grounpManager));
+    EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(NULL)).WillRepeatedly(Return(&grounpManager));
     AuthNetLedgertInterfaceMock ledgermock;
-    EXPECT_CALL(ledgermock, LnnGetLocalStrInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, false);
     EXPECT_TRUE(ret == false);
     ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, false);
@@ -215,9 +207,7 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     EXPECT_CALL(hichainMock, GetGmInstance).WillRepeatedly(Return(&grounpManager));
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgermock, GetJsonObjectStringItem)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgermock, GetJsonObjectStringItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
     bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, true);
     EXPECT_TRUE(ret == false);
     ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, true);
@@ -275,9 +265,7 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
     grounpManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
     grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
     grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
-    EXPECT_CALL(hichainMock, GetGmInstance)
-        .WillOnce(Return(NULL))
-        .WillRepeatedly(Return(&grounpManager));
+    EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(NULL)).WillRepeatedly(Return(&grounpManager));
     bool ret = IsSameAccountGroupDevice();
     EXPECT_TRUE(ret == false);
     ret = IsSameAccountGroupDevice();

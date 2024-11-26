@@ -88,7 +88,7 @@ void AuthEnhanceMockTest::SetUp()
     AUTH_LOGI(AUTH_TEST, "AuthTest start.");
 }
 
-void AuthEnhanceMockTest::TearDown() {}
+void AuthEnhanceMockTest::TearDown() { }
 
 void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock,
     GroupAuthManager &authManager, DeviceGroupManager &groupManager)
@@ -267,7 +267,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     NiceMock<AuthCommonInterfaceMock> commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
-    NodeInfo *info = {0};
+    NodeInfo *info = { 0 };
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
@@ -324,10 +324,8 @@ HWTEST_F(AuthEnhanceMockTest, CHECK_SESSIONKEY_VALID_Test_002, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ASSERT_TRUE(memcpy_s(info.connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash,
-        UDID_HASH_LEN) == EOK);
-    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash,
-        UDID_HASH_LEN) == EOK);
+    ASSERT_TRUE(memcpy_s(info.connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) == EOK);
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) == EOK);
     EXPECT_EQ(AuthDirectOnlineCreateAuthManager(authSeq, &info), SOFTBUS_OK);
 
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
@@ -362,10 +360,8 @@ HWTEST_F(AuthEnhanceMockTest, CHECK_SESSION_KEY_VALID_BY_AUTH_HANDLE_Test_001, T
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ASSERT_TRUE(memcpy_s(info.connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash,
-        UDID_HASH_LEN) == EOK);
-    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash,
-        UDID_HASH_LEN) == EOK);
+    ASSERT_TRUE(memcpy_s(info.connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) == EOK);
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) == EOK);
     EXPECT_EQ(AuthDirectOnlineCreateAuthManager(authSeq, &info), SOFTBUS_OK);
     AuthHandle authHandle = { .authId = authSeq, .type = connInfo.type };
     SessionKey sessionKey;

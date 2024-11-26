@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,6 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
 int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName);
 bool CheckDiscPermission(pid_t callingUid, const char *pkgName);
 bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName);
-int32_t CheckDynamicPermission(void);
 int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName);
 int32_t RemoveTransPermission(const char *sessionName);
 

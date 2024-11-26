@@ -20,6 +20,12 @@
 #include "gtest/gtest.h"
 
 namespace OHOS {
+void TransRunAllTest(const uint8_t *data, size_t size)
+{
+    (void)data;
+    (void)size;
+    (void)RUN_ALL_TESTS();
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -30,7 +36,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     if (isFirst) {
         testing::InitGoogleTest();
-        (void)RUN_ALL_TESTS();
+        OHOS::TransRunAllTest(data, size);
         isFirst = false;
     }
 

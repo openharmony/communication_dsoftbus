@@ -14,9 +14,9 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
 #include "access_control.h"
+#include "securec.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -30,16 +30,16 @@ const int32_t HAP_TOKENID = 123456;
 const int32_t NATIVE_TOKENID = 134341184;
 class SoftbusPermissionACLTest : public testing::Test {
 public:
-    SoftbusPermissionACLTest() {}
-    ~SoftbusPermissionACLTest() {}
+    SoftbusPermissionACLTest() { }
+    ~SoftbusPermissionACLTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void SoftbusPermissionACLTest::SetUpTestCase(void) {}
-void SoftbusPermissionACLTest::TearDownTestCase(void) {}
+void SoftbusPermissionACLTest::SetUpTestCase(void) { }
+void SoftbusPermissionACLTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: TransCheckClientAccessControl001

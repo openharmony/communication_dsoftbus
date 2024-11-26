@@ -21,8 +21,8 @@
 #include "bus_center_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
-#include "net_ledger_mock.h"
 #include "message_handler.h"
+#include "net_ledger_mock.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 
@@ -47,20 +47,16 @@ void P2pInfoMockTest::TearDownTestCase()
     LooperDeinit();
 }
 
-void P2pInfoMockTest::SetUp()
-{
-}
+void P2pInfoMockTest::SetUp() { }
 
-void P2pInfoMockTest::TearDown()
-{
-}
+void P2pInfoMockTest::TearDown() { }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_001
-* @tc.desc: test LnnInitLocalP2pInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: P2P_INFO_MOCK_TEST_001
+ * @tc.desc: test LnnInitLocalP2pInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
 {
     NetLedgerMock netLedgerMock;
@@ -89,27 +85,26 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_002
-* @tc.desc: test LnnSyncP2pInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: P2P_INFO_MOCK_TEST_002
+ * @tc.desc: test LnnSyncP2pInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
 {
     NetLedgerMock netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncP2pInfo();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_003
-* @tc.desc: test LnnInitP2p
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: P2P_INFO_MOCK_TEST_003
+ * @tc.desc: test LnnInitP2p
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
 {
     int32_t ret = LnnInitP2p();
@@ -118,11 +113,11 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_004
-* @tc.desc: test LnnInitWifiDirect
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: P2P_INFO_MOCK_TEST_004
+ * @tc.desc: test LnnInitWifiDirect
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_004, TestSize.Level1)
 {
     int32_t ret = LnnInitWifiDirect();
@@ -131,16 +126,15 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_005
-* @tc.desc: test LnnSyncWifiDirectAddr
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: P2P_INFO_MOCK_TEST_005
+ * @tc.desc: test LnnSyncWifiDirectAddr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_005, TestSize.Level1)
 {
     NetLedgerMock netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncWifiDirectAddr();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(500);

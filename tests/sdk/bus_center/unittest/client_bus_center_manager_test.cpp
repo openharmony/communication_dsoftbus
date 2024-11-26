@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
-#include "client_bus_center_manager_mock.h"
 #include "client_bus_center_manager.h"
+#include "client_bus_center_manager_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
@@ -55,27 +55,27 @@ public:
     void TearDown();
 };
 
-void ClientBusCentManagerTest::SetUpTestCase() {}
+void ClientBusCentManagerTest::SetUpTestCase() { }
 
-void ClientBusCentManagerTest::TearDownTestCase() {}
+void ClientBusCentManagerTest::TearDownTestCase() { }
 
-void ClientBusCentManagerTest::SetUp() {}
+void ClientBusCentManagerTest::SetUp() { }
 
-void ClientBusCentManagerTest::TearDown() {}
+void ClientBusCentManagerTest::TearDown() { }
 
 /*
-* @tc.name: BUS_CENTER_CLIENT_INIT_Test_001
-* @tc.desc: bus center client init test
-* @tc.type: FUNC
-
-* @tc.require:
-*/
+ * @tc.name: BUS_CENTER_CLIENT_INIT_Test_001
+ * @tc.desc: bus center client init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, BUS_CENTER_CLIENT_INIT_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit())
-        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT)).WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_NE(BusCenterClientInit(), SOFTBUS_OK);
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
@@ -83,11 +83,11 @@ HWTEST_F(ClientBusCentManagerTest, BUS_CENTER_CLIENT_INIT_Test_001, TestSize.Lev
 }
 
 /*
-* @tc.name: JOIN_LNN_INNER_Test_001
-* @tc.desc: join lnn inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: JOIN_LNN_INNER_Test_001
+ * @tc.desc: join lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
 {
     OnJoinLNNResult cb = nullptr;
@@ -126,11 +126,11 @@ HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LEAVE_LNN_INNER_Test_001
-* @tc.desc: leave lnn inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LEAVE_LNN_INNER_Test_001
+ * @tc.desc: leave lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LEAVE_LNN_INNER_Test_001, TestSize.Level1)
 {
     OnLeaveLNNResult cb = nullptr;
@@ -149,11 +149,11 @@ HWTEST_F(ClientBusCentManagerTest, LEAVE_LNN_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: REG_NODE_DEVICE_STATE_CB_INNER_Test_001
-* @tc.desc: reg node device state cb inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REG_NODE_DEVICE_STATE_CB_INNER_Test_001
+ * @tc.desc: reg node device state cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, REG_NODE_DEVICE_STATE_CB_INNER_Test_001, TestSize.Level1)
 {
     INodeStateCb callback;
@@ -168,11 +168,11 @@ HWTEST_F(ClientBusCentManagerTest, REG_NODE_DEVICE_STATE_CB_INNER_Test_001, Test
 }
 
 /*
-* @tc.name: UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001
-* @tc.desc: unreg node device state cb inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001
+ * @tc.desc: unreg node device state cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001, TestSize.Level1)
 {
     INodeStateCb callback;
@@ -186,11 +186,11 @@ HWTEST_F(ClientBusCentManagerTest, UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001, Te
 }
 
 /*
-* @tc.name: GET_ALL_NODE_DEVICE_INFO_INNER_Test_001
-* @tc.desc: get all node device info inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_NODE_DEVICE_INFO_INNER_Test_001
+ * @tc.desc: get all node device info inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, GET_ALL_NODE_DEVICE_INFO_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -202,11 +202,11 @@ HWTEST_F(ClientBusCentManagerTest, GET_ALL_NODE_DEVICE_INFO_INNER_Test_001, Test
 }
 
 /*
-* @tc.name: GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001
-* @tc.desc: get local node device info inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001
+ * @tc.desc: get local node device info inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -218,11 +218,11 @@ HWTEST_F(ClientBusCentManagerTest, GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001, Te
 }
 
 /*
-* @tc.name: GET_NODE_KEY_INFO_INNER_Test_001
-* @tc.desc: get node key info inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_NODE_KEY_INFO_INNER_Test_001
+ * @tc.desc: get node key info inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Level1)
 {
     int32_t infoLen = 0;
@@ -235,11 +235,11 @@ HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001
-* @tc.desc: set node data change flag inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001
+ * @tc.desc: set node data change flag inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001, TestSize.Level1)
 {
     uint16_t dataChangeFlag = 0;
@@ -252,11 +252,11 @@ HWTEST_F(ClientBusCentManagerTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001, Tes
 }
 
 /*
-* @tc.name: START_TIME_SYNC_INNER_Test_001
-* @tc.desc: start time sync inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: START_TIME_SYNC_INNER_Test_001
+ * @tc.desc: start time sync inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_001, TestSize.Level1)
 {
     ITimeSyncCb cb;
@@ -275,11 +275,11 @@ HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: STOP_TIME_SYNC_INNER_Test_001
-* @tc.desc: stop time sync inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: STOP_TIME_SYNC_INNER_Test_001
+ * @tc.desc: stop time sync inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -293,11 +293,11 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: STOP_TIME_SYNC_INNER_Test_002
-* @tc.desc: stop time sync inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: STOP_TIME_SYNC_INNER_Test_002
+ * @tc.desc: stop time sync inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_002, TestSize.Level1)
 {
     ITimeSyncCb cb;
@@ -324,11 +324,11 @@ static void OnPublishResultCb(int32_t publishId, PublishResult reason)
 }
 
 /*
-* @tc.name: PUBLISH_LNN_INNER_Test_001
-* @tc.desc: publish lnn inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: PUBLISH_LNN_INNER_Test_001
+ * @tc.desc: publish lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
 {
     IPublishCb cb;
@@ -340,8 +340,8 @@ HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
     info.medium = COAP;
     info.freq = HIGH;
     info.capability = CAPABILITY;
-    info.capabilityData = const_cast<unsigned char*>(CAPABILITY_DATA);
-    info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char*>(CAPABILITY_DATA)));
+    info.capabilityData = const_cast<unsigned char *>(CAPABILITY_DATA);
+    info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char *>(CAPABILITY_DATA)));
     info.ranging = false;
     LnnOnPublishLNNResult(LNN_PUBLISH_ID, RESULT_REASON);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -354,11 +354,11 @@ HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: STOP_PUBLISH_LNN_INNER_Test_001
-* @tc.desc: stop publish lnn inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: STOP_PUBLISH_LNN_INNER_Test_001
+ * @tc.desc: stop publish lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, STOP_PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -383,11 +383,11 @@ static void OnDiscoverResultCb(int32_t refreshId, RefreshResult reason)
 }
 
 /*
-* @tc.name: REFRESH_LNN_INNER_Test_001
-* @tc.desc: refresh lnn inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REFRESH_LNN_INNER_Test_001
+ * @tc.desc: refresh lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
 {
     SubscribeInfo info;
@@ -402,8 +402,8 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
     info.isSameAccount = false;
     info.isWakeRemote = false;
     info.capability = CAPABILITY;
-    info.capabilityData = const_cast<unsigned char*>(CAPABILITY_DATA);
-    info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char*>(CAPABILITY_DATA)));
+    info.capabilityData = const_cast<unsigned char *>(CAPABILITY_DATA);
+    info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char *>(CAPABILITY_DATA)));
     LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
     LnnOnRefreshDeviceFound(nullptr);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -417,11 +417,11 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: STOP_REFRESH_LNN_INNER_Test_001
-* @tc.desc: stop refresh lnn inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: STOP_REFRESH_LNN_INNER_Test_001
+ * @tc.desc: stop refresh lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, STOP_REFRESH_LNN_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -441,11 +441,11 @@ static void OnJoinLNNResultCb(ConnectionAddr *addr, const char *networkId, int32
 }
 
 /*
-* @tc.name: LNN_ONJOIN_RESULT_Test_001
-* @tc.desc: lnn on join result test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ONJOIN_RESULT_Test_001
+ * @tc.desc: lnn on join result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ONJOIN_RESULT_Test_001, TestSize.Level1)
 {
     int32_t retCode = 0;
@@ -476,11 +476,11 @@ static void OnLeaveResultCb(const char *networkId, int32_t retCode)
 }
 
 /*
-* @tc.name: LNN_ON_LEAVE_RESULT_Test_001
-* @tc.desc: lnn on leave result test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_LEAVE_RESULT_Test_001
+ * @tc.desc: lnn on leave result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_LEAVE_RESULT_Test_001, TestSize.Level1)
 {
     int32_t retCode = 0;
@@ -526,11 +526,11 @@ static void OnNodeStatusChangedCb(NodeStatusType type, NodeStatus *status)
 }
 
 /*
-* @tc.name: LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001
-* @tc.desc: lnn on node online state changed test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001
+ * @tc.desc: lnn on node online state changed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001, TestSize.Level1)
 {
     INodeStateCb callBcak;
@@ -555,11 +555,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001, Te
 }
 
 /*
-* @tc.name: LNN_ON_NODE_BASICINFO_CHANGED_Test_001
-* @tc.desc: lnn on node basic info changed test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_NODE_BASICINFO_CHANGED_Test_001
+ * @tc.desc: lnn on node basic info changed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_BASICINFO_CHANGED_Test_001, TestSize.Level1)
 {
     INodeStateCb callBcak;
@@ -585,11 +585,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_BASICINFO_CHANGED_Test_001, TestS
 }
 
 /*
-* @tc.name: LNN_ON_NODE_STATUS_CHANGED_Test_001
-* @tc.desc: lnn on node status changed test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_NODE_STATUS_CHANGED_Test_001
+ * @tc.desc: lnn on node status changed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_STATUS_CHANGED_Test_001, TestSize.Level1)
 {
     INodeStateCb callBcak;
@@ -599,16 +599,16 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_STATUS_CHANGED_Test_001, TestSize
     NodeStatus info;
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(LnnOnNodeStatusChanged(nullptr, reinterpret_cast<void *>(&info), TYPE_SCREEN_STATUS) ==
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(
+        LnnOnNodeStatusChanged(nullptr, reinterpret_cast<void *>(&info), TYPE_SCREEN_STATUS) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnOnNodeStatusChanged("", nullptr, TYPE_STATUS_MAX + 1) == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callBcak) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(RegNodeDeviceStateCbInner(PKGNAME, &callBcak) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnOnNodeStatusChanged("", reinterpret_cast<void *>(&info), TYPE_STATUS_MAX + 1) ==
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(
+        LnnOnNodeStatusChanged("", reinterpret_cast<void *>(&info), TYPE_STATUS_MAX + 1) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnOnNodeStatusChanged("", reinterpret_cast<void *>(&info), TYPE_SCREEN_STATUS) == SOFTBUS_OK);
     BusCenterClientDeinit();
 }
@@ -621,11 +621,11 @@ static void OnTimeSyncResultCb(const TimeSyncResultInfo *info, int32_t retCode)
 }
 
 /*
-* @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_001
-* @tc.desc: lnn on time sync result test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_001
+ * @tc.desc: lnn on time sync result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_001, TestSize.Level1)
 {
     int32_t retCode = 0;

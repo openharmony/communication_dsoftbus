@@ -32,18 +32,16 @@ public:
     void TearDown();
 };
 
-void AuthNormalizeRequestTest::SetUpTestCase()
-{
-}
+void AuthNormalizeRequestTest::SetUpTestCase() { }
 
-void AuthNormalizeRequestTest::TearDownTestCase() {}
+void AuthNormalizeRequestTest::TearDownTestCase() { }
 
 void AuthNormalizeRequestTest::SetUp()
 {
     AUTH_LOGI(AUTH_TEST, "AuthNormalizeRequestTest start");
 }
 
-void AuthNormalizeRequestTest::TearDown() {}
+void AuthNormalizeRequestTest::TearDown() { }
 
 /*
  * @tc.name: NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001

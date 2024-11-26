@@ -124,7 +124,7 @@ static int32_t BuildBroadcastPacket(const uint8_t* data, size_t size, BroadcastP
     return SOFTBUS_OK;
 }
 
-static BcScanParams BuildScanParam(const uint8_t* data, size_t size)
+static BcScanParams BuildScanParam()
 {
     g_baseFuzzPos = 0;
     BcScanParams scanParam;
@@ -152,10 +152,10 @@ static int32_t BuildLpBroadcastParam(const uint8_t* data, size_t size, LpBroadca
     return SOFTBUS_OK;
 }
 
-static LpScanParam BuildLpScanParam(const uint8_t* data, size_t size)
+static LpScanParam BuildLpScanParam()
 {
     LpScanParam lpScanParam;
-    lpScanParam.scanParam = BuildScanParam(data, size);
+    lpScanParam.scanParam = BuildScanParam();
 
     return lpScanParam;
 }
@@ -251,9 +251,9 @@ void StopBroadcastingFuzzTest(int32_t bcId)
     StopBroadcasting(bcId);
 }
 
-void StartScanFuzzTest(int32_t listenerId, const uint8_t* data, size_t size)
+void StartScanFuzzTest(int32_t listenerId)
 {
-    BcScanParams scanParam = BuildScanParam(data, size);
+    BcScanParams scanParam = BuildScanParam();
 
     StartScan(listenerId, &scanParam);
 }
@@ -267,7 +267,7 @@ void BroadcastSetAdvDeviceParamFuzzTest(int32_t listenerId, const uint8_t* data,
 {
     g_baseFuzzPos = 0;
     uint8_t type = GetData<uint8_t>();
-    LpScanParam lpScanParam = BuildLpScanParam(data, size);
+    LpScanParam lpScanParam = BuildLpScanParam();
     lpScanParam.listenerId = listenerId;
     LpBroadcastParam lpBcParam;
     BuildLpBroadcastParam(data, size, &lpBcParam);
@@ -325,7 +325,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::UpdateBroadcastingFuzzTest(bcId, data, size);
     OHOS::SetBroadcastingDataFuzzTest(bcId, data, size);
     OHOS::StopBroadcastingFuzzTest(bcId);
-    OHOS::StartScanFuzzTest(listenerId, data, size);
+    OHOS::StartScanFuzzTest(listenerId);
     OHOS::StopScanFuzzTest(listenerId);
     OHOS::BroadcastSetAdvDeviceParamFuzzTest(listenerId, data, size);
     OHOS::BroadcastGetBroadcastHandleFuzzTest(bcId);

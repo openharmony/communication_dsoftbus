@@ -16,10 +16,11 @@
 #ifndef DISTRIBUTE_NET_LEDGER_MOCK_H
 #define DISTRIBUTE_NET_LEDGER_MOCK_H
 
-#include "lnn_distributed_net_ledger.h"
-#include "bus_center_manager.h"
 #include <gmock/gmock.h>
 #include <mutex>
+
+#include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 
 namespace OHOS {
 class DistributeLedgerInterface {

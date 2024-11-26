@@ -72,8 +72,8 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     return BusCenterIpcInterfaceInstance()->LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
 }
 
-int32_t LnnStartTimeSync(const char *pkgName,
-    int32_t callingPid, const char *targetNetworkId, TimeSyncAccuracy accuracy, TimeSyncPeriod period)
+int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
+    TimeSyncAccuracy accuracy, TimeSyncPeriod period)
 {
     return BusCenterIpcInterfaceInstance()->LnnStartTimeSync(pkgName, callingPid, targetNetworkId, accuracy, period);
 }
@@ -93,7 +93,8 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     return BusCenterIpcInterfaceInstance()->LnnUnPublishService(pkgName, publishId, isInnerRequest);
 }
 
-int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest)
+int32_t LnnStartDiscDevice(
+    const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest)
 {
     return BusCenterIpcInterfaceInstance()->LnnStartDiscDevice(pkgName, info, cb, isInnerRequest);
 }
@@ -118,13 +119,14 @@ int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
     return BusCenterIpcInterfaceInstance()->LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
-int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+int32_t LnnShiftLNNGear(
+    const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     return BusCenterIpcInterfaceInstance()->LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
 int32_t ClientOnJoinLNNResult(
-    PkgNameAndPidInfo *info,  void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+    PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
     return BusCenterIpcInterfaceInstance()->ClientOnJoinLNNResult(info, addr, addrTypeLen, networkId, retCode);
 }

@@ -19,12 +19,12 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "lnn_device_info_recovery.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_heartbeat_utils.h"
-#include "lnn_distributed_net_ledger.h"
-#include "softbus_utils.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_cipherkey_manager.h"
+#include "lnn_device_info_recovery.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_heartbeat_utils.h"
+#include "softbus_utils.h"
 
 namespace OHOS {
 class LnnDataCloudSyncInterface {
@@ -42,10 +42,10 @@ public:
     virtual int32_t LnnGetLocalBroadcastCipherInfo(CloudSyncInfo *info);
     virtual int32_t LnnSetRemoteBroadcastCipherInfo(const char *value, const char *udid);
     virtual int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
-    virtual int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen,
-        const char *inBuf, uint32_t inLen);
-    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-        void *para, uint64_t delayMillis);
+    virtual int32_t ConvertHexStringToBytes(
+        unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen);
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
 };
 
 class LnnDataCloudSyncInterfaceMock : public LnnDataCloudSyncInterface {
@@ -53,18 +53,18 @@ public:
     LnnDataCloudSyncInterfaceMock();
     ~LnnDataCloudSyncInterfaceMock() override;
 
-    MOCK_METHOD1(LnnSaveRemoteDeviceInfo, int32_t (const NodeInfo *));
-    MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
-    MOCK_METHOD1(LnnDeleteDeviceInfo, void (const char *));
-    MOCK_METHOD1(LnnGetLocalCacheNodeInfo, int32_t (NodeInfo *));
-    MOCK_METHOD2(LnnPackCloudSyncDeviceInfo, int32_t (cJSON *, const NodeInfo *));
-    MOCK_METHOD2(LnnUnPackCloudSyncDeviceInfo, int32_t (cJSON *, NodeInfo *));
-    MOCK_METHOD1(LnnUpdateNetworkId, int32_t (const NodeInfo *));
-    MOCK_METHOD1(LnnGetLocalBroadcastCipherInfo, int32_t (CloudSyncInfo *));
-    MOCK_METHOD2(LnnSetRemoteBroadcastCipherInfo, int32_t (const char *, const char *));
-    MOCK_METHOD3(LnnGenerateHexStringHash, int32_t (const unsigned char *, char *, uint32_t));
-    MOCK_METHOD4(ConvertHexStringToBytes, int32_t (unsigned char *, uint32_t, const char *, uint32_t));
-    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD1(LnnSaveRemoteDeviceInfo, int32_t(const NodeInfo *));
+    MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD1(LnnDeleteDeviceInfo, void(const char *));
+    MOCK_METHOD1(LnnGetLocalCacheNodeInfo, int32_t(NodeInfo *));
+    MOCK_METHOD2(LnnPackCloudSyncDeviceInfo, int32_t(cJSON *, const NodeInfo *));
+    MOCK_METHOD2(LnnUnPackCloudSyncDeviceInfo, int32_t(cJSON *, NodeInfo *));
+    MOCK_METHOD1(LnnUpdateNetworkId, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnGetLocalBroadcastCipherInfo, int32_t(CloudSyncInfo *));
+    MOCK_METHOD2(LnnSetRemoteBroadcastCipherInfo, int32_t(const char *, const char *));
+    MOCK_METHOD3(LnnGenerateHexStringHash, int32_t(const unsigned char *, char *, uint32_t));
+    MOCK_METHOD4(ConvertHexStringToBytes, int32_t(unsigned char *, uint32_t, const char *, uint32_t));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
 };
 } // namespace OHOS
 #endif // LNN_AUTH_MOCK_H
