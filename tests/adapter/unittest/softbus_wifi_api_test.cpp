@@ -63,7 +63,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(wifiMock, GetDeviceConfigs)
         .WillOnce(DoAll(SetArgPointee<1>(WIFI_MAX_CONFIG_SIZE + 1), Return(WIFI_SUCCESS)));
-        
+
     ret = SoftBusGetWifiDeviceConfig(&configList, &num);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     EXPECT_CALL(wifiMock, GetDeviceConfigs)
@@ -281,9 +281,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetCurrentGroupTest001, TestSize.Level1
 HWTEST_F(AdapterDsoftbusWifiTest, SoftBusIsWifiActiveTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
-    EXPECT_CALL(wifiMock, IsWifiActive)
-        .WillOnce(Return(WIFI_STA_ACTIVE))
-        .WillRepeatedly(Return(WIFI_STA_NOT_ACTIVE));
+    EXPECT_CALL(wifiMock, IsWifiActive).WillOnce(Return(WIFI_STA_ACTIVE)).WillRepeatedly(Return(WIFI_STA_NOT_ACTIVE));
     bool ret = SoftBusIsWifiActive();
     EXPECT_TRUE(ret == true);
     ret = SoftBusIsWifiActive();
@@ -305,20 +303,17 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiStateTest001, TestSize.Level1)
     SoftBusWifiDetailState ret = SoftBusGetWifiState();
     EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_UNKNOWN);
 
-    EXPECT_CALL(wifiMock, GetWifiDetailState)
-        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
+    EXPECT_CALL(wifiMock, GetWifiDetailState).WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
     ret = SoftBusGetWifiState();
     EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_INACTIVE);
 
     wifiState = STATE_ACTIVATED;
-    EXPECT_CALL(wifiMock, GetWifiDetailState)
-        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
+    EXPECT_CALL(wifiMock, GetWifiDetailState).WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
     ret = SoftBusGetWifiState();
     EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_ACTIVED);
 
     wifiState = STATE_SEMI_ACTIVE;
-    EXPECT_CALL(wifiMock, GetWifiDetailState)
-        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
+    EXPECT_CALL(wifiMock, GetWifiDetailState).WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
     ret = SoftBusGetWifiState();
     EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_SEMIACTIVE);
 }

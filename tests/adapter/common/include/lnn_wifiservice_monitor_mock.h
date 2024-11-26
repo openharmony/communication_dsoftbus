@@ -16,10 +16,10 @@
 #ifndef LNN_WIFISERVICE_MONITOR_MOCK_H
 #define LNN_WIFISERVICE_MONITOR_MOCK_H
 
-#include <gmock/gmock.h>
-#include <mutex>
 #include "message_handler.h"
 #include "softbus_wifi_api_adapter.h"
+#include <gmock/gmock.h>
+#include <mutex>
 
 typedef void (*LnnAsyncCallbackFunc)(void *para);
 
@@ -34,15 +34,15 @@ public:
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
     virtual bool SoftBusIsWifiActive(void) = 0;
     virtual int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info) = 0;
-    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
 };
 class LnnWifiServiceMonitorInterfaceMock : public LnnWifiServiceMonitorInterface {
 public:
     LnnWifiServiceMonitorInterfaceMock();
     ~LnnWifiServiceMonitorInterfaceMock() override;
 
-    MOCK_METHOD1(GetLooper, SoftBusLooper*(int32_t));
+    MOCK_METHOD1(GetLooper, SoftBusLooper *(int32_t));
     MOCK_METHOD1(LnnNotifyWlanStateChangeEvent, void(void *));
     MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *));
     MOCK_METHOD0(SoftBusIsWifiActive, bool(void));

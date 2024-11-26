@@ -38,8 +38,8 @@ static DecisionDbDepsInterfaceMock *GetDecisionDbDepsInterface()
     return reinterpret_cast<DecisionDbDepsInterfaceMock *>(g_decisionDbDepsInterface);
 }
 
-int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(SoftBusLooper *looper,
-    LnnAsyncCallbackFunc callback, void *para)
+int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
 {
     if (callback != NULL) {
         callback(para);
@@ -59,14 +59,12 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
     return GetDecisionDbDepsInterface()->LnnDeleteKeyByHuks(keyAlias);
 }
 
-int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias,
-    const struct HksBlob *inData, struct HksBlob *outData)
+int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
 {
     return GetDecisionDbDepsInterface()->LnnEncryptDataByHuks(keyAlias, inData, outData);
 }
 
-int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias,
-    const struct HksBlob *inData, struct HksBlob *outData)
+int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
 {
     return GetDecisionDbDepsInterface()->LnnDecryptDataByHuks(keyAlias, inData, outData);
 }
@@ -151,8 +149,7 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
     return GetDecisionDbDepsInterface()->LnnGetLocalByteInfo(key, info, len);
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen,
-    const unsigned char *inBuf, uint32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return GetDecisionDbDepsInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
@@ -192,14 +189,12 @@ bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *
     return GetDecisionDbDepsInterface()->LnnVisitHbTypeSet(callback, typeSet, data);
 }
 
-int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias,
-    const struct HksBlob *inData, struct HksBlob *outData)
+int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
 {
     return GetDecisionDbDepsInterface()->LnnCeEncryptDataByHuks(keyAlias, inData, outData);
 }
 
-int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias,
-    const struct HksBlob *inData, struct HksBlob *outData)
+int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
 {
     return GetDecisionDbDepsInterface()->LnnCeDecryptDataByHuks(keyAlias, inData, outData);
 }

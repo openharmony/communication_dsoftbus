@@ -36,32 +36,24 @@ public:
     void TearDown();
 };
 
-void NetBuilderTest::SetUpTestCase()
-{
-}
+void NetBuilderTest::SetUpTestCase() { }
 
-void NetBuilderTest::TearDownTestCase()
-{
-}
+void NetBuilderTest::TearDownTestCase() { }
 
-void NetBuilderTest::SetUp()
-{
-}
+void NetBuilderTest::SetUp() { }
 
-void NetBuilderTest::TearDown()
-{
-}
+void NetBuilderTest::TearDown() { }
 
 /*
-* @tc.name: NET_BUILDER_GEN_ID_Test_001
-* @tc.desc: generate network id interface test
-* @tc.type: FUNC
-* @tc.require: AR000FK6J3
-*/
+ * @tc.name: NET_BUILDER_GEN_ID_Test_001
+ * @tc.desc: generate network id interface test
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J3
+ */
 HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_001, TestSize.Level0)
 {
-    char networkIdFirst[NETWORK_ID_BUF_LEN] = {0};
-    char networkIdSecond[NETWORK_ID_BUF_LEN] = {0};
+    char networkIdFirst[NETWORK_ID_BUF_LEN] = { 0 };
+    char networkIdSecond[NETWORK_ID_BUF_LEN] = { 0 };
 
     EXPECT_TRUE(LnnGenLocalNetworkId(networkIdFirst, NETWORK_ID_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(LnnGenLocalNetworkId(networkIdSecond, NETWORK_ID_BUF_LEN) == SOFTBUS_OK);
@@ -69,15 +61,15 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: NET_BUILDER_GEN_ID_Test_002
-* @tc.desc: generate uuid interface test
-* @tc.type: FUNC
-* @tc.require: AR000FK6J3
-*/
+ * @tc.name: NET_BUILDER_GEN_ID_Test_002
+ * @tc.desc: generate uuid interface test
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J3
+ */
 HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_002, TestSize.Level0)
 {
-    char uuidFirst[UUID_BUF_LEN] = {0};
-    char uuidSecond[UUID_BUF_LEN] = {0};
+    char uuidFirst[UUID_BUF_LEN] = { 0 };
+    char uuidSecond[UUID_BUF_LEN] = { 0 };
 
     EXPECT_TRUE(LnnGenLocalUuid(uuidFirst, UUID_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(LnnGenLocalUuid(uuidSecond, UUID_BUF_LEN) == SOFTBUS_OK);
@@ -85,15 +77,15 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: NET_BUILDER_GEN_ID_Test_003
-* @tc.desc: generate irk interface test
-* @tc.type: FUNC
-* @tc.require:
+ * @tc.name: NET_BUILDER_GEN_ID_Test_003
+ * @tc.desc: generate irk interface test
+ * @tc.type: FUNC
+ * @tc.require:
  */
 HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
 {
-    unsigned char irkFirst[LFINDER_IRK_LEN] = {0};
-    unsigned char irkSecond[LFINDER_IRK_LEN] = {0};
+    unsigned char irkFirst[LFINDER_IRK_LEN] = { 0 };
+    unsigned char irkSecond[LFINDER_IRK_LEN] = { 0 };
 
     EXPECT_TRUE(LnnGenLocalIrk(irkFirst, LFINDER_IRK_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(LnnGenLocalIrk(irkSecond, LFINDER_IRK_LEN) == SOFTBUS_OK);
@@ -101,11 +93,11 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
 }
 
 /*
-* @tc.name: NET_BUILDER_CONNECTION_ADDR_Test_001
-* @tc.desc: connection address compare interface test
-* @tc.type: FUNC
-* @tc.require: AR000FK6J2
-*/
+ * @tc.name: NET_BUILDER_CONNECTION_ADDR_Test_001
+ * @tc.desc: connection address compare interface test
+ * @tc.type: FUNC
+ * @tc.require: AR000FK6J2
+ */
 HWTEST_F(NetBuilderTest, NET_BUILDER_CONNECTION_ADDR_Test_001, TestSize.Level0)
 {
     ConnectionAddr bleAddr = {

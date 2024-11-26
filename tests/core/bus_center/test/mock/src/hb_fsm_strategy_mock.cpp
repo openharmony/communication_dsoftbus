@@ -46,8 +46,8 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
 int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
     LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
 {
-    return HeartBeatFSMStrategyInterfaceInstance()->LnnPostSendBeginMsgToHbFsm(hbFsm, type, wakeupFlag,
-        msgPara, delayMillis);
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnPostSendBeginMsgToHbFsm(
+        hbFsm, type, wakeupFlag, msgPara, delayMillis);
 }
 
 SoftBusScreenState GetScreenState(void)
@@ -90,14 +90,14 @@ int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbe
     return HeartBeatFSMStrategyInterfaceInstance()->LnnPostSetMediumParamMsgToHbFsm(hbFsm, para);
 }
 
-int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
-    uint64_t delayMillis)
+int32_t LnnPostCheckDevStatusMsgToHbFsm(
+    LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnPostCheckDevStatusMsgToHbFsm(hbFsm, para, delayMillis);
 }
 
-int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
-    uint64_t delayMillis)
+int32_t LnnPostScreenOffCheckDevMsgToHbFsm(
+    LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnPostScreenOffCheckDevMsgToHbFsm(hbFsm, para, delayMillis);
 }
@@ -132,21 +132,18 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return HeartBeatFSMStrategyInterfaceInstance()->LnnStopHeartbeatFsm(hbFsm);
 }
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
-    bool wakeupFlag, bool isRelay, bool *isRemoved)
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved)
 {
-    return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveSendEndMsg(hbFsm,
-        type, wakeupFlag, isRelay, isRemoved);
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveSendEndMsg(hbFsm, type, wakeupFlag, isRelay, isRemoved);
 }
 
-int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para,
-    uint64_t delayMillis)
+int32_t LnnPostNextSendOnceMsgToHbFsm(
+    LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para, uint64_t delayMillis)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnPostNextSendOnceMsgToHbFsm(hbFsm, para, delayMillis);
 }
 
-void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType,
-    LnnHeartbeatStrategyType strategyType)
+void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveProcessSendOnceMsg(hbFsm, hbType, strategyType);
 }
@@ -187,4 +184,3 @@ bool LnnIsMultiDeviceOnline(void)
 }
 }
 } // namespace OHOS
-

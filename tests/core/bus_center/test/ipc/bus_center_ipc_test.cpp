@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_bus_center_ipc.cpp"
 #include "bus_center_ipc_mock.h"
+#include "lnn_bus_center_ipc.cpp"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
@@ -65,9 +65,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
-    EXPECT_CALL(busCenterIpcMock, LnnIsSameConnectionAddr)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(busCenterIpcMock, LnnIsSameConnectionAddr).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(busCenterIpcMock, LnnServerJoin).WillRepeatedly(Return(SOFTBUS_OK));
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     AddJoinLNNInfo(TEST_PKGNAME, 0, &addr);
@@ -130,9 +128,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level1)
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     AddJoinLNNInfo(TEST_PKGNAME, 0, &addr);
     AddJoinLNNInfo(TEST_PKGNAME2, 0, &addr);
-    EXPECT_CALL(busCenterIpcMock, LnnIsSameConnectionAddr)
-        .WillOnce(Return(true))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(busCenterIpcMock, LnnIsSameConnectionAddr).WillOnce(Return(true)).WillRepeatedly(Return(false));
     int32_t ret =
         LnnIpcNotifyJoinResult(reinterpret_cast<void *>(&addr), TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);

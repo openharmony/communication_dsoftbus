@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "bluetooth_mock.h"
-
 #include <securec.h>
 
+#include "bluetooth_mock.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
@@ -24,7 +23,7 @@
 MockBluetooth *MockBluetooth::targetMocker = nullptr;
 BtGapCallBacks *MockBluetooth::btGapCallback = nullptr;
 BtGattCallbacks *MockBluetooth::btGattCallback = nullptr;
-BleScanCallbacks  *MockBluetooth::bleScanCallback  = nullptr;
+BleScanCallbacks *MockBluetooth::bleScanCallback = nullptr;
 
 static int32_t ActionGapRegisterCallbacks(BtGapCallBacks *func)
 {
@@ -198,8 +197,8 @@ int32_t BleGattsUnRegister(int32_t serverId)
     return MockBluetooth::GetMocker()->BleGattsUnRegister(serverId);
 }
 
-int32_t BleGattsAddCharacteristic(int32_t serverId, int32_t srvcHandle,
-                                  BtUuid characUuid, int32_t properties, int32_t permissions)
+int32_t BleGattsAddCharacteristic(
+    int32_t serverId, int32_t srvcHandle, BtUuid characUuid, int32_t properties, int32_t permissions)
 {
     return MockBluetooth::GetMocker()->BleGattsAddCharacteristic(
         serverId, srvcHandle, characUuid, properties, permissions);

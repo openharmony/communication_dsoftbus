@@ -23,10 +23,11 @@
  */
 
 #include <stdint.h>
+
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
-const char g_networkId[NETWORK_ID_BUF_LEN] = {0};
+const char g_networkId[NETWORK_ID_BUF_LEN] = { 0 };
 
 // Notify add current device to the LNN result.
 static void OnJoinLnnDone(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -61,10 +62,10 @@ int32_t main(void)
     const char *pkgName = "pkgName.demo";
     // Device B is found by coap or ble, we can get it's addr info before join lnn.
     ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_WLAN,  // connection type of device B
-        .peerUid = "012345678998765432101234567898765432101234567898765432101234567",  // uuid of device B
-        .info.ip.ip = "192.168.0.1",   // ip info of device B
-        .info.ip.port = 1000           // auth port of device B
+        .type = CONNECTION_ADDR_WLAN,                                                 // connection type of device B
+        .peerUid = "012345678998765432101234567898765432101234567898765432101234567", // uuid of device B
+        .info.ip.ip = "192.168.0.1",                                                  // ip info of device B
+        .info.ip.port = 1000                                                          // auth port of device B
     };
 
     /*

@@ -16,8 +16,9 @@
 #ifndef LNN_ASYNC_CALLBACK_MOCK_H
 #define LNN_ASYNC_CALLBACK_MOCK_H
 
-#include "lnn_async_callback_utils.h"
 #include <gmock/gmock.h>
+
+#include "lnn_async_callback_utils.h"
 
 namespace OHOS {
 class LnnAsyncCallbackInterface {
@@ -26,8 +27,8 @@ public:
     virtual ~LnnAsyncCallbackInterface() {};
 
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
-    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-        void *para, uint64_t delayMillis) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
 };
 
 class LnnAsyncCallbackInterfaceMock : public LnnAsyncCallbackInterface {
@@ -36,8 +37,8 @@ public:
     ~LnnAsyncCallbackInterfaceMock() override;
 
     MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para));
-    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-        void *para, uint64_t delayMillis));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper,
+        int32_t(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

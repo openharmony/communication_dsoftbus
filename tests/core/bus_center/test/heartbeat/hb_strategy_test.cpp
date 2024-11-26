@@ -19,8 +19,8 @@
 #include "bus_center_event.h"
 #include "hb_fsm_strategy_mock.h"
 #include "lnn_ble_heartbeat_virtual.c"
-#include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_strategy.c"
+#include "lnn_heartbeat_strategy.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {
@@ -461,8 +461,8 @@ HWTEST_F(HeartBeatStrategyTest, LNN_BLE_HEARTBEAT_VIRTUAL_TEST_01, TestSize.Leve
 HWTEST_F(HeartBeatStrategyTest, LNN_START_STRATEGY_DIRECTLY_TEST_01, TestSize.Level1)
 {
     uint64_t timeout = 100;
-    int32_t ret = LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE,
-        false, NULL, timeout);
+    int32_t ret =
+        LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false, NULL, timeout);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

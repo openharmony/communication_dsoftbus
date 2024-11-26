@@ -31,11 +31,12 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dsoftbus_adapter_common_interface") {
     include_dirs = [
-      "$softbus_adapter_common/include",
-      "$softbus_adapter_common/include/OS_adapter_define/linux",
-      "$softbus_adapter_config/spec_config",
       "$dsoftbus_root_path/core/common/include",
       "$hilog_lite_include_path",
+      "$softbus_adapter_common/include",
+      "$softbus_adapter_common/include/OS_adapter_define/linux",
+      "$softbus_adapter_common/security/access_token/include",
+      "$softbus_adapter_config/spec_config",
       "$utils_lite_include_path",
     ]
     if (board_name == "v200zr") {
@@ -47,6 +48,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$softbus_adapter_common/security/access_token/include",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -87,6 +89,17 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
         "$softbus_adapter_common/range/softbus_adapter_range.c",
       ]
+
+      if (dsoftbus_access_token_feature) {
+        sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter.cpp" ]
+        external_deps += [
+          "access_token:libaccesstoken_sdk",
+          "access_token:libprivacy_sdk",
+          "access_token:libtokenid_sdk",
+        ]
+      } else {
+        sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
+      }
 
       if (enhance_feature) {
         sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
@@ -165,6 +178,17 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/range/softbus_adapter_range.c",
       ]
 
+      if (dsoftbus_access_token_feature) {
+        sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter.cpp" ]
+        external_deps += [
+          "access_token:libaccesstoken_sdk",
+          "access_token:libprivacy_sdk",
+          "access_token:libtokenid_sdk",
+        ]
+      } else {
+        sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
+      }
+
       if (enhance_feature) {
         sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
       } else {
@@ -201,11 +225,12 @@ if (defined(ohos_lite)) {
 } else {
   config("config_adapter_common") {
     include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_feature_product_config_path/spec_config",
+      "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
       "$softbus_adapter_common/include/OS_adapter_define/linux",
-      "$dsoftbus_feature_product_config_path/spec_config",
-      "$dsoftbus_dfx_path/interface/include",
-      "$dsoftbus_root_path/core/common/include",
+      "$softbus_adapter_common/security/access_token/include",
     ]
   }
 
@@ -224,7 +249,9 @@ if (defined(ohos_lite)) {
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
+      "$softbus_adapter_common/security/access_token/include",
     ]
+
     external_deps = [ "bounds_checking_function:libsec_shared" ]
     if (is_standard_system) {
       external_deps += [
@@ -244,6 +271,17 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
       "$softbus_adapter_common/perf/softbus_adapter_perf.c",
     ]
+
+    if (dsoftbus_access_token_feature) {
+      sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter.cpp" ]
+      external_deps += [
+        "access_token:libaccesstoken_sdk",
+        "access_token:libprivacy_sdk",
+        "access_token:libtokenid_sdk",
+      ]
+    } else {
+      sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
+    }
 
     if (enhance_feature) {
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
