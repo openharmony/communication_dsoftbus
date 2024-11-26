@@ -540,6 +540,7 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
         DetectDisableWifiDirectApply();
     }
+    (void)HandleLaneQosChange(&laneLinkInfo);
 }
 
 static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *link)

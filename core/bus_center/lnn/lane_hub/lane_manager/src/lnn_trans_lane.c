@@ -1367,6 +1367,7 @@ static void NotifyLinkSucc(uint32_t laneReqId)
     }
     ProcessPowerControlInfoByLaneReqId(linkType, laneReqId);
     NotifyLaneAllocSuccess(laneReqId, laneId, &info);
+    (void)HandleLaneQosChange(&info);
     FreeLowPriorityLink(laneReqId, linkType);
     return;
 FAIL:
@@ -1896,4 +1897,97 @@ void DelLogicAndLaneRelationship(uint64_t laneId)
         }
     }
     Unlock();
+}
+
+static void DestroyRequestNodeList(ListNode *reqInfoList)
+{
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, reqInfoList, TransReqInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
+static int32_t GetNodeToNotifyQosEvent(ListNode *reqInfoList, const char *peerNetworkId)
+{
+    if (reqInfoList == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (Lock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t ret = SOFTBUS_OK;
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (strcmp(item->networkId, peerNetworkId) != 0 || item->allocInfo.qosRequire.minBW != DB_MAGIC_NUMBER) {
+            continue;
+        }
+        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u", item->laneReqId);
+        TransReqInfo *info = (TransReqInfo *)SoftBusCalloc(sizeof(TransReqInfo));
+        if (info == NULL) {
+            ret = SOFTBUS_MALLOC_ERR;
+            break;
+        }
+        ListInit(&info->node);
+        if (memcpy_s(info, sizeof(TransReqInfo), item, sizeof(TransReqInfo)) != EOK) {
+            LNN_LOGE(LNN_LANE, "memcpy fail");
+            SoftBusFree(info);
+            ret = SOFTBUS_MEM_ERR;
+            break;
+        }
+        ListTailInsert(reqInfoList, &info->node);
+    }
+    Unlock();
+    if (ret != SOFTBUS_OK) {
+        DestroyRequestNodeList(reqInfoList);
+    }
+    return ret;
+}
+
+static bool NeedToNotify(uint64_t laneId)
+{
+    LaneResource laneLinkInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
+    int32_t ret = FindLaneResourceByLaneId(laneId, &laneLinkInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "find laneId=%{public}" PRIu64 " fail, ret=%{public}d", laneId, ret);
+        return false;
+    }
+    return laneLinkInfo.link.type == LANE_BR;
+}
+
+int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
+{
+    if (laneLinkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (laneLinkInfo->type != LANE_P2P) {
+        return SOFTBUS_OK;
+    }
+    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = LnnGetNetworkIdByUdid(laneLinkInfo->peerUdid, peerNetworkId, sizeof(peerNetworkId));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get networkId by udid fail");
+        return ret;
+    }
+    ListNode reqInfoList;
+    ListInit(&reqInfoList);
+    ret = GetNodeToNotifyQosEvent(&reqInfoList, peerNetworkId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get list fail, ret=%{public}d", ret);
+        return ret;
+    }
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &reqInfoList, TransReqInfo, node) {
+        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, laneId=%{public}u" PRIu64 "", item->laneReqId, item->laneId);
+        if (item->listener.onLaneQosEvent != NULL && NeedToNotify(item->laneId)) {
+            item->listener.onLaneQosEvent(item->laneReqId, LANE_OWNER_OTHER, LANE_QOS_BW_HIGH);
+        }
+    }
+    DestroyRequestNodeList(&reqInfoList);
+    return SOFTBUS_OK;
 }
