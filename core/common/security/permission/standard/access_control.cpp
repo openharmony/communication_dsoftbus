@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
+#include <map>
 #include <securec.h>
 #include <vector>
-#include <map>
 
-#include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_control_profile.h"
 #include "anonymizer.h"
-#ifdef SUPPORT_ABILITY_RUNTIME
-#include "app_mgr_interface.h"
-#include "app_mgr_proxy.h"
-#endif
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "comm_log.h"
@@ -33,14 +28,19 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "permission_entry.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "system_ability_definition.h"
 
+#ifdef SUPPORT_ABILITY_RUNTIME
+#include "app_mgr_interface.h"
+#include "app_mgr_proxy.h"
+#endif
+
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
-    using namespace OHOS::Security::AccessToken;
     using namespace OHOS;
 }
 
@@ -82,9 +82,9 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         return SOFTBUS_OK;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingTokenId);
-    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
-        COMM_LOGI(COMM_PERM, "tokenType=%{public}d, not hap, no verification required", tokenType);
+    int32_t accessTokenType = SoftBusGetAccessTokenType(callingTokenId);
+    if (accessTokenType != ACCESS_TOKEN_TYPE_HAP) {
+        COMM_LOGI(COMM_PERM, "accessTokenType=%{public}d, not hap, no verification required", accessTokenType);
         return SOFTBUS_OK;
     }
 
@@ -131,9 +131,9 @@ int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
         return SOFTBUS_OK;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingTokenId);
-    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
-        COMM_LOGI(COMM_PERM, "tokenType=%{public}d, not hap, no verification required", tokenType);
+    int32_t accessTokenType = SoftBusGetAccessTokenType(callingTokenId);
+    if (accessTokenType != ACCESS_TOKEN_TYPE_HAP) {
+        COMM_LOGI(COMM_PERM, "accessTokenType=%{public}d, not hap, no verification required", accessTokenType);
         return SOFTBUS_OK;
     }
 
@@ -233,30 +233,14 @@ void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int
         return;
     }
 
-    auto typeFlag = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingId);
-    if (typeFlag == ATokenTypeEnum::TOKEN_NATIVE) {
+    int32_t accessTokenType = SoftBusGetAccessTokenType(callingId);
+    if (accessTokenType == ACCESS_TOKEN_TYPE_NATIVE) {
         *tokenType = SYSTEM_SA_TYPE;
-        NativeTokenInfo tokenInfo;
-        int32_t ret = AccessTokenKit::GetNativeTokenInfo(callingId, tokenInfo);
-        if (ret != ERR_OK) {
-            COMM_LOGW(COMM_PERM, "GetNativeTokenInfo return err:%{public}d", ret);
-            return;
-        }
-        if (strncpy_s(tokenName, nameLen, tokenInfo.processName.c_str(), nameLen - 1) != EOK) {
-            COMM_LOGW(COMM_PERM, "strncpy_s processName failed");
-        }
-    } else if (typeFlag == ATokenTypeEnum::TOKEN_HAP) {
+        SoftBusGetTokenNameByTokenType(tokenName, nameLen, callingId, (SoftBusAccessTokenType)accessTokenType);
+    } else if (accessTokenType == ACCESS_TOKEN_TYPE_HAP) {
         *tokenType = TOKEN_HAP_TYPE;
         GetForegroundApplications(callingId, tokenType);
-        HapTokenInfo hapTokenInfo;
-        int32_t ret = AccessTokenKit::GetHapTokenInfo(callingId, hapTokenInfo);
-        if (ret != ERR_OK) {
-            COMM_LOGW(COMM_PERM, "GetHapTokenInfo return err:%{public}d", ret);
-            return;
-        }
-        if (strncpy_s(tokenName, nameLen, hapTokenInfo.bundleName.c_str(), nameLen - 1) != EOK) {
-            COMM_LOGW(COMM_PERM, "strncpy_s bundleName failed");
-        }
+        SoftBusGetTokenNameByTokenType(tokenName, nameLen, callingId, (SoftBusAccessTokenType)accessTokenType);
     } else {
         *tokenType = TOKEN_SHELL_TYPE;
     }
