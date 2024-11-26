@@ -14,15 +14,16 @@
  */
 
 #include <securec.h>
+
 #include "cJSON.h"
-#include "gtest/gtest.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
+#include "gtest/gtest.h"
 
-#define ARRAY_LEN 10
-#define INPUT_NUM 123
-#define DOUBLE_NUM 123.456
+#define ARRAY_LEN    10
+#define INPUT_NUM    123
+#define DOUBLE_NUM   123.456
 #define INPUT_STRING "strvalue"
 #define JSON_KEY1    "key"
 
