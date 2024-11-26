@@ -230,7 +230,7 @@ static int ConvertCapBitMap(int oldCap)
     }
 }
 
-static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums)
+static void DeConvertBitMap(uint32_t *dstCap, uint32_t *srcCap, int nums)
 {
     (void)nums;
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
