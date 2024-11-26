@@ -316,6 +316,15 @@ DFINDER_EXPORT int32_t NSTACKX_InitV2(const NSTACKX_Parameter *parameter, bool i
 DFINDER_EXPORT void NSTACKX_Deinit(void);
 
 /*
+ * NSTACKX thread Initialization
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_ThreadInit(void);
+
+/* NSTACKX thread Destruction */
+DFINDER_EXPORT void NSTACKX_ThreadDeinit(void);
+
+/*
  * Start device discovery
  * return 0 on success, negative value on failure
  */
