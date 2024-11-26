@@ -539,7 +539,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest006, TestSize.L
     int32_t fd = TEST_FD;
     int32_t recvLen = VALIDRECVLEN;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, ConnRecvSocketData).WillOnceRepeatedly(Return(recvLen));
+    EXPECT_CALL(TcpMessageMock, ConnRecvSocketData).WillRepeatedly(Return(recvLen));
 
     int32_t ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
