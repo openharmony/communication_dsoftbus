@@ -18,11 +18,12 @@
 
 #include <gmock/gmock.h>
 #include <mutex>
-#include "bus_center_manager.h"
+
 #include "bus_center_decision_center.h"
+#include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_local_net_ledger.h"
 #include "softbus_utils.h"
 
 namespace OHOS {
@@ -37,8 +38,8 @@ class BusCenterDecisionCenterInterfaceMock : public BusCenterDecisionCenterInter
 public:
     BusCenterDecisionCenterInterfaceMock();
     ~BusCenterDecisionCenterInterfaceMock() override;
-    MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t (const char *, char *, uint32_t));
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
+    MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *id, IdCategory type, NodeInfo *info));
 };
 } // namespace OHOS
 #endif // BUS_CENTER_DECISION_CENTER_MOCK_H

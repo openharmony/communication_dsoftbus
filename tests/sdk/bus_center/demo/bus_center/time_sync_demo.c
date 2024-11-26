@@ -23,6 +23,7 @@
  */
 
 #include <stdint.h>
+
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 

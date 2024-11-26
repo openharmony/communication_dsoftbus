@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "lnn_local_net_ledger.h"
+#include "lnn_local_ledger_deps_mock.h"
 #include "lnn_local_net_ledger.c"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
-#include "lnn_local_ledger_deps_mock.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_common.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -43,22 +43,16 @@ public:
     void TearDown();
 };
 
-void LNNLedgerMockTest::SetUpTestCase()
-{
-}
+void LNNLedgerMockTest::SetUpTestCase() { }
 
-void LNNLedgerMockTest::TearDownTestCase()
-{
-}
+void LNNLedgerMockTest::TearDownTestCase() { }
 
 void LNNLedgerMockTest::SetUp()
 {
     LNN_LOGI(LNN_TEST, "LNNLedgerMockTest start");
 }
 
-void LNNLedgerMockTest::TearDown()
-{
-}
+void LNNLedgerMockTest::TearDown() { }
 
 static void LocalLedgerKeyTestPackaged(void)
 {
@@ -96,11 +90,11 @@ static void LocalLedgerKeyTestPackaged(void)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_001
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_001
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -112,11 +106,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_002
-* @tc.desc: local ledger init and deinit test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_002
+ * @tc.desc: local ledger init and deinit test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 {
     NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
@@ -124,11 +118,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     ON_CALL(localLedgerMock, GetCommonOsType).WillByDefault(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
+        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     int32_t ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLocalLedger();
@@ -137,11 +131,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_003
-* @tc.desc: local ledger delay init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_003
+ * @tc.desc: local ledger delay init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -151,11 +145,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_004
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_004
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -169,11 +163,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_005
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_005
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -188,11 +182,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_006
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_006
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -208,11 +202,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_007
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_007
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -229,11 +223,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_008
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_008
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -243,11 +237,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_MOCK_Test_009
-* @tc.desc: local ledger init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_MOCK_Test_009
+ * @tc.desc: local ledger init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -260,11 +254,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_001
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_001
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
 {
     char infoTmp[] = "";
@@ -278,11 +272,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
+        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     int32_t ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     for (uint32_t i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
@@ -309,11 +303,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_002
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_002
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
 {
     char infoTmp[] = "";
@@ -325,11 +319,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
+        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     int32_t ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_EQ(g_localKeyTable[12].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
@@ -356,11 +350,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_003
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_003
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -369,11 +363,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
+        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     for (uint32_t i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (g_localKeyTable[i].getInfo != NULL) {
@@ -385,18 +379,18 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_005
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_005
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
 {
     NodeInfo *info = nullptr;
     int32_t ret = LnnInitLocalNodeInfo(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    NodeInfo *nodeInfo = (NodeInfo*)SoftBusMalloc(sizeof(NodeInfo));
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusMalloc(sizeof(NodeInfo));
     ASSERT_TRUE(nodeInfo != nullptr);
     (void)memset_s(nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
@@ -406,8 +400,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_SET_P2P_INFO_FAIL));
@@ -423,11 +417,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_006
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_006
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
 {
     int32_t ret = LnnSetLocalUnifiedName(NULL);
@@ -443,7 +437,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
     const void *testId = "testId";
     ret = UpdateLocalPubMac(testId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    
+
     ret = LlUpdateStaticCapability(NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -452,11 +446,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_007
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_007
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
 {
     uint32_t len = 101;
@@ -468,7 +462,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LlGetCipherInfoKey(NULL, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    
+
     void *buf = SoftBusCalloc(100);
     ASSERT_TRUE(buf != nullptr);
     ret = LlGetStaticCapability(buf, len);
@@ -492,11 +486,11 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
 }
 
 /*
-* @tc.name: Local_Ledger_Key_Test_008
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Local_Ledger_Key_Test_008
+ * @tc.desc: local ledger key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_008, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
@@ -505,8 +499,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_008, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_SET_P2P_INFO_FAIL));

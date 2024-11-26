@@ -14,8 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
+#include "securec.h"
 #include "softbus_bitmap.h"
 #include "softbus_common.h"
 #include "softbus_def.h"

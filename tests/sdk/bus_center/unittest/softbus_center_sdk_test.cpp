@@ -16,12 +16,12 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "bus_center_manager.h"
 #include "bus_center_info_key.h"
-#include "softbus_access_token_test.h"
+#include "bus_center_manager.h"
 #include "lnn_local_net_ledger.h"
-#include "softbus_common.h"
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_common.h"
 #include "softbus_error_code.h"
 
 constexpr char PKG_NAME[] = "com.softbus.test";
@@ -46,24 +46,18 @@ void ClientBusCenterSdkTest::SetUpTestCase()
     SetAceessTokenPermission("busCenterTest");
 }
 
-void ClientBusCenterSdkTest::TearDownTestCase()
-{
-}
+void ClientBusCenterSdkTest::TearDownTestCase() { }
 
-void ClientBusCenterSdkTest::SetUp()
-{
-}
+void ClientBusCenterSdkTest::SetUp() { }
 
-void ClientBusCenterSdkTest::TearDown()
-{
-}
+void ClientBusCenterSdkTest::TearDown() { }
 
 /*
-* @tc.name: SOFTBUS_CENTER_SDK_TEST_001
-* @tc.desc: test set dataChangeFlag and get dataChangeFlag
-* @tc.type: FUNC
-* @tc.require: I5TQW0
-*/
+ * @tc.name: SOFTBUS_CENTER_SDK_TEST_001
+ * @tc.desc: test set dataChangeFlag and get dataChangeFlag
+ * @tc.type: FUNC
+ * @tc.require: I5TQW0
+ */
 HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
 {
     NodeBasicInfo info;
@@ -71,17 +65,17 @@ HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
     EXPECT_TRUE(GetLocalNodeDeviceInfo(PKG_NAME, &info) == SOFTBUS_OK);
     EXPECT_TRUE(SetNodeDataChangeFlag(PKG_NAME, info.networkId, DATA_CHANGE_FLAG) == SOFTBUS_OK);
     uint16_t dataChangeFlag = 0;
-    EXPECT_TRUE(GetNodeKeyInfo(PKG_NAME, info.networkId, NODE_KEY_DATA_CHANGE_FLAG,
-        (uint8_t *)&dataChangeFlag, DATA_CHANGE_FLAG_BUF_NUM) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(PKG_NAME, info.networkId, NODE_KEY_DATA_CHANGE_FLAG, (uint8_t *)&dataChangeFlag,
+                    DATA_CHANGE_FLAG_BUF_NUM) == SOFTBUS_OK);
     EXPECT_TRUE(dataChangeFlag == DATA_CHANGE_FLAG);
 }
 
 /*
-* @tc.name: SOFTBUS_CENTER_SDK_TEST_002
-* @tc.desc: test SetNodeDataChangeFlag fail
-* @tc.type: FUNC
-* @tc.require: I5TQW0
-*/
+ * @tc.name: SOFTBUS_CENTER_SDK_TEST_002
+ * @tc.desc: test SetNodeDataChangeFlag fail
+ * @tc.type: FUNC
+ * @tc.require: I5TQW0
+ */
 HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_002, TestSize.Level0)
 {
     NodeBasicInfo info;
@@ -92,22 +86,21 @@ HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SOFTBUS_CENTER_SDK_TEST_003
-* @tc.desc: after joinLNN test get remote dataChangeFlag
-* @tc.type: FUNC
-* @tc.require: I5TQW0
-*/
+ * @tc.name: SOFTBUS_CENTER_SDK_TEST_003
+ * @tc.desc: after joinLNN test get remote dataChangeFlag
+ * @tc.type: FUNC
+ * @tc.require: I5TQW0
+ */
 HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_003, TestSize.Level0)
 {
     NodeBasicInfo *info = nullptr;
     int32_t infoNum = 0;
     uint16_t dataChangeFlag = 1;
     EXPECT_TRUE(GetAllNodeDeviceInfo(PKG_NAME, &info, &infoNum) == SOFTBUS_OK);
-    if (info != nullptr && infoNum != 0)
-    {
-        EXPECT_TRUE(GetNodeKeyInfo(PKG_NAME, info->networkId, NODE_KEY_DATA_CHANGE_FLAG,
-            (uint8_t *)&dataChangeFlag, DATA_CHANGE_FLAG_BUF_NUM) == SOFTBUS_OK);
+    if (info != nullptr && infoNum != 0) {
+        EXPECT_TRUE(GetNodeKeyInfo(PKG_NAME, info->networkId, NODE_KEY_DATA_CHANGE_FLAG, (uint8_t *)&dataChangeFlag,
+                        DATA_CHANGE_FLAG_BUF_NUM) == SOFTBUS_OK);
         EXPECT_TRUE(dataChangeFlag == DATA_CHANGE_FLAG);
     }
 }
-}
+} // namespace OHOS

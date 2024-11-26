@@ -14,12 +14,12 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
-#include "softbus_network_utils.h"
+#include "securec.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_network_utils.h"
 
 #define TEST_2G_CHANNEL   8
 #define TEST_5G_CHANNEL   36

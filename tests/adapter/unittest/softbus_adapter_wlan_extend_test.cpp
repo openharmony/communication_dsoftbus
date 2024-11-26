@@ -16,16 +16,16 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
-#include "softbus_adapter_wlan_extend.h"
 #include "lnn_async_callback_utils.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_wlan_extend.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
-#define WLAN_SERVICE_NAME "wlan_interface_service"
-#define WLAN_IFNAME "wlan0"
-#define MEAS_TIME_PER_CHAN_MS (15)
+#define WLAN_SERVICE_NAME        "wlan_interface_service"
+#define WLAN_IFNAME              "wlan0"
+#define MEAS_TIME_PER_CHAN_MS    (15)
 #define GET_MEAS_RESULT_DELAY_MS (1000)
 static struct IWlanInterface *g_wlanObj = NULL;
 static WlanChannelInfoCb *g_wlanChannelInfoCb = NULL;
@@ -41,28 +41,20 @@ public:
     void TearDown();
 };
 
-void AdapterWlanExtendTest::SetUpTestCase()
-{
-}
+void AdapterWlanExtendTest::SetUpTestCase() { }
 
-void AdapterWlanExtendTest::TearDownTestCase()
-{
-}
+void AdapterWlanExtendTest::TearDownTestCase() { }
 
-void AdapterWlanExtendTest::SetUp()
-{
-}
+void AdapterWlanExtendTest::SetUp() { }
 
-void AdapterWlanExtendTest::TearDown()
-{
-}
+void AdapterWlanExtendTest::TearDown() { }
 
 /*
-* @tc.name: Wlan_Extend_Test_001
-* @tc.desc: apply SoftBusRegWlanChannelInfoCb test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Wlan_Extend_Test_001
+ * @tc.desc: apply SoftBusRegWlanChannelInfoCb test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_001, TestSize.Level0)
 {
     g_wlanChannelInfoCb = NULL;
@@ -77,11 +69,11 @@ HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Wlan_Extend_Test_002
-* @tc.desc: apply SoftBusRequestWlanChannelInfo test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Wlan_Extend_Test_002
+ * @tc.desc: apply SoftBusRequestWlanChannelInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_002, TestSize.Level0)
 {
     int32_t *channelId = nullptr;

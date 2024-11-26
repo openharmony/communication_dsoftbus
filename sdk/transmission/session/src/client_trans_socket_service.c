@@ -15,21 +15,23 @@
 
 #include "string.h"
 #include <securec.h>
+
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_session_service.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_socket_option.h"
 #include "inner_socket.h"
+#include "session_ipc_adapter.h"
 #include "socket.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
-#include "client_trans_session_service.h"
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
@@ -96,7 +98,14 @@ int32_t Socket(SocketInfo info)
 
     int32_t socketFd = INVALID_SESSION_ID;
     char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
-    if (CheckIsNormalApp(info.name)) {
+    uint32_t callingTokenId = 0;
+    uint64_t callingFullTokenId = 0;
+    ret = SoftBusGetCallingTokenId(&callingTokenId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingTokenId failed");
+    ret = SoftBusGetCallingFullTokenId(&callingFullTokenId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingFullTokenId failed");
+
+    if (SoftBusCheckIsNormalApp(callingTokenId, callingFullTokenId, info.name)) {
         if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, info.name, strlen(info.name)) != EOK) {
             TRANS_LOGE(TRANS_SDK, "copy session name failed");
             return SOFTBUS_STRCPY_ERR;

@@ -27,7 +27,7 @@ using namespace testing::ext;
 static constexpr char KEY_ALIAS[] = "dsoftbus_test_key_alias";
 static constexpr char RANDOM_KEY[] = "b0d8bfed90d1e018c84f0a1abd4cbcc7f33481b42476719b401b1d70d3998a7c";
 
-static struct HksBlob g_keyAlias = {0};
+static struct HksBlob g_keyAlias = { 0 };
 
 class LNNHuksUtilsTest : public testing::Test {
 public:
@@ -50,9 +50,7 @@ void LNNHuksUtilsTest::TearDownTestCase()
     LnnDeinitHuksInterface();
 }
 
-void LNNHuksUtilsTest::SetUp()
-{
-}
+void LNNHuksUtilsTest::SetUp() { }
 
 void LNNHuksUtilsTest::TearDown()
 {
@@ -60,62 +58,62 @@ void LNNHuksUtilsTest::TearDown()
 }
 
 /*
-* @tc.name: Generate_Key_Test_001
-* @tc.desc: generate key test
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: Generate_Key_Test_001
+ * @tc.desc: generate key test
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNHuksUtilsTest, Generate_Key_Test_01, TestSize.Level0)
 {
-    struct HksBlob keyAlias = {0};
+    struct HksBlob keyAlias = { 0 };
     keyAlias.size = strlen(KEY_ALIAS);
     keyAlias.data = (uint8_t *)KEY_ALIAS;
-    
+
     EXPECT_EQ(LnnGenerateKeyByHuks(&keyAlias), SOFTBUS_OK);
 }
 
 /*
-* @tc.name: Generate_Key_Test_002
-* @tc.desc: generate key twice test
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: Generate_Key_Test_002
+ * @tc.desc: generate key twice test
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNHuksUtilsTest, Generate_Key_Test_02, TestSize.Level0)
 {
-    struct HksBlob keyAlias = {0};
+    struct HksBlob keyAlias = { 0 };
     keyAlias.size = strlen(KEY_ALIAS);
     keyAlias.data = (uint8_t *)KEY_ALIAS;
-    
+
     EXPECT_EQ(LnnGenerateKeyByHuks(&keyAlias), SOFTBUS_OK);
     EXPECT_EQ(LnnGenerateKeyByHuks(&keyAlias), SOFTBUS_OK);
 }
 
 /*
-* @tc.name: Generate_Random_Test_001
-* @tc.desc: generate randowm key test
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: Generate_Random_Test_001
+ * @tc.desc: generate randowm key test
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNHuksUtilsTest, Generate_Random_Test_01, TestSize.Level0)
 {
-    uint8_t randomKey[LNN_HUKS_AES_COMMON_SIZE] = {0};
+    uint8_t randomKey[LNN_HUKS_AES_COMMON_SIZE] = { 0 };
 
     EXPECT_EQ(LnnGenerateRandomByHuks(randomKey, LNN_HUKS_AES_COMMON_SIZE), SOFTBUS_OK);
 }
 
 /*
-* @tc.name: Encrypt_Data_Test_001
-* @tc.desc: encrypt data test
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: Encrypt_Data_Test_001
+ * @tc.desc: encrypt data test
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
 {
-    struct HksBlob inData = {0};
+    struct HksBlob inData = { 0 };
     inData.size = strlen(RANDOM_KEY);
     inData.data = (uint8_t *)RANDOM_KEY;
 
-    struct HksBlob outData = {0};
+    struct HksBlob outData = { 0 };
     outData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
     ASSERT_NE(outData.data, nullptr);
 
@@ -126,22 +124,22 @@ HWTEST_F(LNNHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
 }
 
 /*
-* @tc.name: Decrypt_Data_Test_001
-* @tc.desc: decrypt data test
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: Decrypt_Data_Test_001
+ * @tc.desc: decrypt data test
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
 {
-    struct HksBlob plainData = {0};
+    struct HksBlob plainData = { 0 };
     plainData.size = strlen(RANDOM_KEY);
     plainData.data = (uint8_t *)RANDOM_KEY;
 
-    struct HksBlob encryptData = {0};
+    struct HksBlob encryptData = { 0 };
     encryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
     ASSERT_NE(encryptData.data, nullptr);
 
-    struct HksBlob decryptData = {0};
+    struct HksBlob decryptData = { 0 };
     decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
     if (decryptData.data == NULL) {
         SoftBusFree(encryptData.data);
