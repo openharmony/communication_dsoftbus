@@ -78,9 +78,9 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t
 {
     return GetSoftbusServerStubTestInterface()->LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
-int32_t CheckDynamicPermission()
+int32_t SoftBusCheckDynamicPermission(uint32_t tokenId)
 {
-    return GetSoftbusServerStubTestInterface()->CheckDynamicPermission();
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckDynamicPermission(tokenId);
 }
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {

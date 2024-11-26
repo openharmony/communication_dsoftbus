@@ -86,8 +86,8 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     return GetNetworkManagerInterface()->LnnGetOnlineStateById(id, type);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
 {
     return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
@@ -97,8 +97,8 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     return GetNetworkManagerInterface()->LnnRequestLeaveByAddrType(type, typeLen);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetNetworkManagerInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }

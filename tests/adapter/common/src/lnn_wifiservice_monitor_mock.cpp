@@ -38,35 +38,35 @@ static LnnWifiServiceMonitorInterface *GetLnnWifiServiceMonitorInterface()
 }
 
 extern "C" {
-    SoftBusLooper *GetLooper(int32_t looper)
-    {
-        return GetLnnWifiServiceMonitorInterface()->GetLooper(looper);
-    }
-    
-    void LnnNotifyWlanStateChangeEvent(void *state)
-    {
-        return GetLnnWifiServiceMonitorInterface()->LnnNotifyWlanStateChangeEvent(state);
-    }
+SoftBusLooper *GetLooper(int32_t looper)
+{
+    return GetLnnWifiServiceMonitorInterface()->GetLooper(looper);
+}
 
-    int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
-    {
-        return GetLnnWifiServiceMonitorInterface()->LnnAsyncCallbackHelper(looper, callback, para);
-    }
+void LnnNotifyWlanStateChangeEvent(void *state)
+{
+    return GetLnnWifiServiceMonitorInterface()->LnnNotifyWlanStateChangeEvent(state);
+}
 
-    bool SoftBusIsWifiActive(void)
-    {
-        return GetLnnWifiServiceMonitorInterface()->SoftBusIsWifiActive();
-    }
+int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
+{
+    return GetLnnWifiServiceMonitorInterface()->LnnAsyncCallbackHelper(looper, callback, para);
+}
 
-    int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
-    {
-        return GetLnnWifiServiceMonitorInterface()->SoftBusGetLinkedInfo(info);
-    }
+bool SoftBusIsWifiActive(void)
+{
+    return GetLnnWifiServiceMonitorInterface()->SoftBusIsWifiActive();
+}
 
-    int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-        void *para, uint64_t delayMillis)
-    {
-        return GetLnnWifiServiceMonitorInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
-    }
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
+{
+    return GetLnnWifiServiceMonitorInterface()->SoftBusGetLinkedInfo(info);
+}
+
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
+{
+    return GetLnnWifiServiceMonitorInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
 }
 } // namespace OHOS

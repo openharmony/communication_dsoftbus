@@ -30,7 +30,7 @@ typedef struct {
     DiscoverMode mode;
     ExchangeMedium medium;
     ExchangeFreq freq;
-    unsigned int dataLen;
+    uint32_t dataLen;
 } DiscSerializer;
 
 typedef struct {

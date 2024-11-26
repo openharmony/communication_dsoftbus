@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "bluetooth_mock.h"
 #include <securec.h>
+
+#include "bluetooth_mock.h"
 #include "disc_log.h"
 
 MockBluetooth *MockBluetooth::targetMocker = nullptr;
 BtGapCallBacks *MockBluetooth::btGapCallback = nullptr;
 BtGattCallbacks *MockBluetooth::btGattCallback = nullptr;
-BleScanCallbacks  *MockBluetooth::bleScanCallback  = nullptr;
+BleScanCallbacks *MockBluetooth::bleScanCallback = nullptr;
 const SoftbusBroadcastMediumInterface *MockBluetooth::interface = nullptr;
 
 static int32_t ActionGapRegisterCallbacks(BtGapCallBacks *func)
@@ -47,8 +48,8 @@ static int32_t ActionBleDeregisterScanCallbacks(int32_t scannerId)
     return OHOS_BT_STATUS_SUCCESS;
 }
 
-static int32_t ActionRegisterBroadcastMediumFunction(SoftbusMediumType type,
-    const SoftbusBroadcastMediumInterface *func)
+static int32_t ActionRegisterBroadcastMediumFunction(
+    SoftbusMediumType type, const SoftbusBroadcastMediumInterface *func)
 {
     MockBluetooth::interface = func;
     return OHOS_BT_STATUS_SUCCESS;
@@ -130,8 +131,8 @@ int32_t BleDeregisterScanCallbacks(int32_t scannerId)
     return MockBluetooth::GetMocker()->BleDeregisterScanCallbacks(scannerId);
 }
 
-int32_t BleStartScanEx(int32_t scannerId, const BleScanConfigs *configs, const BleScanNativeFilter *filter,
-    uint32_t filterSize)
+int32_t BleStartScanEx(
+    int32_t scannerId, const BleScanConfigs *configs, const BleScanNativeFilter *filter, uint32_t filterSize)
 {
     return MockBluetooth::GetMocker()->BleStartScanEx(scannerId, configs, filter, filterSize);
 }
@@ -156,8 +157,8 @@ int32_t DisableSyncDataToLpDevice()
     return OHOS_BT_STATUS_SUCCESS;
 }
 
-int32_t SetLpDeviceAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
-    int32_t interval, int32_t bcHandle)
+int32_t SetLpDeviceAdvParam(
+    int32_t duration, int32_t maxExtAdvEvents, int32_t window, int32_t interval, int32_t bcHandle)
 {
     return OHOS_BT_STATUS_SUCCESS;
 }
@@ -249,8 +250,8 @@ int32_t BleGattsUnRegister(int32_t serverId)
     return MockBluetooth::GetMocker()->BleGattsUnRegister(serverId);
 }
 
-int32_t BleGattsAddCharacteristic(int32_t serverId, int32_t srvcHandle,
-                                  BtUuid characUuid, int32_t properties, int32_t permissions)
+int32_t BleGattsAddCharacteristic(
+    int32_t serverId, int32_t srvcHandle, BtUuid characUuid, int32_t properties, int32_t permissions)
 {
     return MockBluetooth::GetMocker()->BleGattsAddCharacteristic(
         serverId, srvcHandle, characUuid, properties, permissions);

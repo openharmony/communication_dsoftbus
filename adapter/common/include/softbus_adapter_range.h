@@ -40,6 +40,7 @@ typedef struct {
     char subModelId[SOFTBUS_SUB_MODEL_ID_LEN];
     char newModelId[SOFTBUS_NEW_MODEL_ID_LEN];
     int32_t rssi;
+    int32_t serviceType;
 } SoftBusRangeParam;
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);

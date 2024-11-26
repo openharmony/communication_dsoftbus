@@ -294,7 +294,10 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
-    NodeInfo nodeInfo = { .discoveryType = TEST_DISC_TYPE, .deviceInfo.deviceUdid = TEST_UDID_HASH, };
+    NodeInfo nodeInfo = {
+        .discoveryType = TEST_DISC_TYPE,
+        .deviceInfo.deviceUdid = TEST_UDID_HASH,
+    };
     HbRespData hbResp = { .capabiltiy = TEST_CAPABILTIY, .stateVersion = TEST_STATEVERSION };
     ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     ON_CALL(ledgerMock, LnnGetNodeInfoById).WillByDefault(Return(&nodeInfo));
@@ -307,10 +310,12 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     device.addr->type = CONNECTION_ADDR_BR;
     device.devType = SMART_PHONE;
     LnnHeartbeatWeight mediumWeight = { .weight = TEST_WEIGHT, .localMasterWeight = TEST_WEIGHT2 };
-    DeviceInfo device11 = { .isOnline = false, };
+    DeviceInfo device11 = {
+        .isOnline = false,
+    };
     storedInfo.device = &device11;
-    int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device,
-        mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
+    int32_t ret1 = HbFirstSaveRecvTime(
+        &storedInfo, &device, mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
     ON_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
@@ -319,8 +324,8 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     EXPECT_CALL(hbStrateMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int32_t ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
-    HbFirstSaveRecvTime(&storedInfo, &device,
-        mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
+    HbFirstSaveRecvTime(
+        &storedInfo, &device, mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -761,10 +766,8 @@ HWTEST_F(HeartBeatMediumTest, UpdateOnlineInfoNoConnection_TEST01, TestSize.Leve
     };
     UpdateOnlineInfoNoConnection(TEST_NETWORK_ID, &hbResp);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
-    EXPECT_CALL(ledgerMock, LnnSetDLConnCapability)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
+    EXPECT_CALL(ledgerMock, LnnSetDLConnCapability).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
     UpdateOnlineInfoNoConnection(TEST_NETWORK_ID, &hbResp);
 }
 
@@ -817,10 +820,8 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingByRecvInfo_TEST01, TestSize.L
     EXPECT_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp)
         .WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(heartBeatMock, LnnStopOfflineTimingStrategy)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(heartBeatMock, LnnStartOfflineTimingStrategy)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartBeatMock, LnnStopOfflineTimingStrategy).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartBeatMock, LnnStartOfflineTimingStrategy).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, hbType, TEST_UPDATETIME);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR);
     ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, hbType, TEST_UPDATETIME);
@@ -989,8 +990,7 @@ HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     nodeInfo.feature = 0x1FFFF;
-    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).
-        WillOnce(DoAll(SetArgPointee<1>(nodeInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(nodeInfo), Return(SOFTBUS_OK)));
     ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
     EXPECT_TRUE(ret == true);
 

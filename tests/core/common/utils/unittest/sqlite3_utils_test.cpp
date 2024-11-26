@@ -17,11 +17,11 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "sqlite3_utils.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
+#include "sqlite3_utils.h"
 
 namespace OHOS {
 using namespace testing::ext;

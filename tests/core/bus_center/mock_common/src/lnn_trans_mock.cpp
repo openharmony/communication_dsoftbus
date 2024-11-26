@@ -44,8 +44,8 @@ int32_t TransRegisterNetworkingChannelListener(const char *sessionName, const IN
     return GetTransInterface()->TransRegisterNetworkingChannelListener(listener);
 }
 
-int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId,
-    const LanePreferredLinkList *preferred)
+int32_t TransOpenNetWorkingChannel(
+    const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred)
 {
     LNN_LOGI(LNN_TEST, "TransOpenNetWorkingChannel enter");
     return GetTransInterface()->TransOpenNetWorkingChannel(sessionName, peerNetworkId);

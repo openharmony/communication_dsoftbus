@@ -39,28 +39,22 @@ void BusCenterMetaNodeSdkTest::SetUpTestCase()
     SetAceessTokenPermission("busCenterTest");
 }
 
-void BusCenterMetaNodeSdkTest::TearDownTestCase()
-{
-}
+void BusCenterMetaNodeSdkTest::TearDownTestCase() { }
 
-void BusCenterMetaNodeSdkTest::SetUp()
-{
-}
+void BusCenterMetaNodeSdkTest::SetUp() { }
 
-void BusCenterMetaNodeSdkTest::TearDown()
-{
-}
+void BusCenterMetaNodeSdkTest::TearDown() { }
 
 /*
-* @tc.name: BUS_CENTER_SDK_META_NODE_Test_001
-* @tc.desc: meta node interface test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BUS_CENTER_SDK_META_NODE_Test_001
+ * @tc.desc: meta node interface test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_001, TestSize.Level0)
 {
     char udid[] = "0123456789987654321001234567899876543210012345678998765432100123";
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum = MAX_META_NODE_NUM;
     MetaNodeConfigInfo configInfo;
@@ -83,15 +77,15 @@ HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_001, TestSize.L
 }
 
 /*
-* @tc.name: BUS_CENTER_SDK_META_NODE_Test_002
-* @tc.desc: meta node interface test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BUS_CENTER_SDK_META_NODE_Test_002
+ * @tc.desc: meta node interface test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_002, TestSize.Level0)
 {
     char udid[] = "0123456789987654321001234567899876543210012345678998765432100123";
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum = MAX_META_NODE_NUM;
     MetaNodeConfigInfo configInfo;

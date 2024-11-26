@@ -43,6 +43,7 @@ public:
 
     bool Update(int32_t id, int32_t st, SoftBusGattcNotify *param);
     testing::AssertionResult Expect(int32_t id, int32_t st, SoftBusGattcNotify *param);
+
 private:
     SoftBusGattcNotify notify;
     void Reset();
@@ -143,7 +144,7 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConnect, TestSize.Level3)
     MockAll(mocker);
 
     SoftBusBtAddr addr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66}
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 }
     };
     EXPECT_CALL(mocker, BleGattcConnect).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     EXPECT_EQ(SoftbusGattcConnect(1, &addr), SOFTBUS_GATTC_INTERFACE_FAILED);
@@ -317,7 +318,7 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
     ASSERT_NE(clientId, -1);
     SoftbusGattcRegisterCallback(GetStubGattcCallback(), clientId);
     SoftBusBtAddr addr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66}
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 }
     };
     ASSERT_EQ(SoftbusGattcConnect(clientId, &addr), SOFTBUS_OK);
     gattClientCallback->ConnectionStateCb(clientId, OHOS_STATE_CONNECTED, OHOS_BT_STATUS_SUCCESS);
@@ -453,7 +454,7 @@ HWTEST_F(AdapterBleGattClientTest, SetBleConnectionPriority, TestSize.Level3)
     MockAll(mocker);
 
     SoftBusBtAddr addr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66}
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 }
     };
     ASSERT_EQ(SoftbusGattcSetPriority(-1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(SoftbusGattcSetPriority(1, nullptr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_INVALID_PARAM);
