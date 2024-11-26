@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#include "lnn_distributed_net_ledger.h"
-
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
+#include "bus_center_manager.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_distributed_net_ledger.c"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_net_ledger_manager.c"
 #include "lnn_fast_offline.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -31,10 +34,6 @@
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "legacy/softbus_hidumper_buscenter.h"
-#include "bus_center_manager.h"
-#include "lnn_distributed_net_ledger.c"
-#include "lnn_distributed_net_ledger_manager.c"
 #include <cstring>
 
 namespace OHOS {
@@ -75,13 +74,9 @@ void TestFunc(NodeBasicInfo *info)
     return;
 }
 
-void LNNDisctributedLedgerTest::SetUpTestCase()
-{
-}
+void LNNDisctributedLedgerTest::SetUpTestCase() { }
 
-void LNNDisctributedLedgerTest::TearDownTestCase()
-{
-}
+void LNNDisctributedLedgerTest::TearDownTestCase() { }
 
 void LNNDisctributedLedgerTest::SetUp()
 {
@@ -107,11 +102,11 @@ void LNNDisctributedLedgerTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_ADD_ONLINE_NODE_Test_001
-* @tc.desc: lnn add online node test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ADD_ONLINE_NODE_Test_001
+ * @tc.desc: lnn add online node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
@@ -125,29 +120,18 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_GET_REMOTE_STRINFO_Test_001
-* @tc.desc: lnn get remote strInfo test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_REMOTE_STRINFO_Test_001
+ * @tc.desc: lnn get remote strInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Level1)
 {
-    static InfoKey keyStringTable[] = {
-        STRING_KEY_HICE_VERSION,
-        STRING_KEY_DEV_UDID,
-        STRING_KEY_UUID,
-        STRING_KEY_DEV_TYPE,
-        STRING_KEY_DEV_NAME,
-        STRING_KEY_BT_MAC,
-        STRING_KEY_WLAN_IP,
-        STRING_KEY_MASTER_NODE_UDID,
-        STRING_KEY_P2P_MAC,
-        STRING_KEY_P2P_GO_MAC,
-        STRING_KEY_NODE_ADDR,
-        STRING_KEY_OFFLINE_CODE,
-        STRING_KEY_WIFIDIRECT_ADDR
-    };
-    char buf[UDID_BUF_LEN] = {0};
+    static InfoKey keyStringTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_UUID,
+        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_WLAN_IP, STRING_KEY_MASTER_NODE_UDID,
+        STRING_KEY_P2P_MAC, STRING_KEY_P2P_GO_MAC, STRING_KEY_NODE_ADDR, STRING_KEY_OFFLINE_CODE,
+        STRING_KEY_WIFIDIRECT_ADDR };
+    char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteStrInfo(NODE1_NETWORK_ID, STRING_KEY_HICE_VERSION, nullptr, UDID_BUF_LEN);
@@ -167,23 +151,15 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_GET_REMOTE_NUMNFO_Test_002
-* @tc.desc: lnn get remote num info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_REMOTE_NUMNFO_Test_002
+ * @tc.desc: lnn get remote num info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Level1)
 {
-    static InfoKey keyNumTable[] = {
-        NUM_KEY_META_NODE,
-        NUM_KEY_SESSION_PORT,
-        NUM_KEY_AUTH_PORT,
-        NUM_KEY_PROXY_PORT,
-        NUM_KEY_NET_CAP,
-        NUM_KEY_DISCOVERY_TYPE,
-        NUM_KEY_MASTER_NODE_WEIGHT,
-        NUM_KEY_P2P_ROLE
-    };
+    static InfoKey keyNumTable[] = { NUM_KEY_META_NODE, NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT,
+        NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE };
     int32_t ret;
     uint32_t i;
     int32_t len = LNN_COMMON_LEN;
@@ -198,14 +174,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_GET_REMOTE_BYTEINFO_Test_003
-* @tc.desc: lnn get remote byte info test
-* @tc.type: FUNC
-* @tc.require:
+ * @tc.name: LNN_GET_REMOTE_BYTEINFO_Test_003
+ * @tc.desc: lnn get remote byte info test
+ * @tc.type: FUNC
+ * @tc.require:
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.Level1)
 {
-    unsigned char irk[LFINDER_IRK_LEN] = {0};
+    unsigned char irk[LFINDER_IRK_LEN] = { 0 };
     int32_t ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_IRK, nullptr, LFINDER_IRK_LEN);
@@ -213,7 +189,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.L
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    unsigned char pubMac[LFINDER_MAC_ADDR_LEN] = {0};
+    unsigned char pubMac[LFINDER_MAC_ADDR_LEN] = { 0 };
     ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_PUB_MAC, pubMac, LFINDER_MAC_ADDR_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_PUB_MAC, nullptr, LFINDER_MAC_ADDR_LEN);
@@ -221,7 +197,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.L
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_PUB_MAC, pubMac, LFINDER_MAC_ADDR_LEN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
+    unsigned char cipherKey[SESSION_KEY_LENGTH] = { 0 };
     ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_KEY, nullptr, SESSION_KEY_LENGTH);
@@ -229,7 +205,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.L
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    unsigned char cipherIv[BROADCAST_IV_LEN] = {0};
+    unsigned char cipherIv[BROADCAST_IV_LEN] = { 0 };
     ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_IV, nullptr, BROADCAST_IV_LEN);
@@ -239,11 +215,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.L
 }
 
 /*
-* @tc.name: LNN_GET_CNN_CODE_Test_001
-* @tc.desc: lnn get cnn code test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_CNN_CODE_Test_001
+ * @tc.desc: lnn get cnn code test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_CNN_CODE_Test_001, TestSize.Level1)
 {
     DiscoveryType type = DISCOVERY_TYPE_WIFI;
@@ -256,11 +232,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_CNN_CODE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_UPDATE_NODE_INFO_Test_001
-* @tc.desc: lnn update node info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_UPDATE_NODE_INFO_Test_001
+ * @tc.desc: lnn update node info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Level1)
 {
     NodeInfo newInfo;
@@ -275,11 +251,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_SET_NODE_OFFLINE_Test_001
-* @tc.desc: lnn set node offline test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_NODE_OFFLINE_Test_001
+ * @tc.desc: lnn set node offline test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_NODE_OFFLINE_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(REPORT_NONE == LnnSetNodeOffline(NODE1_UDID, CONNECTION_ADDR_WLAN, AUTH_ID));
@@ -288,11 +264,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_NODE_OFFLINE_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_GET_BASIC_INFO_BY_UDID_Test_001
-* @tc.desc: lnn get basic info by udid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_BASIC_INFO_BY_UDID_Test_001
+ * @tc.desc: lnn get basic info by udid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_BASIC_INFO_BY_UDID_Test_001, TestSize.Level1)
 {
     NodeBasicInfo basicInfo;
@@ -304,15 +280,15 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_BASIC_INFO_BY_UDID_Test_001, TestSiz
 }
 
 /*
-* @tc.name: LNN_CONVERT_DLID_Test_001
-* @tc.desc: lnn convert dl id test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONVERT_DLID_Test_001
+ * @tc.desc: lnn convert dl id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DLID_Test_001, TestSize.Level1)
 {
-    char buf[UDID_BUF_LEN] = {0};
+    char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnConvertDlId(nullptr, CATEGORY_UDID, CATEGORY_UDID, buf, UDID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnConvertDlId(NODE1_UDID, CATEGORY_UDID, CATEGORY_UDID, buf, UDID_BUF_LEN);
@@ -326,11 +302,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DLID_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SET_DLP2P_INFO_Test_001
-* @tc.desc: lnn get lnn relation test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DLP2P_INFO_Test_001
+ * @tc.desc: lnn get lnn relation test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLP2P_INFO_Test_001, TestSize.Level1)
 {
     P2pInfo info;
@@ -347,14 +323,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLP2P_INFO_Test_001, TestSize.Level1
 }
 
 /*
-* @tc.name: LNN_GET_NETWORKID_BYBTMAC_Test_001
-* @tc.desc: lnn get neteorkId by bt mac test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_NETWORKID_BYBTMAC_Test_001
+ * @tc.desc: lnn get neteorkId by bt mac test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BYBTMAC_Test_001, TestSize.Level1)
 {
-    char buf[NETWORK_ID_BUF_LEN] = {0};
+    char buf[NETWORK_ID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetNetworkIdByBtMac(nullptr, buf, NETWORK_ID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetNetworkIdByBtMac(NODE1_BT_MAC, buf, NETWORK_ID_BUF_LEN);
@@ -364,14 +340,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BYBTMAC_Test_001, TestSize
 }
 
 /*
-* @tc.name: LNN_GET_NETWORKID_BY_UUID_Test_001
-* @tc.desc: lnn get neteorkId by uuid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_NETWORKID_BY_UUID_Test_001
+ * @tc.desc: lnn get neteorkId by uuid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UUID_Test_001, TestSize.Level1)
 {
-    char buf[UUID_BUF_LEN] = {0};
+    char buf[UUID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetNetworkIdByUuid(nullptr, buf, UUID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetNetworkIdByUuid(NODE1_UUID, buf, NETWORK_ID_BUF_LEN);
@@ -381,14 +357,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UUID_Test_001, TestSize
 }
 
 /*
-* @tc.name: LNN_GET_NETWORKID_BY_UDID_Test_001
-* @tc.desc: lnn get neteorkId by udid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_NETWORKID_BY_UDID_Test_001
+ * @tc.desc: lnn get neteorkId by udid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UDID_Test_001, TestSize.Level1)
 {
-    char buf[UDID_BUF_LEN] = {0};
+    char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetNetworkIdByUdid(nullptr, buf, UDID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetNetworkIdByUdid(NODE1_UDID, buf, UDID_BUF_LEN);
@@ -398,11 +374,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UDID_Test_001, TestSize
 }
 
 /*
-* @tc.name: LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001
-* @tc.desc: lnn get dl heartbeat time stamp test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001
+ * @tc.desc: lnn get dl heartbeat time stamp test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001, TestSize.Level1)
 {
     uint64_t timeStamp;
@@ -413,11 +389,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001, Te
 }
 
 /*
-* @tc.name: LNN_SET_DLHEARTBEAT_TIMER_STAMP_Test_001
-* @tc.desc: lnn set dl heartbeat time stamp test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DLHEARTBEAT_TIMER_STAMP_Test_001
+ * @tc.desc: lnn set dl heartbeat time stamp test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLHEARTBEAT_TIMER_STAMP_Test_001, TestSize.Level1)
 {
     uint64_t timeStamp = NEW_TIME_STAMP;
@@ -428,11 +404,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLHEARTBEAT_TIMER_STAMP_Test_001, Te
 }
 
 /*
-* @tc.name: LNN_SET_DLCONN_CAPABILITY_Test_001
-* @tc.desc: lnn set dl conn capability test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DLCONN_CAPABILITY_Test_001
+ * @tc.desc: lnn set dl conn capability test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLCONN_CAPABILITY_Test_001, TestSize.Level1)
 {
     uint64_t connCapability = CAPABILITY;
@@ -441,11 +417,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLCONN_CAPABILITY_Test_001, TestSize
 }
 
 /*
-* @tc.name: LNN_SET_DLNODE_ADDR_Test_001
-* @tc.desc: lnn set dl node addr test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DLNODE_ADDR_Test_001
+ * @tc.desc: lnn set dl node addr test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLNODE_ADDR_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnSetDLNodeAddr(NODE1_NETWORK_ID, CATEGORY_NETWORK_ID, NODE_ADDRESS);
@@ -455,22 +431,22 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLNODE_ADDR_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_GET_ONLINE_NODE_BY_UDID_HASH_Test_001
-* @tc.desc: lnn get online node by udid hash test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_ONLINE_NODE_BY_UDID_HASH_Test_001
+ * @tc.desc: lnn get online node by udid hash test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_NODE_BY_UDID_HASH_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnGetOnlineNodeByUdidHash(RECV_UDID_HASH) == nullptr);
 }
 
 /*
-* @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
-* @tc.desc: lnn get data change flag test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
+ * @tc.desc: lnn get data change flag test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 {
     int16_t info = 0;
@@ -483,11 +459,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.
 }
 
 /*
-* @tc.name: LNN_CONVERT_DLID_TO_UDID_Test_001
-* @tc.desc: lnn convert dlid to udid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONVERT_DLID_TO_UDID_Test_001
+ * @tc.desc: lnn convert dlid to udid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DLID_TO_UDID_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnConvertDLidToUdid(nullptr, CATEGORY_NETWORK_ID) == nullptr);
@@ -496,14 +472,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DLID_TO_UDID_Test_001, TestSize.
 }
 
 /*
-* @tc.name: LNN_GET_LNN_RELATION_Test_001
-* @tc.desc: lnn get lnn relation test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_LNN_RELATION_Test_001
+ * @tc.desc: lnn get lnn relation test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_LNN_RELATION_Test_001, TestSize.Level1)
 {
-    uint8_t relation[CONNECTION_ADDR_MAX] = {0};
+    uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
     int32_t ret = LnnGetLnnRelation(nullptr, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetLnnRelation(NODE1_UDID, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
@@ -513,11 +489,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_LNN_RELATION_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_SET_DL_DEVICE_INFO_NAME_Test_001
-* @tc.desc: lnn set dl device info name test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DL_DEVICE_INFO_NAME_Test_001
+ * @tc.desc: lnn set dl device info name test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DL_DEVICE_INFO_NAME_Test_001, TestSize.Level1)
 {
     bool ret = LnnSetDLDeviceInfoName(nullptr, nullptr);
@@ -877,11 +853,11 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SET_DLWIFIDIRECT_ADDR_Test_001
-* @tc.desc: lnn get lnn relation test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SET_DLWIFIDIRECT_ADDR_Test_001
+ * @tc.desc: lnn get lnn relation test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLWIFIDIRECT_ADDR_Test_001, TestSize.Level1)
 {
     bool ret = LnnSetDLWifiDirectAddr(NODE1_NETWORK_ID, nullptr);

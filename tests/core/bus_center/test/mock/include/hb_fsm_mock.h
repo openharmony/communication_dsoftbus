@@ -16,14 +16,15 @@
 #ifndef HEARTBEAT_FSM_H
 #define HEARTBEAT_FSM_H
 
+#include <gmock/gmock.h>
+#include <mutex>
+
 #include "lnn_connection_addr_utils.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
 #include "wifi_direct_manager.h"
-#include <gmock/gmock.h>
-#include <mutex>
 
 namespace OHOS {
 class HeartBeatFSMInterface {
@@ -33,8 +34,8 @@ public:
 
     virtual int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
-    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-        bool isNeedConnect) = 0;
+    virtual int32_t LnnNotifyDiscoveryDevice(
+        const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect) = 0;
     virtual int32_t LnnSetHbAsMasterNodeState(bool isMasterNode) = 0;
     virtual int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight) = 0;
     virtual void LnnNotifyHBRepeat(void);
@@ -59,7 +60,7 @@ public:
     virtual int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType) = 0;
     virtual SoftBusScreenState GetScreenState(void) = 0;
     virtual void SetScreenState(SoftBusScreenState state) = 0;
-    virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
+    virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
 };
 class HeartBeatFSMInterfaceMock : public HeartBeatFSMInterface {
 public:
@@ -71,7 +72,7 @@ public:
     MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
     MOCK_METHOD3(LnnNotifyMasterElect, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD1(LnnSetHbAsMasterNodeState, int32_t(bool));
-    MOCK_METHOD0(LnnNotifyHBRepeat, void ());
+    MOCK_METHOD0(LnnNotifyHBRepeat, void());
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
     MOCK_METHOD1(LnnHbMediumMgrStop, int32_t(LnnHeartbeatType *));
     MOCK_METHOD0(LnnDumpHbMgrRecvList, void(void));
@@ -92,7 +93,7 @@ public:
     MOCK_METHOD1(StopHeartBeatAdvByTypeNow, int32_t(LnnHeartbeatType));
     MOCK_METHOD0(GetScreenState, SoftBusScreenState(void));
     MOCK_METHOD1(SetScreenState, void(SoftBusScreenState));
-    MOCK_METHOD0(GetWifiDirectManager, WifiDirectManager*(void));
+    MOCK_METHOD0(GetWifiDirectManager, WifiDirectManager *(void));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

@@ -33,21 +33,13 @@ public:
     void TearDown();
 };
 
-void WifiSoftBusTest::SetUpTestCase()
-{
-}
+void WifiSoftBusTest::SetUpTestCase() { }
 
-void WifiSoftBusTest::TearDownTestCase()
-{
-}
+void WifiSoftBusTest::TearDownTestCase() { }
 
-void WifiSoftBusTest::SetUp()
-{
-}
+void WifiSoftBusTest::SetUp() { }
 
-void WifiSoftBusTest::TearDown()
-{
-}
+void WifiSoftBusTest::TearDown() { }
 
 static void OnWifiScanStateChangedHandler(int32_t state, int32_t size);
 static bool g_stateScanSuccess = false;
@@ -63,9 +55,7 @@ static void OnWifiScanStateChangedHandler(int32_t state, int32_t size)
     return;
 }
 
-static ISoftBusScanResult g_scanResultCb = {
-    .onSoftBusWifiScanResult = OnWifiScanStateChangedHandler
-};
+static ISoftBusScanResult g_scanResultCb = { .onSoftBusWifiScanResult = OnWifiScanStateChangedHandler };
 
 static void WaitSacnResult(void)
 {
@@ -84,7 +74,7 @@ static void WaitSacnResult(void)
 
 HWTEST_F(WifiSoftBusTest, WifiSoftBusGetWifiScanListTest001, TestSize.Level0)
 {
-    SoftBusWifiScanInfo* result = NULL;
+    SoftBusWifiScanInfo *result = NULL;
     unsigned int size = WIFI_MAX_SCAN_HOTSPOT_LIMIT;
     int32_t ret;
 
@@ -111,4 +101,4 @@ HWTEST_F(WifiSoftBusTest, WifiSoftBusGetWifiScanListTest001, TestSize.Level0)
     SoftBusFree(result);
     EXPECT_TRUE(SoftBusUnRegisterWifiEvent(&g_scanResultCb) == SOFTBUS_OK);
 }
-}
+} // namespace OHOS

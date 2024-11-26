@@ -33,8 +33,8 @@
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "lnn_bus_center_ipc.h"
 #include "lnn_bus_center_ipc.cpp"
+#include "lnn_bus_center_ipc.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
@@ -50,7 +50,6 @@
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 
-
 namespace OHOS {
 using namespace testing::ext;
 constexpr uint8_t DEFAULT_LEN = 32;
@@ -64,20 +63,12 @@ public:
     void TearDown();
 };
 
-void LNNBusCenterIpcTest::SetUpTestCase()
-{
-}
+void LNNBusCenterIpcTest::SetUpTestCase() { }
 
-void LNNBusCenterIpcTest::TearDownTestCase()
-{
-}
+void LNNBusCenterIpcTest::TearDownTestCase() { }
 
-void LNNBusCenterIpcTest::SetUp()
-{
-}
+void LNNBusCenterIpcTest::SetUp() { }
 
-void LNNBusCenterIpcTest::TearDown()
-{
-}
+void LNNBusCenterIpcTest::TearDown() { }
 
 } // namespace OHOS

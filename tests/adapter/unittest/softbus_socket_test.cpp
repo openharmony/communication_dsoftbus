@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
-#include <securec.h>
 #include <fcntl.h>
-#include "gtest/gtest.h"
-#include "softbus_adapter_socket.h"
+#include <securec.h>
+#include <unistd.h>
+
 #include "softbus_adapter_errcode.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
+#include "gtest/gtest.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -36,13 +37,9 @@ const int32_t CMD_REPLY = 0x33003300;
 const int32_t SET_SIZE = 100;
 const int32_t WLAN_INDEX = 4;
 
-SoftBusSockAddrIn g_serAddr = {
-    .sinFamily = SOFTBUS_AF_INET,
+SoftBusSockAddrIn g_serAddr = { .sinFamily = SOFTBUS_AF_INET,
     .sinPort = SoftBusHtoNs(TEST_PORT),
-    .sinAddr = {
-        .sAddr = SoftBusInetAddr("127.0.0.1")
-    }
-};
+    .sinAddr = { .sAddr = SoftBusInetAddr("127.0.0.1") } };
 
 struct SocketProtocol {
     unsigned int cmd;
@@ -57,30 +54,22 @@ protected:
     void TearDown();
 };
 
-void AdapterDsoftbusSocketTest::SetUpTestCase(void)
-{
-}
+void AdapterDsoftbusSocketTest::SetUpTestCase(void) { }
 
-void AdapterDsoftbusSocketTest::TearDownTestCase(void)
-{
-}
+void AdapterDsoftbusSocketTest::TearDownTestCase(void) { }
 
-void AdapterDsoftbusSocketTest::SetUp()
-{
-}
+void AdapterDsoftbusSocketTest::SetUp() { }
 
-void AdapterDsoftbusSocketTest::TearDown()
-{
-}
+void AdapterDsoftbusSocketTest::TearDown() { }
 
 static void SocketServiceStart(int32_t localFlag)
 {
     int32_t socketFd = -1;
     int32_t optVal = 1;
     int32_t backLog = 2;
-    SoftBusSockAddrIn cliAddr = {0};
+    SoftBusSockAddrIn cliAddr = { 0 };
     int32_t acceptFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
@@ -134,15 +123,15 @@ static void SocketIpv6ServiceStart(int localFlag)
     int32_t socketFd = -1;
     int32_t optVal = 1;
     int32_t backLog = 2;
-    SoftBusSockAddrIn cliAddr = {0};
+    SoftBusSockAddrIn cliAddr = { 0 };
     int32_t acceptFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &optVal, sizeof(optVal));
     EXPECT_EQ(0, ret);
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = { 0 };
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -158,7 +147,7 @@ static void SocketIpv6ServiceStart(int localFlag)
 
     if (localFlag) {
         char serviceIP[46];
-        SoftBusSockAddrIn6 serviceAddr6 = {0};
+        SoftBusSockAddrIn6 serviceAddr6 = { 0 };
         SoftBusSocketGetLocalName(acceptFd, (SoftBusSockAddr *)&serviceAddr6);
         SoftBusInetNtoP(SOFTBUS_AF_INET6, &serviceAddr6.sin6Addr, serviceIP, sizeof(serviceIP));
         uint16_t port = SoftBusNtoHs(serviceAddr6.sin6Port);
@@ -193,13 +182,9 @@ static void SocketIpv6ServiceStart(int localFlag)
 static void ClientConnect(int32_t *socketFd)
 {
     EXPECT_TRUE(socketFd != nullptr);
-    SoftBusSockAddrIn serAddr = {
-        .sinFamily = SOFTBUS_AF_INET,
+    SoftBusSockAddrIn serAddr = { .sinFamily = SOFTBUS_AF_INET,
         .sinPort = SoftBusHtoNs(8888),
-        .sinAddr = {
-            .sAddr = SoftBusInetAddr("127.0.0.1")
-        }
-    };
+        .sinAddr = { .sAddr = SoftBusInetAddr("127.0.0.1") } };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(*socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
@@ -209,7 +194,7 @@ static void ClientConnect(int32_t *socketFd)
 static void ClientIpv6Connect(int32_t *socketFd)
 {
     EXPECT_TRUE(socketFd != nullptr);
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = { 0 };
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -234,11 +219,11 @@ static void ClientExit(int32_t socketFd)
 }
 
 /*
-* @tc.name: SoftBusSocketCreate001
-* @tc.desc: Create Socket Success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketCreate001
+ * @tc.desc: Create Socket Success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate001, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -247,19 +232,19 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate001, TestSize.Level0)
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
 
-    ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
-        SOFTBUS_SOCK_CLOEXEC, 0, &socketFd);
+    ret = SoftBusSocketCreate(
+        SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK | SOFTBUS_SOCK_CLOEXEC, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
 }
 
 /*
-* @tc.name: SoftBusSocketCreate002
-* @tc.desc: Error Domain
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketCreate002
+ * @tc.desc: Error Domain
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -268,11 +253,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketCreate003
-* @tc.desc: Error type
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketCreate003
+ * @tc.desc: Error type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate003, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -283,11 +268,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketCreate004
-* @tc.desc: Error protocol
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketCreate004
+ * @tc.desc: Error protocol
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate004, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -296,11 +281,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketCreate005
-* @tc.desc: Error socketFd
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketCreate005
+ * @tc.desc: Error socketFd
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate005, TestSize.Level0)
 {
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, NULL);
@@ -308,11 +293,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCreate005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSetOptTest001
-* @tc.desc: opt set success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest001
+ * @tc.desc: opt set success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -328,11 +313,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSetOptTest002
-* @tc.desc: select SOFTBUS_IPPROTO_IP Protocol
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest002
+ * @tc.desc: select SOFTBUS_IPPROTO_IP Protocol
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest002, TestSize.Level0)
 {
     int32_t socketFd;
@@ -348,11 +333,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSetOptTest003
-* @tc.desc: select SOFTBUS_SO_KEEPALIVE Protocol
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest003
+ * @tc.desc: select SOFTBUS_SO_KEEPALIVE Protocol
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest003, TestSize.Level0)
 {
     int32_t socketFd;
@@ -369,11 +354,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSetOptTest004
-* @tc.desc: socketFd illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest004
+ * @tc.desc: socketFd illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest004, TestSize.Level0)
 {
     int32_t optVal = 1;
@@ -383,11 +368,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSetOptTest005
-* @tc.desc: Protocol is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest005
+ * @tc.desc: Protocol is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest005, TestSize.Level0)
 {
     int32_t socketFd;
@@ -403,11 +388,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSetOptTest006
-* @tc.desc: optVal is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest006
+ * @tc.desc: optVal is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest006, TestSize.Level0)
 {
     int32_t socketFd;
@@ -423,11 +408,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest006, TestSize.Level0)
 
 #if HAVE_PRO
 /*
-* @tc.name: SoftBusSocketSetOptTest007
-* @tc.desc: optValLen is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSetOptTest007
+ * @tc.desc: optValLen is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest007, TestSize.Level0)
 {
     int32_t socketFd;
@@ -443,11 +428,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest007, TestSize.Level0)
 #endif
 
 /*
-* @tc.name: SoftBusSocketGetOptTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetOptTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest001, TestSize.Level0)
 {
     int32_t socketFd;
@@ -462,11 +447,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketGetOptTest002
-* @tc.desc: socketFd illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetOptTest002
+ * @tc.desc: socketFd illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest002, TestSize.Level0)
 {
     int32_t on = 1;
@@ -476,11 +461,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest001
-* @tc.desc: test in service get port
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest001
+ * @tc.desc: test in service get port
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest001, TestSize.Level0)
 {
     sleep(1);
@@ -499,11 +484,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest001, TestSize.L
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest002
-* @tc.desc: socketFd illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest002
+ * @tc.desc: socketFd illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -513,11 +498,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest002, TestSize.L
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest003
-* @tc.desc: addr is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest003
+ * @tc.desc: addr is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest003, TestSize.Level0)
 {
     sleep(1);
@@ -539,11 +524,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest003, TestSize.L
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest004
-* @tc.desc: addrLen is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest004
+ * @tc.desc: addrLen is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest004, TestSize.Level0)
 {
     sleep(1);
@@ -566,11 +551,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest004, TestSize.L
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest005
-* @tc.desc: socketFd is service fd
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest005
+ * @tc.desc: socketFd is service fd
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest005, TestSize.Level0)
 {
     int32_t socketFd;
@@ -585,25 +570,25 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest005, TestSize.L
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest006
-* @tc.desc: socketFd illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest006
+ * @tc.desc: socketFd illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest006, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 clientAddr6 = {0};
+    SoftBusSockAddrIn6 clientAddr6 = { 0 };
     int32_t ret = SoftBusSocketGetLocalName(socketFd, (SoftBusSockAddr *)&clientAddr6);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
 /*
-* @tc.name: SoftBusSocketGetLocalNameTest007
-* @tc.desc: addrLen is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetLocalNameTest007
+ * @tc.desc: addrLen is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest007, TestSize.Level0)
 {
     sleep(1);
@@ -618,7 +603,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest007, TestSize.L
 
     ClientIpv6Connect(&socketFd);
 
-    SoftBusSockAddrIn6 clientAddr6 = {0};
+    SoftBusSockAddrIn6 clientAddr6 = { 0 };
     ret = SoftBusSocketGetLocalName(socketFd, (SoftBusSockAddr *)&clientAddr6);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
 
@@ -626,11 +611,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest007, TestSize.L
 }
 
 /*
-* @tc.name: SoftBusSocketGetPeerNameTest001
-* @tc.desc: get service port success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetPeerNameTest001
+ * @tc.desc: get service port success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest001, TestSize.Level0)
 {
     sleep(1);
@@ -658,11 +643,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest001, TestSize.Le
 }
 
 /*
-* @tc.name: SoftBusSocketGetPeerNameTest002
-* @tc.desc: socketFd illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetPeerNameTest002
+ * @tc.desc: socketFd illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest002, TestSize.Level0)
 {
     SoftBusSockAddr addr;
@@ -671,11 +656,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest002, TestSize.Le
 }
 
 /*
-* @tc.name: SoftBusSocketGetPeerNameTest003
-* @tc.desc: get service port success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetPeerNameTest003
+ * @tc.desc: get service port success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest003, TestSize.Level0)
 {
     sleep(1);
@@ -697,11 +682,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest003, TestSize.Le
 }
 
 /*
-* @tc.name: SoftBusSocketGetPeerNameTest004
-* @tc.desc: get service port success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetPeerNameTest004
+ * @tc.desc: get service port success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest004, TestSize.Level0)
 {
     sleep(1);
@@ -725,11 +710,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest004, TestSize.Le
 }
 
 /*
-* @tc.name: SoftBusSocketGetPeerNameTest005
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetPeerNameTest005
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest005, TestSize.Level0)
 {
     int32_t socketFd;
@@ -744,11 +729,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest005, TestSize.Le
 }
 
 /*
-* @tc.name: SoftBusSocketGetPeerNameTest006
-* @tc.desc: get service port success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketGetPeerNameTest006
+ * @tc.desc: get service port success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest006, TestSize.Level0)
 {
     sleep(1);
@@ -764,7 +749,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest006, TestSize.Le
     ClientIpv6Connect(&socketFd);
 
     char serviceIP[46];
-    SoftBusSockAddrIn6 serviceAddr6 {0};
+    SoftBusSockAddrIn6 serviceAddr6 { 0 };
 
     ret = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&serviceAddr6);
     EXPECT_EQ(0, ret);
@@ -776,11 +761,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest006, TestSize.Le
 }
 
 /*
-* @tc.name: SoftBusSocketBind001
-* @tc.desc: Bind Socket Success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketBind001
+ * @tc.desc: Bind Socket Success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind001, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -796,11 +781,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketBind002
-* @tc.desc: addrLen is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketBind002
+ * @tc.desc: addrLen is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -816,11 +801,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketBind003
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketBind003
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind003, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -832,11 +817,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketBind004
-* @tc.desc: addr is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketBind004
+ * @tc.desc: addr is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind004, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -849,15 +834,15 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketBind005
-* @tc.desc: Bind Socket Success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketBind005
+ * @tc.desc: Bind Socket Success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind005, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = { 0 };
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -872,11 +857,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketListen001
-* @tc.desc: Listen Socket Success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketListen001
+ * @tc.desc: Listen Socket Success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen001, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -898,11 +883,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketListen002
-* @tc.desc: backlog is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketListen002
+ * @tc.desc: backlog is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -924,11 +909,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketListen003
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketListen003
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen003, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -939,16 +924,16 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketListen004
-* @tc.desc: Listen Socket Success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketListen004
+ * @tc.desc: Listen Socket Success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen004, TestSize.Level0)
 {
     int32_t socketFd = -1;
     int32_t backLog = 2;
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = { 0 };
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -968,11 +953,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketAccept001
-* @tc.desc: Accept Socket Success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketAccept001
+ * @tc.desc: Accept Socket Success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept001, TestSize.Level0)
 {
     sleep(1);
@@ -991,11 +976,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketAccept002
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketAccept002
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1008,24 +993,20 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketAccept003
-* @tc.desc: acceptFd is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketAccept003
+ * @tc.desc: acceptFd is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept003, TestSize.Level0)
 {
     int32_t socketFd = -1;
     int32_t optVal = 1;
     int32_t backLog = 2;
-    SoftBusSockAddrIn serAddr = {
-        .sinFamily = SOFTBUS_AF_INET,
+    SoftBusSockAddrIn serAddr = { .sinFamily = SOFTBUS_AF_INET,
         .sinPort = SoftBusHtoNs(TEST_PORT),
-        .sinAddr = {
-            .sAddr = SoftBusInetAddr("127.0.0.1")
-        }
-    };
-    SoftBusSockAddrIn cliAddr = {0};
+        .sinAddr = { .sAddr = SoftBusInetAddr("127.0.0.1") } };
+    SoftBusSockAddrIn cliAddr = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
@@ -1044,11 +1025,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketConnect001
-* @tc.desc: connect success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketConnect001
+ * @tc.desc: connect success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect001, TestSize.Level0)
 {
     sleep(1);
@@ -1067,11 +1048,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketConnect002
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketConnect002
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1083,11 +1064,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketConnect003
-* @tc.desc: addr is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketConnect003
+ * @tc.desc: addr is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect003, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1100,21 +1081,17 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketConnect004
-* @tc.desc: addrLen is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketConnect004
+ * @tc.desc: addrLen is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect004, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn serAddr = {
-        .sinFamily = SOFTBUS_AF_INET,
+    SoftBusSockAddrIn serAddr = { .sinFamily = SOFTBUS_AF_INET,
         .sinPort = SoftBusHtoNs(8888),
-        .sinAddr = {
-            .sAddr = SoftBusInetAddr("127.0.0.1")
-        }
-    };
+        .sinAddr = { .sAddr = SoftBusInetAddr("127.0.0.1") } };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
@@ -1124,15 +1101,15 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketConnect005
-* @tc.desc: addrLen is illegal
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketConnect005
+ * @tc.desc: addrLen is illegal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect005, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = { 0 };
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_PORT);
     const char *srcAddr = "::1";
@@ -1147,29 +1124,29 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketFdZeroTest001
-* @tc.desc: set fdsBits zero success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdZeroTest001
+ * @tc.desc: set fdsBits zero success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdZeroTest001, TestSize.Level0)
 {
-    SoftBusFdSet set = {0};
+    SoftBusFdSet set = { 0 };
     set.fdsBits[0] = 1;
     SoftBusSocketFdZero(&set);
     EXPECT_TRUE(set.fdsBits[0] == 0);
 }
 
 /*
-* @tc.name: SoftBusSocketFdSetTest001
-* @tc.desc: socketFd set success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdSetTest001
+ * @tc.desc: socketFd set success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest001, TestSize.Level0)
 {
     int32_t socketFd;
-    SoftBusFdSet set = {0};
+    SoftBusFdSet set = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     SoftBusSocketFdSet(socketFd, &set);
@@ -1178,11 +1155,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketFdSetTest003
-* @tc.desc: set is NULL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdSetTest003
+ * @tc.desc: set is NULL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest003, TestSize.Level0)
 {
     int32_t socketFd;
@@ -1195,11 +1172,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketFdClrTest001
-* @tc.desc: fd clr success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdClrTest001
+ * @tc.desc: fd clr success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdClrTest001, TestSize.Level0)
 {
     SoftBusFdSet set;
@@ -1210,11 +1187,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdClrTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketFdIssetTest001
-* @tc.desc: FdIsset success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdIssetTest001
+ * @tc.desc: FdIsset success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest001, TestSize.Level0)
 {
     SoftBusFdSet set;
@@ -1224,25 +1201,25 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest001, TestSize.Level0
 }
 
 /*
-* @tc.name: SoftBusSocketFdIssetTest002
-* @tc.desc: fd not in set
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdIssetTest002
+ * @tc.desc: fd not in set
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest002, TestSize.Level0)
 {
-    SoftBusFdSet set = {0};
+    SoftBusFdSet set = { 0 };
     SoftBusSocketFdClr(1, &set);
     int32_t ret = SoftBusSocketFdIsset(1, &set);
     EXPECT_TRUE(ret == 0);
 }
 
 /*
-* @tc.name: SoftBusSocketFdIssetTest003
-* @tc.desc: set is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFdIssetTest003
+ * @tc.desc: set is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest003, TestSize.Level0)
 {
     int32_t ret = SoftBusSocketFdIsset(1, NULL);
@@ -1250,19 +1227,16 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest003, TestSize.Level0
 }
 
 /*
-* @tc.name: SoftBusSocketSelectTest001
-* @tc.desc: select read fds
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSelectTest001
+ * @tc.desc: select read fds
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest001, TestSize.Level0)
 {
     int32_t socketFd;
     SoftBusFdSet readFds;
-    SoftBusSockTimeOut tv = {
-        .sec = 5,
-        .usec = 1
-    };
+    SoftBusSockTimeOut tv = { .sec = 5, .usec = 1 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
@@ -1276,20 +1250,17 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSelectTest002
-* @tc.desc: select write fds
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSelectTest002
+ * @tc.desc: select write fds
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest002, TestSize.Level0)
 {
     int32_t socketFd;
     SoftBusFdSet writeFds;
     SoftBusFdSet fdSelect;
-    SoftBusSockTimeOut tv = {
-        .sec = 5,
-        .usec = 1
-    };
+    SoftBusSockTimeOut tv = { .sec = 5, .usec = 1 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
@@ -1304,20 +1275,17 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSelectTest003
-* @tc.desc: select expcept fds
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSelectTest003
+ * @tc.desc: select expcept fds
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest003, TestSize.Level0)
 {
     int32_t socketFd;
     SoftBusFdSet exceptFds;
     SoftBusFdSet fdSelect;
-    SoftBusSockTimeOut tv = {
-        .sec = 5,
-        .usec = 1
-    };
+    SoftBusSockTimeOut tv = { .sec = 5, .usec = 1 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
@@ -1332,18 +1300,15 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSelectTest004
-* @tc.desc: select all fds
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSelectTest004
+ * @tc.desc: select all fds
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest004, TestSize.Level0)
 {
     SoftBusFdSet readFds, writeFds, exceptFds;
-    SoftBusSockTimeOut tv = {
-        .sec = 5,
-        .usec = 1
-    };
+    SoftBusSockTimeOut tv = { .sec = 5, .usec = 1 };
     SoftBusSocketFdZero(&readFds);
     SoftBusSocketFdZero(&writeFds);
     SoftBusSocketFdZero(&exceptFds);
@@ -1352,44 +1317,38 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSelectTest005
-* @tc.desc: nfds is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSelectTest005
+ * @tc.desc: nfds is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest005, TestSize.Level0)
 {
-    SoftBusSockTimeOut tv = {
-        .sec = 5,
-        .usec = 1
-    };
+    SoftBusSockTimeOut tv = { .sec = 5, .usec = 1 };
     int32_t ret = SoftBusSocketSelect(SET_SIZE, NULL, NULL, NULL, &tv);
     EXPECT_TRUE(ret >= 0);
 }
 
 /*
-* @tc.name: SoftBusSocketSelectTest006
-* @tc.desc: The value of timeOut is 0
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSelectTest006
+ * @tc.desc: The value of timeOut is 0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest006, TestSize.Level0)
 {
-    SoftBusSockTimeOut tv = {
-        .sec = 0,
-        .usec = 0
-    };
+    SoftBusSockTimeOut tv = { .sec = 0, .usec = 0 };
     SoftBusFdSet readFds, writeFds, exceptFds;
     int32_t ret = SoftBusSocketSelect(SET_SIZE, &readFds, &writeFds, &exceptFds, &tv);
     EXPECT_TRUE(ret >= 0);
 }
 
 /*
-* @tc.name: SoftBusSocketIoctlTest001
-* @tc.desc:fd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketIoctlTest001
+ * @tc.desc:fd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketIoctlTest001, TestSize.Level0)
 {
     int32_t nread = 0;
@@ -1400,11 +1359,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketIoctlTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketIoctlTest002
-* @tc.desc: cmd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketIoctlTest002
+ * @tc.desc: cmd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketIoctlTest002, TestSize.Level0)
 {
     int32_t nread;
@@ -1421,11 +1380,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketIoctlTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketFcntlTest001
-* @tc.desc: Fcntl is success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFcntlTest001
+ * @tc.desc: Fcntl is success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFcntlTest001, TestSize.Level0)
 {
     int32_t socketFd;
@@ -1442,11 +1401,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFcntlTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketFcntlTest002
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketFcntlTest002
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFcntlTest002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1458,15 +1417,15 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFcntlTest002, TestSize.Level0)
 
 #if HAVE_PRO
 /*
-* @tc.name: SoftBusSocketSendTest001
-* @tc.desc: socketFd is invalid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendTest001
+ * @tc.desc: socketFd is invalid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    char buf[TEST_BUF_SIZE] = {0};
+    char buf[TEST_BUF_SIZE] = { 0 };
 
     int32_t ret = SoftBusSocketSend(socketFd, buf, TEST_BUF_SIZE, 0);
     EXPECT_EQ(-1, ret);
@@ -1474,11 +1433,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
 #endif
 
 /*
-* @tc.name: SoftBusSocketSendTest002
-* @tc.desc: buf is invalid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendTest002
+ * @tc.desc: buf is invalid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
 {
     sleep(1);
@@ -1489,14 +1448,10 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    SoftBusSockAddrIn serAddr = {
-        .sinFamily = SOFTBUS_AF_INET,
+    SoftBusSockAddrIn serAddr = { .sinFamily = SOFTBUS_AF_INET,
         .sinPort = SoftBusHtoNs(8888),
-        .sinAddr = {
-            .sAddr = SoftBusInetAddr("127.0.0.1")
-        }
-    };
-    struct SocketProtocol buf = {0};
+        .sinAddr = { .sAddr = SoftBusInetAddr("127.0.0.1") } };
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
@@ -1512,11 +1467,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendTest003
-* @tc.desc: bufLen is invalid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendTest003
+ * @tc.desc: bufLen is invalid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
 {
     sleep(1);
@@ -1527,14 +1482,10 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    SoftBusSockAddrIn serAddr = {
-        .sinFamily = SOFTBUS_AF_INET,
+    SoftBusSockAddrIn serAddr = { .sinFamily = SOFTBUS_AF_INET,
         .sinPort = SoftBusHtoNs(8888),
-        .sinAddr = {
-            .sAddr = SoftBusInetAddr("127.0.0.1")
-        }
-    };
-    struct SocketProtocol buf = {0};
+        .sinAddr = { .sAddr = SoftBusInetAddr("127.0.0.1") } };
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
@@ -1552,11 +1503,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendTest004
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendTest004
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest004, TestSize.Level0)
 {
     sleep(1);
@@ -1567,7 +1518,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest004, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
@@ -1579,28 +1530,28 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendToTest001
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendToTest001
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(-1, ret);
 }
 
 /*
-* @tc.name: SoftBusSocketSendToTest002
-* @tc.desc: send to success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendToTest002
+ * @tc.desc: send to success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
 {
     sleep(1);
@@ -1611,7 +1562,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1626,11 +1577,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendToTest003
-* @tc.desc: buf is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendToTest003
+ * @tc.desc: buf is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
 {
     sleep(1);
@@ -1641,7 +1592,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1654,11 +1605,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendToTest004
-* @tc.desc: addr is NULL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendToTest004
+ * @tc.desc: addr is NULL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
 {
     sleep(1);
@@ -1669,7 +1620,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     ClientConnect(&socketFd);
 
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, NULL, sizeof(SoftBusSockAddrIn));
@@ -1679,11 +1630,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendToTest005
-* @tc.desc: addrLen is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendToTest005
+ * @tc.desc: addrLen is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
 {
     sleep(1);
@@ -1694,7 +1645,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1708,11 +1659,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendToTest006
-* @tc.desc: bufLen is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendToTest006
+ * @tc.desc: bufLen is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
 {
     sleep(1);
@@ -1723,7 +1674,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1736,11 +1687,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketSendTest007
-* @tc.desc: buf is invalid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketSendTest007
+ * @tc.desc: buf is invalid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest007, TestSize.Level0)
 {
     sleep(1);
@@ -1751,13 +1702,13 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest007, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = { 0 };
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
     SoftBusInetPtoN(SOFTBUS_AF_INET6, srcAddr, &addrIn6.sin6Addr);
     addrIn6.sin6ScopeId = SoftBusIfNameToIndex("lo");
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
@@ -1773,25 +1724,25 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest007, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketRecvTest001
-* @tc.desc: socketFd is NULL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketRecvTest001
+ * @tc.desc: socketFd is NULL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     int32_t ret = SoftBusSocketRecv(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_NE(0, ret);
 }
 
 /*
-* @tc.name: SoftBusSocketRecvTest002
-* @tc.desc: recv success
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketRecvTest002
+ * @tc.desc: recv success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
 {
     sleep(1);
@@ -1802,7 +1753,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
@@ -1818,26 +1769,26 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name:  SoftBusSocketRecvFromTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name:  SoftBusSocketRecvFromTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvFromTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddr fromAddr = {0};
+    SoftBusSockAddr fromAddr = { 0 };
     int32_t fromAddrLen;
     int32_t ret = SoftBusSocketRecvFrom(socketFd, NULL, 0, 0, &fromAddr, &fromAddrLen);
     EXPECT_EQ(-1, ret);
 }
 
 /*
-* @tc.name: SoftBusSocketShutDownTest001
-* @tc.desc: socketFd is service fd
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketShutDownTest001
+ * @tc.desc: socketFd is service fd
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketShutDownTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1855,11 +1806,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketShutDownTest001, TestSize.Level
 }
 
 /*
-* @tc.name: SoftBusSocketShutDownTest002
-* @tc.desc: socketFd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketShutDownTest002
+ * @tc.desc: socketFd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketShutDownTest002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1868,11 +1819,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketShutDownTest002, TestSize.Level
 }
 
 /*
-* @tc.name: SoftBusSocketShutDownTest003
-* @tc.desc: how is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketShutDownTest003
+ * @tc.desc: how is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketShutDownTest003, TestSize.Level0)
 {
     int32_t socketFd;
@@ -1885,11 +1836,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketShutDownTest003, TestSize.Level
 }
 
 /*
-* @tc.name: SoftBusSocketCloseTest001
-* @tc.desc: normal close
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketCloseTest001
+ * @tc.desc: normal close
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCloseTest001, TestSize.Level0)
 {
     int32_t socketFd;
@@ -1901,11 +1852,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCloseTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketCloseTest002
-* @tc.desc: fd is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusSocketCloseTest002
+ * @tc.desc: fd is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCloseTest002, TestSize.Level0)
 {
     int32_t socketFd = -1;
@@ -1915,110 +1866,110 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketCloseTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest001
-* @tc.desc: string is valid format
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest001
+ * @tc.desc: string is valid format
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest001, TestSize.Level0)
 {
     const char *src = "192.168.0.1";
-    char dst[TEST_BUF_SIZE] = {0};
+    char dst[TEST_BUF_SIZE] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(0, ret);
     EXPECT_EQ(0x100A8C0, *(unsigned int *)dst);
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest002
-* @tc.desc: string is invalid format
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest002
+ * @tc.desc: string is invalid format
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest002, TestSize.Level0)
 {
     const char *src = "abcde";
-    char dst[TEST_BUF_SIZE] = {0};
+    char dst[TEST_BUF_SIZE] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest003
-* @tc.desc: string is invalid format
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest003
+ * @tc.desc: string is invalid format
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest003, TestSize.Level0)
 {
     const char *src = "1234";
-    char dst[TEST_BUF_SIZE] = {0};
+    char dst[TEST_BUF_SIZE] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest004
-* @tc.desc: string is invalid format
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest004
+ * @tc.desc: string is invalid format
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest004, TestSize.Level0)
 {
     const char *src = "0x1234";
-    char dst[TEST_BUF_SIZE] = {0};
+    char dst[TEST_BUF_SIZE] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest005
-* @tc.desc: string is invalid format
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest005
+ * @tc.desc: string is invalid format
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest005, TestSize.Level0)
 {
     const char *src = "__*0x1234";
-    char dst[TEST_BUF_SIZE] = {0};
+    char dst[TEST_BUF_SIZE] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest006
-* @tc.desc: af is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest006
+ * @tc.desc: af is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest006, TestSize.Level0)
 {
     const char *src = "192.168.0.1";
-    char dst[TEST_BUF_SIZE] = {0};
+    char dst[TEST_BUF_SIZE] = { 0 };
     int32_t ret = SoftBusInetPtoN(-1, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
 /*
-* @tc.name: SoftBusInetPtoNTest007
-* @tc.desc: loop back
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetPtoNTest007
+ * @tc.desc: loop back
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest007, TestSize.Level0)
 {
     const char *src = "::1";
-    char dst[46] = {0};
+    char dst[46] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET6, src, dst);
     EXPECT_EQ(0, ret);
 }
 
 /*
-* @tc.name: SoftBusHtoNlTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusHtoNlTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNlTest001, TestSize.Level0)
 {
     uint32_t hostlong = 0x12345678;
@@ -2027,11 +1978,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNlTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusHtoNlTest002
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusHtoNlTest002
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNlTest002, TestSize.Level0)
 {
     uint32_t hostlong = 0x0;
@@ -2040,11 +1991,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNlTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusHtoNsTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusHtoNsTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNsTest001, TestSize.Level0)
 {
     uint16_t hostshort = 0x1234;
@@ -2053,11 +2004,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNsTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusHtoNsTest002
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusHtoNsTest002
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNsTest002, TestSize.Level0)
 {
     uint16_t hostshort = 0x0;
@@ -2066,11 +2017,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusHtoNsTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusNtoHlTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusNtoHlTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHlTest001, TestSize.Level0)
 {
     int32_t netlong = 0x12345678;
@@ -2079,11 +2030,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHlTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusNtoHlTest002
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusNtoHlTest002
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHlTest002, TestSize.Level0)
 {
     uint32_t netlong = 0x12;
@@ -2092,11 +2043,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHlTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusNtoHsTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusNtoHsTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHsTest001, TestSize.Level0)
 {
     uint16_t netshort = 0x1234;
@@ -2105,11 +2056,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHsTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusNtoHsTest002
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusNtoHsTest002
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHsTest002, TestSize.Level0)
 {
     uint16_t netshort = 0x12;
@@ -2118,11 +2069,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusNtoHsTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusInetAddrTest001
-* @tc.desc: positive
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetAddrTest001
+ * @tc.desc: positive
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest001, TestSize.Level0)
 {
     const char *cp = "127.0.0.1";
@@ -2131,11 +2082,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusInetAddrTest002
-* @tc.desc: invalid cp
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetAddrTest002
+ * @tc.desc: invalid cp
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest002, TestSize.Level0)
 {
     const char *cp = "abcde";
@@ -2144,11 +2095,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusInetAddrTest003
-* @tc.desc: invalid cp
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetAddrTest003
+ * @tc.desc: invalid cp
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest003, TestSize.Level0)
 {
     const char *cp = "0x1234";
@@ -2157,11 +2108,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusInetAddrTest004
-* @tc.desc: invalid cp
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetAddrTest004
+ * @tc.desc: invalid cp
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest004, TestSize.Level0)
 {
     const char *cp = "1234";
@@ -2170,11 +2121,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusInetAddrTest005
-* @tc.desc: invalid cp
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusInetAddrTest005
+ * @tc.desc: invalid cp
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest005, TestSize.Level0)
 {
     const char *cp = "adc1234";
@@ -2183,11 +2134,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusIfNameToIndexTest001
-* @tc.desc: chba0
-* @tc.type: FUNC
-* @tc.require: 4
-*/
+ * @tc.name: SoftBusIfNameToIndexTest001
+ * @tc.desc: chba0
+ * @tc.type: FUNC
+ * @tc.require: 4
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIfNameToIndexTest001, TestSize.Level0)
 {
     const char *ifname = "wlan0";
@@ -2196,11 +2147,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIfNameToIndexTest001, TestSize.Level0
 }
 
 /*
-* @tc.name: SoftBusIndexToIfNameTest001
-* @tc.desc: invalidIndex
-* @tc.type: FUNC
-* @tc.require: SOFTBUS_ADAPTER_ERR
-*/
+ * @tc.name: SoftBusIndexToIfNameTest001
+ * @tc.desc: invalidIndex
+ * @tc.type: FUNC
+ * @tc.require: SOFTBUS_ADAPTER_ERR
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIndexToIfNameTest001, TestSize.Level0)
 {
     char ifname[IF_NAME_SIZE] = { 0 };
@@ -2210,11 +2161,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIndexToIfNameTest001, TestSize.Level0
 }
 
 /*
-* @tc.name: SoftBusIndexToIfNameTest001
-* @tc.desc: invalidIndex
-* @tc.type: FUNC
-* @tc.require: SOFTBUS_INVALID_PARAM
-*/
+ * @tc.name: SoftBusIndexToIfNameTest001
+ * @tc.desc: invalidIndex
+ * @tc.type: FUNC
+ * @tc.require: SOFTBUS_INVALID_PARAM
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIndexToIfNameTest002, TestSize.Level0)
 {
     char ifname[IF_NAME_SIZE] = { 0 };
@@ -2224,11 +2175,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIndexToIfNameTest002, TestSize.Level0
 }
 
 /*
-* @tc.name: SoftBusIndexToIfNameTest001
-* @tc.desc: WLAN_INDEX
-* @tc.type: FUNC
-* @tc.require: SOFTBUS_ADAPTER_OK
-*/
+ * @tc.name: SoftBusIndexToIfNameTest001
+ * @tc.desc: WLAN_INDEX
+ * @tc.type: FUNC
+ * @tc.require: SOFTBUS_ADAPTER_OK
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIndexToIfNameTest003, TestSize.Level0)
 {
     char ifname[IF_NAME_SIZE] = { 0 };
@@ -2237,11 +2188,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIndexToIfNameTest003, TestSize.Level0
 }
 
 /*
-* @tc.name: SoftBusSocketFullFunc001
-* @tc.desc: Cover Serial Multiple Interfaces
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusSocketFullFunc001
+ * @tc.desc: Cover Serial Multiple Interfaces
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFullFunc001, TestSize.Level0)
 {
     sleep(1);
@@ -2253,7 +2204,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFullFunc001, TestSize.Level0)
     sleep(1);
     int32_t ret;
     int32_t socketFd = -1;
-    struct SocketProtocol buf = {0};
+    struct SocketProtocol buf = { 0 };
 
     ClientConnect(&socketFd);
     EXPECT_TRUE(socketFd != -1);
@@ -2272,4 +2223,4 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFullFunc001, TestSize.Level0)
 
     ClientExit(socketFd);
 }
-}
+} // namespace OHOS

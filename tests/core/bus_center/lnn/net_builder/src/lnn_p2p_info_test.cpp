@@ -17,17 +17,17 @@
 #include <securec.h>
 
 #include "lnn_net_ledger_mock.h"
-#include "lnn_p2p_info.h"
 #include "lnn_p2p_info.c"
+#include "lnn_p2p_info.h"
 #include "lnn_service_mock.h"
 #include "lnn_sync_info_mock.h"
 
-#define JSON_KEY_P2P_ROLE "P2P_ROLE"
-#define JSON_KEY_P2P_MAC "P2P_MAC"
-#define JSON_KEY_GO_MAC "GO_MAC"
+#define JSON_KEY_P2P_ROLE        "P2P_ROLE"
+#define JSON_KEY_P2P_MAC         "P2P_MAC"
+#define JSON_KEY_GO_MAC          "GO_MAC"
 #define JSON_KEY_WIFIDIRECT_ADDR "WIFIDIRECT_ADDR"
-#define OH_OS_TYPE 10
-#define HO_OS_TYPE 11
+#define OH_OS_TYPE               10
+#define HO_OS_TYPE               11
 
 namespace OHOS {
 using namespace testing::ext;
@@ -47,21 +47,13 @@ public:
     void TearDown();
 };
 
-void LNNP2pInfoTest::SetUpTestCase()
-{
-}
+void LNNP2pInfoTest::SetUpTestCase() { }
 
-void LNNP2pInfoTest::TearDownTestCase()
-{
-}
+void LNNP2pInfoTest::TearDownTestCase() { }
 
-void LNNP2pInfoTest::SetUp()
-{
-}
+void LNNP2pInfoTest::SetUp() { }
 
-void LNNP2pInfoTest::TearDown()
-{
-}
+void LNNP2pInfoTest::TearDown() { }
 
 /*
  * @tc.name: LNN_GET_P2P_INFO_MSG_TEST_001
@@ -91,7 +83,9 @@ HWTEST_F(LNNP2pInfoTest, LNN_GET_P2P_INFO_MSG_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNP2pInfoTest, LNN_GET_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level1)
 {
-    NodeInfo info = { .wifiDirectAddr = "wifiDirectAddr", };
+    NodeInfo info = {
+        .wifiDirectAddr = "wifiDirectAddr",
+    };
     char *ret = LnnGetWifiDirectAddrMsg(&info);
     EXPECT_NE(ret, nullptr);
 }
@@ -172,8 +166,7 @@ HWTEST_F(LNNP2pInfoTest, IS_NEED_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(lnnServiceMock, IsFeatureSupport).WillRepeatedly(Return(true));
     int32_t osType = HO_OS_TYPE;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetOsTypeByNetworkId)
-        .WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_ERR)));
+    EXPECT_CALL(netLedgerMock, LnnGetOsTypeByNetworkId).WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_ERR)));
     ret = IsNeedSyncP2pInfo(&localInfo, &info);
     EXPECT_EQ(ret, true);
 }
@@ -207,8 +200,8 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     ProcessSyncP2pInfo(nullptr);
     ProcessSyncWifiDirectAddr(nullptr);
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillRepeatedly(
-        LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     EXPECT_CALL(netLedgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nullptr));
     ProcessSyncP2pInfo(nullptr);
     ProcessSyncWifiDirectAddr(nullptr);
@@ -242,8 +235,8 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_002, TestSize.Level1)
         .wifiDirectAddr = "wifiDirectAddr",
     };
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillRepeatedly(
-        LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     EXPECT_CALL(netLedgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(&info));
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
     ProcessSyncP2pInfo(nullptr);
@@ -269,7 +262,9 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_002, TestSize.Level1)
  */
 HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Level1)
 {
-    NodeInfo info = { .wifiDirectAddr = "wifiDirectAddr", };
+    NodeInfo info = {
+        .wifiDirectAddr = "wifiDirectAddr",
+    };
     char *msg = LnnGetWifiDirectAddrMsg(&info);
     EXPECT_NE(msg, nullptr);
     OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_OFFLINE, NETWORKID, MSG, ERR_MSG_LEN);
@@ -280,12 +275,11 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Lev
     EXPECT_CALL(netLedgerMock, LnnSetDLWifiDirectAddr)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID,
-        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
-    OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID,
-        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveWifiDirectSyncAddr(
+        LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveWifiDirectSyncAddr(
+        LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
 }
-
 
 /*
  * @tc.name: LNN_SYNC_P2P_INFO_TEST_001
@@ -348,22 +342,26 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_P2P_INFO_MSG_TEST_001, TestSize.Level1)
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
     EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
-    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
-    "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\"}");
+    (void)strcpy_s(msg, sizeof(msg),
+        "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "
+        "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\"}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
     EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
-    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+    (void)strcpy_s(msg, sizeof(msg),
+        "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "
         "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\", \"STA_FREQUENCY\":2008}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
     EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
-    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+    (void)strcpy_s(msg, sizeof(msg),
+        "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "
         "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\", \"STA_FREQUENCY\":2008, \"P2P_MAC\":\"P2P_MAC\"}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
     EXPECT_TRUE(ret == SOFTBUS_GET_INFO_FROM_JSON_FAIL);
 
-    (void)strcpy_s(msg, sizeof(msg),  "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+    (void)strcpy_s(msg, sizeof(msg),
+        "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "
         "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\",\"STA_FREQUENCY\":2008, \"P2P_MAC\":\"P2P_MAC\", \"GO_MAC\":\"GO_MAC\"}");
     ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -392,12 +390,8 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
     OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID, MSG, ERR_MSG_LEN);
     OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, nullptr, MSG, OK_MSG_LEN);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnSetDLP2pInfo)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
-    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID,
-        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
-    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID,
-        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    EXPECT_CALL(netLedgerMock, LnnSetDLP2pInfo).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
 }
 } // namespace OHOS

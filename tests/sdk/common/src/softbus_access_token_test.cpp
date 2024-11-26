@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_common.h"
+
+#include "softbus_access_token_test.h"
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
+#include "softbus_common.h"
 #include "token_setproc.h"
-#include "softbus_access_token_test.h"
 
-void SetAceessTokenPermission(const char* processName)
+void SetAceessTokenPermission(const char *processName)
 {
     uint64_t tokenId;
-    const char** perms = new const char *[2];
+    const char **perms = new const char *[2];
     perms[0] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     perms[1] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     NativeTokenInfoParams infoInstance = {
@@ -38,4 +39,3 @@ void SetAceessTokenPermission(const char* processName)
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
-

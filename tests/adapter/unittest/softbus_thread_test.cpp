@@ -14,9 +14,10 @@
  */
 
 #include <securec.h>
-#include "gtest/gtest.h"
+
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
+#include "gtest/gtest.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -34,21 +35,13 @@ protected:
     void TearDown();
 };
 
-void SoftbusThreadTest::SetUpTestCase(void)
-{
-}
+void SoftbusThreadTest::SetUpTestCase(void) { }
 
-void SoftbusThreadTest::TearDownTestCase(void)
-{
-}
+void SoftbusThreadTest::TearDownTestCase(void) { }
 
-void SoftbusThreadTest::SetUp()
-{
-}
+void SoftbusThreadTest::SetUp() { }
 
-void SoftbusThreadTest::TearDown()
-{
-}
+void SoftbusThreadTest::TearDown() { }
 
 static void *SoftBusThreadTask(void *arg)
 {
@@ -85,11 +78,11 @@ static void *ThreadSignalTest(void *arg)
 }
 
 /*
-* @tc.name: SoftbusMutexAttrInitTest001
-* @tc.desc: mutexAttr is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftbusMutexAttrInitTest001
+ * @tc.desc: mutexAttr is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftbusMutexAttrInitTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexAttrInit(nullptr);
@@ -97,11 +90,11 @@ HWTEST_F(SoftbusThreadTest, SoftbusMutexAttrInitTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftbusMutexAttrInitTest002
-* @tc.desc: mutexAttr is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftbusMutexAttrInitTest002
+ * @tc.desc: mutexAttr is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftbusMutexAttrInitTest002, TestSize.Level0)
 {
     SoftBusMutexAttr mutexAttr;
@@ -111,11 +104,11 @@ HWTEST_F(SoftbusThreadTest, SoftbusMutexAttrInitTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexInitTest001
-* @tc.desc: mutexAttr is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexInitTest001
+ * @tc.desc: mutexAttr is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest001, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -124,11 +117,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexInitTest002
-* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexInitTest002
+ * @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest002, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -140,11 +133,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexInitTest003
-* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_RECURSIVE
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexInitTest003
+ * @tc.desc: mutexAttr type is SOFTBUS_MUTEX_RECURSIVE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest003, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -156,11 +149,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexLockTest001
-* @tc.desc: mutex is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexLockTest001
+ * @tc.desc: mutex is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexLock(nullptr);
@@ -168,11 +161,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexLockTest002
-* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexLockTest002
+ * @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest002, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -186,11 +179,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexLockTest003
-* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_RECURSIVE
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexLockTest003
+ * @tc.desc: mutexAttr type is SOFTBUS_MUTEX_RECURSIVE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest003, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -204,11 +197,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexLockTest004
-* @tc.desc: mutex is default
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexLockTest004
+ * @tc.desc: mutex is default
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest004, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -218,11 +211,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexLockTest005
-* @tc.desc: mutex value is 0
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexLockTest005
+ * @tc.desc: mutex value is 0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest005, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -231,11 +224,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexUnlockTest001
-* @tc.desc: mutex is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexUnlockTest001
+ * @tc.desc: mutex is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexUnlock(nullptr);
@@ -243,11 +236,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexUnlockTest002
-* @tc.desc: mutex value is 0
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexUnlockTest002
+ * @tc.desc: mutex value is 0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest002, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -256,11 +249,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexUnlockTest003
-* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexUnlockTest003
+ * @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -276,11 +269,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexUnlockTest004
-* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexUnlockTest004
+ * @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -296,11 +289,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexUnlockTest005
-* @tc.desc: mutex value is default
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexUnlockTest005
+ * @tc.desc: mutex value is default
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest005, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -313,11 +306,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexDestroyTest001
-* @tc.desc: mutex is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexDestroyTest001
+ * @tc.desc: mutex is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexDestroy(nullptr);
@@ -325,11 +318,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexDestroyTest002
-* @tc.desc: mutex value is 0
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexDestroyTest002
+ * @tc.desc: mutex value is 0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest002, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -338,11 +331,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexDestroyTest003
-* @tc.desc: mutexAttr is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexDestroyTest003
+ * @tc.desc: mutexAttr is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest003, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -354,11 +347,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexDestroyTest004
-* @tc.desc: mutexAttr is SOFTBUS_MUTEX_NORMAL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexDestroyTest004
+ * @tc.desc: mutexAttr is SOFTBUS_MUTEX_NORMAL
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest004, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -373,11 +366,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusMutexDestroyTest005
-* @tc.desc: mutexAttr is SOFTBUS_MUTEX_RECURSIVE
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusMutexDestroyTest005
+ * @tc.desc: mutexAttr is SOFTBUS_MUTEX_RECURSIVE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest005, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -417,11 +410,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockGuardTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadAttrInitTest001
-* @tc.desc: threadAttr is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadAttrInitTest001
+ * @tc.desc: threadAttr is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadAttrInitTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusThreadAttrInit(nullptr);
@@ -429,27 +422,27 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadAttrInitTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadAttrInitTest002
-* @tc.desc: threadAttr is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadAttrInitTest002
+ * @tc.desc: threadAttr is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadAttrInitTest002, TestSize.Level0)
 {
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest001
-* @tc.desc: thread is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest001
+ * @tc.desc: thread is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest001, TestSize.Level0)
 {
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -458,11 +451,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest002
-* @tc.desc: threadAttr is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest002
+ * @tc.desc: threadAttr is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest002, TestSize.Level0)
 {
     SoftBusThread thread = 0;
@@ -473,15 +466,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest003
-* @tc.desc: threadAttr is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest003
+ * @tc.desc: threadAttr is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest003, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -492,15 +485,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest003, TestSize.Level0)
 
 #if HAVE_PRO
 /*
-* @tc.name: SoftBusThreadCreateTest004
-* @tc.desc: threadAttr add taskName
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest004
+ * @tc.desc: threadAttr add taskName
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -512,15 +505,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 #endif
 
 /*
-* @tc.name: SoftBusThreadCreateTest005
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest005
+ * @tc.desc: threadAttr modify prior
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest005, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -531,15 +524,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest006
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest006
+ * @tc.desc: threadAttr modify prior
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest006, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -550,15 +543,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest006, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest007
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest007
+ * @tc.desc: threadAttr modify prior
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest007, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -569,15 +562,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest007, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest008
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest008
+ * @tc.desc: threadAttr modify prior
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest008, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -588,15 +581,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest008, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadCreateTest009
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest009
+ * @tc.desc: threadAttr modify prior
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest009, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -608,15 +601,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest009, TestSize.Level0)
 
 #if HAVE_PRO
 /*
-* @tc.name: SoftBusThreadCreateTest010
-* @tc.desc: threadEntry is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadCreateTest010
+ * @tc.desc: threadEntry is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -625,15 +618,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadSetNameTest001
-* @tc.desc: name is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadSetNameTest001
+ * @tc.desc: name is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -648,16 +641,16 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadSetNameTest002
-* @tc.desc: name is large than TASK_NAME_MAX_LEN
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadSetNameTest002
+ * @tc.desc: name is large than TASK_NAME_MAX_LEN
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest002, TestSize.Level0)
 {
     const char *name = "abcdefghijklmnopqrstuvwxyz";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -672,16 +665,16 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadSetNameTest003
-* @tc.desc: name is equal to TASK_NAME_MAX_LEN
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadSetNameTest003
+ * @tc.desc: name is equal to TASK_NAME_MAX_LEN
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest003, TestSize.Level0)
 {
     const char *name = "abcdefghijklmnop";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -696,16 +689,16 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadSetNameTest004
-* @tc.desc: name include chinese character
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadSetNameTest004
+ * @tc.desc: name include chinese character
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest004, TestSize.Level0)
 {
     const char *name = "a中文p";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -718,16 +711,16 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadSetNameTest005
-* @tc.desc: name is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadSetNameTest005
+ * @tc.desc: name is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest005, TestSize.Level0)
 {
     const char *name = "testThread";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -740,11 +733,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest005, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadSetNameTest006
-* @tc.desc: threadAttr is nullptr, name is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadSetNameTest006
+ * @tc.desc: threadAttr is nullptr, name is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest006, TestSize.Level0)
 {
     const char *name = "testThread";
@@ -760,11 +753,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest006, TestSize.Level0)
 #endif
 
 /*
-* @tc.name: SoftBusThreadGetSelfTest001
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadGetSelfTest001
+ * @tc.desc: threadAttr modify prior
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadGetSelfTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
@@ -775,11 +768,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadGetSelfTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondInitTest001
-* @tc.desc: cond is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondInitTest001
+ * @tc.desc: cond is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondInitTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondInit(nullptr);
@@ -787,11 +780,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondInitTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondInitTest002
-* @tc.desc: cond is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondInitTest002
+ * @tc.desc: cond is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondInitTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -801,11 +794,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondInitTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondSignalTest001
-* @tc.desc: cond is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondSignalTest001
+ * @tc.desc: cond is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondSignalTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondSignal(nullptr);
@@ -813,11 +806,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondSignalTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondSignalTest002
-* @tc.desc: no wait thread
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondSignalTest002
+ * @tc.desc: no wait thread
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondSignalTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -826,11 +819,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondSignalTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondSignalTest003
-* @tc.desc: no wait thread
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondSignalTest003
+ * @tc.desc: no wait thread
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondSignalTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -842,11 +835,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondSignalTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondBroadcastTest001
-* @tc.desc: cond is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondBroadcastTest001
+ * @tc.desc: cond is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondBroadcast(nullptr);
@@ -854,11 +847,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondBroadcastTest002
-* @tc.desc: cond is not init
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondBroadcastTest002
+ * @tc.desc: cond is not init
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -868,11 +861,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondBroadcastTest003
-* @tc.desc: cond is init value
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondBroadcastTest003
+ * @tc.desc: cond is init value
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -885,11 +878,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondWaitTest001
-* @tc.desc: cond is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondWaitTest001
+ * @tc.desc: cond is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest001, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
@@ -903,11 +896,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondWaitTest002
-* @tc.desc: cond value is invalid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondWaitTest002
+ * @tc.desc: cond value is invalid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -922,11 +915,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondWaitTest003
-* @tc.desc: mutex is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondWaitTest003
+ * @tc.desc: mutex is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -938,11 +931,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondWaitTest004
-* @tc.desc: mutex value is invalid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondWaitTest004
+ * @tc.desc: mutex value is invalid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest004, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -956,11 +949,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest004, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondDestroyTest001
-* @tc.desc: cond is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondDestroyTest001
+ * @tc.desc: cond is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondDestroyTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondDestroy(nullptr);
@@ -968,11 +961,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondDestroyTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondDestroyTest002
-* @tc.desc: cond is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondDestroyTest002
+ * @tc.desc: cond is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondDestroyTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -985,11 +978,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondDestroyTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusCondDestroyTest003
-* @tc.desc: cond is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusCondDestroyTest003
+ * @tc.desc: cond is valid
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusCondDestroyTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
@@ -998,15 +991,15 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondDestroyTest003, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadJoinTest001
-* @tc.desc: value is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadJoinTest001
+ * @tc.desc: value is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1018,16 +1011,16 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadJoinTest002
-* @tc.desc: value is not nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadJoinTest002
+ * @tc.desc: value is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
 {
     char *value = nullptr;
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1040,11 +1033,11 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusThreadFullTest001
-* @tc.desc: thread process test
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: SoftBusThreadFullTest001
+ * @tc.desc: thread process test
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexInit(&g_mutex, NULL);
@@ -1055,7 +1048,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
 
     SoftBusThread threadWait = 0;
     SoftBusThread threadSignal = 0;
-    SoftBusThreadAttr threadAttr = {0};
+    SoftBusThreadAttr threadAttr = { 0 };
     ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1072,4 +1065,4 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
     ret = SoftBusThreadJoin(threadSignal, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-}
+} // namespace OHOS

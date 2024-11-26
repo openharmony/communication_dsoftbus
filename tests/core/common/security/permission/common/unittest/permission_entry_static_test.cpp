@@ -14,13 +14,13 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
 #include "permission_entry.c"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
+#include "securec.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -34,16 +34,16 @@ const char *g_errPkgName = "abc";
 
 class PermissionEntrystaticTest : public testing::Test {
 public:
-    PermissionEntrystaticTest() {}
-    ~PermissionEntrystaticTest() {}
+    PermissionEntrystaticTest() { }
+    ~PermissionEntrystaticTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void PermissionEntrystaticTest::SetUpTestCase(void) {}
-void PermissionEntrystaticTest::TearDownTestCase(void) {}
+void PermissionEntrystaticTest::SetUpTestCase(void) { }
+void PermissionEntrystaticTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: GetPeMapValueTest001
@@ -108,7 +108,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessPermissionEntryTest001, TestSize.Leve
 
     pRet = ProcessPermissionEntry(NULL);
     EXPECT_TRUE(pRet == NULL);
-    
+
     pRet = ProcessPermissionEntry(&object);
     EXPECT_TRUE(pRet == NULL);
 }
@@ -328,10 +328,10 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
     bool ret;
     char sessionName[NUM] = "";
     char sessionNameWrong[SESSION_NAME_SIZE_MAX * 2] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+                                                       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                                                       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                                                       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                                                       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     int32_t callingUid = 0;
     int32_t callingPid = 0;
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));

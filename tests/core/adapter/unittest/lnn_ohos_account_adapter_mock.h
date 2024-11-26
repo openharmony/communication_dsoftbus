@@ -16,9 +16,9 @@
 #ifndef LNN_OHOS_ACCOUNT_ADAPTER_MOCK_H
 #define LNN_OHOS_ACCOUNT_ADAPTER_MOCK_H
 
+#include <atomic>
 #include <gmock/gmock.h>
 #include <utility>
-#include <atomic>
 #include <vector>
 
 #include "account_info.h"

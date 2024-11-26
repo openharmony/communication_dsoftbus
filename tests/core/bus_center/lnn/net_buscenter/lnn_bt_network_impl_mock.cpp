@@ -44,7 +44,7 @@ int32_t LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr(const cha
 
 int32_t LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBle(const char *ifName, LnnNetIfType *type)
 {
-   *type = (LnnNetIfType)LNN_NETIF_TYPE_BLE;
+    *type = (LnnNetIfType)LNN_NETIF_TYPE_BLE;
     return SOFTBUS_OK;
 }
 
@@ -99,4 +99,4 @@ void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType proto
     return GetLnnBtNetworkImplInterface()->LnnNotifyPhysicalSubnetStatusChanged(ifName, protocolType, status);
 }
 }
-}
+} // namespace OHOS

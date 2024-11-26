@@ -45,15 +45,15 @@ public:
     ~AuthInterfaceMock() override;
     MOCK_METHOD(void, AuthHandleLeaveLNN, (AuthHandle), (override));
     MOCK_METHOD(uint32_t, AuthGenRequestId, (), (override));
-    MOCK_METHOD(int32_t, AuthStartVerify, (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
-        AuthVerifyModule, bool), (override));
+    MOCK_METHOD(int32_t, AuthStartVerify,
+        (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, AuthVerifyModule, bool), (override));
     MOCK_METHOD(int32_t, AuthGetVersion, (int64_t, SoftBusVersion *), (override));
     MOCK_METHOD(int32_t, AuthGetDeviceUuid, (int64_t, char *, uint16_t), (override));
 
-    MOCK_METHOD2(RegAuthTransListener, int32_t (int32_t, const AuthTransListener *));
-    MOCK_METHOD1(UnregAuthTransListener, void (int32_t));
-    MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
-    MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
+    MOCK_METHOD2(RegAuthTransListener, int32_t(int32_t, const AuthTransListener *));
+    MOCK_METHOD1(UnregAuthTransListener, void(int32_t));
+    MOCK_METHOD2(AuthPostTransData, int32_t(AuthHandle, const AuthTransData *));
+    MOCK_METHOD3(AuthGetIdByConnInfo, int64_t(const AuthConnInfo *, bool, bool));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
 };
