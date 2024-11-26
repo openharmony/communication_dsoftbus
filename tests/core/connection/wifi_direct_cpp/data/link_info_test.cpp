@@ -102,12 +102,12 @@ HWTEST_F(LinkInfoTest, SetAndGetString, TestSize.Level1)
 {
     LinkInfo info;
     EXPECT_EQ(info.GetLocalInterface(), "");
-    info.SetLocalInterface("chba0");
-    EXPECT_EQ(info.GetLocalInterface(), "chba0");
+    info.SetLocalInterface(IF_NAME_HML);
+    EXPECT_EQ(info.GetLocalInterface(), IF_NAME_HML);
 
     EXPECT_EQ(info.GetRemoteInterface(), "");
-    info.SetRemoteInterface("chba0");
-    EXPECT_EQ(info.GetRemoteInterface(), "chba0");
+    info.SetRemoteInterface(IF_NAME_HML);
+    EXPECT_EQ(info.GetRemoteInterface(), IF_NAME_HML);
 
     EXPECT_EQ(info.GetSsid(), "");
     info.SetSsid("OHOS-1234");
@@ -158,8 +158,8 @@ HWTEST_F(LinkInfoTest, SetAndGetIpv4Info, TestSize.Level1)
 HWTEST_F(LinkInfoTest, MarshallingAndUnmarshalling, TestSize.Level1)
 {
     LinkInfo info1;
-    info1.SetLocalInterface("chba0");
-    info1.SetRemoteInterface("chba0");
+    info1.SetLocalInterface(IF_NAME_HML);
+    info1.SetRemoteInterface(IF_NAME_HML);
     info1.SetLocalBaseMac("01:02:03:04:05:06");
     info1.SetRemoteBaseMac("06:05:04:03:02:01");
     info1.SetCenter20M(5180);
@@ -189,8 +189,8 @@ HWTEST_F(LinkInfoTest, MarshallingAndUnmarshalling, TestSize.Level1)
     LinkInfo info4;
     info4.Unmarshalling(*protocol4, output);
 
-    EXPECT_EQ(info2.GetLocalInterface(), "chba0");
-    EXPECT_EQ(info2.GetRemoteInterface(), "chba0");
+    EXPECT_EQ(info2.GetLocalInterface(), IF_NAME_HML);
+    EXPECT_EQ(info2.GetRemoteInterface(), IF_NAME_HML);
     EXPECT_EQ(info2.GetLocalBaseMac(), "01:02:03:04:05:06");
     EXPECT_EQ(info2.GetRemoteBaseMac(), "06:05:04:03:02:01");
     EXPECT_EQ(info2.GetCenter20M(), 5180);
