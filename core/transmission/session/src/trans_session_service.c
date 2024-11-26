@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 #include "trans_session_service.h"
 
+#include "securec.h"
 #include <stdatomic.h>
 
 #include "anonymizer.h"
-#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -27,6 +27,7 @@
 #include "softbus_scenario_manager.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
+#include "trans_client_proxy.h"
 #include "trans_event.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
@@ -63,6 +64,7 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
         return ret;
     }
+    RegisterPermissionChangeCallback();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
     return SOFTBUS_OK;
