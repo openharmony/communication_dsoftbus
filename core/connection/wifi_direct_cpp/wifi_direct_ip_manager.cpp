@@ -168,7 +168,7 @@ void WifiDirectIpManager::ClearAllIpv4()
     auto localIpv4Array = WifiDirectUtils::GetLocalIpv4Infos();
     for (const auto &ipv4 : localIpv4Array) {
         std::string ipStr = ipv4.ToIpString();
-        if (DeleteInterfaceAddress("chba0", ipStr, ipv4.GetPrefixLength()) != SOFTBUS_OK) {
+        if (DeleteInterfaceAddress(IF_NAME_HML, ipStr, ipv4.GetPrefixLength()) != SOFTBUS_OK) {
             CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(ipStr).c_str());
         }
     }
