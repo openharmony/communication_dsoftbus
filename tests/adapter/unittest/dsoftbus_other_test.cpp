@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
 #include <cstring>
+#include <fcntl.h>
 
-#include "gtest/gtest.h"
-#include "lnn_ip_utils_adapter.h"
 #include "bus_center_adapter.h"
+#include "lnn_ip_utils_adapter.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "gtest/gtest.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -36,9 +36,7 @@ protected:
     void SetUp();
     void TearDown();
 };
-void AdapterDsoftbusOtherTest::SetUpTestCase(void)
-{
-}
+void AdapterDsoftbusOtherTest::SetUpTestCase(void) { }
 void AdapterDsoftbusOtherTest::TearDownTestCase(void)
 {
     int32_t ret = remove(g_FileName);
@@ -46,19 +44,15 @@ void AdapterDsoftbusOtherTest::TearDownTestCase(void)
         return;
     }
 }
-void AdapterDsoftbusOtherTest::SetUp(void)
-{
-}
-void AdapterDsoftbusOtherTest::TearDown(void)
-{
-}
+void AdapterDsoftbusOtherTest::SetUp(void) { }
+void AdapterDsoftbusOtherTest::TearDown(void) { }
 
 /*
-* @tc.name: GetNetworkIpByIfName001
-* @tc.desc: ifName is illegal
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetNetworkIpByIfName001
+ * @tc.desc: ifName is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
@@ -70,11 +64,11 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
 }
 
 /*
-* @tc.name: GetNetworkIpByIfName002
-* @tc.desc: ifName is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetNetworkIpByIfName002
+ * @tc.desc: ifName is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
@@ -89,11 +83,11 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
 }
 
 /*
-* @tc.name: GetNetworkIpByIfName003
-* @tc.desc: netmask is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
+ * @tc.name: GetNetworkIpByIfName003
+ * @tc.desc: netmask is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
 HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
@@ -112,7 +106,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
 {
     const char *writeBuf = "abcdef";
-    char readbuf[1024] = {"\0"};
+    char readbuf[1024] = { "\0" };
     int32_t maxLen = 100;
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -128,7 +122,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
 {
-    char readbuf[1024] = {"\0"};
+    char readbuf[1024] = { "\0" };
     int32_t maxLen = 100;
     int32_t ret = SoftBusReadFullFile(nullptr, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
@@ -145,7 +139,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
 {
-    char readbuf[1024] = {"\0"};
+    char readbuf[1024] = { "\0" };
     int32_t maxLen = 0;
     int32_t ret = SoftBusReadFullFile(g_FileName, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
@@ -311,4 +305,4 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
     EXPECT_EQ(NULL, ret);
 }
 
-}
+} // namespace OHOS

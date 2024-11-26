@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "auth_device_profile_listener_mock.h"
 #include "auth_device_profile_listener.h"
+#include "auth_device_profile_listener_mock.h"
 #include "auth_deviceprofile.h"
 #include <gtest/gtest.h>
 
+#include "auth_log.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
-#include "auth_log.h"
 #include "softbus_error_code.h"
 #include "trust_device_profile.h"
 
@@ -110,7 +110,6 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_003, Te
     int32_t ret = listener->OnTrustDeviceProfileAdd(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001

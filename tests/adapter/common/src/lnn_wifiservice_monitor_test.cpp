@@ -17,22 +17,22 @@
 
 #include "bus_center_client_proxy.h"
 #include "common_event_data.h"
-#include "gtest/gtest.h"
 #include "lnn_wifiservice_monitor.cpp"
 #include "lnn_wifiservice_monitor_mock.cpp"
-#include "softbus_wifi_api_adapter.h"
 #include "softbus_error_code.h"
+#include "softbus_wifi_api_adapter.h"
+#include "gtest/gtest.h"
 
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 bool g_subscribeCommonEventRet = false;
 namespace EventFwk {
-    bool CommonEventManager::SubscribeCommonEvent(const std::shared_ptr<EventFwk::CommonEventSubscriber> &subscriber)
-    {
-        return g_subscribeCommonEventRet;
-    }
+bool CommonEventManager::SubscribeCommonEvent(const std::shared_ptr<EventFwk::CommonEventSubscriber> &subscriber)
+{
+    return g_subscribeCommonEventRet;
 }
+} // namespace EventFwk
 
 class LnnWifiServiceMonitorTest : public testing::Test {
 public:
@@ -42,21 +42,13 @@ public:
     void TearDown();
 };
 
-void LnnWifiServiceMonitorTest::SetUpTestCase()
-{
-}
+void LnnWifiServiceMonitorTest::SetUpTestCase() { }
 
-void LnnWifiServiceMonitorTest::TearDownTestCase()
-{
-}
+void LnnWifiServiceMonitorTest::TearDownTestCase() { }
 
-void LnnWifiServiceMonitorTest::SetUp()
-{
-}
+void LnnWifiServiceMonitorTest::SetUp() { }
 
-void LnnWifiServiceMonitorTest::TearDown()
-{
-}
+void LnnWifiServiceMonitorTest::TearDown() { }
 
 /**
  * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
@@ -124,4 +116,4 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiHotSpo
     EXPECT_EQ(state, SOFTBUS_WIFI_UNKNOWN);
 }
 
-}
+} // namespace OHOS

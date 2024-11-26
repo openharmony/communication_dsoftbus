@@ -20,9 +20,9 @@
 #include "softbus_error_code.h"
 #include "trans_client_proxy.h"
 
-#define PID 520
+#define PID     520
 #define TOKENID 7758
-#define STATE 1
+#define STATE   1
 
 using namespace testing::ext;
 
@@ -32,24 +32,16 @@ static std::string g_permName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 
 class PermissionStateTest : public testing::Test {
 public:
-    PermissionStateTest()
-    {}
-    ~PermissionStateTest()
-    {}
+    PermissionStateTest() { }
+    ~PermissionStateTest() { }
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp()
-    {}
-    void TearDown()
-    {}
+    void SetUp() { }
+    void TearDown() { }
 };
 
-void PermissionStateTest::SetUpTestCase()
-{
-}
+void PermissionStateTest::SetUpTestCase() { }
 
-void PermissionStateTest::TearDownTestCase()
-{
-}
+void PermissionStateTest::TearDownTestCase() { }
 
 } // namespace OHOS

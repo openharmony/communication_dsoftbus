@@ -14,15 +14,16 @@
  */
 
 #include <securec.h>
+
 #include "cJSON.h"
-#include "gtest/gtest.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
+#include "gtest/gtest.h"
 
-#define ARRAY_LEN 10
-#define INPUT_NUM 123
-#define DOUBLE_NUM 123.456
+#define ARRAY_LEN    10
+#define INPUT_NUM    123
+#define DOUBLE_NUM   123.456
 #define INPUT_STRING "strvalue"
 #define JSON_KEY1    "key"
 
@@ -33,16 +34,12 @@ namespace OHOS {
 
 class SoftbusJsonUtilsTest : public testing::Test {
 public:
-    SoftbusJsonUtilsTest()
-    {}
-    ~SoftbusJsonUtilsTest()
-    {}
+    SoftbusJsonUtilsTest() { }
+    ~SoftbusJsonUtilsTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 void SoftbusJsonUtilsTest::SetUpTestCase(void) { }
@@ -115,8 +112,8 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject004, TestSize.Level1)
 HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject005, TestSize.Level1)
 {
     cJSON *json = cJSON_CreateObject();
-    cJSON_AddStringToObject(json, "string",
-        "This is a very long string that is definitely too long to fit in the target buffer.");
+    cJSON_AddStringToObject(
+        json, "string", "This is a very long string that is definitely too long to fit in the target buffer.");
     char target[ARRAY_LEN];
     int32_t ret = GetStringItemByJsonObject(json, "string", target, ARRAY_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -867,8 +864,8 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject005, TestSize.Lev
 HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject001, TestSize.Level1)
 {
     const char *string = "test";
-    int32_t array[] = {1, 2, 3}; // 1, 2, 3 are test values
-    int32_t arrayLen = 3; // 3 is test value
+    int32_t array[] = { 1, 2, 3 }; // 1, 2, 3 are test values
+    int32_t arrayLen = 3;          // 3 is test value
     bool result = AddIntArrayToJsonObject(nullptr, string, array, arrayLen);
     EXPECT_FALSE(result);
 }
@@ -882,8 +879,8 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject001, TestSize.Level1)
 HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject002, TestSize.Level1)
 {
     cJSON *json = cJSON_CreateObject();
-    int32_t array[] = {1, 2, 3}; // 1, 2, 3 are test values
-    int32_t arrayLen = 3; // 3 is test value
+    int32_t array[] = { 1, 2, 3 }; // 1, 2, 3 are test values
+    int32_t arrayLen = 3;          // 3 is test value
     bool result = AddIntArrayToJsonObject(json, nullptr, array, arrayLen);
     EXPECT_FALSE(result);
     cJSON_Delete(json);
@@ -915,7 +912,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject004, TestSize.Level1)
 {
     cJSON *json = cJSON_CreateObject();
     const char *string = "test";
-    int32_t array[] = {1, 2, 3}; // 1, 2, 3 are test values
+    int32_t array[] = { 1, 2, 3 }; // 1, 2, 3 are test values
     int32_t arrayLen = 0;
     bool result = AddIntArrayToJsonObject(json, string, array, arrayLen);
     EXPECT_FALSE(result);
@@ -932,8 +929,8 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject005, TestSize.Level1)
 {
     cJSON *json = cJSON_CreateObject();
     const char *string = "test";
-    int32_t array[] = {1, 2, 3}; // 1, 2, 3 are test values
-    int32_t arrayLen = 3; // 3 is test value
+    int32_t array[] = { 1, 2, 3 }; // 1, 2, 3 are test values
+    int32_t arrayLen = 3;          // 3 is test value
     bool result = AddIntArrayToJsonObject(json, string, array, arrayLen);
     EXPECT_TRUE(result);
     cJSON_Delete(json);
@@ -1033,4 +1030,4 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem006, TestSize.Level1)
     cJSON_Delete(json);
 }
 
-}
+} // namespace OHOS

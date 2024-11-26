@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "comm_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
@@ -89,7 +89,7 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
 {
     EXPECT_EQ(SoftBusGetBtMacAddr(NULL), SOFTBUS_INVALID_PARAM);
     MockBluetooth mocker;
-    SoftBusBtAddr mac = {0};
+    SoftBusBtAddr mac = { 0 };
     EXPECT_CALL(mocker, GetLocalAddr(mac.addr, BT_ADDR_LEN)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_OK);
     EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_COMM_BLUETOOTH_UNDERLAY_GET_ADDR_ERR);
@@ -197,10 +197,10 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
     MockBluetooth::btGapCallback->aclStateChangedCallbak(nullptr, (GapAclState)-1, 0);
 
     BdAddr bdAddr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
     };
     SoftBusBtAddr addr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
     };
     MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
     auto aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_CONNECTED);
@@ -235,7 +235,7 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
 HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
 {
     BdAddr bdAddr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
     };
     MockBluetooth mocker;
     EXPECT_CALL(mocker, PairRequestReply(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
@@ -262,7 +262,7 @@ HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
 HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
 {
     BdAddr bdAddr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
     };
     MockBluetooth mocker;
     EXPECT_CALL(mocker, SetDevicePairingConfirmation(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
