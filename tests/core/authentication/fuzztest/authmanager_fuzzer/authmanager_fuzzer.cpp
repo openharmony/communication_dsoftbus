@@ -229,10 +229,10 @@ namespace OHOS {
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
         if (auth != nullptr) {
-            GetAuthConnInfoByUuid(uuid.c_str(), type, &info.connInfo);
+            GetLatestIdByConnInfo(&info.connInfo);
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
-        GetAuthConnInfoByUuid(uuid.c_str(), type, &info.connInfo);
+        GetLatestIdByConnInfo(&info.connInfo);
         return true;
     }
 
@@ -427,7 +427,7 @@ namespace OHOS {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
         AuthSessionInfo info = {0};
-        info.connInfo.type = AUTH_LINK_TYPE_WIFI;
+        info.connInfo.type = AUTH_LINK_TYPE_BLE;
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
         AuthManager *auth = NewAuthManager(authSeq, &info);
         if (auth != nullptr) {
@@ -1018,7 +1018,7 @@ namespace OHOS {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
         AuthSessionInfo info = {0};
-        info.connInfo.type = AUTH_LINK_TYPE_WIFI;
+        info.connInfo.type = AUTH_LINK_TYPE_BLE;
         info.isServer = true;
         int32_t index = 0;
         GenerateInt32(index);
