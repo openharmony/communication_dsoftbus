@@ -47,6 +47,7 @@
 #define DEFAULT_LINK_LATENCY 30000
 #define DELAY_DESTROY_LANE_TIME 5000
 #define WIFI_DIRECET_NUM_LIMIT 4
+#define DB_MAGIC_NUMBER 0x5A5A5A5A
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -1921,7 +1922,8 @@ static int32_t GetNodeToNotifyQosEvent(ListNode *reqInfoList, const char *peerNe
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
-        if (strcmp(item->networkId, peerNetworkId) != 0 || item->allocInfo.qosRequire.minBW != DB_MAGIC_NUMBER) {
+        if (strcmp(item->allocInfo.networkId, peerNetworkId) != 0 ||
+            item->allocInfo.qosRequire.minBW != DB_MAGIC_NUMBER) {
             continue;
         }
         LNN_LOGI(LNN_LANE, "laneReqId=%{public}u", item->laneReqId);
@@ -1983,7 +1985,7 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &reqInfoList, TransReqInfo, node) {
-        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, laneId=%{public}u" PRIu64 "", item->laneReqId, item->laneId);
+        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, laneId=%{public}" PRIu64 "", item->laneReqId, item->laneId);
         if (item->listener.onLaneQosEvent != NULL && NeedToNotify(item->laneId)) {
             item->listener.onLaneQosEvent(item->laneReqId, LANE_OWNER_OTHER, LANE_QOS_BW_HIGH);
         }
