@@ -17,6 +17,7 @@
 #define DISC_MANAGER_MOCK_H
 
 #include <gmock/gmock.h>
+
 #include "disc_manager.h"
 #include "lnn_ohos_account_adapter.h"
 
@@ -30,8 +31,8 @@ public:
     virtual int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info) = 0;
     virtual int32_t DiscUnPublishService(const char *packageName, int32_t publishId) = 0;
     virtual int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId) = 0;
-    virtual int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
-        const IServerDiscInnerCallback *cb) = 0;
+    virtual int32_t DiscStartDiscovery(
+        const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb) = 0;
     virtual int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback) = 0;
     virtual int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info) = 0;
     virtual int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId) = 0;

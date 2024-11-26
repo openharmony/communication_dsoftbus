@@ -27,7 +27,7 @@
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
-NodeInfo *info = {0};
+NodeInfo *info = { 0 };
 constexpr int64_t ACCOUNT_ID = 10;
 constexpr char *DEVICE_NAME1 = nullptr;
 constexpr char DEVICE_NAME2[] = "ABCDEFG";
@@ -43,40 +43,29 @@ public:
     void TearDown();
 };
 
-void LNNDeviceNameInfoTest::SetUpTestCase()
-{
-}
+void LNNDeviceNameInfoTest::SetUpTestCase() { }
 
-void LNNDeviceNameInfoTest::TearDownTestCase()
-{
-}
+void LNNDeviceNameInfoTest::TearDownTestCase() { }
 
-void LNNDeviceNameInfoTest::SetUp()
-{
-}
+void LNNDeviceNameInfoTest::SetUp() { }
 
-void LNNDeviceNameInfoTest::TearDown()
-{
-}
+void LNNDeviceNameInfoTest::TearDown() { }
 
 /*
-* @tc.name: ON_RECEIVE_DEVICE_NAME_TEST_001
-* @tc.desc: on receive device name test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ON_RECEIVE_DEVICE_NAME_TEST_001
+ * @tc.desc: on receive device name test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     char msg[] = "msg";
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(ledgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnSetDLDeviceInfoName).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnSetDLDeviceInfoName).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, LnnNotifyBasicInfoChanged).WillRepeatedly(Return());
     EXPECT_CALL(serviceMock, UpdateProfile).WillRepeatedly(Return());
     OnReceiveDeviceName(LNN_INFO_TYPE_COUNT, NETWORKID, reinterpret_cast<uint8_t *>(msg), strlen(msg) + 1);
@@ -91,19 +80,17 @@ HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NAME_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: ON_RECEIVE_DEVICE_NICK_NAME_TEST_001
-* @tc.desc: on receive device nick name test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ON_RECEIVE_DEVICE_NICK_NAME_TEST_001
+ * @tc.desc: on receive device nick name test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NICK_NAME_TEST_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr)).WillRepeatedly(Return(&nodeInfo));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     char msg1[] = "{\"KEY_NICK_NAME\":\"nickName\"}";
     char msg2[] = "{\"KEY_ACCOUNT\":10}";
     char msg3[] = "{\"KEY_ACCOUNT\":10, \"KEY_NICK_NAME\":\"nickName\"}";
@@ -118,19 +105,17 @@ HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NICK_NAME_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: LNN_SYNC_DEVICE_NAME_TEST_001
-* @tc.desc: lnn sync device name test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SYNC_DEVICE_NAME_TEST_001
+ * @tc.desc: lnn sync device name test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(&nodeInfo));
-    EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillOnce(Return(DEVICE_NAME1))
-        .WillRepeatedly(Return(DEVICE_NAME2));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr)).WillRepeatedly(Return(&nodeInfo));
+    EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillOnce(Return(DEVICE_NAME1)).WillRepeatedly(Return(DEVICE_NAME2));
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg)
         .WillOnce(Return(SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED))
@@ -146,22 +131,25 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: NICK_NAME_MSG_PROC_TEST_001
-* @tc.desc: nick name msg proc test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NICK_NAME_MSG_PROC_TEST_001
+ * @tc.desc: nick name msg proc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDeviceNameInfoTest, NICK_NAME_MSG_PROC_TEST_001, TestSize.Level1)
 {
-    NodeInfo nodeInfo = { .accountId = ACCOUNT_ID + 1, };
+    NodeInfo nodeInfo = {
+        .accountId = ACCOUNT_ID + 1,
+    };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(&nodeInfo));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr)).WillRepeatedly(Return(&nodeInfo));
     EXPECT_CALL(ledgerMock, LnnSetDLDeviceNickName).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillRepeatedly(Return(SOFTBUS_ERR));
 
-    NodeInfo peerNodeInfo1 = { .deviceInfo.nickName = "nickName", };
+    NodeInfo peerNodeInfo1 = {
+        .deviceInfo.nickName = "nickName",
+    };
     NodeInfo peerNodeInfo2 = {
         .deviceInfo.nickName = "diffNickName",
         .deviceInfo.unifiedName = "unifiedName",
@@ -194,19 +182,17 @@ HWTEST_F(LNNDeviceNameInfoTest, NICK_NAME_MSG_PROC_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001
-* @tc.desc: notify device display name change test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001
+ * @tc.desc: notify device display name change test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, LnnNotifyBasicInfoChanged).WillRepeatedly(Return());
     EXPECT_CALL(serviceMock, UpdateProfile).WillRepeatedly(Return());
     NotifyDeviceDisplayNameChange(NETWORKID, NODE_UDID);
@@ -215,15 +201,16 @@ HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, Test
 }
 
 /*
-* @tc.name: LNN_INIT_DEVICE_NAME_TEST_001
-* @tc.desc: LnnInitDevicename test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_INIT_DEVICE_NAME_TEST_001
+ * @tc.desc: LnnInitDevicename test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler).WillOnce(Return(SOFTBUS_LOCK_ERR))
+    EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler)
+        .WillOnce(Return(SOFTBUS_LOCK_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitDevicename();
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);

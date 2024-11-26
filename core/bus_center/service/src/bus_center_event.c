@@ -841,6 +841,24 @@ void LnnNotifyNetworkIdChangeEvent(const char *networkId)
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
+void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)
+{
+    if (networkId == NULL) {
+        LNN_LOGW(LNN_EVENT, "networkId is null");
+        return;
+    }
+    LnnNodeNetTypeInfo eventInfo;
+    (void)memset_s(&eventInfo, sizeof(eventInfo), 0, sizeof(eventInfo));
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_EVENT, "notify online netType, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    eventInfo.basic.event = LNN_EVENT_NODE_NET_TYPE;
+    eventInfo.addrType = addrType;
+    eventInfo.networkId = networkId;
+    NotifyEvent((LnnEventBasicInfo *)&eventInfo);
+}
+
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;

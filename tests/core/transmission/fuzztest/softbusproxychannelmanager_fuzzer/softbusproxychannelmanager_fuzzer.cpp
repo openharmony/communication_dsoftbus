@@ -94,8 +94,27 @@ static void FillConnectOption(const uint8_t *data, size_t size, ConnectOption *c
     connInfo->type = static_cast<ConnectType>(*(reinterpret_cast<const int32_t *>(data)));
 }
 
+static uint8_t *TestDataSwitch(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return nullptr;
+    }
+    uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+    if (dataWithEndCharacter == nullptr) {
+        return nullptr;
+    }
+    if (memcpy_s(dataWithEndCharacter, size, data, size) != EOK) {
+        SoftBusFree(dataWithEndCharacter);
+        return nullptr;
+    }
+    return dataWithEndCharacter;
+}
+
 void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
 
     (void)TransProxyGetNewChanSeq(channelId);
@@ -103,7 +122,7 @@ void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
 
 void TransProxyOpenProxyChannelTest(const uint8_t *data, size_t size)
 {
-    if (size < sizeof(int64_t)) {
+    if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
 
@@ -119,6 +138,9 @@ void TransProxyOpenProxyChannelTest(const uint8_t *data, size_t size)
 
 void TransProxyCloseProxyChannelTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
 
     (void)TransProxyCloseProxyChannel(channelId);
@@ -126,7 +148,7 @@ void TransProxyCloseProxyChannelTest(const uint8_t *data, size_t size)
 
 void TransProxyDelByConnIdTest(const uint8_t *data, size_t size)
 {
-    if (size < sizeof(uint32_t)) {
+    if (data == nullptr || size < sizeof(uint32_t)) {
         return;
     }
 
@@ -136,6 +158,9 @@ void TransProxyDelByConnIdTest(const uint8_t *data, size_t size)
 
 void TransProxyDelChanByReqIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t reqId = *(reinterpret_cast<const int32_t *>(data));
     int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
 
@@ -144,6 +169,9 @@ void TransProxyDelChanByReqIdTest(const uint8_t *data, size_t size)
 
 void TransProxyDelChanByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
 
     TransProxyDelChanByChanId(chanId);
@@ -151,6 +179,9 @@ void TransProxyDelChanByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetChanByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
     ProxyChannelInfo chan;
 
@@ -159,6 +190,9 @@ void TransProxyGetChanByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetChanByReqIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t reqId = *(reinterpret_cast<const int32_t *>(data));
     ProxyChannelInfo chan;
 
@@ -167,6 +201,9 @@ void TransProxyGetChanByReqIdTest(const uint8_t *data, size_t size)
 
 void TransProxyOpenProxyChannelSuccessTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
 
     TransProxyOpenProxyChannelSuccess(channelId);
@@ -174,7 +211,7 @@ void TransProxyOpenProxyChannelSuccessTest(const uint8_t *data, size_t size)
 
 void TransProxyOpenProxyChannelFailTest(const uint8_t *data, size_t size)
 {
-    if (size < sizeof(int64_t)) {
+    if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
@@ -188,6 +225,9 @@ void TransProxyOpenProxyChannelFailTest(const uint8_t *data, size_t size)
 
 void TransProxyGetSessionKeyByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     uint32_t sessionKeySize = SESSION_KEY_LENGTH;
@@ -197,6 +237,9 @@ void TransProxyGetSessionKeyByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetSendMsgChanInfoTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     ProxyChannelInfo chan;
 
@@ -205,7 +248,7 @@ void TransProxyGetSendMsgChanInfoTest(const uint8_t *data, size_t size)
 
 void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
 {
-    if (size < sizeof(int64_t)) {
+    if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
@@ -222,6 +265,9 @@ void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
 
 void TransProxyChanProcessByReqIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t reqId = *(reinterpret_cast<const int32_t *>(data));
     uint32_t connId = *(reinterpret_cast<const uint32_t *>(data));
 
@@ -230,6 +276,9 @@ void TransProxyChanProcessByReqIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetAuthIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     AuthHandle authHandle;
 
@@ -238,6 +287,9 @@ void TransProxyGetAuthIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetNameByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
     uint16_t pkgLen = *(reinterpret_cast<const uint16_t *>(data));
     uint16_t sessionLen = *(reinterpret_cast<const uint16_t *>(data));
@@ -249,6 +301,9 @@ void TransProxyGetNameByChanIdTest(const uint8_t *data, size_t size)
 
 void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
 
     (void)TransRefreshProxyTimesNative(channelId);
@@ -256,14 +311,22 @@ void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
 
 void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
 {
-    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(data));
-    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
+    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
+    if (dataWithEndCharacter == nullptr) {
+        return;
+    }
+    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
+    int32_t pid = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
 
     TransProxyDeathCallback(pkgName, pid);
+    SoftBusFree(dataWithEndCharacter);
 }
 
 void TransProxyGetAppInfoByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
     AppInfo appInfo;
 
@@ -272,6 +335,9 @@ void TransProxyGetAppInfoByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetConnIdByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     int32_t connId;
 
@@ -280,6 +346,9 @@ void TransProxyGetConnIdByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetConnOptionByChanIdTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     ConnectOption connOpt;
 
@@ -288,7 +357,7 @@ void TransProxyGetConnOptionByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyGetAppInfoTypeTest(const uint8_t *data, size_t size)
 {
-    if (size < sizeof(int16_t)) {
+    if (data == nullptr || size < sizeof(int16_t)) {
         return;
     }
 
@@ -301,11 +370,17 @@ void TransProxyGetAppInfoTypeTest(const uint8_t *data, size_t size)
 
 static void InitProxyChannelInfo(const uint8_t *data, size_t size, ProxyChannelInfo *proxyChannelInfo)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     proxyChannelInfo->channelId = *(reinterpret_cast<const int32_t *>(data));
 }
 
 void TransProxySpecialUpdateChanInfoTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     ProxyChannelInfo proxyChannelInfo;
     InitProxyChannelInfo(data, size, &proxyChannelInfo);
 
@@ -320,7 +395,7 @@ static void InitAuthHandle(const uint8_t *data, size_t size, AuthHandle *authHan
 
 void TransProxySetAuthHandleByChanIdTest(const uint8_t *data, size_t size)
 {
-    if (size < sizeof(int64_t)) {
+    if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
 
@@ -333,6 +408,9 @@ void TransProxySetAuthHandleByChanIdTest(const uint8_t *data, size_t size)
 
 void TransProxyNegoSessionKeySuccTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
 
     TransProxyNegoSessionKeySucc(channelId);
@@ -340,6 +418,9 @@ void TransProxyNegoSessionKeySuccTest(const uint8_t *data, size_t size)
 
 void TransProxyNegoSessionKeyFailTest(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
 
@@ -348,6 +429,8 @@ void TransProxyNegoSessionKeyFailTest(const uint8_t *data, size_t size)
 
 void ProxyChannelListLockTest(const uint8_t *data, size_t size)
 {
+    (void)data;
+    (void)size;
     (void)GetProxyChannelMgrHead();
     (void)GetProxyChannelLock();
     (void)ReleaseProxyChannelLock();
@@ -357,22 +440,8 @@ void ProxyChannelListLockTest(const uint8_t *data, size_t size)
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return 0;
-    }
-
     static OHOS::SoftBusProxyChannelManagerTestEnv env;
     if (!env.IsInited()) {
-        return 0;
-    }
-
-    uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
-    if (dataWithEndCharacter == nullptr) {
-        return 0;
-    }
-
-    if (memcpy_s(dataWithEndCharacter, size, data, size) != EOK) {
-        SoftBusFree(dataWithEndCharacter);
         return 0;
     }
 
@@ -394,7 +463,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyGetAuthIdTest(data, size);
     OHOS::TransProxyGetNameByChanIdTest(data, size);
     OHOS::TransRefreshProxyTimesNativeTest(data, size);
-    OHOS::TransProxyDeathCallbackTest(dataWithEndCharacter, size);
+    OHOS::TransProxyDeathCallbackTest(data, size);
     OHOS::TransProxyGetAppInfoByChanIdTest(data, size);
     OHOS::TransProxyGetConnIdByChanIdTest(data, size);
     OHOS::TransProxyGetConnOptionByChanIdTest(data, size);
@@ -404,7 +473,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyNegoSessionKeySuccTest(data, size);
     OHOS::TransProxyNegoSessionKeyFailTest(data, size);
     OHOS::ProxyChannelListLockTest(data, size);
-    SoftBusFree(dataWithEndCharacter);
 
     return 0;
 }

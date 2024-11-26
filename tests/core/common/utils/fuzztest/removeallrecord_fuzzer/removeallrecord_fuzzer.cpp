@@ -26,13 +26,15 @@ namespace OHOS {
             return true;
         }
 
+        uint8_t *numData = const_cast<uint8_t *>(data);
+        uint8_t index = *numData % 2;
+        TableNameID tableNameID = static_cast<TableNameID>(index);
         DbContext *ctx = nullptr;
-        RemoveAllRecord(ctx, TABLE_TRUSTED_DEV_INFO);
-        RemoveAllRecord(ctx, TABLE_NAME_ID_MAX);
+        RemoveAllRecord(ctx, tableNameID);
 
         return true;
     }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

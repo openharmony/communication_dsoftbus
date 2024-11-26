@@ -14,10 +14,10 @@
  */
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "securec.h"
 
 #include "disc_log.h"
 #include "message_handler.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_ble_mock.h"
 #include "softbus_broadcast_utils.h"
@@ -26,13 +26,13 @@
 using namespace testing::ext;
 using ::testing::Return;
 
-#define BC_ADV_FLAG                  0x2
-#define BC_ADV_TX_POWER_DEFAULT      (-6)
-#define BC_CHANNLE_MAP               0x0
-#define BC_INTERNAL                  48
-#define MANUFACTURE_COMPANY_ID       0x027D
-#define SERVICE_UUID                 0xFDEE
-#define SRV_TYPE_INVALID             (-1)
+#define BC_ADV_FLAG             0x2
+#define BC_ADV_TX_POWER_DEFAULT (-6)
+#define BC_CHANNLE_MAP          0x0
+#define BC_INTERNAL             48
+#define MANUFACTURE_COMPANY_ID  0x027D
+#define SERVICE_UUID            0xFDEE
+#define SRV_TYPE_INVALID        (-1)
 
 namespace OHOS {
 class SoftbusBroadcastMgrTest : public testing::Test {
@@ -47,12 +47,12 @@ public:
         LooperDeinit();
     }
 
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 
-    static inline uint8_t BC_DATA_PAYLOAD[] = {0x04, 0x05, 0x90, 0x00, 0x00, 0x10, 0x00, 0x18, 0xB9, 0x13, 0x3D, 0x28,
-        0xFC, 0x0D, 0x7F, 0xAB, 0x21, 0x00, 0x30, 0x4F, 0x70, 0x65, 0x6E, 0x48};
-    static inline uint8_t RSP_DATA_PAYLOAD[] = {0x61, 0x72, 0x6D, 0x6F, 0x6E, 0x79, 0x20, 0x33, 0x2E, 0x32, 0x00};
+    static inline uint8_t BC_DATA_PAYLOAD[] = { 0x04, 0x05, 0x90, 0x00, 0x00, 0x10, 0x00, 0x18, 0xB9, 0x13, 0x3D, 0x28,
+        0xFC, 0x0D, 0x7F, 0xAB, 0x21, 0x00, 0x30, 0x4F, 0x70, 0x65, 0x6E, 0x48 };
+    static inline uint8_t RSP_DATA_PAYLOAD[] = { 0x61, 0x72, 0x6D, 0x6F, 0x6E, 0x79, 0x20, 0x33, 0x2E, 0x32, 0x00 };
 };
 
 static void ActionOfSoftbusBleAdapterInitNull()
@@ -97,8 +97,8 @@ static void BuildScanParam(BcScanParams *scanParam)
 // filter is released in UnRegisterScanListener
 static BcScanFilter *GetBcScanFilter(void)
 {
-    unsigned char serviceData[] = {0x04, 0x05, 0x90};
-    unsigned char serviceDataMask[] = {0xFF, 0xFF, 0xFF};
+    unsigned char serviceData[] = { 0x04, 0x05, 0x90 };
+    unsigned char serviceDataMask[] = { 0xFF, 0xFF, 0xFF };
     int32_t serviceDataLength = sizeof(serviceData);
 
     BcScanFilter *filter = static_cast<BcScanFilter *>(SoftBusCalloc(sizeof(BcScanFilter)));
@@ -358,8 +358,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster001, TestSi
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV, RegisterBroadcaster(static_cast<BaseServiceType>(SRV_TYPE_INVALID), &bcId,
-        GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV,
+        RegisterBroadcaster(static_cast<BaseServiceType>(SRV_TYPE_INVALID), &bcId, GetBroadcastCallback()));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterBroadcaster(SRV_TYPE_DIS, nullptr, GetBroadcastCallback()));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, nullptr));
 
@@ -402,14 +402,14 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster003, TestSi
     ManagerMock managerMock;
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
-    int32_t bcId[BC_NUM_MAX + 1] = {-1};
+    int32_t bcId[BC_NUM_MAX + 1] = { -1 };
     for (int32_t i = 0; i < BC_NUM_MAX; i++) {
         EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId[i], GetBroadcastCallback()));
         EXPECT_TRUE(bcId[i] >= 0);
     }
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_REG_NO_AVAILABLE_BC_ID, RegisterBroadcaster(SRV_TYPE_DIS, &bcId[BC_NUM_MAX],
-        GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_REG_NO_AVAILABLE_BC_ID,
+        RegisterBroadcaster(SRV_TYPE_DIS, &bcId[BC_NUM_MAX], GetBroadcastCallback()));
 
     for (int32_t i = 0; i < BC_NUM_MAX; i++) {
         EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId[i]));
@@ -491,8 +491,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener001, TestS
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV, RegisterScanListener(static_cast<BaseServiceType>(SRV_TYPE_INVALID),
-        &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV,
+        RegisterScanListener(static_cast<BaseServiceType>(SRV_TYPE_INVALID), &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterScanListener(SRV_TYPE_DIS, nullptr, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterScanListener(SRV_TYPE_DIS, &listenerId, nullptr));
 
@@ -751,7 +751,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting001, TestSiz
 HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastUpdateBroadcasting002 begin ----");
-        ManagerMock managerMock;
+    ManagerMock managerMock;
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
@@ -1160,7 +1160,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
     EXPECT_TRUE(connListenerId >= 0);
     EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
-    EXPECT_TRUE(lpListenerId  >= 0);
+    EXPECT_TRUE(lpListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, filterNum));
@@ -1216,7 +1216,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest002, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
     EXPECT_TRUE(connListenerId >= 0);
     EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
-    EXPECT_TRUE(lpListenerId  >= 0);
+    EXPECT_TRUE(lpListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, filterNum));
@@ -1240,7 +1240,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest002, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(connListenerId));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(lpListenerId));
-    
+
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest002 end ----");
@@ -1278,7 +1278,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest003, TestSize.Level
 
     EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
-    
+
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest003 end ----");

@@ -16,9 +16,9 @@
 #ifndef DSOFTBUS_APP_BIND_MOCK_H
 #define DSOFTBUS_APP_BIND_MOCK_H
 
+#include "lnn_heartbeat_utils.h"
 #include <gmock/gmock.h>
 #include <mutex>
-#include "lnn_heartbeat_utils.h"
 
 namespace OHOS {
 class AuthDeviceProfileListenerInterface {
@@ -36,12 +36,11 @@ class AuthDeviceProfileListenerInterfaceMock : public AuthDeviceProfileListenerI
 public:
     AuthDeviceProfileListenerInterfaceMock();
     ~AuthDeviceProfileListenerInterfaceMock() override;
-    MOCK_METHOD1(DelNotTrustDevice, void (const char *udid));
+    MOCK_METHOD1(DelNotTrustDevice, void(const char *udid));
     MOCK_METHOD0(RestartCoapDiscovery, void(void));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
     MOCK_METHOD2(NotifyRemoteDevOffLineByUserId, void(int32_t, const char *));
 };
 } // namespace OHOS
 #endif // AUTH_LANE_H
-

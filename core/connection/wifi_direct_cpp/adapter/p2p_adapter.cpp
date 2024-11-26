@@ -48,7 +48,7 @@ int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
         CONN_WIFI_DIRECT, "ret=%{public}d", ToSoftBusErrorCode(static_cast<int32_t>(ret)));
 
     int count = 0;
-    while (array[count]) {
+    while (count < CHANNEL_ARRAY_NUM_MAX && array[count]) {
         channels.push_back(array[count]);
         count++;
     }

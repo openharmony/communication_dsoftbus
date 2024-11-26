@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,15 @@
  */
 
 #include <gtest/gtest.h>
-#include "trans_client_proxy.h"
-#include "permission_status_change_cb.h"
-#include "softbus_common.h"
-#include "softbus_error_code.h"
 #include <string>
 
-#define PID 520
+#include "softbus_common.h"
+#include "softbus_error_code.h"
+#include "trans_client_proxy.h"
+
+#define PID     520
 #define TOKENID 7758
-#define STATE 1
+#define STATE   1
 
 using namespace testing::ext;
 
@@ -32,24 +32,16 @@ static std::string g_permName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 
 class PermissionStateTest : public testing::Test {
 public:
-    PermissionStateTest()
-    {}
-    ~PermissionStateTest()
-    {}
+    PermissionStateTest() { }
+    ~PermissionStateTest() { }
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp()
-    {}
-    void TearDown()
-    {}
+    void SetUp() { }
+    void TearDown() { }
 };
 
-void PermissionStateTest::SetUpTestCase()
-{
-}
+void PermissionStateTest::SetUpTestCase() { }
 
-void PermissionStateTest::TearDownTestCase()
-{
-}
+void PermissionStateTest::TearDownTestCase() { }
 
 } // namespace OHOS
