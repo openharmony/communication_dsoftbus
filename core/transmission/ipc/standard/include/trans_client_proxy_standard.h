@@ -50,6 +50,8 @@ public:
     int32_t OnClientPermissonChange(const char *pkgName, int32_t state);
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
+    int32_t OnClientChannelOnQos(
+        int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;
