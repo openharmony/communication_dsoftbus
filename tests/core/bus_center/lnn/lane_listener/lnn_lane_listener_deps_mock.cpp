@@ -95,5 +95,9 @@ void DetectDisableWifiDirectApply(void)
 {
     GetLaneListenerDepsInterface()->DetectDisableWifiDirectApply();
 }
+
+int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
+{
+    return GetLaneListenerDepsInterface()->HandleLaneQosChange(reqInfoList, laneLinkInfo);
 }
 } // namespace OHOS

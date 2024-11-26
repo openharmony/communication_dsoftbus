@@ -376,6 +376,40 @@ int32_t TransClientProxy::SetChannelInfo(
     return serverRet;
 }
 
+int32_t TransClientProxy::OnClientChannelOnQos(
+    int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    if (qos == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "qos is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        remote != nullptr, SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
+
+    MessageParcel data;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()), SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED,
+        TRANS_CTRL, "write interface token failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        data.WriteInt32(channelId), SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        data.WriteInt32(channelType), SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        data.WriteInt32(event), SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write qos event failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        data.WriteUint32(count), SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write qos tv count failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        data.WriteBuffer(qos, sizeof(QosTV) * count), SOFTBUS_IPC_ERR, TRANS_CTRL, "write qos failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    int32_t ret = remote->SendRequest(CLIENT_CHANNEL_ON_QOS, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnClientChannelOnQos send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addr;

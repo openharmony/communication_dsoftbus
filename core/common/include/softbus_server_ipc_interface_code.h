@@ -111,6 +111,7 @@ enum SoftBusFuncId {
     CLIENT_ON_DATA_LEVEL_CHANGED,
     CLIENT_ON_TRANS_LIMIT_CHANGE,
     CLIENT_ON_CHANNEL_BIND,
+    CLIENT_CHANNEL_ON_QOS,
 };
 
 #ifdef __cplusplus
