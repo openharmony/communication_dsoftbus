@@ -1957,7 +1957,7 @@ static bool NeedToNotify(const TransReqInfo *info)
     (void)memset_s(&laneLinkInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
     int32_t ret = FindLaneResourceByLaneId(info->laneId, &laneLinkInfo);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "find laneId=%{public}" PRIu64 " fail, ret=%{public}d", laneId, ret);
+        LNN_LOGE(LNN_LANE, "find laneId=%{public}" PRIu64 " fail, ret=%{public}d", info->laneId, ret);
         return false;
     }
     LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, type=%{public}d", info->laneReqId, laneLinkInfo.link.type);
