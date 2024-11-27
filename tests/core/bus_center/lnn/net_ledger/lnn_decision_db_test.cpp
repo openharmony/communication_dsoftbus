@@ -83,7 +83,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_NETWORK_DATABASE_FAILED));
     EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_, _, _)).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_PATH_FAILED));
     int32_t ret = LnnInitDecisionDbDelay();
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_DATABASE_FAILED);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_PATH_FAILED);
 }
 
 /*
@@ -210,7 +210,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, LnnGenerateRandomByHuks(_, _)).WillRepeatedly(Return(SOFTBUS_HUKS_ERR));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitDecisionDbDelay();
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_PATH_FAILED);
 }
 
 /*
