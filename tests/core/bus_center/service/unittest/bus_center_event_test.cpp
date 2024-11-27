@@ -16,6 +16,8 @@
 #include <cstdlib>
 #include <gtest/gtest.h>
 #include <securec.h>
+#include <cstdbool>
+#include <cstdint>
 
 #include "anonymizer.h"
 #include "bus_center_event.h"
@@ -39,10 +41,19 @@
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_qos.h"
+#include "softbus_bus_center.h"
 
 using namespace testing;
 using namespace testing::ext;
 constexpr char NODE1_NETWORK_ID[] = "235689BNHFCF";
+
+typedef enum {
+    NOTIFY_ONLINE_STATE_CHANGED = 0,
+    NOTIFY_NODE_BASIC_INFO_CHANGED,
+    NOTIFY_NODE_STATUS_CHANGED,
+    NOTIFY_NETWORKID_UPDATE,
+    NOTIFY_LOCAL_NETWORKID_UPDATE,
+} NotifyType;
 
 namespace OHOS {
 
@@ -455,7 +466,6 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest021, TestSize.Level1)
     LnnEventHandler handler = NULL;
     const char *networkId = nullptr;
     const char *networkIdTest = "testNetworkId";
-
     LnnNotifyNetworkIdChangeEvent(networkId);
     LnnNotifyNetworkIdChangeEvent(networkIdTest);
     int32_t ret = LnnRegisterEventHandler(event, handler);
@@ -592,4 +602,195 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(mockState);
 }
+
+/*
+ * @tc.name: BusCenterEventTest25
+ * @tc.desc: Handle Notify Message Test.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest25, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyNodeStatusChanged(nullptr, TYPE_AUTH_STATUS));
+}
+
+/*
+ * @tc.name: BusCenterEventTest26
+ * @tc.desc: Test the LnnRegisterEventHandler function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest26, TestSize.Level1)
+{
+    NodeStatus info = {};
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyNodeStatusChanged(&info, TYPE_AUTH_STATUS));
+}
+
+/*
+ * @tc.name: BusCenterEventTest27
+ * @tc.desc: Test the LnnNotifyDeviceTrustedChange function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest027, TestSize.Level1)
+{
+    char *msg = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDeviceTrustedChange(DEVICE_NOT_TRUSTED, msg, 1));
+}
+
+/*
+ * @tc.name:BusCenterEventTest28
+ * @tc.desc: Test the LnnNotifyDeviceTrustedChange function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest028, TestSize.Level1)
+{
+    const char *msg = "msg";
+    uint32_t msgLen = 0;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDeviceTrustedChange(DEVICE_NOT_TRUSTED, msg, msgLen));
+}
+
+/*
+ * @tc.name: BusCenterEventTest29
+ * @tc.desc: Test the LnnNotifyDeviceTrustedChange function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest029, TestSize.Level1)
+{
+    char *msg = nullptr;
+    uint32_t msgLen = 0;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDeviceTrustedChange(DEVICE_NOT_TRUSTED, msg, msgLen));
+}
+
+/*
+ * @tc.name: BusCenterEventTest30
+ * @tc.desc: Test the LnnNotifyDataShareStateChangeEvent function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest030, TestSize.Level1)
+{
+    SoftBusDataShareState state = SOFTBUS_DATA_SHARE_UNKNOWN;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDataShareStateChangeEvent(state));
+}
+
+/*
+ * @tc.name: BusCenterEventTest31
+ * @tc.desc: Test the LnnNotifyDifferentAccountChangeEvent function.
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
+{
+    SoftBusDifferentAccountState *difAccountState =
+        (SoftBusDifferentAccountState *)SoftBusMalloc(sizeof(SoftBusDifferentAccountState));
+    ASSERT_TRUE(difAccountState != nullptr);
+    *difAccountState = SOFTBUS_DIF_ACCOUNT_DEV_CHANGE;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent((void *)difAccountState));
+}
+
+/* @tc.name: BusCenterEventTest032
+ * @tc.desc:  Test the LnnNotifyDifferentAccountChangeEvent function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest032, TestSize.Level1)
+{
+    SoftBusDifferentAccountState *difAccountState =
+        (SoftBusDifferentAccountState *)SoftBusMalloc(sizeof(SoftBusDifferentAccountState));
+    ASSERT_TRUE(difAccountState != nullptr);
+    *difAccountState = SOFTBUS_DIF_ACCOUNT_UNKNOWN;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent((void *)difAccountState));
+}
+
+/*
+ * @tc.name: BusCenterEventTest33
+ * @tc.desc: Test the LnnNotifyNightModeStateChangeEvent function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest033, TestSize.Level1)
+{
+    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)SoftBusMalloc(sizeof(SoftBusNightModeState));
+    ASSERT_TRUE(nightModeState != nullptr);
+    *nightModeState = SOFTBUS_NIGHT_MODE_ON;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyNightModeStateChangeEvent((void *)nightModeState));
+}
+/*
+ * @tc.name: BusCenterEventTest34
+ * @tc.desc: Test the LnnNotifyNightModeStateChangeEvent function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest034, TestSize.Level1)
+{
+    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)SoftBusMalloc(sizeof(SoftBusNightModeState));
+    ASSERT_TRUE(nightModeState != nullptr);
+    *nightModeState = SOFTBUS_NIGHT_MODE_UNKNOWN;
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyNightModeStateChangeEvent((void *)nightModeState));
+}
+
+/*
+ * @tc.name: BusCenterEventTest35
+ * @tc.desc: Test the LnnRegisterEventHandler function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest035, TestSize.Level1)
+{
+    LnnEventType event = LNN_EVENT_NETWORK_STATE_CHANGED;
+    LnnEventHandler handler = OnNetworkStateChange;
+    SoftBusLooper loop = {};
+    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
+    int32_t rdt = LnnInitBusCenterEvent();
+    EXPECT_EQ(rdt, SOFTBUS_OK);
+    int32_t ret = LnnRegisterEventHandler(event, handler);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnRegisterEventHandler(event, handler);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(LnnUnregisterEventHandler(event, handler));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitBusCenterEvent());
+}
+
+/*
+ * @tc.name: BusCenterEventTest36
+ * @tc.desc: Test the LnnNotifyOnlineState function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest036, TestSize.Level1)
+{
+    bool isOnline = false;
+    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
+    NodeBasicInfo info = {
+        .networkId = "testNetworkId",
+        .deviceName = "testDeviceName",
+        .deviceTypeId = 1,
+    };
+    EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyOnlineState(isOnline, &info));
+}
+
+/*
+ * @tc.name: BusCenterEventTest37
+ * @tc.desc: Test the LnnNotifyOnlineState function.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(BusCenterEventTest, BusCenterEventTest037, TestSize.Level1)
+{
+    bool isOnline = false;
+    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
+    NodeBasicInfo info = {
+        .networkId = "testNetworkId",
+        .deviceName = "testDeviceName",
+        .deviceTypeId = 1,
+    };
+    EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_))
+        .WillRepeatedly(DoAll(SetArgPointee<0>(0), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyOnlineState(isOnline, &info));
+}
+
 }
