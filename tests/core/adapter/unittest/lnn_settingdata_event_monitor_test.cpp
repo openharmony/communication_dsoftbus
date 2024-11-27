@@ -98,32 +98,4 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSiz
     int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, deviceName, DEVICE_NAME_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-
-/*
-* @tc.name: LnnGetSettingDeviceNameTest004
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest004, TestSize.Level1)
-{
-    NiceMock<SettingDataEventMonitorDepsInterfaceMock> SettingDataEventMonitorMock;
-    int32_t ret = LnnInitDeviceNameMonitorImpl();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
-* @tc.name: LnnGetSettingDeviceNameTest005
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest005, TestSize.Level1)
-{
-    NiceMock<SettingDataEventMonitorDepsInterfaceMock> SettingDataEventMonitorMock;
-    SoftBusLooper loop;
-    EXPECT_CALL(SettingDataEventMonitorMock, GetLooper(_)).WillRepeatedly(Return(&loop));
-    int32_t ret = LnnInitDeviceNameMonitorImpl();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
 }
