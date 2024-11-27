@@ -34,11 +34,17 @@
 #include "system_ability_definition.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+#include "softbus_adapter_mem.h"
+#include "lnn_settingdata_event_monitor_deps_mock.h"
 
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
+constexpr char *DEVICE_NAME1 = nullptr;
+const char *DEVICE_NAME2 = "ABCDEFG";
 const char *NICK_NAME = "TEST_NICK_NAME";
 const char *DEFAULT_NAME = "TEST_DEFAULT_NAME";
 
@@ -55,11 +61,36 @@ void LnnSettingdataEventMonitorTest::SetUp(void) { }
 void LnnSettingdataEventMonitorTest::TearDown(void) { }
 
 /*
- * @tc.name: LnnGetSettingDeviceNameTest003
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require: 1
- */
+* @tc.name: LnnGetSettingDeviceNameTest001
+* @tc.desc:
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSize.Level1)
+{
+    int32_t ret = LnnGetSettingDeviceName(DEVICE_NAME1, DEVICE_NAME_BUF_LEN);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LnnGetSettingDeviceNameTest002
+* @tc.desc:
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest002, TestSize.Level1)
+{
+    LnnDeviceNameHandler handler = NULL;
+    int32_t ret = LnnInitGetDeviceName(handler);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LnnGetSettingDeviceNameTest003
+* @tc.desc:
+* @tc.type: FUNC
+* @tc.require: 1
+*/
 HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSize.Level1)
 {
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
@@ -67,4 +98,4 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSiz
     int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, deviceName, DEVICE_NAME_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-} // namespace OHOS
+}

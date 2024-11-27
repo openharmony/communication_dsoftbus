@@ -118,7 +118,6 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_SYNC_TRUSTED_RELATION, "SyncTrustedRelationShip"},
     {SERVER_RIPPLE_STATS, "RippleStats"},
     {SERVER_CTRL_LNN_BLE_HB, "CtrlLNNBleHb"},
-    {SERVER_SET_DEV_NAME, "SetLocalDeviceName"},
 };
 
 typedef struct {

@@ -69,6 +69,10 @@ public:
 
 void TransAuthChannelTest::SetUpTestCase(void)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     SoftbusConfigInit();
     LooperInit();
     ConnServerInit();
@@ -325,6 +329,10 @@ HWTEST_F(TransAuthChannelTest, OnAuthChannelDataRecvTest001, TestSize.Level1)
     data->data = (uint8_t *)TEST_AUTH_DATA;
     data->len = strlen(TEST_AUTH_DATA) + 1;
     data->flag = AUTH_CHANNEL_REQ;
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OnAuthChannelDataRecv(authId, data);
 
     data->flag = AUTH_CHANNEL_REPLY;
@@ -501,6 +509,8 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest004, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, NotifyOpenAuthChannelSuccessTest001, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     bool isServer = true;
     int32_t ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -536,6 +546,8 @@ HWTEST_F(TransAuthChannelTest, NotifyOpenAuthChannelFailedTest001, TestSize.Leve
  */
 HWTEST_F(TransAuthChannelTest, NofifyCloseAuthChannelTest001, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = NofifyCloseAuthChannel(g_pkgName, TRANS_TEST_PID, TRANS_TEST_CHANNEL_ID);
@@ -612,6 +624,8 @@ HWTEST_F(TransAuthChannelTest, CopyPeerAppInfoTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest001, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransSessionMgrInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
@@ -662,6 +676,8 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest001, TestSize.Level
  */
 HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest002, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransSessionMgrInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
@@ -720,6 +736,10 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     cJSON *msg = cJSON_CreateObject();
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
@@ -760,6 +780,10 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransSessionMgrInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
