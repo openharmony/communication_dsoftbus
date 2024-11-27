@@ -68,6 +68,12 @@ static LocalDevice g_localDevice;
 #define IFACE_COAP_CTX_INIT_MAX_RETRY_TIMES 4
 static const uint32_t g_ifaceCoapCtxRetryBackoffList[IFACE_COAP_CTX_INIT_MAX_RETRY_TIMES] = { 10, 15, 25, 100 };
 
+static pthread_mutex_t g_capabilityLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_serviceDataLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_businessDataLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_extendServiceDataLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_deviceInfoLock = PTHREAD_MUTEX_INITIALIZER;
+
 static void LocalDeviceTimeout(void *data)
 {
     (void)data;
@@ -448,6 +454,10 @@ static int CopyDeviceInfoV2(const NSTACKX_LocalDeviceInfoV2 *devInfo)
 
 int RegisterLocalDeviceV2(const NSTACKX_LocalDeviceInfoV2 *devInfo, int registerType)
 {
+    if (PthreadMutexLock(&g_deviceInfoLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     if (registerType == REGISTER_TYPE_UPDATE_ALL) {
         RemoveAllLocalIface();
     } else {
@@ -455,6 +465,9 @@ int RegisterLocalDeviceV2(const NSTACKX_LocalDeviceInfoV2 *devInfo, int register
     }
 
     if (CopyDeviceInfoV2(devInfo) != NSTACKX_EOK) {
+        if (PthreadMutexUnlock(&g_deviceInfoLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+        }
         return NSTACKX_EFAILED;
     }
 
@@ -462,6 +475,13 @@ int RegisterLocalDeviceV2(const NSTACKX_LocalDeviceInfoV2 *devInfo, int register
         if (registerType == REGISTER_TYPE_UPDATE_ALL) {
             RemoveAllLocalIface(); /* maybe some ifaces is added, so remove all ifaces again */
         }
+        if (PthreadMutexUnlock(&g_deviceInfoLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+        }
+        return NSTACKX_EFAILED;
+    }
+    if (PthreadMutexUnlock(&g_deviceInfoLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
         return NSTACKX_EFAILED;
     }
 
@@ -497,6 +517,10 @@ void SetLocalDeviceHash(uint64_t deviceHash)
 
 int SetLocalDeviceCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
+    if (PthreadMutexLock(&g_capabilityLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     (void)memset_s(g_localDevice.deviceInfo.capabilityBitmap, sizeof(g_localDevice.deviceInfo.capabilityBitmap),
         0, sizeof(g_localDevice.deviceInfo.capabilityBitmap));
     g_localDevice.deviceInfo.capabilityBitmapNum = 0;
@@ -505,18 +529,36 @@ int SetLocalDeviceCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBi
         if (memcpy_s(g_localDevice.deviceInfo.capabilityBitmap, sizeof(g_localDevice.deviceInfo.capabilityBitmap),
             capabilityBitmap, sizeof(uint32_t) * capabilityBitmapNum) != EOK) {
             DFINDER_LOGE(TAG, "capabilityBitmap copy error");
+            if (PthreadMutexUnlock(&g_capabilityLock) != 0) {
+                DFINDER_LOGE(TAG, "failed to unlock");
+            }
             return NSTACKX_EFAILED;
         }
     }
 
     g_localDevice.deviceInfo.capabilityBitmapNum = capabilityBitmapNum;
+    if (PthreadMutexUnlock(&g_capabilityLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
+        return NSTACKX_EFAILED;
+    }
     return NSTACKX_EOK;
 }
 
 int32_t SetLocalDeviceServiceData(const char *serviceData)
 {
+    if (PthreadMutexLock(&g_serviceDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     if (strcpy_s(g_localDevice.deviceInfo.serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, serviceData) != EOK) {
         DFINDER_LOGE(TAG, "serviceData copy error");
+        if (PthreadMutexUnlock(&g_serviceDataLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+        }
+        return NSTACKX_EFAILED;
+    }
+    if (PthreadMutexUnlock(&g_serviceDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
@@ -534,6 +576,10 @@ uint8_t GetLocalDeviceBusinessType(void)
 
 int SetLocalDeviceBusinessData(const char *data, bool unicast)
 {
+    if (PthreadMutexLock(&g_businessDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     int ret = EOK;
     if (unicast) {
         ret = strcpy_s(g_localDevice.deviceInfo.businessData.businessDataUnicast,
@@ -545,6 +591,14 @@ int SetLocalDeviceBusinessData(const char *data, bool unicast)
 
     if (ret != EOK) {
         DFINDER_LOGE(TAG, "businessData copy error, unicast: %d", unicast);
+        if (PthreadMutexUnlock(&g_businessDataLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+        }
+        return NSTACKX_EFAILED;
+    }
+
+    if (PthreadMutexUnlock(&g_businessDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
         return NSTACKX_EFAILED;
     }
 
@@ -573,9 +627,20 @@ void SetLocalDeviceMode(uint8_t mode)
 #ifndef DFINDER_USE_MINI_NSTACKX
 int32_t SetLocalDeviceExtendServiceData(const char *extendServiceData)
 {
+    if (PthreadMutexLock(&g_extendServiceDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
     if (strcpy_s(g_localDevice.deviceInfo.extendServiceData, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN,
         extendServiceData) != EOK) {
         DFINDER_LOGE(TAG, "extendServiceData copy error");
+        if (PthreadMutexUnlock(&g_extendServiceDataLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+        }
+        return NSTACKX_EFAILED;
+    }
+    if (PthreadMutexUnlock(&g_extendServiceDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;

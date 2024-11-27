@@ -36,10 +36,10 @@ class LnnAuthtInterfaceMock : public LnnAuthInterface {
 public:
     LnnAuthtInterfaceMock();
     ~LnnAuthtInterfaceMock() override;
-    MOCK_METHOD5(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
-        AuthVerifyModule, bool));
-    MOCK_METHOD2(AuthGetVersion, int32_t (int64_t, SoftBusVersion *));
-    MOCK_METHOD1(RegGroupChangeListener, int32_t (const GroupChangeListener *));
+    MOCK_METHOD5(
+        AuthStartVerify, int32_t(const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, AuthVerifyModule, bool));
+    MOCK_METHOD2(AuthGetVersion, int32_t(int64_t, SoftBusVersion *));
+    MOCK_METHOD1(RegGroupChangeListener, int32_t(const GroupChangeListener *));
 };
 } // namespace OHOS
 #endif // LNN_AUTH_MOCK_H

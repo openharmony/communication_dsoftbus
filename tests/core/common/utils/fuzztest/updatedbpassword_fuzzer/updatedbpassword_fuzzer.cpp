@@ -20,18 +20,18 @@
 #include "sqlite3_utils.h"
 
 namespace OHOS {
-    bool UpdateDbPasswordFuzzTest(const uint8_t *data, size_t size)
-    {
-        if (data == nullptr || size == 0) {
-            return true;
-        }
-
-        DbContext *ctx = nullptr;
-        UpdateDbPassword(ctx, data, size);
-
+bool UpdateDbPasswordFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
         return true;
     }
+
+    DbContext *ctx = nullptr;
+    UpdateDbPassword(ctx, data, size);
+
+    return true;
 }
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

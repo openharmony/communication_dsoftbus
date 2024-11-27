@@ -36,16 +36,12 @@ static const char *g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErr
 
 class BusCenterSdkPublish : public testing::Test {
 public:
-    BusCenterSdkPublish()
-    {}
-    ~BusCenterSdkPublish()
-    {}
+    BusCenterSdkPublish() { }
+    ~BusCenterSdkPublish() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp()
-    {}
-    void TearDown()
-    {}
+    void SetUp() { }
+    void TearDown() { }
 };
 
 void BusCenterSdkPublish::SetUpTestCase(void)
@@ -53,8 +49,7 @@ void BusCenterSdkPublish::SetUpTestCase(void)
     SetAceessTokenPermission("busCenterTest");
 }
 
-void BusCenterSdkPublish::TearDownTestCase(void)
-{}
+void BusCenterSdkPublish::TearDownTestCase(void) { }
 
 static int32_t GetPublishId(void)
 {
@@ -62,27 +57,23 @@ static int32_t GetPublishId(void)
     return g_publishId;
 }
 
-static PublishInfo g_newpInfo = {
-    .publishId = 1,
+static PublishInfo g_newpInfo = { .publishId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata2",
     .dataLen = sizeof("capdata2"),
-    .ranging = false
-};
+    .ranging = false };
 
-static PublishInfo g_newpInfo1 = {
-    .publishId = 1,
+static PublishInfo g_newpInfo1 = { .publishId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata4",
     .dataLen = sizeof("capdata4"),
-    .ranging = false
-};
+    .ranging = false };
 
 static void TestOnPublishResult(int32_t publishId, PublishResult reason)
 {
@@ -105,16 +96,14 @@ static const IPublishCb g_publishCb = {
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(NULL, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -151,16 +140,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
@@ -200,16 +187,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
@@ -256,16 +241,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     testInfo.publishId = GetPublishId();
     testInfo.capabilityData = NULL;
@@ -321,7 +304,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
 {
     int32_t ret;
-    
+
     g_newpInfo.publishId = GetPublishId();
     ret = PublishLNN(g_pkgName, &g_newpInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -352,16 +335,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -404,16 +385,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -456,16 +435,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = sizeof("capdata2"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -508,16 +485,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = LOW,
         .capability = "ddmpCapability",
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = sizeof("capdata3"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -560,16 +535,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest010, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = true
-    };
+        .ranging = true };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -595,16 +568,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest010, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -630,16 +601,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest012, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = true
-    };
+        .ranging = true };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -665,16 +634,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest012, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest013, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -700,16 +667,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest013, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -747,16 +712,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -794,21 +757,19 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest016, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = true
-    };
+        .ranging = true };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    
+
     testInfo.publishId = GetPublishId();
     testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
@@ -827,16 +788,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest016, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -860,16 +819,14 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     ret = StopPublishLNN(NULL, testInfo.publishId);
@@ -889,17 +846,15 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
-    
+        .ranging = false };
+
     int32_t testID = testInfo.publishId;
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     testInfo.publishId = GetPublishId();
@@ -922,20 +877,18 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
 HWTEST_F(BusCenterSdkPublish, StopPublishLNN003, TestSize.Level1)
 {
     int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
+    PublishInfo testInfo = { .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
+        .ranging = false };
 
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
     EXPECT_TRUE(ret != 0);
 }
-}
+} // namespace OHOS

@@ -21,9 +21,9 @@
 
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_error_code.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_proxy.h"
-#include "softbus_error_code.h"
 
 using namespace testing::ext;
 
@@ -37,16 +37,12 @@ const int32_t ERRO_CAPDATA_LEN = 514;
 
 class BusCenterSdkRefresh : public testing::Test {
 public:
-    BusCenterSdkRefresh()
-    {}
-    ~BusCenterSdkRefresh()
-    {}
+    BusCenterSdkRefresh() { }
+    ~BusCenterSdkRefresh() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp()
-    {}
-    void TearDown()
-    {}
+    void SetUp() { }
+    void TearDown() { }
 };
 
 void BusCenterSdkRefresh::SetUpTestCase(void)
@@ -55,9 +51,7 @@ void BusCenterSdkRefresh::SetUpTestCase(void)
     SetAceessTokenPermission("busCenterTest");
 }
 
-void BusCenterSdkRefresh::TearDownTestCase(void)
-{
-}
+void BusCenterSdkRefresh::TearDownTestCase(void) { }
 
 static int32_t GetSubscribeId(void)
 {
@@ -65,8 +59,7 @@ static int32_t GetSubscribeId(void)
     return g_subscribeId;
 }
 
-static SubscribeInfo g_sInfo2 = {
-    .subscribeId = GetSubscribeId(),
+static SubscribeInfo g_sInfo2 = { .subscribeId = GetSubscribeId(),
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -74,11 +67,9 @@ static SubscribeInfo g_sInfo2 = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = strlen("capdata3")
-};
+    .dataLen = strlen("capdata3") };
 
-static SubscribeInfo g_sInfo3 = {
-    .subscribeId = GetSubscribeId(),
+static SubscribeInfo g_sInfo3 = { .subscribeId = GetSubscribeId(),
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -86,8 +77,7 @@ static SubscribeInfo g_sInfo3 = {
     .isWakeRemote = false,
     .capability = "hicall",
     .capabilityData = NULL,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 static void OnDiscoverResult(int32_t refreshId, RefreshResult Reason)
 {
     printf("[client]TestDiscoverResult\n");
@@ -103,15 +93,9 @@ static void TestRangeDeviceFound(const DeviceInfo *device)
     printf("TestRangeDeviceFound rang:%d\n", device->range);
 }
 
-static IRefreshCallback g_refreshCb1 = {
-    .OnDeviceFound = TestDeviceFound,
-    .OnDiscoverResult = OnDiscoverResult
-};
+static IRefreshCallback g_refreshCb1 = { .OnDeviceFound = TestDeviceFound, .OnDiscoverResult = OnDiscoverResult };
 
-static IRefreshCallback g_refreshCb2 = {
-    .OnDeviceFound = TestRangeDeviceFound,
-    .OnDiscoverResult = OnDiscoverResult
-};
+static IRefreshCallback g_refreshCb2 = { .OnDeviceFound = TestRangeDeviceFound, .OnDiscoverResult = OnDiscoverResult };
 
 /**
  * @tc.name: RefreshLNNTest001
@@ -124,8 +108,7 @@ static IRefreshCallback g_refreshCb2 = {
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
@@ -133,8 +116,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -181,8 +163,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = MID,
@@ -190,8 +171,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -238,8 +218,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
@@ -247,8 +226,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -295,8 +273,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = MID,
@@ -304,8 +281,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -352,8 +328,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = AUTO,
         .freq = MID,
@@ -361,8 +336,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -409,8 +383,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = MID,
@@ -418,8 +391,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -466,8 +438,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
         .medium = BLE,
         .freq = MID,
@@ -475,8 +446,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
@@ -523,8 +493,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
 {
     int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
+    SubscribeInfo testInfo = { .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = MID,
@@ -532,8 +501,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
+        .dataLen = strlen("capdata3") };
 
     ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);

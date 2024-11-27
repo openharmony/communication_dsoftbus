@@ -14,14 +14,14 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
+#include "securec.h"
 #include "softbus_bitmap.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
-#define BITNUM 32
+#define BITNUM   32
 #define TEST_POS 1
 #define TEST_BIT 2
 
@@ -31,16 +31,16 @@ using namespace testing::ext;
 namespace OHOS {
 class CommonCoreBitMapTest : public testing::Test {
 public:
-    CommonCoreBitMapTest() {}
-    ~CommonCoreBitMapTest() {}
+    CommonCoreBitMapTest() { }
+    ~CommonCoreBitMapTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void CommonCoreBitMapTest::SetUpTestCase(void) {}
-void CommonCoreBitMapTest::TearDownTestCase(void) {}
+void CommonCoreBitMapTest::SetUpTestCase(void) { }
+void CommonCoreBitMapTest::TearDownTestCase(void) { }
 
 /**
  * @tc.name: CommonBitMapTest001
@@ -52,7 +52,7 @@ HWTEST_F(CommonCoreBitMapTest, CommonBitMapTest001, TestSize.Level0)
 {
     uint8_t pos = BITNUM + 1;
     uint32_t bitmap = 0;
- 
+
     SoftbusBitmapSet(nullptr, pos);
     EXPECT_EQ(SOFTBUS_OK, bitmap);
 

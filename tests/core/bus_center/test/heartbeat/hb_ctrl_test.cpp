@@ -25,8 +25,8 @@
 #include "lnn_ble_heartbeat.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_net_ledger_mock.h"
 #include "lnn_ip_network_impl_mock.h"
+#include "lnn_net_ledger_mock.h"
 #include "lnn_state_machine.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -63,11 +63,11 @@ void HeartBeatCtrlTest::SetUp() { }
 void HeartBeatCtrlTest::TearDown() { }
 
 /*
-* @tc.name: LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001
-* @tc.desc: test LnnOfflineTimingByHeartbeat
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001
+ * @tc.desc: test LnnOfflineTimingByHeartbeat
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
@@ -90,11 +90,11 @@ HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.
 }
 
 /*
-* @tc.name: LNN_SHIFT_LNN_GEAR_TEST_001
-* @tc.desc: test LnnShiftLNNGear
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SHIFT_LNN_GEAR_TEST_001
+ * @tc.desc: test LnnShiftLNNGear
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
@@ -123,11 +123,11 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001
-* @tc.desc: test LnnShiftLNNGearWithoutPkgName
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001
+ * @tc.desc: test LnnShiftLNNGearWithoutPkgName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSize.Level1)
 {
     GearMode mode;
@@ -148,11 +148,11 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSi
 }
 
 /*
-* @tc.name: LNN_INIT_HEARBEAT_TEST_001
-* @tc.desc: test LnnInitHeartbeat
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_INIT_HEARBEAT_TEST_001
+ * @tc.desc: test LnnInitHeartbeat
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> serviceMock;
@@ -175,4 +175,3 @@ HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
-

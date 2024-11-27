@@ -16,16 +16,16 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "softbus_ble_gatt.h"
-#include "softbus_broadcast_type.h"
-#include "disc_log.h"
-#include "c_header/ohos_bt_gatt.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
+#include "c_header/ohos_bt_gatt.h"
+#include "disc_log.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_ble_gatt.h"
+#include "softbus_broadcast_type.h"
+#include "softbus_error_code.h"
 
-#define GATT_ADV_MAX_NUM 16
+#define GATT_ADV_MAX_NUM  16
 #define GATT_SCAN_MAX_NUM 2
 
 using namespace testing::ext;
@@ -40,6 +40,7 @@ public:
     ~ScanResultCtx();
     bool Update(int32_t scannerId, const SoftBusBcScanResult *reportData);
     testing::AssertionResult Expect(int32_t scannerId, const SoftBusBcScanResult *reportData);
+
 private:
     SoftBusBcScanResult scanResult;
     void Reset();
@@ -80,12 +81,10 @@ static void StubOnScanResult(int32_t scannerId, const SoftBusBcScanResult *repor
 
 static SoftbusScanCallback *GetStubScanListener()
 {
-    static SoftbusScanCallback listener = {
-        .OnStartScanCallback = nullptr,
+    static SoftbusScanCallback listener = { .OnStartScanCallback = nullptr,
         .OnStopScanCallback = nullptr,
         .OnReportScanDataCallback = StubOnScanResult,
-        .OnScanStateChanged = nullptr
-    };
+        .OnScanStateChanged = nullptr };
     return &listener;
 }
 
@@ -134,7 +133,7 @@ static testing::AssertionResult PrepareScanListener(int32_t *scannerId)
 
 static SoftBusBcScanFilter *CreateScanFilter()
 {
-    unsigned char serviceData[] = {0xE, 0xE, 0xF, 0xF, 0x04, 0x05};
+    unsigned char serviceData[] = { 0xE, 0xE, 0xF, 0xF, 0x04, 0x05 };
     int32_t len = sizeof(serviceData);
 
     SoftBusBcScanFilter *filter = static_cast<SoftBusBcScanFilter *>(SoftBusCalloc(sizeof(SoftBusBcScanFilter)));
@@ -202,7 +201,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-//充当参数
+// 充当参数
 static void FakeBcBleCallback(int32_t adapterBcld, int32_t status)
 {
     (void)adapterBcld;
@@ -333,7 +332,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-//充当参数
+// 充当参数
 static void FakeScanCallback(int32_t adapterScanld, int32_t status)
 {
     (void)adapterScanld;
@@ -495,16 +494,38 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-//SoftbusBroadcastData类型的数据填充
+// SoftbusBroadcastData类型的数据填充
 const char ADV_DATA_EXAMPLE[] = {
-    0x02, 0x01, 0x02, 0x15, 0x16,
-    0xEE, 0xFD, 0x04, 0x05, 0x90,
-    0x00, 0x00, 0x04, 0x00,
-    0x18, 0x33, 0x39, 0x36,
-    0x62, 0x33, 0x61, 0x33, 0x31,
-    0x21, 0x00, 0x02, 0x0A, 0xEF,
+    0x02,
+    0x01,
+    0x02,
+    0x15,
+    0x16,
+    0xEE,
+    0xFD,
+    0x04,
+    0x05,
+    0x90,
+    0x00,
+    0x00,
+    0x04,
+    0x00,
+    0x18,
+    0x33,
+    0x39,
+    0x36,
+    0x62,
+    0x33,
+    0x61,
+    0x33,
+    0x31,
+    0x21,
+    0x00,
+    0x02,
+    0x0A,
+    0xEF,
 };
-const unsigned char SCAN_RSP_DATA_EXAMPLE[] = {0x03, 0xFF, 0x7D, 0x02};
+const unsigned char SCAN_RSP_DATA_EXAMPLE[] = { 0x03, 0xFF, 0x7D, 0x02 };
 
 /**
  * @tc.name: TestSoftbusStartAdv002
@@ -793,8 +814,8 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan002, TestSize.Level1)
     };
 
     SoftBusBcScanFilter softBusBcScanFilter = {};
-    softBusBcScanFilter.address = (int8_t*)"address";
-    softBusBcScanFilter.deviceName = (int8_t*)"deviceName";
+    softBusBcScanFilter.address = (int8_t *)"address";
+    softBusBcScanFilter.deviceName = (int8_t *)"deviceName";
     softBusBcScanFilter.serviceUuid = 1;
     softBusBcScanFilter.serviceDataLength = 1;
     softBusBcScanFilter.manufactureId = 1;
@@ -826,8 +847,8 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan003, TestSize.Level1)
     };
 
     SoftBusBcScanFilter softBusBcScanFilter = {};
-    softBusBcScanFilter.address = (int8_t*)"address";
-    softBusBcScanFilter.deviceName = (int8_t*)"deviceName";
+    softBusBcScanFilter.address = (int8_t *)"address";
+    softBusBcScanFilter.deviceName = (int8_t *)"deviceName";
     softBusBcScanFilter.serviceUuid = 1;
     softBusBcScanFilter.serviceDataLength = 1;
     softBusBcScanFilter.manufactureId = 1;
@@ -1077,7 +1098,7 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperLpDeviceInfoCb, TestSize.Level1)
  * @tc.desc: Test IsLpAvailable
  * @tc.type: FUNC
  * @tc.require: NONE
-*/
+ */
 HWTEST_F(SoftbusBleGattTest, TestIsLpAvailable, TestSize.Level1)
 {
     MockBluetooth mocker;
@@ -1131,8 +1152,7 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
         ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
     }
 
-    ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, GetStubScanListener()),
-        SOFTBUS_LOCK_ERR);
+    ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, GetStubScanListener()), SOFTBUS_LOCK_ERR);
 
     for (size_t i = 0; i < GATT_SCAN_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(scanListerIds[i]), SOFTBUS_LOCK_ERR);
@@ -1217,13 +1237,13 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
     ASSERT_EQ(MockBluetooth::interface->StartScan(scannerId, &scanParam, filter, 0), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->StartScan(scannerId, &scanParam, filter, 1), SOFTBUS_LOCK_ERR);
 
-    const unsigned char scanDataExample[] = {0x02, 0x01, 0x02, 0x15, 0x16, 0xEE, 0xFD, 0x04, 0x05, 0x90, 0x00, 0x00,
+    const unsigned char scanDataExample[] = { 0x02, 0x01, 0x02, 0x15, 0x16, 0xEE, 0xFD, 0x04, 0x05, 0x90, 0x00, 0x00,
         0x04, 0x00, 0x18, 0x33, 0x39, 0x36, 0x62, 0x33, 0x61, 0x33, 0x31, 0x21, 0x00, 0x02, 0x0A, 0xEF, 0x03, 0xFF,
-        0x7D, 0x02};
-    SoftBusBcScanResult expectScanResult = {0};
+        0x7D, 0x02 };
+    SoftBusBcScanResult expectScanResult = { 0 };
     expectScanResult.data.bcData.payloadLen = sizeof(scanDataExample);
     expectScanResult.data.bcData.payload = (unsigned char *)scanDataExample;
-    BtScanResultData mockScanResult = {0};
+    BtScanResultData mockScanResult = { 0 };
     mockScanResult.advLen = sizeof(scanDataExample);
     mockScanResult.advData = (unsigned char *)scanDataExample;
 
@@ -1258,8 +1278,7 @@ HWTEST_F(SoftbusBleGattTest, RegisterBroadcaster, TestSize.Level3)
     for (size_t i = 0; i < GATT_ADV_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advIds[i], GetStubAdvCallback()), SOFTBUS_LOCK_ERR);
     }
-    ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advId, GetStubAdvCallback()),
-        SOFTBUS_LOCK_ERR);
+    ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advId, GetStubAdvCallback()), SOFTBUS_LOCK_ERR);
     for (size_t i = 0; i < GATT_ADV_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->UnRegisterBroadcaster(advIds[i]), SOFTBUS_LOCK_ERR);
     }
@@ -1313,7 +1332,7 @@ testing::AssertionResult ScanResultCtx::Expect(int32_t id, const SoftBusBcScanRe
 
     if (this->scanResult.data.bcData.payloadLen == scanResultParam->data.bcData.payloadLen &&
         memcmp(this->scanResult.data.bcData.payload, scanResultParam->data.bcData.payload,
-        scanResultParam->data.bcData.payloadLen) == 0) {
+            scanResultParam->data.bcData.payloadLen) == 0) {
         result = testing::AssertionSuccess();
         goto ClEANUP;
     }

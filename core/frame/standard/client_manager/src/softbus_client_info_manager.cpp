@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 
 #include "softbus_client_info_manager.h"
-#include "permission_status_change_cb.h"
+
+#include "ipc_skeleton.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_def.h"
 #include "softbus_server.h"
 
@@ -44,7 +46,7 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
 
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
     std::string permissionName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    RegisterDataSyncPermission(tokenCaller, permissionName, pkgName, pid);
+    SoftBusRegisterDataSyncPermission(tokenCaller, permissionName.c_str(), pkgName.c_str(), pid);
 
     return SOFTBUS_OK;
 }

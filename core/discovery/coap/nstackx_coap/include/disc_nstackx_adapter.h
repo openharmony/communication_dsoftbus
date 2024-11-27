@@ -56,6 +56,7 @@ int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap
 int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability);
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);
+void DiscCoapModifyNstackThread(LinkStatus status);
 void DiscCoapUpdateLocalIp(LinkStatus status);
 void DiscCoapUpdateDevName(void);
 void DiscCoapUpdateAccount(void);

@@ -75,6 +75,11 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicIn
 }
 
 extern "C" {
+int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
+{
+    return GetNetBuilderDepsInterface()->LnnGetSettingDeviceName(deviceName, len);
+}
+
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);
@@ -85,7 +90,7 @@ int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
     return GetNetBuilderDepsInterface()->LnnDeleteMetaInfo(udid, type);
 }
 
-int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
+int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t *connId)
 {
     return GetNetBuilderDepsInterface()->TransGetConnByChanId(channelId, channelType, connId);
 }
@@ -197,8 +202,8 @@ bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
     return GetNetBuilderDepsInterface()->AddNumberToJsonObject(json, string, num);
 }
 
-int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg,
-    uint32_t len, LnnSyncInfoMsgComplete complete)
+int32_t LnnSendSyncInfoMsg(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
     return GetNetBuilderDepsInterface()->LnnSendSyncInfoMsg(type, networkId, msg, len, complete);
 }
@@ -223,8 +228,8 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t nu
     return GetNetBuilderDepsInterface()->AuthGetLatestAuthSeqList(udid, authSeq, num);
 }
 
-int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
-    char *dstIdBuf, uint32_t dstIdBufLen)
+int32_t LnnConvertDlId(
+    const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
     return GetNetBuilderDepsInterface()->LnnConvertDlId(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
 }
@@ -294,8 +299,8 @@ int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, Lnn
     return GetNetBuilderDepsInterface()->LnnSendNotTrustedInfo(info, num, complete);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetNetBuilderDepsInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
@@ -490,7 +495,7 @@ int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
     return GetNetBuilderDepsInterface()->LnnStartConnectionFsm(connFsm);
 }
 
-void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight)
+void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight)
 {
     return GetNetBuilderDepsInterface()->LnnNotifyMasterNodeChanged(isMaster, masterNodeUdid, weight);
 }
