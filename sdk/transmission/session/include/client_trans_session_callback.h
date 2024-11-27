@@ -17,6 +17,7 @@
 #define CLIENT_TRANS_SESSION_CALLBACK_H
 
 #include "session.h"
+#include "socket.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
@@ -39,6 +40,7 @@ typedef struct {
     int32_t (*OnRawStreamEncryptOptGet)(int32_t channelId, int32_t channelType, bool *isEncrypt);
     int32_t (*OnChannelBind)(int32_t channelId, int32_t channelType);
     int32_t (*IfChannelForSocket)(const char *sessionName, bool *isSocket);
+    int32_t (*OnQos)(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
 } IClientSessionCallBack;
 
 IClientSessionCallBack *GetClientSessionCb(void);
