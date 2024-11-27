@@ -98,7 +98,7 @@ typedef struct {
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
     const char *firstTokenName; // FIRST_TOKEN_NAME
-    uint32_t firstTokenId;     // FIRST_TOKEN_ID
+    uint64_t firstTokenId;     // FIRST_TOKEN_ID
     int32_t  firstTokenType;   // FIRST_TOKEN_TYPE
     const char *trafficStats;  // TRAFFIC_STATS
     int32_t  osType;           // OS_TYPE

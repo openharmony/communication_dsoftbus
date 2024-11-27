@@ -672,8 +672,8 @@ HWTEST_F(TransLanePendingTest, TransGetLaneReqItemParamByLaneHandle001, TestSize
 {
     SessionParam *newParam = TestCreateNewSessionParam();
     ASSERT_TRUE(newParam != nullptr);
-    uint32_t callingTokenId;
-    uint32_t firstTokenId;
+    uint64_t callingTokenId;
+    uint64_t firstTokenId;
     int64_t timeStart;
     int32_t ret = TransGetLaneReqItemParamByLaneHandle(0, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -757,7 +757,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProc001, TestSize.Level1)
     SoftBusFree(param);
     param = nullptr;
 
-    uint32_t firstTokenId;
+    uint64_t firstTokenId;
     firstTokenId = TOKENID_NOT_SET;
     appInfo.callingTokenId = TEST_TOKEN_ID;
     TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &extra);

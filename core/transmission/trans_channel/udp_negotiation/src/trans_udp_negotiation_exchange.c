@@ -142,7 +142,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
             (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
-            if (!GetJsonObjectNumberItem(msg, "CALLING_TOKEN_ID", (int32_t *)&appInfo->callingTokenId)) {
+            if (!GetJsonObjectNumber64Item(msg, "CALLING_TOKEN_ID", (int64_t *)&appInfo->callingTokenId)) {
                 appInfo->callingTokenId = TOKENID_NOT_SET;
             }
             (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
@@ -174,7 +174,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
         case TYPE_UDP_CHANNEL_OPEN:
             (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
             (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
-            (void)AddNumberToJsonObject(msg, "CALLING_TOKEN_ID", (int32_t)appInfo->callingTokenId);
+            (void)AddNumber64ToJsonObject(msg, "CALLING_TOKEN_ID", (int64_t)appInfo->callingTokenId);
             (void)AddNumberToJsonObject(msg, "LINK_TYPE", appInfo->linkType);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:

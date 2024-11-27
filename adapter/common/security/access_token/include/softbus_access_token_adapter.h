@@ -36,17 +36,17 @@ typedef enum {
     ACCESS_TOKEN_TYPE_BUTT,
 } SoftBusAccessTokenType;
 
-bool SoftBusCheckIsSystemService(uint32_t tokenId);
-bool SoftBusCheckIsNormalApp(uint32_t tokenId, uint64_t fullTokenId, const char *sessionName);
-bool SoftBusCheckIsAccessAndRecordAccessToken(uint32_t tokenId, const char *permission);
-int32_t SoftBusCalcPermType(uint32_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid);
-int32_t SoftBusCheckDynamicPermission(uint32_t tokenId);
+bool SoftBusCheckIsSystemService(uint64_t tokenId);
+bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char *sessionName);
+bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission);
+int32_t SoftBusCalcPermType(uint64_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid);
+int32_t SoftBusCheckDynamicPermission(uint64_t tokenId);
 void SoftBusRegisterDataSyncPermission(
-    const uint32_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);
+    const uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);
 void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb);
-int32_t SoftBusGetAccessTokenType(uint32_t tokenId);
+int32_t SoftBusGetAccessTokenType(uint64_t tokenId);
 void SoftBusGetTokenNameByTokenType(
-    char *tokenName, int32_t nameLen, uint32_t tokenId, SoftBusAccessTokenType tokenType);
+    char *tokenName, int32_t nameLen, uint64_t tokenId, SoftBusAccessTokenType tokenType);
 
 #ifdef __cplusplus
 #if __cplusplus

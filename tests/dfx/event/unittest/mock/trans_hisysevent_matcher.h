@@ -30,6 +30,13 @@ static void MatchTransEventNameTypeExtraInt32Param(const HiSysEventParam *params
     EXPECT_EQ(params[index].v.i32, extraParam);
 }
 
+static void MatchTransEventNameTypeExtraInt64Param(const HiSysEventParam *params, int32_t index, int64_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.i64, extraParam);
+}
+
 static void MatchTransEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index,
     const char * extraParam)
 {
@@ -81,7 +88,7 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.firstTokenName);
-    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.firstTokenId);
+    MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.firstTokenId);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.firstTokenType);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.trafficStats);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.osType);
@@ -105,7 +112,7 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     int32_t num = 25;
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
-    EXPECT_EQ(params[index].v.i32, extra.firstTokenId);
+    EXPECT_EQ(params[index].v.i64, extra.firstTokenId);
     EXPECT_EQ(++index, validSize);
     return true;
 }

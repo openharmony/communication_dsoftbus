@@ -87,7 +87,7 @@ int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     return SoftbusTransProxyChannelManagerMock::GetMockObj().ConnGetConnectionInfo(connectionId, info);
 }
 
-int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
+int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
 {
     std::cout << "TransCheckServerAccessControl calling enter" << std::endl;
     return SoftbusTransProxyChannelManagerMock::GetMockObj().TransCheckServerAccessControl(callingTokenId);
