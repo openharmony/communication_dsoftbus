@@ -51,6 +51,10 @@ static void TransactBtSubnetState(LnnPhysicalSubnet *subnet, BtSubnetManagerEven
         [BT_SUBNET_MANAGER_EVENT_IF_READY] = {LNN_SUBNET_RUNNING, LNN_SUBNET_IDLE},
         [BT_SUBNET_MANAGER_EVENT_IF_DOWN] = {LNN_SUBNET_SHUTDOWN, subnet->status},
     };
+    if (event == BT_SUBNET_MANAGER_EVENT_MAX) {
+        LNN_LOGE(LNN_BUILDER, "event error");
+        return;
+    }
     subnet->status = transactMap[event][isAccepted ? BT_EVENT_RESULT_ACCEPTED : BT_EVENT_RESULT_REJECTED];
     LNN_LOGD(LNN_BUILDER,
         "subnet ifName status trans. ifName=%{public}s, status:%{public}d->%{public}d", subnet->ifName,

@@ -42,6 +42,10 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     ipAddr = (ip4_addr_t *)netif_ip4_addr(netif);
     netMask = (ip4_addr_t *)netif_ip4_netmask(netif);
 #endif
+    if (ipAddr == NULL || netMask == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "ipAddr or netMask is NULL!");
+        return SOFTBUS_ERR;
+    }
     ipStr = ip4addr_ntoa(ipAddr);
     if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "copy ip failed!");
