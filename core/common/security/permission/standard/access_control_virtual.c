@@ -31,22 +31,22 @@ int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionNa
     return SOFTBUS_OK;
 }
 
-int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
+int32_t TransCheckServerAccessControl(uint64_t firstCallingId)
 {
     (void)firstCallingId;
     return SOFTBUS_OK;
 }
-uint32_t TransACLGetFirstTokenID(void)
+uint64_t TransACLGetFirstTokenID(void)
 {
     return TOKENID_NOT_SET;
 }
 
-uint32_t TransACLGetCallingTokenID(void)
+uint64_t TransACLGetCallingTokenID(void)
 {
     return TOKENID_NOT_SET;
 }
 
-void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
+void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
 {
     (void)callingId;
     (void)tokenName;

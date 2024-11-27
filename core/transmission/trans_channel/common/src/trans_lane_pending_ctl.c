@@ -58,8 +58,8 @@ typedef struct {
     bool isFinished;
     uint32_t laneHandle;
     int32_t errCode;
-    uint32_t callingTokenId; // used for transmission access control
-    uint32_t firstTokenId; // used for dfx connection success rate
+    uint64_t callingTokenId; // used for transmission access control
+    uint64_t firstTokenId; // used for dfx connection success rate
     int64_t timeStart;
     SoftBusCond cond;
     ListNode node;
@@ -371,7 +371,7 @@ static int32_t CopyAsyncReqItemSessionParam(const SessionParam *source, SessionP
 }
 
 static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const SessionParam *param,
-    uint32_t callingTokenId, int64_t timeStart)
+    uint64_t callingTokenId, int64_t timeStart)
 {
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
@@ -446,7 +446,7 @@ static int32_t TransGetLaneReqItemByLaneHandle(uint32_t laneHandle, bool *bSucc,
 }
 
 static int32_t TransGetLaneReqItemParamByLaneHandle(
-    uint32_t laneHandle, SessionParam *param, uint32_t *callingTokenId, uint32_t *firstTokenId, int64_t *timeStart)
+    uint32_t laneHandle, SessionParam *param, uint64_t *callingTokenId, uint64_t *firstTokenId, int64_t *timeStart)
 {
     if (param == NULL) {
         TRANS_LOGE(TRANS_SVC, "param err.");
@@ -592,7 +592,7 @@ EXIT_ERR:
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
 }
 
-static void TransAsyncSetFirstTokenInfo(uint32_t firstTokenId, AppInfo *appInfo, TransEventExtra *event)
+static void TransAsyncSetFirstTokenInfo(uint64_t firstTokenId, AppInfo *appInfo, TransEventExtra *event)
 {
     event->firstTokenId = firstTokenId;
     if (event->firstTokenId == TOKENID_NOT_SET) {
@@ -637,8 +637,8 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
     SessionParam param;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
     param.isQosLane = true;
-    uint32_t callingTokenId = TOKENID_NOT_SET;
-    uint32_t firstTokenId = TOKENID_NOT_SET;
+    uint64_t callingTokenId = TOKENID_NOT_SET;
+    uint64_t firstTokenId = TOKENID_NOT_SET;
     int64_t timeStart = 0;
     int32_t ret = TransGetLaneReqItemParamByLaneHandle(laneHandle, &param, &callingTokenId, &firstTokenId, &timeStart);
     if (ret != SOFTBUS_OK) {
@@ -699,7 +699,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     SessionParam param;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
     param.isQosLane = true;
-    uint32_t callingTokenId = TOKENID_NOT_SET;
+    uint64_t callingTokenId = TOKENID_NOT_SET;
     TransInfo transInfo = { .channelId = INVALID_CHANNEL_ID, .channelType = CHANNEL_TYPE_BUTT};
     int64_t timeStart = 0;
     int32_t ret = TransGetLaneReqItemParamByLaneHandle(laneHandle, &param, &callingTokenId, NULL, &timeStart);
@@ -1292,7 +1292,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
 }
 
 int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneRequestOption *requestOption,
-    uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart)
+    uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart)
 {
     if (param == NULL || requestOption == NULL || laneHandle == NULL) {
         TRANS_LOGE(TRANS_SVC, "async get lane info param error.");
@@ -1332,7 +1332,7 @@ int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneReque
 }
 
 int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInfo *allocInfo,
-    uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart)
+    uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart)
 {
     if (param == NULL || allocInfo == NULL || laneHandle == NULL) {
         TRANS_LOGE(TRANS_SVC, "async get lane info param error.");
@@ -1377,7 +1377,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
 }
 
 int32_t TransAsyncGetLaneInfo(
-    const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart)
+    const SessionParam *param, uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart)
 {
     if (param == NULL || laneHandle == NULL) {
         TRANS_LOGE(TRANS_SVC, "async get lane info param error.");

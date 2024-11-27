@@ -44,11 +44,11 @@ namespace {
     using namespace OHOS;
 }
 
-static int32_t TransCheckAccessControl(uint32_t callingTokenId, const char *deviceId)
+static int32_t TransCheckAccessControl(uint64_t callingTokenId, const char *deviceId)
 {
     char *tmpName = nullptr;
     Anonymize(deviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "tokenId=%{public}u, deviceId=%{public}s", callingTokenId, tmpName);
+    COMM_LOGI(COMM_PERM, "tokenId=%{public}llx, deviceId=%{public}s", callingTokenId, tmpName);
     AnonymizeFree(tmpName);
 
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
@@ -60,7 +60,7 @@ static int32_t TransCheckAccessControl(uint32_t callingTokenId, const char *devi
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
     COMM_LOGI(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
     if (profile.empty()) {
-        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}u", callingTokenId);
+        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}llx", callingTokenId);
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     for (auto &item : profile) {
@@ -77,7 +77,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
+    uint64_t callingTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
     if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
@@ -93,7 +93,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     if (ret != SOFTBUS_OK) {
         char *tmpName = nullptr;
         Anonymize(peerNetworkId, &tmpName);
-        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}u, networkId=%{public}s, ret=%{public}d",
+        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}llx, networkId=%{public}s, ret=%{public}d",
             callingTokenId, tmpName, ret);
         AnonymizeFree(tmpName);
         return ret;
@@ -125,7 +125,7 @@ int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionNa
     return SOFTBUS_OK;
 }
 
-int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
+int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
 {
     if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
@@ -140,20 +140,20 @@ int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
     char deviceId[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}u, ret=%{public}d", callingTokenId, ret);
+        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}llx, ret=%{public}d", callingTokenId, ret);
         return ret;
     }
     return TransCheckAccessControl(callingTokenId, deviceId);
 }
 
-uint32_t TransACLGetFirstTokenID(void)
+uint64_t TransACLGetFirstTokenID(void)
 {
-    return OHOS::IPCSkeleton::GetFirstTokenID();
+    return OHOS::IPCSkeleton::GetFirstFullTokenID();
 }
 
-uint32_t TransACLGetCallingTokenID(void)
+uint64_t TransACLGetCallingTokenID(void)
 {
-    return OHOS::IPCSkeleton::GetCallingTokenID();
+    return OHOS::IPCSkeleton::GetCallingFullTokenID();
 }
 
 #ifdef SUPPORT_ABILITY_RUNTIME
@@ -172,7 +172,7 @@ public:
 };
 } // namespace OHOS
 
-static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
+static void GetForegroundApplications(uint64_t firstTokenId, int32_t *tokenType)
 {
     if (g_appMgrProxy == nullptr) {
         sptr<ISystemAbilityManager> abilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -219,14 +219,14 @@ static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
     *tokenType = BACKGROUND_APP_TYPE;
 }
 #else
-static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
+static void GetForegroundApplications(uint64_t firstTokenId, int32_t *tokenType)
 {
     (void)firstTokenId;
     (void)tokenType;
 }
 #endif
 
-void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
+void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
 {
     if (callingId == TOKENID_NOT_SET || tokenName == nullptr || tokenType == nullptr) {
         COMM_LOGE(COMM_PERM, "param is invalid");

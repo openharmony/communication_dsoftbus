@@ -1297,7 +1297,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL) {
         return;
     }
-    uint32_t tokenId = 0;
+    uint64_t tokenId = 0;
     int32_t ret = SoftBusGetSelfTokenId(&tokenId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get selfTokenId failed");
