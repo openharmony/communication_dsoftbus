@@ -20,10 +20,10 @@
 #include "bus_center_manager.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
+#include "lnn_net_builder_process.h"
 #include "message_handler.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
-#include "lnn_net_builder_process.h"
 
 constexpr char NETWORKID[] = "ABCDEFG";
 constexpr char OLD_NETWORKID[] = "ABCDEFG";
@@ -39,8 +39,8 @@ constexpr uint8_t MSG[] = "123456BNHFCF";
 constexpr int64_t AUTH_ID = 10;
 constexpr uint32_t REQUEST_ID = 10;
 
-#define SOFTBUS_SUB_SYSTEM 203
-#define SOFTBUS_AUTH_MODULE 3
+#define SOFTBUS_SUB_SYSTEM        203
+#define SOFTBUS_AUTH_MODULE       3
 #define HICHAIN_ERROR_KEY_NOEXIST (-((SOFTBUS_SUB_SYSTEM << 21) | (SOFTBUS_AUTH_MODULE << 16) | 0x0101))
 
 namespace OHOS {
@@ -76,17 +76,14 @@ void LNNNetBuilderTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001
-* @tc.desc: test LnnNotifyDiscoveryDevice
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001
+ * @tc.desc: test LnnNotifyDiscoveryDevice
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level0)
 {
-    ConnectionAddr target = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
+    ConnectionAddr target = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
@@ -100,14 +97,14 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001
-* @tc.desc: test LnnRequestLeaveByAddrType
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001
+ * @tc.desc: test LnnRequestLeaveByAddrType
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Level0)
 {
-    const bool type[CONNECTION_ADDR_MAX] = {true, true, true, true, true};
+    const bool type[CONNECTION_ADDR_MAX] = { true, true, true, true, true };
     int32_t ret = LnnRequestLeaveByAddrType(type, CONNECTION_ADDR_MAX);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
@@ -121,11 +118,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_REQUEST_LEAVE_SPECIFIC_TEST_001
-* @tc.desc: test LnnRequestLeaveSpecific
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_REQUEST_LEAVE_SPECIFIC_TEST_001
+ * @tc.desc: test LnnRequestLeaveSpecific
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0)
 {
     char *networkId = nullptr;
@@ -140,11 +137,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
 }
 
 /*
-* @tc.name: LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001
-* @tc.desc: test LnnRequestLeaveInvalidConn
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001
+ * @tc.desc: test LnnRequestLeaveInvalidConn
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
@@ -156,11 +153,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_REQUEST_CLEAN_CONN_FSM_TEST_001
-* @tc.desc: test LnnRequestCleanConnFsm
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_REQUEST_CLEAN_CONN_FSM_TEST_001
+ * @tc.desc: test LnnRequestCleanConnFsm
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnRequestCleanConnFsm(CONN_FSM_ID);
@@ -172,17 +169,14 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0
 }
 
 /*
-* @tc.name: LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001
-* @tc.desc: test LnnNotifyNodeStateChanged
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001
+ * @tc.desc: test LnnNotifyNodeStateChanged
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Level0)
 {
-    ConnectionAddr target = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
+    ConnectionAddr target = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     int32_t ret = LnnNotifyNodeStateChanged(&target);
@@ -194,11 +188,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_NOTIFY_MASTER_ELECT_TEST_001
-* @tc.desc: test LnnNotifyMasterElect
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_NOTIFY_MASTER_ELECT_TEST_001
+ * @tc.desc: test LnnNotifyMasterElect
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnNotifyMasterElect(NETWORKID, MASTER_UDID, MASTER_WEIGHT);
@@ -213,11 +207,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: LNN_UPDATE_NODE_ADDR_TEST_001
-* @tc.desc: test LnnUpdateNodeAddr
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
+ * @tc.name: LNN_UPDATE_NODE_ADDR_TEST_001
+ * @tc.desc: test LnnUpdateNodeAddr
+ * @tc.type: FUNC
+ * @tc.require: I5PRUD
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
 {
     char *addr = nullptr;
@@ -234,11 +228,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: LNN_SYNC_OFFLINE_COMPLETE_TEST_001
-* @tc.desc: test LnnSyncOfflineComplete
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SYNC_OFFLINE_COMPLETE_TEST_001
+ * @tc.desc: test LnnSyncOfflineComplete
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
 {
     uint32_t len = TYPE_LEN;
@@ -250,11 +244,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: LNN_SERVER_LEAVE_TEST_001
-* @tc.desc: test LnnServerLeave
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SERVER_LEAVE_TEST_001
+ * @tc.desc: test LnnServerLeave
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnServerLeave(NETWORKID, "pkaName");
@@ -268,17 +262,14 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: LNN_SERVER_JOIN_TEST_001
-* @tc.desc: test LnnServerJoin
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SERVER_JOIN_TEST_001
+ * @tc.desc: test LnnServerJoin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
 {
-    ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
     int32_t ret = LnnServerJoin(&addr, "pkgName");
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
@@ -293,17 +284,14 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: FIND_REQUEST_ID_BY_ADDR_TEST_001
-* @tc.desc: test FindRequestIdByAddr
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FIND_REQUEST_ID_BY_ADDR_TEST_001
+ * @tc.desc: test FindRequestIdByAddr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
 {
-    ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
     uint32_t requestId;
     uint32_t ret = LnnInitNetBuilder();
@@ -313,17 +301,14 @@ HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: FIND_NODE_INFO_BY_RQUESTID_TEST_001
-* @tc.desc: test FindNodeInfoByRquestId
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FIND_NODE_INFO_BY_RQUESTID_TEST_001
+ * @tc.desc: test FindNodeInfoByRquestId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0)
 {
-    ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
     int32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -332,17 +317,14 @@ HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0
 }
 
 /*
-* @tc.name: LNN_GET_VERIFY_CALLBACK_TEST_001
-* @tc.desc: test three verify callback
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_VERIFY_CALLBACK_TEST_001
+ * @tc.desc: test three verify callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
 {
-    ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
     NodeInfo *info = nullptr;
     NodeInfo info1;
@@ -360,11 +342,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001
-* @tc.desc: lnn notify auth handle leave lnn test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001
+ * @tc.desc: lnn notify auth handle leave lnn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001, TestSize.Level0)
 {
     AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };

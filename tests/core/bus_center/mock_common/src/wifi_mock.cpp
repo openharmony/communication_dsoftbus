@@ -78,7 +78,7 @@ WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
     return GetWifiInterface()->GetLinkedInfo(info);
 }
 
-WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo)
+WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo *groupInfo)
 {
     return GetWifiInterface()->GetCurrentGroup(groupInfo);
 }

@@ -47,8 +47,8 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
     return HeartBeatFSMInterfaceInstance()->LnnStopOfflineTimingStrategy(networkId, addrType);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
 {
     return HeartBeatFSMInterfaceInstance()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
@@ -164,7 +164,7 @@ void SetScreenState(SoftBusScreenState state)
     return HeartBeatFSMInterfaceInstance()->SetScreenState(state);
 }
 
-struct WifiDirectManager* GetWifiDirectManager(void)
+struct WifiDirectManager *GetWifiDirectManager(void)
 {
     return HeartBeatFSMInterfaceInstance()->GetWifiDirectManager();
 }

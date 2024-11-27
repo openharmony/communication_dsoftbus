@@ -17,11 +17,11 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "sqlite3_utils.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
+#include "sqlite3_utils.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -53,13 +53,9 @@ void Sqlite3UtilsTest::SetUpTestCase()
     (void)strcpy_s(g_record3.udid, UDID_BUF_LEN, DEVICE1_HASH);
 }
 
-void Sqlite3UtilsTest::TearDownTestCase()
-{
-}
+void Sqlite3UtilsTest::TearDownTestCase() { }
 
-void Sqlite3UtilsTest::SetUp()
-{
-}
+void Sqlite3UtilsTest::SetUp() { }
 
 void Sqlite3UtilsTest::TearDown()
 {
@@ -67,11 +63,11 @@ void Sqlite3UtilsTest::TearDown()
 }
 
 /*
-* @tc.name: Open_Database_Test_001
-* @tc.desc: open database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Open_Database_Test_001
+ * @tc.desc: open database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_01, TestSize.Level0)
 {
     DbContext **ctxPtr = nullptr;
@@ -80,11 +76,11 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_01, TestSize.Level0)
 }
 
 /*
-* @tc.name: Open_Database_Test_002
-* @tc.desc: open database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Open_Database_Test_002
+ * @tc.desc: open database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_02, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -95,11 +91,11 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_02, TestSize.Level0)
 }
 
 /*
-* @tc.name: Open_Database_Test_003
-* @tc.desc: open database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Open_Database_Test_003
+ * @tc.desc: open database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_03, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -113,11 +109,11 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_03, TestSize.Level0)
 }
 
 /*
-* @tc.name: Create_Table_Test_001
-* @tc.desc: create table test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_Table_Test_001
+ * @tc.desc: create table test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_Table_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -127,11 +123,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_Table_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Create_Table_Test_002
-* @tc.desc: create table test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_Table_Test_002
+ * @tc.desc: create table test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_Table_Test_002, TestSize.Level0)
 {
     bool isExist = false;
@@ -151,11 +147,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_Table_Test_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: Create_and_Encrypt_Database_Test_001
-* @tc.desc: create and encrypt database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_and_Encrypt_Database_Test_001
+ * @tc.desc: create and encrypt database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_001, TestSize.Level0)
 {
     bool isExist = false;
@@ -176,11 +172,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_001, TestSize.Level0
 }
 
 /*
-* @tc.name: Create_and_Encrypt_Database_Test_002
-* @tc.desc: create and encrypt database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_and_Encrypt_Database_Test_002
+ * @tc.desc: create and encrypt database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_002, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -213,11 +209,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_002, TestSize.Level0
 }
 
 /*
-* @tc.name: Create_and_Encrypt_Database_Test_003
-* @tc.desc: create and encrypt database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_and_Encrypt_Database_Test_003
+ * @tc.desc: create and encrypt database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_003, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -252,11 +248,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_003, TestSize.Level0
 }
 
 /*
-* @tc.name: Create_and_Encrypt_Database_Test_004
-* @tc.desc: create and encrypt database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_and_Encrypt_Database_Test_004
+ * @tc.desc: create and encrypt database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_004, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -291,11 +287,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_004, TestSize.Level0
 }
 
 /*
-* @tc.name: Create_and_Encrypt_Database_Test_005
-* @tc.desc: create and encrypt database test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Create_and_Encrypt_Database_Test_005
+ * @tc.desc: create and encrypt database test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_005, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -331,11 +327,11 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_005, TestSize.Level0
 }
 
 /*
-* @tc.name: Insert_data_Inerface_Test_001
-* @tc.desc: insert data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Insert_data_Inerface_Test_001
+ * @tc.desc: insert data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -354,11 +350,11 @@ HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Insert_data_Inerface_Test_002
-* @tc.desc: insert data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Insert_data_Inerface_Test_002
+ * @tc.desc: insert data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_002, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -379,11 +375,11 @@ HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: Remove_data_Inerface_Test_001
-* @tc.desc: remove data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Remove_data_Inerface_Test_001
+ * @tc.desc: remove data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -403,11 +399,11 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Remove_data_Inerface_Test_002
-* @tc.desc: remove data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Remove_data_Inerface_Test_002
+ * @tc.desc: remove data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_002, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -427,11 +423,11 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: Remove_data_Inerface_Test_003
-* @tc.desc: remove data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Remove_data_Inerface_Test_003
+ * @tc.desc: remove data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_003, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -451,11 +447,11 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_003, TestSize.Level0)
 }
 
 /*
-* @tc.name: Query_data_Inerface_Test_001
-* @tc.desc: query data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Query_data_Inerface_Test_001
+ * @tc.desc: query data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_001, TestSize.Level0)
 {
     int32_t num;
@@ -471,8 +467,7 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_001, TestSize.Level0)
     ASSERT_TRUE(num != 0);
     record = (char *)SoftBusCalloc(num * UDID_BUF_LEN);
     ASSERT_TRUE(record != nullptr);
-    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID,
-        (uint8_t **)&record, num), SOFTBUS_OK);
+    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID, (uint8_t **)&record, num), SOFTBUS_OK);
     EXPECT_STREQ(record, DEVICE1_HASH);
     SoftBusFree(record);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
@@ -480,11 +475,11 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Query_data_Inerface_Test_002
-* @tc.desc: query data interface test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Query_data_Inerface_Test_002
+ * @tc.desc: query data interface test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_002, TestSize.Level0)
 {
     int32_t num;
@@ -502,8 +497,7 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_002, TestSize.Level0)
     ASSERT_TRUE(num != 0);
     record = (char *)SoftBusCalloc(num * UDID_BUF_LEN);
     ASSERT_TRUE(record != nullptr);
-    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID,
-        (uint8_t **)&record, num), SOFTBUS_OK);
+    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID, (uint8_t **)&record, num), SOFTBUS_OK);
     EXPECT_STREQ(record, DEVICE1_HASH);
     EXPECT_STREQ(record + UDID_BUF_LEN, DEVICE2_HASH);
     SoftBusFree(record);
@@ -512,11 +506,11 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: Open_and_Close_Transaction_Test_001
-* @tc.desc: open and close transaction test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Open_and_Close_Transaction_Test_001
+ * @tc.desc: open and close transaction test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -534,11 +528,11 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Open_and_Close_Transaction_Test_002
-* @tc.desc: open and close transaction test
-* @tc.type: FUNC
-* @tc.require: I5PIFW
-*/
+ * @tc.name: Open_and_Close_Transaction_Test_002
+ * @tc.desc: open and close transaction test
+ * @tc.type: FUNC
+ * @tc.require: I5PIFW
+ */
 HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_002, TestSize.Level0)
 {
     int32_t num;
@@ -556,8 +550,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_002, TestSize.Level0)
     ASSERT_TRUE(num != 0);
     record = (char *)SoftBusCalloc(num * UDID_BUF_LEN);
     ASSERT_TRUE(record != nullptr);
-    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID,
-        (uint8_t **)&record, num), SOFTBUS_OK);
+    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID, (uint8_t **)&record, num), SOFTBUS_OK);
     EXPECT_STREQ(record, DEVICE1_HASH);
     SoftBusFree(record);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
@@ -565,11 +558,11 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_002, TestSize.Level0)
 }
 
 /*
-* @tc.name: Open_Database_Test_001
-* @tc.desc: open database test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Open_Database_Test_001
+ * @tc.desc: open database test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_001, TestSize.Level0)
 {
     DbContext *ctxPtr = nullptr;
@@ -583,11 +576,11 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Insert_Record_Test_001
-* @tc.desc: insert record test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Insert_Record_Test_001
+ * @tc.desc: insert record test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Insert_Record_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -599,11 +592,11 @@ HWTEST_F(Sqlite3UtilsTest, Insert_Record_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Close_Database_Test_001
-* @tc.desc: close database test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Close_Database_Test_001
+ * @tc.desc: close database test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Close_Database_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -614,11 +607,11 @@ HWTEST_F(Sqlite3UtilsTest, Close_Database_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Db_Password_Test_001
-* @tc.desc: db password test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Db_Password_Test_001
+ * @tc.desc: db password test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -631,7 +624,7 @@ HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
     EXPECT_EQ(EncryptedDb(ctx, password, len), SOFTBUS_INVALID_PARAM);
     int32_t testid = EncryptedDb(ctx, PASSWORD1, len);
     EXPECT_EQ(testid, SOFTBUS_ERR);
-    
+
     ctx = nullptr;
     EXPECT_EQ(UpdateDbPassword(ctx, password, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
@@ -642,11 +635,11 @@ HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Remove_Record_Key_001
-* @tc.desc: remove record key
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Remove_Record_Key_001
+ * @tc.desc: remove record key
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Remove_Record_Key_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -659,18 +652,18 @@ HWTEST_F(Sqlite3UtilsTest, Remove_Record_Key_001, TestSize.Level0)
     ctx = nullptr;
     EXPECT_EQ(RemoveAllRecord(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), SOFTBUS_OK);
-    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID,
-        (uint8_t **)&record, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID, (uint8_t **)&record, 0),
+        SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(CloseTransaction(ctx, CLOSE_TRANS_COMMIT), SOFTBUS_INVALID_PARAM);
 }
 
 /*
-* @tc.name: Get_Query_Result_001
-* @tc.desc: Get Record Key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Get_Query_Result_001
+ * @tc.desc: Get Record Key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Get_Query_Result_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
@@ -699,11 +692,11 @@ HWTEST_F(Sqlite3UtilsTest, Get_Query_Result_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: Bind_Para_Test_001
-* @tc.desc: bind para test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: Bind_Para_Test_001
+ * @tc.desc: bind para test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(Sqlite3UtilsTest, Bind_Para_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;

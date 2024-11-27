@@ -36,8 +36,8 @@ static LnnSyncInfoInterface *GetSyncInterface()
 }
 
 extern "C" {
-int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
-    const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
+int32_t LnnSendSyncInfoMsg(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
     return GetSyncInterface()->LnnSendSyncInfoMsg(type, networkId, msg, len, complete);
 }

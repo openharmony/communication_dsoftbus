@@ -39,6 +39,7 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_settingdata_event_monitor.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","
@@ -51,7 +52,7 @@
 
 #define LNN_CHECK_OOBE_DELAY_LEN (5 * 60 * 1000LL)
 
-static pthread_mutex_t g_dataShareMutex;
+static SoftBusMutex g_dataShareMutex;
 static bool g_isDataShareInit = false;
 
 typedef enum {
@@ -347,26 +348,26 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
     SoftBusDataShareState state = (SoftBusDataShareState)event->status;
     switch (state) {
         case SOFTBUS_DATA_SHARE_READY:
+            if (SoftBusMutexLock(&g_dataShareMutex) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
+                return;
+            }
             LNN_LOGI(LNN_BUILDER, "data share state is=%{public}d", g_isDataShareInit);
-            if (g_isDataShareInit != true) {
-                if (pthread_mutex_lock(&g_dataShareMutex) != 0) {
-                    LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
-                    return;
-                }
+            if (!g_isDataShareInit) {
                 g_isDataShareInit = true;
-                (void)pthread_mutex_unlock(&g_dataShareMutex);
                 LnnInitOOBEStateMonitorImpl();
+                LnnInitDeviceNameMonitorImpl();
                 RetryCheckOOBEState(NULL);
             }
+            (void)SoftBusMutexUnlock(&g_dataShareMutex);
             break;
         default:
-            if (pthread_mutex_lock(&g_dataShareMutex) != 0) {
+            if (SoftBusMutexLock(&g_dataShareMutex) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
                 return;
             }
             g_isDataShareInit = false;
-            (void)pthread_mutex_unlock(&g_dataShareMutex);
-            return;
+            (void)SoftBusMutexUnlock(&g_dataShareMutex);
     }
 }
 
@@ -376,12 +377,12 @@ void LnnGetDataShareInitResult(bool *isDataShareInit)
         LNN_LOGE(LNN_BUILDER, "Data share get invalid param");
         return;
     }
-    if (pthread_mutex_lock(&g_dataShareMutex) != 0) {
+    if (SoftBusMutexLock(&g_dataShareMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
         return;
     }
     *isDataShareInit = g_isDataShareInit;
-    (void)pthread_mutex_unlock(&g_dataShareMutex);
+    (void)SoftBusMutexUnlock(&g_dataShareMutex);
 }
 
 int32_t LnnClearNetConfigList(void)
@@ -728,6 +729,10 @@ static int32_t LnnRegisterEvent(void)
 
 int32_t LnnInitNetworkManager(void)
 {
+    if (SoftBusMutexInit(&g_dataShareMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "softbus mutex init fail");
+        return SOFTBUS_NO_INIT;
+    }
     RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
     RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
     RegistNetIfMgr(LNN_BR_TYPE, CreateNetifMgr);
@@ -852,6 +857,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
+    (void)SoftBusMutexDestroy(&g_dataShareMutex);
 }
 
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)

@@ -14,6 +14,7 @@
  */
 
 #include "lnn_socket_mock.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -40,12 +41,12 @@ int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, 
     return GetSocketMockInterface()->ConnOpenClientSocket(option, bindAddr, isNonBlock);
 }
 
-const SocketInterface* GetSocketInterface(ProtocolType protocolType)
+const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
     return GetSocketMockInterface()->GetSocketInterface(protocolType);
 }
 
-int32_t RegistSocketProtocol(const SocketInterface* interface)
+int32_t RegistSocketProtocol(const SocketInterface *interface)
 {
     return GetSocketMockInterface()->RegistSocketProtocol(interface);
 }

@@ -16,7 +16,8 @@
 #ifndef NET_WORK_MOCK_H
 #define NET_WORK_MOCK_H
 
-
+#include "gtest/gtest.h"
+#include <arpa/inet.h>
 #include <gmock/gmock.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -26,8 +27,6 @@
 #include <stdint.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include "gtest/gtest.h"
-#include <arpa/inet.h>
 
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"

@@ -19,8 +19,8 @@
 #include <sys/time.h>
 
 #include "auth_request.h"
-#include "auth_session_fsm.h"
 #include "auth_session_fsm.c"
+#include "auth_session_fsm.h"
 #include "ble_mock.h"
 #include "softbus_adapter_mem.h"
 
@@ -63,9 +63,9 @@ void AuthSessionFsmTest::TearDownTestCase()
     GTEST_LOG_(INFO) << "AuthSessionFsmTest end";
 }
 
-void AuthSessionFsmTest::SetUp() {}
+void AuthSessionFsmTest::SetUp() { }
 
-void AuthSessionFsmTest::TearDown() {}
+void AuthSessionFsmTest::TearDown() { }
 
 /*
  * @tc.name: TRANSLATE_TO_AUTH_FSM_TEST_001
@@ -108,8 +108,8 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.authId = REQUEST_ID;
     request.type = REQUEST_TYPE_RECONNECT;
-    EXPECT_TRUE(SoftBusGenerateStrHash(DEVICE_ID_HASH, DEVICE_ID_HASH_LEN,
-        request.connInfo.info.bleInfo.deviceIdHash) == SOFTBUS_OK);
+    EXPECT_TRUE(SoftBusGenerateStrHash(
+                    DEVICE_ID_HASH, DEVICE_ID_HASH_LEN, request.connInfo.info.bleInfo.deviceIdHash) == SOFTBUS_OK);
     EXPECT_TRUE(AddAuthRequest(&request) == 0);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -276,7 +276,7 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
 {
-    AuthSessionInfo info = {0};
+    AuthSessionInfo info = { 0 };
     info.nodeInfo.feature = 0xF7CA;
     BleMock bleMock;
     AuthFsm authFsm;
@@ -479,4 +479,3 @@ HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_002, TestSize.Level1
     HandleMsgRecvCloseAck(&authFsm, para1);
 }
 } // namespace OHOS
-
