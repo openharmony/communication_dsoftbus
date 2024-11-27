@@ -17,14 +17,14 @@
 #define LNN_HICHAIN_MOCK_H
 
 #include <gmock/gmock.h>
+#include <map>
 #include <mutex>
 
 #include "device_auth.h"
 #include "device_auth_defines.h"
-#include "softbus_adapter_thread.h"
 #include "lnn_connection_fsm.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
-#include <map>
 
 #define TEST_LEN 1
 #define TEST_SEQ 2
@@ -50,7 +50,7 @@ public:
     MOCK_METHOD0(DestroyDeviceAuthService, void());
     MOCK_METHOD0(GetGaInstance, GroupAuthManager *());
     MOCK_METHOD0(GetGmInstance, DeviceGroupManager *());
-    MOCK_METHOD1(GetLnnTriggerInfo, void (LnnTriggerInfo *));
+    MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
 
     static int32_t InvokeAuthDevice(
         int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback);

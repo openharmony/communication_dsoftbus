@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <securec.h>
 #include "gtest/gtest.h"
+#include <securec.h>
 
-#include "softbus_adapter_file.h"
 #include "softbus_adapter_errcode.h"
+#include "softbus_adapter_file.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
@@ -33,18 +33,10 @@ protected:
     void SetUp();
     void TearDown();
 };
-void AdaptorDsoftbusFileTest::SetUpTestCase(void)
-{
-}
-void AdaptorDsoftbusFileTest::TearDownTestCase(void)
-{
-}
-void AdaptorDsoftbusFileTest::SetUp()
-{
-}
-void AdaptorDsoftbusFileTest::TearDown()
-{
-}
+void AdaptorDsoftbusFileTest::SetUpTestCase(void) { }
+void AdaptorDsoftbusFileTest::TearDownTestCase(void) { }
+void AdaptorDsoftbusFileTest::SetUp() { }
+void AdaptorDsoftbusFileTest::TearDown() { }
 
 /**
  * @tc.name: SoftBusAdapter_ReadFileTest_001
@@ -80,11 +72,11 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
 HWTEST_F(AdaptorDsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Level1)
 {
     int32_t fd = 0;
-    int32_t ret = SoftBusOpenFileWithPerms(NULL, SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE,
-        SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
+    int32_t ret =
+        SoftBusOpenFileWithPerms(NULL, SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     EXPECT_EQ(SOFTBUS_INVALID_FD, ret);
-    fd = SoftBusOpenFileWithPerms("/dev/urandom", SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE,
-        SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
+    fd = SoftBusOpenFileWithPerms(
+        "/dev/urandom", SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     EXPECT_NE(SOFTBUS_INVALID_FD, fd);
     SoftBusCloseFile(fd);
 }
@@ -141,4 +133,4 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
     ret = SoftBusGetFileSize("/dev/test", &fileSize);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
-}
+} // namespace OHOS

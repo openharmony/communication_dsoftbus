@@ -121,6 +121,10 @@ static void NotifyWifi(const char *ifName, const char *localMac,
 static void OriginalScenarioInit(OriginalScenario *scenarioInfo,
     const char *localMac, const char *peerMac, int localPid, int businessType)
 {
+    if (localMac == NULL || peerMac == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid parameter");
+        return;
+    }
     if (strcpy_s(scenarioInfo->localMac, sizeof(scenarioInfo->localMac), localMac) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "set scenarioInfo localMac err");
         return;

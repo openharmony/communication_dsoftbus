@@ -37,14 +37,14 @@ static BusCenterDecisionCenterInterface *BusCenterDecisionCenterInterface()
 }
 
 extern "C" {
-    int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
-    {
-        return BusCenterDecisionCenterInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
-    }
+int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
+{
+    return BusCenterDecisionCenterInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
+}
 
-    int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
-    {
-        return BusCenterDecisionCenterInterface()->LnnGetRemoteNodeInfoById(id, type, info);
-    }
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return BusCenterDecisionCenterInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
 }
 } // namespace OHOS

@@ -124,11 +124,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("ClientBusCenterSdkTest") {
@@ -147,11 +151,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("ClientBusMangerTest") {
@@ -170,11 +178,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("BusCenterHeartbeatSdkTest") {
@@ -193,11 +205,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("BusCenterMetaNodeSdkTest") {
@@ -216,11 +232,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("ClientBusCentManagerTest") {
@@ -264,14 +284,18 @@ if (defined(ohos_lite)) {
     ]
     if (is_standard_system) {
       external_deps = [
-        "access_token:libnativetoken",
-        "access_token:libtoken_setproc",
         "bounds_checking_function:libsec_shared",
         "c_utils:utils",
         "googletest:gmock",
         "googletest:gtest_main",
         "hilog:libhilog",
       ]
+      if (dsoftbus_access_token_feature) {
+        external_deps += [
+          "access_token:libnativetoken",
+          "access_token:libtoken_setproc",
+        ]
+      }
     } else {
       external_deps = [
         "bounds_checking_function:libsec_shared",
@@ -298,11 +322,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("BusCenterServerProxyStandardTest") {
@@ -321,11 +349,15 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   ohos_unittest("BusCenterServerProxyTest") {
@@ -344,25 +376,32 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_single",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
   }
 
   group("unittest") {
     testonly = true
-    deps = [
-      ":BusCenterHeartbeatSdkTest",
-      ":BusCenterMetaNodeSdkTest",
-      ":BusCenterSdkTest",
-      ":BusCenterServerProxyStandardTest",
-      ":BusCenterServerProxyTest",
-      ":BusCenterServerTest",
-      ":ClientBusCentManagerTest",
-      ":ClientBusCenterSdkTest",
-      ":ClientBusMangerTest",
-    ]
+    deps = []
+    if (dsoftbus_access_token_feature) {
+      deps += [
+        ":BusCenterHeartbeatSdkTest",
+        ":BusCenterMetaNodeSdkTest",
+        ":BusCenterSdkTest",
+        ":BusCenterServerProxyStandardTest",
+        ":BusCenterServerProxyTest",
+        ":BusCenterServerTest",
+        ":ClientBusCentManagerTest",
+        ":ClientBusCenterSdkTest",
+        ":ClientBusMangerTest",
+      ]
+    }
   }
 }

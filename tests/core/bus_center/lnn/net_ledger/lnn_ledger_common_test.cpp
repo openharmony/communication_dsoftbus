@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <cstdint>
+#include <gtest/gtest.h>
+#include <securec.h>
 
 #include "bus_center_manager.h"
 #include "lnn_decision_db.h"
@@ -37,15 +37,14 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 
-#define ONE_BIT_MAX_HEX 15
-#define DEVICE_TYPE_MAX_LENGTH 3
-#define LEFT_SHIFT_DEVICE_TYPE_LENGTH  (DEVICE_TYPE_MAX_LENGTH * 4)
+#define ONE_BIT_MAX_HEX               15
+#define DEVICE_TYPE_MAX_LENGTH        3
+#define LEFT_SHIFT_DEVICE_TYPE_LENGTH (DEVICE_TYPE_MAX_LENGTH * 4)
 
 namespace OHOS {
 using namespace testing::ext;
 constexpr char NODE_DEVICE_NAME[] = "node1_test";
-constexpr char INVALID_DEVICE_NAME[] =
-    "ASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJK\
+constexpr char INVALID_DEVICE_NAME[] = "ASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJK\
     LPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJ\
     KLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLP";
 constexpr char DEVICE_TYPE[] = "PAD";
@@ -85,29 +84,23 @@ public:
     void TearDown();
 };
 
-void LNNNetLedgerCommonTest::SetUpTestCase()
-{
-}
+void LNNNetLedgerCommonTest::SetUpTestCase() { }
 
-void LNNNetLedgerCommonTest::TearDownTestCase()
-{
-}
+void LNNNetLedgerCommonTest::TearDownTestCase() { }
 
 void LNNNetLedgerCommonTest::SetUp()
 {
     LNN_LOGI(LNN_TEST, "LNNNetLedgerCommonTest start");
 }
 
-void LNNNetLedgerCommonTest::TearDown()
-{
-}
+void LNNNetLedgerCommonTest::TearDown() { }
 
 /*
-* @tc.name: LNN_DEVICE_INFO_Test_001
-* @tc.desc: lnn device info function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_DEVICE_INFO_Test_001
+ * @tc.desc: lnn device info function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
 {
     DeviceBasicInfo info;
@@ -134,11 +127,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_HUKS_UTILS_Test_001
-* @tc.desc: lnn huks utils function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_HUKS_UTILS_Test_001
+ * @tc.desc: lnn huks utils function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
 {
     struct HksBlob keyAlias;
@@ -152,11 +145,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_CAPABILITY_Test_001
-* @tc.desc: lnn net capability function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_CAPABILITY_Test_001
+ * @tc.desc: lnn net capability function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
 {
     uint32_t capability = 0;
@@ -166,11 +159,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_CAPABILITY_Test_002
-* @tc.desc: lnn net capability function test, LnnSetNetCapability, LnnHasCapability
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_CAPABILITY_Test_002
+ * @tc.desc: lnn net capability function test, LnnSetNetCapability, LnnHasCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_002, TestSize.Level1)
 {
     uint32_t capability = 0;
@@ -212,11 +205,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_CAPABILITY_Test_003
-* @tc.desc: lnn net capability function test, LnnSetNetCapability, LnnClearNetCapability
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_CAPABILITY_Test_003
+ * @tc.desc: lnn net capability function test, LnnSetNetCapability, LnnClearNetCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_003, TestSize.Level1)
 {
     uint32_t capability = 0;
@@ -240,11 +233,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_001
-* @tc.desc: lnn node info function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_001
+ * @tc.desc: lnn node info function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnHasDiscoveryType(nullptr, DISCOVERY_TYPE_WIFI) == false);
@@ -284,11 +277,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_002
-* @tc.desc: lnn node info function test, LnnSetDiscoveryType, LnnHasDiscoveryType, LnnClearDiscoveryType
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_002
+ * @tc.desc: lnn node info function test, LnnSetDiscoveryType, LnnHasDiscoveryType, LnnClearDiscoveryType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_002, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -324,11 +317,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_003
-* @tc.desc: lnn node info function test, LnnSetDeviceUdid, LnnGetDeviceUdid
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_003
+ * @tc.desc: lnn node info function test, LnnSetDeviceUdid, LnnGetDeviceUdid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_003, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -353,11 +346,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_004
-* @tc.desc: lnn node info function test, LnnGetDeviceUuid
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_004
+ * @tc.desc: lnn node info function test, LnnGetDeviceUuid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_004, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -371,11 +364,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_005
-* @tc.desc: lnn node info function testm, LnnSetBtMac, LnnGetBtMac
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_005
+ * @tc.desc: lnn node info function testm, LnnSetBtMac, LnnGetBtMac
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_005, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -393,7 +386,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_005, TestSize.Level1)
     btMac = LnnGetBtMac(&nodeInfo);
     EXPECT_EQ(strcmp(btMac, LOCAL_BT_MAC), 0);
 
-    char* localBtMac = (char *)SoftBusCalloc((MAC_LEN + 1) * sizeof(char));
+    char *localBtMac = (char *)SoftBusCalloc((MAC_LEN + 1) * sizeof(char));
     LnnSetBtMac(&nodeInfo, localBtMac);
     EXPECT_EQ(strcmp(nodeInfo.connectInfo.macAddr, localBtMac), 0);
     SoftBusFree(localBtMac);
@@ -403,11 +396,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_006
-* @tc.desc: lnn node info function test, LnnSetNetIfName, LnnGetNetIfName
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_006
+ * @tc.desc: lnn node info function test, LnnSetNetIfName, LnnGetNetIfName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_006, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -435,11 +428,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_006, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_007
-* @tc.desc: lnn node info function test, LnnSetWiFiIp
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_007
+ * @tc.desc: lnn node info function test, LnnSetWiFiIp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_007, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -451,15 +444,15 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_007, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_008
-* @tc.desc: lnn node info function test, LnnSetMasterUdid, LnnGetMasterUdid
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_008
+ * @tc.desc: lnn node info function test, LnnSetMasterUdid, LnnGetMasterUdid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_008, TestSize.Level1)
 {
     NodeInfo nodeInfo;
-    int32_t  ret = LnnSetMasterUdid(nullptr, MASTER_NODE_UDID);
+    int32_t ret = LnnSetMasterUdid(nullptr, MASTER_NODE_UDID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetMasterUdid(&nodeInfo, MASTER_NODE_UDID);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -470,11 +463,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_008, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_009
-* @tc.desc: lnn node info function test, LnnSetWifiCfg, LnnGetWifiCfg
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_009
+ * @tc.desc: lnn node info function test, LnnSetWifiCfg, LnnGetWifiCfg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_009, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -502,11 +495,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_009, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_010
-* @tc.desc: lnn node info function test, LnnSetChanList5g, LnnGetChanList5g
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_010
+ * @tc.desc: lnn node info function test, LnnSetChanList5g, LnnGetChanList5g
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_010, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -533,11 +526,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_010, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_011
-* @tc.desc: lnn node info function test LnnSetP2pGoMac, LnnGetP2pGoMac
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_011
+ * @tc.desc: lnn node info function test LnnSetP2pGoMac, LnnGetP2pGoMac
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_011, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -561,11 +554,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_011, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_012
-* @tc.desc: lnn node info function test, LnnSetStaFrequency, LnnGetStaFrequency
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_012
+ * @tc.desc: lnn node info function test, LnnSetStaFrequency, LnnGetStaFrequency
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_012, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -584,11 +577,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_012, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_013
-* @tc.desc: lnn node info function test, LnnSetP2pMac, LnnGetP2pMac
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_013
+ * @tc.desc: lnn node info function test, LnnSetP2pMac, LnnGetP2pMac
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_013, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -608,11 +601,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_013, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_014
-* @tc.desc: lnn node info function test, LnnSetDataDynamicLevel, LnnGetDataDynamicLevel
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_014
+ * @tc.desc: lnn node info function test, LnnSetDataDynamicLevel, LnnGetDataDynamicLevel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_014, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -631,11 +624,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_014, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_015
-* @tc.desc: lnn node info function test, LnnSetDataStaticLevel, LnnGetDataStaticLevel
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_015
+ * @tc.desc: lnn node info function test, LnnSetDataStaticLevel, LnnGetDataStaticLevel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_015, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -654,11 +647,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_015, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_016
-* @tc.desc: lnn node info function test, LnnSetDataSwitchLevel, LnnGetDataSwitchLevel
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_016
+ * @tc.desc: lnn node info function test, LnnSetDataSwitchLevel, LnnGetDataSwitchLevel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_016, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -677,11 +670,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_016, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_017
-* @tc.desc: lnn node info function test, LnnSetDataSwitchLength, LnnGetDataSwitchLength
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_017
+ * @tc.desc: lnn node info function test, LnnSetDataSwitchLength, LnnGetDataSwitchLength
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_017, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -700,11 +693,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_017, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_018
-* @tc.desc: lnn node info function test LnnSetWifiDirectAddr, LnnGetWifiDirectAddr
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_018
+ * @tc.desc: lnn node info function test LnnSetWifiDirectAddr, LnnGetWifiDirectAddr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_018, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -722,11 +715,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_018, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_019
-* @tc.desc: lnn node info function test LnnSetStaticCapability, LnnGetStaticCapability
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_019
+ * @tc.desc: lnn node info function test LnnSetStaticCapability, LnnGetStaticCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_019, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -757,16 +750,16 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_019, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_020
-* @tc.desc: lnn node info function test LnnSetPtk
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_020
+ * @tc.desc: lnn node info function test LnnSetPtk
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_020, TestSize.Level1)
 {
     NodeInfo nodeInfo;
-    char remotePtk[PTK_DEFAULT_LEN] = {"12345567890"};
-    char remotePtk2[10] = {"12345"};
+    char remotePtk[PTK_DEFAULT_LEN] = { "12345567890" };
+    char remotePtk2[10] = { "12345" };
 
     LnnDumpRemotePtk(remotePtk, remotePtk2, nullptr);
     int32_t ret = LnnSetPtk(nullptr, remotePtk);
@@ -782,11 +775,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_020, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NODE_INFO_Test_021
-* @tc.desc: lnn node info function test LnnSetScreenStatus
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NODE_INFO_Test_021
+ * @tc.desc: lnn node info function test LnnSetScreenStatus
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_021, TestSize.Level1)
 {
     NodeInfo nodeInfo;
@@ -802,17 +795,17 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_021, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_LEDGER_Test_001
-* @tc.desc: lnn net ledger function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_LEDGER_Test_001
+ * @tc.desc: lnn net ledger function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
 {
     int32_t i;
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
-    uint8_t info[BUF_LEN] = {0};
+    uint8_t info[BUF_LEN] = { 0 };
     EXPECT_TRUE(LnnGetNodeKeyInfo(nullptr, 0, info, BUF_LEN) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, 0, info, BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, KEY_MAX_INDEX - 1, info, BUF_LEN) == SOFTBUS_OK);
@@ -826,11 +819,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_LEDGER_Test_002
-* @tc.desc: lnn net ledger function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_LEDGER_Test_002
+ * @tc.desc: lnn net ledger function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
@@ -843,26 +836,16 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_LEDGER_Test_003
-* @tc.desc: lnn net ledger function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_LEDGER_Test_003
+ * @tc.desc: lnn net ledger function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
 {
-    static int32_t nodeKeyInfoLenTable[] = {
-        UDID_BUF_LEN,
-        UUID_BUF_LEN,
-        UDID_BUF_LEN,
-        MAC_LEN,
-        IP_LEN,
-        DEVICE_NAME_BUF_LEN,
-        LNN_COMMON_LEN,
-        LNN_COMMON_LEN,
-        SOFTBUS_INVALID_NUM,
-        DATA_CHANGE_FLAG_BUF_LEN,
-        SHORT_ADDRESS_MAX_LEN
-    };
+    static int32_t nodeKeyInfoLenTable[] = { UDID_BUF_LEN, UUID_BUF_LEN, UDID_BUF_LEN, MAC_LEN, IP_LEN,
+        DEVICE_NAME_BUF_LEN, LNN_COMMON_LEN, LNN_COMMON_LEN, SOFTBUS_INVALID_NUM, DATA_CHANGE_FLAG_BUF_LEN,
+        SHORT_ADDRESS_MAX_LEN };
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     for (int32_t i = 0; i < KEY_MAX_INDEX; i++) {
         EXPECT_TRUE(LnnGetNodeKeyInfoLen(i) == nodeKeyInfoLenTable[i]);
@@ -871,11 +854,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_NET_LEDGER_Test_004
-* @tc.desc: lnn net ledger function test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_NET_LEDGER_Test_004
+ * @tc.desc: lnn net ledger function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
@@ -895,32 +878,19 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_Test_001
-* @tc.desc: lnn local key table test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_Test_001
+ * @tc.desc: lnn local key table test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
-    static InfoKey getLocalStringInfoKeyTable[] = {
-        STRING_KEY_HICE_VERSION,
-        STRING_KEY_DEV_UDID,
-        STRING_KEY_NETWORKID,
-        STRING_KEY_UUID,
-        STRING_KEY_DEV_TYPE,
-        STRING_KEY_DEV_NAME,
-        STRING_KEY_BT_MAC,
-        STRING_KEY_WLAN_IP,
-        STRING_KEY_NET_IF_NAME,
-        STRING_KEY_MASTER_NODE_UDID,
-        STRING_KEY_NODE_ADDR,
-        STRING_KEY_P2P_MAC,
-        STRING_KEY_P2P_GO_MAC,
-        STRING_KEY_OFFLINE_CODE,
-        STRING_KEY_WIFIDIRECT_ADDR
-    };
-    char buf[UDID_BUF_LEN] = {0};
+    static InfoKey getLocalStringInfoKeyTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_NETWORKID,
+        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_WLAN_IP,
+        STRING_KEY_NET_IF_NAME, STRING_KEY_MASTER_NODE_UDID, STRING_KEY_NODE_ADDR, STRING_KEY_P2P_MAC,
+        STRING_KEY_P2P_GO_MAC, STRING_KEY_OFFLINE_CODE, STRING_KEY_WIFIDIRECT_ADDR };
+    char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret;
     uint32_t i;
     LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, LOCAL_UDID);
@@ -937,11 +907,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_Test_002
-* @tc.desc: lnn local key table test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_Test_002
+ * @tc.desc: lnn local key table test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
@@ -969,25 +939,17 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_Test_003
-* @tc.desc: lnn local key table test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_Test_003
+ * @tc.desc: lnn local key table test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
-    static InfoKey getLocalNumInfoKeyTable[] = {
-        NUM_KEY_SESSION_PORT,
-        NUM_KEY_AUTH_PORT,
-        NUM_KEY_PROXY_PORT,
-        NUM_KEY_NET_CAP,
-        NUM_KEY_DISCOVERY_TYPE,
-        NUM_KEY_DEV_TYPE_ID,
-        NUM_KEY_MASTER_NODE_WEIGHT,
-        NUM_KEY_P2P_ROLE,
-        NUM_KEY_STATIC_CAP_LEN
-    };
+    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT,
+        NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_DEV_TYPE_ID, NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE,
+        NUM_KEY_STATIC_CAP_LEN };
     int32_t ret, info;
     LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
     for (uint32_t i = 0; i < sizeof(getLocalNumInfoKeyTable) / sizeof(InfoKey); i++) {
@@ -999,11 +961,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_Test_004
-* @tc.desc: lnn local key table test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_Test_004
+ * @tc.desc: lnn local key table test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
@@ -1025,11 +987,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LOCAL_LEDGER_Test_005
-* @tc.desc: lnn local key table test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LOCAL_LEDGER_Test_005
+ * @tc.desc: lnn local key table test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
 {
     int64_t info;

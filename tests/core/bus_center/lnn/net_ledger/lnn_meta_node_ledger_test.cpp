@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
+#include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_id.h"
-#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -49,13 +49,9 @@ public:
     void TearDown();
 };
 
-void LNNMetaNodeLedgerTest::SetUpTestCase()
-{
-}
+void LNNMetaNodeLedgerTest::SetUpTestCase() { }
 
-void LNNMetaNodeLedgerTest::TearDownTestCase()
-{
-}
+void LNNMetaNodeLedgerTest::TearDownTestCase() { }
 
 void LNNMetaNodeLedgerTest::SetUp()
 {
@@ -70,11 +66,11 @@ void LNNMetaNodeLedgerTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_ACTIVE_META_NODE_Test_001
-* @tc.desc: lnn active meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ACTIVE_META_NODE_Test_001
+ * @tc.desc: lnn active meta node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
 {
     MetaNodeConfigInfo info;
@@ -82,7 +78,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
     info.addrNum = CONNECTION_ADDR_WLAN;
     (void)strncpy_s(info.udid, UUID_BUF_LEN, NODE_UDID, strlen(NODE_UDID));
     (void)strncpy_s(info.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
     int32_t ret = LnnActiveMetaNode(&info, metaNodeId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     info.addrNum = ADDR_NUM;
@@ -93,11 +89,11 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_GET_ALL_META_NODE_INFO_Test_001
-* @tc.desc: lnn get all meta node info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_GET_ALL_META_NODE_INFO_Test_001
+ * @tc.desc: lnn get all meta node info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Level1)
 {
     MetaNodeInfo infos[MAX_META_NODE_NUM];
@@ -111,11 +107,11 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_DEACTIVE_META_NODE_Test_001
-* @tc.desc: lnn deactive meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_DEACTIVE_META_NODE_Test_001
+ * @tc.desc: lnn deactive meta node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnDeactiveMetaNode(META_NODE_ID);
@@ -141,7 +137,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
     info.addrNum = CONNECTION_ADDR_WLAN;
     (void)strncpy_s(info.udid, UUID_BUF_LEN, NODE_UDID, strlen(NODE_UDID));
     (void)strncpy_s(info.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
 
     int32_t ret = LnnActiveMetaNode(&info, metaNodeId);
     networkId = info.bypassInfo;
@@ -167,7 +163,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_002, TestSize.Level1
     info.addrNum = CONNECTION_ADDR_WLAN;
     (void)strncpy_s(info.udid, UUID_BUF_LEN, NODE_UDID, strlen(NODE_UDID));
     (void)strncpy_s(info.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
 
     int32_t ret = LnnActiveMetaNode(&info, metaNodeId);
     networkId = info.bypassInfo;

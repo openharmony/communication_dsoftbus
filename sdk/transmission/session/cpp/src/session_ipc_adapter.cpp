@@ -17,39 +17,36 @@
 
 #include <string>
 
-#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
-#include "tokenid_kit.h"
+#include "softbus_error_code.h"
 #include "trans_log.h"
 
-bool CheckIsSystemService(void)
+int32_t SoftBusGetSelfTokenId(uint32_t *selfTokenId)
 {
-    uint32_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
-    auto type = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    TRANS_LOGD(TRANS_SDK, "access token type=%{public}d", type);
-    if (type == OHOS::Security::AccessToken::TOKEN_NATIVE) {
-        return true;
+    if (selfTokenId == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, selfTokenId is nullptr");
+        return SOFTBUS_INVALID_PARAM;
     }
-    return false;
+    *selfTokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    return SOFTBUS_OK;
 }
 
-bool CheckIsNormalApp(const char *sessionName)
+int32_t SoftBusGetCallingTokenId(uint32_t *callingTokenId)
 {
-#define DBINDER_BUS_NAME_PREFIX "DBinder"
-    // The authorization of dbind is granted through Samgr, and there is no control here
-    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
-        return false;
+    if (callingTokenId == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, callingTokenId is nullptr");
+        return SOFTBUS_INVALID_PARAM;
     }
-    uint64_t selfToken = OHOS::IPCSkeleton::GetSelfTokenID();
-    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(static_cast<uint32_t>(selfToken));
-    if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        return false;
-    } else if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        bool isSystemApp = OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken);
-        if (isSystemApp) {
-            return false;
-        }
+    *callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetCallingFullTokenId(uint64_t *callingFullTokenId)
+{
+    if (callingFullTokenId == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, callingFullTokenId is nullptr");
+        return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_SDK, "is normal app");
-    return true;
+    *callingFullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
+    return SOFTBUS_OK;
 }

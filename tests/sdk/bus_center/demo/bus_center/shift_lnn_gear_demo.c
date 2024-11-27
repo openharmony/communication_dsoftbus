@@ -23,6 +23,7 @@
  */
 
 #include <stdint.h>
+
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
@@ -31,11 +32,7 @@ int32_t main(void)
     const char *pkgName = "pkgName.demo";
     const char *callerId = "1";
     const char *networkId = "765432101234567898765432123456789876543210123654789876543210123";
-    GearMode mode = {
-        .cycle = MID_FREQ_CYCLE,
-        .duration = DEFAULT_DURATION,
-        .wakeupFlag = false
-    };
+    GearMode mode = { .cycle = MID_FREQ_CYCLE, .duration = DEFAULT_DURATION, .wakeupFlag = false };
     // Modify heartbeat parameters and trigger a temporary heartbeat.
     if (ShiftLNNGear(pkgName, callerId, networkId, &mode) != 0) {
         printf("[demo]ShiftLNNGear fail");

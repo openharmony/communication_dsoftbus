@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,6 @@ import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
-dsoftbus_root_path = "../../../../../.."
 
 ohos_unittest("SoftbusPermissionTest") {
   module_out_path = module_output_path
@@ -68,6 +67,12 @@ ohos_unittest("SoftbusPermissionACLTest") {
       "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libaccesstoken_sdk",
+        "access_token:libtoken_setproc",
+      ]
+    }
     if (!defined(global_parts_info) ||
         defined(global_parts_info.ability_ability_runtime)) {
       external_deps += [ "ability_runtime:app_manager" ]
@@ -93,8 +98,8 @@ ohos_unittest("SoftbusPermissionACLTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":SoftbusPermissionACLTest",
-    ":SoftbusPermissionTest",
-  ]
+  deps = [ ":SoftbusPermissionTest" ]
+  if (dsoftbus_access_token_feature) {
+    deps += [ ":SoftbusPermissionACLTest" ]
+  }
 }
