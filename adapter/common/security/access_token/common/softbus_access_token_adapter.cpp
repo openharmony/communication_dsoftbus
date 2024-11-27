@@ -26,7 +26,6 @@
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
-#include "trans_log.h"
 
 constexpr int32_t JUDG_CNT = 1;
 const std::string SAMGR_PROCESS_NAME = "samgr";
@@ -50,11 +49,8 @@ extern "C" {
 bool SoftBusCheckIsSystemService(uint32_t tokenId)
 {
     auto type = AccessTokenKit::GetTokenTypeFlag(tokenId);
-    TRANS_LOGD(TRANS_SDK, "access token type=%{public}d", type);
-    if (type == ATokenTypeEnum::TOKEN_NATIVE) {
-        return true;
-    }
-    return false;
+    COMM_LOGD(COMM_ADAPTER, "access token type=%{public}d", type);
+    return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
 bool SoftBusCheckIsNormalApp(uint32_t tokenId, uint64_t fullTokenId, const char *sessionName)
@@ -79,7 +75,7 @@ bool SoftBusCheckIsNormalApp(uint32_t tokenId, uint64_t fullTokenId, const char 
             return false;
         }
     }
-    COMM_LOGI(COMM_SVC, "The caller is a normal app");
+    COMM_LOGI(COMM_ADAPTER, "The caller is a normal app");
     return true;
 }
 
@@ -98,12 +94,12 @@ bool SoftBusCheckIsAccessAndRecordAccessToken(uint32_t tokenId, const char *perm
         int32_t tmp =
             PrivacyKit::AddPermissionUsedRecord(tokenId, permission, successCnt, failCnt);
         if (tmp != Security::AccessToken::RET_SUCCESS) {
-            COMM_LOGW(COMM_SVC,
+            COMM_LOGW(COMM_ADAPTER,
                 "AddPermissionUsedRecord failed, permissionName=%{public}s, successCnt=%{public}d, failCnt=%{public}d, "
                 "tmp=%{public}d", permission, successCnt, failCnt, tmp);
         }
     }
-    return (ret == Security::AccessToken::PERMISSION_GRANTED) ? true : false;
+    return ret == Security::AccessToken::PERMISSION_GRANTED;
 }
 
 int32_t SoftBusCalcPermType(uint32_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid)
@@ -155,8 +151,7 @@ void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &res
     }
 }
 
-void SoftBusRegisterDataSyncPermission(
-    const uint32_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
+void SoftBusRegisterDataSyncPermission(uint32_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     if (permissionName == nullptr || pkgName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, permissionName or pkgName is nullptr");
@@ -222,7 +217,7 @@ void SoftBusGetTokenNameByTokenType(
         case ATokenTypeEnum::TOKEN_SHELL:
         default: {
             COMM_LOGW(COMM_PERM, "invalid tokenType=%{public}d", (int32_t)tokenType);
-            return;
+            break;
         }
     }
 }
