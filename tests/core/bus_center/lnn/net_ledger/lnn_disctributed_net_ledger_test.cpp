@@ -146,7 +146,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
     }
     for (i = 0; i < sizeof(keyStringTable) / sizeof(InfoKey); i++) {
         ret = LnnGetRemoteStrInfo(NODE2_NETWORK_ID, keyStringTable[i], buf, UDID_BUF_LEN);
-        EXPECT_TRUE(ret == SOFTBUS_ERR);
+        EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     }
 }
 
