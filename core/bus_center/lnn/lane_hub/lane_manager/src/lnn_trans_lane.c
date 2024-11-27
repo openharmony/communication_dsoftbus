@@ -1910,9 +1910,9 @@ static void DestroyRequestNodeList(ListNode *reqInfoList)
     }
 }
 
-static int32_t GetNodeToNotifyQosEvent(ListNode *reqInfoList, const char *peerNetworkId)
+static int32_t GetNodeToNotifyQosEvent(const char *peerNetworkId, ListNode *reqInfoList)
 {
-    if (reqInfoList == NULL) {
+    if (peerNetworkId == NULL || reqInfoList == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (Lock() != SOFTBUS_OK) {
@@ -1970,7 +1970,7 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (laneLinkInfo->type != LANE_P2P) {
+    if (laneLinkInfo->type != LANE_P2P && laneLinkInfo->type != LANE_HML) {
         return SOFTBUS_OK;
     }
     char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
@@ -1981,7 +1981,7 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
     }
     ListNode reqInfoList;
     ListInit(&reqInfoList);
-    ret = GetNodeToNotifyQosEvent(&reqInfoList, peerNetworkId);
+    ret = GetNodeToNotifyQosEvent(peerNetworkId, &reqInfoList);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get list fail, ret=%{public}d", ret);
         return ret;
