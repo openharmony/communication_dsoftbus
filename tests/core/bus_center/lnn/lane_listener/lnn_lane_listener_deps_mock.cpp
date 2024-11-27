@@ -100,4 +100,5 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
 {
     return GetLaneListenerDepsInterface()->HandleLaneQosChange(laneLinkInfo);
 }
+}
 } // namespace OHOS
