@@ -1926,7 +1926,7 @@ static int32_t GetNodeToNotifyQosEvent(ListNode *reqInfoList, const char *peerNe
             item->allocInfo.qosRequire.minBW != DB_MAGIC_NUMBER) {
             continue;
         }
-        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u", item->laneReqId);
+        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, laneId=%{public}" PRIu64 "", item->laneReqId, item->laneId);
         TransReqInfo *info = (TransReqInfo *)SoftBusCalloc(sizeof(TransReqInfo));
         if (info == NULL) {
             ret = SOFTBUS_MALLOC_ERR;
@@ -1948,15 +1948,19 @@ static int32_t GetNodeToNotifyQosEvent(ListNode *reqInfoList, const char *peerNe
     return ret;
 }
 
-static bool NeedToNotify(uint64_t laneId)
+static bool NeedToNotify(const TransReqInfo *info)
 {
+    if (info == NULL) {
+        return false;
+    }
     LaneResource laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
-    int32_t ret = FindLaneResourceByLaneId(laneId, &laneLinkInfo);
+    int32_t ret = FindLaneResourceByLaneId(info->laneId, &laneLinkInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "find laneId=%{public}" PRIu64 " fail, ret=%{public}d", laneId, ret);
         return false;
     }
+    LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, type=%{public}d", info->laneReqId, laneLinkInfo.link.type);
     return laneLinkInfo.link.type == LANE_BR;
 }
 
@@ -1985,8 +1989,7 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &reqInfoList, TransReqInfo, node) {
-        LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, laneId=%{public}" PRIu64 "", item->laneReqId, item->laneId);
-        if (item->listener.onLaneQosEvent != NULL && NeedToNotify(item->laneId)) {
+        if (item->listener.onLaneQosEvent != NULL && NeedToNotify(item)) {
             item->listener.onLaneQosEvent(item->laneReqId, LANE_OWNER_OTHER, LANE_QOS_BW_HIGH);
         }
     }
