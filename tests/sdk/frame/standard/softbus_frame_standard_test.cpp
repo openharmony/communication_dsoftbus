@@ -109,6 +109,11 @@ public:
     {
         return SOFTBUS_OK;
     }
+    int32_t OnClientChannelOnQos([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
+        [[maybe_unused]] QoSEvent event, [[maybe_unused]] const QosTV *qos, [[maybe_unused]] uint32_t count) override
+    {
+        return SOFTBUS_OK;
+    }
 };
 
 namespace {
@@ -501,6 +506,8 @@ HWTEST_F(SoftBusServerProxyFrameTest, ISoftBusClientTest001, TestSize.Level1)
     ret = g_stub->OnClientTransLimitChange(testInt, testUint);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_stub->OnChannelBind(testInt, testInt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_stub->OnClientChannelOnQos(testInt, testInt, QOS_SATISFIED, nullptr, testUint);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
