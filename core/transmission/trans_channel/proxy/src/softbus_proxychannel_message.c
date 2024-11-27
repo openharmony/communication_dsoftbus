@@ -358,7 +358,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
 
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
-    if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inData == 0) {
+    if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -491,6 +491,11 @@ static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return NULL;
+    }
+
     cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
@@ -538,15 +543,15 @@ EXIT:
 
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
-    cJSON *root = NULL;
-    char *buf = NULL;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, NULL, TRANS_CTRL, "invalid param.");
+
     AppInfo *appInfo = &(chan->appInfo);
     if (appInfo == NULL || appInfo->appType == APP_TYPE_NOT_CARE) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return NULL;
     }
 
-    root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
@@ -585,7 +590,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
         }
     }
 
-    buf = cJSON_PrintUnformatted(root);
+    char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     return buf;
 }

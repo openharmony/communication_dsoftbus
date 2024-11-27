@@ -659,6 +659,7 @@ int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetwor
 
 std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, "", CONN_WIFI_DIRECT, "remoteNetworkId is null");
     std::string remoteOsVersion;
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, "", CONN_WIFI_DIRECT, "nodeInfo malloc err");
@@ -675,6 +676,8 @@ std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
 
 int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
+        "remoteNetworkId is null");
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "nodeInfo malloc err");
     auto ret = LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);

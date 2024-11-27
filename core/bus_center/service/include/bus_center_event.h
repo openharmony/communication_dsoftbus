@@ -55,6 +55,7 @@ typedef enum {
     LNN_EVENT_LP_EVENT_REPORT,
     LNN_EVENT_LANE_VAP_CHANGE,
     LNN_EVENT_DATA_SHARE_STATE_CHANGE,
+    LNN_EVENT_NODE_NET_TYPE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -242,6 +243,12 @@ typedef struct {
     int32_t vapPreferChannel;
 } LnnLaneVapChangeEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    ConnectionAddrType addrType;
+    const char *networkId;
+} LnnNodeNetTypeInfo;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 int32_t LnnInitBusCenterEvent(void);
@@ -299,6 +306,8 @@ void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
 void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
 
 void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
+
+void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType);
 
 #ifdef __cplusplus
 }

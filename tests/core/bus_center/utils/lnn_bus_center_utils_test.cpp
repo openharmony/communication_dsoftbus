@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
-#include "softbus_def.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -53,23 +53,23 @@ public:
     void TearDown();
 };
 
-void LNNConnAddrUtilsTest::SetUpTestCase() {}
+void LNNConnAddrUtilsTest::SetUpTestCase() { }
 
-void LNNConnAddrUtilsTest::TearDownTestCase() {}
+void LNNConnAddrUtilsTest::TearDownTestCase() { }
 
 void LNNConnAddrUtilsTest::SetUp()
 {
     LNN_LOGI(LNN_TEST, "LNNConnAddrUtilsTest start");
 }
 
-void LNNConnAddrUtilsTest::TearDown() {}
+void LNNConnAddrUtilsTest::TearDown() { }
 
 /*
-* @tc.name: LNN_IS_SAME_CONNECTION_ADDR_Test_001
-* @tc.desc: lnn is same connection addr test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_IS_SAME_CONNECTION_ADDR_Test_001
+ * @tc.desc: lnn is same connection addr test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
 {
     ConnectionAddr addr1;
@@ -120,11 +120,11 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_CONVERT_ADDR_TO_OPTION_Test_001
-* @tc.desc: lnn convert addr to option test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONVERT_ADDR_TO_OPTION_Test_001
+ * @tc.desc: lnn convert addr to option test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_ADDR_TO_OPTION_Test_001, TestSize.Level1)
 {
     ConnectionAddr addr;
@@ -150,11 +150,11 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_ADDR_TO_OPTION_Test_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_CONVERT_OPTION_TO_ADDR_Test_001
-* @tc.desc: lnn convert option to addr test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONVERT_OPTION_TO_ADDR_Test_001
+ * @tc.desc: lnn convert option to addr test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_OPTION_TO_ADDR_Test_001, TestSize.Level1)
 {
     ConnectionAddr addr;
@@ -180,11 +180,11 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_OPTION_TO_ADDR_Test_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001
-* @tc.desc: lnn convert option to addr test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001
+ * @tc.desc: lnn convert option to addr test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnConvAddrTypeToDiscType(CONNECTION_ADDR_WLAN) == DISCOVERY_TYPE_WIFI);
@@ -196,11 +196,11 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001, TestSiz
 }
 
 /*
-* @tc.name: LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001
-* @tc.desc: lnn disc type to conn addr type test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001
+ * @tc.desc: lnn disc type to conn addr type test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnDiscTypeToConnAddrType(DISCOVERY_TYPE_WIFI) == CONNECTION_ADDR_WLAN);
@@ -210,11 +210,11 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001, TestSiz
 }
 
 /*
-* @tc.name: LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001
-* @tc.desc: lnn conver addr to auth conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001
+ * @tc.desc: lnn conver addr to auth conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001, TestSize.Level1)
 {
     ConnectionAddr addr;
@@ -240,11 +240,11 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001, TestS
 }
 
 /*
-* @tc.name: LNN_CONVER_AUTH_CONN_INFO_TO_ADDR_Test_001
-* @tc.desc: lnn conver addr to auth conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CONVER_AUTH_CONN_INFO_TO_ADDR_Test_001
+ * @tc.desc: lnn conver addr to auth conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVER_AUTH_CONN_INFO_TO_ADDR_Test_001, TestSize.Level1)
 {
     ConnectionAddr addr;

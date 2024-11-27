@@ -32,6 +32,10 @@
 namespace OHOS {
 int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
 {
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = Remote();
     TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
         SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");

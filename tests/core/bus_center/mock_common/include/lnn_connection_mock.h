@@ -16,6 +16,9 @@
 #ifndef LNN_CONNECTION_MOCK_H
 #define LNN_CONNECTION_MOCK_H
 
+#include <gmock/gmock.h>
+#include <mutex>
+
 #include "auth_common.h"
 #include "disc_interface.h"
 #include "lnn_node_info.h"
@@ -23,8 +26,6 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
-#include <gmock/gmock.h>
-#include <mutex>
 
 namespace OHOS {
 class LnnConnectInterface {
@@ -35,7 +36,8 @@ public:
     virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
     virtual void ConnUnSetConnectCallback(ConnModule moduleId) = 0;
-    virtual int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result) = 0;
+    virtual int32_t ConnConnectDevice(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result) = 0;
     virtual int32_t ConnDisconnectDevice(uint32_t connectionId) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data) = 0;

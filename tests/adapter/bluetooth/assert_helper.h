@@ -49,16 +49,18 @@ public:
         }
         return result;
     }
+
 protected:
     // static c string
     const char *identifier;
+
 private:
     int32_t id;
 };
 
 class StRecordCtx : public RecordCtx {
 public:
-    explicit StRecordCtx(const char *identifier) : RecordCtx(identifier), st(-1) {}
+    explicit StRecordCtx(const char *identifier) : RecordCtx(identifier), st(-1) { }
 
     bool Update(int32_t id, int32_t stParam)
     {
@@ -85,6 +87,7 @@ public:
         this->st = -1;
         return result;
     }
+
 private:
     int32_t st;
 };
@@ -120,6 +123,7 @@ public:
         Reset();
         return result;
     }
+
 private:
     SoftBusBtAddr addrVal;
     void Reset()
@@ -130,7 +134,7 @@ private:
 
 class IntRecordCtx : public StRecordCtx {
 public:
-    explicit IntRecordCtx(const char *identifier) : StRecordCtx(identifier), val(-1) {}
+    explicit IntRecordCtx(const char *identifier) : StRecordCtx(identifier), val(-1) { }
 
     bool Update(int32_t id, int32_t st, int32_t valParam)
     {
@@ -157,6 +161,7 @@ public:
         this->val = -1;
         return result;
     }
+
 private:
     int32_t val;
 };

@@ -42,8 +42,8 @@ int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callb
     return GetAsyncInterface()->LnnAsyncCallbackHelper(looper, callback, para);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetAsyncInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }

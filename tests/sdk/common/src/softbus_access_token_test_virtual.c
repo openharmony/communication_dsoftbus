@@ -14,9 +14,8 @@
  */
 #include "softbus_access_token_test.h"
 
-void SetAceessTokenPermission(const char* processName)
+void SetAceessTokenPermission(const char *processName)
 {
     (void)processName;
     return;
 }
-

@@ -248,6 +248,11 @@ int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
     return GetServiceInterface()->LnnSubscribeAccountBootEvent(handle);
 }
 
+void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)
+{
+    return GetServiceInterface()->LnnNotifyOnlineNetType(networkId, addrType);
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {

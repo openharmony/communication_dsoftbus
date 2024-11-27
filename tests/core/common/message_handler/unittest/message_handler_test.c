@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "comm_log.h"
 
 #define CASE_ONE_WHAT   1
 #define CASE_TWO_WHAT   2
