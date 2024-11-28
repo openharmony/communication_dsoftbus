@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "lnn_heartbeat_utils.h"
+#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +29,8 @@ int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type);
 int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *randPos, int32_t num);
 int32_t LnnSendBroadcastInfoToLp(void);
 int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len);
+int32_t EncryptUserId(uint8_t *advUserId, uint32_t len, int32_t userId);
+int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len);
 
 void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnBleHbUnregDataLevelChangeCb(void);

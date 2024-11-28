@@ -189,6 +189,10 @@
 
 #define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
+/* userId */
+#define USERID_CHECKSUM "USERID_CHECKSUM"
+#define USERID "USERID"
+
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
 {
@@ -1984,6 +1988,9 @@ static void UpdateLocalNetBrMac(void)
 #define USERID_CHECKSUM_HEXSTRING_LEN 9
 static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
 {
+    if (!JSON_AddInt32ToObject(json, USERID, nodeInfo->userId)) {
+        AUTH_LOGW(AUTH_FSM, "pack userId fail");
+    }
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = {0};
     int32_t ret = ConvertBytesToHexString(userIdCheckSumHexStr, USERID_CHECKSUM_HEXSTRING_LEN,
         nodeInfo->userIdCheckSum, sizeof(nodeInfo->userIdCheckSum));
@@ -1991,7 +1998,7 @@ static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
         AUTH_LOGE(AUTH_FSM, "ConvertBytesToHexString failed.");
         return ret;
     }
-    if (!JSON_AddStringToObject(json, "useridchecksum", userIdCheckSumHexStr)) {
+    if (!JSON_AddStringToObject(json, USERID_CHECKSUM, userIdCheckSumHexStr)) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
         return SOFTBUS_CREATE_JSON_ERR;
     }
@@ -2100,8 +2107,8 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
 static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
 {
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = {0};
-
-    if (!JSON_GetStringFromOject(json, "useridchecksum", userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
+    OptInt(json, USERID, &nodeInfo->userId, 0);
+    if (!JSON_GetStringFromOject(json, USERID_CHECKSUM, userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
         AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromOject failed!");
         return;
     }

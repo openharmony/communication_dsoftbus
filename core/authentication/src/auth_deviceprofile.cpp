@@ -155,6 +155,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     AnonymizeFree(anonyDeviceIdHash);
     return false;
 }
+
 static void DumpAccountId(int64_t localAccountId, int64_t peerAccountId)
 {
     char localAccountString[LONG_TO_STRING_MAX_LEN] = {0};
@@ -194,7 +195,7 @@ static bool IsSameAccount(int64_t accountId)
     return false;
 }
 
-static void InsertDpSameAccount(const std::string peerUdid)
+static void InsertDpSameAccount(const std::string peerUdid, int32_t peerUserId)
 {
     OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
     OHOS::DistributedDeviceProfile::Accesser accesser;
@@ -215,6 +216,9 @@ static void InsertDpSameAccount(const std::string peerUdid)
     }
     accesser.SetAccesserAccountId(accountInfo.uid_);
     accessee.SetAccesseeDeviceId(peerUdid);
+    if (peerUserId != 0) {
+        accessee.SetAccesseeUserId(peerUserId);
+    }
     accessee.SetAccesseeAccountId(accountInfo.uid_);
     accessControlProfile.SetBindType((uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT);
     accessControlProfile.SetDeviceIdType((uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID);
@@ -231,11 +235,12 @@ static void InsertDpSameAccount(const std::string peerUdid)
     }
     char *anonyUdid = nullptr;
     Anonymize(peerUdid.c_str(), &anonyUdid);
-    LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), accesser.GetAccesserUserId(), accessee.GetAccesseeUserId());
     AnonymizeFree(anonyUdid);
 }
 
-void UpdateDpSameAccount(int64_t accountId, const char *deviceId)
+void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId)
 {
     if (deviceId == nullptr) {
         LNN_LOGE(LNN_STATE, "deviceId is null");
@@ -243,7 +248,7 @@ void UpdateDpSameAccount(int64_t accountId, const char *deviceId)
     }
     std::string peerUdid(deviceId);
     if (IsSameAccount(accountId)) {
-        InsertDpSameAccount(peerUdid);
+        InsertDpSameAccount(peerUdid, peerUserId);
     }
 }
 

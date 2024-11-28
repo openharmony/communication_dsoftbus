@@ -21,10 +21,11 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     return true;
 }
 
-void UpdateDpSameAccount(int64_t accountId, const char *deviceId)
+void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId)
 {
     (void)accountId;
     (void)deviceId;
+    (void)peerUserId;
 }
 
 void DelNotTrustDevice(const char *udid)

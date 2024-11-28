@@ -506,29 +506,37 @@ static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t
     return false;
 }
 
-static void UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
+static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
 {
-    if (hbResp == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "hbResp is NULL");
-        return;
+    if (deviceInfo == NULL || hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "deviceInfo or hbResp is NULL");
+        return SOFTBUS_INVALID_PARAM;
     }
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
     if (memcmp(hbResp->userIdCheckSum, userIdCheckSum, USERID_CHECKSUM_LEN) == 0) {
         LNN_LOGI(LNN_HEART_BEAT, "checkSum is null no need update");
-        return;
+        return SOFTBUS_OK;
     }
     int32_t ret = memcpy_s(deviceInfo->userIdCheckSum, USERID_CHECKSUM_LEN, hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "memcpy failed");
     }
+    uint8_t noEncryptUserId[USERID_LEN] = {0xFF, 0xFF, 0xFF, 0xFF};
+    if (memcmp(noEncryptUserId, hbResp->advUserId, USERID_LEN) == 0) {
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    uint8_t defaultUserId[USERID_LEN] = {0};
+    if ((memcmp(defaultUserId, hbResp->advUserId, USERID_LEN) != 0) &&
+        DecryptUserId(deviceInfo, hbResp->advUserId, USERID_LEN) != SOFTBUS_OK) {
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
-    if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because resp data");
-        return true;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
+        true, LNN_HEART_BEAT,  "ble don't support ble direct online");
     int32_t ret, stateVersion;
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -558,7 +566,8 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
     (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
     (void)SetDeviceScreenStatus(&deviceInfo, hbResp->isScreenOn);
-    UpdateUserIdCheckSum(&deviceInfo, hbResp);
+    LNN_CHECK_AND_RETURN_RET_LOGE(UpdateUserIdCheckSum(&deviceInfo, hbResp) == SOFTBUS_OK,
+        true, LNN_HEART_BEAT, "don't support ble direct online because UpdateUserIdCheckSum fail");
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         *connectReason = UPDATE_REMOTE_DEVICE_INFO_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);

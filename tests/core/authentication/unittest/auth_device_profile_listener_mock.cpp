@@ -61,5 +61,20 @@ void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
 {
     return GetInterface()->NotifyRemoteDevOffLineByUserId(userId, udid);
 }
+
+bool LnnIsLocalSupportBurstFeature(void)
+{
+    return GetInterface()->LnnIsLocalSupportBurstFeature();
+}
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return GetInterface()->GetActiveOsAccountIds();
+}
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
 }
 } // namespace OHOS

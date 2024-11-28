@@ -124,3 +124,19 @@ int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *
     (void)len;
     return SOFTBUS_OK;
 }
+
+int32_t EncryptUserId(uint8_t *advUserId, uint32_t len, int32_t userId)
+{
+    (void)userId;
+    (void)len;
+    (void)advUserId;
+    return SOFTBUS_OK;
+}
+
+int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len)
+{
+    (void)deviceInfo;
+    (void)advUserId;
+    (void)len;
+    return SOFTBUS_OK;
+}
