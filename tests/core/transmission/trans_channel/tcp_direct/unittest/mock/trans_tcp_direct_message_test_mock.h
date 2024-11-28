@@ -127,7 +127,7 @@ public:
     MOCK_METHOD4(TransTdcOnMsgReceived, int32_t (const char *pkgName, int32_t pid,
         int32_t channelId, TransReceiveData *receiveData));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
-    MOCK_METHOD1(TransCheckServerAccessControl, int64_t (uint64_t callingTokenId));
+    MOCK_METHOD1(TransCheckServerAccessControl, int32_t (uint64_t callingTokenId));
     MOCK_METHOD3(TransTdcOnChannelClosed, int32_t (const char *pkgName, int32_t pid, int32_t channelId));
 };
 } // namespace OHOS
