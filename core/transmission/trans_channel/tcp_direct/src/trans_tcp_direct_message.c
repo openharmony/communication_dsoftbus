@@ -1295,7 +1295,7 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
         "freeBufferLen=%{public}zu less than bufferSize=%{public}d. channelId=%{public}d", len, bufferSize, channelId);
 
     int32_t totalRecvLen = 0;
-    while (totalRecvLen  < bufferSize) {
+    while (totalRecvLen < bufferSize) {
         int32_t recvLen = ConnRecvSocketData(fd, buffer, bufferSize - totalRecvLen, 0);
         if (recvLen < 0) {
             TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, channelId=%{public}d, retLen=%{public}d, total=%{public}d, "
