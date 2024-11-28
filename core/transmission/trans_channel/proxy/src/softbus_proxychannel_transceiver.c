@@ -699,11 +699,11 @@ static int32_t TransProxyConnExistProc(ProxyChannelInfo *chan, int32_t chanNewId
             .status = PROXY_CHANNEL_STATUS_HANDSHAKEING,
             .connId = conn.connId
         };
-        TransProxySpecialUpdateChanInfo(&channelInfo);
         if (TransAddConnRefByConnId(conn.connId, (bool)chan->isServer) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "TransAddConnRefByConnId: connId=%{public}u err", conn.connId);
             return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
         }
+        TransProxySpecialUpdateChanInfo(&channelInfo);
         TransProxyPostHandshakeMsgToLoop(chanNewId);
     }
     return SOFTBUS_OK;
