@@ -29,7 +29,7 @@ static int32_t NetifStatusCallback(
     (void)args;
     if (netif == NULL) {
         LNN_LOGE(LNN_BUILDER, "input netif is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (reason == LWIP_NSC_IPSTATUS_CHANGE) {
