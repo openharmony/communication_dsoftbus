@@ -17,7 +17,7 @@
 
 #include "softbus_error_code.h"
 
-int32_t SoftBusGetSelfTokenId(uint32_t *selfTokenId)
+int32_t SoftBusGetSelfTokenId(uint64_t *selfTokenId)
 {
     (void)selfTokenId;
     return SOFTBUS_OK;

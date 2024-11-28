@@ -21,7 +21,7 @@
 #include "softbus_error_code.h"
 #include "trans_log.h"
 
-int32_t SoftBusGetSelfTokenId(uint32_t *selfTokenId)
+int32_t SoftBusGetSelfTokenId(uint64_t *selfTokenId)
 {
     if (selfTokenId == nullptr) {
         TRANS_LOGE(TRANS_SDK, "invalid param, selfTokenId is nullptr");

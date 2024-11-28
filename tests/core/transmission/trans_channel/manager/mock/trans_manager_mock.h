@@ -35,7 +35,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConnInfo *connInfo) = 0;
     virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
-    virtual uint32_t TransACLGetFirstTokenID() = 0;
+    virtual uint64_t TransACLGetFirstTokenID() = 0;
     virtual int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo) = 0;
     virtual int32_t TransAsyncGetLaneInfo(
         const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart) = 0;
@@ -56,7 +56,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
     MOCK_METHOD2(AuthCheckSessionKeyValidByConnInfo, int32_t (const char *, const AuthConnInfo *));
     MOCK_METHOD2(ConnGetConnectionInfo, int32_t (uint32_t, ConnectionInfo *));
-    MOCK_METHOD0(TransACLGetFirstTokenID, uint32_t ());
+    MOCK_METHOD0(TransACLGetFirstTokenID, uint64_t ());
     MOCK_METHOD2(TransCommonGetAppInfo, int32_t (const SessionParam *, AppInfo *));
     MOCK_METHOD4(TransAsyncGetLaneInfo, int32_t (const SessionParam *, uint32_t *, uint32_t, int64_t));
     MOCK_METHOD3(TransGetLaneInfo, int32_t (const SessionParam *, LaneConnInfo *, uint32_t *));

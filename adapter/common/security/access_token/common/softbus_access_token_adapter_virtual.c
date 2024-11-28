@@ -17,13 +17,13 @@
 
 #include "softbus_error_code.h"
 
-bool SoftBusCheckIsSystemService(uint32_t tokenId)
+bool SoftBusCheckIsSystemService(uint64_t tokenId)
 {
     (void)tokenId;
     return false;
 }
 
-bool SoftBusCheckIsNormalApp(uint32_t tokenId, uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char *sessionName)
 {
     (void)tokenId;
     (void)fullTokenId;
@@ -31,14 +31,14 @@ bool SoftBusCheckIsNormalApp(uint32_t tokenId, uint64_t fullTokenId, const char 
     return false;
 }
 
-bool SoftBusCheckIsAccessAndRecordAccessToken(uint32_t tokenId, const char *permission)
+bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission)
 {
     (void)tokenId;
     (void)permission;
     return false;
 }
 
-int32_t SoftBusCalcPermType(uint32_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid)
+int32_t SoftBusCalcPermType(uint64_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid)
 {
     (void)tokenId;
     (void)fullTokenId;
@@ -47,14 +47,14 @@ int32_t SoftBusCalcPermType(uint32_t tokenId, uint64_t fullTokenId, pid_t uid, p
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t SoftBusCheckDynamicPermission(uint32_t tokenId)
+int32_t SoftBusCheckDynamicPermission(uint64_t tokenId)
 {
     (void)tokenId;
     return SOFTBUS_PERMISSION_DENIED;
 }
 
 void SoftBusRegisterDataSyncPermission(
-    const uint32_t tokenId, const char *permissionName, const char *pkgName, int32_t pid)
+    const uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     (void)tokenId;
     (void)permissionName;
@@ -67,14 +67,14 @@ void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb)
     (void)cb;
 }
 
-int32_t SoftBusGetAccessTokenType(uint32_t tokenId)
+int32_t SoftBusGetAccessTokenType(uint64_t tokenId)
 {
     (void)tokenId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 void SoftBusGetTokenNameByTokenType(
-    char *tokenName, int32_t nameLen, uint32_t tokenId, SoftBusAccessTokenType tokenType)
+    char *tokenName, int32_t nameLen, uint64_t tokenId, SoftBusAccessTokenType tokenType)
 {
     (void)tokenName;
     (void)nameLen;

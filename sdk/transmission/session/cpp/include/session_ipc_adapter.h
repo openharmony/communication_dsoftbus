@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-int32_t SoftBusGetSelfTokenId(uint32_t *selfTokenId);
+int32_t SoftBusGetSelfTokenId(uint64_t *selfTokenId);
 int32_t SoftBusGetCallingTokenId(uint32_t *callingTokenId);
 int32_t SoftBusGetCallingFullTokenId(uint64_t *callingFullTokenId);
 

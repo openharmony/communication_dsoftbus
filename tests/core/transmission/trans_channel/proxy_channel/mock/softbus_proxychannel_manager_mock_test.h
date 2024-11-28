@@ -34,7 +34,7 @@ public:
     virtual int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len) = 0;
     virtual bool CheckSessionNameValidOnAuthChannel(const char *sessionName) = 0;
     virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
-    virtual int32_t TransCheckServerAccessControl(uint32_t callingTokenId) = 0;
+    virtual int32_t TransCheckServerAccessControl(uint64_t callingTokenId) = 0;
     virtual int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type) = 0;
 };
 
@@ -58,7 +58,7 @@ public:
         int32_t, TransProxyUnpackHandshakeMsg, (const char *msg, ProxyChannelInfo *chan, int32_t len), (override));
     MOCK_METHOD(bool, CheckSessionNameValidOnAuthChannel, (const char *sessionName), (override));
     MOCK_METHOD(int32_t, ConnGetConnectionInfo, (uint32_t connectionId, ConnectionInfo *info), (override));
-    MOCK_METHOD(int32_t, TransCheckServerAccessControl, (uint32_t callingTokenId), (override));
+    MOCK_METHOD(int32_t, TransCheckServerAccessControl, (uint64_t callingTokenId), (override));
     MOCK_METHOD(int32_t, ConnGetTypeByConnectionId, (uint32_t connectionId, ConnectType *type), (override));
 
 private:

@@ -78,7 +78,7 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t
 {
     return GetSoftbusServerStubTestInterface()->LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
-int32_t SoftBusCheckDynamicPermission(uint32_t tokenId)
+int32_t SoftBusCheckDynamicPermission(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckDynamicPermission(tokenId);
 }

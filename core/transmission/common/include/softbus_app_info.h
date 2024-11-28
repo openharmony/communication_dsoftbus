@@ -122,7 +122,7 @@ typedef struct {
     int32_t connectType;
     int32_t channelType;
     int32_t errorCode;
-    uint32_t callingTokenId; // for transmission access control
+    uint64_t callingTokenId; // for transmission access control
     int32_t osType;
     const uint8_t *fastTransData;
     int64_t timeStart;
