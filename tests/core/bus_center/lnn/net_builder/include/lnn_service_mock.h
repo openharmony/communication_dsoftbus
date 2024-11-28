@@ -53,9 +53,11 @@ public:
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyLnnRelationChanged(
         const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin) = 0;
+    virtual int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler) = 0;
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight) = 0;
     virtual void RegisterNameMonitor(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
+    virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
     virtual int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
@@ -106,9 +108,11 @@ public:
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void(void *));
     MOCK_METHOD4(LnnNotifyLnnRelationChanged, void(const char *, ConnectionAddrType, uint8_t, bool));
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void(bool, const char *, int32_t));
+    MOCK_METHOD1(LnnInitGetDeviceName, int32_t (LnnDeviceNameHandler));
     MOCK_METHOD0(RegisterNameMonitor, void(void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD2(LnnOfflineTimingByHeartbeat, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
     MOCK_METHOD0(AuthGenRequestId, uint32_t());
     MOCK_METHOD1(AuthHandleLeaveLNN, void(AuthHandle));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t(int64_t, char *, uint16_t));
@@ -138,8 +142,10 @@ public:
     MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t(AccountEventHandle handle));
     MOCK_METHOD2(LnnNotifyOnlineNetType, void(const char *, ConnectionAddrType));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
+    static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static inline std::map<LnnEventType, LnnEventHandler> g_lnnEventHandlers;
+    static inline LnnDeviceNameHandler g_deviceNameHandler;
 };
 } // namespace OHOS
 #endif // LNN_SERVICE_MOCK_H

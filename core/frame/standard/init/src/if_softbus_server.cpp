@@ -121,12 +121,4 @@ int32_t ISoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
     COMM_LOGE(COMM_SVC, "GetBusCenterExObj ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
-
-int32_t ISoftBusServer::SetLocalDeviceName(const char *pkgName, const char *displayName)
-{
-    (void)pkgName;
-    (void)displayName;
-    COMM_LOGE(COMM_SVC, "ipc default impl");
-    return SOFTBUS_IPC_ERR;
-}
 } // namespace OHOS

@@ -789,6 +789,65 @@ static void TransOnLaneFreeFail(uint32_t laneHandle, int32_t reason)
     }
 }
 
+static int32_t TransNotifyLaneQosEvent(uint32_t laneHandle, LaneOwner laneOwner, LaneQosEvent qosEvent)
+{
+    if (laneOwner > LANE_OWNER_BUTT || laneOwner < LANE_OWNER_SELF || qosEvent > LANE_QOS_BW_BUTT ||
+        qosEvent < LANE_QOS_BW_HIGH) {
+        TRANS_LOGE(
+            TRANS_SVC, "invalid lane owner or qos event, owner=%{public}d, qosEvent=%{public}d", laneOwner, qosEvent);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (laneOwner != LANE_OWNER_OTHER || qosEvent != LANE_QOS_BW_HIGH) {
+        TRANS_LOGI(TRANS_SVC, "ignore lane qos event, owner=%{public}d, qosEvent=%{public}d", laneOwner, qosEvent);
+        return SOFTBUS_OK;
+    }
+    TransLaneInfo laneInfo;
+    (void)memset_s(&laneInfo, sizeof(TransLaneInfo), 0, sizeof(TransLaneInfo));
+    int32_t ret = TransGetTransLaneInfoByLaneHandle(laneHandle, &laneInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get trans lane info failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+        return ret;
+    }
+    ChannelMsg data = {
+        .msgChannelId = laneInfo.channelId,
+        .msgChannelType = laneInfo.channelType,
+        .msgPid = laneInfo.pid,
+        .msgPkgName = laneInfo.pkgName,
+        .msgUuid = NULL,
+        .msgUdid = NULL
+    };
+    switch (qosEvent) {
+        case LANE_QOS_BW_HIGH: {
+            uint32_t count = 1;
+            QosTV qos[] = {
+                {QOS_TYPE_MIN_BW, 0},
+            };
+            QoSEvent event = QOS_SATISFIED;
+            ret = ClientIpcChannelOnQos(&data, event, (const QosTV *)qos, count);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(
+                    TRANS_SVC, "qos event failed, channelId=%{public}d, ret=%{public}d", laneInfo.channelId, ret);
+            }
+            break;
+        }
+        default:
+            ret = SOFTBUS_NOT_IMPLEMENT;
+            TRANS_LOGE(TRANS_SVC, "invalid lane qos event type, type=%{public}d", qosEvent);
+            break;
+    }
+    return ret;
+}
+
+static void TransOnLaneQosEvent(uint32_t laneHandle, LaneOwner laneOwner, LaneQosEvent qosEvent)
+{
+    TRANS_LOGI(TRANS_SVC, "lane qos event, laneHandle=%{public}u, owner=%{public}d, qosEvent=%{public}d", laneHandle,
+        laneOwner, qosEvent);
+    int32_t ret = TransNotifyLaneQosEvent(laneHandle, laneOwner, qosEvent);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "notify qos event failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+    }
+}
+
 static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_LINK_TYPE_BUTT,
     LANE_WLAN_5G,
@@ -1152,6 +1211,7 @@ static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const L
     allocListener.onLaneAllocFail = TransOnLaneRequestFail;
     allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
     allocListener.onLaneFreeFail = TransOnLaneFreeFail;
+    allocListener.onLaneQosEvent = TransOnLaneQosEvent;
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         GetLaneManager() != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_SVC, "GetLaneManager is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
@@ -1357,6 +1417,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
     allocListener.onLaneAllocFail = TransOnAsyncLaneFail;
     allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
     allocListener.onLaneFreeFail = TransOnLaneFreeFail;
+    allocListener.onLaneQosEvent = TransOnLaneQosEvent;
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnAllocLane is null");
     ret = GetLaneManager()->lnnAllocLane(*laneHandle, allocInfo, &allocListener);

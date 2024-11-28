@@ -83,15 +83,15 @@ HWTEST_F(WifiConfigInfoTest, GetInterfaceInfoTest, TestSize.Level1)
     WifiConfigInfo wifiCfg;
     std::vector<InterfaceInfo> infos;
     InterfaceInfo info;
-    info.SetName("chba0");
+    info.SetName(IF_NAME_HML);
     infos.push_back(info);
 
     wifiCfg.SetInterfaceInfoArray(infos);
     auto ret = wifiCfg.GetInterfaceInfo("p2p0");
     EXPECT_EQ(ret.GetName(), "");
 
-    ret = wifiCfg.GetInterfaceInfo("chba0");
-    EXPECT_EQ(ret.GetName(), "chba0");
+    ret = wifiCfg.GetInterfaceInfo(IF_NAME_HML);
+    EXPECT_EQ(ret.GetName(), IF_NAME_HML);
 
     wifiCfg.SetDeviceId("test");
     EXPECT_EQ(wifiCfg.GetDeviceId(), "test");
