@@ -35,6 +35,7 @@ extern "C" {
 #define PTK_DEFAULT_LEN 32
 #define STATIC_CAP_LEN 100
 #define USERID_CHECKSUM_LEN 4
+#define USERID_LEN 4
 #define STATIC_CAP_STR_LEN 201
 #define PTK_ENCODE_LEN 45
 

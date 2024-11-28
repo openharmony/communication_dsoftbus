@@ -36,7 +36,11 @@ static void ProcessBootEvent(void *para)
     LnnUpdateOhosAccount(true);
     int32_t userId = GetActiveOsAccountIds();
     LNN_LOGI(LNN_EVENT, "get userId:%{public}d", userId);
-    int32_t ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_USERID, userId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_EVENT, "set userId failed");
+    }
+    ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_EVENT, "get userIdCheckSum failed");
     }
