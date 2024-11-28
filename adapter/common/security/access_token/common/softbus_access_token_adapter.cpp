@@ -48,7 +48,7 @@ private:
 extern "C" {
 bool SoftBusCheckIsSystemService(uint64_t tokenId)
 {
-    auto type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    auto type = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
     COMM_LOGD(COMM_ADAPTER, "access token type=%{public}d", type);
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
