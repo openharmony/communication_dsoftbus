@@ -378,7 +378,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, Prox
 static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 {
     if (appInfo->fastTransDataSize > 0) {
-            TRANS_LOGI(TRANS_CTRL, "have fast data need transport");
+        TRANS_LOGI(TRANS_CTRL, "have fast data need transport");
         if (!AddNumberToJsonObject(root, JSON_KEY_ROUTE_TYPE, appInfo->routeType)) {
             TRANS_LOGE(TRANS_CTRL, "add route type fail.");
             return SOFTBUS_PARSE_JSON_ERR;
