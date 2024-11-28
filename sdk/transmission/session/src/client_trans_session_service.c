@@ -921,9 +921,9 @@ int CreateSocket(const char *pkgName, const char *sessionName)
         TRANS_LOGE(TRANS_SDK, "copy session name failed");
         return SOFTBUS_STRCPY_ERR;
     }
-    uint32_t callingTokenId = 0;
+    uint64_t callingTokenId = 0;
     uint64_t callingFullTokenId = 0;
-    ret = SoftBusGetCallingTokenId(&callingTokenId);
+    ret = SoftBusGetCallingFullTokenId(&callingTokenId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingTokenId failed");
     ret = SoftBusGetCallingFullTokenId(&callingFullTokenId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingFullTokenId failed");

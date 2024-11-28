@@ -235,7 +235,7 @@ TRANSPORT_BEHAVIOR:
   SESSION_ID: { type: INT32, desc: session id }
   DEVICE_STATE: { type: INT32, desc: device state }
   FIRST_TOKEN_NAME: { type: STRING, desc: first token name }
-  FIRST_TOKEN_ID: { type: UINT32, desc: first token id }
+  FIRST_TOKEN_ID: { type: UINT64, desc: first token id }
   FIRST_TOKEN_TYPE: { type: INT32, desc: first token type }
 
 TRANSPORT_AUDIT:

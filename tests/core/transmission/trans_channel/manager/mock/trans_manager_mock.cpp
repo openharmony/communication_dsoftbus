@@ -51,7 +51,7 @@ int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     return GetTransManagerInterface()->ConnGetConnectionInfo(connectionId, info);
 }
 
-uint32_t TransACLGetFirstTokenID()
+uint64_t TransACLGetFirstTokenID()
 {
     return GetTransManagerInterface()->TransACLGetFirstTokenID();
 }
@@ -62,7 +62,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
 }
 
 int32_t TransAsyncGetLaneInfo(
-    const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart)
+    const SessionParam *param, uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart)
 {
     return GetTransManagerInterface()->TransAsyncGetLaneInfo(param, laneHandle, callingTokenId, timeStart);
 }

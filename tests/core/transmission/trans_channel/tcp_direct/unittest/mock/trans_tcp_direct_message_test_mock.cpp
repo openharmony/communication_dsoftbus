@@ -219,7 +219,7 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
     return GetTransTcpDirectMessageInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
 
-int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
+int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
 {
     return GetTransTcpDirectMessageInterface()->TransCheckServerAccessControl(callingTokenId);
 }

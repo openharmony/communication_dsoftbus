@@ -48,7 +48,7 @@ public:
     virtual int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key,
         unsigned char *buf, uint32_t len) = 0;
-    virtual int32_t SoftBusCheckDynamicPermission(uint32_t tokenId) = 0;
+    virtual int32_t SoftBusCheckDynamicPermission(uint64_t tokenId) = 0;
     virtual int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId) = 0;
     virtual int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId) = 0;
     virtual int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) = 0;
@@ -72,7 +72,7 @@ public:
     MOCK_METHOD3(LnnIpcGetLocalDeviceInfo, int32_t (const char *pkgName, void *info, uint32_t infoTypeLen));
     MOCK_METHOD5(LnnIpcGetNodeKeyInfo, int32_t (const char *pkgName, const char *networkId, int32_t key,
         unsigned char *buf, uint32_t len));
-    MOCK_METHOD1(SoftBusCheckDynamicPermission, int32_t (uint32_t tokenId));
+    MOCK_METHOD1(SoftBusCheckDynamicPermission, int32_t (uint64_t tokenId));
     MOCK_METHOD2(LnnIpcActiveMetaNode, int32_t (const MetaNodeConfigInfo *info, char *metaNodeId));
     MOCK_METHOD1(LnnIpcDeactiveMetaNode, int32_t (const char *metaNodeId));
     MOCK_METHOD2(LnnIpcGetAllMetaNodeInfo, int32_t (MetaNodeInfo *infos, int32_t *infoNum));
