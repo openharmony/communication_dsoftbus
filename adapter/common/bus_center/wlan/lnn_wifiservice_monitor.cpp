@@ -160,7 +160,7 @@ int32_t SubscribeEvent::SubscribeAPConnStateEvent()
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -172,7 +172,7 @@ int32_t SubscribeEvent::SubscribeWifiConnStateEvent()
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -184,7 +184,7 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -197,7 +197,7 @@ int32_t SubscribeEvent::SubscribeWifiSemiStateEvent()
     subscriberInfo.SetPublisherUid(WIFI_UID);
     std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
     return SOFTBUS_OK;
 }
