@@ -26,7 +26,6 @@
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
-#include "trans_log.h"
 
 constexpr int32_t JUDG_CNT = 1;
 const std::string SAMGR_PROCESS_NAME = "samgr";
@@ -49,12 +48,9 @@ private:
 extern "C" {
 bool SoftBusCheckIsSystemService(uint64_t tokenId)
 {
-    auto type = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
-    TRANS_LOGD(TRANS_SDK, "access token type=%{public}d", type);
-    if (type == ATokenTypeEnum::TOKEN_NATIVE) {
-        return true;
-    }
-    return false;
+    auto type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    COMM_LOGD(COMM_ADAPTER, "access token type=%{public}d", type);
+    return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
 bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char *sessionName)
@@ -79,7 +75,7 @@ bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char 
             return false;
         }
     }
-    COMM_LOGI(COMM_SVC, "The caller is a normal app");
+    COMM_LOGI(COMM_ADAPTER, "The caller is a normal app");
     return true;
 }
 
@@ -90,7 +86,7 @@ bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *perm
         return false;
     }
 
-    int32_t ret = AccessTokenKit::VerifyAccessToken(tokenId, permission);
+    int32_t ret = AccessTokenKit::VerifyAccessToken((AccessTokenID)tokenId, permission);
     ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
     int32_t successCnt = (int32_t)(ret == Security::AccessToken::PERMISSION_GRANTED);
     int32_t failCnt = JUDG_CNT - successCnt;
@@ -98,12 +94,12 @@ bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *perm
         int32_t tmp =
             PrivacyKit::AddPermissionUsedRecord(tokenId, permission, successCnt, failCnt);
         if (tmp != Security::AccessToken::RET_SUCCESS) {
-            COMM_LOGW(COMM_SVC,
+            COMM_LOGW(COMM_ADAPTER,
                 "AddPermissionUsedRecord failed, permissionName=%{public}s, successCnt=%{public}d, failCnt=%{public}d, "
                 "tmp=%{public}d", permission, successCnt, failCnt, tmp);
         }
     }
-    return (ret == Security::AccessToken::PERMISSION_GRANTED) ? true : false;
+    return ret == Security::AccessToken::PERMISSION_GRANTED;
 }
 
 int32_t SoftBusCalcPermType(uint64_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid)
@@ -222,7 +218,7 @@ void SoftBusGetTokenNameByTokenType(
         case ATokenTypeEnum::TOKEN_SHELL:
         default: {
             COMM_LOGW(COMM_PERM, "invalid tokenType=%{public}d", (int32_t)tokenType);
-            return;
+            break;
         }
     }
 }

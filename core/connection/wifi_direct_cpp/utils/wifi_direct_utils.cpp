@@ -39,6 +39,7 @@
 #include <unistd.h>
 #include "softbus_adapter_mem.h"
 
+static constexpr int SSCANF_IPV4_NUM = 4;
 namespace OHOS::SoftBus {
 std::vector<std::string> WifiDirectUtils::SplitString(const std::string &input, const std::string &delimiter)
 {
@@ -346,7 +347,7 @@ std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
     struct ifaddrs *ifa = nullptr;
     for (ifa = ifAddr; ifa != nullptr; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET || ifa->ifa_netmask == nullptr ||
-            strcmp(ifa->ifa_name, "chba0") != 0) {
+            strcmp(ifa->ifa_name, IF_NAME_HML) != 0) {
             continue;
         }
         char ip[IP_LEN] {};
@@ -434,7 +435,7 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
 
     int32_t ret = sscanf_s(addrString, "%u.%u.%u.%u", addrArray, addrArray + 1, addrArray + 2, addrArray + 3);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret > 0, SOFTBUS_CONN_SCAN_IP_NUMBER_FAILED, CONN_WIFI_DIRECT, "scan ip number failed");
+        ret == SSCANF_IPV4_NUM, SOFTBUS_CONN_SCAN_IP_NUMBER_FAILED, CONN_WIFI_DIRECT, "scan ip number failed");
     return SOFTBUS_OK;
 }
 

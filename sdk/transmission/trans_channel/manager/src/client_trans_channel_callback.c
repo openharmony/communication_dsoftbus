@@ -209,3 +209,8 @@ int32_t TransOnChannelBind(int32_t channelId, int32_t channelType)
     }
     return SOFTBUS_OK;
 }
+
+int32_t TransOnChannelOnQos(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    return GetClientSessionCb()->OnQos(channelId, channelType, event, qos, count);
+}

@@ -2946,7 +2946,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_03, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_ERR)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_NETWORK_NOT_FOUND)));
 
     int32_t ret = FinalDecideLinkType("test", &linkList, listNum, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -3008,7 +3008,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_05, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(wifiMock, SoftBusGetWifiState)
         .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_INACTIVE));
     int32_t ret = DecideAvailableLane("test", &request, &recommendList);
@@ -3036,7 +3036,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_05, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(linkMock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(osType), Return(SOFTBUS_OK)));
     ret = DecideAvailableLane(NODE_NETWORK_ID, &request, &recommendList);
@@ -3419,7 +3419,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_15, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
     EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
 }
@@ -3450,7 +3450,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_16, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
     EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
 }

@@ -31,6 +31,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
+#include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
@@ -867,6 +868,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 }
                 LnnUpdateOhosAccount(true);
                 HbConditionChanged(false);
+                LnnUpdateDeviceName();
                 if (IsHeartbeatEnable()) {
                     DfxRecordTriggerTime(USER_SWITCHED, EVENT_STAGE_LNN_USER_SWITCHED);
                 }
