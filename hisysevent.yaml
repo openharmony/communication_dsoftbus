@@ -141,6 +141,11 @@ BUSCENTER_BEHAVIOR:
   OS_TYPE: { type: INT32, desc: os type }
   CONN_ONLINE_REASON: { type: UINT32, desc: connect online reason }
   STRATEGY_FOR_LNN_BLE: { type: UINT32, desc: strategy for lnn ble }
+  LANE_LINK_TYPE: { type: INT32, desc: lane link type }
+  HML_CHANNEL_ID: { type: INT32, desc: hml channel id }
+  P2P_CHANNEL_ID: { type: INT32, desc: p2p channel id }
+  STA_CHANNEL_ID: { type: INT32, desc: sta channel id }
+  AP_CHANNEL_ID: { type: INT32, desc: ap channel id }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
