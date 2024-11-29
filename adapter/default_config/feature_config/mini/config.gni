@@ -14,6 +14,7 @@
 declare_args() {
   dsoftbus_feature_disc_ble = false
   dsoftbus_feature_disc_coap = true
+  dsoftbus_feature_disc_usb = false
 
   dsoftbus_feature_conn_tcp = true
   dsoftbus_feature_conn_br = false

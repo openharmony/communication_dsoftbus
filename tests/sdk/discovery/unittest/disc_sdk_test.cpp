@@ -511,7 +511,11 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.mode = DISCOVER_MODE_PASSIVE;
 
-    testInfo.medium = (ExchangeMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP1);
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    testInfo.medium = (ExchangeMedium)(USB);
+    testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -732,6 +736,24 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RefreshLNNTest009
+ * @tc.desc: Test usb capability with passive usb discovery
+ * @tc.type: FUNC
+ * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
+ */
+HWTEST_F(DiscSdkTest, RefreshLNNTest009, TestSize.Level1)
+{
+    g_subscribeInfo.subscribeId = GetSubscribeId();
+    g_subscribeInfo.mode = DISCOVER_MODE_PASSIVE;
+    g_subscribeInfo.medium = USB;
+    int32_t ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: StopPublishLNNTest001
  * @tc.desc: Verify StopPublishLNN invalid parameter.
  * @tc.type: FUNC
@@ -932,6 +954,7 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest004, TestSize.Level1)
     g_subscribeInfo.subscribeId = GetSubscribeId();
     g_subscribeInfo.mode = DISCOVER_MODE_PASSIVE;
     g_subscribeInfo.medium = COAP;
+    g_subscribeInfo.capability = "osdCapability";
 
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     int32_t ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
