@@ -83,6 +83,11 @@ int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType)
         return SOFTBUS_NOT_FIND;
     }
 
+    if (info.detail.needStopListener) {
+        TRANS_LOGI(TRANS_SDK, "info.detail.needStopListener is true, channelId=%{public}d", channelId);
+        return SOFTBUS_OK;
+    }
+
     ret = TransTdcCreateListener(info.detail.fd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "TransTdcCreateListener failed, channelId=%{public}d", channelId);
@@ -90,18 +95,6 @@ int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType)
         return ret;
     }
 
-    (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    res = TransTdcGetInfoById(channelId, &info);
-    if (res == NULL) {
-        g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_LOCAL);
-        TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channelId);
-        return SOFTBUS_NOT_FIND;
-    }
-
-    if (info.detail.needStopListener) {
-        (void)TransTdcStopRead(info.detail.fd);
-        TRANS_LOGI(TRANS_SDK, "listener has been disabled, stop read now, channelId=%{public}d", channelId);
-    }
     return SOFTBUS_OK;
 }
 
