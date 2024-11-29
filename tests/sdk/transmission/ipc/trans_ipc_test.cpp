@@ -141,13 +141,13 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
 HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level0)
 {
     TransServerProxy transServerProxy(nullptr);
-    int32_t ret = transServerProxy.CreateSessionServer(nullptr, g_sessionName);
+    int32_t ret = transServerProxy.CreateSessionServer(nullptr, g_sessionName, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = transServerProxy.CreateSessionServer(g_pkgName, nullptr);
+    ret = transServerProxy.CreateSessionServer(g_pkgName, nullptr, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = transServerProxy.CreateSessionServer(g_pkgName, g_sessionName);
+    ret = transServerProxy.CreateSessionServer(g_pkgName, g_sessionName, false);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
