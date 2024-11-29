@@ -23,7 +23,7 @@
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 
-#define STATE_LISTENER_MAX_NUM 18
+#define STATE_LISTENER_MAX_NUM 16
 
 using namespace testing::ext;
 using ::testing::_;
@@ -294,7 +294,7 @@ HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
         EXPECT_TRUE(ret >= 0);
     }
     ret = SoftBusAddBtStateListener(GetMockBtStateListener());
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR);
 }
 
 static void StubOnBtStateChanged(int32_t listenerId, int32_t state)
