@@ -400,6 +400,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     item->param.isAsync = param->isAsync;
     item->param.sessionId = param->sessionId;
     item->param.actionId = param->actionId;
+    item->param.pid = param->pid;
     if (SoftBusMutexLock(&g_asyncReqLanePendingList->lock) != SOFTBUS_OK) {
         DestroyAsyncReqItemParam(&(item->param));
         SoftBusFree(item);
