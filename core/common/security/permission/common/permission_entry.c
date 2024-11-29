@@ -761,7 +761,7 @@ int32_t DeleteDynamicPermission(const char *sessionName)
             g_dynamicPermissionList->cnt--;
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
-            COMM_LOGD(COMM_PERM, "session dynamic permission granted. sessionName=%{public}s, count=%{public}d",
+            COMM_LOGI(COMM_PERM, "session dynamic permission deleted. sessionName=%{public}s, count=%{public}d",
                 AnonymizeWrapper(tmpName), g_dynamicPermissionList->cnt);
             AnonymizeFree(tmpName);
             (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
