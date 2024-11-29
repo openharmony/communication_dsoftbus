@@ -120,12 +120,9 @@ NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *ses
         SoftBusFree(destroyNode);
         return NULL;
     }
-    if (server->listener.isSocketListener == false) {
-        destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
-    } else {
-        destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
-            server->listener.socketClient.OnShutdown;
-    }
+    destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
+    destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
+        server->listener.socketClient.OnShutdown;
     return destroyNode;
 }
 
