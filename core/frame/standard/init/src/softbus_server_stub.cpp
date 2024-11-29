@@ -15,19 +15,18 @@
 
 #include "softbus_server_stub.h"
 
-#include "access_control.h"
-#include "accesstoken_kit.h"
-#include "anonymizer.h"
-#include "ipc_skeleton.h"
-#include "privacy_kit.h"
 #include "regex.h"
 #include "securec.h"
-#include "softbus_adapter_mem.h"
+
+#include "access_control.h"
+#include "anonymizer.h"
+#include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_access_token_adapter.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "tokenid_kit.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_network_statistics.h"
@@ -52,11 +51,9 @@
 
 namespace OHOS {
     namespace {
-        constexpr int32_t JUDG_CNT = 1;
         constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
-        constexpr int32_t DEVICE_NAME_SIZE_MAX = 128;
     }
 
 
@@ -108,26 +105,6 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
         return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;
-}
-
-static int32_t CheckAndRecordAccessToken(const char *permission)
-{
-    uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
-    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
-
-    Security::AccessToken::ATokenTypeEnum type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenCaller);
-    int32_t successCnt = (int32_t)(ret == Security::AccessToken::PERMISSION_GRANTED);
-    int32_t failCnt = JUDG_CNT - successCnt;
-    if (type == Security::AccessToken::TOKEN_HAP) {
-        int32_t tmp =
-            Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
-        if (tmp != Security::AccessToken::RET_SUCCESS) {
-            COMM_LOGW(COMM_SVC,
-                "AddPermissionUsedRecord failed, permissionName=%{public}s, successCnt=%{public}d, failCnt=%{public}d, "
-                "tmp=%{public}d", permission, successCnt, failCnt, tmp);
-        }
-    }
-    return ret;
 }
 
 static void SoftbusReportPermissionFaultEvt(uint32_t ipcCode)
@@ -183,7 +160,6 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
-    memberFuncMap_[SERVER_SET_DEV_NAME] = &SoftBusServerStub::SetDeviceNameInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -228,7 +204,6 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    memberPermissionMap_[SERVER_SET_DEV_NAME] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -250,8 +225,9 @@ int32_t SoftBusServerStub::OnRemoteRequest(
     auto itPerm = memberPermissionMap_.find(code);
     if (itPerm != memberPermissionMap_.end()) {
         const char *permission = itPerm->second;
+        uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
         if ((permission != nullptr) &&
-            (CheckAndRecordAccessToken(permission) != Security::AccessToken::PERMISSION_GRANTED)) {
+            (!SoftBusCheckIsAccessAndRecordAccessToken(callingTokenId, permission))) {
             SoftbusReportPermissionFaultEvt(code);
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
@@ -304,28 +280,6 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
 }
 
 #ifdef SUPPORT_BUNDLENAME
-static bool CheckCallingIsNormalApp(const char *sessionName)
-{
-#define DBINDER_BUS_NAME_PREFIX "DBinder"
-    // The authorization of dbind is granted through Samgr, and there is no control here
-    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
-        return false;
-    }
-    uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
-    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
-    if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        return false;
-    } else if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        uint64_t calling64Token = OHOS::IPCSkeleton::GetCallingFullTokenID();
-        bool isSystemApp = OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(calling64Token);
-        if (isSystemApp) {
-            return false;
-        }
-    }
-    COMM_LOGI(COMM_SVC, "The caller is a normal app");
-    return true;
-}
-
 static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
@@ -390,7 +344,9 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 static int32_t CheckNormalAppSessionName(
     const char *sessionName, pid_t callingUid, std::string &strName, bool *isNormalApp)
 {
-    if (CheckCallingIsNormalApp(sessionName)) {
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (SoftBusCheckIsNormalApp(callingTokenId, callingFullTokenId, sessionName)) {
         *isNormalApp = true;
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
@@ -1331,7 +1287,8 @@ int32_t SoftBusServerStub::GrantPermissionInner(MessageParcel &data, MessageParc
     int32_t uid = 0;
     int32_t pid = 0;
     const char *sessionName = nullptr;
-    int32_t ret = CheckDynamicPermission();
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = SoftBusCheckDynamicPermission(callingTokenId);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "GrantPermissionInner check permission failed. ret=%{public}d!", ret);
         goto EXIT;
@@ -1356,7 +1313,8 @@ EXIT:
 int32_t SoftBusServerStub::RemovePermissionInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *sessionName = nullptr;
-    int32_t ret = CheckDynamicPermission();
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = SoftBusCheckDynamicPermission(callingTokenId);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "RemovePermissionInner check permission failed. ret=%{public}d!", ret);
         goto EXIT;
@@ -1653,32 +1611,6 @@ int32_t SoftBusServerStub::GetBusCenterExObjInner(MessageParcel &data, MessagePa
             COMM_LOGE(COMM_SVC, "GetBusCenterExObjInner write object failed!");
             return SOFTBUS_TRANS_PROXY_WRITEOBJECT_FAILED;
         }
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::SetDeviceNameInner(MessageParcel &data, MessageParcel &reply)
-{
-    COMM_LOGD(COMM_SVC, "enter");
-    const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
-        COMM_LOGE(COMM_SVC, "read pkgName failed!");
-        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
-    }
-    if (strcmp(DM_PACKAGE_NAME, pkgName) != 0) {
-        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    SoftbusRecordCalledApiInfo(pkgName, SERVER_SET_DEV_NAME);
-    const char *displayName = data.ReadCString();
-    if (displayName == nullptr || strnlen(displayName, DEVICE_NAME_SIZE_MAX) >= DEVICE_NAME_SIZE_MAX) {
-        COMM_LOGE(COMM_SVC, "read displayName failed!");
-        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
-    }
-    int32_t retReply = SetLocalDeviceName(pkgName, displayName);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "write reply failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
 }

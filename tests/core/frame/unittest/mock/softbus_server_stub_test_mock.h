@@ -16,17 +16,19 @@
 #ifndef SOFTBUS_SERVER_STUB_TEST_MOCK_H
 #define SOFTBUS_SERVER_STUB_TEST_MOCK_H
 
+#include <gmock/gmock.h>
+
 #include "access_token.h"
 #include "accesstoken_kit.h"
 #include "ipc_object_stub.h"
 #include "lnn_bus_center_ipc.h"
 #include "message_option.h"
 #include "message_parcel.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_app_info.h"
 #include "softbus_permission.h"
 #include "softbus_trans_def.h"
 #include "trans_channel_manager.h"
-#include <gmock/gmock.h>
 
 namespace OHOS {
 class SoftbusServerStubTestInterface {
@@ -46,7 +48,7 @@ public:
     virtual int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key,
         unsigned char *buf, uint32_t len) = 0;
-    virtual int32_t CheckDynamicPermission() = 0;
+    virtual int32_t SoftBusCheckDynamicPermission(uint64_t tokenId) = 0;
     virtual int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId) = 0;
     virtual int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId) = 0;
     virtual int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) = 0;
@@ -70,7 +72,7 @@ public:
     MOCK_METHOD3(LnnIpcGetLocalDeviceInfo, int32_t (const char *pkgName, void *info, uint32_t infoTypeLen));
     MOCK_METHOD5(LnnIpcGetNodeKeyInfo, int32_t (const char *pkgName, const char *networkId, int32_t key,
         unsigned char *buf, uint32_t len));
-    MOCK_METHOD0(CheckDynamicPermission, int32_t ());
+    MOCK_METHOD1(SoftBusCheckDynamicPermission, int32_t (uint64_t tokenId));
     MOCK_METHOD2(LnnIpcActiveMetaNode, int32_t (const MetaNodeConfigInfo *info, char *metaNodeId));
     MOCK_METHOD1(LnnIpcDeactiveMetaNode, int32_t (const char *metaNodeId));
     MOCK_METHOD2(LnnIpcGetAllMetaNodeInfo, int32_t (MetaNodeInfo *infos, int32_t *infoNum));

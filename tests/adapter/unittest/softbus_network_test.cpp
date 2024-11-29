@@ -15,11 +15,11 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "lnn_bt_monitor.c"
+#include "lnn_event_monitor_impl.h"
+#include "lnn_netlink_monitor.c"
 #include "network_mock.h"
 #include "softbus_error_code.h"
-#include "lnn_event_monitor_impl.h"
-#include "lnn_bt_monitor.c"
-#include "lnn_netlink_monitor.c"
 
 namespace OHOS {
 #define TEST_LEN          5
@@ -61,18 +61,22 @@ HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1
     ON_CALL(networkMock, SoftBusSocketBind).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = CreateNetlinkSocket();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_CALL(networkMock, SoftBusSocketCreate).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = CreateNetlinkSocket();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(networkMock, SoftBusSocketSetOpt)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillOnce(Return(SOFTBUS_ERR))
+    EXPECT_CALL(networkMock, SoftBusSocketCreate)
+        .WillOnce(Return(SOFTBUS_ADAPTER_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = CreateNetlinkSocket();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(networkMock, SoftBusSocketBind).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_CREATE_SOCKET_FAILED);
+    EXPECT_CALL(networkMock, SoftBusSocketSetOpt)
+        .WillOnce(Return(SOFTBUS_ADAPTER_ERR))
+        .WillOnce(Return(SOFTBUS_ADAPTER_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = CreateNetlinkSocket();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_SET_SOCKET_OPTION_FAILED);
+    EXPECT_CALL(networkMock, SoftBusSocketBind)
+        .WillOnce(Return(SOFTBUS_ADAPTER_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = CreateNetlinkSocket();
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_BIND_SOCKET_FAILED);
 }
 
 /*
@@ -138,6 +142,6 @@ HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(networkMock, SoftBusAddBtStateListener).WillRepeatedly(Return(TEST_LISTENER_ID2));
     ret = LnnInitBtStateMonitorImpl();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR);
 }
 } // namespace OHOS

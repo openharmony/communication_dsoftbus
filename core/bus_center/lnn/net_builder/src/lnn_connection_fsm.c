@@ -540,6 +540,7 @@ static void SetLnnConnNodeInfo(
     LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
     LnnNotifyLnnRelationChanged(
         connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, relation[connInfo->addr.type], true);
+    LnnNotifyOnlineNetType(networkId, connInfo->addr.type);
 }
 
 static int32_t DfxRecordLnnOnlineType(const NodeInfo *info)

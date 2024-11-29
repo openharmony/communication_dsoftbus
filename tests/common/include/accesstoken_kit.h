@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Security {
 namespace AccessToken {
-typedef uint32_t AccessTokenID;
+typedef uint64_t AccessTokenID;
 
 typedef enum TypeATokenTypeEnum {
     TOKEN_INVALID = -1,

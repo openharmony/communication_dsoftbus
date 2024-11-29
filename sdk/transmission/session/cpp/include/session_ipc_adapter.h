@@ -12,18 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef SOFTBUS_SESSION_IPC_ADAPTER
 #define SOFTBUS_SESSION_IPC_ADAPTER
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-bool CheckIsSystemService(void);
-bool CheckIsNormalApp(const char *sessionName);
+int32_t SoftBusGetSelfTokenId(uint64_t *selfTokenId);
+int32_t SoftBusGetCallingTokenId(uint32_t *callingTokenId);
+int32_t SoftBusGetCallingFullTokenId(uint64_t *callingFullTokenId);
 
 #ifdef __cplusplus
 #if __cplusplus

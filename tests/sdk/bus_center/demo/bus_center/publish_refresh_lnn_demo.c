@@ -24,6 +24,7 @@
  */
 
 #include <stdint.h>
+
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
@@ -37,31 +38,25 @@ static void OnPublishDone(int32_t publishId, PublishResult reason)
     }
 }
 
-static IPublishCb g_publishCB = {
-    .OnPublishResult = OnPublishDone;
+static IPublishCb g_publishCB = { .OnPublishResult = OnPublishDone;
 }
 
-static PublishInfo g_pubInfo = {
-    .publishId = 1,
+static PublishInfo g_pubInfo = { .publishId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char)"capadata1",
-    .dataLen = strlen("capadata1")
-};
+    .dataLen = strlen("capadata1") };
 
-static SubscribeInfo g_subInfo = {
-    .subscribeId = 1,
+static SubscribeInfo g_subInfo = { .subscribeId = 1,
     .mode = DISCOVER_MODE_PASSIVE,
-    .medium = COAP.
-    .freq = MID,
+    .medium = COAP..freq = MID,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "ddmpCapablity",
     .capabilityData = (unsigned char)"capadata2",
-    .dataLen = strlen("capadata2")
-};
+    .dataLen = strlen("capadata2") };
 
 static void OnDeviceFoundTest(const DeviceInfo *device)
 {
@@ -76,10 +71,7 @@ static void OnDiscoverResultTest(int32_t refreshId, RefreshResult reason)
     }
 }
 
-static IRefreshCallback g_refreshCB = {
-    .OnDeviceFound = OnDeviceFoundTest,
-    .OnDiscoverResult = OnDiscoverResultTest
-};
+static IRefreshCallback g_refreshCB = { .OnDeviceFound = OnDeviceFoundTest, .OnDiscoverResult = OnDiscoverResultTest };
 
 int32_t main(void)
 {

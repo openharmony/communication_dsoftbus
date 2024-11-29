@@ -185,12 +185,12 @@ HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_002, TestSize.Level1)
     WifiStateEventHandler(nullptr);
     WifiStateEventHandler(info);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     event.basic.event = LNN_EVENT_WIFI_STATE_CHANGED;
     const LnnEventBasicInfo *info1 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
     WifiStateEventHandler(info1);
     EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     WifiStateEventHandler(info1);
     const char *coexistCap2 = COEXISTCAP2;
     EXPECT_EQ(IsSupportApCoexist(coexistCap2), false);
@@ -212,7 +212,7 @@ HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Le
     BtStateChangeEventHandler(nullptr);
     BtStateChangeEventHandler(info);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     event.basic.event = LNN_EVENT_BT_STATE_CHANGED;
     const LnnEventBasicInfo *info1 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
     BtStateChangeEventHandler(info1);
@@ -220,7 +220,7 @@ HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Le
     event.status = SOFTBUS_BR_TURN_ON;
     EXPECT_CALL(netLedgerMock, LnnSetNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(netLedgerMock, LnnClearNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR));
     const LnnEventBasicInfo *info2 = reinterpret_cast<const LnnEventBasicInfo *>(&event);
     BtStateChangeEventHandler(info2);
     event.status = SOFTBUS_BLE_TURN_ON;
@@ -254,7 +254,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1
     EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo);
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     WifiStateProcess(TYPE_63, true);
     WifiStateProcess(TYPE_63, false);
     SendNetCapabilityToRemote(TYPE_63, TYPE_1);

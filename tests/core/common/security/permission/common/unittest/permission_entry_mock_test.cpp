@@ -17,9 +17,9 @@
 #include <securec.h>
 
 #include "comm_log.h"
+#include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "permission_entry.h"
 
 using namespace testing::ext;
 

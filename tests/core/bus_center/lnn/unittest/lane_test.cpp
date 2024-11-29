@@ -24,12 +24,12 @@
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_parameter_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "lnn_parameter_utils.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -93,13 +93,9 @@ void LaneTest::TearDownTestCase()
     GTEST_LOG_(INFO) << "LaneTest end";
 }
 
-void LaneTest::SetUp()
-{
-}
+void LaneTest::SetUp() { }
 
-void LaneTest::TearDown()
-{
-}
+void LaneTest::TearDown() { }
 
 static void ConstructRemoteNode(void)
 {
@@ -131,8 +127,8 @@ static void ConstructLocalInfo(void)
 {
     int32_t ret = LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORK_ID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (1 << BIT_BR) |
-        (1 << BIT_WIFI_24G) | (1 << BIT_WIFI_5G) | (1 << BIT_WIFI_P2P));
+    ret = LnnSetLocalNumInfo(
+        NUM_KEY_NET_CAP, (1 << BIT_BR) | (1 << BIT_WIFI_24G) | (1 << BIT_WIFI_5G) | (1 << BIT_WIFI_P2P));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -204,11 +200,11 @@ static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode)
 }
 
 /*
-* @tc.name: LANE_REQ_ID_APPLY_Test_001
-* @tc.desc: apply laneReqId test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LANE_REQ_ID_APPLY_Test_001
+ * @tc.desc: apply laneReqId test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
@@ -220,11 +216,11 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_REQ_ID_APPLY_Test_002
-* @tc.desc: apply laneReqId test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LANE_REQ_ID_APPLY_Test_002
+ * @tc.desc: apply laneReqId test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
@@ -249,11 +245,11 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_SELECT_Test_001
-* @tc.desc: lane select fileTransLane by LNN
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LANE_SELECT_Test_001
+ * @tc.desc: lane select fileTransLane by LNN
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
@@ -269,11 +265,11 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_001
-* @tc.desc: lane select fileTransLane by qos
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_001
+ * @tc.desc: lane select fileTransLane by qos
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_001, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
@@ -289,11 +285,11 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_SELECT_Test_002
-* @tc.desc: lane select by preferredLinkList
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LANE_SELECT_Test_002
+ * @tc.desc: lane select by preferredLinkList
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
@@ -312,11 +308,11 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_002
-* @tc.desc: lane select BYTE TransLane by qos
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_002
+ * @tc.desc: lane select BYTE TransLane by qos
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
@@ -329,11 +325,11 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_LINK_Test_001
-* @tc.desc: LaneLink of wlan5G
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LANE_LINK_Test_001
+ * @tc.desc: LaneLink of wlan5G
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 {
     ConnServerInit();
@@ -356,11 +352,11 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_LINK_Test_002
-* @tc.desc: LaneLink of BR
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LANE_LINK_Test_002
+ * @tc.desc: LaneLink of BR
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 {
     LinkRequest reqInfo;
@@ -380,11 +376,11 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: TRANS_LANE_ALLOC_Test_001
-* @tc.desc: TransLaneRequest test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: TRANS_LANE_ALLOC_Test_001
+ * @tc.desc: TransLaneRequest test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
@@ -418,14 +414,16 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ADD_LANE_RESOURCE_TO_POOL_Test_001
-* @tc.desc: AddLaneResourceToPool test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: ADD_LANE_RESOURCE_TO_POOL_Test_001
+ * @tc.desc: AddLaneResourceToPool test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, ADD_LANE_RESOURCE_TO_POOL_Test_001, TestSize.Level1)
 {
-    LaneLinkInfo linkInfo = { .type = LANE_HML, };
+    LaneLinkInfo linkInfo = {
+        .type = LANE_HML,
+    };
     EXPECT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, NODE_UDID, UDID_BUF_LEN), EOK);
     EXPECT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, REMOTE_WLAN_IP, IP_LEN), EOK);
     EXPECT_EQ(AddLaneResourceToPool(&linkInfo, LANE_ID, true), SOFTBUS_OK);
@@ -436,8 +434,9 @@ HWTEST_F(LaneTest, ADD_LANE_RESOURCE_TO_POOL_Test_001, TestSize.Level1)
     EXPECT_EQ(strncpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, NODE_BT_MAC, BT_MAC_LEN), EOK);
     EXPECT_EQ(AddLaneResourceToPool(&linkInfo, LANE_ID, true), SOFTBUS_OK);
     linkInfo.type = LANE_BLE_DIRECT;
-    EXPECT_EQ(strncpy_s(linkInfo.linkInfo.bleDirect.networkId,
-        NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(
+        strncpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN),
+        EOK);
     EXPECT_EQ(AddLaneResourceToPool(&linkInfo, LANE_ID, true), SOFTBUS_OK);
     linkInfo.type = LANE_WLAN_5G;
     EXPECT_EQ(AddLaneResourceToPool(&linkInfo, LANE_ID, true), SOFTBUS_OK);
@@ -446,11 +445,11 @@ HWTEST_F(LaneTest, ADD_LANE_RESOURCE_TO_POOL_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001
-* @tc.desc: CheckLaneResourceNumByLinkType test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001
+ * @tc.desc: CheckLaneResourceNumByLinkType test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001, TestSize.Level1)
 {
     const char *peerUdid = "123456ABCDEF";
@@ -463,11 +462,11 @@ HWTEST_F(LaneTest, CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: UPDATE_LANE_RESOURCE_LANE_ID_Test_001
-* @tc.desc: UpdateLaneResourceLaneId test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: UPDATE_LANE_RESOURCE_LANE_ID_Test_001
+ * @tc.desc: UpdateLaneResourceLaneId test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
 {
     uint64_t oldLaneId = LANE_ID;
@@ -482,11 +481,11 @@ HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DESTROY_LINK_Test_001
-* @tc.desc: DestroyLink test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: DESTROY_LINK_Test_001
+ * @tc.desc: DestroyLink test
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LaneTest, DESTROY_LINK_Test_001, TestSize.Level1)
 {
     const char *networkId = "111122223333abcdef";

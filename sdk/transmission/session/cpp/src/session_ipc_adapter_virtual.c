@@ -13,15 +13,24 @@
  * limitations under the License.
  */
 
-#include <stdbool.h>
 #include "session_ipc_adapter.h"
 
-bool CheckIsSystemService(void)
+#include "softbus_error_code.h"
+
+int32_t SoftBusGetSelfTokenId(uint64_t *selfTokenId)
 {
-    return false;
+    (void)selfTokenId;
+    return SOFTBUS_OK;
 }
 
-bool CheckIsNormalApp(const char *sessionName)
+int32_t SoftBusGetCallingTokenId(uint32_t *callingTokenId)
 {
-    return false;
+    (void)callingTokenId;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetCallingFullTokenId(uint64_t *callingFullTokenId)
+{
+    (void)callingFullTokenId;
+    return SOFTBUS_OK;
 }

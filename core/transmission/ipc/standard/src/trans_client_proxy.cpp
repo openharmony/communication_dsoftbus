@@ -16,6 +16,8 @@
 #include "trans_client_proxy.h"
 
 #include <unistd.h>
+
+#include "softbus_access_token_adapter.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -48,6 +50,11 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     return clientProxy->OnClientPermissonChange(pkgName, state);
+}
+
+void RegisterPermissionChangeCallback(void)
+{
+    SoftBusRegisterPermissionChangeCb(InformPermissionChange);
 }
 
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
@@ -239,4 +246,19 @@ int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid)
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     return SOFTBUS_OK;
+}
+
+int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    if (data == nullptr || data->msgPkgName == nullptr || qos == nullptr || count == 0 || count >= QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+
+    return clientProxy->OnClientChannelOnQos(data->msgChannelId, data->msgChannelType, event, qos, count);
 }

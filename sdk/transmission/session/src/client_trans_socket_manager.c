@@ -660,7 +660,7 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
 void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode,
     int32_t waitOutSocket[], uint32_t capacity, uint32_t *num)
 {
-    if (sessionNode == NULL || waitOutSocket == NULL || num == NULL) {
+    if (serverNode == NULL || sessionNode == NULL || waitOutSocket == NULL || num == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return;
     }

@@ -33,17 +33,16 @@ public:
     virtual int32_t BusCenterServerProxyInit(void);
     virtual void BusCenterServerProxyDeInit(void);
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
-    virtual int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName,
-        void **info, uint32_t infoTypeLen, int32_t *infoNum);
+    virtual int32_t ServerIpcGetAllOnlineNodeInfo(
+        const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
     virtual int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
-    virtual int32_t ServerIpcGetNodeKeyInfo(const char *pkgName,
-        const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
-    virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName,
-        const char *networkId, uint16_t dataChangeFlag);
+    virtual int32_t ServerIpcGetNodeKeyInfo(
+        const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
+    virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
     virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
     virtual int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
-    virtual int32_t ServerIpcStartTimeSync(const char *pkgName,
-        const char *targetNetworkId, int32_t accuracy, int32_t period);
+    virtual int32_t ServerIpcStartTimeSync(
+        const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
     virtual int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
     virtual int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info);
     virtual int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);
@@ -55,21 +54,21 @@ public:
     ClientBusCenterManagerInterfaceMock();
     ~ClientBusCenterManagerInterfaceMock() override;
 
-    MOCK_METHOD0(BusCenterServerProxyInit, int32_t ());
-    MOCK_METHOD0(BusCenterServerProxyDeInit, void ());
-    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
-    MOCK_METHOD4(ServerIpcGetAllOnlineNodeInfo, int32_t (const char *, void **, uint32_t, int32_t *));
-    MOCK_METHOD3(ServerIpcGetLocalDeviceInfo, int32_t (const char *, void *, uint32_t));
-    MOCK_METHOD5(ServerIpcGetNodeKeyInfo, int32_t (const char *, const char *, int, unsigned char *, uint32_t));
-    MOCK_METHOD3(ServerIpcSetNodeDataChangeFlag, int32_t (const char *, const char *, uint16_t));
-    MOCK_METHOD3(ServerIpcJoinLNN, int32_t (const char *, void *, unsigned int));
-    MOCK_METHOD2(ServerIpcLeaveLNN, int32_t (const char *, const char *));
-    MOCK_METHOD4(ServerIpcStartTimeSync, int32_t (const char *, const char *, int32_t, int32_t));
-    MOCK_METHOD2(ServerIpcStopTimeSync, int32_t (const char *, const char *));
-    MOCK_METHOD2(ServerIpcPublishLNN, int32_t (const char *, const PublishInfo *));
-    MOCK_METHOD2(ServerIpcStopPublishLNN, int32_t (const char *, int32_t));
-    MOCK_METHOD2(ServerIpcRefreshLNN, int32_t (const char *, const SubscribeInfo *));
-    MOCK_METHOD2(ServerIpcStopRefreshLNN, int32_t (const char *, int32_t));
+    MOCK_METHOD0(BusCenterServerProxyInit, int32_t());
+    MOCK_METHOD0(BusCenterServerProxyDeInit, void());
+    MOCK_METHOD3(SoftbusGetConfig, int32_t(ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD4(ServerIpcGetAllOnlineNodeInfo, int32_t(const char *, void **, uint32_t, int32_t *));
+    MOCK_METHOD3(ServerIpcGetLocalDeviceInfo, int32_t(const char *, void *, uint32_t));
+    MOCK_METHOD5(ServerIpcGetNodeKeyInfo, int32_t(const char *, const char *, int, unsigned char *, uint32_t));
+    MOCK_METHOD3(ServerIpcSetNodeDataChangeFlag, int32_t(const char *, const char *, uint16_t));
+    MOCK_METHOD3(ServerIpcJoinLNN, int32_t(const char *, void *, unsigned int));
+    MOCK_METHOD2(ServerIpcLeaveLNN, int32_t(const char *, const char *));
+    MOCK_METHOD4(ServerIpcStartTimeSync, int32_t(const char *, const char *, int32_t, int32_t));
+    MOCK_METHOD2(ServerIpcStopTimeSync, int32_t(const char *, const char *));
+    MOCK_METHOD2(ServerIpcPublishLNN, int32_t(const char *, const PublishInfo *));
+    MOCK_METHOD2(ServerIpcStopPublishLNN, int32_t(const char *, int32_t));
+    MOCK_METHOD2(ServerIpcRefreshLNN, int32_t(const char *, const SubscribeInfo *));
+    MOCK_METHOD2(ServerIpcStopRefreshLNN, int32_t(const char *, int32_t));
 };
 } // namespace OHOS
 #endif // CLIENT_BUS_CENTER_MANAGER_MOCK_H

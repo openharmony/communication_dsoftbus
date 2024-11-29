@@ -321,7 +321,7 @@ std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
     struct ifaddrs *ifa = nullptr;
     for (ifa = ifAddr; ifa != nullptr; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET || ifa->ifa_netmask == nullptr ||
-            strcmp(ifa->ifa_name, "chba0") != 0) {
+            strcmp(ifa->ifa_name, IF_NAME_HML) != 0) {
             continue;
         }
         char ip[IP_LEN] {};

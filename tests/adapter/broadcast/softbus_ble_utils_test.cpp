@@ -15,8 +15,8 @@
 
 #include "gtest/gtest.h"
 
-#include "softbus_ble_utils.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_ble_utils.h"
 #include "softbus_broadcast_type.h"
 #include "softbus_broadcast_utils.h"
 #include "softbus_error_code.h"
@@ -240,7 +240,7 @@ HWTEST(SoftbusBleUtilsTest, GetBtScanMode, TestSize.Level3)
  */
 HWTEST(SoftbusBleUtilsTest, AssembleAdvData, TestSize.Level3)
 {
-    SoftbusBroadcastData *data =  (SoftbusBroadcastData *)calloc(1, sizeof(SoftbusBroadcastData));
+    SoftbusBroadcastData *data = (SoftbusBroadcastData *)calloc(1, sizeof(SoftbusBroadcastData));
     data->isSupportFlag = true;
     data->flag = 1;
     SoftbusBroadcastPayload bcData;
@@ -252,8 +252,8 @@ HWTEST(SoftbusBleUtilsTest, AssembleAdvData, TestSize.Level3)
     data->bcData = bcData;
     uint16_t dataLen = 0;
     uint8_t *advData = AssembleAdvData(data, &dataLen);
-    uint16_t expectedDataLen = (data->isSupportFlag) ?
-        bcData.payloadLen + BC_HEAD_LEN : bcData.payloadLen + BC_HEAD_LEN - BC_FLAG_LEN;
+    uint16_t expectedDataLen =
+        (data->isSupportFlag) ? bcData.payloadLen + BC_HEAD_LEN : bcData.payloadLen + BC_HEAD_LEN - BC_FLAG_LEN;
     EXPECT_EQ(dataLen, expectedDataLen);
     EXPECT_NE(advData, nullptr);
 

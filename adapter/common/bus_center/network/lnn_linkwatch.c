@@ -44,7 +44,7 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, uint16_t type
 
     if (NLMSG_ALIGN(nlMsgHdr->nlmsg_len) + RTA_ALIGN(len) > maxLen) {
         LNN_LOGE(LNN_BUILDER, "message exceeded bound. maxLen=%{public}d", maxLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_INVALID_NLMSG;
     }
     rta = ((struct rtattr *) (((uint8_t *) (nlMsgHdr)) + NLMSG_ALIGN((nlMsgHdr)->nlmsg_len)));
     rta->rta_type = type;
@@ -67,7 +67,7 @@ static int32_t ProcessNetlinkAnswer(struct nlmsghdr *answer, int32_t bufLen, uin
         len = hdr->nlmsg_len;
         if ((hdr->nlmsg_len - sizeof(*hdr)) < 0 || len > (uint32_t)remain) {
             LNN_LOGE(LNN_BUILDER, "malformed message: len=%{public}d", len);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_INVALID_NLMSG;
         }
         if (hdr->nlmsg_seq != seq) {
             // skip that message
@@ -77,11 +77,11 @@ static int32_t ProcessNetlinkAnswer(struct nlmsghdr *answer, int32_t bufLen, uin
         }
         if (hdr->nlmsg_type == NLMSG_ERROR) {
             LNN_LOGE(LNN_BUILDER, "netlink msg err");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_INVALID_NLMSG;
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_INVALID_NLMSG;
 }
 
 static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer, uint32_t maxlen)
@@ -92,14 +92,14 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
     int32_t ret  = SoftBusSocketCreate(SOFTBUS_AF_NETLINK, SOFTBUS_SOCK_RAW, NETLINK_ROUTE, &fd);
     if (ret != SOFTBUS_ADAPTER_OK) {
         LNN_LOGE(LNN_BUILDER, "netlink_socket failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CREATE_SOCKET_FAILED;
     }
 
     status = SoftBusSocketSend(fd, nlMsgHdr, nlMsgHdr->nlmsg_len, 0);
     if (status != (int32_t)(nlMsgHdr->nlmsg_len)) {
         LNN_LOGE(LNN_BUILDER, "Cannot talk to rtnetlink");
         SoftBusSocketClose(fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_SOCKET_SEND_FAILED;
     }
 
     while (true) {
@@ -112,12 +112,12 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
             }
             LNN_LOGE(LNN_BUILDER, "netlink receive error, status=%{public}d", status);
             SoftBusSocketClose(fd);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SOCKET_RECV_FAILED;
         }
         if (status == 0) {
             LNN_LOGE(LNN_BUILDER, "EOF on netlink");
             SoftBusSocketClose(fd);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SOCKET_RECV_FAILED;
         }
         SoftBusSocketClose(fd);
         return ProcessNetlinkAnswer(answer, status, nlMsgHdr->nlmsg_seq);
@@ -139,7 +139,7 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_NETLINK_GET_ATTR_FAILED;
 }
 
 bool LnnIsLinkReady(const char *iface)
