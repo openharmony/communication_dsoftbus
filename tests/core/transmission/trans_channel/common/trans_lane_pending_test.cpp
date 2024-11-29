@@ -672,8 +672,8 @@ HWTEST_F(TransLanePendingTest, TransGetLaneReqItemParamByLaneHandle001, TestSize
 {
     SessionParam *newParam = TestCreateNewSessionParam();
     ASSERT_TRUE(newParam != nullptr);
-    uint32_t callingTokenId;
-    uint32_t firstTokenId;
+    uint64_t callingTokenId;
+    uint64_t firstTokenId;
     int64_t timeStart;
     int32_t ret = TransGetLaneReqItemParamByLaneHandle(0, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -757,7 +757,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProc001, TestSize.Level1)
     SoftBusFree(param);
     param = nullptr;
 
-    uint32_t firstTokenId;
+    uint64_t firstTokenId;
     firstTokenId = TOKENID_NOT_SET;
     appInfo.callingTokenId = TEST_TOKEN_ID;
     TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &extra);
@@ -1422,4 +1422,36 @@ HWTEST_F(TransLanePendingTest, TransCancelLaneItemCondByLaneHandle001, TestSize.
 
     TransReqLanePendingDeinit();
 }
+
+
+/**
+ * @tc.name: TransNotifyLaneQosEventTest001
+ * @tc.desc: TransNotifyLaneQosEvent test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransNotifyLaneQosEventTest001, TestSize.Level1)
+{
+    int32_t ret = TransNotifyLaneQosEvent(0, (LaneOwner)(LANE_OWNER_BUTT + 1), (LaneQosEvent)(LANE_QOS_BW_BUTT + 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(0, (LaneOwner)(LANE_OWNER_SELF - 1), (LaneQosEvent)(LANE_QOS_BW_BUTT + 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, (LaneQosEvent)(LANE_QOS_BW_BUTT + 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, (LaneQosEvent)(LANE_QOS_BW_HIGH - 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, LANE_QOS_BW_MID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_OTHER, LANE_QOS_BW_MID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, LANE_QOS_BW_HIGH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
 } // namespace OHOS

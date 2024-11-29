@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "securec.h"
+#include <gtest/gtest.h>
+
+#include "permission_entry.h"
 #include "permission_utils.h"
-#include "softbus_permission.h"
+#include "session.h"
+#include "softbus_access_token_adapter.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
-#include "permission_entry.h"
+#include "softbus_permission.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -153,7 +155,8 @@ HWTEST_F(SoftbusPermissionTest, RemoveTransPermissionTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusPermissionTest, CheckDynamicPermissionTest001, TestSize.Level0)
 {
-    int32_t ret = CheckDynamicPermission();
+    int32_t invalidTokenId = -1;
+    int32_t ret = SoftBusCheckDynamicPermission(invalidTokenId);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 } // namespace OHOS

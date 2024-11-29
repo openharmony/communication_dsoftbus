@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
+#include <map>
 #include <securec.h>
 #include <vector>
-#include <map>
 
-#include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_control_profile.h"
 #include "anonymizer.h"
-#ifdef SUPPORT_ABILITY_RUNTIME
-#include "app_mgr_interface.h"
-#include "app_mgr_proxy.h"
-#endif
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "comm_log.h"
@@ -33,22 +28,27 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "permission_entry.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "system_ability_definition.h"
 
+#ifdef SUPPORT_ABILITY_RUNTIME
+#include "app_mgr_interface.h"
+#include "app_mgr_proxy.h"
+#endif
+
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
-    using namespace OHOS::Security::AccessToken;
     using namespace OHOS;
 }
 
-static int32_t TransCheckAccessControl(uint32_t callingTokenId, const char *deviceId)
+static int32_t TransCheckAccessControl(uint64_t callingTokenId, const char *deviceId)
 {
     char *tmpName = nullptr;
     Anonymize(deviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "tokenId=%{public}u, deviceId=%{public}s", callingTokenId, tmpName);
+    COMM_LOGI(COMM_PERM, "tokenId=%{public}llx, deviceId=%{public}s", callingTokenId, tmpName);
     AnonymizeFree(tmpName);
 
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
@@ -60,7 +60,7 @@ static int32_t TransCheckAccessControl(uint32_t callingTokenId, const char *devi
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
     COMM_LOGI(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
     if (profile.empty()) {
-        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}u", callingTokenId);
+        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}llx", callingTokenId);
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     for (auto &item : profile) {
@@ -77,14 +77,14 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
+    uint64_t callingTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
     if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingTokenId);
-    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
-        COMM_LOGI(COMM_PERM, "tokenType=%{public}d, not hap, no verification required", tokenType);
+    int32_t accessTokenType = SoftBusGetAccessTokenType(callingTokenId);
+    if (accessTokenType != ACCESS_TOKEN_TYPE_HAP) {
+        COMM_LOGI(COMM_PERM, "accessTokenType=%{public}d, not hap, no verification required", accessTokenType);
         return SOFTBUS_OK;
     }
 
@@ -93,7 +93,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     if (ret != SOFTBUS_OK) {
         char *tmpName = nullptr;
         Anonymize(peerNetworkId, &tmpName);
-        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}u, networkId=%{public}s, ret=%{public}d",
+        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}llx, networkId=%{public}s, ret=%{public}d",
             callingTokenId, tmpName, ret);
         AnonymizeFree(tmpName);
         return ret;
@@ -125,35 +125,35 @@ int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionNa
     return SOFTBUS_OK;
 }
 
-int32_t TransCheckServerAccessControl(uint32_t callingTokenId)
+int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
 {
     if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingTokenId);
-    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
-        COMM_LOGI(COMM_PERM, "tokenType=%{public}d, not hap, no verification required", tokenType);
+    int32_t accessTokenType = SoftBusGetAccessTokenType(callingTokenId);
+    if (accessTokenType != ACCESS_TOKEN_TYPE_HAP) {
+        COMM_LOGI(COMM_PERM, "accessTokenType=%{public}d, not hap, no verification required", accessTokenType);
         return SOFTBUS_OK;
     }
 
     char deviceId[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}u, ret=%{public}d", callingTokenId, ret);
+        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}llx, ret=%{public}d", callingTokenId, ret);
         return ret;
     }
     return TransCheckAccessControl(callingTokenId, deviceId);
 }
 
-uint32_t TransACLGetFirstTokenID(void)
+uint64_t TransACLGetFirstTokenID(void)
 {
-    return OHOS::IPCSkeleton::GetFirstTokenID();
+    return OHOS::IPCSkeleton::GetFirstFullTokenID();
 }
 
-uint32_t TransACLGetCallingTokenID(void)
+uint64_t TransACLGetCallingTokenID(void)
 {
-    return OHOS::IPCSkeleton::GetCallingTokenID();
+    return OHOS::IPCSkeleton::GetCallingFullTokenID();
 }
 
 #ifdef SUPPORT_ABILITY_RUNTIME
@@ -172,7 +172,7 @@ public:
 };
 } // namespace OHOS
 
-static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
+static void GetForegroundApplications(uint64_t firstTokenId, int32_t *tokenType)
 {
     if (g_appMgrProxy == nullptr) {
         sptr<ISystemAbilityManager> abilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -219,44 +219,28 @@ static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
     *tokenType = BACKGROUND_APP_TYPE;
 }
 #else
-static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
+static void GetForegroundApplications(uint64_t firstTokenId, int32_t *tokenType)
 {
     (void)firstTokenId;
     (void)tokenType;
 }
 #endif
 
-void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
+void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
 {
     if (callingId == TOKENID_NOT_SET || tokenName == nullptr || tokenType == nullptr) {
         COMM_LOGE(COMM_PERM, "param is invalid");
         return;
     }
 
-    auto typeFlag = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingId);
-    if (typeFlag == ATokenTypeEnum::TOKEN_NATIVE) {
+    int32_t accessTokenType = SoftBusGetAccessTokenType(callingId);
+    if (accessTokenType == ACCESS_TOKEN_TYPE_NATIVE) {
         *tokenType = SYSTEM_SA_TYPE;
-        NativeTokenInfo tokenInfo;
-        int32_t ret = AccessTokenKit::GetNativeTokenInfo(callingId, tokenInfo);
-        if (ret != ERR_OK) {
-            COMM_LOGW(COMM_PERM, "GetNativeTokenInfo return err:%{public}d", ret);
-            return;
-        }
-        if (strncpy_s(tokenName, nameLen, tokenInfo.processName.c_str(), nameLen - 1) != EOK) {
-            COMM_LOGW(COMM_PERM, "strncpy_s processName failed");
-        }
-    } else if (typeFlag == ATokenTypeEnum::TOKEN_HAP) {
+        SoftBusGetTokenNameByTokenType(tokenName, nameLen, callingId, (SoftBusAccessTokenType)accessTokenType);
+    } else if (accessTokenType == ACCESS_TOKEN_TYPE_HAP) {
         *tokenType = TOKEN_HAP_TYPE;
         GetForegroundApplications(callingId, tokenType);
-        HapTokenInfo hapTokenInfo;
-        int32_t ret = AccessTokenKit::GetHapTokenInfo(callingId, hapTokenInfo);
-        if (ret != ERR_OK) {
-            COMM_LOGW(COMM_PERM, "GetHapTokenInfo return err:%{public}d", ret);
-            return;
-        }
-        if (strncpy_s(tokenName, nameLen, hapTokenInfo.bundleName.c_str(), nameLen - 1) != EOK) {
-            COMM_LOGW(COMM_PERM, "strncpy_s bundleName failed");
-        }
+        SoftBusGetTokenNameByTokenType(tokenName, nameLen, callingId, (SoftBusAccessTokenType)accessTokenType);
     } else {
         *tokenType = TOKEN_SHELL_TYPE;
     }

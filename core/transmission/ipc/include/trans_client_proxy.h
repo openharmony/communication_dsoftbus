@@ -17,6 +17,7 @@
 #define TRANS_CLIENT_PROXY_H
 
 #include "session.h"
+#include "socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 
@@ -46,6 +47,8 @@ int32_t ClientIpcSetChannelInfo(
     const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid);
 int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t channelId, uint8_t tos);
 int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid);
+void RegisterPermissionChangeCallback(void);
+int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos, uint32_t count);
 
 #ifdef __cplusplus
 }

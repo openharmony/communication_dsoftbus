@@ -447,6 +447,16 @@ static int32_t SetLocalDeviceInfo(void)
     return SOFTBUS_OK;
 }
 
+void DiscCoapModifyNstackThread(LinkStatus status)
+{
+    if (status == LINK_STATUS_UP) {
+        int32_t ret = NSTACKX_ThreadInit();
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "init nstack thread failed, ret=%{public}d", ret);
+    } else if (status == LINK_STATUS_DOWN) {
+        NSTACKX_ThreadDeinit();
+    }
+}
+
 void DiscCoapUpdateLocalIp(LinkStatus status)
 {
     DISC_CHECK_AND_RETURN_LOGE(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,

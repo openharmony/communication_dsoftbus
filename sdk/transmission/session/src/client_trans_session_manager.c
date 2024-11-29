@@ -27,6 +27,7 @@
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "session_ipc_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
@@ -1296,6 +1297,12 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL) {
         return;
     }
+    uint64_t tokenId = 0;
+    int32_t ret = SoftBusGetSelfTokenId(&tokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get selfTokenId failed");
+        return;
+    }
     if (LockClientSessionServerList() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
@@ -1309,7 +1316,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0 && CheckIsSystemService()) {
+        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0 && SoftBusCheckIsSystemService(tokenId)) {
             TRANS_LOGD(TRANS_SDK, "cast plus sessionname is different");
             continue;
         }
@@ -1317,7 +1324,6 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     }
     UnlockClientSessionServerList();
     (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LINK_DOWN);
-    return;
 }
 
 int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int32_t *algorithm, int32_t *crc)

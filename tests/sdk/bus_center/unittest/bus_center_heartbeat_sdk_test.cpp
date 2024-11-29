@@ -57,20 +57,16 @@ void BusCenterHeartbeatSdkTest::TearDownTestCase()
     LnnDeinitLnnLooper();
 }
 
-void BusCenterHeartbeatSdkTest::SetUp()
-{
-}
+void BusCenterHeartbeatSdkTest::SetUp() { }
 
-void BusCenterHeartbeatSdkTest::TearDown()
-{
-}
+void BusCenterHeartbeatSdkTest::TearDown() { }
 
 /*
-* @tc.name: Shift_Lnn_Gear_Test_001
-* @tc.desc: heart beat parameter adjust test
-* @tc.type: FUNC
-* @tc.require: I5HMXC
-*/
+ * @tc.name: Shift_Lnn_Gear_Test_001
+ * @tc.desc: heart beat parameter adjust test
+ * @tc.type: FUNC
+ * @tc.require: I5HMXC
+ */
 HWTEST_F(BusCenterHeartbeatSdkTest, Shift_Lnn_Gear_Test_001, TestSize.Level1)
 {
     char networkId1[] = "012345678B987654321001234A678998";
@@ -82,7 +78,7 @@ HWTEST_F(BusCenterHeartbeatSdkTest, Shift_Lnn_Gear_Test_001, TestSize.Level1)
     const char *callerId5 = "5";
     const char *callerId6 = "";
     const char *callerId7 = "012345678B987654321001234A67899876543210012E4567899876543210012FFFFFFFFF012345678B9876"
-        "54321001234A67899876543210012E4567899876543210012FFFFFFFFF";
+                            "54321001234A67899876543210012E4567899876543210012FFFFFFFFF";
     GearMode mode1 = { .cycle = MID_FREQ_CYCLE, .duration = DEFAULT_DURATION, .wakeupFlag = false };
     GearMode mode2 = { .cycle = HIGH_FREQ_CYCLE, .duration = DEFAULT_DURATION, .wakeupFlag = true };
     GearMode mode3 = { .cycle = LOW_FREQ_CYCLE, .duration = LONG_DURATION, .wakeupFlag = true };

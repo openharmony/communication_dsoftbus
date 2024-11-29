@@ -41,6 +41,8 @@ namespace OHOS {
 
     static void GenRanDiscInfo(const uint8_t* data, size_t size)
     {
+        (void)data;
+        (void)size;
         g_stateCb.events = EVENT_NODE_STATE_ONLINE | EVENT_NODE_STATE_OFFLINE;
         g_stateCb.onNodeOffline = onNodeOffline;
         g_stateCb.onNodeOnline = onNodeOnline;

@@ -39,6 +39,7 @@
 #include <unistd.h>
 #include "softbus_adapter_mem.h"
 
+static constexpr int SSCANF_IPV4_NUM = 4;
 namespace OHOS::SoftBus {
 std::vector<std::string> WifiDirectUtils::SplitString(const std::string &input, const std::string &delimiter)
 {
@@ -346,7 +347,7 @@ std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
     struct ifaddrs *ifa = nullptr;
     for (ifa = ifAddr; ifa != nullptr; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET || ifa->ifa_netmask == nullptr ||
-            strcmp(ifa->ifa_name, "chba0") != 0) {
+            strcmp(ifa->ifa_name, IF_NAME_HML) != 0) {
             continue;
         }
         char ip[IP_LEN] {};
@@ -434,7 +435,7 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
 
     int32_t ret = sscanf_s(addrString, "%u.%u.%u.%u", addrArray, addrArray + 1, addrArray + 2, addrArray + 3);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret > 0, SOFTBUS_CONN_SCAN_IP_NUMBER_FAILED, CONN_WIFI_DIRECT, "scan ip number failed");
+        ret == SSCANF_IPV4_NUM, SOFTBUS_CONN_SCAN_IP_NUMBER_FAILED, CONN_WIFI_DIRECT, "scan ip number failed");
     return SOFTBUS_OK;
 }
 
@@ -659,6 +660,7 @@ int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetwor
 
 std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, "", CONN_WIFI_DIRECT, "remoteNetworkId is null");
     std::string remoteOsVersion;
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, "", CONN_WIFI_DIRECT, "nodeInfo malloc err");
@@ -675,6 +677,8 @@ std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
 
 int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
+        "remoteNetworkId is null");
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "nodeInfo malloc err");
     auto ret = LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);

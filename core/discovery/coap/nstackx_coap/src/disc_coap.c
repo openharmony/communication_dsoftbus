@@ -466,6 +466,7 @@ static int32_t CoapUnsubscribe(const SubscribeOption *option)
 
 static void CoapUpdateLocalIp(LinkStatus status)
 {
+    DiscCoapModifyNstackThread(status);
     DiscCoapUpdateLocalIp(status);
 }
 

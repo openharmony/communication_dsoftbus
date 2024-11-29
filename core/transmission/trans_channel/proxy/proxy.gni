@@ -28,6 +28,7 @@ trans_proxy_channel_src = [
 ]
 trans_proxy_channel_inc = [
   "$dsoftbus_root_path/core/adapter/transmission/include",
+  "$dsoftbus_root_path/core/common/security/permission/transmission/include",
   "$dsoftbus_trans_proxy_channel_path/include",
 ]
 trans_proxy_channel_deps = []

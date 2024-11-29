@@ -68,7 +68,7 @@ static void FillAppInfoPart(const uint8_t *data, size_t size, AppInfo *appInfo)
     appInfo->connectedStart = *(reinterpret_cast<const int64_t *>(data));
     appInfo->fastTransData = (reinterpret_cast<const uint8_t *>(data));
     appInfo->fastTransDataSize = size;
-    appInfo->callingTokenId = *(reinterpret_cast<const uint32_t *>(data));
+    appInfo->callingTokenId = *(reinterpret_cast<const uint64_t *>(data));
     appInfo->isClient = *(reinterpret_cast<const bool *>(data));
     appInfo->osType = *(reinterpret_cast<const int32_t *>(data));
 }

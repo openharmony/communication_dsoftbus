@@ -127,15 +127,15 @@ static int32_t MockSetBroadcastingData(int32_t bcId, const SoftbusBroadcastData 
     return SOFTBUS_OK;
 }
 
-static int32_t MockUpdateBroadcasting(int32_t bcId, const SoftbusBroadcastParam *param,
-    const SoftbusBroadcastData *data)
+static int32_t MockUpdateBroadcasting(
+    int32_t bcId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
 {
     ManagerMock::broadcastCallback->OnUpdateBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
-static int32_t MockStartScan(int32_t scanerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
-    int32_t filterSize)
+static int32_t MockStartScan(
+    int32_t scanerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter, int32_t filterSize)
 {
     return SOFTBUS_OK;
 }
@@ -150,8 +150,8 @@ static bool MockIsLpDeviceAvailable(void)
     return true;
 }
 
-static bool MockSetAdvFilterParam(LpServerType type,
-    const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
+static bool MockSetAdvFilterParam(
+    LpServerType type, const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
     return SOFTBUS_OK;
 }
@@ -176,8 +176,8 @@ static int32_t MockSetScanReportChannelToLpDevice(int32_t scannerId, bool enable
     return SOFTBUS_OK;
 }
 
-static int32_t MockSetLpDeviceParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
-    int32_t interval, int32_t bcHandle)
+static int32_t MockSetLpDeviceParam(
+    int32_t duration, int32_t maxExtAdvEvents, int32_t window, int32_t interval, int32_t bcHandle)
 {
     return SOFTBUS_OK;
 }
@@ -201,7 +201,7 @@ static void ActionOfSoftbusBleAdapterInit()
         .IsLpDeviceAvailable = MockIsLpDeviceAvailable,
         .SetAdvFilterParam = MockSetAdvFilterParam,
         .GetBroadcastHandle = MockGetBroadcastHandle,
-        .EnableSyncDataToLpDevice  = MockEnableSyncDataToLpDevice,
+        .EnableSyncDataToLpDevice = MockEnableSyncDataToLpDevice,
         .DisableSyncDataToLpDevice = MockDisableSyncDataToLpDevice,
         .SetScanReportChannelToLpDevice = MockSetScanReportChannelToLpDevice,
         .SetLpDeviceParam = MockSetLpDeviceParam,

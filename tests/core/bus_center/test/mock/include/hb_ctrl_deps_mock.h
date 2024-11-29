@@ -16,12 +16,13 @@
 #ifndef HEARTBEAT_CTRL_DEPS_H
 #define HEARTBEAT_CTRL_DEPS_H
 
+#include <gmock/gmock.h>
+#include <mutex>
+
 #include "bus_center_event.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
 #include "softbus_common.h"
-#include <gmock/gmock.h>
-#include <mutex>
 
 namespace OHOS {
 class HeartBeatCtrlDepsInterface {
@@ -47,18 +48,18 @@ public:
     HeartBeatCtrlDepsInterfaceMock();
     ~HeartBeatCtrlDepsInterfaceMock() override;
 
-    MOCK_METHOD1(LnnNotifyNetworkStateChanged, void (SoftBusNetworkState));
+    MOCK_METHOD1(LnnNotifyNetworkStateChanged, void(SoftBusNetworkState));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
-    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
-    MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
-    MOCK_METHOD0(RestartCoapDiscovery, void (void));
-    MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType (LnnHeartbeatType));
-    MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool (void));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
+    MOCK_METHOD0(SoftBusGetBrState, int32_t(void));
+    MOCK_METHOD0(RestartCoapDiscovery, void(void));
+    MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType(LnnHeartbeatType));
+    MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
     MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(void *));
-    MOCK_METHOD0(LnnIslocalSupportBurstFeature, bool (void));
+    MOCK_METHOD0(LnnIslocalSupportBurstFeature, bool(void));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
-    MOCK_METHOD0(LnnGenerateCeParams, int32_t (void));
+    MOCK_METHOD0(LnnGenerateCeParams, int32_t(void));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_CTRL_DEPS_H

@@ -15,25 +15,24 @@
 
 #include <gtest/gtest.h>
 #include <securec.h>
-#include "bus_center_decision_center_mock.h"
+
 #include "bus_center_decision_center.h"
+#include "bus_center_decision_center_mock.h"
 #include "bus_center_manager.h"
-#include "lnn_net_builder_mock.h"
 #include "lnn_decision_center.h"
-#include "lnn_node_info.h"
 #include "lnn_log.h"
+#include "lnn_net_builder_mock.h"
+#include "lnn_node_info.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
+#include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "softbus_conn_interface.h"
-#include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
-#include "softbus_adapter_mem.h"
 
-#define HCI_ERR_BR_CONN_PAGE_TIMEOUT 0x04
+#define HCI_ERR_BR_CONN_PAGE_TIMEOUT               0x04
 #define HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE 0x54
-#define HCI_ERR_BR_CONN_ACL_RECREATE 0x57
+#define HCI_ERR_BR_CONN_ACL_RECREATE               0x57
 
 typedef struct {
     SoftBusList *connections;
@@ -118,7 +117,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test03, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_01, TestSize.Level1)
+HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -254,7 +253,8 @@ HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_04, TestSize.
     option->type = CONNECT_BR;
     (void)strcpy_s(option->brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac)
-        .WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     LnnDCReportConnectException(option, errorCode);
     SoftBusFree(option);
 }
@@ -289,7 +289,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_01, TestSi
     ConnectOption option = {};
     int32_t ret = InitDecisionCenter();
     int32_t errorCode = HCI_ERR_BR_CONN_ACL_RECREATE;
-    option.type = CONNECT_TCP ;
+    option.type = CONNECT_TCP;
     LnnDCReportConnectException(&option, errorCode);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -306,10 +306,11 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_02, TestSi
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
     int32_t errorCode = HCI_ERR_BR_CONN_ACL_RECREATE;
     int32_t ret = InitDecisionCenter();
-    option.type = CONNECT_BR ;
+    option.type = CONNECT_BR;
     (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac)
-        .WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     LnnDCReportConnectException(&option, errorCode);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -505,4 +506,4 @@ HWTEST_F(BusCenterDecisionCenterTest, DeinitDecisionCenterTest_2, TestSize.Level
     }
 }
 
-}
+} // namespace OHOS

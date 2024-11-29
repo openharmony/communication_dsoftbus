@@ -75,12 +75,9 @@ protected:
     const int32_t iterations = 1000;
 };
 
-void BusCenterTest::SetUpTestCase(void)
-{
-}
+void BusCenterTest::SetUpTestCase(void) { }
 
-void BusCenterTest::TearDownTestCase(void)
-{}
+void BusCenterTest::TearDownTestCase(void) { }
 
 static void OnNodeOnline(NodeBasicInfo *info)
 {
@@ -98,22 +95,17 @@ static int32_t GetPublishId(void)
     return g_publishId;
 }
 
-static PublishInfo g_pInfo = {
-    .publishId = 1,
+static PublishInfo g_pInfo = { .publishId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)CAPABILITY_4,
-    .dataLen = strlen(CAPABILITY_4)
-};
+    .dataLen = strlen(CAPABILITY_4) };
 
-static void TestPublishResult(int32_t publishId, PublishResult reason)
-{}
+static void TestPublishResult(int32_t publishId, PublishResult reason) { }
 
-static IPublishCb g_publishCb = {
-    .OnPublishResult = TestPublishResult
-};
+static IPublishCb g_publishCb = { .OnPublishResult = TestPublishResult };
 
 static int32_t GetSubscribeId(void)
 {
@@ -121,8 +113,7 @@ static int32_t GetSubscribeId(void)
     return g_subscribeId;
 }
 
-static SubscribeInfo g_sInfo = {
-    .subscribeId = 1,
+static SubscribeInfo g_sInfo = { .subscribeId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -130,19 +121,13 @@ static SubscribeInfo g_sInfo = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)CAPABILITY_3,
-    .dataLen = strlen(CAPABILITY_3)
-};
+    .dataLen = strlen(CAPABILITY_3) };
 
-static void TestDeviceFound(const DeviceInfo *device)
-{}
+static void TestDeviceFound(const DeviceInfo *device) { }
 
-static void TestDiscoverResult(int32_t refreshId, RefreshResult reason)
-{}
+static void TestDiscoverResult(int32_t refreshId, RefreshResult reason) { }
 
-static IRefreshCallback g_refreshCb = {
-    .OnDeviceFound = TestDeviceFound,
-    .OnDiscoverResult = TestDiscoverResult
-};
+static IRefreshCallback g_refreshCb = { .OnDeviceFound = TestDeviceFound, .OnDiscoverResult = TestDiscoverResult };
 
 /**
  * @tc.name: RegNodeDeviceStateCbTestCase
@@ -236,13 +221,12 @@ BENCHMARK_F(BusCenterTest, GetNodeKeyInfoTestCase)(benchmark::State &state)
     while (state.KeepRunning()) {
         int32_t ret;
         NodeBasicInfo info;
-        char udid[UDID_BUF_LEN] = {0};
+        char udid[UDID_BUF_LEN] = { 0 };
         (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
         state.PauseTiming();
         GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info);
         state.ResumeTiming();
-        ret = GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID,
-            (uint8_t *)udid, UDID_BUF_LEN);
+        ret = GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN);
         if (ret != 0) {
             state.SkipWithError("GetNodeKeyInfoTestCase failed.");
         }
@@ -306,7 +290,7 @@ BENCHMARK_F(BusCenterTest, RefreshLNNTestCase)(benchmark::State &state)
     while (state.KeepRunning()) {
         int32_t ret;
         g_sInfo.subscribeId = GetSubscribeId();
-        
+
         state.ResumeTiming();
         ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
         if (ret != 0) {
@@ -340,7 +324,7 @@ BENCHMARK_F(BusCenterTest, StopRefreshLNNTestCase)(benchmark::State &state)
     }
 }
 BENCHMARK_REGISTER_F(BusCenterTest, StopRefreshLNNTestCase);
-}
+} // namespace OHOS
 
 // Run the benchmark
 BENCHMARK_MAIN();

@@ -358,7 +358,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
 
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
-    if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inData == 0) {
+    if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -450,7 +450,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(root, JSON_KEY_PEER_HANDLE_ID, appInfo->peerHandleId);
-    (void)AddNumberToJsonObject(root, JSON_KEY_CALLING_TOKEN_ID, (int32_t)appInfo->callingTokenId);
+    (void)AddNumber64ToJsonObject(root, JSON_KEY_CALLING_TOKEN_ID, (int64_t)appInfo->callingTokenId);
     return SOFTBUS_OK;
 }
 
@@ -491,6 +491,11 @@ static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return NULL;
+    }
+
     cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
@@ -538,15 +543,15 @@ EXIT:
 
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
-    cJSON *root = NULL;
-    char *buf = NULL;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, NULL, TRANS_CTRL, "invalid param.");
+
     AppInfo *appInfo = &(chan->appInfo);
     if (appInfo == NULL || appInfo->appType == APP_TYPE_NOT_CARE) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return NULL;
     }
 
-    root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
@@ -585,7 +590,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
         }
     }
 
-    buf = cJSON_PrintUnformatted(root);
+    char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     return buf;
 }
@@ -775,7 +780,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
         return SOFTBUS_TRANS_PROXY_UNPACK_FAST_DATA_FAILED;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_CALLING_TOKEN_ID, (int32_t *)&appInfo->callingTokenId)) {
+    if (!GetJsonObjectNumber64Item(root, JSON_KEY_CALLING_TOKEN_ID, (int64_t *)&appInfo->callingTokenId)) {
         appInfo->callingTokenId = TOKENID_NOT_SET;
     }
     return SOFTBUS_OK;

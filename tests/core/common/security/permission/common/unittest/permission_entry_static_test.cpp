@@ -14,13 +14,13 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
 #include "permission_entry.c"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
+#include "securec.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
 
 using namespace std;
 using namespace testing::ext;

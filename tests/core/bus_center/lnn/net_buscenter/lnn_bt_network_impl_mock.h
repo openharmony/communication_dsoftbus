@@ -47,16 +47,16 @@ class LnnBtNetworkImplInterfaceMock : public LnnBtNetworkImplInterface {
 public:
     LnnBtNetworkImplInterfaceMock();
     ~LnnBtNetworkImplInterfaceMock() override;
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
-    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
-    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
-    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
-    MOCK_METHOD4(ConvertBtMacToStr, int32_t (char *, uint32_t, const uint8_t *, uint32_t));
-    MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
-    MOCK_METHOD2(LnnGetNetIfTypeByName, int32_t (const char *, LnnNetIfType *));
-    MOCK_METHOD2(LnnVisitNetif, bool (VisitNetifCallback, void *));
-    MOCK_METHOD1(LnnRegistPhysicalSubnet, int32_t (LnnPhysicalSubnet *));
-    MOCK_METHOD3(LnnNotifyPhysicalSubnetStatusChanged, void (const char *, ProtocolType, void *));
+    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t(SoftBusBtAddr *));
+    MOCK_METHOD4(ConvertBtMacToStr, int32_t(char *, uint32_t, const uint8_t *, uint32_t));
+    MOCK_METHOD2(LnnRegisterEventHandler, int32_t(LnnEventType, LnnEventHandler));
+    MOCK_METHOD2(LnnGetNetIfTypeByName, int32_t(const char *, LnnNetIfType *));
+    MOCK_METHOD2(LnnVisitNetif, bool(VisitNetifCallback, void *));
+    MOCK_METHOD1(LnnRegistPhysicalSubnet, int32_t(LnnPhysicalSubnet *));
+    MOCK_METHOD3(LnnNotifyPhysicalSubnetStatusChanged, void(const char *, ProtocolType, void *));
     static int32_t ActionOfLnnGetNetIfTypeByNameBr(const char *ifName, LnnNetIfType *type);
     static int32_t ActionOfLnnGetNetIfTypeByNameBle(const char *ifName, LnnNetIfType *type);
 };
