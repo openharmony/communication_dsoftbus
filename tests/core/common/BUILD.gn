@@ -26,6 +26,9 @@ group("unittest") {
     "sequence_verification:unittest",
     "utils:unittest",
   ]
+  if (is_standard_system) {
+    deps += [ "message_handler/ffrttest:unittest" ]
+  }
 }
 
 group("fuzztest") {
