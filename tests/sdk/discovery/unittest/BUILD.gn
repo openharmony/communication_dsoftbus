@@ -56,6 +56,11 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/tests/sdk/common/include",
       "unittest/common/",
     ]
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     deps = [
       "$dsoftbus_root_path/tests/sdk:softbus_client_static",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
