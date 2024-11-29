@@ -739,7 +739,7 @@ int32_t AuthInit(void)
         .onException = NotifyTransException,
     };
     int32_t ret = AuthDeviceInit(&callBack);
-    if (ret == SOFTBUS_AUTH_COMM_INIT_FAIL || ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_AUTH_CONN_INIT_FAIL) {
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "auth device init failed");
         return SOFTBUS_AUTH_INIT_FAIL;
     }
