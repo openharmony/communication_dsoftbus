@@ -60,8 +60,8 @@ HWTEST_F(InnerLinkTest, SetAndGetString, TestSize.Level1)
 {
     InnerLink info("");
     EXPECT_EQ(info.GetLocalInterface(), "");
-    info.SetLocalInterface("p2p0");
-    EXPECT_EQ(info.GetLocalInterface(), "p2p0");
+    info.SetLocalInterface(IF_NAME_P2P);
+    EXPECT_EQ(info.GetLocalInterface(), IF_NAME_P2P);
 
     EXPECT_EQ(info.GetLocalBaseMac(), "");
     info.SetLocalBaseMac("00:11:22:33:44:55");

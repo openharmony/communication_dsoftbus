@@ -26,7 +26,7 @@
 
 #define IP_NUM_MAX 32
 #define IF_NAME_HML "chba0"
-#define IF_NAME_P2P0 "p2p0"
+#define IF_NAME_P2P "p2p0"
 #define IF_NAME_WLAN "wlan0"
 #define IF_NAME_WLAN1 "wlan1"
 
