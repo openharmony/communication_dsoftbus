@@ -74,6 +74,7 @@ constexpr uint32_t ROM_NUM2 = 2;
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 static int32_t g_errCode = 0;
+static bool g_isNeedCondWait = true;
 
 static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info);
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode);
@@ -153,24 +154,44 @@ void LNNLaneMockTest::TearDown()
 static void CondSignal(void)
 {
     if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondSignal SoftBusMutexLock failed";
         return;
     }
     if (SoftBusCondSignal(&g_cond) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondSignal SoftBusCondSignal failed";
         (void)SoftBusMutexUnlock(&g_lock);
         return;
     }
+    g_isNeedCondWait = false;
     (void)SoftBusMutexUnlock(&g_lock);
 }
 
 static void CondWait(void)
 {
     if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondWait SoftBusMutexLock failed";
         return;
     }
-    if (SoftBusCondWait(&g_cond, &g_lock, nullptr) != SOFTBUS_OK) {
+    if (!g_isNeedCondWait) {
+        GTEST_LOG_(INFO) << "Doesn't need CondWait, g_isNeedCondWait = " << g_isNeedCondWait;
         (void)SoftBusMutexUnlock(&g_lock);
         return;
     }
+    if (SoftBusCondWait(&g_cond, &g_lock, nullptr) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondWait SoftBusCondWait failed";
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lock);
+}
+
+static void SetIsNeedCondWait(void)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "SetIsNeedCondWait SoftBusMutexLock failed";
+        return;
+    }
+    g_isNeedCondWait = true;
     (void)SoftBusMutexUnlock(&g_lock);
 }
 
@@ -313,8 +334,8 @@ static LaneAllocListener g_listenerCbForP2p = {
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
-static LaneAllocListener g_listenerCbForP2p2 = {
-    .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+static LaneAllocListener g_listenerCbForBr2 = {
+    .onLaneAllocSuccess = OnLaneAllocSuccessForBr,
     .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
@@ -416,9 +437,10 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_ERRTEST_001, TestSize.Level1)
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
+    CondWait();
     EXPECT_EQ(g_errCode, ERROR_WIFI_OFF);
     
     (void)laneManager->lnnFreeLane(laneReqId);
@@ -453,9 +475,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_001, TestSize.Level1)
 
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, 0, 0, 0, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForWlan5g);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -484,9 +508,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_002, TestSize.Level1)
     ASSERT_EQ(strncpy_s(allocInfo.extendInfo.peerBleMac, MAX_MAC_LEN,
         PEER_MAC, strlen(PEER_MAC)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_BYTE, 0, 0, 0, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForBle);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -515,6 +541,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_003, TestSize.Level1)
 
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_FILE, 0, 0, 0, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -546,6 +573,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_004, TestSize.Level1)
 
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_RAW_STREAM, 0, 0, 0, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -575,9 +603,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_005, TestSize.Level1)
 
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_RAW_STREAM, MESH_MAGIC_NUMBER, 0, 0, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForBr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -607,6 +637,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_006, TestSize.Level1)
     LaneAllocInfo allocInfo = {};
     allocInfo.qosRequire.rttLevel = LANE_RTT_LEVEL_LOW;
     CreateAllocInfoForAllocTest(LANE_T_RAW_STREAM, DEFAULT_QOSINFO_MIN_BW, 0, 0, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -640,6 +671,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_007, TestSize.Level1)
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForHml);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -678,9 +710,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_008, TestSize.Level1)
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + MID_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForWlan5g);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -717,9 +751,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_009, TestSize.Level1)
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + LOW_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForWlan5g);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -750,9 +786,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_010, TestSize.Level1)
         PEER_MAC, strlen(PEER_MAC)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForBle);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -871,6 +909,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_002, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -917,11 +956,13 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + MID_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForWlan5g);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     CondWait();
@@ -957,6 +998,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + LOW_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForHml);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -994,11 +1036,13 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForBr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     CondWait();
@@ -1030,6 +1074,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_001, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -1066,10 +1111,12 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_002, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnCancelLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
     LnnWifiAdpterInterfaceMock::delayNotifyLinkSuccess = false;
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
 }
@@ -1100,12 +1147,12 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnCancelLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -2475,7 +2522,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_006, TestSize.Level1)
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
     char buf[] = "lanedetect";
     EXPECT_CALL(mock, ConnSendSocketData).WillRepeatedly(Return(sizeof(buf)));
-
+    SetIsNeedCondWait();
     int32_t ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -3129,7 +3176,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_05, TestSize.Level1)
 
     ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /*
@@ -3150,13 +3196,17 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_06, TestSize.Level1)
     EXPECT_CALL(wifiMock, LnnConnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
     RawLaneAllocInfo allocInfo;
     allocInfo.type = LANE_TYPE_TRANS;
-    LaneAllocListener listener;
+    LaneAllocListener listener = {
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
+    };
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocRawLane(laneHandle, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    CondWait();
 }
 
 /*
@@ -3195,7 +3245,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_07, TestSize.Level1)
     allocInfo.linkList.linkTypeNum = LANE_LINK_TYPE_BUTT;
     ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /*
@@ -3221,16 +3270,17 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_08, TestSize.Level1)
     wifiMock.SetDefaultResult();
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneHandle, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
-    EXPECT_CALL(laneDepMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     allocInfo.linkList.linkTypeNum = LANE_LINK_TYPE_BUTT - 1;
     allocInfo.type = LANE_TYPE_TRANS;
-    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForP2p2);
+    SetIsNeedCondWait();
+    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForBr2);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
+    CondWait();
+    SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    CondWait();
 }
 
 /*
@@ -3323,6 +3373,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_12, TestSize.Level1)
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
