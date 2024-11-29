@@ -32,31 +32,62 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/include",
   "$dsoftbus_root_path/core/discovery/common/include",
   "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/discovery/usb/disc_usb/include",
 ]
+
+if (dsoftbus_feature_disc_usb && has_ces_part) {
+  dsoftbus_feature_disc_usb_support = true
+} else {
+  dsoftbus_feature_disc_usb_support = false
+}
 
 ble_discovery_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 ble_discovery_external_deps = []
 if (support_i18n && qemu_arm_disable) {
   ble_discovery_external_deps += [ "i18n:intl_util" ]
 }
-
-if (!support_bluetooth) {
+ble_discovery_src = []
+if (!support_bluetooth && !dsoftbus_feature_disc_usb_support) {
   ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
-} else {
-  if (!dsoftbus_feature_disc_ble) {
-    ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
-  } else {
-    ble_discovery_src = [
-      "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
-      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
-      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+} else if (!dsoftbus_feature_disc_ble && !dsoftbus_feature_disc_usb_support) {
+  ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
+} else if (dsoftbus_feature_disc_ble && !dsoftbus_feature_disc_usb_support) {
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+  ]
+  if (support_i18n && qemu_arm_disable) {
+    ble_discovery_src += [
+      "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
     ]
-    if (support_i18n && qemu_arm_disable) {
-      ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp" ]
-    } else {
-      ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
-    }
+  } else {
+    ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
   }
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/usb/disc_usb/src/disc_usb_virtual.c",
+  ]
+} else {
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/usb/disc_usb/disc_usb.gni")
+
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+  ]
+  if (support_i18n && qemu_arm_disable) {
+    ble_discovery_src += [
+      "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
+    ]
+  } else {
+    ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
+  }
+
+  usb_discovery_src += usb_discovery_sources
+  ble_discovery_inc += usb_discovery_dirs
+  ble_discovery_deps += usb_discovery_deps
+  ble_discovery_external_deps += usb_discovery_external_deps
 }
 
 if (dsoftbus_feature_disc_ble && disc_enhanced) {
