@@ -303,7 +303,7 @@ int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     if (strcpy_s(uuid, size, auth->uuid) != EOK) {
         AUTH_LOGI(AUTH_CONN, "copy uuid fail, size=%{public}u", size);
         DelDupAuthManager(auth);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     DelDupAuthManager(auth);
     return SOFTBUS_OK;
@@ -448,7 +448,7 @@ static int32_t RetryRegTrustDataChangeListener()
         AUTH_LOGW(AUTH_HICHAIN, "retry regDataChangeListener, current retry times=%{public}d, err=%{public}d", i, ret);
         (void)SoftBusSleepMs(RETRY_REGDATA_MILLSECONDS);
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_REG_DATA_FAIL;
 }
 
 int32_t RegTrustListenerOnHichainSaStart(void)
@@ -510,7 +510,7 @@ int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo
     if (info->connInfo.type != AUTH_LINK_TYPE_BLE) {
         AUTH_LOGE(AUTH_FSM, "sessionkey online only support ble");
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE;
     }
 
     bool isNewCreated = false;
@@ -518,7 +518,7 @@ int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo
     if (auth == NULL) {
         AUTH_LOGE(AUTH_FSM, "auth manager does not exist.");
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     auth->hasAuthPassed[info->connInfo.type] = true;
     AUTH_LOGI(AUTH_FSM,
@@ -633,7 +633,7 @@ int32_t AuthStartReconnectDevice(
     }
     if (AddAuthRequest(&request) == 0) {
         AUTH_LOGE(AUTH_CONN, "add reconnect request fail, requestId=%{public}u", requestId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_ADD_REQUEST_FAIL;
     }
     if (ConnectAuthDevice(requestId, &request.connInfo, sideType) != SOFTBUS_OK) {
         DelAuthRequest(requestId);

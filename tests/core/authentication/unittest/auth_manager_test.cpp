@@ -161,7 +161,7 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
 static int32_t MyUpdateFuncReturnError(AuthManager *auth1, const AuthManager *auth2, AuthLinkType type)
 {
     GTEST_LOG_(INFO) << "MyUpdateFuncReturnError Called";
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 static int32_t MyUpdateFuncReturnOk(AuthManager *auth1, const AuthManager *auth2, AuthLinkType type)
@@ -188,9 +188,10 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(FindAuthManagerByConnId(CONN_ID, false) != nullptr);
     AuthManager *auth = FindAuthManagerByConnId(CONN_ID, true);
     EXPECT_TRUE(auth == nullptr);
-    EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ_2, MyUpdateFuncReturnError, auth, AUTH_LINK_TYPE_WIFI) ==
-        SOFTBUS_AUTH_NOT_FOUND);
-    EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnError, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_ERR);
+    EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ_2,
+        MyUpdateFuncReturnError, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_NE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnError, auth,
+        AUTH_LINK_TYPE_WIFI), SOFTBUS_OK);
     EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnOk, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_OK);
     AuthConnInfo connInfo;
     uint32_t type = 0;
@@ -392,7 +393,7 @@ HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSiz
     OnGroupCreated("myId", GROUP_TYPE);
     OnGroupDeleted("myId", GROUP_TYPE);
     OnDeviceBound(UDID_TEST, "groupInfo");
-    EXPECT_TRUE(RetryRegTrustDataChangeListener() == SOFTBUS_ERR);
+    EXPECT_NE(RetryRegTrustDataChangeListener(), SOFTBUS_OK);
     RemoveNotPassedAuthManagerByUdid(nullptr);
     RemoveNotPassedAuthManagerByUdid(PEER_UID);
     RemoveNotPassedAuthManagerByUdid(UDID_TEST);
@@ -485,7 +486,7 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
     ClearAuthRequest();
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
-    HandleReconnectResult(&request, CONN_ID_1, SOFTBUS_ERR, 0);
+    HandleReconnectResult(&request, CONN_ID_1, SOFTBUS_INVALID_PARAM, 0);
     request.authId = REQUEST_ID;
     request.type = REQUEST_TYPE_RECONNECT;
     HandleReconnectResult(&request, CONN_ID_1, SOFTBUS_OK, 0);
@@ -502,8 +503,8 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
     request.authId = REQUEST_ID_1;
     request.type = REQUEST_TYPE_VERIFY;
     EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
-    OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_ERR, &connInfo);
-    OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_ERR, nullptr);
+    OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_INVALID_PARAM, &connInfo);
+    OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_INVALID_PARAM, nullptr);
     OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_OK, &connInfo);
 }
 
@@ -714,7 +715,7 @@ HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     ret = AuthSetTcpKeepaliveByConnInfo(&connInfo, HIGH_FREQ_CYCLE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -916,7 +917,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_002, TestSize.Level1)
     AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST);
     AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST);
     AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP);
-    AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_ERR);
+    AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_INVALID_PARAM);
     AuthDeviceNotTrust(nullptr);
     const char *peerUdid = "";
     AuthDeviceNotTrust(peerUdid);
