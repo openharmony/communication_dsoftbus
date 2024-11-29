@@ -19,7 +19,6 @@
 #include <stdatomic.h>
 
 #include "anonymizer.h"
-#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -31,7 +30,6 @@
 #include "trans_client_proxy.h"
 #include "trans_event.h"
 #include "trans_log.h"
-#include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 
 static _Atomic bool g_transSessionInitFlag = false;
@@ -91,9 +89,11 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
     TransDelItemByPackageName(pkgName, pid);
 }
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
+int32_t TransCreateSessionServer(
+    const char *pkgName, const char *sessionName, int32_t uid, int32_t pid, bool isNormalApp)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
+        !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         return SOFTBUS_INVALID_PARAM;
     }
     char *tmpName = NULL;
@@ -102,7 +102,9 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
         pkgName, AnonymizeWrapper(tmpName), uid, pid);
     AnonymizeFree(tmpName);
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc failed");
+    if (newNode == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
     if (strcpy_s(newNode->pkgName, sizeof(newNode->pkgName), pkgName) != EOK) {
         SoftBusFree(newNode);
         return SOFTBUS_STRCPY_ERR;
@@ -114,13 +116,9 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->type = SEC_TYPE_CIPHERTEXT;
     newNode->uid = uid;
     newNode->pid = pid;
-    uint64_t callingTokenId = 0;
-    int32_t ret = SoftBusGetCallingFullTokenId(&callingTokenId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get callingTokenId failed");
-    int32_t tokenType = SoftBusGetAccessTokenType(callingTokenId);
-    newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
-        CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
-    ret = TransSessionServerAddItem(newNode);
+    newNode->callerType = isNormalApp ? CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
+
+    int32_t ret = TransSessionServerAddItem(newNode);
     TransEventExtra extra = {
         .socketName = sessionName,
         .callerPkg = pkgName,

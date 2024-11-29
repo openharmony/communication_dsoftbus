@@ -31,7 +31,7 @@ public:
 
     virtual int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) = 0;
 
-    virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName) = 0;
+    virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp) = 0;
     virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
     virtual int32_t OpenSession(const SessionParam *param, TransInfo *info) = 0;
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
