@@ -120,7 +120,7 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return proxy->CreateSessionServer(pkgName, sessionName);
+    return proxy->CreateSessionServer(pkgName, sessionName, false);
 }
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
