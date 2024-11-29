@@ -83,7 +83,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, CreateSessionServer_TEST_001, TestSiz
     const char *sessionName = "111";
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.CreateSessionServer(pkgName, sessionName, false);
+    int32_t ret = servertest.CreateSessionServer(pkgName, sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
