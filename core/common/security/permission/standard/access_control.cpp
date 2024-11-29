@@ -91,11 +91,11 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     char deviceId[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
     if (ret != SOFTBUS_OK) {
-        char *tmpName = nullptr;
-        Anonymize(peerNetworkId, &tmpName);
+        char *tmpPeerNetworkId = nullptr;
+        Anonymize(peerNetworkId, &tmpPeerNetworkId);
         COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}" PRIu64, callingTokenId);
-        COMM_LOGE(COMM_PERM, "networkId=%{public}s, ret=%{public}d", tmpName, ret);
-        AnonymizeFree(tmpName);
+        COMM_LOGE(COMM_PERM, "networkId=%{public}s, ret=%{public}d", AnonymizeWrapper(tmpPeerNetworkId), ret);
+        AnonymizeFree(tmpPeerNetworkId);
         return ret;
     }
     return TransCheckAccessControl(callingTokenId, deviceId);
