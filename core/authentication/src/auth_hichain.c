@@ -389,13 +389,13 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
     if (!GetJsonObjectStringItem(msg, FIELD_GROUP_ID, groupInfo->groupId, GROUPID_BUF_LEN)) {
         AUTH_LOGE(AUTH_HICHAIN, "get FIELD_GROUP_ID fail");
         cJSON_Delete(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_GROUP_ID_FAIL;
     }
     int32_t groupType = 0;
     if (!GetJsonObjectNumberItem(msg, FIELD_GROUP_TYPE, &groupType)) {
         AUTH_LOGE(AUTH_HICHAIN, "get FIELD_GROUP_TYPE fail");
         cJSON_Delete(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_GROUP_TYPE_FAIL;
     }
     groupInfo->groupType = (GroupType)groupType;
     cJSON_Delete(msg);

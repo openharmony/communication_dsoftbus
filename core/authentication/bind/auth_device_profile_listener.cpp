@@ -56,7 +56,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProf
     }
     if (g_deviceProfileChange.onDeviceProfileAdd == NULL) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileAdd failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
     DelNotTrustDevice(profile.GetDeviceId().c_str());
     g_deviceProfileChange.onDeviceProfileAdd(profile.GetDeviceId().c_str(), NULL);
@@ -74,7 +74,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
     AnonymizeFree(anonyUdid);
     if (g_deviceProfileChange.onDeviceProfileDeleted == NULL) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
     if (profile.GetLocalUserId() != GetActiveOsAccountIds()) {
         AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");

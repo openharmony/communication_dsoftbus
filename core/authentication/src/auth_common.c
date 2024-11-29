@@ -124,16 +124,16 @@ int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, ui
 
 static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
 {
-    CHECK_NULL_PTR_RETURN_VALUE(msg, SOFTBUS_ERR);
-    CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);
+    CHECK_NULL_PTR_RETURN_VALUE(msg, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_INVALID_PARAM);
     EventRemoveInfo *info = (EventRemoveInfo *)param;
     if (msg->what != (int32_t)info->event) {
         AUTH_LOGE(AUTH_CONN, "msg->what and event inequality");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info->cmpFunc == NULL) {
         AUTH_LOGE(AUTH_CONN, "cmpFunc is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return info->cmpFunc(msg->obj, info->param);
 }
@@ -360,7 +360,7 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", connInfo->type);
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE;
     }
     return SOFTBUS_OK;
 }
@@ -381,7 +381,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
         case CONNECT_TCP:
             if (info->socketInfo.protocol != LNN_PROTOCOL_IP) {
                 AUTH_LOGW(AUTH_CONN, "only support LNN_PROTOCOL_IP");
-                return SOFTBUS_ERR;
+                return SOFTBUS_AUTH_INVALID_PROTOCOL;
             }
             if (IsEnhanceP2pModuleId(info->socketInfo.moduleId)) {
                 connInfo->type = AUTH_LINK_TYPE_ENHANCED_P2P;
@@ -415,7 +415,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info->type);
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE;
     }
     return SOFTBUS_OK;
 }
@@ -464,7 +464,7 @@ int32_t AuthCommonInit(void)
 
     if (SoftBusMutexInit(&g_authLock, NULL) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "auth mutex init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
