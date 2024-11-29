@@ -37,9 +37,9 @@ typedef enum {
 } SoftBusAccessTokenType;
 
 bool SoftBusCheckIsSystemService(uint64_t tokenId);
-bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char *sessionName);
+bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName);
 bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission);
-int32_t SoftBusCalcPermType(uint64_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid);
+int32_t SoftBusCalcPermType(uint64_t fullTokenId, pid_t uid, pid_t pid);
 int32_t SoftBusCheckDynamicPermission(uint64_t tokenId);
 void SoftBusRegisterDataSyncPermission(
     const uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);

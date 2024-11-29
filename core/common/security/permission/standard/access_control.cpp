@@ -48,7 +48,7 @@ static int32_t TransCheckAccessControl(uint64_t callingTokenId, const char *devi
 {
     char *tmpName = nullptr;
     Anonymize(deviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "tokenId=%{public}llx, deviceId=%{public}s", callingTokenId, tmpName);
+    COMM_LOGI(COMM_PERM, "tokenId=%{public}" PRIu64 ", deviceId=%{public}s", callingTokenId, tmpName);
     AnonymizeFree(tmpName);
 
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
@@ -60,7 +60,7 @@ static int32_t TransCheckAccessControl(uint64_t callingTokenId, const char *devi
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
     COMM_LOGI(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
     if (profile.empty()) {
-        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}llx", callingTokenId);
+        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}" PRIu64, callingTokenId);
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     for (auto &item : profile) {
@@ -93,8 +93,8 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     if (ret != SOFTBUS_OK) {
         char *tmpName = nullptr;
         Anonymize(peerNetworkId, &tmpName);
-        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}llx, networkId=%{public}s, ret=%{public}d",
-            callingTokenId, tmpName, ret);
+        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}" PRIu64, callingTokenId);
+        COMM_LOGE(COMM_PERM, "networkId=%{public}s, ret=%{public}d", tmpName, ret);
         AnonymizeFree(tmpName);
         return ret;
     }
@@ -140,7 +140,8 @@ int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
     char deviceId[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}llx, ret=%{public}d", callingTokenId, ret);
+        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}" PRIu64 ", ret=%{public}d",
+            callingTokenId, ret);
         return ret;
     }
     return TransCheckAccessControl(callingTokenId, deviceId);
