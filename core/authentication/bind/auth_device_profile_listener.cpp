@@ -15,11 +15,15 @@
 
 #include "auth_device_profile_listener.h"
 
+#include <securec.h>
+
+#include "anonymizer.h"
 #include "auth_deviceprofile.h"
 #include "auth_log.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_network_info.h"
@@ -62,10 +66,28 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProf
 
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceProfile &profile)
 {
-    AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete start!");
+    char *anonyUdid = nullptr;
+    Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
+    AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete start! "
+        "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
+    AnonymizeFree(anonyUdid);
     if (g_deviceProfileChange.onDeviceProfileDeleted == NULL) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
         return SOFTBUS_ERR;
+    }
+    if (profile.GetLocalUserId() != GetActiveOsAccountIds()) {
+        AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");
+        // delete db
+        return SOFTBUS_OK;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(profile.GetDeviceId().c_str(), CATEGORY_UDID, &nodeInfo);
+    if (ret == SOFTBUS_OK && nodeInfo.userId != 0 &&
+        nodeInfo.userId != profile.GetPeerUserId()) {
+        AUTH_LOGE(AUTH_INIT, "no match peer user");
+        return SOFTBUS_OK;
     }
     g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str());
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");
@@ -83,7 +105,14 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileUpdate(
 
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceProfile &profile)
 {
-    AUTH_LOGI(AUTH_INIT, "dp active callback enter!");
+    char *anonyUdid = nullptr;
+    Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
+    AUTH_LOGI(AUTH_INIT, "dp active callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
+    if (GetScreenState() == SOFTBUS_SCREEN_OFF && !LnnIsLocalSupportBurstFeature()) {
+        AUTH_LOGI(AUTH_INIT, "screen off and not support burst. no need online");
+        return SOFTBUS_OK;
+    }
     DelNotTrustDevice(profile.GetDeviceId().c_str());
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     if (IsHeartbeatEnable()) {
@@ -99,7 +128,10 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
 
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDeviceProfile &profile)
 {
-    AUTH_LOGI(AUTH_INIT, "dp inactive callback enter!");
+    char *anonyUdid = nullptr;
+    Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
+    AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
     LnnUpdateOhosAccount(true);
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     int32_t userId = profile.GetPeerUserId();
