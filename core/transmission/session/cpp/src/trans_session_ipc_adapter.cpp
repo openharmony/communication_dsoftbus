@@ -24,7 +24,7 @@
 int32_t SoftBusGetCallingFullTokenId(uint64_t *callingFullTokenId)
 {
     if (callingFullTokenId == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "invalid param, callingFullTokenId is nullptr");
+        TRANS_LOGE(TRANS_CTRL, "invalid param, callingFullTokenId is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
     *callingFullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
