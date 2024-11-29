@@ -2285,6 +2285,7 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
     int32_t userId = GetActiveOsAccountIds();
     LNN_LOGI(LNN_LEDGER, "get userId:%{public}d", userId);
+    nodeInfo->userId = userId;
     int32_t ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_LEDGER, "get userIdCheckSum failed, ret=%{public}d", ret);
