@@ -272,11 +272,6 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
         TRANS_LOGI(TRANS_SDK, "no need listen here, channelId=%{public}d", channel->channelId);
         return SOFTBUS_OK;
     }
-    ret = TransTdcCreateListener(channel->fd);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "create listener fail, channelId=%{public}d", channel->channelId);
-        return ret;
-    }
 
     TcpDirectChannelInfo info;
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
@@ -288,9 +283,16 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
     }
 
     if (info.detail.needStopListener) {
-        (void)TransTdcStopRead(channel->fd);
-        TRANS_LOGI(TRANS_SDK, "listener has been disabled, stop read now, channelId=%{public}d", channel->channelId);
+        TRANS_LOGI(TRANS_SDK, "info.detail.needStopListener, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_OK;
     }
+
+    ret = TransTdcCreateListener(channel->fd);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "create listener fail, channelId=%{public}d", channel->channelId);
+        return ret;
+    }
+
     return SOFTBUS_OK;
 }
 
