@@ -21,10 +21,11 @@
 #include "disc_manager.h"
 #include "disc_share_ble.h"
 #include "disc_touch_ble.h"
+#include "disc_usb.h"
 #include "disc_virtual_link_ble.h"
 #include "softbus_error_code.h"
 
-#define DISPATCHER_SIZE 5
+#define DISPATCHER_SIZE 6
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
@@ -203,6 +204,15 @@ static int32_t DiscBleInitExt(DiscInnerCallback *discInnerCb)
     }
     g_dispatchers[g_dispatcherSize++] = touchInterface;
     DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_OK);
+
+    DiscoveryBleDispatcherInterface *usbInterface = DiscUsbInit(discInnerCb);
+    if (usbInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_USB_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
+        DISC_LOGE(DISC_INIT, "DiscUsbInit err");
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
+    g_dispatchers[g_dispatcherSize++] = usbInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_USB_INIT, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
@@ -279,4 +289,5 @@ void DiscBleDeinit(void)
     DiscApproachBleDeinit();
     DiscVLinkBleDeinit();
     DiscTouchBleDeinit();
+    DiscUsbDeinit();
 }

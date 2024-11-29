@@ -39,7 +39,8 @@
       "dsoftbus_feature_lnn_wifiservice_dependence",
       "dsoftbus_feature_protocol_newip",
       "dsoftbus_feature_ex_kits",
-      "dsoftbus_feature_wifi_notify"
+      "dsoftbus_feature_wifi_notify",
+      "dsoftbus_feature_disc_usb"
     ],
     "rom": "3000KB",
     "ram": "40MB",
@@ -88,7 +89,8 @@
         "zlib",
         "libnl",
         "power_manager",
-        "ffrt"
+        "ffrt",
+        "usb_manager"
       ],
       "third_party": [
         "cJSON",
