@@ -277,6 +277,10 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
                 SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, DISC_CONTROL, "all medium failed");
             return SOFTBUS_OK;
         }
+        case USB:
+            ret = CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, ret);
+            return ret;
         default:
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -439,10 +443,12 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
-        SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= USB,
+        SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "medium is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq < FREQ_BUTT,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGW(!(info->medium == USB && info->mode == DISCOVER_MODE_ACTIVE),
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "usb is not support active mode");
 
     if (info->capabilityData == NULL) {
         if (info->dataLen == 0) {
