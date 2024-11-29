@@ -1621,7 +1621,7 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     auto finalFrequency = ChooseFrequency(stationFrequency, WifiDirectUtils::StringToChannelList(channelListString));
     CONN_CHECK_AND_RETURN_RET_LOGW(finalFrequency > 0, finalFrequency, CONN_WIFI_DIRECT,
         "choose frequency failed, frequency=%{public}d", finalFrequency);
-    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P0, WifiDirectUtils::FrequencyToChannel(finalFrequency));
+    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, WifiDirectUtils::FrequencyToChannel(finalFrequency));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, errorcode=%{public}d", coexCode);
     bool isLocalWideBandSupported = P2pAdapter::IsWideBandSupported();
@@ -1687,7 +1687,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
         return SOFTBUS_INVALID_PARAM;
     }
     auto freq = strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ].c_str(), nullptr, DECIMAL_BASE);
-    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P0, WifiDirectUtils::FrequencyToChannel(freq));
+    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, WifiDirectUtils::FrequencyToChannel(freq));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, errorcode=%{public}d", coexCode);
     std::string remoteMac = msg.GetLegacyP2pMac();
@@ -1706,7 +1706,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
-        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { IF_NAME_P2P0 });
+        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { IF_NAME_P2P });
         return result.errorCode_;
     }
     auto ret = UpdateWhenConnectSuccess(groupConfig, msg);
@@ -1774,7 +1774,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 int P2pV1Processor::DestroyGroup()
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "start to destroy group");
-    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
+    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
     auto result = P2pEntity::GetInstance().DestroyGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "destroy group failed, error=%{public}d", result.errorCode_);
@@ -1916,7 +1916,7 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0, do not call entity disconnect");
         return SOFTBUS_OK;
     }
-    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
+    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "entity disconnect failed, error=%{public}d", result.errorCode_);
