@@ -84,7 +84,7 @@ if (!support_bluetooth && !dsoftbus_feature_disc_usb_support) {
     ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
   }
 
-  usb_discovery_src += usb_discovery_sources
+  ble_discovery_src += usb_discovery_sources
   ble_discovery_inc += usb_discovery_dirs
   ble_discovery_deps += usb_discovery_deps
   ble_discovery_external_deps += usb_discovery_external_deps
