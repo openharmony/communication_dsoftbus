@@ -16,6 +16,7 @@
 #include "lnn_event_monitor_impl.h"
 
 #include <securec.h>
+#include <string>
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
@@ -27,7 +28,9 @@
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "lnn_heartbeat_strategy.h"
+#include "lnn_ohos_account_adapter.h"
 #include "want.h"
+#include "want_params.h"
 
 #include "power_mgr_client.h"
 #include "softbus_adapter_mem.h"
@@ -75,7 +78,15 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 
     if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT ||
         action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF) {
-        state = SOFTBUS_ACCOUNT_LOG_OUT;
+        const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+        int32_t eventUserId = -1;
+        int32_t activeUserId = GetActiveOsAccountIds();
+        std::string userIdKey = "userId";
+        eventUserId = wantParams.GetIntParam(userIdKey, -1);
+        LNN_LOGI(LNN_EVENT, "activeUserId=%{public}d, eventUserId=%{public}d", activeUserId, eventUserId);
+        if (eventUserId == activeUserId) {
+            state = SOFTBUS_ACCOUNT_LOG_OUT;
+        }
     }
     if (state != SOFTBUS_ACCOUNT_UNKNOWN) {
         LnnNotifyAccountStateChangeEvent(state);
