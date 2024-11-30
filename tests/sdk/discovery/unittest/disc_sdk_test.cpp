@@ -746,6 +746,8 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest009, TestSize.Level1)
     g_subscribeInfo.subscribeId = GetSubscribeId();
     g_subscribeInfo.mode = DISCOVER_MODE_PASSIVE;
     g_subscribeInfo.medium = USB;
+    g_subscribeInfo.capability = "usb";
+
     int32_t ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 
