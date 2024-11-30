@@ -93,8 +93,9 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     if (ret != SOFTBUS_OK) {
         char *tmpPeerNetworkId = nullptr;
         Anonymize(peerNetworkId, &tmpPeerNetworkId);
-        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}" PRIu64, callingTokenId);
-        COMM_LOGE(COMM_PERM, "networkId=%{public}s, ret=%{public}d", AnonymizeWrapper(tmpPeerNetworkId), ret);
+        COMM_LOGE(COMM_PERM,
+            "get remote udid failed, tokenId=%{public}" PRIu64, "networkId=%{public}s, ret=%{public}d",
+            callingTokenId, AnonymizeWrapper(tmpPeerNetworkId), ret);
         AnonymizeFree(tmpPeerNetworkId);
         return ret;
     }
