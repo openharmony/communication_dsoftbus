@@ -942,6 +942,14 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     return SOFTBUS_OK;
 }
 
+bool TransUdpGetAuthType(const char *peerNetWorkId, const char *mySessionName)
+{
+    if (IsIShareSession(mySessionName) && IsAvailableMeta(peerNetWorkId)) {
+        return true;
+    }
+    return TransGetAuthTypeByNetWorkId(peerNetWorkId);
+}
+
 static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
@@ -960,7 +968,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     }
     channelObj->requestId = requestId;
     channelObj->status = UDP_CHANNEL_STATUS_OPEN_AUTH;
-    bool isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
+    bool isMeta = TransUdpGetAuthType(channel->info.peerNetWorkId, channel->info.myData.sessionName);
     ReleaseUdpChannelLock();
 
     TransEventExtra extra = {
