@@ -921,14 +921,11 @@ int CreateSocket(const char *pkgName, const char *sessionName)
         TRANS_LOGE(TRANS_SDK, "copy session name failed");
         return SOFTBUS_STRCPY_ERR;
     }
-    uint64_t callingTokenId = 0;
     uint64_t callingFullTokenId = 0;
-    ret = SoftBusGetCallingFullTokenId(&callingTokenId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingTokenId failed");
     ret = SoftBusGetCallingFullTokenId(&callingFullTokenId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingFullTokenId failed");
 
-    if (SoftBusCheckIsNormalApp(callingTokenId, callingFullTokenId, sessionName)) {
+    if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
         if (!RemoveAppIdFromSessionName(sessionName, newSessionName)) {
             TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
             return SOFTBUS_TRANS_NOT_FIND_APPID;
