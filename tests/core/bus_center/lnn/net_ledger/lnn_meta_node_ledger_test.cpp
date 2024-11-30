@@ -115,7 +115,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Le
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnDeactiveMetaNode(META_NODE_ID);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_FOUND);
     EXPECT_TRUE(LnnDeactiveMetaNode(nullptr) == SOFTBUS_INVALID_PARAM);
     LnnDeinitMetaNodeLedger();
 }
@@ -143,7 +143,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
     networkId = info.bypassInfo;
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetMetaNodeUdidByNetworkId(networkId, udid);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_FOUND);
 }
 
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1)
@@ -169,6 +169,6 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_002, TestSize.Level1
     networkId = info.bypassInfo;
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetMetaNodeInfoByNetworkId(networkId, nodeInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_FOUND);
 }
 } // namespace OHOS

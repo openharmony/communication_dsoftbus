@@ -117,7 +117,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnGetDeviceTypeId(&info, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetDeviceTypeId(&info, &typeId) == SOFTBUS_OK);
     EXPECT_TRUE(LnnConvertDeviceTypeToId(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnConvertDeviceTypeToId(INVALID_DEVICE_TYPE, &typeId) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(INVALID_DEVICE_TYPE, &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     EXPECT_TRUE(LnnConvertDeviceTypeToId(DEVICE_TYPE, &typeId) == SOFTBUS_OK);
     typeId = 0;
     LnnConvertIdToDeviceType(TYPE_WATCH_ID);
@@ -830,7 +830,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetNodeDataChangeFlag(nullptr, DATA_CHANGE_FLAG) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetNodeDataChangeFlag(LOCAL_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnSetNodeDataChangeFlag(REMOTE_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_ERR);
+    EXPECT_TRUE(
+        LnnSetNodeDataChangeFlag(REMOTE_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     LnnDeinitNetLedger();
 }
 
@@ -843,7 +844,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
 {
     static int32_t nodeKeyInfoLenTable[] = { UDID_BUF_LEN, UUID_BUF_LEN, UDID_BUF_LEN, MAC_LEN, IP_LEN,
-        DEVICE_NAME_BUF_LEN, LNN_COMMON_LEN, LNN_COMMON_LEN, SOFTBUS_ERR, DATA_CHANGE_FLAG_BUF_LEN,
+        DEVICE_NAME_BUF_LEN, LNN_COMMON_LEN, LNN_COMMON_LEN, SOFTBUS_INVALID_NUM, DATA_CHANGE_FLAG_BUF_LEN,
         SHORT_ADDRESS_MAX_LEN };
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     for (int32_t i = 0; i < KEY_MAX_INDEX; i++) {

@@ -236,7 +236,7 @@ static int32_t DlGetStaticCapLen(const char *networkId, bool checkOnline, void *
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
         LNN_LOGE(LNN_LEDGER, "device is offline");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     *((int32_t *)buf) = info->staticCapLen;
     return SOFTBUS_OK;
@@ -496,7 +496,7 @@ static int32_t DlGetWifiDirectAddr(const char *networkId, bool checkOnline, void
     wifiDirectAddr = LnnGetWifiDirectAddr(info);
     if (wifiDirectAddr == NULL) {
         LNN_LOGE(LNN_LEDGER, "get wifidirect addr fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     if (strcpy_s((char*)buf, len, wifiDirectAddr) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy wifidirect addr to buf fail");
@@ -1403,13 +1403,13 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     if (it == NULL) {
         LNN_LOGE(LNN_LEDGER, "it is null");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
     }
     while (LnnMapHasNext(it)) {
         it = LnnMapNext(it);
         if (it == NULL) {
             (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
         }
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
         if ((LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) &&
@@ -1445,14 +1445,14 @@ int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen,
     if (it == NULL) {
         LNN_LOGE(LNN_LEDGER, "it is null");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
     }
     uint8_t nodeUdidHash[SHA_256_HASH_LEN] = {0};
     while (LnnMapHasNext(it)) {
         it = LnnMapNext(it);
         if (it == NULL) {
             (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
         }
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
         if (!needOnline || LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) {
@@ -1493,14 +1493,14 @@ int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *con
     if (it == NULL) {
         LNN_LOGE(LNN_LEDGER, "it is null");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
     }
     unsigned char shortUdidHashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     while (LnnMapHasNext(it)) {
         it = LnnMapNext(it);
         if (it == NULL) {
             (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
         }
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
         if (LnnIsNodeOnline(nodeInfo)) {
@@ -1714,10 +1714,11 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->netCapacity = connCapability;
-    if (LnnSaveRemoteDeviceInfo(nodeInfo) != SOFTBUS_OK) {
+    int32_t ret = LnnSaveRemoteDeviceInfo(nodeInfo);
+    if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         LNN_LOGE(LNN_LEDGER, "save remote netCapacity fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
@@ -1843,7 +1844,7 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
         LNN_LOGE(LNN_LEDGER, "set node addr failed! ret=%{public}d", ret);
     }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-    return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
+    return ret == EOK ? SOFTBUS_OK : SOFTBUS_STRCPY_ERR;
 }
 
 int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort)

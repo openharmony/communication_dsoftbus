@@ -152,7 +152,7 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
         if (mstRet != EOK) {
             *typeId = TYPE_UNKNOW_ID;
             LNN_LOGE(LNN_LEDGER, "memset_s fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
         }
         *typeId = ConvertStringToInt(deviceType, typeId);
         if (*typeId != TYPE_UNKNOW_ID) {
@@ -162,7 +162,7 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
             *typeId, deviceType);
     }
     *typeId = TYPE_UNKNOW_ID;
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_INVALID_DEV_INFO;
 }
 
 char *LnnConvertIdToDeviceType(uint16_t typeId)
