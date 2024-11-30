@@ -1833,3 +1833,14 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
+
+bool IsAvailableMeta(const char *peerNetWorkId)
+{
+    int32_t value = 0;
+    int32_t ret = LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_NODE, &value);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "GetAuthType fail, ret=%{public}d", ret);
+        return false;
+    }
+    return ((uint32_t)value & (1 << ONLINE_METANODE));
+}
