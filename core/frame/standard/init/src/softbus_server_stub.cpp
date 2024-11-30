@@ -344,9 +344,8 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 static int32_t CheckNormalAppSessionName(
     const char *sessionName, pid_t callingUid, std::string &strName)
 {
-    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
     uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
-    if (SoftBusCheckIsNormalApp(callingTokenId, callingFullTokenId, sessionName)) {
+    if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
         if (result != SOFTBUS_OK) {

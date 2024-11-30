@@ -58,10 +58,9 @@ int32_t CheckTransPermission(
         COMM_LOGI(COMM_PERM, "invalid param");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    uint32_t callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
     uint64_t callingFullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
     char *tmpName = nullptr;
-    int32_t permType = SoftBusCalcPermType(callingTokenId, callingFullTokenId, callingUid, callingPid);
+    int32_t permType = SoftBusCalcPermType(callingFullTokenId, callingUid, callingPid);
     SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
         COMM_LOGI(COMM_PERM, "pItem is null");

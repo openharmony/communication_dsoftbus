@@ -53,7 +53,7 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
-bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
 {
     if (sessionName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
@@ -66,7 +66,7 @@ bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char 
         return false;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
     if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
         return false;
     } else if (tokenType == ATokenTypeEnum::TOKEN_HAP) {
@@ -102,14 +102,14 @@ bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *perm
     return ret == Security::AccessToken::PERMISSION_GRANTED;
 }
 
-int32_t SoftBusCalcPermType(uint64_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid)
+int32_t SoftBusCalcPermType(uint64_t fullTokenId, pid_t uid, pid_t pid)
 {
     if (uid == static_cast<pid_t>(getuid()) && pid == getpid()) {
         COMM_LOGI(COMM_PERM, "self app");
         return SELF_APP;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
     if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
         return NATIVE_APP;
     } else if (tokenType == ATokenTypeEnum::TOKEN_HAP) {
@@ -164,7 +164,7 @@ void SoftBusRegisterDataSyncPermission(
     scopeInfo.tokenIDs = {tonkenId};
     std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ =
         std::make_shared<SoftBusAccessTokenAdapter>(scopeInfo, pkgName, pid);
-    COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}llx", tonkenId);
+    COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}" PRIu64, tonkenId);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
     }
