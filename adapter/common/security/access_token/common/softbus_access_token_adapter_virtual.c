@@ -23,9 +23,8 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return false;
 }
 
-bool SoftBusCheckIsNormalApp(uint64_t tokenId, uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
 {
-    (void)tokenId;
     (void)fullTokenId;
     (void)sessionName;
     return false;
@@ -38,9 +37,8 @@ bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *perm
     return false;
 }
 
-int32_t SoftBusCalcPermType(uint64_t tokenId, uint64_t fullTokenId, pid_t uid, pid_t pid)
+int32_t SoftBusCalcPermType(uint64_t fullTokenId, pid_t uid, pid_t pid)
 {
-    (void)tokenId;
     (void)fullTokenId;
     (void)uid;
     (void)pid;
