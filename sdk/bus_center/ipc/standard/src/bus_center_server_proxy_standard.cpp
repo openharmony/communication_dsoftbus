@@ -86,11 +86,10 @@ int32_t BusCenterServerProxy::SoftbusRegisterService(const char *clientPkgName, 
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName, bool isNormalApp)
+int32_t BusCenterServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
 {
     (void)pkgName;
     (void)sessionName;
-    (void)isNormalApp;
     return SOFTBUS_OK;
 }
 
