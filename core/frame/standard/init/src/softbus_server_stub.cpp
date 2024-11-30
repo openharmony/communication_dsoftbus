@@ -342,11 +342,10 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 }
 
 static int32_t CheckNormalAppSessionName(
-    const char *sessionName, pid_t callingUid, std::string &strName, bool *isNormalApp)
+    const char *sessionName, pid_t callingUid, std::string &strName)
 {
     uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
     if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
-        *isNormalApp = true;
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
         if (result != SOFTBUS_OK) {
@@ -387,7 +386,6 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
 {
     COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
-    bool isNormalApp = false;
     pid_t callingUid;
     pid_t callingPid;
     const char *pkgName = data.ReadCString();
@@ -412,13 +410,13 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (CheckNormalAppSessionName(sessionName, callingUid, strName, &isNormalApp) != SOFTBUS_OK) {
+    if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
     sessionName = strName.c_str();
 #endif
-    retReply = CreateSessionServer(pkgName, sessionName, isNormalApp);
+    retReply = CreateSessionServer(pkgName, sessionName);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner write reply failed!");

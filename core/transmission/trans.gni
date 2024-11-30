@@ -45,6 +45,7 @@ trans_session_inc += [
   "$dsoftbus_root_path/core/transmission/ipc/include",
   "$dsoftbus_root_path/core/transmission/session/include",
   "$dsoftbus_root_path/core/transmission/interface",
+  "$dsoftbus_root_path/core/transmission/session/cpp/include",
 ]
 
 if (enhanced_qos_info) {
@@ -59,6 +60,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     trans_session_src += [
       "$dsoftbus_root_path/core/transmission/ipc/mini/trans_client_proxy.c",
+      "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_ipc_adapter_virtual.c",
     ]
     trans_session_inc +=
         [ "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include" ]
@@ -66,6 +68,7 @@ if (defined(ohos_lite)) {
   } else {
     trans_session_src += [
       "$dsoftbus_root_path/core/transmission/ipc/small/trans_client_proxy.c",
+      "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_ipc_adapter_virtual.c",
     ]
     trans_session_deps += [
       "//build/lite/config/component/cJSON:cjson_shared",
@@ -81,6 +84,7 @@ if (defined(ohos_lite)) {
   trans_session_src += [
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy.cpp",
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy_standard.cpp",
+    "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_ipc_adapter.cpp",
   ]
   if (enhanced_broadcast) {
     import(
