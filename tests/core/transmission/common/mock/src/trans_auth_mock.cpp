@@ -131,9 +131,9 @@ int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return GetTransAuthInterface()->AuthGetHmlConnInfo(uuid, connInfo, isMeta);
 }
 
-void AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta, AuthHandle *authHandle)
+void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
-    return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, isIpConnection, isMeta, authHandle);
+    return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, type, isMeta, authHandle);
 }
 
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
