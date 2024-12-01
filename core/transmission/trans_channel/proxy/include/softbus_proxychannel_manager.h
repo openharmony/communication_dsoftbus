@@ -61,7 +61,7 @@ int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
 
-int32_t TransRefreshProxyTimesNative(int channelId);
+int32_t TransRefreshProxyTimesNative(int32_t channelId);
 
 void TransProxyDeathCallback(const char *pkgName, int32_t pid);
 
