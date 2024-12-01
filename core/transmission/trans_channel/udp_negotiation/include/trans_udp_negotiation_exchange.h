@@ -31,7 +31,7 @@ int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode);
 int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo);
 int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo);
 int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc);
-bool IsIShareSession(const char* sessionName);
+bool IsIShareSession(const char *sessionName);
 
 #ifdef __cplusplus
 }
