@@ -382,7 +382,7 @@ int32_t P2pAdapter::GetIpAddress(std::string &ipString)
 
 std::string P2pAdapter::GetMacAddress()
 {
-    std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_P2P0);
+    std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_P2P);
     std::string macString = WifiDirectUtils::MacArrayToString(macArray);
     if (macString.empty()) {
         macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_WLAN);
