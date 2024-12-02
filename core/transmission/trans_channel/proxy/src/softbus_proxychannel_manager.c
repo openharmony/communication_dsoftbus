@@ -28,6 +28,7 @@
 #include "data_bus_native.h"
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_timer.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -43,6 +44,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 #include "trans_auth_negotiation.h"
+#include "trans_bind_request_manager.h"
 #include "trans_channel_limit.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
@@ -1518,7 +1520,6 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", channelId);
         return;
     }
-
     channelInfo->appInfo.connectedStart = GetSoftbusRecordTimeMillis();
     int32_t ret = TransProxyHandshake(channelInfo);
     if (ret != SOFTBUS_OK) {
@@ -1602,6 +1603,10 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId)
 
 void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
+    if (errCode == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
+        (void)TransAddTimestampToList(
+            appInfo->myData.sessionName, appInfo->peerData.sessionName, appInfo->peerNetWorkId, SoftBusGetSysTimeMs());
+    }
     (void)OnProxyChannelOpenFailed(channelId, appInfo, errCode);
 }
 
