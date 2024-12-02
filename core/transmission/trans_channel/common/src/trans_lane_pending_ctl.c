@@ -684,8 +684,8 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
     (void)TransDelLaneReqFromPendingList(laneHandle, true);
 }
 
-static void TransBuildLaneAllocFailEvent(
-    TransEventExtra *extra, TransInfo *transInfo, AppInfo *appInfo, SessionParam *param, int32_t reason)
+static void TransBuildLaneAllocFailEvent(TransEventExtra *extra, TransInfo *transInfo, const AppInfo *appInfo,
+    const SessionParam *param, int32_t reason)
 {
     extra->peerUdid = appInfo->peerUdid;
     extra->peerDevVer = appInfo->peerVersion;
