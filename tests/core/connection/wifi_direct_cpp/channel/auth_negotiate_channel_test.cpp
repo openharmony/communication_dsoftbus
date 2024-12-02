@@ -23,6 +23,9 @@
 #include "wifi_direct_test_context.h"
 #include "conn_log.h"
 #include "softbus_utils.h"
+#include "fuzz_data_generator.h"
+#include "fuzz_environment.h"
+#include "softbus_common.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -49,6 +52,27 @@ protected:
     std::shared_ptr<AuthNegotiateChannel> NewAuthNegotiateChannel(WifiDirectInterfaceMock &mock);
     WifiDirectTestContext<TestContextKey> context_;
 };
+
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
+template <class T>
+T GetAuthChannelRandomData()
+{
+    T objetct {};
+    size_t objetctSize = sizeof(objetct);
+    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
+        COMM_LOGE(COMM_TEST, "data invalid");
+        return objetct;
+    }
+    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
+    if (ret != EOK) {
+        COMM_LOGE(COMM_TEST, "memory copy error");
+        return {};
+    }
+    g_baseFuzzPos += objetctSize;
+    return objetct;
+}
 
 void AuthNegotiateChannelTest::PrepareContext()
 {
@@ -91,7 +115,7 @@ HWTEST_F(AuthNegotiateChannelTest, SendMessage, TestSize.Level1)
 
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = true;
             return SOFTBUS_OK;
         });
@@ -100,7 +124,7 @@ HWTEST_F(AuthNegotiateChannelTest, SendMessage, TestSize.Level1)
 
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = false;
             return SOFTBUS_OK;
         });
@@ -109,7 +133,7 @@ HWTEST_F(AuthNegotiateChannelTest, SendMessage, TestSize.Level1)
 
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = true;
             return SOFTBUS_OK;
         });
@@ -246,5 +270,30 @@ HWTEST_F(AuthNegotiateChannelTest, OpenConnection_004, TestSize.Level1)
     uint32_t authReqId = 0;
     auto ret = channel->OpenConnection(param, channel, authReqId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: OnDataReceivedFuzzTest
+ * @tc.desc: !!! Just for fuzz
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthNegotiateChannelTest, OnDataReceivedFuzzTest, TestSize.Level1)
+{
+    if (!FuzzEnvironment::IsFuzzEnable()) {
+        GTEST_SKIP() << "only support in fuzz test";
+    }
+    WifiDirectInterfaceMock mock;
+    auto testData = GetAuthChannelRandomData<AuthTransData *>();
+    auto handle = GetAuthChannelRandomData<AuthHandle>();
+    EXPECT_CALL(mock, LnnGetFeatureCapabilty).WillRepeatedly(Return(0));
+    EXPECT_CALL(mock, IsFeatureSupport).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, RegAuthTransListener(_, _))
+        .WillRepeatedly([testData, &handle](int32_t module, const AuthTransListener *listener) {
+            listener->onDataReceived(handle, testData);
+            return SOFTBUS_OK;
+        });
+    SoftBusSleepMs(1000);
 }
 }

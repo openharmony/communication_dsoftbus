@@ -51,6 +51,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$wifi_direct_path/command",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   sources = [
@@ -160,6 +161,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$wifi_direct_path/command",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   sources = [
