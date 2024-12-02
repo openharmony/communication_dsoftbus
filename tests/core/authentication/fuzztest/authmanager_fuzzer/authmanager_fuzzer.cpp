@@ -52,6 +52,13 @@ static void FuzzEnvDeinit()
     DataGenerator::Clear();
 }
 
+static void GenerateUint8Array(uint8_t *data, uint8_t len)
+{
+    for (uint8_t i = 0; i < len; i++) {
+        GenerateUint8(data[i]);
+    }
+}
+
 namespace OHOS {
     bool NewAuthManagerFuzzTest(const uint8_t *data, size_t size)
     {
@@ -63,10 +70,10 @@ namespace OHOS {
         string udid, uuid;
         GenerateString(udid);
         GenerateString(uuid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN, udid.c_str(), UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str(), UUID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
             return false;
         }
         GenerateFromList(info.connInfo.type, AUTH_LINK_TYPE_LIST);
@@ -87,10 +94,10 @@ namespace OHOS {
         string udid, uuid;
         GenerateString(udid);
         GenerateString(uuid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN, udid.c_str(), UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str(), UUID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
             return false;
         }
         GenerateFromList(info.connInfo.type, AUTH_LINK_TYPE_LIST);
@@ -181,16 +188,16 @@ namespace OHOS {
         AuthSessionInfo sessionInfo = {0};
         sessionInfo.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
         GenerateBool(sessionInfo.isServer);
-        if (memcpy_s(sessionInfo.udid, UDID_BUF_LEN, udid.c_str(), UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(sessionInfo.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
             return false;
         }
-        if (memcpy_s(sessionInfo.uuid, UUID_BUF_LEN, uuid.c_str(), UUID_BUF_LEN) != EOK) {
+        if (memcpy_s(sessionInfo.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
             return false;
         }
         sessionInfo.connInfo.type = type;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(sessionInfo.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(sessionInfo.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthConnInfo info;
@@ -215,16 +222,16 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN, udid.c_str(), UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str(), UUID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
             return false;
         }
         info.connInfo.type = type;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -247,16 +254,16 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN, udid.c_str(), UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str(), UUID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
             return false;
         }
         info.connInfo.type = type;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -277,16 +284,16 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN, udid.c_str(), UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str(), UUID_BUF_LEN) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         int64_t lastAuthSeq = authSeq;
@@ -308,17 +315,13 @@ namespace OHOS {
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
         SessionKey key;
         (void)memset_s(&key, sizeof(SessionKey), 0, sizeof(SessionKey));
-        string value;
-        GenerateString(value);
-        if (memcpy_s(key.value, SESSION_KEY_LENGTH, value.c_str(), SESSION_KEY_LENGTH) != EOK) {
-            return false;
-        }
+        GenerateUint8Array(key.value, SESSION_KEY_LENGTH);
         GenerateUint32(key.len);
         bool isConnect = false;
         bool isOldKey = false;
@@ -341,7 +344,7 @@ namespace OHOS {
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -364,7 +367,7 @@ namespace OHOS {
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -386,7 +389,7 @@ namespace OHOS {
         info.module = AUTH_MODULE_TRANS;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -407,7 +410,7 @@ namespace OHOS {
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -454,7 +457,7 @@ namespace OHOS {
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -492,13 +495,13 @@ namespace OHOS {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
         AuthSessionInfo info = {0};
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
+        if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -517,13 +520,13 @@ namespace OHOS {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
         AuthSessionInfo info = {0};
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
+        if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -542,13 +545,13 @@ namespace OHOS {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
         AuthSessionInfo info = {0};
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
+        if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -568,13 +571,13 @@ namespace OHOS {
         GenerateInt64(authSeq);
         bool checkConn = false;
         AuthSessionInfo info = {0};
-        if (memcpy_s(info.uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
+        if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         info.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
@@ -592,8 +595,8 @@ namespace OHOS {
         char udid[UDID_BUF_LEN] = "abcabcabcabcabc";
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
-        int64_t seqList[1] = {0};
-        uint64_t verifyTime[1] = {0};
+        int64_t seqList[2] = {0};
+        uint64_t verifyTime[2] = {0};
         GenerateInt64(seqList[0]);
         GenerateUint64(verifyTime[0]);
         AuthSessionInfo info = {0};
@@ -601,7 +604,7 @@ namespace OHOS {
         DiscoveryType type = DISCOVERY_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -618,14 +621,14 @@ namespace OHOS {
         char udid[UDID_BUF_LEN] = "abcabcabcabcabc";
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
-        int64_t seqList[1] = {0};
+        int64_t seqList[DISCOVERY_TYPE_COUNT] = {0};
         GenerateInt64(seqList[0]);
         DiscoveryType type = DISCOVERY_TYPE_COUNT;
         AuthSessionInfo info = {0};
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -649,7 +652,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -673,7 +676,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthHandle authHandle = {0};
@@ -698,7 +701,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthHandle authHandle = {0};
@@ -725,7 +728,7 @@ namespace OHOS {
         info.isServer = isServer;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthHandle authHandle = {0};
@@ -756,7 +759,7 @@ namespace OHOS {
         info.isServer = isServer;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -778,7 +781,7 @@ namespace OHOS {
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -836,7 +839,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -861,7 +864,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -890,7 +893,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -911,7 +914,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -932,7 +935,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -955,7 +958,7 @@ namespace OHOS {
         info.isServer = true;
         string ip;
         GenerateFromList(ip, AUTH_LINK_TYPE_WIFI_IP_LIST);
-        if (memcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str(), IP_LEN) != EOK) {
+        if (strcpy_s(info.connInfo.info.ipInfo.ip, IP_LEN, ip.c_str()) != EOK) {
             return false;
         }
         AuthManager *auth = NewAuthManager(authSeq, &info);
