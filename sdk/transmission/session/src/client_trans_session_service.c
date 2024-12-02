@@ -19,6 +19,7 @@
 #define _GNU_SOURCE
 #endif
 
+#include "securec.h"
 #include <unistd.h>
 
 #include "anonymizer.h"
@@ -30,8 +31,8 @@
 #include "client_trans_socket_manager.h"
 #include "dfs_session.h"
 #include "inner_session.h"
-#include "securec.h"
 #include "session_ipc_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
@@ -909,26 +910,31 @@ int CreateSocket(const char *pkgName, const char *sessionName)
         TRANS_LOGE(TRANS_SDK, "invalid pkgName or sessionName");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "init softbus err");
-        return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "invalid pkg name");
-        return SOFTBUS_INVALID_PKGNAME;
-    }
+    int32_t ret = InitSoftBus(pkgName);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, SOFTBUS_TRANS_SESSION_ADDPKG_FAILED, TRANS_SDK, "init softbus err");
+
+    ret = CheckPackageName(pkgName);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PKGNAME, TRANS_SDK, "invalid pkg name");
     char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
     if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, strlen(sessionName)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy session name failed");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (CheckIsNormalApp(sessionName)) {
+    uint32_t callingTokenId = 0;
+    uint64_t callingFullTokenId = 0;
+    ret = SoftBusGetCallingTokenId(&callingTokenId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingTokenId failed");
+    ret = SoftBusGetCallingFullTokenId(&callingFullTokenId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingFullTokenId failed");
+
+    if (SoftBusCheckIsNormalApp(callingTokenId, callingFullTokenId, sessionName)) {
         if (!RemoveAppIdFromSessionName(sessionName, newSessionName)) {
             TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }
     }
-    int32_t ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName);
+    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
