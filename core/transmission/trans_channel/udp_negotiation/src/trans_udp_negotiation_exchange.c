@@ -33,8 +33,12 @@ typedef enum {
 
 #define ISHARE_SESSION_NAME "IShare*"
 
-static inline bool IsIShareSession(const char* sessionName)
+bool IsIShareSession(const char *sessionName)
 {
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid sessionName");
+        return false;
+    }
     regex_t regComp;
     if (regcomp(&regComp, ISHARE_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
         TRANS_LOGE(TRANS_CTRL, "regcomp failed.");
