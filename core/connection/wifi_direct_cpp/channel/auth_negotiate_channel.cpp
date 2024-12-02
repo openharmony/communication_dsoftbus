@@ -34,7 +34,7 @@
 namespace OHOS::SoftBus {
 static constexpr int TIMER_TIMEOUT = 50;
 static constexpr int WAIT_DETECT_RESPONSE_TIMEOUT_MS = 1000;
-static constexpr int MAX_AUTH_DATA_LEN = 4096;
+static constexpr int MAX_AUTH_DATA_LEN = 131072;
 Utils::Timer AuthNegotiateChannel::timer_("DetectLink", TIMER_TIMEOUT);
 
 AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
