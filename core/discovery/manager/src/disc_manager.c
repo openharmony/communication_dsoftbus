@@ -286,10 +286,14 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
     }
 }
 
-static int32_t TransferStringCapToBitmap(const char *capability)
+static int32_t TransferStringCapToBitmap(const char *capability, ExchangeMedium medium)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(capability != NULL, SOFTBUS_DISCOVER_MANAGER_CAPABILITY_INVALID,
         DISC_CONTROL, "capability is null");
+
+    if ((medium == USB) && (strcmp(capability, g_capabilityMap[APPROACH_CAPABILITY_BITMAP].capability) == 0)) {
+        return USB_CAPABILITY_BITMAP;
+    }
 
     for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
         if (strcmp(capability, g_capabilityMap[i].capability) == 0) {
@@ -551,7 +555,7 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
         }
     }
 
-    int32_t bitmap = TransferStringCapToBitmap(info->capability);
+    int32_t bitmap = TransferStringCapToBitmap(info->capability, info->medium);
     if (bitmap < 0) {
         DISC_LOGE(DISC_CONTROL, "capability not found");
         FreeDiscInfo(infoNode, PUBLISH_SERVICE);
@@ -594,7 +598,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         }
     }
 
-    int32_t bimap = TransferStringCapToBitmap(info->capability);
+    int32_t bimap = TransferStringCapToBitmap(info->capability, info->medium);
     if (bimap < 0) {
         DISC_LOGE(DISC_CONTROL, "capability not found");
         FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);
