@@ -16,6 +16,8 @@
 #define private public
 #define ENHANCED_FLAG
 
+#include <gtest/gtest.h>
+
 #include "auth_interface.h"
 #include "disc_log.h"
 #include "ipc_skeleton.h"
@@ -37,7 +39,6 @@
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
 #include "trans_type.h"
-#include <gtest/gtest.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -1216,11 +1217,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest033, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
-    EXPECT_CALL(softbusServerStubMock, CheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->GrantPermissionInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(softbusServerStubMock, CheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_OK));
     datas.WriteInt32(uid);
     datas.WriteInt32(pid);
     ret = softBusServer->GrantPermissionInner(datas, reply);
@@ -1232,11 +1233,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest033, TestSize.Level1)
     ret = softBusServer->GrantPermissionInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(softbusServerStubMock, CheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     ret = softBusServer->RemovePermissionInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(softbusServerStubMock, CheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckDynamicPermission).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->RemovePermissionInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
