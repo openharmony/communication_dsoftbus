@@ -34,6 +34,7 @@
 namespace OHOS::SoftBus {
 static constexpr int TIMER_TIMEOUT = 50;
 static constexpr int WAIT_DETECT_RESPONSE_TIMEOUT_MS = 1000;
+static constexpr int MAX_AUTH_DATA_LEN = 131072;
 Utils::Timer AuthNegotiateChannel::timer_("DetectLink", TIMER_TIMEOUT);
 
 AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
@@ -212,6 +213,9 @@ static bool CheckSameAccount(const NegotiateMessage &msg)
 
 static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
 {
+    CONN_CHECK_AND_RETURN_LOGW(data != nullptr, CONN_WIFI_DIRECT, "invalid param, data is null");
+    CONN_CHECK_AND_RETURN_LOGW(data->len <= MAX_AUTH_DATA_LEN, CONN_WIFI_DIRECT, "data len is invalid");
+    CONN_CHECK_AND_RETURN_LOGW(data->data != nullptr, CONN_WIFI_DIRECT, "invalid param, data of data is null");
     ProtocolType type { ProtocolType::TLV };
     auto channel = std::make_shared<AuthNegotiateChannel>(handle);
     auto remoteDeviceId = channel->GetRemoteDeviceId();

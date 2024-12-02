@@ -21,6 +21,7 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "wifi_direct_ip_manager.h"
+#include "wifi_direct_defines.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -108,7 +109,7 @@ HWTEST_F(WifiDirectIpManagerTest, ConfigAndReleaseIpv4, TestSize.Level1)
 {
     NetManagerStandard::MockNetConnClient client;
 
-    std::string interface("p2p0");
+    std::string interface(IF_NAME_P2P);
     Ipv4Info local("172.30.1.2");
     Ipv4Info remote("172.30.1.1");
     std::string remoteMac("08:fb:ea:19:78:38");
@@ -195,7 +196,7 @@ HWTEST_F(WifiDirectIpManagerTest, GetNetworkDestination, TestSize.Level1)
 HWTEST_F(WifiDirectIpManagerTest, AddAndDeleteInterfaceAddress, TestSize.Level1)
 {
     std::string ipString = "192.168.1.255";
-    std::string interface = "p2p0";
+    std::string interface = IF_NAME_P2P;
     int32_t prefixLength = 24;
     WifiDirectIpManager &ipManager = WifiDirectIpManager::GetInstance();
 
@@ -251,7 +252,7 @@ HWTEST_F(WifiDirectIpManagerTest, ConfigIpv6, TestSize.Level1)
 {
     NetManagerStandard::MockNetConnClient client;
     std::string ipString = "192.168.1.255";
-    std::string interface = "p2p0";
+    std::string interface = IF_NAME_P2P;
 
     EXPECT_CALL(client, AddInterfaceAddress(_, _, _)).WillOnce(Return(0));
     auto ret = WifiDirectIpManager::GetInstance().ConfigIpv6(interface, ipString);

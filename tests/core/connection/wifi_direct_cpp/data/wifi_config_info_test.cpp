@@ -87,7 +87,7 @@ HWTEST_F(WifiConfigInfoTest, GetInterfaceInfoTest, TestSize.Level1)
     infos.push_back(info);
 
     wifiCfg.SetInterfaceInfoArray(infos);
-    auto ret = wifiCfg.GetInterfaceInfo("p2p0");
+    auto ret = wifiCfg.GetInterfaceInfo(IF_NAME_P2P);
     EXPECT_EQ(ret.GetName(), "");
 
     ret = wifiCfg.GetInterfaceInfo(IF_NAME_HML);
