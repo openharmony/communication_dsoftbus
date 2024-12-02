@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,11 @@
  */
 
 #include <gtest/gtest.h>
-#include "trans_client_proxy.h"
-#include "permission_status_change_cb.h"
+#include <string>
+
 #include "softbus_common.h"
 #include "softbus_error_code.h"
-#include <string>
+#include "trans_client_proxy.h"
 
 #define PID 520
 #define TOKENID 7758
