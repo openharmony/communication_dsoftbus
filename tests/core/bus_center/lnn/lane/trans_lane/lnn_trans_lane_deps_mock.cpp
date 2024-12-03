@@ -155,5 +155,10 @@ int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, 
 {
     return GetTransLaneIf()->CheckLaneResourceNumByLinkType(peerUdid, type, laneNum);
 }
+
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
+{
+    return GetTransLaneIf()->CheckLinkConflictByReleaseLink(releaseLink);
+}
 }
 } // namespace OHOS
