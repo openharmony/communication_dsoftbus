@@ -366,6 +366,9 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
 {
     if (infoNode->item != NULL && infoNode->item->callback.serverCb.OnServerDeviceFound != NULL &&
         !IsInnerModule(infoNode)) {
+        if ((device->addr[0].type == USB) && IsBitmapSet(&device->capabilityBitmap[0], USB_CAPABILITY_BITMAP)) {
+            BitmapSet((uint32_t *)&device->capabilityBitmap[0], APPROACH_CAPABILITY_BITMAP);
+        }
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }
