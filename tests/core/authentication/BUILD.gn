@@ -934,6 +934,48 @@ ohos_unittest("AuthDeviceProfileListenerTest") {
   ]
 }
 
+ohos_unittest("AuthSessionJsonMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_session_json_deps_mock.cpp",
+    "unittest/auth_session_json_mock_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -946,6 +988,7 @@ group("unittest") {
     ":AuthNormalizeRequestTest",
     ":AuthOtherTest",
     ":AuthSessionFsmTest",
+    ":AuthSessionJsonMockTest",
     ":AuthSessionKeyTest",
     ":AuthSessionMessageTest",
     ":AuthTcpConnectionTest",
