@@ -158,5 +158,10 @@ void DelLogicAndLaneRelationship(uint64_t laneId)
 {
     GetLaneLinkDepsInterface()->DelLogicAndLaneRelationship(laneId);
 }
+
+int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
+{
+    return GetLaneLinkDepsInterface()->CheckLinkConflictByReleaseLink(releaseLink);
+}
 }
 } // namespace OHOS
