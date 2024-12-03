@@ -404,8 +404,8 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localP2PMac, &anonyP2pMac);
     Anonymize(localInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_HEART_BEAT,
-        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=..*%{public}s, brMac=::%{public}s, "
-        "p2pMac=::%{public}s, onlineNodeNum=%{public}d",
+        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, brMac=%{public}s, "
+        "p2pMac=%{public}s, onlineNodeNum=%{public}d",
         devTypeStr, localInfo.deviceTypeId, anonyDeviceName, anonyIp, anonyBtMac, anonyP2pMac, onlineNodeNum);
     AnonymizeFree(anonyDeviceName);
     AnonymizeFree(anonyIp);
