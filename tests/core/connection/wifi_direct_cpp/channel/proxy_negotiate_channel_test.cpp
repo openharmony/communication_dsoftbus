@@ -24,6 +24,9 @@
 #include "wifi_direct_executor.h"
 #include "wifi_direct_scheduler.h"
 #include "negotiate_command.h"
+#include "fuzz_data_generator.h"
+#include "fuzz_environment.h"
+
 using namespace testing::ext;
 using namespace testing;
 using ::testing::_;
@@ -40,11 +43,32 @@ protected:
     std::shared_ptr<CoCProxyNegotiateChannel> NewCoCProxyNegotiateChannel(WifiDirectInterfaceMock &mock);
 };
 
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
+template <class T>
+T GetProxyChannelRandomData()
+{
+    T objetct {};
+    size_t objetctSize = sizeof(objetct);
+    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
+        COMM_LOGE(COMM_TEST, "data invalid");
+        return objetct;
+    }
+    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
+    if (ret != EOK) {
+        COMM_LOGE(COMM_TEST, "memory copy error");
+        return {};
+    }
+    g_baseFuzzPos += objetctSize;
+    return objetct;
+}
+
 std::shared_ptr<CoCProxyNegotiateChannel> ProxyNegotiateChannelTest::NewCoCProxyNegotiateChannel(
     WifiDirectInterfaceMock &mock)
 {
     EXPECT_CALL(mock, TransProxyPipelineGetUuidByChannelId(_, _, _))
-        .WillRepeatedly([this](int32_t channelId, char *uuid, uint32_t uuidLen) {
+        .WillRepeatedly([](int32_t channelId, char *uuid, uint32_t uuidLen) {
             std::string id = "uuid_0123456789ABCDEFGH";
             EXPECT_EQ(EOK, strcpy_s(uuid, UUID_BUF_LEN, id.c_str()));
             return SOFTBUS_OK;
@@ -64,7 +88,7 @@ HWTEST_F(ProxyNegotiateChannelTest, CoCProxyNegotiateChannel, TestSize.Level1)
 {
     NiceMock<WifiDirectInterfaceMock> mock;
     EXPECT_CALL(mock, TransProxyPipelineGetUuidByChannelId(_, _, _))
-        .WillRepeatedly([this](int32_t channelId, char *uuid, uint32_t uuidLen) {
+        .WillRepeatedly([](int32_t channelId, char *uuid, uint32_t uuidLen) {
             std::string id = "uuid_0123456789ABCDEFGH";
             EXPECT_EQ(EOK, strcpy_s(uuid, UUID_BUF_LEN, id.c_str()));
             return SOFTBUS_NOT_FIND;
@@ -88,7 +112,7 @@ HWTEST_F(ProxyNegotiateChannelTest, onDataReceived, TestSize.Level1)
 
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = true;
             return SOFTBUS_OK;
         });
@@ -102,7 +126,7 @@ HWTEST_F(ProxyNegotiateChannelTest, onDataReceived, TestSize.Level1)
 
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = false;
             return SOFTBUS_OK;
         });
@@ -111,7 +135,7 @@ HWTEST_F(ProxyNegotiateChannelTest, onDataReceived, TestSize.Level1)
 
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([this](const std::string &networkId, InfoKey key, bool *info) {
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = true;
             return SOFTBUS_OK;
         });
@@ -122,5 +146,32 @@ HWTEST_F(ProxyNegotiateChannelTest, onDataReceived, TestSize.Level1)
         });
     ret = channel->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnDataReceivedFuzzTest
+ * @tc.desc: !!! Just for fuzz
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyNegotiateChannelTest, OnDataReceivedFuzzTest, TestSize.Level1)
+{
+    if (!FuzzEnvironment::IsFuzzEnable()) {
+        GTEST_SKIP() << "only support in fuzz test";
+    }
+    WifiDirectInterfaceMock mock;
+    const char *testData = GetProxyChannelRandomData<char *>();
+    EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
+            *info = true;
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(mock, TransProxyPipelineRegisterListener(_, _))
+        .WillRepeatedly([testData](TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener) {
+            listener->onDataReceived(CID, testData, strlen(testData));
+            return SOFTBUS_OK;
+        });
+    SoftBusSleepMs(1000);
 }
 }
