@@ -23,8 +23,6 @@ processorv1_ut_include_dirs = [
 
   "//third_party/cJSON",
   "//third_party/json/include",
-  "//third_party/googletest/googletest/include",
-  "//third_party/googletest/googletest/src",
   "//third_party/bounds_checking_function/include",
 
   "$dsoftbus_dfx_path/interface/include",
