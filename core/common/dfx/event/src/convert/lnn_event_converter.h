@@ -54,6 +54,11 @@ LNN_ASSIGNER(Int32, LaneId, laneId)
 LNN_ASSIGNER(Int32, ChanReqId, chanReqId)
 LNN_ASSIGNER(Int32, ConnReqId, connReqId)
 LNN_ASSIGNER(Int32, Strategy, strategy)
+LNN_ASSIGNER(Int32, LaneLinkType, laneLinkType)
+LNN_ASSIGNER(Int32, HmlChannelId, hmlChannelId)
+LNN_ASSIGNER(Int32, P2pChannelId, p2pChannelId)
+LNN_ASSIGNER(Int32, StaChannelId, staChannelId)
+LNN_ASSIGNER(Int32, ApChannelId, apChannelId)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -69,7 +74,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 34 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 39 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -91,6 +96,11 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "CHAN_REQ_ID",          HISYSEVENT_INT32,  LnnAssignerChanReqId        },
     { "CONN_REQ_ID",          HISYSEVENT_INT32,  LnnAssignerConnReqId        },
     { "STRATEGY_FOR_LNN_BLE", HISYSEVENT_INT32,  LnnAssignerStrategy         },
+    { "LANE_LINK_TYPE",       HISYSEVENT_INT32,  LnnAssignerLaneLinkType     },
+    { "HML_CHANNEL_ID",       HISYSEVENT_INT32,  LnnAssignerHmlChannelId     },
+    { "P2P_CHANNEL_ID",       HISYSEVENT_INT32,  LnnAssignerP2pChannelId     },
+    { "STA_CHANNEL_ID",       HISYSEVENT_INT32,  LnnAssignerStaChannelId     },
+    { "AP_CHANNEL_ID",        HISYSEVENT_INT32,  LnnAssignerApChannelId      },
     { "PEER_DEV_INFO",        HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
     { "PEER_IP",              HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, LnnAssignerPeerBrMac        },
