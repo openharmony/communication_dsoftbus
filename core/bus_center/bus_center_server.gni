@@ -143,6 +143,20 @@ if (lnn_lp_enhanced) {
   bus_center_server_src += adapter_mlps_src
 }
 
+lnn_lane_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/src"
+lnn_lane_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                [
+                                  "$native_source_path",
+                                  "$lnn_lane_dir",
+                                ],
+                                "value")
+
+if (lnn_lane_enhanced) {
+  import("../../dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lane.gni")
+  bus_center_server_src += bus_center_lane_enhance_src
+  bus_center_server_external_deps += bus_center_lane_enhance_external_deps
+}
+
 route_dir = "dsoftbus_enhance/components/newip/route"
 route_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              [

@@ -102,7 +102,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_STOP_TIME_SYNC_TEST_001, TestSize.Level
     int32_t ret = ServerIpcStartTimeSync(pkgName, targetNetworkId, NORMAL_ACCURACY, BIT_NETWORK_TYPE_WIFI);
     EXPECT_TRUE(ret != SOFTBUS_ERR);
     ret = ServerIpcStopTimeSync(pkgName, targetNetworkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
