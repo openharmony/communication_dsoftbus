@@ -75,8 +75,6 @@ group("unittest") {
     "trans_channel:unittest",
   ]
   if (trans_enhance_test) {
-    deps += [
-      "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission:unittest",
-    ]
+    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission/unittest:unittest" ]
   }
 }
