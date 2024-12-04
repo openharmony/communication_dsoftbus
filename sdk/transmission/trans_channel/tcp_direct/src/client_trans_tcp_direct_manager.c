@@ -30,9 +30,9 @@
 #include "trans_server_proxy.h"
 
 #define HEART_TIME 300
-#define TCP_KEEPALIVE_INTERVAL 2
+#define TCP_KEEPALIVE_INTERVAL 4
 #define TCP_KEEPALIVE_COUNT 5
-#define USER_TIME_OUT (305 * 1000)
+#define USER_TIME_OUT (320 * 1000)
 
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
 
