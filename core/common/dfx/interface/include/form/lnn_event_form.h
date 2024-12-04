@@ -34,6 +34,7 @@ typedef enum {
     EVENT_SCENE_LNN = 1,
     EVENT_SCENE_JOIN_LNN = 2,
     EVENT_SCENE_LEAVE_LNN = 3,
+    EVENT_SCENE_LANE = 4,
 } LnnEventScene;
 
 typedef enum {
@@ -65,6 +66,10 @@ typedef enum {
 typedef enum {
     EVENT_STAGE_LEAVE_LNN = 1,
 } LnnEventLeaveLnnStage;
+
+typedef enum {
+    EVENT_STAGE_LANE_CONFLICT = 1,
+} LnnEventLaneStage;
 
 typedef enum {
     DISC_SERVER_PUBLISH = 1,
@@ -112,6 +117,11 @@ typedef struct {
     int32_t chanReqId;          // CHAN_REQ_ID
     int32_t connReqId;          // CONN_REQ_ID
     int32_t strategy;           // STRATEGY_FOR_LNN_BLE
+    int32_t laneLinkType;       // LANE_LINK_TYPE
+    int32_t hmlChannelId;       // HML_CHANNEL_ID
+    int32_t p2pChannelId;       // P2P_CHANNEL_ID
+    int32_t staChannelId;       // STA_CHANNEL_ID
+    int32_t apChannelId;        // AP_CHANNEL_ID
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

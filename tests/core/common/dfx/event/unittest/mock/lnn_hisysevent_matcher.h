@@ -82,6 +82,11 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.chanReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.strategy);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.laneLinkType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.hmlChannelId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.p2pChannelId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.staChannelId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.apChannelId);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
