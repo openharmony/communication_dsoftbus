@@ -1568,6 +1568,44 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
     return SOFTBUS_OK;
 }
 
+int32_t LnnUpdateLocalDeviceName(const DeviceBasicInfo *info)
+{
+    if (info == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (strlen(g_localNetLedger.localInfo.deviceInfo.deviceName) > 0) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_OK;
+    }
+    int32_t ret = ModifyId(g_localNetLedger.localInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, info->deviceName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return ret;
+    }
+    ret = ModifyId(g_localNetLedger.localInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, info->unifiedName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return ret;
+    }
+    ret = ModifyId(g_localNetLedger.localInfo.deviceInfo.nickName, DEVICE_NAME_BUF_LEN, info->nickName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return ret;
+    }
+    ret = ModifyId(g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN,
+        info->unifiedDefaultName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return ret;
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 void LnnUpdateStateVersion(StateVersionChangeReason reason)
 {
     UpdateStateVersionAndStore(reason);
