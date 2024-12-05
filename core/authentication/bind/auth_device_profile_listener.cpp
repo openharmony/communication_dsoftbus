@@ -89,7 +89,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         AUTH_LOGE(AUTH_INIT, "no match peer user");
         return SOFTBUS_OK;
     }
-    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str());
+    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");
     return SOFTBUS_OK;
 }

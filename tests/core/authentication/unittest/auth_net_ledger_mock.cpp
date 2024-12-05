@@ -55,9 +55,9 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return GetNetLedgerInterface()->LnnGetLocalStrInfo(key, info, len);
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
 {
-    return GetNetLedgerInterface()->LnnDeleteSpecificTrustedDevInfo(udid);
+    return GetNetLedgerInterface()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
 }
 
 const NodeInfo *LnnGetLocalNodeInfo(void)

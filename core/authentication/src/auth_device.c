@@ -18,6 +18,7 @@
 #include <securec.h>
 #include "anonymizer.h"
 #include "auth_connection.h"
+#include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_log.h"
 #include "auth_request.h"
@@ -28,6 +29,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "legacy/softbus_adapter_hitrace.h"
@@ -337,7 +339,7 @@ void AuthDeviceNotTrust(const char *peerUdid)
     }
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
-    LnnDeleteSpecificTrustedDevInfo(peerUdid);
+    LnnDeleteSpecificTrustedDevInfo(peerUdid, GetActiveOsAccountIds());
     LnnHbOnTrustedRelationReduced();
     AuthRemoveDeviceKeyByUdid(peerUdid);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
@@ -380,11 +382,16 @@ void AuthNotifyDeviceDisconnect(AuthHandle authHandle)
     g_verifyListener.onDeviceDisconnect(authHandle);
 }
 
-static void OnDeviceNotTrusted(const char *peerUdid)
+static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
 {
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
-    LnnDeleteSpecificTrustedDevInfo(peerUdid);
+    if (!DpHasAccessControlProfile(peerUdid, false, localUserId)) {
+        LnnDeleteLinkFinderInfo(peerUdid);
+    }
+    if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
+        LnnDeleteSpecificTrustedDevInfo(peerUdid, localUserId);
+    }
     if (g_verifyListener.onDeviceNotTrusted == NULL) {
         AUTH_LOGW(AUTH_HICHAIN, "onDeviceNotTrusted not set");
         return;

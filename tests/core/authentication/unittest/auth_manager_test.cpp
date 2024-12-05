@@ -59,6 +59,7 @@ constexpr char PEER_UID[MAX_ACCOUNT_HASH_LEN] = "123456789uditest";
 constexpr uint8_t KEY_VALUE[SESSION_KEY_LENGTH] = "123456keytest";
 constexpr uint8_t TMP_IN_DATA[TMP_DATA_LEN] = "tmpInData";
 static const int32_t TEST_DATA_LEN = 600;
+constexpr int32_t DEFAULT_USERID = 100;
 
 class AuthManagerTest : public testing::Test {
 public:
@@ -389,7 +390,7 @@ HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSiz
     authHandle.authId = AUTH_SEQ_2;
     AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
     AuthNotifyDeviceDisconnect(authHandle);
-    OnDeviceNotTrusted(UDID_TEST);
+    OnDeviceNotTrusted(UDID_TEST, DEFAULT_USERID);
     OnGroupCreated("myId", GROUP_TYPE);
     OnGroupDeleted("myId", GROUP_TYPE);
     OnDeviceBound(UDID_TEST, "groupInfo");
