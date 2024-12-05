@@ -117,8 +117,6 @@ ohos_unittest("BleConnectionManagerTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
   ]
   public_configs = [ ":softbus_connection_ble_test_config" ]
   sources = [
