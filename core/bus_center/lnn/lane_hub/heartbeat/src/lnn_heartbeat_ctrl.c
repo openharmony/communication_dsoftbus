@@ -34,6 +34,7 @@
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
@@ -839,6 +840,21 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void RefreshBleBroadcastByUserSwitched()
+{
+    LnnProcessSendOnceMsgPara msgPara = {
+        .hbType = HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
+        .strategyType = STRATEGY_HB_SEND_SINGLE,
+        .isRelay = false,
+        .isSyncData = false,
+        .isDirectBoardcast = false,
+        .callerId = HB_USER_SWITCH_CALLER_ID,
+    };
+    if (LnnStartHbByTypeAndStrategyEx(&msgPara) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "refresh ble broadcast fail");
+    }
+}
+
 static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
@@ -866,9 +882,10 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
+                LnnUpdateDeviceName();
                 LnnUpdateOhosAccount(true);
                 HbConditionChanged(false);
-                LnnUpdateDeviceName();
+                RefreshBleBroadcastByUserSwitched();
                 if (IsHeartbeatEnable()) {
                     DfxRecordTriggerTime(USER_SWITCHED, EVENT_STAGE_LNN_USER_SWITCHED);
                 }
@@ -1119,7 +1136,7 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     if (type == UPDATE_HB_ACCOUNT_INFO && !LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
         LNN_LOGI(LNN_HEART_BEAT, "account is login");
-        HbConditionChanged(true);
+        HbConditionChanged(false);
     }
     LnnUpdateSendInfoStrategy(type);
 }

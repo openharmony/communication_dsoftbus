@@ -629,6 +629,10 @@ const char *SelectUseUdid(const char *peerUdid, const char *lowerUdid)
 
 void LnnDeleteLinkFinderInfo(const char *peerUdid)
 {
+    if (peerUdid == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get networkId fail.");
