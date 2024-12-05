@@ -70,10 +70,10 @@ namespace OHOS {
         string udid, uuid;
         GenerateString(udid);
         GenerateString(uuid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         GenerateFromList(info.connInfo.type, AUTH_LINK_TYPE_LIST);
@@ -94,10 +94,10 @@ namespace OHOS {
         string udid, uuid;
         GenerateString(udid);
         GenerateString(uuid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         GenerateFromList(info.connInfo.type, AUTH_LINK_TYPE_LIST);
@@ -188,10 +188,10 @@ namespace OHOS {
         AuthSessionInfo sessionInfo = {0};
         sessionInfo.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
         GenerateBool(sessionInfo.isServer);
-        if (memcpy_s(sessionInfo.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(sessionInfo.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(sessionInfo.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(sessionInfo.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         sessionInfo.connInfo.type = type;
@@ -222,10 +222,10 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         info.connInfo.type = type;
@@ -254,10 +254,10 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         info.connInfo.type = type;
@@ -284,10 +284,10 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
