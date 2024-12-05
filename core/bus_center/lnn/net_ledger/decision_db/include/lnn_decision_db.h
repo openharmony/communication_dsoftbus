@@ -31,7 +31,7 @@ typedef enum {
 } LnnEncryptDataLevel;
 
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid);
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId);
 int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
 bool LnnIsPotentialHomeGroup(const char *udid);
 int32_t UpdateRecoveryDeviceInfoFromDb(void);

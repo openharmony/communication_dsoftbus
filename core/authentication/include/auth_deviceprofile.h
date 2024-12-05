@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash);
+bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId);
 void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId);
 void DelNotTrustDevice(const char *udid);
 

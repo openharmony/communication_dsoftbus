@@ -1003,6 +1003,7 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         return;
     }
     deviceInfo->netCapacity = info->netCapacity;
+    deviceInfo->accountId = info->accountId;
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;

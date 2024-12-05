@@ -141,5 +141,10 @@ int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32
 {
     return GetCommonInterface()->AuthFailNotifyProofInfo(errCode, errorReturn, errorReturnLen);
 }
+
+void LnnDeleteLinkFinderInfo(const char *peerUdid)
+{
+    return GetCommonInterface()->LnnDeleteLinkFinderInfo(peerUdid);
+}
 }
 } // namespace OHOS

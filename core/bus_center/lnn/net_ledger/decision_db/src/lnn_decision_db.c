@@ -374,24 +374,19 @@ static void RemoveTrustedDevInfoRecord(void *param)
     DbContext *ctx = NULL;
     TrustedDevInfoRecord record;
 
-    char *udid = (char *)param;
-    if (udid == NULL) {
+    TrustedDevInfoRecord *tempRecord = (TrustedDevInfoRecord *)param;
+    if (tempRecord == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return;
     }
-    if (BuildTrustedDevInfoRecord(udid, &record) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "build remove trusted dev info record failed");
-        SoftBusFree(udid);
-        return;
-    }
+    record = *tempRecord;
+    SoftBusFree(tempRecord);
     if (DbLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
-        SoftBusFree(udid);
         return;
     }
     if (OpenDatabase(&ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "open database failed");
-        SoftBusFree(udid);
         DbUnlock();
         return;
     }
@@ -415,10 +410,9 @@ static void RemoveTrustedDevInfoRecord(void *param)
     }
     DbUnlock();
     char *anonyUdid = NULL;
-    Anonymize(udid, &anonyUdid);
+    Anonymize(record.udid, &anonyUdid);
     LNN_LOGI(LNN_LEDGER, "remove udid from trusted dev info table. udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
-    SoftBusFree(udid);
 }
 
 static void DeleteDeviceFromList(TrustedDevInfoRecord *record)
@@ -505,35 +499,68 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
+static int32_t BuildTrustedDevInfoRecordEx(const char *udid, TrustedDevInfoRecord *record, int32_t localUserId)
 {
-    char *dupUdid = NULL;
+    uint8_t accountHash[SHA_256_HASH_LEN] = {0};
+    char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
+    if (udid == NULL || record == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (memset_s(record, sizeof(TrustedDevInfoRecord), 0, sizeof(TrustedDevInfoRecord)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset_s record failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert accountHash failed");
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+    if (sprintf_s(record->accountHexHash, SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1,
+        "%s-%d", accountHexHash, localUserId) < 0) {
+        LNN_LOGE(LNN_LEDGER, "sprintf_s fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    if (strcpy_s(record->udid, sizeof(record->udid), udid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s udid hash failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    record->userId = localUserId;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+{
+    TrustedDevInfoRecord *dupRecord = NULL;
 
     if (udid == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     TrustedDevInfoRecord record;
-    int32_t ret = BuildTrustedDevInfoRecord(udid, &record);
+    int32_t ret = BuildTrustedDevInfoRecordEx(udid, &record, localUserId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "build delete trusted dev info record failed");
         return ret;
     }
     DeleteDeviceFromList(&record);
-    dupUdid = (char *)SoftBusMalloc(UDID_BUF_LEN);
-    if (dupUdid == NULL) {
-        LNN_LOGE(LNN_LEDGER, "malloc dupUdid failed");
+    dupRecord = (TrustedDevInfoRecord *)SoftBusMalloc(sizeof(TrustedDevInfoRecord));
+    if (dupRecord == NULL) {
+        LNN_LOGE(LNN_LEDGER, "malloc dupRecord failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (strcpy_s(dupUdid, UDID_BUF_LEN, udid) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s dupUdid failed");
-        SoftBusFree(dupUdid);
+    if (memcpy_s(dupRecord, sizeof(TrustedDevInfoRecord), &record, sizeof(TrustedDevInfoRecord)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s dupRecord failed");
+        SoftBusFree(dupRecord);
         return SOFTBUS_STRCPY_ERR;
     }
     if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), RemoveTrustedDevInfoRecord,
-        (void *)dupUdid) != SOFTBUS_OK) {
+        (void *)dupRecord) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "async call remove trusted dev info failed");
-        SoftBusFree(dupUdid);
+        SoftBusFree(dupRecord);
         return SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED;
     }
     return SOFTBUS_OK;
