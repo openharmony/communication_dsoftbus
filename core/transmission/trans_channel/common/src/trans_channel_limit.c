@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,11 +68,6 @@ static const SessionWhiteList g_sessionWhiteList[] = {
     }
 };
 
-#define NO_PKG_NAME_SESSION_WHITE_LIST_NUM (1)
-static char g_noPkgNameSessionWhiteList[NO_PKG_NAME_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MAX] = {
-    "com.huawei.devicemanager.resident",
-};
-
 bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
 {
     if (sessionName == NULL) {
@@ -91,23 +86,5 @@ bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
     TRANS_LOGE(TRANS_CTRL,
         "auth channel sessionName invalid. sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
-    return false;
-}
-
-bool IsNoPkgNameSession(const char *sessionName)
-{
-    if (sessionName == NULL) {
-        return false;
-    }
-
-    uint16_t index = 0;
-    size_t len = 0;
-    for (; index < NO_PKG_NAME_SESSION_WHITE_LIST_NUM; ++index) {
-        len = strnlen(g_noPkgNameSessionWhiteList[index], SESSION_NAME_SIZE_MAX);
-        if (strncmp(sessionName, g_noPkgNameSessionWhiteList[index], len) == 0) {
-            return true;
-        }
-    }
-
     return false;
 }
