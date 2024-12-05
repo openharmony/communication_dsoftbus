@@ -49,6 +49,7 @@ ohos_unittest("P2pv1ProcessorTest") {
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_rtti",
     "googletest:gtest_rtti",
