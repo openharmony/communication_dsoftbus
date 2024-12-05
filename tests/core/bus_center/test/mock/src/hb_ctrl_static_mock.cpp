@@ -251,5 +251,10 @@ void LnnUpdateDeviceName(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnUpdateDeviceName();
 }
+
+int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStartHbByTypeAndStrategyEx(msgPara);
+}
 }
 } // namespace OHOS

@@ -156,6 +156,49 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     return false;
 }
 
+bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId)
+{
+    if (udid == nullptr) {
+        LNN_LOGE(LNN_STATE, "udid is null");
+        return false;
+    }
+
+    char *anonyUdid = nullptr;
+    Anonymize(udid, &anonyUdid);
+    LNN_LOGI(LNN_STATE, "udid=%{public}s, isNeedUserId=%{public}d, localUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), isNeedUserId, localUserId);
+    AnonymizeFree(anonyUdid);
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_NOT_FIND_DATA && ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return false;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return false;
+    }
+    for (const auto &trustDevice :aclProfiles) {
+        if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+            trustDevice.GetTrustDeviceId().empty() ||
+            trustDevice.GetTrustDeviceId() != udid) {
+            continue;
+        }
+        if (isNeedUserId && trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
+            if (trustDevice.GetAccesser().GetAccesserUserId() != localUserId) {
+                continue;
+            }
+        } else if (isNeedUserId && trustDevice.GetAccessee().GetAccesseeUserId() != localUserId) {
+            continue;
+        }
+
+        LNN_LOGI(LNN_STATE, "dp has accessControlProfile");
+        return true;
+    }
+    LNN_LOGI(LNN_STATE, "dp not has accessControlProfile");
+    return false;
+}
+
 static void DumpAccountId(int64_t localAccountId, int64_t peerAccountId)
 {
     char localAccountString[LONG_TO_STRING_MAX_LEN] = {0};

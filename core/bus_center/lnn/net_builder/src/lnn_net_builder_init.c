@@ -691,7 +691,6 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     if (useUdid == NULL) {
         return;
     }
-    LnnDeleteLinkFinderInfo(peerUdid);
     LNN_CHECK_AND_RETURN_LOGW(!IsNeedNotifyOfflineByAdv(peerUdid), LNN_BUILDER, "need notify offline by adv");
     NotTrustedDelayInfo *info = (NotTrustedDelayInfo *)SoftBusCalloc(sizeof(NotTrustedDelayInfo));
     LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "malloc NotTrustedDelayInfo fail");

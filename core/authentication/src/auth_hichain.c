@@ -31,6 +31,7 @@
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_ohos_account_adapter.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -479,7 +480,7 @@ static void OnDeviceNotTrusted(const char *udid)
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
-        g_dataChangeListener.onDeviceNotTrusted(udid);
+        g_dataChangeListener.onDeviceNotTrusted(udid, GetActiveOsAccountIds());
     }
 }
 
