@@ -197,7 +197,7 @@ public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
     void SetUp();
-    void TearDown() {}
+    void TearDown();
 };
 
 void ClientConnectionTest::SetUp()
@@ -214,6 +214,11 @@ void ClientConnectionTest::SetUp()
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect).
         WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
+}
+
+void ClientConnectionTest::TearDown()
+{
+    LooperDeinit();
 }
 
 /*
