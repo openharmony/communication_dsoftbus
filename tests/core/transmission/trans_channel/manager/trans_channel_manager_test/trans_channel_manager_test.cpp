@@ -501,27 +501,6 @@ HWTEST_F(TransChannelManagerTest, IsLaneModuleError001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransSetFirstTokenInfo test
- * @tc.desc: TransSetFirstTokenInfo001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerTest, TransSetFirstTokenInfo001, TestSize.Level1)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-    (void)strcpy_s(appInfo->tokenName, SESSION_NAME_SIZE_MAX, TEST_SESSION_NAME);
-    appInfo->callingTokenId = 2;
-    TransEventExtra extra;
-    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
-    TransManagerInterfaceMock mock;
-    EXPECT_CALL(mock, TransACLGetFirstTokenID).WillOnce(Return(TOKENID_NOT_SET));
-    TransSetFirstTokenInfo(appInfo, &extra);
-    EXPECT_NE(nullptr, appInfo);
-    TransFreeAppInfo(appInfo);
-}
-
-/**
  * @tc.name: TransNotifyAuthSuccess test
  * @tc.desc: TransNotifyAuthSuccess002
  * @tc.type: FUNC

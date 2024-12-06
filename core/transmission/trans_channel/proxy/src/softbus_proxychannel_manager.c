@@ -1049,7 +1049,6 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     }
     ret = TransProxyGetLocalInfo(chan);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransProxyGetLocalInfo fail. ret=%{public}d.", ret);
         return ret;
     }
 

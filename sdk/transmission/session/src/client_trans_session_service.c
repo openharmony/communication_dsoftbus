@@ -243,6 +243,19 @@ static SessionAttribute *BuildParamSessionAttribute(const SessionAttribute *attr
     return tmpAttr;
 }
 
+static void InitSessionParam(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
+    const char *groupId, SessionParam *param)
+{
+    param->sessionName = mySessionName;
+    param->peerSessionName = peerSessionName;
+    param->peerDeviceId = peerNetworkId;
+    param->groupId = groupId;
+    param->isQosLane = false;
+    param->qosCount = 0;
+    param->isAsync = false;
+    param->actionId = INVALID_ACTION_ID;
+}
+
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
@@ -252,16 +265,9 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     PrintSessionName(mySessionName, peerSessionName);
     SessionAttribute *tmpAttr = BuildParamSessionAttribute(attr);
     TRANS_CHECK_AND_RETURN_RET_LOGE(tmpAttr != NULL, SOFTBUS_MEM_ERR, TRANS_SDK, "Build SessionAttribute failed.");
-    SessionParam param = {
-        .sessionName = mySessionName,
-        .peerSessionName = peerSessionName,
-        .peerDeviceId = peerNetworkId,
-        .groupId = groupId,
-        .attr = tmpAttr,
-        .isQosLane = false,
-        .qosCount = 0,
-        .actionId = INVALID_ACTION_ID,
-    };
+    SessionParam param = { 0 };
+    InitSessionParam(mySessionName, peerSessionName, peerNetworkId, groupId, &param);
+    param.attr = tmpAttr;
     (void)memset_s(param.qos, sizeof(param.qos), 0, sizeof(param.qos));
 
     int32_t sessionId = INVALID_SESSION_ID;
@@ -277,7 +283,6 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
         return ret;
     }
-    param.isAsync = false;
     param.sessionId = sessionId;
     TransInfo transInfo = { 0 };
     ret = ServerIpcOpenSession(&param, &transInfo);
@@ -880,16 +885,16 @@ bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
     const char tag = '-';
     const char *posName = strchr(sessionName, tag);
     if (posName == NULL) {
-        TRANS_LOGE(TRANS_SDK, "sdk not find appid");
+        TRANS_LOGE(TRANS_SDK, "sdk not find bundlename");
         return false;
     }
-    const char *posId  = strchr(posName + 1, tag);
+    const char *posId = strchr(posName + 1, tag);
     if (posId == NULL) {
         TRANS_LOGE(TRANS_SDK, "sdk not find appid");
         return false;
     }
     size_t len = posId - sessionName;
-    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX +1, sessionName, len) != EOK) {
+    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, len) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy sessionName failed");
         return false;
     }
@@ -910,8 +915,8 @@ int CreateSocket(const char *pkgName, const char *sessionName)
         TRANS_LOGE(TRANS_SDK, "invalid pkg name");
         return SOFTBUS_INVALID_PKGNAME;
     }
-    char newSessionName[SESSION_NAME_SIZE_MAX +1] = {0};
-    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX +1, sessionName, strlen(sessionName)) != EOK) {
+    char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
+    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, strlen(sessionName)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy session name failed");
         return SOFTBUS_STRCPY_ERR;
     }
@@ -1243,10 +1248,8 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         TRANS_LOGI(TRANS_SDK, "Bind timeout Shutdown ok, no delete socket: socket=%{public}d", socket);
         return;
     }
-    ret = ClientDeleteSocketSession(socket);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ClientShutdown delete socket session server: ret=%{public}d", ret);
-    }
+    (void)ClientDeleteSocketSession(socket);
+
     TRANS_LOGI(TRANS_SDK, "Shutdown ok: socket=%{public}d", socket);
 }
 
