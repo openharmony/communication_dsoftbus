@@ -95,3 +95,8 @@ int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos
     (void)count;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+void RegisterPermissionChangeCallback(void)
+{
+    return;
+}
