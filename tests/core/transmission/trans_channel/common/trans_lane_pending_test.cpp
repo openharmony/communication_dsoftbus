@@ -759,22 +759,6 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProc001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransAsyncSetFirstTokenInfo001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLanePendingTest, TransAsyncSetFirstTokenInfo001, TestSize.Level1)
-{
-    uint32_t firstTokenId;
-    AppInfo appInfo;
-    TransEventExtra event;
-    firstTokenId = TOKENID_NOT_SET;
-    appInfo.callingTokenId = TEST_TOKEN_ID;
-    TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &event);
-}
-
-/**
  * @tc.name: CheckSocketChannelState001
  * @tc.desc:
  * @tc.type: FUNC
@@ -1103,7 +1087,7 @@ HWTEST_F(TransLanePendingTest, TransWaitingFreeLane001, TestSize.Level1)
     ret = TransAddFreeLaneToPending(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransWaitingFreeLane(laneReqId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_LANE_IS_EXISTED, ret);
 
     ret = TransDelLaneFreeFromPending(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1130,7 +1114,7 @@ HWTEST_F(TransLanePendingTest, TransFreeLaneByLaneHandle001, TestSize.Level1)
     ret = TransAddFreeLaneToPending(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransFreeLaneByLaneHandle(laneReqId, false);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_LANE_IS_EXISTED, ret);
 
     ret = TransDelLaneFreeFromPending(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);

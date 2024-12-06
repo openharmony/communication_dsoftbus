@@ -693,7 +693,6 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_CTRL, "callingPid=%{public}d not equal curChannelPid=%{public}d", pid, curChannelPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", curChannelPid);
     return SOFTBUS_OK;
 }
 
@@ -709,7 +708,6 @@ int32_t TransGetAndComparePidBySession(pid_t pid, const char *sessionName, int32
         TRANS_LOGE(TRANS_CTRL, "callingPid=%{public}d not equal curSessionPid=%{public}d", pid, curSessionPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", pid);
     return SOFTBUS_OK;
 }
 
