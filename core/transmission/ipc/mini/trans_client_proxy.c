@@ -86,3 +86,8 @@ int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid)
     (void)pid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+void RegisterPermissionChangeCallback(void)
+{
+    return;
+}
