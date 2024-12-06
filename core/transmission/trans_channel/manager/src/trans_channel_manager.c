@@ -20,14 +20,15 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_qos.h"
+#include "message_handler.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
@@ -45,6 +46,7 @@
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
+#include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
@@ -57,12 +59,21 @@
 #define ID_NOT_USED 0
 #define ID_USED 1UL
 #define BIT_NUM 8
+#define REPORT_UDP_INFO_SIZE 4
 
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
 static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)] = {0};
 static uint32_t g_proxyIdMark = 0;
 static uint32_t g_channelIdCount = 0;
+
+const char *g_channelResultLoopName = "transChannelResultLoopName";
+SoftBusHandler g_channelResultHandler = { 0 };
+
+typedef enum {
+    LOOP_CHANNEL_OPEN_MSG,
+    LOOP_LIMIT_CHANGE_MSG,
+} ChannelResultLoopMsg;
 
 static int32_t GenerateTdcChannelId()
 {
@@ -134,6 +145,83 @@ int32_t GenerateChannelId(bool isTdcChannel)
     return isTdcChannel ? GenerateTdcChannelId() : GenerateProxyChannelId();
 }
 
+void TransAsyncChannelOpenTaskManager(int32_t channelId, int32_t channelType)
+{
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            TransAsyncProxyChannelTask(channelId);
+            break;
+        case CHANNEL_TYPE_TCP_DIRECT:
+            TransAsyncTcpDirectChannelTask(channelId);
+            break;
+        case CHANNEL_TYPE_UDP:
+            TransAsyncUdpChannelTask(channelId);
+            break;
+        case CHANNEL_TYPE_AUTH:
+            TransAsyncAuthChannelTask(channelId);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error!", channelType);
+    }
+}
+
+static void TransChannelResultLoopMsgHandler(SoftBusMessage *msg)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param msg is invalid");
+    int32_t channelId;
+    int32_t channelType;
+    if (msg->what == LOOP_CHANNEL_OPEN_MSG) {
+        channelId = (int32_t)msg->arg1;
+        channelType = (int32_t)msg->arg2;
+        TransAsyncChannelOpenTaskManager(channelId, channelType);
+    }
+}
+
+int32_t TransChannelResultLoopInit(void)
+{
+    g_channelResultHandler.name = (char *)g_channelResultLoopName;
+    g_channelResultHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (g_channelResultHandler.looper == NULL) {
+        return SOFTBUS_TRANS_INIT_FAILED;
+    }
+    g_channelResultHandler.HandleMessage = TransChannelResultLoopMsgHandler;
+    return SOFTBUS_OK;
+}
+
+static void TransChannelResultFreeLoopMsg(SoftBusMessage *msg)
+{
+    if (msg != NULL) {
+        if (msg->obj != NULL) {
+            SoftBusFree(msg->obj);
+        }
+        SoftBusFree((void *)msg);
+    }
+}
+
+static SoftBusMessage *TransChannelResultCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, char *data)
+{
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        TRANS_LOGE(TRANS_MSG, "msg calloc failed");
+        return NULL;
+    }
+    msg->what = what;
+    msg->arg1 = arg1;
+    msg->arg2 = arg2;
+    msg->handler = &g_channelResultHandler;
+    msg->FreeMessage = TransChannelResultFreeLoopMsg;
+    msg->obj = (void *)data;
+    return msg;
+}
+
+void TransCheckChannelOpenToLooperDelay(int32_t channelId, int32_t channelType, uint32_t delayTime)
+{
+    SoftBusMessage *msg  = TransChannelResultCreateLoopMsg(LOOP_CHANNEL_OPEN_MSG, channelId, channelType, NULL);
+    TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "msg create failed");
+
+    g_channelResultHandler.looper->PostMessageDelay(g_channelResultHandler.looper, msg, delayTime);
+}
+
 int32_t TransChannelInit(void)
 {
     IServerChannelCallBack *cb = TransServerGetChannelCb();
@@ -174,6 +262,9 @@ int32_t TransChannelInit(void)
 
     ret = TransFreeLanePendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans free lane pending init failed.");
+
+    ret = TransChannelResultLoopInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans channel result loop init failed.");
 
     ReqLinkListener();
     ret = SoftBusMutexInit(&g_myIdLock, NULL);
@@ -764,5 +855,160 @@ int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
         ret = CheckIsProxyAuthChannel(connInfo);
     }
     TRANS_LOGW(TRANS_CTRL, "connInfo type=%{public}d, ret=%{public}d", connInfo->type, ret);
+    return ret;
+}
+
+static int32_t GetChannelInfoFromBuf(
+    uint8_t *buf, int32_t *channelId, int32_t *channelType, int32_t *openResult, uint32_t len)
+{
+    int32_t offSet = 0;
+    int32_t ret = SOFTBUS_OK;
+    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offSet, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offSet, openResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get openResult from buf failed!");
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t GetUdpChannelInfoFromBuf(
+    uint8_t *buf, int32_t *channelId, int32_t *channelType, int32_t *openResult, int32_t *udpPort, uint32_t len)
+{
+    int32_t offSet = 0;
+    int32_t ret = SOFTBUS_OK;
+    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offSet, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offSet, openResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get openResult from buf failed!");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offSet, udpPort);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get udpPort from buf failed!");
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t GetLimitChangeInfoFromBuf(
+    uint8_t *buf, int32_t *channelId, uint8_t *tos, int32_t *limitChangeResult, uint32_t len)
+{
+    int32_t offSet = 0;
+    int32_t ret = SOFTBUS_OK;
+    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
+        return ret;
+    }
+    ret = ReadUint8FromBuf(buf, len, &offSet, tos);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tos from buf failed!");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offSet, limitChangeResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get limitChangeResult from buf failed!");
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
+{
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t openResult = 0;
+    int32_t udpPort = 0;
+    int32_t ret = SOFTBUS_OK;
+    if (len == sizeof(int32_t) * REPORT_UDP_INFO_SIZE) {
+        ret = GetUdpChannelInfoFromBuf(buf, &channelId, &channelType, &openResult, &udpPort, len);
+    } else {
+        ret = GetChannelInfoFromBuf(buf, &channelId, &channelType, &openResult, len);
+    }
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            ret = TransDealProxyChannelOpenResult(channelId, openResult);
+            break;
+        case CHANNEL_TYPE_TCP_DIRECT:
+            ret = TransDealTdcChannelOpenResult(channelId, openResult);
+            break;
+        case CHANNEL_TYPE_UDP:
+            ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
+            break;
+        case CHANNEL_TYPE_AUTH:
+            ret = TransDealAuthChannelOpenResult(channelId, openResult);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", channelType);
+            ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "report Event channel opened info failed");
+    }
+    return ret;
+}
+
+static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
+{
+    int32_t channelId = 0;
+    uint8_t tos = 0;
+    int32_t limitChangeResult = 0;
+    int32_t ret = SOFTBUS_OK;
+    ret = GetLimitChangeInfoFromBuf(buf, &channelId, &tos, &limitChangeResult, len);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "GetLimitChangeInfoFromBuf failed, ret=%{public}d", ret);
+    }
+    if (limitChangeResult != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "limitChangeResult is failed, limitChangeResult=%{public}d", limitChangeResult);
+    }
+    ret = TransSetTos(channelId, tos);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Set limit change event failed, ret=%{public}d", ret);
+    }
+}
+
+int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "process inner event buf is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    switch (eventType) {
+        case EVENT_TYPE_CHANNEL_OPENED:
+            ret = TransReportChannelOpenedInfo(buf, len);
+            break;
+        case EVENT_TYPE_TRANS_LIMIT_CHANGE:
+            TransReportLimitChangeInfo(buf, len);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);
+            ret = SOFTBUS_TRANS_MSG_INVALID_EVENT_TYPE;
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "report event failed, eventType=%{public}d", eventType);
+    }
     return ret;
 }

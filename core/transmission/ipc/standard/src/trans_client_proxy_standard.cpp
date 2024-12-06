@@ -19,6 +19,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "trans_channel_manager.h"
 #include "trans_log.h"
 
 #define WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                              \
@@ -129,18 +130,13 @@ int32_t TransClientProxy::OnClientTransLimitChange(int32_t channelId, uint8_t to
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_TRANS_LIMIT_CHANGE, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnClientTransLimitChange send request failed, ret=%{public}d", ret);
         return ret;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened read serverRet failed");
-        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
-    }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -156,18 +152,18 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     ret = remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option);
+    int32_t channelId = channel->channelId;
+    int32_t channelType = channel->channelType;
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelOpened send request failed, ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened read serverRet failed");
-        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    if (channel->isServer) {
+        TransCheckChannelOpenToLooperDelay(channelId, channelType, FAST_INTERVAL_MILLISECOND);
     }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelBind(int32_t channelId, int32_t channelType)

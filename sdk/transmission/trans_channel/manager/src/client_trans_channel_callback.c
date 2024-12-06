@@ -24,8 +24,79 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_server_proxy.h"
+
+#define BITS 8
+#define REPORT_INFO_NUM 3
+#define RERORT_UDP_INFO_NUM 4
+
+static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t channelType, int32_t openResult)
+{
+    uint32_t len = sizeof(uint32_t) * REPORT_INFO_NUM;
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc buf failed, channelId=%{public}d", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t offSet = 0;
+    int32_t ret = WriteInt32ToBuf(buf, len, &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write channelId=%{public}d to buf failed! ret=%{public}d", channelId, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, len, &offSet, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write channelType=%{public}d to buf failed! ret=%{public}d", channelType, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, len, &offSet, openResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write openResult=%{public}d to buf failed! ret=%{public}d", openResult, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    return ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+}
+
+static int32_t TransSendUdpChannelOpenedDataToCore(
+    int32_t channelId, int32_t channelType, int32_t openResult, int32_t udpPort)
+{
+    uint32_t len = sizeof(uint32_t) * RERORT_UDP_INFO_NUM;
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
+    int32_t offSet = 0;
+    int32_t ret = SOFTBUS_OK;
+    ret = WriteInt32ToBuf(buf, len, &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write channelId=%{public}d to buf failed! ret=%{public}d", channelId, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, len, &offSet, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write channelType=%{public}d to buf failed! ret=%{public}d", channelType, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, len, &offSet, openResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write openResult=%{public}d to buf failed! ret=%{public}d", openResult, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, len, &offSet, udpPort);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write udpPort=%{public}d to buf failed! ret=%{public}d", udpPort, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    return ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+}
 
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
@@ -54,11 +125,20 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 
-    AddSocketResource(sessionName, channel);
-    if (channel->channelType == CHANNEL_TYPE_UDP && channel->isServer && udpPort > 0) {
-        return udpPort;
-    }
+    int32_t channelId = channel->channelId;
+    int32_t channelType = channel->channelType;
+    int32_t openResult = ret;
 
+    if (channel->isServer) {
+        if (channelType == CHANNEL_TYPE_UDP && udpPort > 0) {
+            ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort);
+        } else {
+            ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult);
+        }
+    }
+    if (ret == SOFTBUS_OK) {
+        AddSocketResource(sessionName, channel);
+    }
     return ret;
 }
 

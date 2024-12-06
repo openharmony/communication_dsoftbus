@@ -285,23 +285,23 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     //will free in TransOnExchangeUdpInfoReply line 298
     UdpChannelInfo *newChannel = CreateUdpChannelPackTest();
     ASSERT_TRUE(newChannel != nullptr);
-    int64_t authId = AUTH_INVALID_ID;
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = InitQos();
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
 
-    TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
+    TransOnExchangeUdpInfoReply(authHandle, INVALID_SEQ, msg);
 
-    TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel->seq, msg);
+    TransOnExchangeUdpInfoReply(authHandle, newChannel->seq, msg);
 
     //will free in TransOnExchangeUdpInfoReply line 305
     UdpChannelInfo *testChannel = CreateUdpChannelPackTest();
     ASSERT_TRUE(testChannel != nullptr);
     ret = TransAddUdpChannel(testChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransOnExchangeUdpInfoReply(authId, testChannel->seq, msg);
+    TransOnExchangeUdpInfoReply(authHandle, testChannel->seq, msg);
 
     cJSON_Delete(msg);
 }
@@ -314,7 +314,6 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply002, TestSize.Level1)
 {
-    int64_t authId = 1;
     int64_t invalidSeq = 0;
     string msgStr = "normal msgStr";
     cJSON *msg = cJSON_Parse(msgStr.c_str());
@@ -325,9 +324,11 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply002, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(channel);
     ASSERT_FALSE(ret == SOFTBUS_PUBLIC_ERR_BASE);
 
-    TransOnExchangeUdpInfoReply(authId, invalidSeq, msg);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
 
-    TransOnExchangeUdpInfoReply(authId, channel->seq, msg);
+    TransOnExchangeUdpInfoReply(authHandle, invalidSeq, msg);
+
+    TransOnExchangeUdpInfoReply(authHandle, channel->seq, msg);
 
     cJSON_Delete(msg);
 }
@@ -736,11 +737,16 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsServer001, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
 
-    int32_t ret = AcceptUdpChannelAsServer(appInfo);
+    AuthHandle *authHandle = (AuthHandle *)SoftBusCalloc(sizeof(AuthHandle));
+    ASSERT_TRUE(authHandle != nullptr);
+    int64_t seq = 1;
+
+    int32_t ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(channel);
+    SoftBusFree(authHandle);
 }
 
 /**
@@ -778,15 +784,17 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
-    int32_t ret = ProcessUdpChannelState(appInfo, isServerSide);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int64_t seq = 1;
+    int32_t ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     isServerSide = false;
-    ret = ProcessUdpChannelState(appInfo, isServerSide);
+    ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
-    ret = ProcessUdpChannelState(appInfo, isServerSide);
+    ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 
     SoftBusFree(appInfo);
