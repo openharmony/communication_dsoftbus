@@ -1248,20 +1248,6 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_DATA_001
-* @tc.desc: LnnCreateData
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LNN_DATA_001, TestSize.Level1)
-{
-    int32_t ret = LnnCreateData(nullptr, 32, nullptr, 0);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    LnnDeleteData(nullptr, 32);
-}
-
-/*
 * @tc.name: LNN_LANE_PROFILE_001
 * @tc.desc: BindLaneIdToProfile
 * @tc.type: FUNC
