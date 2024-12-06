@@ -1103,4 +1103,12 @@ int32_t BusCenterServerProxy::EvaluateQos(const char *peerNetworkId, TransDataTy
     (void)qosCount;
     return SOFTBUS_OK;
 }
+
+int32_t BusCenterServerProxy::ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    (void)eventType;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

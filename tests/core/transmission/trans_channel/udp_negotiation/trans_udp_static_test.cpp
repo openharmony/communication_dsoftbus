@@ -108,7 +108,9 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest002, TestSize.Level1)
     appInfo->streamType = COMMON_AUDIO_STREAM;
     appInfo->myData.pid = TEST_PID;
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
-    ret = ProcessUdpChannelState(appInfo, true);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int64_t seq = 1;
+    ret = ProcessUdpChannelState(appInfo, true, &authHandle, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransUdpChannelDeinit();
 }

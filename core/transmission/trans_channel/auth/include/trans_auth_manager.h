@@ -56,6 +56,8 @@ int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId);
 int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient);
 int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode);
 int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo);
+int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult);
+void TransAsyncAuthChannelTask(int32_t channelId);
 
 #ifdef __cplusplus
 #if __cplusplus

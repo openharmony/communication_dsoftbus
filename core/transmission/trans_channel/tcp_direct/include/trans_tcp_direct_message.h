@@ -39,6 +39,8 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
 
 int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t errCode);
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
+int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult);
+void TransAsyncTcpDirectChannelTask(int32_t channelId);
 
 #ifdef __cplusplus
 }
