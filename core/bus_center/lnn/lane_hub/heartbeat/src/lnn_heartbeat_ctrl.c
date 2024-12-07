@@ -46,7 +46,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
-
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_broadcast_type.h"
@@ -882,6 +882,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
+                RegisterNameMonitor();
                 LnnUpdateDeviceName();
                 LnnUpdateOhosAccount(true);
                 HbConditionChanged(false);
