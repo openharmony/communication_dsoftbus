@@ -52,7 +52,7 @@ public:
     virtual int32_t LnnSetCloudAbility(const bool isEnableCloud) = 0;
     virtual int32_t LnnDeleteSyncToDB(void) = 0;
     virtual void LnnOnOhosAccountLogout(void) = 0;
-    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
+    virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
     virtual TrustedReturnType AuthHasTrustedRelation(void) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
@@ -104,7 +104,7 @@ public:
     MOCK_METHOD1(LnnSetCloudAbility, int32_t(const bool));
     MOCK_METHOD0(LnnDeleteSyncToDB, int32_t());
     MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD0(AuthHasTrustedRelation, TrustedReturnType(void));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
     MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t(const LnnHeartbeatMediumParam *));

@@ -97,9 +97,9 @@ void LnnOnOhosAccountLogout(void)
     HeartBeatCtrlStaticInterface()->LnnOnOhosAccountLogout();
 }
 
-void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
+void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
-    HeartBeatCtrlStaticInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
+    HeartBeatCtrlStaticInterface()->LnnUpdateOhosAccount(reason);
 }
 
 TrustedReturnType AuthHasTrustedRelation(void)

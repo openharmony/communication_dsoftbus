@@ -103,9 +103,9 @@ int32_t LnnAsyncCallbackDelayHelper(
     return GetNetworkManagerInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
 
-void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
+void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
-    return GetNetworkManagerInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
+    return GetNetworkManagerInterface()->LnnUpdateOhosAccount(reason);
 }
 
 void LnnOnOhosAccountLogout(void)

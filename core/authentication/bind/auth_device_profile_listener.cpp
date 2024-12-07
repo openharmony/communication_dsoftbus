@@ -132,7 +132,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
     Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     int32_t userId = profile.GetPeerUserId();
     AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);
