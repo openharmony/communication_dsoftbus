@@ -730,7 +730,7 @@ static int32_t SendSingleFile(const SendListenerInfo *sendInfo, const char *sour
         TRANS_LOGE(TRANS_FILE, "sourfile or dstfile is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{private}s, dstFile=%{public}s", sendInfo->channelId,
+    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{private}s, dstFile=%{private}s", sendInfo->channelId,
         sourceFile, destFile);
 
     int32_t ret = FileToFrameAndSendFile((SendListenerInfo *)sendInfo, sourceFile, destFile);
@@ -831,7 +831,7 @@ static int32_t ProxyStartSendFile(
         ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(
-                TRANS_FILE, "send file failed. sendFile=%{public}s, ret=%{public}" PRId32, sFileList[index], ret);
+                TRANS_FILE, "send file failed. sendFile=%{private}s, ret=%{public}" PRId32, sFileList[index], ret);
             return SOFTBUS_FILE_ERR;
         }
     }
