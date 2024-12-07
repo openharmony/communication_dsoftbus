@@ -53,7 +53,7 @@ ohos_unittest("NstackxAdapterTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
   ]
 
   external_deps = [
