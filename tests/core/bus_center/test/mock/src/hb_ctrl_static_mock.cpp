@@ -256,5 +256,10 @@ int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
 {
     return HeartBeatCtrlStaticInterface()->LnnStartHbByTypeAndStrategyEx(msgPara);
 }
+
+void RegisterNameMonitor(void)
+{
+    return HeartBeatCtrlStaticInterface()->RegisterNameMonitor();
+}
 }
 } // namespace OHOS
