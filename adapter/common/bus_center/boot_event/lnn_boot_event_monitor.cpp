@@ -33,7 +33,7 @@ static void ProcessBootEvent(void *para)
     (void)para;
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
     LNN_LOGI(LNN_EVENT, "start process account ready event");
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     int32_t userId = GetActiveOsAccountIds();
     LNN_LOGI(LNN_EVENT, "get userId:%{public}d", userId);
     int32_t ret = LnnSetLocalNumInfo(NUM_KEY_USERID, userId);
