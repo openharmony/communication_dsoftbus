@@ -652,4 +652,20 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
     TransDataListDeinit();
 }
+
+/**
+ * @tc.name: TransTdcCreateListenerWithoutAddTriggerTest002
+ * @tc.desc: TransTdcCreateListenerWithoutAddTrigger, use the wrong paramter
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020, TestSize.Level0)
+{
+    int32_t fd = SOFTBUS_INVALID_PARAM;
+    int32_t ret = TransTdcCreateListenerWithoutAddTrigger(fd);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    fd = g_fd;
+    ret = TransTdcCreateListenerWithoutAddTrigger(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
