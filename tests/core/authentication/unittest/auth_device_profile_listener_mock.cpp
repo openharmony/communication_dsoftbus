@@ -52,9 +52,9 @@ int32_t LnnStartHbByTypeAndStrategy(
     return GetInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
 }
 
-void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
+void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
-    return GetInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
+    return GetInterface()->LnnUpdateOhosAccount(reason);
 }
 
 void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)

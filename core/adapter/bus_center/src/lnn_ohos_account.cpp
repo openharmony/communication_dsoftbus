@@ -88,7 +88,7 @@ int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
-void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
+void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
     int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
@@ -109,7 +109,8 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
             return;
         }
     }
-    if (memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
+    if ((reason == UPDATE_ACCOUNT_ONLY || reason == UPDATE_HEARTBEAT) &&
+        memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
         LNN_LOGW(LNN_STATE, "accountHash not changed, accountHash=[%{public}02X, %{public}02X]",
             accountHash[0], accountHash[1]);
         return;
@@ -126,7 +127,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
     if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "update db recovery fail");
     }
-    if (isNeedUpdateHeartbeat) {
+    if (reason == UPDATE_HEARTBEAT || reason == UPDATE_USER_SWITCH) {
         LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
         DfxRecordTriggerTime(UPDATE_ACCOUNT, EVENT_STAGE_LNN_UPDATE_ACCOUNT);
     }
