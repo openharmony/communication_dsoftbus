@@ -105,6 +105,66 @@ ohos_unittest("HeartBeatMediumTest") {
   ]
 }
 
+ohos_unittest("HeartBeatMediumStaticTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_medium_mgr_static_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_medium_mgr_static_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include/form",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/tests/adapter/common/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [ "device_auth:deviceauth_sdk" ]
+  } else {
+    external_deps = [ "huks:libhukssdk" ]
+  }
+  external_deps += [
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+}
+
 ohos_unittest("HeartBeatFSMTest") {
   module_out_path = module_output_path
   sources = [
@@ -688,6 +748,7 @@ group("unittest") {
     ":HeartBeatCtrlStaticTest",
     ":HeartBeatCtrlTest",
     ":HeartBeatFSMTest",
+    ":HeartBeatMediumStaticTest",
     ":HeartBeatMediumTest",
     ":HeartBeatStrategyTest",
     ":HeartBeatUtilsTest",
