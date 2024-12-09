@@ -63,7 +63,7 @@ static const SessionWhiteList g_sessionWhiteList[] = {
         .regexp = false,
     },
     {
-        .sessionName = "ohos.distributehardware.devicemanager.pinholder",
+        .sessionName = "ohos.distributedhardware.devicemanager.pinholder",
         .regexp = false,
     }
 };
