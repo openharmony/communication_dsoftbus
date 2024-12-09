@@ -37,6 +37,7 @@ typedef struct {
 static SoftBusTcpListenerLock g_lock = {
     .lockInit = false,
 };
+static bool g_isInitedFlag = false;
 
 
 static void TdcLockInit(void)
@@ -96,14 +97,13 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
 
 int32_t TransTdcCreateListener(int32_t fd)
 {
-    static bool isInitedFlag = false;
     TdcLockInit();
     if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (isInitedFlag == false) {
-        isInitedFlag = true;
+    if (g_isInitedFlag == false) {
+        g_isInitedFlag = true;
 
         static SoftbusBaseListener listener = {
             .onConnectEvent = ClientTdcOnConnectEvent,
@@ -124,14 +124,13 @@ int32_t TransTdcCreateListener(int32_t fd)
 
 int32_t TransTdcCreateListenerWithoutAddTrigger(int32_t fd)
 {
-    static bool isInitedFlag = false;
     TdcLockInit();
     if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (isInitedFlag == false) {
-        isInitedFlag = true;
+    if (g_isInitedFlag == false) {
+        g_isInitedFlag = true;
         static SoftbusBaseListener listener = {
             .onConnectEvent = ClientTdcOnConnectEvent,
             .onDataEvent = ClientTdcOnDataEvent,
