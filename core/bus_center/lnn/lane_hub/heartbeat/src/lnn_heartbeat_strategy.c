@@ -622,7 +622,12 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
             wakeupFlag, msgPara->isRelay);
         return SOFTBUS_OK;
     }
-    LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+    if (isUserSwitch) {
+        LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+        LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_END);
+    } else {
+        LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+    }
     bool isRelayV0 = msgPara->isRelay && ((registedHbType & HEARTBEAT_TYPE_BLE_V0) == HEARTBEAT_TYPE_BLE_V0);
     if (msgPara->isDirectBoardcast) {
         if (SendDirectBoardcast(hbFsm, msgPara, mode, registedHbType, isRelayV0) != SOFTBUS_OK) {
