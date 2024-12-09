@@ -230,6 +230,14 @@ static void NewBrBleDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
     newInfo->connectInfo.authPort = oldInfo->connectInfo.authPort;
     newInfo->connectInfo.proxyPort = oldInfo->connectInfo.proxyPort;
     newInfo->connectInfo.sessionPort = oldInfo->connectInfo.sessionPort;
+    (void)LnnSetNetCapability(&newInfo->netCapacity, BIT_WIFI);
+    (void)LnnSetNetCapability(&newInfo->netCapacity, BIT_WIFI_P2P);
+    if ((oldInfo->netCapacity & (1 << BIT_WIFI_5G)) != 0) {
+        (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_WIFI_5G);
+    }
+    if ((oldInfo->netCapacity & (1 << BIT_WIFI_24G)) != 0) {
+        (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_WIFI_24G);
+    }
 }
 
 static void RetainOfflineCode(const NodeInfo *oldInfo, NodeInfo *newInfo)
