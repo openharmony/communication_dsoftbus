@@ -171,4 +171,16 @@ int32_t ISoftBusClient::OnChannelBind(int32_t channelId, int32_t channelType)
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+int32_t ISoftBusClient::OnClientChannelOnQos(
+    int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    (void)channelId;
+    (void)channelType;
+    (void)event;
+    (void)qos;
+    (void)count;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

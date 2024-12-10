@@ -460,4 +460,24 @@ HWTEST_F(TransLaneManagerTest, TransGetConnectTypeByChannelId001, TestSize.Level
     ret = TransGetConnectTypeByChannelId(1, &type);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
+
+/**
+ * @tc.name: TransGetTransLaneInfoByLaneHandle Test
+ * @tc.desc: TransGetTransLaneInfoByLaneHandle001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, TransGetTransLaneInfoByLaneHandle001, TestSize.Level1)
+{
+    TransLaneMgrDeinit();
+    int32_t ret = TransGetTransLaneInfoByLaneHandle(1, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    TransLaneInfo info;
+    ret = TransGetTransLaneInfoByLaneHandle(1, &info);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    TransLaneMgrInit();
+    ret = TransGetTransLaneInfoByLaneHandle(1, &info);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    TransLaneMgrDeinit();
+}
 } // OHOS

@@ -61,6 +61,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
     memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] = &SoftBusClientStub::OnClientTransLimitChangeInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
+    memberFuncMap_[CLIENT_CHANNEL_ON_QOS] = &SoftBusClientStub::OnChannelOnQosInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -334,6 +335,37 @@ int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessagePa
     COMM_CHECK_AND_RETURN_RET_LOGE(
         reply.WriteInt32(ret), SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, COMM_SDK, "write reply failed");
 
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_EVENT, "OnChannelOnQosInner");
+    int32_t channelId;
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        data.ReadInt32(channelId), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read channelId failed");
+
+    int32_t channelType;
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        data.ReadInt32(channelType), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read channelType failed");
+
+    int32_t event;
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        data.ReadInt32(event), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read event failed");
+
+    uint32_t count;
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        data.ReadUint32(count), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read count failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(count < QOS_TYPE_BUTT, SOFTBUS_INVALID_PARAM, COMM_SDK, "invalid count");
+
+    QosTV *qos = (QosTV *)data.ReadBuffer(sizeof(QosTV) * count);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        qos != nullptr, SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, COMM_SDK, "read qos failed!");
+
+    int32_t ret = OnClientChannelOnQos(channelId, channelType, (QoSEvent)event, qos, count);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnClientChannelOnQos failed, ret=%{public}d", ret);
+    }
     return SOFTBUS_OK;
 }
 
@@ -760,5 +792,19 @@ void SoftBusClientStub::OnRefreshDeviceFound(const void *device, uint32_t device
 void SoftBusClientStub::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
 {
     LnnOnDataLevelChanged(networkId, dataLevelInfo);
+}
+
+int32_t SoftBusClientStub::OnClientChannelOnQos(
+    int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    if (event < QOS_SATISFIED || event > QOS_NOT_SATISFIED) {
+        COMM_LOGE(COMM_SDK, "OnChannelOnQos invalid event=%{public}d", event);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (qos == nullptr || count == 0) {
+        COMM_LOGE(COMM_SDK, "OnChannelOnQos invalid qos or count");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return TransOnChannelOnQos(channelId, channelType, event, qos, count);
 }
 } // namespace OHOS

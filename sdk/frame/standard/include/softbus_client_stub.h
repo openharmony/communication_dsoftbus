@@ -60,6 +60,8 @@ public:
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
+    int32_t OnClientChannelOnQos(
+        int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -85,6 +87,7 @@ private:
     int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

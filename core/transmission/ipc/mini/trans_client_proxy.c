@@ -86,3 +86,12 @@ int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid)
     (void)pid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    (void)data;
+    (void)event;
+    (void)qos;
+    (void)count;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
