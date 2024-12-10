@@ -1443,4 +1443,36 @@ HWTEST_F(TransLanePendingTest, TransCancelLaneItemCondByLaneHandle001, TestSize.
 
     TransReqLanePendingDeinit();
 }
+
+
+/**
+ * @tc.name: TransNotifyLaneQosEventTest001
+ * @tc.desc: TransNotifyLaneQosEvent test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransNotifyLaneQosEventTest001, TestSize.Level1)
+{
+    int32_t ret = TransNotifyLaneQosEvent(0, (LaneOwner)(LANE_OWNER_BUTT + 1), (LaneQosEvent)(LANE_QOS_BW_BUTT + 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(0, (LaneOwner)(LANE_OWNER_SELF - 1), (LaneQosEvent)(LANE_QOS_BW_BUTT + 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, (LaneQosEvent)(LANE_QOS_BW_BUTT + 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, (LaneQosEvent)(LANE_QOS_BW_HIGH - 1));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, LANE_QOS_BW_MID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_OTHER, LANE_QOS_BW_MID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, LANE_QOS_BW_HIGH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
 } // namespace OHOS
