@@ -377,7 +377,11 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     TRANS_LOGI(TRANS_SDK, "trigger session open failed callback, channelId=%{public}d, channelType=%{public}d",
         channelId, channelType);
     bool isServer = false;
-    (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get Socket Callback Adapter failed, ret=%{public}d", ret);
+        return ret;
+    }
     if (sessionCallback.isSocketListener) {
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         bool isAsync = true;

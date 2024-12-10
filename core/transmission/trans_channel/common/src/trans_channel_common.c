@@ -323,7 +323,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
 
 void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 {
-    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP) {
+    if (connOpt == NULL || connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP) {
         TRANS_LOGD(TRANS_CTRL, "param err.");
         return;
     }
