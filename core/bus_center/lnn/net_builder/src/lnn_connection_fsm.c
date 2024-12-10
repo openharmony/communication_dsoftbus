@@ -1352,7 +1352,7 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *oldAddr, Auth
         LNN_LOGE(LNN_BUILDER, "memcpy udid hash fail");
         return SOFTBUS_MEM_ERR;
     }
-    int32_t rc =JoinLnnWithNodeInfo(&addr, nodeInfo);
+    int32_t rc = JoinLnnWithNodeInfo(&addr, nodeInfo);
     if (rc == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "join with node info success");
     } else {
