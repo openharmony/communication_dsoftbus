@@ -33,8 +33,6 @@ public:
     virtual int32_t GenerateRandomStr(char *str, uint32_t size) = 0;
     virtual int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len) = 0;
     virtual int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len) = 0;
-    virtual int32_t SoftBusEncryptData(AesGcmCipherKey *key, const unsigned char *input, uint32_t inLen,
-        unsigned char *encryptData, uint32_t *encryptLen) = 0;
     virtual int32_t SoftBusDecryptData(AesGcmCipherKey *key, const unsigned char *input, uint32_t inLen,
         unsigned char *decryptData, uint32_t *decryptLen) = 0;
 };
@@ -48,8 +46,6 @@ public:
     MOCK_METHOD2(GenerateRandomStr, int32_t (char *, uint32_t));
     MOCK_METHOD3(SoftBusWriteFile, int32_t (const char *, const char *, uint32_t));
     MOCK_METHOD2(SoftBusGenerateRandomArray, int32_t (unsigned char*, uint32_t));
-    MOCK_METHOD5(
-        SoftBusEncryptData, int32_t (AesGcmCipherKey *, const unsigned char *, uint32_t, unsigned char *, uint32_t *));
     MOCK_METHOD5(
         SoftBusDecryptData, int32_t (AesGcmCipherKey *, const unsigned char *, uint32_t, unsigned char *, uint32_t *));
 };

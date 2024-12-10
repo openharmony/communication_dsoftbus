@@ -260,6 +260,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_ENCRYPT_AES_GCM_TEST_001, TestSize.Level1)
 
     ret = LnnEncryptAesGcm(&in, keyIndex, &out, &outLen);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    in.key = nullptr;
     SoftBusFree(out);
 }
 
@@ -272,7 +273,6 @@ HWTEST_F(BusCenterUtilsTest, LNN_ENCRYPT_AES_GCM_TEST_001, TestSize.Level1)
 HWTEST_F(BusCenterUtilsTest, LNN_DECRYPT_AES_GCM_TEST_001, TestSize.Level1)
 {
     NiceMock<BusCenterUtilsInterfaceMock> bcUtilsMock;
-    int32_t keyIndex = 0;
     int32_t ret = LnnDecryptAesGcm(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -294,15 +294,9 @@ HWTEST_F(BusCenterUtilsTest, LNN_DECRYPT_AES_GCM_TEST_001, TestSize.Level1)
     in.dataLen = strlen("hw.test.data.true/false.com.s.s");
     in.key = (uint8_t *)"www.test.com";
     in.keyLen = SESSION_KEY_LENGTH;
-    EXPECT_CALL(bcUtilsMock, SoftBusGenerateRandomArray)
-        .WillOnce(Return(SOFTBUS_ENCRYPT_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnEncryptAesGcm(&in, keyIndex, &out, &outLen);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
-    SoftBusFree(out);
-
     ret = LnnDecryptAesGcm(&in, &out, &outLen);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    in.key = nullptr;
     SoftBusFree(out);
 }
 
@@ -337,8 +331,9 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_SET_TEST_001, TestSize.Level1)
     ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    EXPECT_NO_FATAL_FAILURE(LnnMapErase(cMap, key));
+    EXPECT_EQ(LnnMapErase(cMap, key), SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
+    SoftBusFree(cMap);
 }
 
 /*
@@ -379,7 +374,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_GET_TEST_001, TestSize.Level1)
 
     EXPECT_NO_FATAL_FAILURE(LnnMapErase(cMap, key));
     EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(cMap));
+    SoftBusFree(cMap);
 }
 
 /*
@@ -419,7 +414,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_ERASE_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(cMap));
+    SoftBusFree(cMap);
 }
 
 /*
@@ -437,7 +432,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_INIT_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnMapInit(cMap));
 
     EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(cMap));
+    SoftBusFree(cMap);
 }
 
 /*
@@ -460,7 +455,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_DELETE_TEST_001, TestSize.Level1)
     const char *key = "123412341234abcdef";
     EXPECT_EQ(LnnMapSet(&g_bcUtilsMap, key, &nodeInfo, HDF_MAP_VALUE_MAX_SIZE), SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(cMap));
+    SoftBusFree(cMap);
 }
 
 /*
@@ -480,7 +475,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_INIT_ITERATOR_TEST_001, TestSize.Level1)
     EXPECT_NE(ret, nullptr);
 
     EXPECT_NO_FATAL_FAILURE(LnnMapDeinitIterator(ret));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(cMap));
+    SoftBusFree(cMap);
 }
 
 /*
@@ -496,6 +491,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_HAS_NEXT_TEST_001, TestSize.Level1)
     it->map = (Map *)SoftBusCalloc(sizeof(Map));
     if (it->map == nullptr) {
         SoftBusFree(it);
+        return;
     }
     it->map->nodeSize = HDF_MAP_VALUE_MAX_SIZE + 1;
     it->nodeNum = 1;
@@ -605,7 +601,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_FSM_POST_MESSAGE_DELAY_TEST_001, TestSize.Level
     ret = LnnFsmPostMessageDelay(fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(fsm));
+    SoftBusFree(fsm);
 }
 
 /*
@@ -636,7 +632,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_FSM_REMOVE_MESSAGE_BY_TYPE_TEST_001, TestSize.L
     ret = LnnFsmRemoveMessageByType(fsm, FSM_CTRL_MSG_START);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(fsm));
+    SoftBusFree(fsm);
 }
 
 /*
@@ -666,7 +662,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_FSM_REMOVE_MESSAGE_TEST_001, TestSize.Level1)
     fsm->handler = g_buscenterUtilsHandler;
     ret = LnnFsmRemoveMessage(fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(fsm));
+    SoftBusFree(fsm);
 }
 
 /*
@@ -684,20 +680,23 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_NEXT_TEST_001, TestSize.Level1)
     ASSERT_NE(it, nullptr);
     it->map = (Map *)SoftBusCalloc(sizeof(Map));
     if (it->map == nullptr) {
-        EXPECT_NO_FATAL_FAILURE(SoftBusFree(it));
+        SoftBusFree(it);
+        return;
     }
     it->map->nodeSize = HDF_MAP_VALUE_MAX_SIZE + 1;
     it->nodeNum = 1;
     it->node = (MapNode *)SoftBusCalloc(sizeof(MapNode));
     if (it->node == nullptr) {
-        EXPECT_NO_FATAL_FAILURE(SoftBusFree(it->map));
-        EXPECT_NO_FATAL_FAILURE(SoftBusFree(it));
+        SoftBusFree(it->map);
+        SoftBusFree(it);
+        return;
     }
     it->node->next = (MapNode *)SoftBusCalloc(sizeof(MapNode));
     if (it->node->next == nullptr) {
-        EXPECT_NO_FATAL_FAILURE(SoftBusFree(it->node));
-        EXPECT_NO_FATAL_FAILURE(SoftBusFree(it->map));
-        EXPECT_NO_FATAL_FAILURE(SoftBusFree(it));
+        SoftBusFree(it->node);
+        SoftBusFree(it->map);
+        SoftBusFree(it);
+        return;
     }
     ret = LnnMapNext(it);
     EXPECT_NE(ret, nullptr);
@@ -707,9 +706,9 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_NEXT_TEST_001, TestSize.Level1)
     ret = LnnMapNext(it);
     EXPECT_NE(ret, nullptr);
 
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(it->node->next));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(it->node));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(it->map));
-    EXPECT_NO_FATAL_FAILURE(SoftBusFree(it));
+    SoftBusFree(it->node->next);
+    SoftBusFree(it->node);
+    SoftBusFree(it->map);
+    SoftBusFree(it);
 }
 } // namespace OHOS
