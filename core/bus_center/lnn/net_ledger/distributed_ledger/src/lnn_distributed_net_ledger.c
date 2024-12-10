@@ -982,50 +982,41 @@ static bool IsDeviceInfoChanged(NodeInfo *info)
 
 static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
 {
-    do {
-        if (strcpy_s(deviceInfo->networkId, sizeof(deviceInfo->networkId), info->networkId) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
-            break;
-        }
-        if (strcpy_s(deviceInfo->uuid, sizeof(deviceInfo->uuid), info->uuid) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "strcpy_s uuid fail");
-            break;
-        }
-        if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
-            sizeof(info->rpaInfo.peerIrk)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
-            break;
-        }
-        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
-            sizeof(info->cipherInfo.key)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
-            break;
-        }
-        if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
-            sizeof(info->cipherInfo.iv)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
-            break;
-        }
-        LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
-        if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
-            break;
-        }
-        deviceInfo->netCapacity = info->netCapacity;
-        deviceInfo->accountId = info->accountId;
-        if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
-            break;
-        }
+    if (strcpy_s(deviceInfo->networkId, sizeof(deviceInfo->networkId), info->networkId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
         return;
-    } while (0);
-    (void)memset_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), 0,
-        sizeof(deviceInfo->rpaInfo.peerIrk));
-    (void)memset_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), 0,
-        sizeof(deviceInfo->cipherInfo.key));
-    (void)memset_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), 0,
-        sizeof(deviceInfo->cipherInfo.iv));
-    (void)memset_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+    }
+    if (strcpy_s(deviceInfo->uuid, sizeof(deviceInfo->uuid), info->uuid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s uuid fail");
+        return;
+    }
+    if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
+        sizeof(info->rpaInfo.peerIrk)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
+        return;
+    }
+        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
+        sizeof(info->cipherInfo.key)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
+        return;
+    }
+    if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
+        sizeof(info->cipherInfo.iv)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
+        return;
+    }
+    LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
+    if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
+        return;
+    }
+    deviceInfo->netCapacity = info->netCapacity;
+    deviceInfo->accountId = info->accountId;
+    if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
+        return;
+    }
+    return;
 }
 
 static void BleDirectlyOnlineProc(NodeInfo *info)
@@ -1060,6 +1051,7 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
         AnonymizeFree(anonyDevNetworkId);
         AnonymizeFree(anonyNetworkId);
         GetAndSaveRemoteDeviceInfo(&deviceInfo, info);
+        (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo);
         return;
     }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
