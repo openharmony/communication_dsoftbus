@@ -1023,6 +1023,8 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         sizeof(deviceInfo->rpaInfo.peerIrk));
     (void)memset_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), 0,
         sizeof(deviceInfo->cipherInfo.key));
+    (void)memset_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), 0,
+        sizeof(deviceInfo->cipherInfo.iv));
     (void)memset_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
 }
 
