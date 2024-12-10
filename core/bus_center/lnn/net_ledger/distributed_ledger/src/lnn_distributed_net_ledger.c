@@ -981,7 +981,8 @@ static bool IsDeviceInfoChanged(NodeInfo *info)
 }
 
 static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
-{   do {
+{
+    do {
         if (strcpy_s(deviceInfo->networkId, sizeof(deviceInfo->networkId), info->networkId) != EOK) {
             LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
             break;
