@@ -59,6 +59,10 @@ int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t s
 
 int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *sessionName, const ChannelInfo *channel)
 {
+    if (sessionName == NULL || channel == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed.");
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;

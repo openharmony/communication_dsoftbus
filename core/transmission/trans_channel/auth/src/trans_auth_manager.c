@@ -465,6 +465,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         extra.localUdid = localUdid;
     }
     AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo, len);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "unpackRequest failed");
