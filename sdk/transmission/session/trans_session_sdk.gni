@@ -54,11 +54,7 @@ if (defined(ohos_lite)) {
   ]
 
   trans_session_sdk_src += [
-    "$dsoftbus_sdk_path/transmission/session/cpp/src/session_callback_mock.cpp",
-    "$dsoftbus_sdk_path/transmission/session/cpp/src/session_impl.cpp",
     "$dsoftbus_sdk_path/transmission/session/cpp/src/session_ipc_adapter.cpp",
-    "$dsoftbus_sdk_path/transmission/session/cpp/src/session_mock.cpp",
-    "$dsoftbus_sdk_path/transmission/session/cpp/src/session_service_impl.cpp",
   ]
 
   if (defined(global_parts_info) &&
