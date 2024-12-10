@@ -24,6 +24,8 @@ namespace OHOS {
 const static uint16_t SHA_HASH_LEN = 32;
 void *g_laneDepsInterface;
 static SoftbusBaseListener g_baseListener = {0};
+constexpr char NODE_NETWORK_ID[] = "123456789";
+
 LaneDepsInterfaceMock::LaneDepsInterfaceMock()
 {
     g_laneDepsInterface = reinterpret_cast<void *>(this);
@@ -75,6 +77,20 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
     EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfLnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
+{
+    (void)udid;
+    if (buf == nullptr) {
+        GTEST_LOG_(ERROR) << "invalid param";
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(buf, len, NODE_NETWORK_ID) != EOK) {
+        GTEST_LOG_(ERROR) << "strcpy_s failed";
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)

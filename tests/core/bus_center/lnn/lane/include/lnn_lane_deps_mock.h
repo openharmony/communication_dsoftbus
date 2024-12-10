@@ -192,6 +192,7 @@ public:
         const AuthConnCallback *callback, bool isMeta);
     static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
         bool isMeta);
+    static int32_t ActionOfLnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
     static int32_t socketEvent;
 };
 } // namespace OHOS
