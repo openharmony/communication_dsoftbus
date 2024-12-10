@@ -592,11 +592,22 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         LNN_LOGE(LNN_BUILDER, "malloc DeviceVerifyPassMsgPara fail");
         return;
     }
-    if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType())) {
-        LNN_LOGE(LNN_BUILDER, "convert connInfo to addr fail");
-        SoftBusFree(para);
-        return;
+
+    if (authHandle.type != AUTH_LINK_TYPE_ENHANCED_P2P) {
+        if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType())) {
+            LNN_LOGE(LNN_BUILDER, "convert connInfo to addr fail");
+            SoftBusFree(para);
+            return;
+        }
+    } else {
+        para->addr.type = CONNECTION_ADDR_BR;
+        if (strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, connInfo.info.brInfo.brMac) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
+            SoftBusFree(para);
+            return;
+        }
     }
+
     para->authHandle = authHandle;
     para->nodeInfo = DupNodeInfo(info);
     if (para->nodeInfo == NULL) {
