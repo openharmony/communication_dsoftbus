@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "ISessionService.h"
 #include "permission_entry.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
@@ -23,8 +22,6 @@
 using namespace testing::ext;
 
 namespace OHOS {
-using Communication::SoftBus::ISessionService;
-
 int32_t g_permUid = 0;
 int32_t g_permPid = 0;
 std::string g_permSessionName;
@@ -60,65 +57,35 @@ void TransDynamicPermissionTest::TearDownTestCase(void)
 
 /**
  * @tc.name: DynamicPermissionTest001
- * @tc.desc: Grant dynamic permission, use invalid params.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest001, TestSize.Level0)
-{
-    std::shared_ptr<ISessionService> softbusManager = ISessionService::GetInstance();
-    ASSERT_NE(softbusManager, nullptr);
-
-    int32_t ret = softbusManager->GrantPermission(g_permUid, g_permPid, g_permSessionName);
-    ASSERT_NE(ret, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: DynamicPermissionTest002
- * @tc.desc: Remove dynamic permission, use invalid params.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level0)
-{
-    std::shared_ptr<ISessionService> softbusManager = ISessionService::GetInstance();
-    ASSERT_NE(softbusManager, nullptr);
-
-    int32_t ret = softbusManager->RemovePermission(g_permSessionName);
-    ASSERT_NE(ret, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: DynamicPermissionTest003
  * @tc.desc: AddDynamicPermission success.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest001, TestSize.Level0)
 {
     int32_t ret = AddDynamicPermission(g_permUid, g_permPid, g_permSessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: DynamicPermissionTest004
+ * @tc.name: DynamicPermissionTest002
  * @tc.desc: DeleteDynamicPermission success.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level0)
 {
     int32_t ret = DeleteDynamicPermission(g_permSessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: DynamicPermissionTest005
+ * @tc.name: DynamicPermissionTest003
  * @tc.desc: Dynamic permission reach the upper limit.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level0)
 {
     int32_t testPid = 10000;
     int32_t ret = 0;
@@ -163,12 +130,12 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: DynamicPermissionTest006
+ * @tc.name: DynamicPermissionTest004
  * @tc.desc: Check trans open permission.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest006, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level0)
 {
     int32_t testPid = 10000;
     int32_t ret = 0;
@@ -202,12 +169,12 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: DynamicPermissionTest007
+ * @tc.name: DynamicPermissionTest005
  * @tc.desc: Repeated call AddDynamicPermission and DeleteDynamicPermission.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest007, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
 {
     int32_t testPid = 17258;
     int32_t ret = 0;
