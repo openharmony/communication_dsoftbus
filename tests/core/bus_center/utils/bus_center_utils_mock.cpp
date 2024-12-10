@@ -61,16 +61,10 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     return GetBusCenterUtilsInterface()->SoftBusGenerateRandomArray(randStr, len);
 }
 
-int32_t SoftBusEncryptData(
-    AesGcmCipherKey *key, const unsigned char *input, uint32_t inLen, unsigned char *encryptData, uint32_t *encryptLen)
-{
-    return GetBusCenterUtilsInterface()->SoftBusEncryptData(key, input, inLen, encryptData, encryptLen);
-}
-
 int32_t SoftBusDecryptData(
     AesGcmCipherKey *key, const unsigned char *input, uint32_t inLen, unsigned char *decryptData, uint32_t *decryptLen)
 {
-    return GetBusCenterUtilsInterface()->SoftBusEncryptData(key, input, inLen, decryptData, decryptLen);
+    return GetBusCenterUtilsInterface()->SoftBusDecryptData(key, input, inLen, decryptData, decryptLen);
 }
 }
 } // namespace OHOS
