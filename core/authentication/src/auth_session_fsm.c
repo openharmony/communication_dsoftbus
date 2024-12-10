@@ -268,6 +268,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.idType = EXCHANGE_UDID;
     if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
+        SoftBusFree(authFsm);
         return NULL;
     }
     if (!isServer) {
