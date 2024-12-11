@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include<stdio.h>
+#include <stdio.h>
 
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
