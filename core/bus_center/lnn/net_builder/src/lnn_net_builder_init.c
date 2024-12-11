@@ -601,10 +601,8 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         }
     } else {
         para->addr.type = CONNECTION_ADDR_BR;
-        if (strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, connInfo.info.brInfo.brMac) != EOK) {
+        if (strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, info->connectInfo.macAddr) != EOK) {
             LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
-            SoftBusFree(para);
-            return;
         }
     }
 
