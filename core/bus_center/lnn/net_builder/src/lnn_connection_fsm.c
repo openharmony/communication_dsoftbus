@@ -1299,6 +1299,11 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
     return SOFTBUS_OK;
 }
 
+static bool IsSupportFeatureByCapability(uint32_t feature, AuthCapability capaBit)
+{
+    return ((feature & (1 << (uint32_t)capaBit)) != 0);
+}
+
 bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
 {
     if (newNodeInfo == NULL) {
@@ -1324,7 +1329,7 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *oldAddr, Auth
     }
 
     NodeInfo remoteInfo;
-    if (!IsSupportFeatureByCapaBit(nodeInfo->authCapacity, authCapability)) {
+    if (!IsSupportFeatureByCapability(nodeInfo->authCapacity, authCapability)) {
         LNN_LOGI(LNN_BUILDER, "remote not support , no need to go online");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
