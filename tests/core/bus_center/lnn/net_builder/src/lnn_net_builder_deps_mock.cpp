@@ -727,6 +727,11 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
     return GetNetBuilderDepsInterface()->CheckRemoteBasicInfoChanged(newNodeInfo);
 }
 
+int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *oldAddr, AuthCapability authCapability)
+{
+    return GetNetBuilderDepsInterface()->ProcessBleOnline(nodeInfo, oldAddr, authCapability);
+}
+
 int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
 {
     return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
