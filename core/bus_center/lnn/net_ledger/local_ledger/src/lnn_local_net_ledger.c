@@ -2040,7 +2040,7 @@ int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len)
     }
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     LNN_LOGE(LNN_LEDGER, "KEY NOT exist");
-    return SOFTBUS_ERR;
+    return SOFTBUS_NETWORK_NOT_FOUND;
 }
 
 static bool JudgeString(const char *info, int32_t len)

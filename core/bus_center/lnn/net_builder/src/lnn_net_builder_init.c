@@ -210,7 +210,7 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "process join lnn request failed");
         if (needReportFailure) {
-            LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_ERR);
+            LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
         }
         if (connFsm != NULL && isCreate) {
             LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
