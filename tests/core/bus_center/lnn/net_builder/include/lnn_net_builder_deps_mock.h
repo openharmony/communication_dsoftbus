@@ -200,7 +200,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual void RegisterOOBEMonitor(void *p);
     virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
-    virtual int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *oldAddr, AuthCapability authCapability);
+    virtual int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
