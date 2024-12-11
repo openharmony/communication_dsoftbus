@@ -1321,10 +1321,10 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
     return IsBasicNodeInfoChanged(&oldNodeInfo, newNodeInfo, false);
 }
 
-int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *oldAddr, AuthCapability authCapability)
+int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability)
 {
-    if (nodeInfo == NULL || oldAddr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "nodeInfo or oldAddr is null");
+    if (nodeInfo == NULL || connAddr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo or connAddr is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -1343,7 +1343,7 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *oldAddr, Auth
     uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     addr.type = CONNECTION_ADDR_BLE;
-    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, oldAddr->info.br.brMac,
+    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac,
         BT_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
         return SOFTBUS_MEM_ERR;

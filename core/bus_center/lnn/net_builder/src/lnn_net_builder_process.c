@@ -374,7 +374,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
     }
 
     if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
-        LNN_LOGI(LNN_BUILDER, "auth type is enhanced p2p,start dup ble");
+        LNN_LOGI(LNN_BUILDER, "auth type is enhanced p2p, start dup ble");
         rc = ProcessEnhancedP2pDupBle(msgPara);
         if (msgPara->nodeInfo != NULL) {
             SoftBusFree((void *)msgPara->nodeInfo);
