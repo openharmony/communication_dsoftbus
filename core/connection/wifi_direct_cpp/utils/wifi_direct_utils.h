@@ -102,6 +102,7 @@ public:
     static int32_t GetOsType(const char *networkId);
     static int32_t GetDeviceType(const char *networkId);
     static int32_t GetDeviceType();
+    static int32_t GetRemoteScreenStatus(const char *remoteNetworkId);
 
 private:
     static inline std::mutex serialParallelLock_;
