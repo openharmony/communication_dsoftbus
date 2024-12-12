@@ -242,11 +242,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Leve
     NodeInfo newInfo;
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE1_UDID, strlen(NODE1_UDID));
-    int32_t ret = LnnUpdateNodeInfo(&newInfo);
+    int32_t ret = LnnUpdateNodeInfo(&newInfo, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE2_UDID, strlen(NODE2_UDID));
-    ret = LnnUpdateNodeInfo(&newInfo);
+    ret = LnnUpdateNodeInfo(&newInfo, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_MAP_GET_FAILED);
 }
 
