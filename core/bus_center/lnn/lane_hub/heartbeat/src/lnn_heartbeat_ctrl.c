@@ -46,7 +46,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
-
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_broadcast_type.h"
@@ -150,7 +150,7 @@ static void HbRefreshConditionState(void)
     if (SoftBusGetBtState() == BLE_ENABLE) {
         g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
     }
-    LnnUpdateOhosAccount(false);
+    LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
     if (!LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
     }
@@ -537,7 +537,7 @@ static void HbDelayConditionChanged(void *para)
 
     g_isCloudSyncEnd = true;
     LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     g_hbConditionState.heartbeatEnable = IsEnableSoftBusHeartbeat();
@@ -656,7 +656,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
         (void)LnnGenerateCeParams();
         AuthLoadDeviceKey();
-        LnnUpdateOhosAccount(false);
+        LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
             LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
         }
@@ -882,8 +882,9 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
+                RegisterNameMonitor();
                 LnnUpdateDeviceName();
-                LnnUpdateOhosAccount(true);
+                LnnUpdateOhosAccount(UPDATE_USER_SWITCH);
                 HbConditionChanged(false);
                 RefreshBleBroadcastByUserSwitched();
                 if (IsHeartbeatEnable()) {

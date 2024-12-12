@@ -30,6 +30,7 @@
 #include "lnn_map.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
+#include "lnn_settingdata_event_monitor.h"
 
 namespace OHOS {
 class HeartBeatCtrlStaticInterface {
@@ -51,7 +52,7 @@ public:
     virtual int32_t LnnSetCloudAbility(const bool isEnableCloud) = 0;
     virtual int32_t LnnDeleteSyncToDB(void) = 0;
     virtual void LnnOnOhosAccountLogout(void) = 0;
-    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
+    virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
     virtual TrustedReturnType AuthHasTrustedRelation(void) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
@@ -84,6 +85,7 @@ public:
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
     virtual void LnnUpdateDeviceName(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
+    virtual void RegisterNameMonitor(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -102,7 +104,7 @@ public:
     MOCK_METHOD1(LnnSetCloudAbility, int32_t(const bool));
     MOCK_METHOD0(LnnDeleteSyncToDB, int32_t());
     MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD0(AuthHasTrustedRelation, TrustedReturnType(void));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
     MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t(const LnnHeartbeatMediumParam *));
@@ -135,6 +137,7 @@ public:
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
     MOCK_METHOD0(LnnUpdateDeviceName, void(void));
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
+    MOCK_METHOD0(RegisterNameMonitor, void(void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

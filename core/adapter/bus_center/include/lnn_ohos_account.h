@@ -22,9 +22,15 @@
 extern "C" {
 #endif
 
+typedef enum {
+    UPDATE_ACCOUNT_ONLY = 1,
+    UPDATE_HEARTBEAT = 2,
+    UPDATE_USER_SWITCH = 3,
+} UpdateAccountReason;
+
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
 int32_t LnnInitOhosAccount(void);
-void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat);
+void LnnUpdateOhosAccount(UpdateAccountReason reason);
 void LnnOnOhosAccountLogout(void);
 bool LnnIsDefaultOhosAccount(void);
 

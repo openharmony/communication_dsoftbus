@@ -14,9 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "access_control.h"
-#include "securec.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
