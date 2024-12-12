@@ -78,15 +78,31 @@ static SoftBusHandlerWrapper g_brConnectionAsyncHandler = {
 
 static int32_t g_readBufferCapacity = -1;
 static int32_t g_mtuSize = -1;
-static int32_t LoopRead(uint32_t connectionId, int32_t socketHandle)
+static int32_t LoopRead(uint32_t connectionId)
 {
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, INVALID_SOCKET_HANDLE, CONN_BR,
+        "get connection failed, connId=%{public}u", connectionId);
     LimitedBuffer *buffer = NULL;
     int32_t status = ConnNewLimitedBuffer(&buffer, g_readBufferCapacity);
     if (status != SOFTBUS_OK) {
+        ConnBrReturnConnection(&connection);
         return status;
     }
 
     while (true) {
+        status = SoftBusMutexLock(&connection->lock);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "try to get lock failed, connId=%{public}u, err=%{public}d", connectionId, status);
+            break;
+        }
+        int32_t socketHandle = connection->socketHandle;
+        (void)SoftBusMutexUnlock(&connection->lock);
+        if (socketHandle == INVALID_SOCKET_HANDLE) {
+            CONN_LOGE(CONN_BLE, "socketHandle=%{public}d", socketHandle);
+            status = INVALID_SOCKET_HANDLE;
+            break;
+        }
         uint8_t *data = NULL;
         int32_t dataLen = ConnBrTransReadOneFrame(connectionId, socketHandle, buffer, &data);
         if (dataLen < 0) {
@@ -96,6 +112,7 @@ static int32_t LoopRead(uint32_t connectionId, int32_t socketHandle)
         g_eventListener.onDataReceived(connectionId, data, dataLen);
     }
     ConnDeleteLimitedBuffer(&buffer);
+    ConnBrReturnConnection(&connection);
     return status;
 }
 
@@ -203,7 +220,7 @@ static void *StartClientConnect(void *connectCtx)
         CONN_LOGI(CONN_BR, "connect ok, id=%{public}u, address=%{public}s, socket=%{public}d",
             connection->connectionId, anomizeAddress, connection->socketHandle);
         g_eventListener.onClientConnected(connection->connectionId);
-        ret = LoopRead(connection->connectionId, connection->socketHandle);
+        ret = LoopRead(connection->connectionId);
         CONN_LOGD(CONN_BR, "br client loop read exit, connId=%{public}u, address=%{public}s, socketHandle=%{public}d, "
             "error=%{public}d", connection->connectionId, anomizeAddress, connection->socketHandle, ret);
 
@@ -269,7 +286,7 @@ static void *StartServerServe(void *serveCtx)
     do {
         CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, socketHandle);
         g_eventListener.onServerAccepted(connection->connectionId);
-        int32_t ret = LoopRead(connection->connectionId, socketHandle);
+        int32_t ret = LoopRead(connection->connectionId);
         CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
             connection->connectionId, socketHandle, ret);
 
