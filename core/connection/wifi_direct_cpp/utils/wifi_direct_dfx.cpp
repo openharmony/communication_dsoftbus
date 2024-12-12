@@ -27,8 +27,6 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
     if (success) {
         DurationStatistic::GetInstance().Record(wifiDirectConnectInfo.requestId, TOTAL_END);
         DurationStatistic::GetInstance().End(wifiDirectConnectInfo.requestId);
-        DurationStatistic::GetInstance().Clear(wifiDirectConnectInfo.requestId);
-        WifiDirectDfx::GetInstance().Clear(wifiDirectConnectInfo.requestId);
 
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_OK,
@@ -36,9 +34,9 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
             .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
-    } else {
         DurationStatistic::GetInstance().Clear(wifiDirectConnectInfo.requestId);
         WifiDirectDfx::GetInstance().Clear(wifiDirectConnectInfo.requestId);
+    } else {
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = reason,
@@ -46,6 +44,8 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
             .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
+        DurationStatistic::GetInstance().Clear(wifiDirectConnectInfo.requestId);
+        WifiDirectDfx::GetInstance().Clear(wifiDirectConnectInfo.requestId);
     }
 }
 
@@ -103,6 +103,8 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     auto remoteDeviceType = WifiDirectUtils::GetDeviceType(wifiDirectConnectInfo.remoteNetworkId);
     auto remoteDeviceTypeStr = std::to_string(remoteDeviceType);
     extra.remoteDeviceType = remoteDeviceTypeStr.c_str();
+    extra.isRenegotiate = DurationStatistic::GetInstance().ReNegotiateFlag(requestId);
+    extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 } // namespace OHOS::SoftBus
