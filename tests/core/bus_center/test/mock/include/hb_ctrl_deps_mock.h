@@ -22,6 +22,7 @@
 #include "bus_center_event.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_ohos_account.h"
 #include "softbus_common.h"
 
 namespace OHOS {
@@ -37,7 +38,7 @@ public:
     virtual void RestartCoapDiscovery(void) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
-    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
+    virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
     virtual int32_t LnnHbMediumMgrSetParam(void *param) = 0;
     virtual bool LnnIslocalSupportBurstFeature(void) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
@@ -55,7 +56,7 @@ public:
     MOCK_METHOD0(RestartCoapDiscovery, void(void));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType(LnnHeartbeatType));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(void *));
     MOCK_METHOD0(LnnIslocalSupportBurstFeature, bool(void));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));

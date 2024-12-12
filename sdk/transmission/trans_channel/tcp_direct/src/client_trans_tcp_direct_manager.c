@@ -273,26 +273,35 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
         return SOFTBUS_OK;
     }
 
+    ret = TransTdcCreateListenerWithoutAddTrigger(channel->fd);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "create listener fail, channelId=%{public}d", channel->channelId);
+        return ret;
+    }
+    if (g_tcpDirectChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "g_tcpDirectChannelInfoList is NULL, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_LOCK_ERR;
+    }
+
     TcpDirectChannelInfo info;
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     TcpDirectChannelInfo *res = TransTdcGetInfoById(channel->channelId, &info);
     if (res == NULL) {
         DelTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channel->channelId);
+        (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
         return SOFTBUS_NOT_FIND;
     }
 
-    if (info.detail.needStopListener) {
-        TRANS_LOGI(TRANS_SDK, "info.detail.needStopListener, channelId=%{public}d", channel->channelId);
-        return SOFTBUS_OK;
+    if (!info.detail.needStopListener) {
+        TRANS_LOGI(TRANS_SDK, "info.detail.needStopListener false, channelId=%{public}d", channel->channelId);
+        AddTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
     }
-
-    ret = TransTdcCreateListener(channel->fd);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "create listener fail, channelId=%{public}d", channel->channelId);
-        return ret;
-    }
-
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
     return SOFTBUS_OK;
 }
 
@@ -448,12 +457,21 @@ int32_t TransDisableSessionListener(int32_t channelId)
         TRANS_LOGE(TRANS_SDK, "invalid handle.");
         return SOFTBUS_INVALID_FD;
     }
+    if (g_tcpDirectChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "g_tcpDirectChannelInfoList is NULL, channelId=%{public}d", channelId);
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed, channelId=%{public}d", channelId);
+        return SOFTBUS_LOCK_ERR;
+    }
 
     (void)TransTdcSetListenerStateById(channelId, true);
     int32_t ret = TransTdcStopRead(channel.detail.fd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SDK, "stop read failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
     }
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
     return SOFTBUS_OK;
 }
 

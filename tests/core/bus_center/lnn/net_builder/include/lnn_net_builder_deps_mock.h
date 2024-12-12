@@ -200,6 +200,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual void RegisterOOBEMonitor(void *p);
     virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
+    virtual int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
@@ -347,6 +348,7 @@ public:
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool(const NodeInfo *));
+    MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));

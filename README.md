@@ -1,15 +1,16 @@
 # DSoftBus
 
-
 ## Introduction
 
-DSoftBus implements unified distributed communications between near-field devices and provides APIs for device discovery, connection, networking, and data transmission, regardless of the link type. It provides the following capabilities:
+There are various ways of communication (such as Wi-Fi and Bluetooth) between devices. The difference in the usage of these communication methods may lead to communication issues. In addition, there are many challenges in converging and sharing communication links between devices and handling conflicts. 
 
--   Device discovery and connection in various communication modes, such as WLAN and Bluetooth.
--   Unified device networking and topology management, and device information provisioning for data transmission.
--   Channel setup for transmitting messages, bytes, streams, and files.
+DSoftBus implements unified distributed communications between near-field devices and provides APIs for device discovery, connections, networking, and data transmission, regardless of the link type. It stands out with the following capabilities:
 
-You can use the APIs provided by DSoftBus to implement fast communication between devices without caring about the communication details, which facilitating deployment and running of services across platforms.
+-   Implements discovery and connections of devices in various communication modes, such as WLAN and Bluetooth.
+-   Performs unified device networking and topology management, and provides device information for data transmission.
+-   Sets up channels for transmitting messages, bytes, streams, and files.
+
+You can use the APIs provided by DSoftBus to implement fast communication between devices without caring about the communication details, which accelerating deployment and running of services across platforms.
 
 ## Architecture
 
@@ -24,108 +25,107 @@ The DSoftBus directory structure is as follows:
 ```text
 //foundation/communication/dsoftbus
 ├── adapter               # Adaptation code
-├── components            # Dependent component code
+├── components            # Dependent components
 ├── core                  # Core code
 │   ├── adapter           # Adaptation code
-│   ├── authentication    # Authentication code
-│   ├── bus_center        # Networking code
+│   ├── authentication    # Code for authentication
+│   ├── bus_center        # Code for networking
 │   ├── common            # Common code
-│   ├── connection        # Connection code
-│   ├── discovery         # Discovery code
+│   ├── connection        # Code for device connections
+│   ├── discovery         # Code for device discovery
 │   ├── frame             # Framework code
-│   └── transmission      # Transmission code
+│   └── transmission      # Code for data transmission
 ├── interfaces            # External APIs
-├── sdk                   # Service process code
-│   ├── bus_center        # Networking code
-│   ├── discovery         # Discovery code
-│   ├── frame             # Framework code
-│   └── transmission      # Transmission code
+├── sdk                   # SDK
+│   ├── bus_center        # Networking
+│   ├── discovery         # Device discovery
+│   ├── frame             # Framework
+│   └── transmission      # Transmission
 ├── tests                 # Test code
-└── tools                 # Tool code
+└── tools                 # Tools
 ```
 
 ## Constraints
 
 -   Connections can be set up only between the devices in the same LAN or between near-field devices.
--   Before setting up a connection between two devices, you must bind the devices. For details about the binding process, see [the Security subsystem](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80%E8%83%BD%E5%8A%9B%E5%AD%90%E7%B3%BB%E7%BB%9F.md) readme file.
+-   Before setting up a connection between two devices, you must bind devices. For details, see [Security](https://gitee.com/openharmony/docs/blob/master/en/readme/Security.md).
 -   After data transmission is complete, the service needs to close the session to release resources.
 
 ## Usage
 
-### Usage Guidelines
-
 >**NOTE**
 >
->- The permissions ohos.permission.DISTRIBUTED_DATASYNC and ohos.permission.DISTRIBUTED_SOFTBUS_CENTER are required for remote procedure calls (RPCs) across devices.
+>The permissions ohos.permission.DISTRIBUTED_DATASYNC and ohos.permission.DISTRIBUTED_SOFTBUS_CENTER are required for remote procedure calls (RPCs) across devices.
 
-**1. Discovery**
+### Device Discovery
 
 -   **Publishing process**
 
-1.  Publish a service of your application.
+1.  Call **PublishLNN()** to publish application information across a network.
 
     ```C
-    // Callback for service publishing.
+    // Callback used to return the publish result.
     typedef struct {
-        /** Callback used to return the publish result. */
+        /** Callback for publish result */
         void (*OnPublishResult)(int publishId, PublishResult reason);
     } IPublishCb;
 
-    // Publish information.
+    // Information to publish.
     typedef struct {
         int publishId;                 // Publish ID.
-        DiscoverMode mode;             // Publish mode.
-        ExchangeMedium medium;         // Medium used for publishing the service.
-        ExchangeFreq freq;             // Service publishing frequency.
-        const char *capability;        // Capability of the device that can be discovered.
-        unsigned char *capabilityData; // Custom data for service publishing
-        unsigned int dataLen;          // Length of the data.
-        bool ranging;                  // Whether to measure the distance.
+        DiscoverMode mode;             // Discovery mode.
+        ExchangeMedium medium;         // Medium to use.
+        ExchangeFreq freq;             // Frequency to use.
+        const char *capability;        // Capability of the device to discover.
+        unsigned char *capabilityData; // Custom data to publish.
+        unsigned int dataLen;          // Data length.
+        bool ranging;                  // Whether ranging is required.
     } PublishInfo;
-
-    // Publish a service.
+    
+    // Publish information.
     int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
     ```
 
-2.  Unpublish a service of your application.
+2.  Call **StopPublishLNN** to stop publishing information when it is not required.
 
     ```C
-    // Unpublish a service.
+    // Stop publishing a service.
     int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
     ```
 
 
 -   **Discovery process**
 
-1.  Discover a device.
+1. Call **RefreshLNN()** to discover devices with the specified capability.
 
-    ```C
-    // Callbacks for device discovery.
-    typedef struct {
-        /** Callback invoked when a device is found. */
-        void (*OnDeviceFound)(const DeviceInfo *device);
-        /** Callback invoked to return the device discovery result. */
-        void (*OnDiscoverResult)(int32_t refreshId, RefreshResult reason);
-    } IRefreshCallback;
-    
-    // Start device discovery.
-    int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
-    ```
+   ```C
+   // Callbacks for device discovery.
+   typedef struct {
+       /** Callback to be invoked when a device is found. */
+       void (*OnDeviceFound)(const DeviceInfo *device);
+       /** Callback for a subscription result. */
+       void (*OnDiscoverResult)(int32_t refreshId, RefreshResult reason);
+   } IRefreshCallback;
+   
+   // Start device discovery.
+   int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
+   ```
 
-2.  DSoftBus notifies the service of the device information via the callback once a device is found.
-3.  Stop device discovery.
+   DSoftBus notifies the service of the device information via a callback once a device is found.
+
+3.  Call **StopRefreshLNN()** to stop device discovery.
 
     ```C
     // Stop the discovery.
     int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
     ```
 
-**2. Networking**
+### Networking
 
-1.  Initiate a connection request with the address of the target device and the connection callback.
+1.  Initiate a request for connection with the target device address and a callback used to return the connection result.
 
     ```C
-    // Address to connect to.
+    // Address of the target device to connect to.
     typedef struct {
         ConnectionAddrType type;
         union {
@@ -153,70 +153,77 @@ The DSoftBus directory structure is as follows:
         CONNECTION_ADDR_MAX
     } ConnectionAddrType;
     
-    // Callback invoked to return the connection result.
+    // Callback used to return the connection result.
     typedef void (*OnJoinLNNResult)(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     
     // Initiate a connection request.
     int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
     ```
 
-2.  Wait for the connection result. If DSoftBus accepts the connection request, a callback is invoked to return the result. In the return value, if **retCode** is **0**, the connection is successful, and the **addr** parameter matches the **target** parameter in **JoinLNN()**. In this case, the value of **networkId** is valid and will be used in the data transmission and disconnection APIs. If the value of **retCode** is not **0**, the connection fails, and the value of **networkId** is invalid.
-3.  Transmit data using transmission APIs.
-4.  Initiate a disconnection request with the **networkId** and the callback.
+2. Wait for the connection result. 
 
-    ```C
-    // Callback invoked to return the disconnection result.
-    typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
-    
-    // Initiate a disconnection request.
-    int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
-    ```
+   If **JoinLNN()** returns success, DSoftBus accepts the connection request and notifies the service of the connection result through the callback. The **addr** parameter in the callback matches the **target** parameter in **JoinLNN()**. If **retCode** in the callback is **0**, the connection is successful. In this case, the value of **networkId** is valid and will be used in the data transmission and disconnection APIs. If the value of **retCode** is not **0**, the connection fails, and the value of **networkId** is invalid.
 
-5.  Wait until the disconnection is complete. The **networkId** parameter in **OnLeaveLNNResult()** matches **networkId** in **LeaveLNN()**. If **retCode** is **0**, the disconnection is successful; otherwise, the disconnection fails. If the disconnection is successful, **networkId** becomes invalid and can no longer be used.
-6.  Register and unregister callbacks for device state changes.
+3. Transmit data using the related APIs.
 
-    ```C
-    // Device state events.
-    #define EVENT_NODE_STATE_ONLINE 0x1
-    #define EVENT_NODE_STATE_OFFLINE 0x02
-    #define EVENT_NODE_STATE_INFO_CHANGED 0x04
-    #define EVENT_NODE_STATUS_CHANGED 0x08
-    #define EVENT_NODE_STATE_MASK 0xF
-    
-    // Device information.
-    typedef struct {
-        char networkId[NETWORK_ID_BUF_LEN];
-        char deviceName[DEVICE_NAME_BUF_LEN];
-        uint16_t deviceTypeId;
-    } NodeBasicInfo;
-    
-    // Device state event callbacks.
-    typedef struct {
-        uint32_t events; // Networking event mask.
-        void (*onNodeOnline)(NodeBasicInfo *info);   // Called when the device gets online.
-        void (*onNodeOffline)(NodeBasicInfo *info);  // Called when the device gets offline.
-        void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info); // Called when the device information changes.
-        void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status); // Called when the device running status changes.
-    } INodeStateCb;
-    
-    // Register the callback for device state events.
-    int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback);
-    
-    // Unregister the callback for device state events.
-    int32_t UnregNodeDeviceStateCb(INodeStateCb *callback);
-    ```
+4. Initiate a disconnection request with the **networkId** and a callback for returing the result.
 
-**3. Transmission**
+   ```C
+   // Callback used to return the disconnection result.
+   typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
+   
+   // Initiate a disconnection request.
+   int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
+   ```
+
+5. Wait until the disconnection is complete. 
+
+   The **networkId** parameter in **OnLeaveLNNResult()** matches **networkId** in **LeaveLNN()**. If **retCode** in the callback is **0**, the disconnection is successful; otherwise, the disconnection fails. If the disconnection is successful, **networkId** becomes invalid and can no longer be used.
+
+6. Register and unregister callbacks for device state changes.
+
+   ```C
+   // Device state events.
+   #define EVENT_NODE_STATE_ONLINE 0x1
+   #define EVENT_NODE_STATE_OFFLINE 0x02
+   #define EVENT_NODE_STATE_INFO_CHANGED 0x04
+   #define EVENT_NODE_STATUS_CHANGED 0x08
+   #define EVENT_NODE_STATE_MASK 0xF
+   
+   // Device information.
+   typedef struct {
+       char networkId[NETWORK_ID_BUF_LEN];
+       char deviceName[DEVICE_NAME_BUF_LEN];
+       uint16_t deviceTypeId;
+   } NodeBasicInfo;
+   
+   // Device state event callbacks.
+   typedef struct {
+       uint32_t events; // Networking event mask.
+       void (*onNodeOnline)(NodeBasicInfo *info);   // Called when the device gets online.
+       void (*onNodeOffline)(NodeBasicInfo *info);  // Called when the device gets offline.
+       void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info); // Called when the device information changes.
+       void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status); // Called when the device running status changes.
+   } INodeStateCb;
+   
+   // Register a callback for device state events.
+   int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback);
+   
+   // Unregister a callback for device state events.
+   int32_t UnregNodeDeviceStateCb(INodeStateCb *callback);
+   ```
+
+### Transmission
 
 1.  Create a **Socket** instance.
 
     ```C
     typedef struct {
-        char *name;               // Local socket name.
-        char *peerName;           // Peer socket name.
-        char *peerNetworkId;      // Peer network ID.
-        char *pkgName;            // Bundle name of the caller.
-        TransDataType dataType;   // Type of the data to be transmitted, which must be the same as that in the sender() method.
+        char *name;                 // Local socket name.
+        char *peerName;             // Peer socket name.
+        char *peerNetworkId;        // Peer network ID.
+        char *pkgName;              // Bundle name of the caller.
+        TransDataType dataType;     // Type of the data to be transmitted.
     } SocketInfo;
     
     // Create sockets.
@@ -226,7 +233,7 @@ The DSoftBus directory structure is as follows:
 2.  Start listening for the socket on the server, and bind the socket on the client.
 
     ```C
-    // Callbacks for the socket.
+    // Socket callbacks.
     typedef struct {
         void (*OnBind)(int32_t socket, PeerSocketInfo info);
         void (*OnShutdown)(int32_t socket, ShutdownReason reason);
@@ -239,14 +246,14 @@ The DSoftBus directory structure is as follows:
     } ISocketListener;
 
     typedef enum {
-        QOS_TYPE_MIN_BW,           // Minimum bandwidth.
-        QOS_TYPE_MAX_WAIT_TIMEOUT,      // Maximum time allowed for the bind operation.
-        QOS_TYPE_MIN_LATENCY,      // Minimum latency for link setup.
-        QOS_TYPE_RTT_LEVEL, // Level of the RTT.
-        QOS_TYPE_MAX_BUFFER,       // Maximum buffer size (reserved).
-        QOS_TYPE_FIRST_PACKAGE,    // Size of the first packet (reserved).
-        QOS_TYPE_MAX_IDLE_TIMEOUT, // Maximum idle time.
-        QOS_TYPE_TRANS_RELIABILITY,// Transmission reliability (reserved).
+        QOS_TYPE_MIN_BW,            // Minimum bandwidth.
+        QOS_TYPE_MAX_WAIT_TIMEOUT,  // Bind timeout.
+        QOS_TYPE_MIN_LATENCY,       // Minimum connection latency.
+        QOS_TYPE_RTT_LEVEL,         // Round-trip time (RTT) level.
+        QOS_TYPE_MAX_BUFFER,        // Maximum buffer (reserved).
+        QOS_TYPE_FIRST_PACKAGE,     // Size of the first packet (reserved).
+        QOS_TYPE_MAX_IDLE_TIMEOUT,  // Maximum idle time.
+        QOS_TYPE_TRANS_RELIABILITY, // Transmission reliability (reserved).
         QOS_TYPE_BUTT,
     } QosType;
 
@@ -269,56 +276,53 @@ The DSoftBus directory structure is as follows:
     int32_t SendBytes(int32_t socket, const void *data, uint32_t len);
     // Send messages.
     int32_t SendMessage(int32_t socket, const void *data, uint32_t len);
-    // Send streams.
+    // Send a stream.
     int32_t SendStream(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
     // Send a file.
     int32_t SendFile(int32_t socket, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
     ```
 
-5. Shut down the socket.
+4. Shut down a socket.
 
     ```C
-    // Shut down the socket.
+    // Shut down a socket.
     void Shutdown(int32_t socket);
     ```
 
-**4. Device Management**
+### Device Management
 
--   **Choose the Wi-Fi keepalive mode.**
 
-1. Call **ShiftLNNGear** on the DSoftBus client to invoke the server **ShiftLNNGear** through an IPC interface. The policy management module adjusts the keepalive attributes of the long-lived TCP connection based on the policy.
+-   Select Wi-Fi keepalive mode.
 
-    ```C
-    typedef struct {
-        ModeCycle cycle;        // Interval for detecting whether the Wi-Fi connection is alive.
-        ModeDuration duration;  // Heartbeat mode duration.
-        bool wakeupFlag;        // Whether to wake up the peer device.
-        ModeAction action;      // Mode to select.
-    } GearMode;
-    
-    typedef enum {
-        /**< The heartbeat interval is 30 seconds. */
-        HIGH_FREQ_CYCLE = 30,
-        /**< The heartbeat interval is 60 seconds. */
-        MID_FREQ_CYCLE = 60,
-        /**< The heartbeat interval is 5 minutes. */
-        LOW_FREQ_CYCLE = 5 * 60,
-        /**< The heartbeat interval is 10 minutes. */
-        DEFAULT_FREQ_CYCLE = 10 * 60,
-    } ModeCycle;
+Call **ShiftLNNGear** on the DSoftBus client to invoke the server **ShiftLNNGear** through an IPC interface. The policy management module adjusts the **keepalive** property of the TCP persistent connection based on the specified policy.
 
-    // Adjust the keepalive parameters of the long-lived TCP connection based on the policy.
-    int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
-    ```
+```C
+typedef struct {
+    ModeCycle cycle;             // Keepalive probe interval.
+    ModeDuration duration;       // Heartbeat mode duration.
+    bool wakeupFlag;             // Whether the heartbeat signal wakes up the peer device.
+    ModeAction action;           // Action to be taken during the keepalive process.
+} GearMode;
 
-2.  Set **ModeCycle** for the service, which determines the TCP keepalive duration for the device.
+typedef enum {
+    HIGH_FREQ_CYCLE = 30,         // Heartbeat interval 30s.
+    MID_FREQ_CYCLE = 60,          // Heartbeat interval 60s.
+    LOW_FREQ_CYCLE = 5 * 60,      // Heartbeat interval 5 minutes.
+    DEFAULT_FREQ_CYCLE = 10 * 60, // Heartbeat interval 10 minutes.
+} ModeCycle;
 
-    ```C
-    If HIGH_FREQ_CYCLE is used, the TCP keepalive duration is within 40 seconds.
-    If MID_FREQ_CYCLE is used, the actual TCP keepalive duration is within 70 seconds.
-    If LOW_FREQ_CYCLE is used, the TCP keepalive duration is within 315 seconds.
-    If DEFAULT_FREQ_CYCLE is used, the TCP keepalive duration is within 615 seconds.
-    ```
+// Adjust the keepalive parameters of a TCP persistent connection based on the specified gear mode.
+int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+```
+
+The TCP keepalive duration varies, depending on **ModeCycle**.  
+
+```C
+HIGH_FREQ_CYCLE = 30, // The TCP keepalive duration is within 40s.
+MID_FREQ_CYCLE = 60, // The TCP keepalive duration is within 70s.
+LOW_FREQ_CYCLE = 5 x 60, // The TCP keepalive duration is within 315s.
+DEFAULT_FREQ_CYCLE = 10 x 60, // The TCP keepalive duration is within 615s.
+```
 
 ## Repositories Involved
 

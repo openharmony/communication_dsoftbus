@@ -123,7 +123,7 @@ HWTEST_F(LNNOhosAccountTest, LNN_UPDATE_OHOS_ACCOUNT_001, TestSize.Level1)
     NiceMock<LnnOhosAccountInterfaceMock> mocker;
     ON_CALL(mocker, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mocker, SoftBusGenerateStrHash).Times(0);
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     bool ret = LnnIsDefaultOhosAccount();
     EXPECT_FALSE(ret);
 }
@@ -140,7 +140,7 @@ HWTEST_F(LNNOhosAccountTest, LNN_UPDATE_OHOS_ACCOUNT_002, TestSize.Level1)
     ON_CALL(mocker, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
     ON_CALL(mocker, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, UpdateRecoveryDeviceInfoFromDb).Times(0);
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     bool ret = LnnIsDefaultOhosAccount();
     EXPECT_FALSE(ret);
 }

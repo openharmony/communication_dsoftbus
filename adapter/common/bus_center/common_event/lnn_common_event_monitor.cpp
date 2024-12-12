@@ -152,7 +152,7 @@ static void LnnSubscribeCommonEvent(void *para)
     }
     if (subscriberPtr->SubscribeCommonEvent() == SOFTBUS_OK) {
         LNN_LOGI(LNN_EVENT, "subscribe common event success");
-        LnnUpdateOhosAccount(true);
+        LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
         if (!LnnIsDefaultOhosAccount()) {
             LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
         }

@@ -767,20 +767,19 @@ ohos_unittest("LNNSyncInfoManagerTest") {
 
   deps = lnn_mock_test_deps
 
-  deps += [
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
-
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1866,7 +1865,6 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
