@@ -208,6 +208,30 @@ static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
     event->firstTokenName = appInfo->tokenName;
 }
 
+static void TransSetQosInfo(const QosTV *qos, uint32_t qosCount, TransEventExtra *extra)
+{
+    if (qosCount > QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_CTRL, "qos count error, qosCount=%{public}" PRIu32, qosCount);
+        return;
+    }
+
+    for (uint32_t i = 0; i < qosCount; i++) {
+        switch (qos[i].qos) {
+            case QOS_TYPE_MIN_BW:
+                extra->minBW = qos[i].value;
+                break;
+            case QOS_TYPE_MAX_LATENCY:
+                extra->maxLatency = qos[i].value;
+                break;
+            case QOS_TYPE_MIN_LATENCY:
+                extra->minLatency = qos[i].value;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 static bool IsLaneModuleError(int32_t errcode)
 {
     if (errcode >= SOFTBUS_LANE_ERR_BASE && errcode < SOFTBUS_CONN_ERR_BASE) {
@@ -263,6 +287,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TransSetFirstTokenInfo(appInfo, &extra);
+    TransSetQosInfo(param->qos, param->qosCount, &extra);
     extra.sessionId = param->sessionId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {
