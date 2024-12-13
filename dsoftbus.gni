@@ -75,6 +75,11 @@ if (defined(global_parts_info) &&
   dsoftbus_access_token_feature = false
 }
 
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_ipc)) {
+  dsoftbus_ipc_feature = false
+}
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
