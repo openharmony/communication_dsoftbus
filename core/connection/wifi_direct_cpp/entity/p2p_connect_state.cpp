@@ -102,13 +102,8 @@ void P2pConnectState::OnP2pStateChangeEvent(P2pState state)
     }
 }
 
-std::string P2pConnectState::CalculateGcIp(const std::string &remoteMac)
+std::string P2pConnectState::CalculateGcIp(const std::string &goIpAddr)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(!remoteMac.empty(), "", CONN_WIFI_DIRECT, "remote mac is empty");
-    std::string goIpAddr;
-    LinkManager::GetInstance().ProcessIfPresent(remoteMac, [&goIpAddr](InnerLink &link) {
-        goIpAddr = link.GetRemoteIpv4();
-    });
     CONN_CHECK_AND_RETURN_RET_LOGE(!goIpAddr.empty(), "", CONN_WIFI_DIRECT, "go ip is empty");
     auto lastDotPos = goIpAddr.find_last_of('.');
     CONN_CHECK_AND_RETURN_RET_LOGE(
@@ -147,7 +142,7 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
             P2pEntity::GetInstance().Unlock();
             return;
         }
-        localIpStr = CalculateGcIp(groupInfo->groupOwner.address);
+        localIpStr = CalculateGcIp(operation->content_.goIp);
         if (localIpStr.empty()) {
             CONN_LOGE(CONN_WIFI_DIRECT, "gc ip is empty");
             P2pEntity::GetInstance().Unlock();
