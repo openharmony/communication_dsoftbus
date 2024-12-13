@@ -1207,9 +1207,10 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     }
     char *anonyUdid = NULL;
     Anonymize(authFsm->info.udid, &anonyUdid);
-    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), authFsm->info.userId);
     AnonymizeFree(anonyUdid);
-    return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid);
+    return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid, authFsm->info.userId);
 }
 
 static void DeviceAuthStateEnter(FsmStateMachine *fsm)

@@ -829,6 +829,13 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
     return SOFTBUS_OK;
 }
 
+static void PackUserId(JsonObj *json, int32_t userId)
+{
+    if (!JSON_AddInt32ToObject(json, USERID, userId)) {
+        AUTH_LOGW(AUTH_FSM, "pack userId fail");
+    }
+}
+
 char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is NULL");
@@ -869,6 +876,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info)
     }
     PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info);
+    PackUserId(obj, nodeInfo->userId);
     if (PackNormalizedData(info, obj, nodeInfo) != SOFTBUS_OK) {
         JSON_Delete(obj);
         return NULL;
@@ -1094,6 +1102,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
     UnpackFastAuth(obj, info);
     UnpackNormalizedKey(obj, info, isSupportNormalizedKey);
     OptBool(obj, IS_NEED_PACK_CERT, &info->isNeedPackCert, false);
+    OptInt(obj, USERID, &info->userId, 0);
     JSON_Delete(obj);
     return SOFTBUS_OK;
 }
