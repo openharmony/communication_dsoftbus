@@ -72,6 +72,12 @@ typedef enum {
 } SessionEnableStatus;
 
 typedef struct {
+    QoSEvent event;
+    QosTV qos[QOS_TYPE_BUTT];
+    uint32_t count;
+} CachedQosEvent;
+
+typedef struct {
     ListNode node;
     int32_t sessionId;
     int32_t channelId;
@@ -98,6 +104,7 @@ typedef struct {
     SocketLifecycleData lifecycle;
     uint32_t actionId;
     int32_t osType;
+    CachedQosEvent cachedQosEvent;
 } SessionInfo;
 
 typedef struct {
@@ -293,6 +300,10 @@ int32_t ClientCancelAuthSessionTimer(int32_t sessionId);
 int32_t ClientSetStatusClosingBySocket(int32_t socket, bool isClosing);
 
 int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
+
+int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count);
+
+int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent);
 #ifdef __cplusplus
 }
 #endif

@@ -52,19 +52,24 @@ ohos_unittest("BusCenterDecisionTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }

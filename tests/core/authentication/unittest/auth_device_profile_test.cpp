@@ -50,9 +50,10 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     AUTH_LOGI(AUTH_TEST, "deviceBound success!");
 }
 
-static void OnDeviceNotTrusted(const char *udid)
+static void OnDeviceNotTrusted(const char *udid, int32_t localUserId)
 {
     (void)udid;
+    (void)localUserId;
     AUTH_LOGI(AUTH_TEST, "device is not trusted!");
 }
 

@@ -15,7 +15,6 @@ import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
-import("../../../../utils/utils.gni")
 
 module_output_path = "dsoftbus/discovery"
 
@@ -38,7 +37,7 @@ ohos_unittest("DiscManagerTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
   ]
 
   external_deps = [
@@ -56,7 +55,6 @@ ohos_unittest("DiscManagerMockTest") {
     "coap_mock.cpp",
     "disc_manager_mock_test.cpp",
   ]
-  sources += test_utils_src
 
   include_dirs = [
     "$softbus_adapter_common/include",
@@ -70,7 +68,6 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
-  include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",

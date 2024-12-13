@@ -24,3 +24,9 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
     (void)isRelay;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+{
+    (void)msgPara;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

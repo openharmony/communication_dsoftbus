@@ -89,7 +89,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         AUTH_LOGE(AUTH_INIT, "no match peer user");
         return SOFTBUS_OK;
     }
-    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str());
+    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");
     return SOFTBUS_OK;
 }
@@ -132,7 +132,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
     Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     int32_t userId = profile.GetPeerUserId();
     AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);

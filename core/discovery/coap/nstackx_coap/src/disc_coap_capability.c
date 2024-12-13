@@ -62,12 +62,10 @@ void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettin
 }
 
 int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb)
+    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(nstackxInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nstackx devInfo is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(devInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "devInfo is NULL");
-    DISC_CHECK_AND_RETURN_RET_LOGE(discCb != NULL && discCb->OnDeviceFound != NULL,
-        SOFTBUS_INVALID_PARAM, DISC_COAP, "discCb is NULL");
 
     InnerDeviceInfoAddtions additions = {
         .medium = COAP,
@@ -88,7 +86,15 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
         AnonymizeFree(anonymizedName);
         AnonymizeFree(anonymizedId);
         AnonymizeFree(anonymizedIp);
+        DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(discCbLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+            DISC_COAP, "lock failed");
+        if (discCb == NULL || discCb->OnDeviceFound == NULL) {
+            DISC_LOGW(DISC_COAP, "discCb is NULL");
+            (void)SoftBusMutexUnlock(discCbLock);
+            return SOFTBUS_INVALID_PARAM;
+        }
         discCb->OnDeviceFound(devInfo, &additions);
+        (void)SoftBusMutexUnlock(discCbLock);
         return SOFTBUS_OK;
     }
 

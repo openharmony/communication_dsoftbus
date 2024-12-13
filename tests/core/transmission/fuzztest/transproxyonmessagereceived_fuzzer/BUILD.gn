@@ -48,7 +48,10 @@ ohos_fuzztest("TransProxyOnMessageReceivedFuzzTest") {
     "$dsoftbus_core_path/frame:softbus_server",
   ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+  ]
 }
 
 group("fuzztest") {

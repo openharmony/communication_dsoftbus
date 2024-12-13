@@ -685,7 +685,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
 }
 
 static void TransBuildLaneAllocFailEvent(
-    TransEventExtra *extra, TransInfo *transInfo, AppInfo *appInfo, SessionParam *param, int32_t reason)
+    TransEventExtra *extra, TransInfo *transInfo, const AppInfo *appInfo, const SessionParam *param, int32_t reason)
 {
     extra->peerUdid = appInfo->peerUdid;
     extra->peerDevVer = appInfo->peerVersion;
@@ -860,6 +860,7 @@ static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_BLE_DIRECT,
     LANE_COC,
     LANE_COC_DIRECT,
+    LANE_HML,
 };
 static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 {

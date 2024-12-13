@@ -36,6 +36,8 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
 
 int32_t TransTdcStopSessionListener(ListenerModule module);
 
+void CloseTcpDirectFd(int32_t fd);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

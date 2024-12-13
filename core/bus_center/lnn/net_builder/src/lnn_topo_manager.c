@@ -369,7 +369,7 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
     } else {
         if (IsSameRelation(topoInfo->relation, relation, len)) {
             LNN_LOGE(LNN_BUILDER, "relation are same");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_SAME_RELATION;
         }
         if (memcpy_s(topoInfo->relation, CONNECTION_ADDR_MAX, relation, len) != EOK) {
             LNN_LOGE(LNN_BUILDER, "memcpy topo info relation fail");
@@ -611,7 +611,7 @@ static int32_t FillAllRelation(LnnRelation *relation, uint32_t relationNum)
         }
     }
     if (index != relationNum) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_NUM;
     }
     return SOFTBUS_OK;
 }

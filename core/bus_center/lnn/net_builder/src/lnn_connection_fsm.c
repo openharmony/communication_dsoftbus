@@ -1143,6 +1143,7 @@ static void FilterRetrieveDeviceInfo(NodeInfo *info)
 {
     info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_CLIENT_SIDE] = 0;
     info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_SERVER_SIDE] = 0;
+    info->AuthTypeValue = 0;
 }
 
 static int32_t LnnRecoveryBroadcastKey()
@@ -1251,7 +1252,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     rc = AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
-        CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
+        CompleteJoinLNN(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
     } else {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
         rc = SOFTBUS_OK;
@@ -1299,7 +1300,7 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
     return SOFTBUS_OK;
 }
 
-static bool IsSupportBrDupBle(uint32_t feature, AuthCapability capaBit)
+static bool IsSupportFeatureByCapability(uint32_t feature, AuthCapability capaBit)
 {
     return ((feature & (1 << (uint32_t)capaBit)) != 0);
 }
@@ -1321,43 +1322,49 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
     return IsBasicNodeInfoChanged(&oldNodeInfo, newNodeInfo, false);
 }
 
-static void ProcessBleOnline(const LnnConntionInfo *connInfo)
+int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability)
 {
-    NodeInfo remoteInfo;
-    if (!IsSupportBrDupBle(connInfo->nodeInfo->authCapacity, BIT_SUPPORT_BR_DUP_BLE)) {
-        LNN_LOGI(LNN_BUILDER, "remote not support br dup ble, no need to go online");
-        return;
+    if (nodeInfo == NULL || connAddr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo or connAddr is null");
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
+
+    NodeInfo remoteInfo;
+    if (!IsSupportFeatureByCapability(nodeInfo->authCapacity, authCapability)) {
+        LNN_LOGI(LNN_BUILDER, "remote not support , no need to go online");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    if (LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
         &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE) &&
-        !CheckRemoteBasicInfoChanged(connInfo->nodeInfo)) {
+        !CheckRemoteBasicInfoChanged(nodeInfo)) {
         LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
-        return;
+        return SOFTBUS_OK;
     }
     ConnectionAddr addr;
     uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     addr.type = CONNECTION_ADDR_BLE;
-    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connInfo->addr.info.br.brMac,
+    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac,
         BT_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
-        return;
+        return SOFTBUS_MEM_ERR;
     }
-    if (SoftBusGenerateStrHash((uint8_t *)connInfo->nodeInfo->deviceInfo.deviceUdid,
-        strlen(connInfo->nodeInfo->deviceInfo.deviceUdid), hash) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), hash) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "generate udid short hash fail.");
-        return;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     if (memcpy_s(addr.info.ble.udidHash, UDID_HASH_LEN, hash, SHORT_UDID_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_BUILDER, "memcpy udid hash fail");
-        return;
+        return SOFTBUS_MEM_ERR;
     }
-    if (JoinLnnWithNodeInfo(&addr, connInfo->nodeInfo) == SOFTBUS_OK) {
+    int32_t rc = JoinLnnWithNodeInfo(&addr, nodeInfo);
+    if (rc == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "join with node info success");
     } else {
         LNN_LOGE(LNN_BUILDER, "join with node info fail");
     }
-    return;
+    return rc;
 }
 
 static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
@@ -1381,7 +1388,7 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
             "[id=%{public}u] auth passed, authId=%{public}" PRId64, connFsm->id, connInfo->authHandle.authId);
         (void)LnnFillConnInfo(connInfo);
         if (connInfo->addr.type == CONNECTION_ADDR_BR && connInfo->nodeInfo != NULL) {
-            ProcessBleOnline(connInfo);
+            (void)ProcessBleOnline(connInfo->nodeInfo, &(connInfo->addr), BIT_SUPPORT_BR_DUP_BLE);
         }
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);

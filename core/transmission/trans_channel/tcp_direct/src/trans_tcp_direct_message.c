@@ -41,12 +41,14 @@
 #include "softbus_tcp_socket.h"
 #include "trans_bind_request_manager.h"
 #include "trans_channel_common.h"
+#include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "trans_tcp_direct_listener.h"
 #include "wifi_direct_manager.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
@@ -900,7 +902,6 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
     OpenDataBusRequestOutSessionName(appInfo->myData.sessionName, appInfo->peerData.sessionName);
     TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
         appInfo->myData.pid, appInfo->peerData.pid);
-
     errCode = NotifyChannelOpened(channelId);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Notify SDK Channel Opened Failed");
@@ -968,28 +969,10 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
             TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
         }
         (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
-        ReleaseSessionConn(conn);
-        return errCode;
-    }
-
-    if (conn->appInfo.fastTransDataSize > 0 && conn->appInfo.fastTransData != NULL) {
-        NotifyFastDataRecv(conn, channelId);
-    }
-
-    errCode = HandleDataBusReply(conn, channelId, &extra, flags, seq);
-    if (errCode != SOFTBUS_OK) {
-        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         (void)TransDelTcpChannelInfoByChannelId(channelId);
+        TransDelSessionConnById(channelId);
         ReleaseSessionConn(conn);
-        return errCode;
     }
-
-    errCode = NotifyChannelBind(channelId);
-    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
-    if (errCode != SOFTBUS_OK) {
-        (void)TransDelTcpChannelInfoByChannelId(channelId);
-    }
-    ReleaseSessionConn(conn);
     return errCode;
 }
 
@@ -1406,4 +1389,149 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
     SoftBusFree(dataBuffer);
 
     return TransTdcSrvProcData(module, channelId, type);
+}
+
+static int32_t TransSrvGetSeqAndFlagsByChannelId(uint64_t *seq, uint32_t *flags, int32_t channelId)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_tcpSrvDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is null");
+
+    int32_t ret = SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    if (node == NULL || node->data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "node is null.");
+        (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_TRANS_NODE_IS_NULL;
+    }
+    TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
+    *seq = pktHead->seq;
+    *flags = pktHead->flags;
+    TRANS_LOGI(TRANS_CTRL, "flags=%{public}d, seq=%{public}" PRIu64, *flags, *seq);
+    (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+    return SOFTBUS_OK;
+}
+
+static void TransCleanTdcSource(int32_t channelId)
+{
+    (void)TransDelTcpChannelInfoByChannelId(channelId);
+    TransDelSessionConnById(channelId);
+    TransSrvDelDataBufNode(channelId);
+}
+
+static void TransProcessAsyncOpenTdcChannelFailed(
+    SessionConn *conn, int32_t openResult, uint64_t seq, uint32_t flags)
+{
+    char errDesc[MAX_ERRDESC_LEN] = { 0 };
+    char *desc = (char *)"Tdc channel open failed";
+    if (strcpy_s(errDesc, MAX_ERRDESC_LEN, desc) != EOK) {
+        TRANS_LOGW(TRANS_CTRL, "strcpy failed");
+    }
+    if (OpenDataBusRequestError(conn->channelId, seq, errDesc, openResult, flags) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
+    }
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    TransCleanTdcSource(conn->channelId);
+    CloseTcpDirectFd(conn->appInfo.fd);
+}
+
+int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
+{
+    SessionConn conn;
+    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
+    int32_t ret = GetSessionConnById(channelId, &conn);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = TransTdcUpdateReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    uint32_t flags = 0;
+    uint64_t seq = 0;
+    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
+    if (openResult != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Tdc channel open failed, openResult=%{public}d", openResult);
+        TransProcessAsyncOpenTdcChannelFailed(&conn, openResult, seq, flags);
+        return SOFTBUS_OK;
+    }
+    if (conn.appInfo.fastTransDataSize > 0 && conn.appInfo.fastTransData != NULL) {
+        NotifyFastDataRecv(&conn, channelId);
+    }
+    ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
+    CloseTcpDirectFd(conn.appInfo.fd);
+    if (ret != SOFTBUS_OK) {
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        goto ERR_EXIT;
+    }
+    ret = NotifyChannelBind(channelId);
+    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    if (ret != SOFTBUS_OK) {
+        goto ERR_EXIT;
+    }
+    TransCleanTdcSource(channelId);
+    return SOFTBUS_OK;
+ERR_EXIT:
+    TransCleanTdcSource(channelId);
+    return ret;
+}
+
+void TransAsyncTcpDirectChannelTask(int32_t channelId)
+{
+    int32_t curCount = 0;
+    int32_t ret = TransCheckTdcChannelOpenStatus(channelId, &curCount);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "check tdc channel statue failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return;
+    }
+    if (curCount == CHANNEL_OPEN_SUCCESS) {
+        TRANS_LOGI(TRANS_CTRL, "Open tdc channel success, channelId=%{public}d", channelId);
+        return;
+    }
+    SessionConn connInfo;
+    (void)memset_s(&connInfo, sizeof(SessionConn), 0, sizeof(SessionConn));
+    ret = GetSessionConnById(channelId, &connInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get session conn by channelId=%{public}d failed, ret=%{public}d", channelId, ret);
+        return;
+    }
+    if (curCount >= LOOPER_REPLY_CNT_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "Open Tdc channel timeout, channelId=%{public}d", channelId);
+        uint32_t flags = 0;
+        uint64_t seq = 0;
+        ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+        if (ret != SOFTBUS_OK) {
+            CloseTcpDirectFd(connInfo.appInfo.fd);
+            TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+            return;
+        }
+        char errDesc[MAX_ERRDESC_LEN] = { 0 };
+        char *desc = (char *)"Open tdc channel time out!";
+        if (strcpy_s(errDesc, MAX_ERRDESC_LEN, desc) != EOK) {
+            TRANS_LOGW(TRANS_CTRL, "strcpy failed");
+        }
+        if (OpenDataBusRequestError(
+            channelId, seq, errDesc, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, flags) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
+        }
+        (void)memset_s(
+            connInfo.appInfo.sessionKey, sizeof(connInfo.appInfo.sessionKey), 0, sizeof(connInfo.appInfo.sessionKey));
+        (void)NotifyChannelClosed(&connInfo.appInfo, channelId);
+        TransCleanTdcSource(channelId);
+        CloseTcpDirectFd(connInfo.appInfo.fd);
+        return;
+    }
+    TRANS_LOGI(TRANS_CTRL, "Open channelId=%{public}d not finished, generate new task and waiting", channelId);
+    uint32_t delayTime = (curCount <= LOOPER_SEPARATE_CNT) ? FAST_INTERVAL_MILLISECOND : SLOW_INTERVAL_MILLISECOND;
+    TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_TCP_DIRECT, delayTime);
 }

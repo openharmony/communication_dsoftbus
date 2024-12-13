@@ -74,15 +74,15 @@ static BindRequestManager *GetBindRequestManagerByPeer(BindRequestParam *bindReq
 }
 
 static uint32_t GenerateParam(
-    const char *mySocketName, const char *peerSocketName, const char *peerNetworkId, BindRequestParam *bindRequestParam)
+    const char *mySocketName, const char *peerSocketName, const char *peerNetworkId, BindRequestParam *bindReqParam)
 {
-    int32_t ret = memcpy_s(bindRequestParam->mySocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
+    int32_t ret = memcpy_s(bindReqParam->mySocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy mySocketName failed");
 
-    ret = memcpy_s(bindRequestParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerNetworkId, SESSION_NAME_SIZE_MAX);
+    ret = memcpy_s(bindReqParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerNetworkId, SESSION_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerSocketName failed");
 
-    ret = memcpy_s(bindRequestParam->peerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
+    ret = memcpy_s(bindReqParam->peerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerNetworkId failed");
     return SOFTBUS_OK;
 }
@@ -95,11 +95,27 @@ static BindRequestManager *CreateBindRequestManager(
     bindRequest->bindDeniedFlag = false;
     bindRequest->count = 0;
     int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, TRANS_SVC, "genarate param failed");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "genarate param failed");
+        SoftBusFree(bindRequest);
+        return NULL;
+    }
     ListInit(&bindRequest->node);
     ListInit(&bindRequest->timestampList);
     ListAdd(&g_bindRequestList->list, &bindRequest->node);
     return bindRequest;
+}
+
+static void FreeBindRequestMessage(SoftBusMessage *msg)
+{
+    if (msg == NULL) {
+        return;
+    }
+    if (msg->obj != NULL) {
+        SoftBusFree(msg->obj);
+        msg->obj = NULL;
+    }
+    SoftBusFree(msg);
 }
 
 static void TransBindRequestMsgToLooper(
@@ -111,7 +127,16 @@ static void TransBindRequestMsgToLooper(
     msg->arg1 = param1;
     msg->arg2 = param2;
     msg->handler = &g_transLoopHandler;
-    msg->obj = (void *)data;
+
+    BindRequestParam *param = (BindRequestParam *)SoftBusCalloc(sizeof(BindRequestParam));
+    if (param == NULL) {
+        TRANS_LOGE(TRANS_SVC, "malloc failed");
+        SoftBusFree(msg);
+        return;
+    }
+    (void)GenerateParam(data->mySocketName, data->peerSocketName, data->peerNetworkId, param);
+    msg->obj = (void *)param;
+    msg->FreeMessage = FreeBindRequestMessage;
 
     if (delayMillis == 0) {
         g_transLoopHandler.looper->PostMessage(g_transLoopHandler.looper, msg);
@@ -120,82 +145,82 @@ static void TransBindRequestMsgToLooper(
     }
 }
 
+static void SendMsgToLooper(BindRequestParam *bindRequestParam, uint64_t timestamp, int32_t count)
+{
+    TransBindRequestMsgToLooper(
+        LOOP_DELETE_TIMESTAMP, timestamp, 0, bindRequestParam, DDOS_DETECTION_PERIOD_MS);
+    if (count >= BIND_FAILED_COUNT_MAX) {
+        TransBindRequestMsgToLooper(
+            LOOP_RESET_BIND_DENIED_FLAG, 0, 0, bindRequestParam, BIND_PROTECT_PERIOD_MS);
+    }
+}
+
 int32_t TransAddTimestampToList(
     const char *mySocketName, const char *peerSocketName, const char *peerNetworkId, uint64_t timestamp)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_bindRequestList != NULL, SOFTBUS_NO_INIT, TRANS_SVC, "bind request list no init");
-    BindRequestParam *bindRequestParam = (BindRequestParam *)SoftBusCalloc(sizeof(BindRequestParam));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(bindRequestParam != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "malloc failed");
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, bindRequestParam);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "genarate param failed");
-        goto ERR_EXIT;
+    if (mySocketName == NULL || peerSocketName == NULL || peerNetworkId == NULL || g_bindRequestList == NULL) {
+        return SOFTBUS_INVALID_PARAM;
     }
-
+    BindRequestParam bindRequestParam = { {0} };
+    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "genarate param failed");
     ret = SoftBusMutexLock(&g_bindRequestList->lock);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed");
-        goto ERR_EXIT;
-    }
-    BindRequestManager *bindRequest = GetBindRequestManagerByPeer(bindRequestParam);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed");
+
+    BindRequestManager *bindRequest = GetBindRequestManagerByPeer(&bindRequestParam);
     if (bindRequest == NULL) {
         bindRequest = CreateBindRequestManager(mySocketName, peerSocketName, peerNetworkId);
         if (bindRequest == NULL) {
-            TRANS_LOGE(TRANS_SVC, "malloc failed");
+            TRANS_LOGE(TRANS_SVC, "create request manager failed");
             (void)SoftBusMutexUnlock(&g_bindRequestList->lock);
-            goto ERR_EXIT;
+            return SOFTBUS_MALLOC_ERR;
         }
     }
-
     BindFailInfo *bindFailInfo = (BindFailInfo *)SoftBusCalloc(sizeof(BindFailInfo));
     if (bindFailInfo == NULL) {
         TRANS_LOGE(TRANS_SVC, "malloc failed");
         (void)SoftBusMutexUnlock(&g_bindRequestList->lock);
-        goto ERR_EXIT;
+        return SOFTBUS_MALLOC_ERR;
     }
+
     bindFailInfo->timestamp = timestamp;
     ListInit(&bindFailInfo->node);
     ListAdd(&bindRequest->timestampList, &bindFailInfo->node);
     bindRequest->count++;
-    TRANS_LOGI(TRANS_SVC, "add timestamp to list success, timestamp=%{public}" PRId64, timestamp);
-
-    TransBindRequestMsgToLooper(LOOP_DELETE_TIMESTAMP, timestamp, 0, &bindRequest->bindRequestParam,
-        DDOS_DETECTION_PERIOD_MS);
-    if (bindRequest->count >= BIND_FAILED_COUNT_MAX) {
+    int32_t count = bindRequest->count;
+    if (count >= BIND_FAILED_COUNT_MAX) {
         bindRequest->bindDeniedFlag = true;
-        TransBindRequestMsgToLooper(LOOP_RESET_BIND_DENIED_FLAG, 0, 0, &bindRequest->bindRequestParam,
-            BIND_PROTECT_PERIOD_MS);
     }
+    TRANS_LOGI(TRANS_SVC, "add timestamp to list success, count=%{public}d, timestamp=%{public}" PRId64,
+        count, timestamp);
     (void)SoftBusMutexUnlock(&g_bindRequestList->lock);
-    SoftBusFree(bindRequestParam);
+    SendMsgToLooper(&bindRequestParam, timestamp, count);
     return SOFTBUS_OK;
-
-ERR_EXIT:
-    TRANS_LOGE(TRANS_SVC, "add timestamp to list failed, timestamp=%{public}" PRId64, timestamp);
-    SoftBusFree(bindRequestParam);
-    return SOFTBUS_MALLOC_ERR;
 }
 
 static void TransDelTimestampFormList(BindRequestParam *bindRequestParam, uint64_t timestamp)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(bindRequestParam != NULL, TRANS_SVC, "bindRequestParam is null");
     TRANS_CHECK_AND_RETURN_LOGE(g_bindRequestList != NULL, TRANS_SVC, "bind request list no init");
     int32_t ret = SoftBusMutexLock(&g_bindRequestList->lock);
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "lock bind request list failed");
 
     BindRequestManager *bindRequest = GetBindRequestManagerByPeer(bindRequestParam);
-    BindFailInfo *failItem = NULL;
-    BindFailInfo *failNext = NULL;
     if (bindRequest != NULL) {
-        LIST_FOR_EACH_ENTRY_SAFE(failItem, failNext, &bindRequest->timestampList, BindFailInfo, node)
-        {
+        BindFailInfo *failItem = NULL;
+        BindFailInfo *failNext = NULL;
+        LIST_FOR_EACH_ENTRY_SAFE(failItem, failNext, &bindRequest->timestampList, BindFailInfo, node) {
             if (failItem->timestamp == timestamp) {
                 ListDelete(&failItem->node);
                 SoftBusFree(failItem);
                 bindRequest->count--;
-                TRANS_LOGI(TRANS_SVC, "delete timestamp form list success, timestamp=%{public}" PRId64, timestamp);
+                TRANS_LOGI(TRANS_SVC, "del timestamp form list success, count=%{public}d, timestamp=%{public}" PRId64,
+                    bindRequest->count, timestamp);
                 break;
             }
+        }
+        if (bindRequest->count == 0) {
+            ListDelete(&bindRequest->node);
+            SoftBusFree(bindRequest);
         }
     }
     (void)SoftBusMutexUnlock(&g_bindRequestList->lock);
@@ -203,30 +228,33 @@ static void TransDelTimestampFormList(BindRequestParam *bindRequestParam, uint64
 
 bool GetDeniedFlagByPeer(const char *mySocketName, const char *peerSocketName, const char *peerNetworkId)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE((mySocketName != NULL && peerSocketName != NULL && peerNetworkId != NULL), false,
-        TRANS_SVC, "mySocketName or peerSocketName or peerNetworkId is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_bindRequestList != NULL, false, TRANS_SVC, "bind request list no init");
-
-    BindRequestParam *bindRequestParam = (BindRequestParam *)SoftBusCalloc(sizeof(BindRequestParam));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(bindRequestParam != NULL, false, TRANS_SVC, "malloc failed");
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, bindRequestParam);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, TRANS_SVC, "genarate param failed");
-    ret = SoftBusMutexLock(&g_bindRequestList->lock);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, TRANS_SVC, "lock bind request list failed");
+    if (mySocketName == NULL || peerSocketName == NULL || peerNetworkId == NULL || g_bindRequestList == NULL) {
+        return false;
+    }
 
     bool flag = false;
-    BindRequestManager *bindRequest = GetBindRequestManagerByPeer(bindRequestParam);
+    BindRequestParam bindRequestParam = { {0} };
+    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "genarate param failed");
+        return flag;
+    }
+    ret = SoftBusMutexLock(&g_bindRequestList->lock);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock bind request list failed");
+        return flag;
+    }
+
+    BindRequestManager *bindRequest = GetBindRequestManagerByPeer(&bindRequestParam);
     if (bindRequest != NULL) {
         flag = bindRequest->bindDeniedFlag;
     }
     (void)SoftBusMutexUnlock(&g_bindRequestList->lock);
-    SoftBusFree(bindRequestParam);
     return flag;
 }
 
 static void TransResetBindDeniedFlag(BindRequestParam *bindRequestParam)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(bindRequestParam != NULL, TRANS_SVC, "bindRequestParam is null");
     TRANS_CHECK_AND_RETURN_LOGE(g_bindRequestList != NULL, TRANS_SVC, "bind request list no init");
     int32_t ret = SoftBusMutexLock(&g_bindRequestList->lock);
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "lock bind request list failed");
@@ -241,7 +269,6 @@ static void TransResetBindDeniedFlag(BindRequestParam *bindRequestParam)
 
 static void TransBindRequestLoopMsgHandler(SoftBusMessage *msg)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
     TRANS_LOGD(TRANS_SVC, "trans loop process msgType=%{public}d", msg->what);
     BindRequestParam *bindRequestParam = (BindRequestParam *)msg->obj;
     switch (msg->what) {
@@ -297,10 +324,8 @@ void TransBindRequestManagerDeinit(void)
     BindRequestManager *bindReqNext = NULL;
     BindFailInfo *bindFailItem = NULL;
     BindFailInfo *bindFailNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(bindReqItem, bindReqNext, &g_bindRequestList->list, BindRequestManager, node)
-    {
-        LIST_FOR_EACH_ENTRY_SAFE(bindFailItem, bindFailNext, &bindReqItem->timestampList, BindFailInfo, node)
-        {
+    LIST_FOR_EACH_ENTRY_SAFE(bindReqItem, bindReqNext, &g_bindRequestList->list, BindRequestManager, node) {
+        LIST_FOR_EACH_ENTRY_SAFE(bindFailItem, bindFailNext, &bindReqItem->timestampList, BindFailInfo, node) {
             ListDelete(&bindFailItem->node);
             SoftBusFree(bindFailItem);
         }

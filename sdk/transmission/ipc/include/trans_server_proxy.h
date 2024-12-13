@@ -42,6 +42,7 @@ int32_t ServerIpcReleaseResources(int32_t channelId);
 int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data);
 int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data);
 int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount);
+int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len);
 #ifdef __cplusplus
 }
 #endif

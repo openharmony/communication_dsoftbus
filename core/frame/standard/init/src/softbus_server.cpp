@@ -427,4 +427,9 @@ int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType data
     ConvertQosInfo(qos, qosCount, &qosInfo);
     return LnnQueryLaneResource(&info, &qosInfo);
 }
+
+int32_t SoftBusServer::ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    return TransProcessInnerEvent(eventType, buf, len);
+}
 } // namespace OHOS

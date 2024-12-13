@@ -27,19 +27,19 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     uint32_t addrSize;
     ReadUint32(data, &addrSize);
     if (addrSize != sizeof(ConnectionAddr)) {
         LNN_LOGE(LNN_EVENT, "read addr failed. addrSize=%{public}d", addrSize);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     void *addr = (void *)ReadBuffer(data, addrSize);
     if (addr == NULL) {
         LNN_LOGE(LNN_EVENT, "read addr failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t retCode = 0;
     ReadInt32(data, &retCode);
@@ -49,13 +49,13 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
         networkId = (const char *)ReadString(data, &networkIdLen);
         if (networkId == NULL) {
             LNN_LOGE(LNN_EVENT, "read networkId failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_READCSTRING_FAILED;
         }
     }
     int32_t retReply = LnnOnJoinResult(addr, networkId, retCode);
     if (retReply != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "LnnOnJoinResult failed");
-        return SOFTBUS_ERR;
+        return retReply;
     }
     return SOFTBUS_OK;
 }
@@ -71,20 +71,20 @@ int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     size_t networkIdLen;
     const char *networkId = (const char *)ReadString(data, &networkIdLen);
     if (networkId == NULL) {
         LNN_LOGE(LNN_EVENT, "read networkId failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
     }
     int32_t retCode = 0;
     ReadInt32(data, &retCode);
     int32_t retReply = LnnOnLeaveResult(networkId, retCode);
     if (retReply != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "LnnOnLeaveResult failed");
-        return SOFTBUS_ERR;
+        return retReply;
     }
     return SOFTBUS_OK;
 }
@@ -100,7 +100,7 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
 {
     if (data== NULL) {
         LNN_LOGE(LNN_EVENT, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     bool isOnline;
     ReadBool(data, &isOnline);
@@ -109,17 +109,17 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
     if (infoSize != sizeof(NodeBasicInfo)) {
         LNN_LOGE(LNN_EVENT,
             "read basic info failed. infoSize=%{public}d", infoSize);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "read basic info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     int32_t retReply = LnnOnNodeOnlineStateChanged("", isOnline, info);
     if (retReply != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "LnnOnNodeOnlineStateChanged failed");
-        return SOFTBUS_ERR;
+        return retReply;
     }
     return SOFTBUS_OK;
 }
@@ -128,7 +128,7 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t type = 0;
@@ -138,18 +138,18 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
     if (infoSize != sizeof(NodeBasicInfo)) {
         LNN_LOGE(LNN_EVENT,
             "read basic info failed. infoSize=%{public}d", infoSize);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "read basic info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     int32_t retReply = LnnOnNodeBasicInfoChanged("", info, type);
     if (retReply != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT,
             "LnnOnNodeBasicInfoChanged failed");
-        return SOFTBUS_ERR;
+        return retReply;
     }
     return SOFTBUS_OK;
 }
@@ -158,19 +158,19 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(TimeSyncResultInfo)) {
         LNN_LOGE(LNN_EVENT, "read info failed. infoSize=%{public}d", infoSize);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "read info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     int32_t retCode = 0;
     ReadInt32(data, &retCode);
@@ -178,7 +178,7 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
     int32_t retReply = LnnOnTimeSyncResult(info, retCode);
     if (retReply != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "LnnOnTimeSyncResult failed");
-        return SOFTBUS_ERR;
+        return retReply;
     }
     return SOFTBUS_OK;
 }

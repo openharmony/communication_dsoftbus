@@ -58,6 +58,7 @@ public:
     virtual int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count) = 0;
     virtual void DeleteNodeFromPcRestrictMap(const char *udidHash) = 0;
     virtual int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen) = 0;
+    virtual void LnnDeleteLinkFinderInfo(const char *peerUdid) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -84,6 +85,7 @@ public:
     MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t (const char *, uint32_t *));
     MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void (const char *));
     MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t (int32_t, const char *, uint32_t));
+    MOCK_METHOD1(LnnDeleteLinkFinderInfo, void (const char *));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

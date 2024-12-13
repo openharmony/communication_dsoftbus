@@ -57,6 +57,7 @@ ohos_unittest("TransUdpNegoTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
@@ -155,6 +156,7 @@ ohos_unittest("TransUdpStaticTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "hilog:libhilog",
     ]
   }
@@ -190,6 +192,7 @@ ohos_unittest("TransUdpManagerTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 

@@ -26,6 +26,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define LOOPER_SEPARATE_CNT 10
+#define LOOPER_REPLY_CNT_MAX 38
+#define CHANNEL_OPEN_SUCCESS 100
+#define FAST_INTERVAL_MILLISECOND 100
+#define SLOW_INTERVAL_MILLISECOND 500
+
 int32_t GenerateChannelId(bool isTdcChannel);
 
 int32_t TransChannelInit(void);
@@ -69,6 +75,14 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
 void ReleaseProxyChannelId(int32_t channelId);
 
 int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
+
+void TransCheckChannelOpenToLooperDelay(int32_t channelId, int32_t channelType, uint32_t delayTime);
+
+int32_t TransChannelResultLoopInit(void);
+
+int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len);
+
+void TransAsyncChannelOpenTaskManager(int32_t channelId, int32_t channelType);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

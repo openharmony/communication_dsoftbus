@@ -332,6 +332,31 @@ static int32_t ProcessVerifyResult(const void *para)
     return rc;
 }
 
+static int32_t JudgingBleState(uint32_t remote)
+{
+    uint32_t local;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local num info failed");
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
+    }
+    if (((local & (1 << BIT_BLE)) == 0) || ((remote & (1 << BIT_BLE)) == 0)) {
+        LNN_LOGE(LNN_BUILDER, "can't support BLE, loal=%{public}u, remote=%{public}u", local, remote);
+        return SOFTBUS_BLUETOOTH_OFF;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ProcessEnhancedP2pDupBle(const DeviceVerifyPassMsgPara *msgPara)
+{
+    if (JudgingBleState(msgPara->nodeInfo->netCapacity) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "can't support BLE");
+        return SOFTBUS_BLUETOOTH_OFF;
+    }
+
+    return ProcessBleOnline(msgPara->nodeInfo, &(msgPara->addr), BIT_SUPPORT_ENHANCEDP2P_DUP_BLE);
+}
+
 static int32_t ProcessDeviceVerifyPass(const void *para)
 {
     int32_t rc;
@@ -348,6 +373,16 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        LNN_LOGI(LNN_BUILDER, "auth type is enhanced p2p, start dup ble");
+        rc = ProcessEnhancedP2pDupBle(msgPara);
+        if (msgPara->nodeInfo != NULL) {
+            SoftBusFree((void *)msgPara->nodeInfo);
+        }
+        SoftBusFree((void *)msgPara);
+        return rc;
+    }
+
     do {
         connFsm = FindConnectionFsmByAuthHandle(&msgPara->authHandle);
         if (connFsm == NULL || connFsm->isDead) {
@@ -359,7 +394,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
             break;
         }
         msgPara->nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(msgPara->addr.type);
-        if (LnnUpdateNodeInfo(msgPara->nodeInfo) != SOFTBUS_OK) {
+        if (LnnUpdateNodeInfo(msgPara->nodeInfo, msgPara->addr.type) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LnnUpdateNodeInfo failed");
         }
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm exist, ignore VerifyPass authId=%{public}" PRId64,
@@ -461,7 +496,7 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
         }
     }
     if (rc != SOFTBUS_OK) {
-        LnnNotifyLeaveResult(networkId, SOFTBUS_ERR);
+        LnnNotifyLeaveResult(networkId, SOFTBUS_NETWORK_REQ_LEAVE_LNN_FAIL);
     }
     SoftBusFree((void *)networkId);
     return rc;

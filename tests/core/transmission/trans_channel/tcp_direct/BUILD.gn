@@ -86,6 +86,7 @@ ohos_unittest("TransServerTcpDirectTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "hilog:libhilog",
     ]
   } else {
@@ -93,6 +94,7 @@ ohos_unittest("TransServerTcpDirectTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "hilog:libhilog",
       "hilog_lite:hilog_lite",
     ]
@@ -165,6 +167,7 @@ ohos_unittest("TransCoreTcpDirectTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "hilog:libhilog",
     ]
   } else {
@@ -172,6 +175,7 @@ ohos_unittest("TransCoreTcpDirectTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "hilog:libhilog",
       "hilog_lite:hilog_lite",
     ]
@@ -246,6 +250,7 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
@@ -292,6 +297,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -341,6 +347,7 @@ ohos_unittest("TransTcpDirectP2pMockTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -479,6 +486,7 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
@@ -663,6 +671,7 @@ ohos_unittest("TransTcpDirectListenerTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }

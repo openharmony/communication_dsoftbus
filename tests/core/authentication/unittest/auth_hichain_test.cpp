@@ -52,8 +52,9 @@ void AuthHichainTest::SetUp()
 
 void AuthHichainTest::TearDown() { }
 
-void OnDeviceNotTrustedTest(const char *peerUdid)
+void OnDeviceNotTrustedTest(const char *peerUdid, int32_t localUserId)
 {
+    (void)localUserId;
     (void)peerUdid;
 }
 

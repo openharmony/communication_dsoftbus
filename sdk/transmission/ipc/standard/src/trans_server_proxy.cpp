@@ -306,3 +306,16 @@ int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, 
 
     return proxy->EvaluateQos(peerNetworkId, dataType, qos, qosCount);
 }
+
+int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    sptr<TransServerProxy> proxy = GetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+    if (eventType >= EVENT_TYPE_BUTT || eventType < EVENT_TYPE_CHANNEL_OPENED || buf == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return proxy->ProcessInnerEvent(eventType, buf, len);
+}

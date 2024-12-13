@@ -18,6 +18,7 @@
 
 #include "lnn_heartbeat_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account.h"
 #include <gmock/gmock.h>
 #include <mutex>
 
@@ -30,7 +31,7 @@ public:
     virtual void RestartCoapDiscovery(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategy(
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
-    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
+    virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
     virtual void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid) = 0;
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
@@ -43,7 +44,7 @@ public:
     MOCK_METHOD1(DelNotTrustDevice, void(const char *udid));
     MOCK_METHOD0(RestartCoapDiscovery, void(void));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD2(NotifyRemoteDevOffLineByUserId, void(int32_t, const char *));
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool (void));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));

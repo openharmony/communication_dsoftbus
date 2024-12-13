@@ -25,6 +25,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account.h"
 #include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -45,7 +46,7 @@ public:
     virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
     virtual void LnnStopPublish(void) = 0;
     virtual int32_t LnnStartPublish(void) = 0;
-    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
+    virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
     virtual void LnnOnOhosAccountLogout(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnNotifyDiscoveryDevice(
@@ -74,7 +75,7 @@ public:
     MOCK_METHOD2(DiscLinkStatusChanged, void(LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void(void));
     MOCK_METHOD0(LnnStartPublish, int32_t(void));
-    MOCK_METHOD1(LnnUpdateOhosAccount, void(bool));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));

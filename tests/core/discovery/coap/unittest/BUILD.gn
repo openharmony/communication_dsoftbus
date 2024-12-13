@@ -47,12 +47,13 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
   ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
@@ -84,7 +85,7 @@ ohos_unittest("DiscCoapTest") {
   deps = [
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
   ]
 
   external_deps = [
