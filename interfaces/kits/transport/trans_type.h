@@ -42,6 +42,12 @@ typedef enum {
     DATA_TYPE_BUTT,
 } TransDataType;
 
+typedef enum {
+    EVENT_TYPE_CHANNEL_OPENED,
+    EVENT_TYPE_TRANS_LIMIT_CHANGE,
+    EVENT_TYPE_BUTT,
+} TransEventType;
+
 /**
  * @brief Defines the description of the socket.
  *

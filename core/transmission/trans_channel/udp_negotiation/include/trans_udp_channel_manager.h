@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "softbus_app_info.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +40,7 @@ typedef struct {
     uint32_t timeOut;
     int64_t seq;
     ListNode node;
+    AuthHandle authHandle;
     AppInfo info;
 } UdpChannelInfo;
 
@@ -86,6 +88,14 @@ bool IsUdpRecoveryTransLimit(void);
 
 int32_t TransUdpGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *remoteIp, uint32_t maxIpLen,
     int32_t *connectType);
+
+int32_t TransUdpUpdateReplyCnt(int32_t channelId);
+
+int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort);
+
+void TransAsyncUdpChannelTask(int32_t channelId);
+
+int32_t TransSetTos(int32_t channelId, uint8_t tos);
 
 #ifdef __cplusplus
 }
