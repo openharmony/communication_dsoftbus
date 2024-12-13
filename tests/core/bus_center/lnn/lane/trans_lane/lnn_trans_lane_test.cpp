@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,11 +37,15 @@ constexpr uint32_t LIST_SIZE = 10;
 constexpr char PEER_UDID[] = "111122223333abcdef";
 constexpr char PEER_IP[] = "127.30.0.1";
 constexpr char NODE_NETWORK_ID[] = "123456789";
+constexpr char NODE_NETWORK_ID_C[] = "CCCCCCCCCC";
 constexpr uint64_t LANE_ID_BASE = 1122334455667788;
 static int32_t g_errCode = 0;
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 static bool g_isNeedCondWait = true;
+static bool g_qosEvent[MAX_LANE_REQ_ID_NUM];
+constexpr int32_t DB_MAGIC_NUMBER = 0x5A5A5A5A;
+constexpr int32_t QOS_BW_10K = 10 * 1024;
 
 class LNNTransLaneMockTest : public testing::Test {
 public:
@@ -172,6 +176,32 @@ static void OnLaneAllocSuccessHml(uint32_t laneHandle, const LaneConnInfo *info)
     CondSignal();
 }
 
+static void OnLaneAllocSuccessBr(uint32_t laneHandle, const LaneConnInfo *info)
+{
+    (void)laneHandle;
+    ASSERT_NE(info, nullptr) << "invalid connInfo";
+    GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
+    EXPECT_EQ(info->type, LANE_BR);
+    CondSignal();
+}
+
+static void OnLaneAllocSuccessWlan5G(uint32_t laneHandle, const LaneConnInfo *info)
+{
+    (void)laneHandle;
+    ASSERT_NE(info, nullptr) << "invalid connInfo";
+    GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
+    EXPECT_EQ(info->type, LANE_WLAN_5G);
+    CondSignal();
+}
+
+static void OnLaneQosEvent(uint32_t laneHandle, LaneOwner laneOwner, LaneQosEvent qosEvent)
+{
+    GTEST_LOG_(INFO) << "received qos event, laneHandle=" << laneHandle;
+    EXPECT_EQ(laneOwner, LANE_OWNER_OTHER);
+    EXPECT_EQ(qosEvent, LANE_QOS_BW_HIGH);
+    g_qosEvent[laneHandle] = true;
+}
+
 static void MockAllocLaneByQos(NiceMock<LaneDepsInterfaceMock> &mock, NiceMock<TransLaneDepsInterfaceMock> &laneMock,
     LaneResource resourceItem)
 {
@@ -196,6 +226,13 @@ static void MockAllocLaneByQos(NiceMock<LaneDepsInterfaceMock> &mock, NiceMock<T
     EXPECT_CALL(laneMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_BASE));
     EXPECT_CALL(laneMock, CheckLinkConflictByReleaseLink).WillRepeatedly(Return(SOFTBUS_OK));
+}
+
+static void ResetQosEventResult()
+{
+    for (uint32_t i = 0; i < MAX_LANE_REQ_ID_NUM; i++) {
+        g_qosEvent[i] = false;
+    }
 }
 
 static LaneAllocListener g_listenerCb = {
@@ -776,6 +813,195 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_003, TestSize.Le
     ret = UpdateReqListLaneId(LANE_ID_BASE, LANE_ID_BASE + 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     DelLogicAndLaneRelationship(LANE_ID_BASE + 1);
+    transObj->deinit();
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_QOS_CHANGE_TEST_001
+* @tc.desc: handle lane qos change test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->init(nullptr);
+
+    int32_t ret = HandleLaneQosChange(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    LaneLinkInfo info;
+    (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    info.type = LANE_BLE;
+    ret = HandleLaneQosChange(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    info.type = LANE_P2P;
+    ret = HandleLaneQosChange(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    info.type = LANE_HML;
+    ret = HandleLaneQosChange(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_QOS_CHANGE_TEST_002
+* @tc.desc: notify qos event only when new link is p2p/HML and BW of old link is DB_MAGIC
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_002, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LaneResource resourceItem = {};
+    resourceItem.link.type = LANE_BR;
+    MockAllocLaneByQos(mock, laneMock, resourceItem);
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->init(nullptr);
+
+    LaneAllocInfo allocInfo = {};
+    allocInfo.type = LANE_TYPE_TRANS;
+    allocInfo.qosRequire.minBW = DB_MAGIC_NUMBER;
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessBr;
+    g_listenerCb.onLaneQosEvent = OnLaneQosEvent;
+    SetIsNeedCondWait();
+    uint32_t laneReqIdDbBr = 21;
+    int32_t ret = transObj->allocLaneByQos(laneReqIdDbBr, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+
+    SetIsNeedCondWait();
+    uint32_t laneReqId10KBr = 22;
+    allocInfo.qosRequire.minBW = QOS_BW_10K;
+    ret = transObj->allocLaneByQos(laneReqId10KBr, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+
+    LaneLinkInfo info = {};
+    info.type = LANE_WLAN_5G;
+    ResetQosEventResult();
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
+    EXPECT_EQ(g_qosEvent[laneReqIdDbBr], false);
+    EXPECT_EQ(g_qosEvent[laneReqId10KBr], false);
+    info.type = LANE_P2P;
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
+    EXPECT_EQ(g_qosEvent[laneReqIdDbBr], true);
+    EXPECT_EQ(g_qosEvent[laneReqId10KBr], false);
+    info.type = LANE_HML;
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
+    EXPECT_EQ(g_qosEvent[laneReqIdDbBr], true);
+    EXPECT_EQ(g_qosEvent[laneReqId10KBr], false);
+
+    EXPECT_EQ(transObj->freeLane(laneReqIdDbBr), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(laneReqId10KBr), SOFTBUS_OK);
+    transObj->deinit();
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_QOS_CHANGE_TEST_003
+* @tc.desc: test multiple devices and multiple links
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_003, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LaneResource resourceItem = {};
+    resourceItem.link.type = LANE_BR;
+    MockAllocLaneByQos(mock, laneMock, resourceItem);
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->init(nullptr);
+
+    LaneAllocInfo allocInfo = {};
+    allocInfo.type = LANE_TYPE_TRANS;
+    allocInfo.qosRequire.minBW = DB_MAGIC_NUMBER;
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessBr;
+    g_listenerCb.onLaneQosEvent = OnLaneQosEvent;
+    SetIsNeedCondWait();
+    uint32_t laneReqIdDbBr1 = 21;
+    int32_t ret = transObj->allocLaneByQos(laneReqIdDbBr1, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+
+    SetIsNeedCondWait();
+    uint32_t laneReqIdDbBr2 = 22;
+    ret = transObj->allocLaneByQos(laneReqIdDbBr2, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    SetIsNeedCondWait();
+    uint32_t laneReqIdDbBrC = 23;
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID_C));
+    ret = transObj->allocLaneByQos(laneReqIdDbBrC, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+
+    LaneLinkInfo info = {};
+    info.type = LANE_HML;
+    ResetQosEventResult();
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
+    EXPECT_EQ(g_qosEvent[laneReqIdDbBr1], true);
+    EXPECT_EQ(g_qosEvent[laneReqIdDbBr2], true);
+    EXPECT_EQ(g_qosEvent[laneReqIdDbBrC], false);
+
+    EXPECT_EQ(transObj->freeLane(laneReqIdDbBr1), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(laneReqIdDbBr2), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(laneReqIdDbBrC), SOFTBUS_OK);
+    transObj->deinit();
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_QOS_CHANGE_TEST_004
+* @tc.desc: not report qos event when old link is not BR
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_004, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LaneResource resourceItem = {};
+    resourceItem.link.type = LANE_WLAN_5G;
+    MockAllocLaneByQos(mock, laneMock, resourceItem);
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->init(nullptr);
+
+    LaneAllocInfo allocInfo = {};
+    allocInfo.type = LANE_TYPE_TRANS;
+    allocInfo.qosRequire.minBW = DB_MAGIC_NUMBER;
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessWlan5G;
+    g_listenerCb.onLaneQosEvent = OnLaneQosEvent;
+    SetIsNeedCondWait();
+    uint32_t laneReqIdDb5G = 21;
+    int32_t ret = transObj->allocLaneByQos(laneReqIdDb5G, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+
+    SetIsNeedCondWait();
+    uint32_t laneReqId10K5G = 22;
+    allocInfo.qosRequire.minBW = QOS_BW_10K;
+    ret = transObj->allocLaneByQos(laneReqId10K5G, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+
+    LaneLinkInfo info = {};
+    info.type = LANE_P2P;
+    ResetQosEventResult();
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
+    EXPECT_EQ(g_qosEvent[laneReqIdDb5G], false);
+    EXPECT_EQ(g_qosEvent[laneReqId10K5G], false);
+
+    EXPECT_EQ(transObj->freeLane(laneReqIdDb5G), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(laneReqId10K5G), SOFTBUS_OK);
     transObj->deinit();
 }
 } // namespace OHOS
