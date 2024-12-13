@@ -35,6 +35,7 @@ declare_args() {
   softbus_lnn_lp_feature = true
   dsoftbus_build_eng = false
   dsoftbus_access_token_feature = true
+  dsoftbus_ipc_feature = true
 
   if (product_name != "qemu-arm-linux-min") {
     qemu_arm_disable = true
