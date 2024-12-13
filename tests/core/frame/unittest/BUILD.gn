@@ -61,6 +61,7 @@ ohos_unittest("SoftbusServerStubTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
       "ipc:ipc_single",
@@ -103,6 +104,7 @@ ohos_unittest("SoftbusServerTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
       "samgr:samgr_proxy",

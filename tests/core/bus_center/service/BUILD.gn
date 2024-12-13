@@ -58,6 +58,7 @@ ohos_unittest("BusCenterDecisionTest") {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock_main",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -66,6 +67,7 @@ ohos_unittest("BusCenterDecisionTest") {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock_main",
       "googletest:gtest_main",
       "hilog:libhilog",

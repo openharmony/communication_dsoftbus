@@ -49,6 +49,7 @@ ohos_unittest("TransChannelManagerMockTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
