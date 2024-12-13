@@ -587,6 +587,46 @@ int32_t ClientTransIfChannelForSocket(const char *sessionName, bool *isSocket)
     return SOFTBUS_OK;
 }
 
+int32_t ClientTransOnQos(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    if (qos == NULL) {
+        TRANS_LOGE(TRANS_SDK, "qos is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char sessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
+    if (ClientGetSessionNameByChannelId(channelId, channelType, sessionName, SESSION_NAME_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_SDK, "failed to get sessionName, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+    }
+    if (!IsDistributedDataSession(sessionName)) {
+        TRANS_LOGI(TRANS_SDK, "not report qos event on non-distributed data session");
+        return SOFTBUS_OK;
+    }
+    int32_t socket = INVALID_SESSION_ID;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = false;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &socket, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get session callback failed channelId=%{public}d", channelId);
+        return ret;
+    }
+    if (isServer) {
+        TRANS_LOGI(TRANS_SDK, "not report qos event on server side");
+        return SOFTBUS_OK;
+    }
+    if (!sessionCallback.isSocketListener) {
+        TRANS_LOGI(TRANS_SDK, "not report qos event on non-socket session");
+        return SOFTBUS_OK;
+    }
+    if (sessionCallback.socketClient.OnQos != NULL) {
+        sessionCallback.socketClient.OnQos(socket, event, qos, count);
+        TRANS_LOGI(
+            TRANS_SDK, "successful report qos event to client socket=%{public}d, event=%{public}d", socket, event);
+    }
+    return SOFTBUS_OK;
+}
+
 IClientSessionCallBack *GetClientSessionCb(void)
 {
     g_sessionCb.OnSessionOpened = TransOnSessionOpened;
@@ -601,5 +641,6 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnRawStreamEncryptOptGet = ClientRawStreamEncryptOptGet;
     g_sessionCb.OnChannelBind = ClientTransOnChannelBind;
     g_sessionCb.IfChannelForSocket = ClientTransIfChannelForSocket;
+    g_sessionCb.OnQos = ClientTransOnQos;
     return &g_sessionCb;
 }

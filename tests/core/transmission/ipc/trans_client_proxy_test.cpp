@@ -473,4 +473,38 @@ HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
     ret = CheckServiceIsRegistered(g_pkgName, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: ClientIpcChannelOnQosTest001
+ * @tc.desc: ClientIpcChannelOnQos test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level0)
+{
+    int32_t ret = ClientIpcChannelOnQos(nullptr, QOS_SATISFIED, nullptr, QOS_TYPE_BUTT);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ChannelMsg data;
+    data.msgPkgName = nullptr;
+    ret = ClientIpcChannelOnQos(&data, QOS_SATISFIED, nullptr, QOS_TYPE_BUTT);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    data.msgPkgName = g_pkgName;
+    ret = ClientIpcChannelOnQos(&data, QOS_SATISFIED, nullptr, QOS_TYPE_BUTT);
+    QosTV qos[] = {
+        {QOS_TYPE_MIN_BW, 0},
+    };
+    ret = ClientIpcChannelOnQos(&data, QOS_SATISFIED, qos, QOS_TYPE_BUTT);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcChannelOnQos(&data, QOS_SATISFIED, qos, 1);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    data.msgChannelId = TEST_CHANNELID;
+    data.msgChannelType = TEST_CHANNELTYPE;
+    data.msgPid = TEST_PID;
+    ret = ClientIpcChannelOnQos(&data, QOS_SATISFIED, qos, 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 } // namespace OHOS

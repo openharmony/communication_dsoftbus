@@ -35,6 +35,17 @@ typedef enum {
     CORE_SESSION_STATE_BUTT,
 } CoreSessionState;
 
+typedef struct {
+    ListNode node;
+    bool isQosLane;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t channelId;
+    int32_t channelType;
+    int32_t pid;
+    uint32_t laneHandle;
+    LaneConnInfo laneConnInfo;
+} TransLaneInfo;
+
 int32_t TransLaneMgrInit(void);
 
 int32_t TransSocketLaneMgrInit(void);
@@ -85,6 +96,8 @@ int32_t TransGetSocketChannelLaneInfoBySession(
 int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32_t sessionId, int32_t *pid);
 
 int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectType);
+
+int32_t TransGetTransLaneInfoByLaneHandle(uint32_t laneHandle, TransLaneInfo *laneInfo);
 
 #ifdef __cplusplus
 }
