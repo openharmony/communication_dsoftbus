@@ -53,6 +53,7 @@ ohos_unittest("DiscNstackxAdapterTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]

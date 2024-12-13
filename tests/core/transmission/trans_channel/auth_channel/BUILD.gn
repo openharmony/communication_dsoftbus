@@ -64,6 +64,7 @@ ohos_unittest("TransAuthChannelTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -100,6 +101,7 @@ ohos_unittest("TransAuthManagerTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
