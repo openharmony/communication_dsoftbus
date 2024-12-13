@@ -453,3 +453,28 @@ int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, 
     (void)qosCount;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    TRANS_LOGD(TRANS_SDK, "enter.");
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteInt32(&request, eventType);
+    WriteInt32(&request, len);
+    bool value = WriteRawData(&request, buf, len);
+    if (!value) {
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+    int32_t ret = SOFTBUS_NO_INIT;
+    if (g_serverProxy == NULL) {
+        TRANS_LOGE(TRANS_SDK, "server proxy not init");
+        return ret;
+    }
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PROCESS_INNER_EVENT, &request, &ret, ProxyCallback);
+    if (ans != EC_SUCCESS) {
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
+        return ans;
+    }
+    return ret;
+}
