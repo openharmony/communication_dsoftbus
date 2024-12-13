@@ -41,6 +41,7 @@ public:
         bool isLegacyGo;
         bool isNeedDhcp;
         std::string gcIp;
+        std::string goIp;
     };
 
     struct DestroyGroupParam {
