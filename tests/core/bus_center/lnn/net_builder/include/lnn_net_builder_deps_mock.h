@@ -93,7 +93,7 @@ public:
     virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
         LnnSyncInfoMsgComplete complete);
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
-    virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
+    virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType);
     virtual int32_t LnnAddMetaInfo(NodeInfo *info);
     virtual int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t num);
     virtual int32_t LnnConvertDlId(
@@ -240,7 +240,7 @@ public:
     MOCK_METHOD5(
         LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
-    MOCK_METHOD1(LnnUpdateNodeInfo, int32_t(NodeInfo *));
+    MOCK_METHOD2(LnnUpdateNodeInfo, int32_t(NodeInfo *, int32_t));
     MOCK_METHOD1(LnnAddMetaInfo, int32_t(NodeInfo *));
     MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t(const char *, int64_t *, uint32_t));
     MOCK_METHOD5(LnnConvertDlId, int32_t(const char *, IdCategory, IdCategory, char *, uint32_t));

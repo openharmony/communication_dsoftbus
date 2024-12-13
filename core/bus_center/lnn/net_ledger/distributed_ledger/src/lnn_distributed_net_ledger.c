@@ -732,12 +732,60 @@ static void CheckUserIdCheckSumChange(NodeInfo *oldInfo, const NodeInfo *newInfo
     }
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+static int32_t LnnUpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_t connectionType)
+{
+    if (oldInfo == NULL ||newInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t stateVersion = 0;
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
+    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
+        oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
+        oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
+        oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
+        oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
+    }
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN,
+            newInfo->deviceInfo.unifiedDefaultName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy account hash failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
+    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy ptk failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    oldInfo->accountId = newInfo->accountId;
+    if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
+        UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
+    }
+    CheckUserIdCheckSumChange(oldInfo, newInfo);
+    if (connectionType == CONNECTION_ADDR_BLE) {
+        if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK) {
+            oldInfo->localStateVersion = stateVersion;
+        }
+        oldInfo->stateVersion = newInfo->stateVersion;
+        if (LnnSaveRemoteDeviceInfo(oldInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
 {
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
-    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
 
     UpdateNewNodeAccountHash(newInfo);
     UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid, newInfo->userId);
@@ -753,35 +801,12 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NETWORK_MAP_GET_FAILED;
     }
-    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
-        oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
-        oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
-        oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
-        oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
-    }
-    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
-        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
+    int32_t ret = LnnUpdateRemoteNodeInfo(oldInfo, newInfo, connectionType);
+    if (ret != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_STRCPY_ERR;
+        return ret;
     }
-    if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "copy account hash failed");
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_MEM_ERR;
-    }
-    LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
-    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "copy ptk failed");
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_MEM_ERR;
-    }
-    oldInfo->accountId = newInfo->accountId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
-        UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
-    }
-    CheckUserIdCheckSumChange(oldInfo, newInfo);
     return SOFTBUS_OK;
 }
 
