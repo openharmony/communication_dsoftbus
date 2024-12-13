@@ -97,6 +97,9 @@ if (defined(ohos_lite)) {
           "access_token:libprivacy_sdk",
           "access_token:libtokenid_sdk",
         ]
+        if (dsoftbus_ipc_feature) {
+          external_deps += [ "ipc:ipc_signle" ]
+        }
       } else {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
@@ -185,6 +188,9 @@ if (defined(ohos_lite)) {
           "access_token:libprivacy_sdk",
           "access_token:libtokenid_sdk",
         ]
+        if (dsoftbus_ipc_feature) {
+          external_deps += [ "ipc:ipc_signle" ]
+        }
       } else {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
@@ -279,6 +285,9 @@ if (defined(ohos_lite)) {
         "access_token:libprivacy_sdk",
         "access_token:libtokenid_sdk",
       ]
+      if (dsoftbus_ipc_feature) {
+        external_deps += [ "ipc:ipc_signle" ]
+      }
     } else {
       sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
     }
