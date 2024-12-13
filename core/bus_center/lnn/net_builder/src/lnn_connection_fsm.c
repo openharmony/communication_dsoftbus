@@ -1251,7 +1251,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     rc = AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
-        CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
+        CompleteJoinLNN(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
     } else {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
         rc = SOFTBUS_OK;
