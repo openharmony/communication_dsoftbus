@@ -21,6 +21,7 @@
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "session.h"
+#include "socket.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 
@@ -79,6 +80,10 @@ public:
     virtual int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos);
 
     virtual int32_t OnChannelBind(int32_t channelId, int32_t channelType);
+
+    virtual int32_t OnClientChannelOnQos(
+        int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
+
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
 };

@@ -30,16 +30,6 @@
 #include "trans_session_manager.h"
 
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
-typedef struct {
-    ListNode node;
-    int32_t channelId;
-    int32_t channelType;
-    char pkgName[PKG_NAME_SIZE_MAX];
-    int32_t pid;
-    uint32_t laneHandle;
-    LaneConnInfo laneConnInfo;
-    bool isQosLane;
-} TransLaneInfo;
 
 typedef struct {
     ListNode node;
@@ -861,4 +851,35 @@ int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectTy
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     TRANS_LOGE(TRANS_SVC, "can not find connectType by channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+}
+
+int32_t TransGetTransLaneInfoByLaneHandle(uint32_t laneHandle, TransLaneInfo *laneInfo)
+{
+    if (laneInfo == NULL) {
+        TRANS_LOGE(TRANS_INIT, "laneInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_channelLaneList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    TransLaneInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_channelLaneList->list), TransLaneInfo, node) {
+        if (item->laneHandle == laneHandle) {
+            if (memcpy_s(laneInfo, sizeof(TransLaneInfo), item, sizeof(TransLaneInfo)) != EOK) {
+                (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+                return SOFTBUS_MEM_ERR;
+            }
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find laneInfo by laneHandle=%{public}u", laneHandle);
+    return SOFTBUS_NOT_FIND;
 }
