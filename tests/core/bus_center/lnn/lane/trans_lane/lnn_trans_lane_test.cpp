@@ -72,7 +72,7 @@ void LNNTransLaneMockTest::SetUp()
 void LNNTransLaneMockTest::TearDown()
 {
     (void)SoftBusCondDestroy(&g_cond);
-    (void)SoftBusCondDestroy(&g_lock);
+    (void)SoftBusMutexDestroy(&g_lock);
 }
 
 static void CondSignal(void)
