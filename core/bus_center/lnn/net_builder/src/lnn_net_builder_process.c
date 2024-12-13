@@ -496,7 +496,7 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
         }
     }
     if (rc != SOFTBUS_OK) {
-        LnnNotifyLeaveResult(networkId, SOFTBUS_ERR);
+        LnnNotifyLeaveResult(networkId, SOFTBUS_NETWORK_REQ_LEAVE_LNN_FAIL);
     }
     SoftBusFree((void *)networkId);
     return rc;
