@@ -87,6 +87,7 @@ typedef struct {
     bool isNeedFastAuth;
     int64_t oldIndex;
     int32_t idType;
+    int32_t userId;
     bool isNeedPackCert;
     uint64_t sessionKeyRandomNum;
     AuthVerifyModule module;
