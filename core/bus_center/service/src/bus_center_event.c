@@ -859,6 +859,17 @@ void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
+void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
+{
+    if (state < SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED || state >= SOFTBUS_LOCAL_DEVICE_INFO_UNKNOWN) {
+        LNN_LOGW(LNN_EVENT, "bad deviceInfo state=%{public}d", state);
+        return;
+    }
+    LNN_LOGI(LNN_EVENT, "notify deviceInfo state change");
+    LnnDeviceInfoChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_INFO_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;

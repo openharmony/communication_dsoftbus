@@ -91,6 +91,7 @@ public:
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle) = 0;
     virtual void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -141,6 +142,7 @@ public:
     MOCK_METHOD3(SoftbusGetConfig, int32_t(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t(AccountEventHandle handle));
     MOCK_METHOD2(LnnNotifyOnlineNetType, void(const char *, ConnectionAddrType));
+    MOCK_METHOD1(LnnNotifyDeviceInfoChanged, void(SoftBusDeviceInfoState));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
