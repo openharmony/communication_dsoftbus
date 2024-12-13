@@ -1106,7 +1106,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_SELECT_01, TestSize.Level1)
 {
     const char *networkId = "test";
     LaneLinkType linkType = LANE_LINK_TYPE_BUTT;
-    int32_t ret = LaneCapCheck(networkId, linkType);
+    int32_t ret = LaneCheckLinkValid(networkId, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -1568,7 +1568,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_19, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_NUM), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(LOCAL_NUM), Return(SOFTBUS_OK)));
-    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_COC_CAP);
 }
 
@@ -1588,7 +1588,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_20, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_DEACTIVATING));
-    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 }
 
@@ -1608,7 +1608,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_21, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
-    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP);
 }
 
@@ -1630,14 +1630,14 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_22, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
-    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(ROM_NUM2), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_NUM2), Return(SOFTBUS_OK)));
-    ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -1688,7 +1688,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_24, TestSize.Level1)
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_25, TestSize.Level1)
 {
     LaneLinkType linkType = LANE_ETH;
-    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
