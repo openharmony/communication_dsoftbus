@@ -163,6 +163,9 @@ static void ProcessLocalDeviceInfo(void)
     if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set networkId fail");
     }
+    if (LnnUpdateLocalDeviceName(&info.deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set deviceName fail");
+    }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
     LnnNotifyLocalNetworkIdChanged();
     if (info.networkIdTimestamp != 0) {

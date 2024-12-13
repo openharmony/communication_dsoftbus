@@ -21,6 +21,14 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     return true;
 }
 
+bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId)
+{
+    (void)udid;
+    (void)isNeedUserId;
+    (void)localUserId;
+    return false;
+}
+
 void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId)
 {
     (void)accountId;

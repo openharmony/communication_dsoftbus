@@ -42,12 +42,7 @@ config("softbus_connection_ble_test_config") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/adapter/common/bluetooth/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
   ]
 }
 
@@ -63,13 +58,13 @@ ohos_unittest("ConnectionBleTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }
@@ -83,13 +78,13 @@ ohos_unittest("ConnectionBleSwitchTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }
@@ -106,13 +101,13 @@ ohos_unittest("BleConnectionServiceTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }
@@ -122,8 +117,6 @@ ohos_unittest("BleConnectionManagerTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
   ]
   public_configs = [ ":softbus_connection_ble_test_config" ]
   sources = [
@@ -139,13 +132,13 @@ ohos_unittest("BleConnectionManagerTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }
@@ -174,13 +167,13 @@ ohos_unittest("BleTransTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }
@@ -218,13 +211,13 @@ ohos_unittest("BleClientTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }

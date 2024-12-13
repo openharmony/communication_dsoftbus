@@ -40,6 +40,7 @@ int32_t LnnGetHbStrategyManager(
 
 int32_t LnnStartNewHbStrategyFsm(void);
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay);
+int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara);
 int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
     bool isRelay, const char *networkId, uint64_t timeout);
 int32_t LnnStartHeartbeat(uint64_t delayMillis);

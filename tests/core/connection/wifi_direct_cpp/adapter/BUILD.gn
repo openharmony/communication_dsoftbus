@@ -20,11 +20,6 @@ wifi_direct_cpp_unit_path =
 ohos_unittest("P2pAdapterTest") {
   module_out_path = ut_out_path
   include_dirs = [
-    "//third_party/cJSON",
-    "//third_party/json/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -69,10 +64,6 @@ ohos_unittest("P2pAdapterTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_main",
-    "//third_party/googletest:gtest_rtti",
   ]
 
   sources = [
@@ -124,10 +115,15 @@ ohos_unittest("P2pAdapterTest") {
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }

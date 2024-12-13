@@ -607,29 +607,29 @@ static int32_t LaneDelayInit(void)
 int32_t InitLane(void)
 {
     if (InitLaneModel() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]init laneModel fail");
+        LNN_LOGE(LNN_LANE, "init laneModel fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneLink() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]init laneLink fail");
+        LNN_LOGE(LNN_LANE, "init laneLink fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneListener() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]init laneListener fail");
+        LNN_LOGE(LNN_LANE, "init laneListener fail");
         return SOFTBUS_NO_INIT;
     }
     if (LaneDelayInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]laneDelayInit fail");
+        LNN_LOGE(LNN_LANE, "laneDelayInit fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneLinkConflict() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]InitLaneLinkConflict fail");
+        LNN_LOGE(LNN_LANE, "InitLaneLinkConflict fail");
         return SOFTBUS_NO_INIT;
     }
     int32_t ret = LnnInitVapInfo();
     if (ret != SOFTBUS_OK) {
         /* optional case, ignore result */
-        LNN_LOGW(LNN_LANE, "[InitLane]init vap info err, ret=%{public}d", ret);
+        LNN_LOGW(LNN_LANE, "init vap info err, ret=%{public}d", ret);
     }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_NO_INIT;

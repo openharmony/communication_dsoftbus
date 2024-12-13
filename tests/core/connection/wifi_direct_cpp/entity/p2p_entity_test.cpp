@@ -252,7 +252,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
             return SOFTBUS_OK;
         });
         EXPECT_CALL(mock, Hid2dRemoveGcGroup).WillOnce(WifiDirectInterfaceMock::DestroyGroupTimeOutAction);
-        P2pDestroyGroupParam param{"p2p0"};
+        P2pDestroyGroupParam param{IF_NAME_P2P};
         P2pOperationResult result = P2pEntity::GetInstance().DestroyGroup(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_DESTROY_GROUP_TIMEOUT);
     }

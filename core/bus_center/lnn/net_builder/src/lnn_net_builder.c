@@ -261,7 +261,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
         }
         if ((LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
-            LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_ERR);
+            LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
         }
     }
     LNN_LOGI(LNN_BUILDER, "addr same to before, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
@@ -629,6 +629,10 @@ const char *SelectUseUdid(const char *peerUdid, const char *lowerUdid)
 
 void LnnDeleteLinkFinderInfo(const char *peerUdid)
 {
+    if (peerUdid == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get networkId fail.");

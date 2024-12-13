@@ -60,7 +60,7 @@ static void GenerateUint8Array(uint8_t *data, uint8_t len)
 }
 
 namespace OHOS {
-    bool NewAuthManagerFuzzTest(const uint8_t *data, size_t size)
+    bool NewAuthManagerFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -70,10 +70,10 @@ namespace OHOS {
         string udid, uuid;
         GenerateString(udid);
         GenerateString(uuid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         GenerateFromList(info.connInfo.type, AUTH_LINK_TYPE_LIST);
@@ -81,10 +81,11 @@ namespace OHOS {
         if (auth != nullptr) {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
+
         return true;
     }
 
-    bool GetAuthManagerByAuthIdFuzzTest(const uint8_t *data, size_t size)
+    bool GetAuthManagerByAuthIdFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -94,10 +95,10 @@ namespace OHOS {
         string udid, uuid;
         GenerateString(udid);
         GenerateString(uuid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         GenerateFromList(info.connInfo.type, AUTH_LINK_TYPE_LIST);
@@ -113,19 +114,21 @@ namespace OHOS {
         if (newAuth != nullptr) {
             DelDupAuthManager(newAuth);
         }
+
         return true;
     }
 
-    bool RemoveAuthManagerByAuthIdFuzzTest(const uint8_t *data, size_t size)
+    bool RemoveAuthManagerByAuthIdFuzzTest()
     {
         AuthHandle authHandle = {0};
         GenerateInt64(authHandle.authId);
         GenerateUint32(authHandle.type);
         RemoveAuthManagerByAuthId(authHandle);
+
         return true;
     }
 
-    bool GetAuthManagerByConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool GetAuthManagerByConnInfoFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -146,10 +149,11 @@ namespace OHOS {
         if (newAuth != nullptr) {
             DelDupAuthManager(newAuth);
         }
+
         return true;
     }
 
-    bool GetAuthIdByConnIdFuzzTest(const uint8_t *data, size_t size)
+    bool GetAuthIdByConnIdFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -165,18 +169,20 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         GetAuthIdByConnId(info.connId, info.isServer);
+
         return true;
     }
 
-    bool RemoveNotPassedAuthManagerByUdidFuzzTest(const uint8_t *data, size_t size)
+    bool RemoveNotPassedAuthManagerByUdidFuzzTest()
     {
         string udid;
         GenerateString(udid);
         RemoveNotPassedAuthManagerByUdid(udid.c_str());
+
         return true;
     }
 
-    bool GetAuthConnInfoByUuidFuzzTest(const uint8_t *data, size_t size)
+    bool GetAuthConnInfoByUuidFuzzTest()
     {
         string uuid;
         GenerateString(uuid);
@@ -188,10 +194,10 @@ namespace OHOS {
         AuthSessionInfo sessionInfo = {0};
         sessionInfo.connId = (uint64_t)(1ULL << INT32_BIT_NUM);
         GenerateBool(sessionInfo.isServer);
-        if (memcpy_s(sessionInfo.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(sessionInfo.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(sessionInfo.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(sessionInfo.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         sessionInfo.connInfo.type = type;
@@ -208,10 +214,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[sessionInfo.connInfo.type].type);
         }
         GetAuthConnInfoByUuid(uuid.c_str(), type, &info);
+
         return true;
     }
 
-    bool GetLatestIdByConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool GetLatestIdByConnInfoFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -222,10 +229,10 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         info.connInfo.type = type;
@@ -240,10 +247,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         GetLatestIdByConnInfo(&info.connInfo);
+
         return true;
     }
 
-    bool GetActiveAuthIdByConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool GetActiveAuthIdByConnInfoFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -254,10 +262,10 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         info.connInfo.type = type;
@@ -272,10 +280,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         GetActiveAuthIdByConnInfo(&info.connInfo, info.isServer);
+
         return true;
     }
 
-    bool GetDeviceAuthManagerFuzzTest(const uint8_t *data, size_t size)
+    bool GetDeviceAuthManagerFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -284,10 +293,10 @@ namespace OHOS {
         string uuid, udid;
         GenerateString(uuid);
         GenerateString(udid);
-        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), UDID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.udid, UDID_BUF_LEN - 1, udid.c_str(), udid.size()) != EOK) {
             return false;
         }
-        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), UUID_BUF_LEN - 1) != EOK) {
+        if (memcpy_s(info.uuid, UUID_BUF_LEN - 1, uuid.c_str(), uuid.size()) != EOK) {
             return false;
         }
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -304,10 +313,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         GetDeviceAuthManager(authSeq, &info, &isNewCreated, lastAuthSeq);
+
         return true;
     }
 
-    bool AuthManagerSetSessionKeyFuzzTest(const uint8_t *data, size_t size)
+    bool AuthManagerSetSessionKeyFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -333,10 +343,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthManagerSetSessionKey(authSeq, &info, &key, isConnect, isOldKey);
+
         return true;
     }
 
-    bool AuthManagerGetSessionKeyFuzzTest(const uint8_t *data, size_t size)
+    bool AuthManagerGetSessionKeyFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -356,10 +367,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthManagerGetSessionKey(authSeq, &info, &key);
+
         return true;
     }
 
-    bool AuthNotifyAuthPassedFuzzTest(const uint8_t *data, size_t size)
+    bool AuthNotifyAuthPassedFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -377,10 +389,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthNotifyAuthPassed(authSeq, &info);
+
         return true;
     }
 
-    bool AuthManagerSetAuthPassedFuzzTest(const uint8_t *data, size_t size)
+    bool AuthManagerSetAuthPassedFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -399,10 +412,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthManagerSetAuthPassed(authSeq, &info);
+
         return true;
     }
 
-    bool AuthManagerSetAuthFailedFuzzTest(const uint8_t *data, size_t size)
+    bool AuthManagerSetAuthFailedFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -422,10 +436,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthManagerSetAuthFailed(authSeq, &info, reason);
+
         return true;
     }
 
-    bool AuthManagerSetAuthFinishedFuzzTest(const uint8_t *data, size_t size)
+    bool AuthManagerSetAuthFinishedFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -438,16 +453,18 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthManagerSetAuthFinished(authSeq, &info);
+
         return true;
     }
 
-    bool AuthGenRequestIdFuzzTest(const uint8_t *data, size_t size)
+    bool AuthGenRequestIdFuzzTest()
     {
         AuthGenRequestId();
+
         return true;
     }
 
-    bool AuthHandleLeaveLNNFuzzTest(const uint8_t *data, size_t size)
+    bool AuthHandleLeaveLNNFuzzTest()
     {
         AuthHandle authHandle = {0};
         GenerateInt64(authHandle.authId);
@@ -467,29 +484,32 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthHandleLeaveLNN(authHandle);
+
         return true;
     }
 
-    bool TryGetBrConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool TryGetBrConnInfoFuzzTest()
     {
         string uuid;
         GenerateString(uuid);
         AuthConnInfo info;
         (void)memset_s(&info, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
         TryGetBrConnInfo(uuid.c_str(), &info);
+
         return true;
     }
 
-    bool AuthDeviceGetPreferConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetPreferConnInfoFuzzTest()
     {
         char udid[UDID_BUF_LEN] = "asjdflkasdjflsd";
         AuthConnInfo info;
         (void)memset_s(&info, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
         AuthDeviceGetPreferConnInfo(udid, &info);
+
         return true;
     }
 
-    bool AuthDeviceGetConnInfoByTypeFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetConnInfoByTypeFuzzTest()
     {
         char uuid[UUID_BUF_LEN] = "12341413r43131";
         int64_t authSeq = 0;
@@ -511,10 +531,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetConnInfoByType(uuid, info.connInfo.type, &info.connInfo);
+
         return true;
     }
 
-    bool AuthDeviceGetP2pConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetP2pConnInfoFuzzTest()
     {
         char uuid[UUID_BUF_LEN] = "123erjfea";
         int64_t authSeq = 0;
@@ -536,10 +557,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetP2pConnInfo(uuid, &info.connInfo);
+
         return true;
     }
 
-    bool AuthDeviceGetHmlConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetHmlConnInfoFuzzTest()
     {
         char uuid[UUID_BUF_LEN] = "123erjfea";
         int64_t authSeq = 0;
@@ -561,10 +583,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetHmlConnInfo(uuid, &info.connInfo);
+
         return true;
     }
 
-    bool AuthDeviceCheckConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceCheckConnInfoFuzzTest()
     {
         char uuid[UUID_BUF_LEN] = "asdasdfadf";
         int64_t authSeq = 0;
@@ -587,10 +610,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, checkConn);
+
         return true;
     }
 
-    bool AuthGetLatestAuthSeqListByTypeFuzzTest(const uint8_t *data, size_t size)
+    bool AuthGetLatestAuthSeqListByTypeFuzzTest()
     {
         char udid[UDID_BUF_LEN] = "abcabcabcabcabc";
         int64_t authSeq = 0;
@@ -613,10 +637,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthGetLatestAuthSeqListByType(udid, seqList, verifyTime, type);
+
         return true;
     }
 
-    bool AuthGetLatestAuthSeqListFuzzTest(const uint8_t *data, size_t size)
+    bool AuthGetLatestAuthSeqListFuzzTest()
     {
         char udid[UDID_BUF_LEN] = "abcabcabcabcabc";
         int64_t authSeq = 0;
@@ -637,10 +662,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthGetLatestAuthSeqList(udid, seqList, type);
+
         return true;
     }
 
-    bool GetHmlOrP2pAuthHandleFuzzTest(const uint8_t *data, size_t size)
+    bool GetHmlOrP2pAuthHandleFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -663,10 +689,11 @@ namespace OHOS {
         }
         GetHmlOrP2pAuthHandle(&authHandle2, &num);
         SoftBusFree(authHandle2);
+
         return true;
     }
 
-    bool AuthDeviceGetLatestIdByUuidFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetLatestIdByUuidFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -688,10 +715,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetLatestIdByUuid(uuid, info.connInfo.type, &authHandle);
+
         return true;
     }
 
-    bool AuthDeviceGetIdByConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetIdByConnInfoFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -713,10 +741,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetLatestIdByUuid(uuid, info.connInfo.type, &authHandle);
+
         return true;
     }
 
-    bool AuthDeviceGetIdByUuidFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetIdByUuidFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -740,10 +769,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetIdByUuid(uuid, info.connInfo.type, isServer);
+
         return true;
     }
 
-    bool AuthDeviceGetAuthHandleByIndexFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceGetAuthHandleByIndexFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -768,10 +798,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthDeviceGetAuthHandleByIndex(udid.c_str(), isServer, index, &authHandle);
+
         return true;
     }
 
-    bool AuthGetEncryptSizeFuzzTest(const uint8_t *data, size_t size)
+    bool AuthGetEncryptSizeFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -790,45 +821,50 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         AuthGetEncryptSize(authSeq, inLen);
+
         return true;
     }
 
-    bool AuthGetDecryptSizeFuzzTest(const uint8_t *data, size_t size)
+    bool AuthGetDecryptSizeFuzzTest()
     {
         uint32_t inLen = 0;
         GenerateUint32(inLen);
         AuthGetDecryptSize(inLen);
+
         return true;
     }
 
-    bool AuthDeviceSetP2pMacFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceSetP2pMacFuzzTest()
     {
         char p2pMac[] = "12:DA:CA:D0:08:3E";
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
         AuthDeviceSetP2pMac(authSeq, p2pMac);
+
         return true;
     }
 
-    bool AuthSendKeepaliveOptionFuzzTest(const uint8_t *data, size_t size)
+    bool AuthSendKeepaliveOptionFuzzTest()
     {
         string uuid;
         GenerateString(uuid);
         ModeCycle cycle;
         GenerateFromList(cycle, MODE_CYCLE_LIST);
         AuthSendKeepaliveOption(uuid.c_str(), cycle);
+
         return true;
     }
 
-    bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
+    bool AuthFlushDeviceFuzzTest()
     {
         string uuid;
         GenerateString(uuid);
         AuthFlushDevice(uuid.c_str());
+
         return true;
     }
 
-    bool FindAuthManagerByUdidFuzzTest(const uint8_t *data, size_t size)
+    bool FindAuthManagerByUdidFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -848,10 +884,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         FindAuthManagerByUdid(udid.c_str(), info.connInfo.type, info.isServer);
+
         return true;
     }
 
-    bool FindAuthManagerByConnIdFuzzTest(const uint8_t *data, size_t size)
+    bool FindAuthManagerByConnIdFuzzTest()
     {
         uint64_t connId = (uint64_t)(1ULL << INT32_BIT_NUM);
         int64_t authSeq = 0;
@@ -873,16 +910,18 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         FindAuthManagerByConnId(connId, info.isServer);
+
         return true;
     }
 
-    bool DestroyAuthManagerListFuzzTest(const uint8_t *data, size_t size)
+    bool DestroyAuthManagerListFuzzTest()
     {
         DestroyAuthManagerList();
+
         return true;
     }
 
-    bool SetAuthConnIdFuzzTest(const uint8_t *data, size_t size)
+    bool SetAuthConnIdFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -902,10 +941,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         SetAuthConnId(auth, auth, info.connInfo.type);
+
         return true;
     }
 
-    bool SetAuthP2pMacFuzzTest(const uint8_t *data, size_t size)
+    bool SetAuthP2pMacFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -923,10 +963,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         SetAuthP2pMac(auth, auth, info.connInfo.type);
+
         return true;
     }
 
-    bool RemoveAuthManagerByConnInfoFuzzTest(const uint8_t *data, size_t size)
+    bool RemoveAuthManagerByConnInfoFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -944,10 +985,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         RemoveAuthManagerByConnInfo(&info.connInfo, info.isServer);
+
         return true;
     }
 
-    bool GetAvailableAuthConnInfoByUuidFuzzTest(const uint8_t *data, size_t size)
+    bool GetAvailableAuthConnInfoByUuidFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -967,6 +1009,7 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         GetAvailableAuthConnInfoByUuid(uuid.c_str(), info.connInfo.type, &info.connInfo);
+
         return true;
     }
 
@@ -991,7 +1034,7 @@ namespace OHOS {
 
     static bool g_isInit = false;
 
-    bool AuthDeviceInitFuzzTest(const uint8_t *data, size_t size)
+    bool AuthDeviceInitFuzzTest()
     {
         if (g_isInit) {
             return true;
@@ -1004,19 +1047,21 @@ namespace OHOS {
         AuthDeviceInit(&transCb);
         AuthDeviceDeinit();
         g_isInit = true;
+
         return true;
     }
 
-    bool GenerateUdidHashFuzzTest(const uint8_t *data, size_t size)
+    bool GenerateUdidHashFuzzTest()
     {
         string udid;
         GenerateString(udid);
         uint8_t hash[UDID_HASH_LEN] = {0};
         GenerateUdidHash(udid.c_str(), hash);
+
         return true;
     }
 
-    bool ProcessEmptySessionKeyFuzzTest(const uint8_t *data, size_t size)
+    bool ProcessEmptySessionKeyFuzzTest()
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
@@ -1033,10 +1078,11 @@ namespace OHOS {
             DelAuthManager(auth, auth->connInfo[info.connInfo.type].type);
         }
         ProcessEmptySessionKey(&info, index, info.isServer, &key);
+
         return true;
     }
 
-    bool HandleReconnectResultFuzzTest(const uint8_t *data, size_t size)
+    bool HandleReconnectResultFuzzTest()
     {
         AuthRequest request = {0};
         GenerateUint32(request.requestId);
@@ -1044,70 +1090,77 @@ namespace OHOS {
         int32_t result = 0;
         int32_t type = (int32_t)AUTH_LINK_TYPE_WIFI;
         HandleReconnectResult(&request, connId, result, type);
+        
         return true;
     }
 }
 
-static void ProcessFuzzRequest(const uint8_t *data, size_t size)
+static void ProcessFuzzRequest()
 {
-    OHOS::AuthDeviceInitFuzzTest(data, size);
-    OHOS::NewAuthManagerFuzzTest(data, size);
-    OHOS::GetAuthManagerByAuthIdFuzzTest(data, size);
-    OHOS::RemoveAuthManagerByAuthIdFuzzTest(data, size);
-    OHOS::RemoveNotPassedAuthManagerByUdidFuzzTest(data, size);
-    OHOS::GetAuthConnInfoByUuidFuzzTest(data, size);
-    OHOS::GetLatestIdByConnInfoFuzzTest(data, size);
-    OHOS::GetActiveAuthIdByConnInfoFuzzTest(data, size);
-    OHOS::GetDeviceAuthManagerFuzzTest(data, size);
-    OHOS::AuthManagerSetSessionKeyFuzzTest(data, size);
-    OHOS::AuthManagerGetSessionKeyFuzzTest(data, size);
-    OHOS::AuthNotifyAuthPassedFuzzTest(data, size);
-    OHOS::AuthManagerSetAuthPassedFuzzTest(data, size);
-    OHOS::AuthManagerSetAuthFailedFuzzTest(data, size);
-    OHOS::AuthManagerSetAuthFinishedFuzzTest(data, size);
-    OHOS::AuthGenRequestIdFuzzTest(data, size);
-    OHOS::AuthHandleLeaveLNNFuzzTest(data, size);
-    OHOS::TryGetBrConnInfoFuzzTest(data, size);
-    OHOS::AuthDeviceGetPreferConnInfoFuzzTest(data, size);
-    OHOS::AuthDeviceGetConnInfoByTypeFuzzTest(data, size);
-    OHOS::AuthDeviceGetP2pConnInfoFuzzTest(data, size);
-    OHOS::AuthDeviceGetHmlConnInfoFuzzTest(data, size);
-    OHOS::AuthDeviceCheckConnInfoFuzzTest(data, size);
-    OHOS::AuthGetLatestAuthSeqListByTypeFuzzTest(data, size);
-    OHOS::AuthGetLatestAuthSeqListFuzzTest(data, size);
-    OHOS::GetHmlOrP2pAuthHandleFuzzTest(data, size);
-    OHOS::AuthDeviceGetLatestIdByUuidFuzzTest(data, size);
-    OHOS::AuthDeviceGetIdByConnInfoFuzzTest(data, size);
-    OHOS::AuthDeviceGetIdByUuidFuzzTest(data, size);
-    OHOS::AuthDeviceGetAuthHandleByIndexFuzzTest(data, size);
-    OHOS::AuthGetEncryptSizeFuzzTest(data, size);
-    OHOS::AuthGetDecryptSizeFuzzTest(data, size);
-    OHOS::AuthDeviceSetP2pMacFuzzTest(data, size);
-    OHOS::FindAuthManagerByUdidFuzzTest(data, size);
-    OHOS::FindAuthManagerByConnIdFuzzTest(data, size);
-    OHOS::DestroyAuthManagerListFuzzTest(data, size);
-    OHOS::SetAuthConnIdFuzzTest(data, size);
-    OHOS::SetAuthP2pMacFuzzTest(data, size);
-    OHOS::RemoveAuthManagerByConnInfoFuzzTest(data, size);
-    OHOS::GetAvailableAuthConnInfoByUuidFuzzTest(data, size);
-    OHOS::GenerateUdidHashFuzzTest(data, size);
-    OHOS::GetAuthManagerByConnInfoFuzzTest(data, size);
-    OHOS::GetAuthIdByConnIdFuzzTest(data, size);
-    OHOS::AuthSendKeepaliveOptionFuzzTest(data, size);
-    OHOS::AuthFlushDeviceFuzzTest(data, size);
-    OHOS::ProcessEmptySessionKeyFuzzTest(data, size);
-    OHOS::HandleReconnectResultFuzzTest(data, size);
+    OHOS::AuthDeviceInitFuzzTest();
+    OHOS::NewAuthManagerFuzzTest();
+    OHOS::GetAuthManagerByAuthIdFuzzTest();
+    OHOS::RemoveAuthManagerByAuthIdFuzzTest();
+    OHOS::RemoveNotPassedAuthManagerByUdidFuzzTest();
+    OHOS::GetAuthConnInfoByUuidFuzzTest();
+    OHOS::GetLatestIdByConnInfoFuzzTest();
+    OHOS::GetActiveAuthIdByConnInfoFuzzTest();
+    OHOS::GetDeviceAuthManagerFuzzTest();
+    OHOS::AuthManagerSetSessionKeyFuzzTest();
+    OHOS::AuthManagerGetSessionKeyFuzzTest();
+    OHOS::AuthNotifyAuthPassedFuzzTest();
+    OHOS::AuthManagerSetAuthPassedFuzzTest();
+    OHOS::AuthManagerSetAuthFailedFuzzTest();
+    OHOS::AuthManagerSetAuthFinishedFuzzTest();
+    OHOS::AuthGenRequestIdFuzzTest();
+    OHOS::AuthHandleLeaveLNNFuzzTest();
+    OHOS::TryGetBrConnInfoFuzzTest();
+    OHOS::AuthDeviceGetPreferConnInfoFuzzTest();
+    OHOS::AuthDeviceGetConnInfoByTypeFuzzTest();
+    OHOS::AuthDeviceGetP2pConnInfoFuzzTest();
+    OHOS::AuthDeviceGetHmlConnInfoFuzzTest();
+    OHOS::AuthDeviceCheckConnInfoFuzzTest();
+    OHOS::AuthGetLatestAuthSeqListByTypeFuzzTest();
+    OHOS::AuthGetLatestAuthSeqListFuzzTest();
+    OHOS::GetHmlOrP2pAuthHandleFuzzTest();
+    OHOS::AuthDeviceGetLatestIdByUuidFuzzTest();
+    OHOS::AuthDeviceGetIdByConnInfoFuzzTest();
+    OHOS::AuthDeviceGetIdByUuidFuzzTest();
+    OHOS::AuthDeviceGetAuthHandleByIndexFuzzTest();
+    OHOS::AuthGetEncryptSizeFuzzTest();
+    OHOS::AuthGetDecryptSizeFuzzTest();
+    OHOS::AuthDeviceSetP2pMacFuzzTest();
+    OHOS::FindAuthManagerByUdidFuzzTest();
+    OHOS::FindAuthManagerByConnIdFuzzTest();
+    OHOS::DestroyAuthManagerListFuzzTest();
+    OHOS::SetAuthConnIdFuzzTest();
+    OHOS::SetAuthP2pMacFuzzTest();
+    OHOS::RemoveAuthManagerByConnInfoFuzzTest();
+    OHOS::GetAvailableAuthConnInfoByUuidFuzzTest();
+    OHOS::GenerateUdidHashFuzzTest();
+    OHOS::GetAuthManagerByConnInfoFuzzTest();
+    OHOS::GetAuthIdByConnIdFuzzTest();
+    OHOS::AuthSendKeepaliveOptionFuzzTest();
+    OHOS::AuthFlushDeviceFuzzTest();
+    OHOS::ProcessEmptySessionKeyFuzzTest();
+    OHOS::HandleReconnectResultFuzzTest();
 }
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size == 0) {
+        return 0;
+    }
+    
     /* Run your code on data */
     int32_t ret = FuzzEnvInit(data, size);
     if (ret != 0) {
         return ret;
     }
-    ProcessFuzzRequest(data, size);
+
+    ProcessFuzzRequest();
     FuzzEnvDeinit();
+    
     return 0;
 }

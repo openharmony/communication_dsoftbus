@@ -530,7 +530,8 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
     if (registedHbType == HEARTBEAT_TYPE_BLE_V1) {
         return RelayHeartbeatV1Split(hbFsm, msgPara, wakeupFlag, registedHbType);
     }
-    if (strlen(msgPara->callerId) != 0 && strcmp(msgPara->callerId, HB_SUPER_DEVICE_CALLER_ID) == 0) {
+    if (strlen(msgPara->callerId) != 0 && (strcmp(msgPara->callerId, HB_SUPER_DEVICE_CALLER_ID) == 0 ||
+        strcmp(msgPara->callerId, HB_USER_SWITCH_CALLER_ID) == 0)) {
         return RelayHeartbeatV1Split(hbFsm, msgPara, wakeupFlag, registedHbType);
     }
     return OtherHeartbeatSplit(hbFsm, msgPara, wakeupFlag, registedHbType);
@@ -613,13 +614,20 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         return SOFTBUS_OK;
     }
     LnnRemoveSendEndMsg(hbFsm, registedHbType, wakeupFlag, msgPara->isRelay, &isRemoved);
-    if (!isRemoved) {
+    bool isUserSwitch = (strlen(msgPara->callerId) != 0 && strcmp(msgPara->callerId, HB_USER_SWITCH_CALLER_ID) == 0) ?
+        true : false;
+    if (!isUserSwitch && !isRemoved) {
         LNN_LOGW(LNN_HEART_BEAT,
             "HB send once is beginning, hbType=%{public}d, wakeupFlag=%{public}d, isRelay=%{public}d", msgPara->hbType,
             wakeupFlag, msgPara->isRelay);
         return SOFTBUS_OK;
     }
-    LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+    if (isUserSwitch) {
+        LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+        LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_END);
+    } else {
+        LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+    }
     bool isRelayV0 = msgPara->isRelay && ((registedHbType & HEARTBEAT_TYPE_BLE_V0) == HEARTBEAT_TYPE_BLE_V0);
     if (msgPara->isDirectBoardcast) {
         if (SendDirectBoardcast(hbFsm, msgPara, mode, registedHbType, isRelayV0) != SOFTBUS_OK) {
@@ -1038,6 +1046,19 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
     };
     if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, &msgPara, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB start heartbeat fail, type=%{public}d", hbType);
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+{
+    if (msgPara == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, msgPara, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB start heartbeat fail, type=%{public}d", msgPara->hbType);
         return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
     return SOFTBUS_OK;

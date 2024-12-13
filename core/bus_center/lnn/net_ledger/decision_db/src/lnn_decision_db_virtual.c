@@ -26,9 +26,10 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
 {
     (void)udid;
+    (void)localUserId;
 
     LNN_LOGE(LNN_LEDGER, "remove trusted dev info not implemented");
     return SOFTBUS_NOT_IMPLEMENT;

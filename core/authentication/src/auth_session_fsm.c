@@ -268,6 +268,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.idType = EXCHANGE_UDID;
     if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
+        SoftBusFree(authFsm);
         return NULL;
     }
     if (!isServer) {
@@ -1206,9 +1207,10 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     }
     char *anonyUdid = NULL;
     Anonymize(authFsm->info.udid, &anonyUdid);
-    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), authFsm->info.userId);
     AnonymizeFree(anonyUdid);
-    return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid);
+    return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid, authFsm->info.userId);
 }
 
 static void DeviceAuthStateEnter(FsmStateMachine *fsm)

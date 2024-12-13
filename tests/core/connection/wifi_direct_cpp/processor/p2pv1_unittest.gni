@@ -20,13 +20,6 @@ current_path = rebase_path(".")
 
 processorv1_ut_include_dirs = [
   "$current_path",
-
-  "//third_party/cJSON",
-  "//third_party/json/include",
-  "//third_party/googletest/googletest/include",
-  "//third_party/googletest/googletest/src",
-  "//third_party/bounds_checking_function/include",
-
   "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
   "$dsoftbus_root_path/core/authentication/include",

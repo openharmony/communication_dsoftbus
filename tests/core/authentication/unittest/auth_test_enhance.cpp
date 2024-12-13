@@ -62,6 +62,7 @@ const AuthConnCallback g_connCallback = {
     .onConnOpenFailed = LnnConnectInterfaceMock::onConnOpenFailed,
 };
 static const int32_t MILLIS = 15;
+static constexpr int32_t DEFALUT_USERID = 100;
 
 class AuthEnhanceMockTest : public testing::Test {
 public:
@@ -134,7 +135,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     ON_CALL(hichainMock, GetLnnTriggerInfo(_)).WillByDefault(Return());
-    int32_t ret = HichainStartAuth(authSeq, udid, uid);
+    int32_t ret = HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

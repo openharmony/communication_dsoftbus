@@ -97,9 +97,9 @@ void LnnOnOhosAccountLogout(void)
     HeartBeatCtrlStaticInterface()->LnnOnOhosAccountLogout();
 }
 
-void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
+void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
-    HeartBeatCtrlStaticInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
+    HeartBeatCtrlStaticInterface()->LnnUpdateOhosAccount(reason);
 }
 
 TrustedReturnType AuthHasTrustedRelation(void)
@@ -250,6 +250,16 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
 void LnnUpdateDeviceName(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnUpdateDeviceName();
+}
+
+int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStartHbByTypeAndStrategyEx(msgPara);
+}
+
+void RegisterNameMonitor(void)
+{
+    return HeartBeatCtrlStaticInterface()->RegisterNameMonitor();
 }
 }
 } // namespace OHOS

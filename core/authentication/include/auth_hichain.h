@@ -34,13 +34,13 @@ extern "C" {
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);
-    void (*onDeviceNotTrusted)(const char *udid);
+    void (*onDeviceNotTrusted)(const char *udid, int32_t localUserId);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } TrustDataChangeListener;
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid);
+int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int32_t userId);
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
 uint32_t HichainGetJoinedGroups(int32_t groupType);
 int32_t RegHichainSaStatusListener(void);

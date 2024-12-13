@@ -34,6 +34,7 @@
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
@@ -45,7 +46,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
-
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_broadcast_type.h"
@@ -149,7 +150,7 @@ static void HbRefreshConditionState(void)
     if (SoftBusGetBtState() == BLE_ENABLE) {
         g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
     }
-    LnnUpdateOhosAccount(false);
+    LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
     if (!LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
     }
@@ -536,7 +537,7 @@ static void HbDelayConditionChanged(void *para)
 
     g_isCloudSyncEnd = true;
     LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     g_hbConditionState.heartbeatEnable = IsEnableSoftBusHeartbeat();
@@ -655,7 +656,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
         (void)LnnGenerateCeParams();
         AuthLoadDeviceKey();
-        LnnUpdateOhosAccount(false);
+        LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
             LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
         }
@@ -839,6 +840,21 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void RefreshBleBroadcastByUserSwitched()
+{
+    LnnProcessSendOnceMsgPara msgPara = {
+        .hbType = HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
+        .strategyType = STRATEGY_HB_SEND_SINGLE,
+        .isRelay = false,
+        .isSyncData = false,
+        .isDirectBoardcast = false,
+        .callerId = HB_USER_SWITCH_CALLER_ID,
+    };
+    if (LnnStartHbByTypeAndStrategyEx(&msgPara) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "refresh ble broadcast fail");
+    }
+}
+
 static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
@@ -866,9 +882,11 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
-                LnnUpdateOhosAccount(true);
-                HbConditionChanged(false);
+                RegisterNameMonitor();
                 LnnUpdateDeviceName();
+                LnnUpdateOhosAccount(UPDATE_USER_SWITCH);
+                HbConditionChanged(false);
+                RefreshBleBroadcastByUserSwitched();
                 if (IsHeartbeatEnable()) {
                     DfxRecordTriggerTime(USER_SWITCHED, EVENT_STAGE_LNN_USER_SWITCHED);
                 }
@@ -1119,7 +1137,7 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     if (type == UPDATE_HB_ACCOUNT_INFO && !LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
         LNN_LOGI(LNN_HEART_BEAT, "account is login");
-        HbConditionChanged(true);
+        HbConditionChanged(false);
     }
     LnnUpdateSendInfoStrategy(type);
 }

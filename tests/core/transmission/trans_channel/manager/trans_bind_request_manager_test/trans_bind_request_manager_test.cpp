@@ -87,9 +87,9 @@ HWTEST_F(TransBindRequestManagerTest, GetDeniedFlagByPeer001, TestSize.Level1)
     }
     ret = GetDeniedFlagByPeer(g_mySocketName, g_peerSocketName, g_peerNetworkid);
     EXPECT_EQ(true, ret);
-    BindRequestParam *bindRequestParam = (BindRequestParam *)SoftBusCalloc(sizeof(BindRequestParam));
-    GenerateParam(g_mySocketName, g_peerSocketName, g_peerNetworkid, bindRequestParam);
-    TransResetBindDeniedFlag(bindRequestParam);
+    BindRequestParam bindRequestParam = { {0} };
+    GenerateParam(g_mySocketName, g_peerSocketName, g_peerNetworkid, &bindRequestParam);
+    TransResetBindDeniedFlag(&bindRequestParam);
     ret = GetDeniedFlagByPeer(g_mySocketName, g_peerSocketName, g_peerNetworkid);
     EXPECT_EQ(false, ret);
 }

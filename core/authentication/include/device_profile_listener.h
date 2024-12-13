@@ -16,6 +16,8 @@
 #ifndef DEVICE_PROFILE_LISTENER_H
 #define DEVICE_PROFILE_LISTENER_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -23,7 +25,7 @@ extern "C" {
 #endif
 typedef struct {
     void (*onDeviceProfileAdd)(const char *udid, const char *groupInfo);
-    void (*onDeviceProfileDeleted)(const char *udid);
+    void (*onDeviceProfileDeleted)(const char *udid, int32_t localUserId);
 } DeviceProfileChangeListener;
 
 #ifdef __cplusplus

@@ -73,6 +73,7 @@ public:
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) override;
+    int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) override;
 
 protected:
     void OnStart() override;

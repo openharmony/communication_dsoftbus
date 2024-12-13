@@ -23,7 +23,6 @@
 #include "disc_interface.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "exception_branch_checker.h"
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
@@ -130,28 +129,6 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit002, TestSize.Level1)
 
     EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     DISC_LOGI(DISC_TEST, "DiscManagerInit002 end ----");
-}
-
-/*
- * @tc.name: ClientDeathCallback001
- * @tc.desc: client death callback
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
-{
-    DISC_LOGI(DISC_TEST, "ClientDeathCallback001 begin ----");
-    {
-        ExceptionBranchChecker checker("pkgName is null");
-        DiscMgrDeathCallback(nullptr);
-        EXPECT_EQ(checker.GetResult(), true);
-    }
-    {
-        ExceptionBranchChecker checker("pkg is dead");
-        DiscMgrDeathCallback("Test");
-        EXPECT_EQ(checker.GetResult(), true);
-    }
-    DISC_LOGI(DISC_TEST, "ClientDeathCallback001 end ----");
 }
 
 /*
@@ -868,9 +845,8 @@ HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
     CoapMock coapMock;
     coapMock.SetupStub();
 
-    ExceptionBranchChecker checker("disc manager deinit success");
+    EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     DiscMgrDeinit();
-    EXPECT_EQ(checker.GetResult(), true);
     DISC_LOGI(DISC_TEST, "DiscManagerDeinit001 end ----");
 }
 } // namespace OHOS

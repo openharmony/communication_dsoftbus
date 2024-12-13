@@ -78,7 +78,7 @@ void InterfaceManager::InitInterface(InterfaceInfo::InterfaceType type)
     std::string name;
     int32_t capability = 0;
     if (type == InterfaceInfo::InterfaceType::P2P) {
-        name = IF_NAME_P2P0;
+        name = IF_NAME_P2P;
         capability = static_cast<int32_t>(LinkInfo::LinkMode::GO) | static_cast<uint32_t>(LinkInfo::LinkMode::GC);
     }
     if (type == InterfaceInfo::InterfaceType::HML) {

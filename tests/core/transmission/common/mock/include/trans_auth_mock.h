@@ -53,7 +53,7 @@ public:
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
 
-    virtual void AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta, AuthHandle *authHandle) = 0;
+    virtual void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta) = 0;
 
@@ -120,7 +120,7 @@ public:
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD4(AuthGetIdByP2pMac, int64_t (const char *, AuthLinkType, bool, bool));
 
-    MOCK_METHOD1(AuthGetEncryptSize, uint32_t (int64_t authId, uint32_t inLen));
+    MOCK_METHOD2(AuthGetEncryptSize, uint32_t (int64_t authId, uint32_t inLen));
     MOCK_METHOD1(AuthGetDecryptSize, uint32_t (uint32_t));
 
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char *));
@@ -130,7 +130,7 @@ public:
     MOCK_METHOD2(AuthGetVersion, int32_t (int64_t, SoftBusVersion *));
     MOCK_METHOD2(AuthGetMetaType,     int32_t (int64_t, bool *));
 
-    MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *, uint32_t, int32_t,
+    MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const AuthKeyInfo *, uint32_t, int32_t,
         const AuthVerifyCallback *));
     MOCK_METHOD1(AuthMetaReleaseVerify, void (int64_t));
     MOCK_METHOD5(AuthEncrypt, int32_t (AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));

@@ -215,4 +215,27 @@ HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_04, TestSize.Level0)
     interfaceInfo.SetP2pGroupConfig(groupConfig);
     EXPECT_EQ(interfaceInfo.GetP2pGroupConfig(), groupConfig);
 }
+
+/*
+ * @tc.name: RefreshIsAvailable_01
+ * @tc.desc: Test RefreshIsAvailable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceInfoTest, RefreshIsAvailable_01, TestSize.Level0)
+{
+    InterfaceInfo interfaceInfo;
+    interfaceInfo.SetIsEnable(true);
+
+    interfaceInfo.RefreshIsAvailable();
+    EXPECT_EQ(interfaceInfo.IsAvailable(), true);
+
+    interfaceInfo.SetIsEnable(false);
+    interfaceInfo.RefreshIsAvailable();
+    EXPECT_EQ(interfaceInfo.IsAvailable(), false);
+
+    interfaceInfo.SetRole(LinkInfo::LinkMode::GC);
+    interfaceInfo.RefreshIsAvailable();
+    EXPECT_EQ(interfaceInfo.IsAvailable(), false);
+}
 } // namespace OHOS::SoftBus
