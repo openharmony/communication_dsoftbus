@@ -50,6 +50,7 @@ ohos_fuzztest("LnnNetBuilderFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
