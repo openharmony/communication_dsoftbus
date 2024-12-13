@@ -49,6 +49,7 @@ constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
 constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
 constexpr char UUID_TEST[UUID_BUF_LEN] = "0123456789ABC";
 constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
+static constexpr int32_t DEFALUT_USERID = 100;
 
 #define LINK_TYPE      8
 #define CLIENT_PORT    6666
@@ -151,11 +152,11 @@ HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
     const char *uid = "testdata";
     int32_t ret;
 
-    ret = HichainStartAuth(authSeq, nullptr, uid);
+    ret = HichainStartAuth(authSeq, nullptr, uid, DEFALUT_USERID);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainStartAuth(authSeq, udid, nullptr);
+    ret = HichainStartAuth(authSeq, udid, nullptr, DEFALUT_USERID);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)HichainStartAuth(authSeq, udid, uid);
+    (void)HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
 }
 
 /*
