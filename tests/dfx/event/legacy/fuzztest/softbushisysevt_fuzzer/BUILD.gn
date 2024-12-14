@@ -27,6 +27,7 @@ ohos_fuzztest("SoftBusHiSysEvtFuzzTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   sources = [ "softbushisysevt_fuzzer.cpp" ]
@@ -41,11 +42,10 @@ ohos_fuzztest("SoftBusHiSysEvtFuzzTest") {
 
   deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
 
-  if (is_standard_system) {
-    external_deps = [ "hilog:libhilog" ]
-  } else {
-    external_deps = [ "hilog:libhilog" ]
-  }
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################
