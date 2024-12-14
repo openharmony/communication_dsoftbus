@@ -228,7 +228,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         extra.errcode = ret;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "channelId is invalid");
-        ConnShutdownSocket(cfd);
+        TransTdcSocketReleaseFd(cfd);
         return ret;
     }
     ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
@@ -237,7 +237,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         extra.errcode = ret;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "create srv data buf node failed.");
-        ConnShutdownSocket(cfd);
+        TransTdcSocketReleaseFd(cfd);
         return ret;
     }
     ret = CreateSessionConnNode(module, cfd, channelId, clientAddr);
@@ -247,7 +247,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
-        ConnShutdownSocket(cfd);
+        TransTdcSocketReleaseFd(cfd);
         return ret;
     }
     extra.result = EVENT_STAGE_RESULT_OK;
@@ -289,7 +289,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         }
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
-        ConnShutdownSocket(fd);
+        TransTdcSocketReleaseFd(fd);
         (void)NotifyChannelOpenFailed(channelId, ret);
     } else {
         if (conn.serverSide) {
@@ -341,7 +341,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "start verify session failed, ret=%{public}d", ret);
         DelTrigger(conn->listenMod, fd, READ_TRIGGER);
-        ConnShutdownSocket(fd);
+        TransTdcSocketReleaseFd(fd);
         (void)NotifyChannelOpenFailed(conn->channelId, ret);
         TransDelSessionConnById(conn->channelId);
         TransSrvDelDataBufNode(conn->channelId);
@@ -353,7 +353,7 @@ static void ProcessSocketExceptionEvent(SessionConn *conn, int fd)
 {
     TRANS_LOGE(TRANS_CTRL, "exception occurred.");
     DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
-    ConnShutdownSocket(fd);
+    TransTdcSocketReleaseFd(fd);
     TransDelSessionConnById(conn->channelId);
     TransSrvDelDataBufNode(conn->channelId);
 }
@@ -374,7 +374,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
             DelTrigger((ListenerModule)i, fd, EXCEPT_TRIGGER);
         }
         SoftBusFree(conn);
-        ConnShutdownSocket(fd);
+        TransTdcSocketReleaseFd(fd);
         return SOFTBUS_INVALID_FD;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
@@ -413,4 +413,18 @@ int32_t TransTdcStopSessionListener(ListenerModule module)
 {
     TransTdcStopSessionProc(module);
     return StopBaseListener(module);
+}
+
+void TransTdcSocketReleaseFd(int32_t fd)
+{
+    if (fd < 0) {
+        TRANS_LOGI(TRANS_SDK, "fd less than zero");
+        return;
+    }
+    DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
+    if (ConnGetSocketError(fd) == SOFTBUS_CONN_BAD_FD) {
+        TRANS_LOGI(TRANS_SDK, "fd is bad fd=%{public}d", fd);
+        return;
+    }
+    ConnShutdownSocket(fd);
 }
