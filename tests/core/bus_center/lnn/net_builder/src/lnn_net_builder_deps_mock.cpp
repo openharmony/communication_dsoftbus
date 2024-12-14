@@ -213,9 +213,9 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return GetNetBuilderDepsInterface()->LnnGetNodeInfoById(id, type);
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
 {
-    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo);
+    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo, connectionType);
 }
 
 int32_t LnnAddMetaInfo(NodeInfo *info)
@@ -725,6 +725,11 @@ void RegisterOOBEMonitor(void *p)
 bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
 {
     return GetNetBuilderDepsInterface()->CheckRemoteBasicInfoChanged(newNodeInfo);
+}
+
+int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability)
+{
+    return GetNetBuilderDepsInterface()->ProcessBleOnline(nodeInfo, connAddr, authCapability);
 }
 
 int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)

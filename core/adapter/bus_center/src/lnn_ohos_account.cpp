@@ -124,6 +124,7 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
+    LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
     if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "update db recovery fail");
     }
@@ -147,6 +148,7 @@ void LnnOnOhosAccountLogout(void)
         "accountHash changed. accountHash=[%{public}02X, %{public}02X]", accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
+    LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
     if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "update db recovery fail");
     }

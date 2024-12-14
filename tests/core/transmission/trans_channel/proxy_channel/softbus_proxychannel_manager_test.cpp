@@ -916,34 +916,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, ReleaseChannelInfoTest001, TestSize.Lev
 }
 
 /**@
- * @tc.name: TransProxyProcessHandshakeTest001
- * @tc.desc: test trans proxy process
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessHandshakeTest001, TestSize.Level1)
-{
-    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(nullptr != chan);
-    chan->appInfo.appType = APP_TYPE_NORMAL;
-    chan->channelId = TEST_VALID_CHANNEL_ID;
-    chan->appInfo.fastTransDataSize = TEST_FAST_DATA_SIZE;
-    chan->appInfo.fastTransData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(chan->appInfo.fastTransDataSize)));
-    ASSERT_TRUE(nullptr != chan->appInfo.fastTransData);
-
-    ProxyMessage *msg = reinterpret_cast<ProxyMessage *>(SoftBusCalloc(sizeof(ProxyMessage)));
-    ASSERT_TRUE(nullptr != msg);
-    msg->msgHead.cipher = TEST_VALID_CHANNEL_ID;
-    msg->msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
-    msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-
-    int32_t ret = TransProxyProcessHandshake(chan, msg);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ReleaseChannelInfo(chan);
-    SoftBusFree(msg);
-}
-
-/**@
  * @tc.name: TransProxyProcessHandshakeMsgTest001
  * @tc.desc: test trans proxy process handshake msg
  * @tc.type: FUNC

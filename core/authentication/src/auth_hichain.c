@@ -66,7 +66,7 @@ typedef struct {
 
 static TrustDataChangeListener g_dataChangeListener;
 
-static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClient)
+static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClient, int32_t userId)
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
@@ -82,6 +82,9 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
         AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
         cJSON_Delete(msg);
         return NULL;
+    }
+    if (userId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", userId)) {
+        AUTH_LOGE(AUTH_HICHAIN, "add json userId fail");
     }
 #ifdef AUTH_ACCOUNT
     AUTH_LOGI(AUTH_HICHAIN, "in account auth mode");
@@ -513,13 +516,13 @@ void UnregTrustDataChangeListener(void)
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
+int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int32_t userId)
 {
     if (udid == NULL || uid == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *authParams = GenDeviceLevelParam(udid, uid, true);
+    char *authParams = GenDeviceLevelParam(udid, uid, true, userId);
     if (authParams == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_CREATE_JSON_ERR;

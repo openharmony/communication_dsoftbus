@@ -97,9 +97,9 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
     bool isInnerRequest = false;
     DiscManagerInterfaceMock discMock;
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
     int32_t ret = LnnPublishService(pkgName, &info, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
 }
 
 /*
@@ -117,16 +117,16 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level
     int32_t ret = 0;
 
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
-    EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
     EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -179,20 +179,20 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Lev
         .serverCb = g_discInnerCb,
     };
     (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
-    EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL);
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
-    EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);

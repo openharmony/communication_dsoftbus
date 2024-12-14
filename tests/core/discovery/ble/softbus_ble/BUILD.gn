@@ -106,6 +106,7 @@ ohos_unittest("DiscBleUtilsTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]

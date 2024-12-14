@@ -257,7 +257,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
     return SOFTBUS_OK;
 }
 
-static void CloseTcpDirectFd(int fd)
+void CloseTcpDirectFd(int32_t fd)
 {
 #ifndef __LITEOS_M__
     ConnCloseSocket(fd);
@@ -268,6 +268,8 @@ static void CloseTcpDirectFd(int fd)
 
 static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
 {
+    SessionConn conn;
+    int32_t getInfoRet = GetSessionConnById(channelId, &conn);
     if (ret != SOFTBUS_OK) {
         TransEventExtra extra = {
             .socketName = NULL,
@@ -279,8 +281,8 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
             .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED
         };
-        SessionConn conn;
-        if (GetSessionConnById(channelId, &conn) != SOFTBUS_OK || !conn.serverSide) {
+        
+        if (getInfoRet != SOFTBUS_OK || !conn.serverSide) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -290,6 +292,9 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         TransTdcSocketReleaseFd(fd);
         (void)NotifyChannelOpenFailed(channelId, ret);
     } else {
+        if (conn.serverSide) {
+            return;
+        }
         CloseTcpDirectFd(fd);
     }
     TransDelSessionConnById(channelId);

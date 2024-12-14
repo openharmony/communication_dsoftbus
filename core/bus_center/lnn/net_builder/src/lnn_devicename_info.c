@@ -281,6 +281,7 @@ static void HandlerGetDeviceName(const char *deviceName)
         }
     }
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
+    LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_NAME_CHANGED);
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "get online node fail");
@@ -506,6 +507,7 @@ static void UpdataLocalFromSetting(void *p)
     UpdateLocalExtendDeviceName(deviceName, unifiedName, unifiedDefaultName, nickName);
     RegisterNameMonitor();
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
+    LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_NAME_CHANGED);
     LnnNotifyLocalNetworkIdChanged();
     DumpLocalExtendDeviceName(deviceName, unifiedName, unifiedDefaultName, nickName);
 }

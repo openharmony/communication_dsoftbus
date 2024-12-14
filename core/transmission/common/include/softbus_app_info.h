@@ -124,6 +124,7 @@ typedef struct {
     int32_t errorCode;
     uint64_t callingTokenId; // for transmission access control
     int32_t osType;
+    int32_t waitOpenReplyCnt;
     const uint8_t *fastTransData;
     int64_t timeStart;
     int64_t connectedStart;

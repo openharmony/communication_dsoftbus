@@ -59,6 +59,7 @@ ohos_unittest("TransLaneManagerTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]

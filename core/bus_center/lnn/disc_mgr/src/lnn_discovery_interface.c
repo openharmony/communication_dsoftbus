@@ -45,7 +45,8 @@ static void DfxRecordLnnDiscServiceEnd(int32_t serverType, const char *packageNa
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, LNN_BUILDER, "LnnPublishService: ram test abort");
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        !SoftBusIsRamTest(), SOFTBUS_RAM_TEST_ABORT, LNN_BUILDER, "LnnPublishService: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
         if ((ret = DiscPublishService(pkgName, info)) != SOFTBUS_OK) {
@@ -85,7 +86,8 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
 int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
     bool isInnerRequest)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, LNN_BUILDER, "LnnStartDiscDevice: ram test abort");
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        !SoftBusIsRamTest(), SOFTBUS_RAM_TEST_ABORT, LNN_BUILDER, "LnnStartDiscDevice: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
         if ((ret = DiscStartDiscovery(pkgName, info, &cb->serverCb)) != SOFTBUS_OK) {

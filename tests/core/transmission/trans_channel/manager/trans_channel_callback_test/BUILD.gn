@@ -52,6 +52,7 @@ ohos_unittest("TransChannelCallbackTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 
