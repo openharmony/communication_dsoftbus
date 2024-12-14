@@ -363,6 +363,17 @@
     ]
   },
   {
+    "SESSION_NAME": "carservice.distributedengine.rescueassist",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "PKG_NAME": "carservice.distributedengine",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "^com.*security.devicesec",
     "REGEXP": "true",
     "DEVID": "UDID",

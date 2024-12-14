@@ -79,6 +79,7 @@ ohos_unittest("TransProxyChannelTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
@@ -133,6 +134,7 @@ ohos_unittest("SoftbusTransProxyManagerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -153,6 +155,7 @@ ohos_unittest("SoftbusProxyChannelManagerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -213,6 +216,7 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -454,6 +458,7 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -514,6 +519,7 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -570,6 +576,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]

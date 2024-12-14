@@ -341,6 +341,7 @@ ohos_unittest("LNNNetBuilderTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -349,6 +350,7 @@ ohos_unittest("LNNNetBuilderTest") {
     external_deps = [
       "cJSON:cjson",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -879,6 +881,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -886,6 +889,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
   } else {
     external_deps = [
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1029,6 +1033,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1036,6 +1041,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
   } else {
     external_deps = [
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1187,6 +1193,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1195,6 +1202,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     external_deps = [
       "cJSON:cjson",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1255,6 +1263,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1263,6 +1272,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     external_deps = [
       "cJSON:cjson",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1330,6 +1340,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -1338,6 +1349,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     external_deps = [
       "cJSON:cjson",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -2092,6 +2104,7 @@ ohos_unittest("LNNDataCloudSyncTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -2100,6 +2113,7 @@ ohos_unittest("LNNDataCloudSyncTest") {
     external_deps = [
       "cJSON:cjson",
       "c_utils:utils",
+      "dsoftbus:softbus_client",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",

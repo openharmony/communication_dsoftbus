@@ -1120,9 +1120,10 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
     if (json == NULL) {
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    if (PackBroadcastCipherKeyInner(json, info) != SOFTBUS_OK) {
+    int32_t ret = PackBroadcastCipherKeyInner(json, info);
+    if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
-        return SOFTBUS_ERR;
+        return ret;
     }
     char *putValue = cJSON_PrintUnformatted(json);
     if (putValue == NULL) {
@@ -1133,7 +1134,7 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
     cJSON_Delete(json);
     int32_t dbId = g_dbId;
     LnnSetCloudAbility(true);
-    int32_t ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
+    ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
     cJSON_free(putValue);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);

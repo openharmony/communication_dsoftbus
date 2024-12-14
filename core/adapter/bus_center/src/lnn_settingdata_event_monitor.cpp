@@ -132,7 +132,7 @@ static int32_t GetUserDefinedDeviceName(std::shared_ptr<DataShare::DataShareHelp
     char *deviceName, uint32_t len)
 {
     int32_t osAccountId = GetActiveOsAccountIds();
-    if (osAccountId == SOFTBUS_ERR) {
+    if (osAccountId == SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED) {
         return SOFTBUS_NO_INIT;
     }
     std::string accountIdStr = std::to_string(osAccountId);
@@ -154,7 +154,7 @@ static void RegisterNameMonitorHelper(void)
     dataShareHelper->RegisterObserver(*uri, settingDataObserver);
 
     int32_t osAccountId = GetActiveOsAccountIds();
-    if (osAccountId == SOFTBUS_ERR) {
+    if (osAccountId == SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED) {
         return;
     }
     std::string accountIdStr = std::to_string(osAccountId);

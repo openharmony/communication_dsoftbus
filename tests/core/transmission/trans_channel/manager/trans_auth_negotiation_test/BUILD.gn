@@ -48,6 +48,7 @@ ohos_unittest("TransAuthNegotiateTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 

@@ -246,7 +246,6 @@ if (defined(ohos_lite)) {
   ohos_unittest("ClientBusCentManagerTest") {
     module_out_path = module_output_path
     sources = [
-      "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
       "client_bus_center_manager_mock.cpp",
       "client_bus_center_manager_test.cpp",
     ]

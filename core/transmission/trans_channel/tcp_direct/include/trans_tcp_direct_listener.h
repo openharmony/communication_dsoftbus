@@ -38,6 +38,8 @@ int32_t TransTdcStopSessionListener(ListenerModule module);
 
 void TransTdcSocketReleaseFd(int32_t fd);
 
+void CloseTcpDirectFd(int32_t fd);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

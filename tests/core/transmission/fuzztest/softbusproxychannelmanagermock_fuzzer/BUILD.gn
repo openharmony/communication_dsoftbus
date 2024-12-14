@@ -45,6 +45,7 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "googletest:gtest",
     "hilog:libhilog",

@@ -57,6 +57,7 @@ ohos_unittest("NstackxAdapterTest") {
   ]
 
   external_deps = [
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",

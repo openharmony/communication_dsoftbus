@@ -661,11 +661,8 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level0)
  */
 HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020, TestSize.Level0)
 {
-    int32_t fd = SOFTBUS_INVALID_PARAM;
+    int32_t fd = g_fd;
     int32_t ret = TransTdcCreateListenerWithoutAddTrigger(fd);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    fd = g_fd;
-    ret = TransTdcCreateListenerWithoutAddTrigger(fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

@@ -357,8 +357,7 @@ void AuthNotifyDeviceVerifyPassed(AuthHandle authHandle, const NodeInfo *nodeInf
         AUTH_LOGE(AUTH_FSM, "get auth manager failed");
         return;
     }
-    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P ||
-        auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P) {
         /* P2P auth no need notify to LNN. */
         DelDupAuthManager(auth);
         return;

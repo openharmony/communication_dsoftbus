@@ -254,6 +254,31 @@ static int32_t HandleServerOnNegotiate(int32_t socket, const ISocketListener *so
     return SOFTBUS_OK;
 }
 
+static int32_t HandleCacheQosEvent(int32_t socket, SessionListenerAdapter sessionCallback, bool isServer)
+{
+    if (isServer) {
+        TRANS_LOGD(TRANS_SDK, "server side no need to handle cache qos event");
+        return SOFTBUS_OK;
+    }
+    if (sessionCallback.socketClient.OnQos == NULL) {
+        TRANS_LOGD(TRANS_SDK, "no OnQos callback function socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
+    CachedQosEvent cachedQosEvent;
+    (void)memset_s(&cachedQosEvent, sizeof(CachedQosEvent), 0, sizeof(CachedQosEvent));
+    int32_t ret = ClientGetCachedQosEventBySocket(socket, &cachedQosEvent);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get cached qos event failed, ret=%{public}d", ret);
+        return ret;
+    }
+    if (cachedQosEvent.count > 0) {
+        TRANS_LOGI(TRANS_SDK, "trigger OnQos callback, socket=%{public}d", socket);
+        sessionCallback.socketClient.OnQos(
+            socket, cachedQosEvent.event, (const QosTV *)cachedQosEvent.qos, cachedQosEvent.count);
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleData *lifecycle)
 {
     if (lifecycle->sessionState == SESSION_STATE_CANCELLING) {
@@ -293,9 +318,13 @@ static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
     if (isServer) {
         return HandleServerOnNegotiate(sessionId, &sessionCallback.socketServer);
     } else if (isAsync) {
-        return HandleAsyncBindSuccess(sessionId, &sessionCallback.socketClient, &lifecycle);
+        ret = HandleAsyncBindSuccess(sessionId, &sessionCallback.socketClient, &lifecycle);
+        (void)HandleCacheQosEvent(sessionId, sessionCallback, isServer);
+        return ret;
     } else { // sync bind
-        return HandleSyncBindSuccess(sessionId, &lifecycle);
+        ret = HandleSyncBindSuccess(sessionId, &lifecycle);
+        (void)HandleCacheQosEvent(sessionId, sessionCallback, isServer);
+        return ret;
     }
 
     return SOFTBUS_OK;
@@ -377,7 +406,11 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     TRANS_LOGI(TRANS_SDK, "trigger session open failed callback, channelId=%{public}d, channelType=%{public}d",
         channelId, channelType);
     bool isServer = false;
-    (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get Socket Callback Adapter failed, ret=%{public}d", ret);
+        return ret;
+    }
     if (sessionCallback.isSocketListener) {
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         bool isAsync = true;
@@ -649,10 +682,17 @@ int32_t ClientTransOnQos(int32_t channelId, int32_t channelType, QoSEvent event,
         TRANS_LOGI(TRANS_SDK, "not report qos event on non-socket session");
         return SOFTBUS_OK;
     }
-    if (sessionCallback.socketClient.OnQos != NULL) {
+    if (sessionCallback.socketClient.OnQos == NULL) {
+        TRANS_LOGD(TRANS_SDK, "listener OnQos is NULL, sessionId=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
+    ret = ClientCacheQosEvent(socket, event, qos, count);
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_TRANS_NO_NEED_CACHE_QOS_EVENT) {
+        TRANS_LOGE(TRANS_SDK, "cache qos event failed, ret=%{public}d", ret);
+        return ret;
+    } else if (ret == SOFTBUS_TRANS_NO_NEED_CACHE_QOS_EVENT) {
         sessionCallback.socketClient.OnQos(socket, event, qos, count);
-        TRANS_LOGI(
-            TRANS_SDK, "successful report qos event to client socket=%{public}d, event=%{public}d", socket, event);
+        TRANS_LOGI(TRANS_SDK, "report qos event to client socket=%{public}d, event=%{public}d", socket, event);
     }
     return SOFTBUS_OK;
 }

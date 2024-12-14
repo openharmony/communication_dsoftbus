@@ -272,4 +272,12 @@ int32_t SoftBusServerProxyFrame::EvaluateQos(const char *peerNetworkId, TransDat
     (void)qosCount;
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    (void)eventType;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

@@ -21,10 +21,13 @@
 
 #include "client_bus_center_manager.h"
 #include "client_bus_center_manager_mock.h"
+#include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
 #include "softbus_error_code.h"
+
+#include "client_bus_center_manager.c"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -644,5 +647,446 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_001, TestSize.Le
     EXPECT_TRUE(StartTimeSyncInner(nullptr, NODE1_NETWORK_ID, LOW_ACCURACY, SHORT_PERIOD, &cb) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnTimeSyncResult(reinterpret_cast<const void *>(&info), retCode) == SOFTBUS_OK);
     BusCenterClientDeinit();
+}
+
+/*
+* @tc.name: REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
+* @tc.desc: reg data level change cb inner test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, TestSize.Level1)
+{
+    IDataLevelCb cb;
+    (void)memset_s(&cb, sizeof(IDataLevelCb), 0, sizeof(IDataLevelCb));
+    EXPECT_EQ(RegDataLevelChangeCbInner(nullptr, &cb), SOFTBUS_STRCPY_ERR);
+
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegDataLevelChangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(RegDataLevelChangeCbInner("pkgName", &cb), SOFTBUS_SERVER_NOT_INIT);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegDataLevelChangeCb(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(RegDataLevelChangeCbInner("pkgName", &cb), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: RESTART_REG_DATA_LEVEL_CHANGE_Test_001
+* @tc.desc: restart reg data level change test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, RESTART_REG_DATA_LEVEL_CHANGE_Test_001, TestSize.Level1)
+{
+    g_regDataLevelChangePkgName[0] = '\0';
+    EXPECT_NO_FATAL_FAILURE(RestartRegDataLevelChange());
+
+    g_regDataLevelChangePkgName[0] = '1';
+    g_regDataLevelChangePkgName[1] = '\0';
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegDataLevelChangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_NO_FATAL_FAILURE(RestartRegDataLevelChange());
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegDataLevelChangeCb(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(RestartRegDataLevelChange());
+}
+
+/*
+* @tc.name: UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
+* @tc.desc: unreg data level change cb inner test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregDataLevelChangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(UnregDataLevelChangeCbInner(nullptr), SOFTBUS_SERVER_NOT_INIT);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregDataLevelChangeCb(_)).WillOnce(Return(SOFTBUS_OK));
+    auto ret = UnregDataLevelChangeCbInner(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SET_DATA_LEVEL_INNER_Test_001
+* @tc.desc: set data level inner test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcSetDataLevel(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(SetDataLevelInner(nullptr), SOFTBUS_SERVER_NOT_INIT);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcSetDataLevel(_)).WillOnce(Return(SOFTBUS_OK));
+    auto ret = SetDataLevelInner(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001
+* @tc.desc: lnn on local network id changed test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    EXPECT_EQ(LnnOnLocalNetworkIdChanged(nullptr), SOFTBUS_INVALID_PARAM);
+
+    g_busCenterClient.isInit = false;
+    EXPECT_EQ(LnnOnLocalNetworkIdChanged("pkgName"), SOFTBUS_NO_INIT);
+
+    g_busCenterClient.isInit = true;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnLocalNetworkIdChanged("pkgName"), SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    auto ret = LnnOnLocalNetworkIdChanged("pkgName");
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    ret = LnnOnLocalNetworkIdChanged("pkgName");
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001
+* @tc.desc: lnn on node device trusted change test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    EXPECT_EQ(LnnOnNodeDeviceTrustedChange(nullptr, 0, nullptr, 0), SOFTBUS_INVALID_PARAM);
+
+    g_busCenterClient.isInit = false;
+    EXPECT_EQ(LnnOnNodeDeviceTrustedChange("pkgName", 0, nullptr, 0), SOFTBUS_NO_INIT);
+
+    g_busCenterClient.isInit = true;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnNodeDeviceTrustedChange("pkgName", 0, nullptr, 0), SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnNodeDeviceTrustedChange("pkgName", 0, nullptr, 0), SOFTBUS_OK);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnNodeDeviceTrustedChange("pkgName", 0, nullptr, 0), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001
+* @tc.desc: lnn on hichain proof exception test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    EXPECT_EQ(LnnOnHichainProofException(nullptr, nullptr, 0, 0, 0), SOFTBUS_INVALID_PARAM);
+
+    g_busCenterClient.isInit = false;
+    EXPECT_EQ(LnnOnHichainProofException("pkgName", nullptr, 0, 0, 0), SOFTBUS_NO_INIT);
+
+    g_busCenterClient.isInit = true;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnHichainProofException("pkgName", nullptr, 0, 0, 0), SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnHichainProofException("pkgName", nullptr, 0, 0, 0), SOFTBUS_OK);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnHichainProofException("pkgName", nullptr, 0, 0, 0), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_002
+* @tc.desc: lnn on time sync result test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    EXPECT_EQ(LnnOnTimeSyncResult(nullptr, 0), SOFTBUS_INVALID_PARAM);
+
+    g_busCenterClient.isInit = false;
+    EXPECT_EQ(LnnOnTimeSyncResult("info", 0), SOFTBUS_NETWORK_CLIENT_NOT_INIT);
+
+    g_busCenterClient.isInit = true;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnTimeSyncResult("info", 0), SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnTimeSyncResult("info", 0), SOFTBUS_OK);
+
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(LnnOnTimeSyncResult("info", 0), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_ON_DATA_LEVEL_CHANGED_Test_001
+* @tc.desc: lnn on data level changed test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_DATA_LEVEL_CHANGED_Test_001, TestSize.Level1)
+{
+    auto ptr = g_busCenterClient.dataLevelCb.onDataLevelChanged;
+    g_busCenterClient.dataLevelCb.onDataLevelChanged = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnOnDataLevelChanged(nullptr, nullptr));
+
+    g_busCenterClient.dataLevelCb.onDataLevelChanged = ptr;
+    EXPECT_NO_FATAL_FAILURE(LnnOnDataLevelChanged(nullptr, nullptr));
+}
+
+/*
+* @tc.name: DISC_RECOVERY_PUBLISH_Test_001
+* @tc.desc: disc recovery publish test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_PUBLISH_Test_001, TestSize.Level1)
+{
+    g_isInited = false;
+    EXPECT_EQ(DiscRecoveryPublish(), SOFTBUS_OK);
+
+    g_isInited = true;
+    auto ret = DiscRecoveryPublish();
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/*
+* @tc.name: DISC_RECOVERY_SUBSCRIBE_Test_001
+* @tc.desc: disc recovery subscribe test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_SUBSCRIBE_Test_001, TestSize.Level1)
+{
+    g_isInited = false;
+    EXPECT_EQ(DiscRecoverySubscribe(), SOFTBUS_OK);
+
+    g_isInited = true;
+    auto ret = DiscRecoverySubscribe();
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/*
+* @tc.name: IS_SAME_CONNECTION_ADDR_Test_001
+* @tc.desc: is same connection addr test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
+{
+    ConnectionAddr addr1;
+    (void)memset_s(&addr1, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    ConnectionAddr addr2;
+    (void)memset_s(&addr2, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    addr1.type = CONNECTION_ADDR_WLAN;
+    addr2.type = CONNECTION_ADDR_BR;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    addr1.type = CONNECTION_ADDR_BR;
+    addr2.type = CONNECTION_ADDR_BR;
+    memset_s(addr1.info.br.brMac, BT_MAC_LEN, 0, BT_MAC_LEN);
+    memset_s(addr2.info.br.brMac, BT_MAC_LEN, 0, BT_MAC_LEN);
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    addr1.type = CONNECTION_ADDR_BLE;
+    addr2.type = CONNECTION_ADDR_BLE;
+    memset_s(addr2.info.ble.udidHash, UDID_HASH_LEN, 0, UDID_HASH_LEN);
+    memset_s(addr1.info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN);
+    memset_s(addr2.info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN);
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    memset_s(addr1.info.ble.udidHash, UDID_HASH_LEN, 0, UDID_HASH_LEN);
+    memset_s(addr2.info.ble.udidHash, UDID_HASH_LEN, 1, UDID_HASH_LEN);
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    memset_s(addr1.info.ble.udidHash, UDID_HASH_LEN, 1, UDID_HASH_LEN);
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    addr1.type = CONNECTION_ADDR_WLAN;
+    addr2.type = CONNECTION_ADDR_WLAN;
+    memset_s(addr1.info.ip.ip, IP_STR_MAX_LEN, 0, IP_STR_MAX_LEN);
+    memset_s(addr2.info.ip.ip, IP_STR_MAX_LEN, 0, IP_STR_MAX_LEN);
+    addr1.info.ip.port = 0;
+    addr2.info.ip.port = 0;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    addr2.info.ip.port = 1;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+}
+
+/*
+* @tc.name: IS_SAME_CONNECTION_ADDR_Test_002
+* @tc.desc: is same connection addr test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Level1)
+{
+    ConnectionAddr addr1;
+    (void)memset_s(&addr1, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    ConnectionAddr addr2;
+    (void)memset_s(&addr2, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    addr1.type = CONNECTION_ADDR_WLAN;
+    addr2.type = CONNECTION_ADDR_WLAN;
+    memset_s(addr1.info.ip.ip, IP_STR_MAX_LEN, 0, IP_STR_MAX_LEN);
+    memset_s(addr1.info.ip.ip, IP_STR_MAX_LEN, 1, IP_STR_MAX_LEN);
+    addr1.info.ip.port = 0;
+    addr2.info.ip.port = 0;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    addr1.type = CONNECTION_ADDR_ETH;
+    addr2.type = CONNECTION_ADDR_ETH;
+    memset_s(addr1.info.ip.ip, IP_STR_MAX_LEN, 0, IP_STR_MAX_LEN);
+    memset_s(addr2.info.ip.ip, IP_STR_MAX_LEN, 0, IP_STR_MAX_LEN);
+    addr1.info.ip.port = 0;
+    addr2.info.ip.port = 0;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    addr2.info.ip.port = 1;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    memset_s(addr1.info.ip.ip, IP_STR_MAX_LEN, 1, IP_STR_MAX_LEN);
+    addr1.info.ip.port = 0;
+    addr2.info.ip.port = 0;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    addr1.type = CONNECTION_ADDR_SESSION;
+    addr2.type = CONNECTION_ADDR_SESSION;
+    addr1.info.session.sessionId = 0;
+    addr2.info.session.sessionId = 0;
+    addr1.info.session.channelId = 0;
+    addr2.info.session.channelId = 0;
+    addr1.info.session.type = 0;
+    addr2.info.session.type = 0;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), true);
+
+    addr2.info.session.type = 1;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    addr2.info.session.channelId = 1;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    addr2.info.session.sessionId = 1;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+
+    addr1.type = CONNECTION_ADDR_MAX;
+    addr2.type = CONNECTION_ADDR_MAX;
+    EXPECT_EQ(IsSameConnectionAddr(&addr1, &addr2), false);
+}
+
+/*
+* @tc.name: ADD_LEAVE_LNNCB_ITEM_Test_001
+* @tc.desc: add leave lnncb item test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, ADD_LEAVE_LNNCB_ITEM_Test_001, TestSize.Level1)
+{
+    OnLeaveLNNResult cb = [](const char *, int32_t) -> void {};
+    ListInit(&g_busCenterClient.leaveLNNCbList);
+    EXPECT_EQ(AddLeaveLNNCbItem("1.2.3.4", cb), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: ADD_TIME_SYNC_CB_ITEM_Test_001
+* @tc.desc: add time sync cb item test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, ADD_TIME_SYNC_CB_ITEM_Test_001, TestSize.Level1)
+{
+    ITimeSyncCb cb;
+    (void)memset_s(&cb, sizeof(ITimeSyncCb), 0, sizeof(ITimeSyncCb));
+    cb.onTimeSyncResult = [](const TimeSyncResultInfo *, int32_t) ->void {};
+    ListInit(&g_busCenterClient.timeSyncCbList);
+    EXPECT_EQ(AddTimeSyncCbItem("1.2.3.4", &cb), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: FREE_DISC_PUBLISH_MSG_Test_001
+* @tc.desc: free disc publish msg test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(FreeDiscPublishMsg(nullptr));
+
+    DiscPublishMsg* msg = (DiscPublishMsg *)SoftBusCalloc(sizeof(DiscPublishMsg));
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_TEST, "msg calloc fail");
+        return;
+    }
+    msg->info = nullptr;
+    EXPECT_NO_FATAL_FAILURE(FreeDiscPublishMsg(&msg));
+
+    msg = (DiscPublishMsg *)SoftBusCalloc(sizeof(DiscPublishMsg));
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_TEST, "msg calloc fail");
+        return;
+    }
+    msg->info = (PublishInfo *)SoftBusCalloc(sizeof(PublishInfo));
+    if (msg->info == nullptr) {
+        COMM_LOGE(COMM_TEST, "msgInfo calloc fail");
+        SoftBusFree(msg);
+        return;
+    }
+    msg->info->capability = nullptr;
+    msg->info->capabilityData = nullptr;
+    EXPECT_NO_FATAL_FAILURE(FreeDiscPublishMsg(&msg));
+}
+
+/*
+* @tc.name: FREE_DISC_SUBSCRIBE_MSG_Test_001
+* @tc.desc: free disc subscribe msg test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, FREE_DISC_SUBSCRIBE_MSG_Test_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(FreeDiscSubscribeMsg(nullptr));
+
+    DiscSubscribeMsg* msg = (DiscSubscribeMsg *)SoftBusCalloc(sizeof(DiscSubscribeMsg));
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_TEST, "msg calloc fail");
+        return;
+    }
+    msg->info = nullptr;
+    EXPECT_NO_FATAL_FAILURE(FreeDiscSubscribeMsg(&msg));
+
+    msg = (DiscSubscribeMsg *)SoftBusCalloc(sizeof(DiscSubscribeMsg));
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_TEST, "msg calloc fail");
+        return;
+    }
+    msg->info = (SubscribeInfo *)SoftBusCalloc(sizeof(SubscribeInfo));
+    if (msg->info == nullptr) {
+        COMM_LOGE(COMM_TEST, "msgInfo calloc fail");
+        SoftBusFree(msg);
+        return;
+    }
+    msg->info->capability = nullptr;
+    msg->info->capabilityData = nullptr;
+    EXPECT_NO_FATAL_FAILURE(FreeDiscSubscribeMsg(&msg));
 }
 } // namespace OHOS
