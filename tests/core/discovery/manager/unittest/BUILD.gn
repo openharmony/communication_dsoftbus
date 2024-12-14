@@ -50,10 +50,13 @@ ohos_unittest("DiscManagerTest") {
 ohos_unittest("DiscManagerMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_core_path/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
+    "$dsoftbus_core_path/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c",
     "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
     "ble_mock.cpp",
     "coap_mock.cpp",
     "disc_manager_mock_test.cpp",
+    "usb_mock.cpp",
   ]
 
   include_dirs = [
@@ -64,9 +67,12 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",
     "$dsoftbus_core_path/discovery/ble/dispatcher/include",
+    "$dsoftbus_core_path/discovery/usb/dispatcher/include",
     "$dsoftbus_core_path/discovery/coap/interface",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_core_path/discovery/ble/approach_ble/include",
+    "$dsoftbus_core_path/discovery/ble/virtual_link_ble/include",
   ]
 
   deps = [

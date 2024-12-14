@@ -116,8 +116,12 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         LNN_LOGE(LNN_STATE, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if ((info->medium < AUTO) || (info->medium > COAP)) {
+    if ((info->medium < AUTO) || (info->medium > USB)) {
         LNN_LOGE(LNN_STATE, "medium is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if ((info->medium == USB) && (info->mode == DISCOVER_MODE_ACTIVE)) {
+        LNN_LOGE(LNN_STATE, "usb is not support active mode");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->freq < LOW) || (info->freq >= FREQ_BUTT)) {
