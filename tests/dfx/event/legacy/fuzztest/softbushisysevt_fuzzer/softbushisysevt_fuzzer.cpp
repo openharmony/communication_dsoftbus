@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <securec.h>
+#include "fuzz_data_generator.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "legacy/softbus_hisysevt_common.h"
@@ -36,8 +37,12 @@ void SoftBusRecordAuthResultFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
     SoftBusLinkType linkType = *(reinterpret_cast<const SoftBusLinkType *>(data));
-    int32_t ret = *(reinterpret_cast<const int32_t *>(data));
-    uint64_t constTime = *(reinterpret_cast<const uint64_t *>(data));
+    int32_t ret = 0;
+    uint64_t constTime = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(ret);
+    GenerateUint64(constTime);
+    DataGenerator::Clear();
     AuthFailStage stage = *(reinterpret_cast<const AuthFailStage *>(data));
     SoftBusRecordAuthResult(linkType, ret, constTime, stage);
 }
@@ -46,14 +51,20 @@ void SoftBusRecordBusCenterResultFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
     SoftBusLinkType linkType = *(reinterpret_cast<const SoftBusLinkType *>(data));
-    uint64_t constTime = *(reinterpret_cast<const uint64_t *>(data));
+    uint64_t constTime = 0;
+    DataGenerator::Write(data, size);
+    GenerateUint64(constTime);
+    DataGenerator::Clear();
     SoftBusRecordBusCenterResult(linkType, constTime);
 }
 
 void SoftBusRecordDevOnlineDurResultFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
-    uint64_t constTime = *(reinterpret_cast<const uint64_t *>(data));
+    uint64_t constTime = 0;
+    DataGenerator::Write(data, size);
+    GenerateUint64(constTime);
+    DataGenerator::Clear();
     SoftBusRecordDevOnlineDurResult(constTime);
 }
 
@@ -65,11 +76,13 @@ void SoftBusReportDevOnlineEvtFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     OnlineDeviceInfo info = {0};
-    info.onlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
-    info.btOnlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
-    info.wifiOnlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
-    info.peerDevType = *(reinterpret_cast<const uint32_t *>(data));
-    info.insertFileResult = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateUint32(info.onlineDevNum);
+    GenerateUint32(info.btOnlineDevNum);
+    GenerateUint32(info.wifiOnlineDevNum);
+    GenerateUint32(info.peerDevType);
+    GenerateInt32(info.insertFileResult);
+    DataGenerator::Clear();
     SoftBusReportDevOnlineEvt(&info, udid);
 }
 
@@ -77,22 +90,24 @@ void SoftBusReportBusCenterFaultEvtFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
     SoftBusFaultEvtInfo info = {0};
-    info.moduleType = *(reinterpret_cast<const uint8_t *>(data));
-    info.linkType = *(reinterpret_cast<const uint8_t *>(data));
-    info.channelQuality = *(reinterpret_cast<const float *>(data));
-    info.errorCode = *(reinterpret_cast<const int32_t *>(data));
-    info.peerDevType = *(reinterpret_cast<const int32_t *>(data));
-    info.onLineDevNum = *(reinterpret_cast<const int32_t *>(data));
-    info.connNum = *(reinterpret_cast<const int32_t *>(data));
-    info.nightMode = *(reinterpret_cast<const int32_t *>(data));
-    info.wifiStatue = *(reinterpret_cast<const int32_t *>(data));
-    info.bleStatue = *(reinterpret_cast<const int32_t *>(data));
-    info.callerAppMode = *(reinterpret_cast<const int32_t *>(data));
-    info.subErrCode = *(reinterpret_cast<const int32_t *>(data));
-    info.connBrNum = *(reinterpret_cast<const int32_t *>(data));
-    info.connBleNum = *(reinterpret_cast<const int32_t *>(data));
-    info.bleBradStatus = *(reinterpret_cast<const bool *>(data));
-    info.bleScanStatus = *(reinterpret_cast<const bool *>(data));
+    DataGenerator::Write(data, size);
+    GenerateUint8(info.moduleType);
+    GenerateUint8(info.linkType);
+    GenerateFloat(info.channelQuality);
+    GenerateInt32(info.errorCode);
+    GenerateInt32(info.peerDevType);
+    GenerateInt32(info.onLineDevNum);
+    GenerateInt32(info.connNum);
+    GenerateInt32(info.nightMode);
+    GenerateInt32(info.wifiStatue);
+    GenerateInt32(info.bleStatue);
+    GenerateInt32(info.callerAppMode);
+    GenerateInt32(info.subErrCode);
+    GenerateInt32(info.connBrNum);
+    GenerateInt32(info.connBleNum);
+    GenerateBool(info.bleBradStatus);
+    GenerateBool(info.bleScanStatus);
+    DataGenerator::Clear();
     SoftBusReportBusCenterFaultEvt(&info);
 }
 
@@ -101,7 +116,9 @@ void SoftBusRecordDiscoveryResultFuzzTest(const uint8_t *data, size_t size)
     InitBusCenterDfx();
     DiscoveryStage stage = *(reinterpret_cast<const DiscoveryStage *>(data));
     AppDiscNode node = {0};
-    node.appDiscCnt = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateInt32(node.appDiscCnt);
+    DataGenerator::Clear();
     SoftBusRecordDiscoveryResult(stage, &node);
 }
 

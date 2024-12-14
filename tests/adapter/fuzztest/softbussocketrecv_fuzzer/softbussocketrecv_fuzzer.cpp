@@ -20,6 +20,7 @@
 #include <securec.h>
 
 #include "comm_log.h"
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_define.h"
 #include "softbus_adapter_mem.h"
@@ -32,27 +33,6 @@ struct SocketProtocol {
     char data[PROTOCOL_MAXLEN];
 };
 
-const uint8_t *g_baseFuzzData = nullptr;
-size_t g_baseFuzzSize = 0;
-size_t g_baseFuzzPos;
-
-template <class T> T GetData()
-{
-    T objetct{};
-    size_t objetctSize = sizeof(objetct);
-    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
-        COMM_LOGE(COMM_TEST, "data Invalid");
-        return objetct;
-    }
-    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
-    if (ret != EOK) {
-        COMM_LOGE(COMM_TEST, "memcpy err");
-        return {};
-    }
-    g_baseFuzzPos += objetctSize;
-    return objetct;
-}
-
 void SoftBusSocketRecvFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
@@ -60,14 +40,16 @@ void SoftBusSocketRecvFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    g_baseFuzzSize = size;
-    g_baseFuzzData = data;
-    g_baseFuzzPos = 0;
     struct SocketProtocol buf;
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
-    int32_t socketFd = GetData<int32_t>();
-    uint32_t len = GetData<uint32_t>();
-    int32_t flags = GetData<int32_t>();
+    int32_t socketFd = 0;
+    uint32_t len = 0;
+    int32_t flags = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(socketFd);
+    GenerateUint32(len);
+    GenerateInt32(flags);
+    DataGenerator::Clear();
     SoftBusSocketRecv(socketFd, &buf, len, flags);
     return;
 }
@@ -79,14 +61,16 @@ void SoftBusSocketRecvFromFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    g_baseFuzzSize = size;
-    g_baseFuzzData = data;
-    g_baseFuzzPos = 0;
     struct SocketProtocol buf;
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
-    int32_t socketFd = GetData<int32_t>();
-    uint32_t len = GetData<uint32_t>();
-    int32_t flags = GetData<int32_t>();
+    int32_t socketFd = 0;
+    uint32_t len = 0;
+    int32_t flags = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(socketFd);
+    GenerateUint32(len);
+    GenerateInt32(flags);
+    DataGenerator::Clear();
     SoftBusSockAddr  fromAddr;
     memset_s(&fromAddr, sizeof(SoftBusSockAddr), 0, sizeof(SoftBusSockAddr));
     int32_t fromAddrLen;
@@ -101,9 +85,6 @@ void SoftBusSocketSendFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    g_baseFuzzSize = size;
-    g_baseFuzzData = data;
-    g_baseFuzzPos = 0;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size * sizeof(uint8_t));
     if (buf == nullptr) {
         COMM_LOGE(COMM_TEST, "calloc faild");
@@ -114,9 +95,13 @@ void SoftBusSocketSendFuzzTest(const uint8_t* data, size_t size)
         SoftBusFree(buf);
         return;
     }
-    int32_t socketFd = GetData<int32_t>();
     uint32_t len = size;
-    int32_t flags = GetData<int32_t>();
+    int32_t socketFd = 0;
+    int32_t flags = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(socketFd);
+    GenerateInt32(flags);
+    DataGenerator::Clear();
 
     SoftBusSocketSend(socketFd, buf, len, flags);
     SoftBusFree(buf);
@@ -130,9 +115,6 @@ void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    g_baseFuzzSize = size;
-    g_baseFuzzData = data;
-    g_baseFuzzPos = 0;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size * sizeof(uint8_t));
     if (buf == nullptr) {
         COMM_LOGE(COMM_TEST, "calloc faild");
@@ -142,16 +124,21 @@ void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
         SoftBusFree(buf);
         return;
     }
-    int32_t socketFd = GetData<int32_t>();
     uint32_t len = size;
-    int32_t flags = GetData<int32_t>();
+    int32_t socketFd = 0;
+    int32_t flags = 0;
+    int32_t toAddrLen = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(socketFd);
+    GenerateInt32(flags);
+    GenerateInt32(toAddrLen);
+    DataGenerator::Clear();
     SoftBusSockAddr toAddr = {0};
     if (memcpy_s(&toAddr, sizeof(SoftBusSockAddr), data, sizeof(SoftBusSockAddr)) != EOK) {
         COMM_LOGE(COMM_TEST, "memcpy err");
         SoftBusFree(buf);
         return;
     }
-    int32_t toAddrLen = GetData<int32_t>();
     SoftBusSocketSendTo(socketFd, buf, len, flags, &toAddr, toAddrLen);
     SoftBusFree(buf);
     return;
