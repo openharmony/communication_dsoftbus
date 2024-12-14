@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,14 @@
 
 #include <securec.h>
 
-#include "session.h"
 #include "client_trans_udp_manager.h"
+#include "session.h"
 
 #define STR_LEN 100000
 #define TEST_TMP_STR_LEN 50
 #define TEST_TMP_STR "testtmpStr"
 namespace OHOS {
-    void TransOnUdpChannelOpenedTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelOpenedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -36,40 +36,41 @@ namespace OHOS {
         TransOnUdpChannelOpened((char *)data, &channel, &udpPort);
     }
 
-    void TransOnUdpChannelOpenFailedTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelOpenFailedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransOnUdpChannelOpenFailed((int32_t)size, (int32_t)size);
+        TransOnUdpChannelOpenFailed(static_cast<int32_t>(size), static_cast<int32_t>(size));
     }
 
-    void TransOnUdpChannelClosedTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelClosedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransOnUdpChannelClosed((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
+        TransOnUdpChannelClosed(static_cast<int32_t>(size), SHUTDOWN_REASON_UNKNOWN);
     }
 
-    void TransOnUdpChannelQosEventTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelQosEventTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
         QosTv tvList;
-        TransOnUdpChannelQosEvent((int32_t)size, (int32_t)size, (int32_t)size, &tvList);
+        TransOnUdpChannelQosEvent(
+            static_cast<int32_t>(size), static_cast<int32_t>(size), static_cast<int32_t>(size), &tvList);
     }
 
-    void ClientTransCloseUdpChannelTest(const uint8_t* data, size_t size)
+    void ClientTransCloseUdpChannelTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        ClientTransCloseUdpChannel((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
+        ClientTransCloseUdpChannel(static_cast<int32_t>(size), SHUTDOWN_REASON_UNKNOWN);
     }
 
-    void TransUdpChannelSendStreamTest(const uint8_t* data, size_t size)
+    void TransUdpChannelSendStreamTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -85,10 +86,10 @@ namespace OHOS {
             10,
         };
         StreamFrameInfo ext = {};
-        TransUdpChannelSendStream((int32_t)size, &streamdata1, &streamdata2, &ext);
+        TransUdpChannelSendStream(static_cast<int32_t>(size), &streamdata1, &streamdata2, &ext);
     }
 
-    void TransUdpChannelSendFileTest(const uint8_t* data, size_t size)
+    void TransUdpChannelSendFileTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -99,19 +100,19 @@ namespace OHOS {
             "/data/richu-002.jpg",
             "/data/richu-003.jpg",
         };
-        TransUdpChannelSendFile((int32_t)size, sfileList, NULL, (uint32_t)size);
+        TransUdpChannelSendFile(static_cast<int32_t>(size), sfileList, NULL, static_cast<uint32_t>(size));
     }
 
-    void TransGetUdpChannelByFileIdTest(const uint8_t* data, size_t size)
+    void TransGetUdpChannelByFileIdTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
         UdpChannel udpChannel;
-        TransGetUdpChannelByFileId((int32_t)size, &udpChannel);
+        TransGetUdpChannelByFileId(static_cast<int32_t>(size), &udpChannel);
     }
 
-    void TransUdpDeleteFileListenerlTest(const uint8_t* data, size_t size)
+    void TransUdpDeleteFileListenerlTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
@@ -125,7 +126,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::TransOnUdpChannelOpenedTest(data, size);
     OHOS::TransOnUdpChannelOpenFailedTest(data, size);
