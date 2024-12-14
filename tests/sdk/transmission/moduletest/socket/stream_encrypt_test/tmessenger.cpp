@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "tmessenger.h"
+
 #include <algorithm>
-#include <cinttypes>
 #include <chrono>
+#include <cinttypes>
 #include <thread>
 
 #include "common.h"
-#include "tmessenger.h"
 
 namespace OHOS {
 static constexpr uint32_t WAIT_RESP_TIME = 1;
@@ -167,9 +168,9 @@ int32_t TMessenger::StartListen(const std::string &pkgName, const std::string &m
     LOGI("create listen socket=%d", socket);
 
     QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
+        { .qos = QOS_TYPE_MIN_BW,      .value = 80   },
+        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000 },
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 },
     };
     static ISocketListener listener = {
         .OnBind = TMessenger::OnBind,
@@ -212,9 +213,9 @@ int32_t TMessenger::StartConnect(const std::string &pkgName, const std::string &
     LOGI("create bind socket=%d", socket);
 
     QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
+        { .qos = QOS_TYPE_MIN_BW,      .value = 80   },
+        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000 },
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 },
     };
 
     static ISocketListener listener = {
@@ -291,7 +292,7 @@ void TMessenger::OnMessageRecv(const std::string &result)
 
 void TMessenger::OnRequest()
 {
-    std::thread t([&] {
+    std::thread t([this] {
         std::this_thread::sleep_for(std::chrono::seconds(WAIT_RESP_TIME));
         std::shared_ptr<Response> resp = onQuery_();
         Message msg { *resp };
