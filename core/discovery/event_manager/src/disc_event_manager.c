@@ -16,6 +16,7 @@
 #include "disc_approach_ble.h"
 #include "disc_event_manager.h"
 #include "disc_log.h"
+#include "disc_manager.h"
 #include "disc_touch_ble.h"
 #include "disc_virtual_link_ble.h"
 #include "softbus_error_code.h"
@@ -31,6 +32,9 @@ int32_t DiscEventManagerInit(void)
     ret = DiscTouchBleEventInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init touch ble event failed");
 
+    ret = DiscMgrEventInit();
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init disc manager event failed");
+
     DISC_LOGI(DISC_INIT, "disc event manager init succ");
     return SOFTBUS_OK;
 }
@@ -40,5 +44,6 @@ void DiscEventManagerDeinit(void)
     DiscApproachBleEventDeinit();
     DiscVLinkBleEventDeinit();
     DiscTouchBleEventDeinit();
+    DiscMgrEventDeinit();
 }
 
