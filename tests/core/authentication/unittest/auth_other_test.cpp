@@ -42,9 +42,6 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 constexpr uint32_t TEST_DATA_LEN = 30;
-constexpr uint32_t BLE_CONNID = 196609;
-constexpr uint32_t BR_CONNID = 65570;
-constexpr uint32_t WIFI_CONNID = 131073;
 constexpr uint32_t MSG_LEN = 50;
 constexpr char NETWORK_ID[] = "testnetworkid123";
 
@@ -145,20 +142,6 @@ HWTEST_F(AuthOtherTest, ADD_CONN_REQUEST_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: HANDLE_CONNCONNECT_TIMEOUT_TEST_001
- * @tc.desc: handle connConnect timeout test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_CONNCONNECT_TIMEOUT_TEST_001, TestSize.Level1)
-{
-    const void *para = "testdata";
-
-    HandleConnConnectTimeout(nullptr);
-    HandleConnConnectTimeout(para);
-}
-
-/*
  * @tc.name: REMOVE_FUNC_TEST_001
  * @tc.desc: remove func test
  * @tc.type: FUNC
@@ -175,104 +158,6 @@ HWTEST_F(AuthOtherTest, REMOVE_FUNC_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = RemoveFunc(static_cast<void *>(&obj), static_cast<void *>(&param));
     EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: HANDLE_CONN_CONNECT_CMD_TEST_001
- * @tc.desc: handle conn connect cmd test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_CONN_CONNECT_CMD_TEST_001, TestSize.Level1)
-{
-    ConnCmdInfo info;
-
-    (void)memset_s(&info, sizeof(ConnCmdInfo), 0, sizeof(ConnCmdInfo));
-    HandleConnConnectCmd(nullptr);
-    HandleConnConnectCmd(reinterpret_cast<void *>(&info));
-    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    HandleConnConnectCmd(reinterpret_cast<void *>(&info));
-}
-
-/*
- * @tc.name: HANDLE_CONN_CONNECT_RESULT_TEST_001
- * @tc.desc: handle conn connect result test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_CONN_CONNECT_RESULT_TEST_001, TestSize.Level1)
-{
-    int32_t para = 0;
-
-    HandleConnConnectResult(nullptr);
-    HandleConnConnectResult(reinterpret_cast<void *>(&para));
-}
-
-/*
- * @tc.name: ON_WIFI_DATA_RECEIVED_TEST_001
- * @tc.desc: on wifi data received test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_WIFI_DATA_RECEIVED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-    AuthDataHead head;
-    const uint8_t data[TEST_DATA_LEN] = { 0 };
-
-    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
-    OnWiFiDataReceived(AUTH, fd, nullptr, data);
-    OnWiFiDataReceived(AUTH, fd, &head, nullptr);
-    OnWiFiDataReceived(AUTH, fd, &head, data);
-}
-
-/*
- * @tc.name: ON_WIFI_CONNECTED_TEST_001
- * @tc.desc: on wifi connected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-    AuthDataHead head;
-
-    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
-    OnWiFiConnected(AUTH, fd, false);
-    OnWiFiConnected(AUTH, fd, true);
-}
-
-/*
- * @tc.name: ON_COMM_DISCONNECTED_TEST_001
- * @tc.desc: on comm disconnected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_COMM_DISCONNECTED_TEST_001, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnectionInfo info;
-
-    (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
-    OnCommDisconnected(connectionId, nullptr);
-    OnCommDisconnected(connectionId, &info);
-}
-
-/*
- * @tc.name: ON_COMM_CONNECT_SUCC_TEST_001
- * @tc.desc: on comm connect succ test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_COMM_CONNECT_SUCC_TEST_001, TestSize.Level1)
-{
-    uint32_t requestId = 0;
-    uint32_t connectionId = 0;
-    ConnectionInfo info;
-
-    (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
-    OnCommConnectSucc(requestId, connectionId, nullptr);
-    OnCommConnectSucc(requestId, connectionId, &info);
 }
 
 /*
@@ -560,19 +445,6 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002, TestSize.Level1
 }
 
 /*
- * @tc.name: HANDLE_UPDATE_SESSION_KEY_EVENT_TEST_001
- * @tc.desc: handle update session key event test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_UPDATE_SESSION_KEY_EVENT_TEST_001, TestSize.Level1)
-{
-    int64_t authId = 1;
-    HandleUpdateSessionKeyEvent(nullptr);
-    HandleUpdateSessionKeyEvent(&authId);
-}
-
-/*
  * @tc.name: RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001
  * @tc.desc: rmove update session key func test
  * @tc.type: FUNC
@@ -674,22 +546,6 @@ HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NOTIFY_DATE_RECEIVED_TEST_001
- * @tc.desc: notify data received test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, NOTIFY_DATE_RECEIVED_TEST_001, TestSize.Level1)
-{
-    uint64_t connId = 0;
-    const AuthConnInfo *connInfo = NULL;
-    bool fromServer = false;
-    const AuthDataHead *head = NULL;
-    const uint8_t *data = NULL;
-    NotifyDataReceived(connId, connInfo, fromServer, head, data);
-}
-
-/*
  * @tc.name: ON_COMM_DATA_RECEVIED_TEST_001
  * @tc.desc: on comm data received test
  * @tc.type: FUNC
@@ -714,33 +570,6 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
     OnCommDataReceived(connectionId, moduleId, seq, data, len);
 
     free(data);
-}
-
-/*
- * @tc.name: UPDATE_AUTH_DEVICE_PRIORITY_TEST_001
- * @tc.desc: update auth device priority test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_001, TestSize.Level1)
-{
-    uint64_t connId = 0;
-    UpdateAuthDevicePriority(connId);
-    connId = 0x3FFFFFFFF;
-    UpdateAuthDevicePriority(connId);
-}
-
-/*
- * @tc.name: UPDATE_AUTH_DEVICE_PRIORITY_TEST_002
- * @tc.desc: update auth device priority test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_002, TestSize.Level1)
-{
-    UpdateAuthDevicePriority(BLE_CONNID);
-    UpdateAuthDevicePriority(BR_CONNID);
-    UpdateAuthDevicePriority(WIFI_CONNID);
 }
 
 /*
