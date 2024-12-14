@@ -207,7 +207,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(0);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -244,7 +244,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(12);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -257,7 +257,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(256);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -270,7 +270,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(0);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -283,7 +283,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(22);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 

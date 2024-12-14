@@ -104,7 +104,7 @@ void SoftBusSocketSendFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzData = data;
     g_baseFuzzPos = 0;
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(size * sizeof(uint8_t));
+    uint8_t *buf = static_cast<uint8_t*>(SoftBusCalloc(size * sizeof(uint8_t)));
     if (buf == nullptr) {
         COMM_LOGE(COMM_TEST, "calloc faild");
         return;
@@ -133,7 +133,7 @@ void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzData = data;
     g_baseFuzzPos = 0;
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(size * sizeof(uint8_t));
+    uint8_t *buf = static_cast<uint8_t*>(SoftBusCalloc(size * sizeof(uint8_t)));
     if (buf == nullptr) {
         COMM_LOGE(COMM_TEST, "calloc faild");
         return;
