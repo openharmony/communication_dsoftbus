@@ -14,13 +14,17 @@
 import("../../core/discovery/ble/disc_ble.gni")
 import("../../core/discovery/coap/disc_coap.gni")
 import("../../core/discovery/event_manager/disc_event_manager.gni")
+import("../../core/discovery/usb/disc_usb.gni")
 import("../../dsoftbus.gni")
 
 DISC_SERVER_DEFINES = []
-disc_server_src = ble_discovery_src + disc_coap_src + disc_event_manager_src
-disc_server_inc = ble_discovery_inc + disc_coap_inc + disc_event_manager_inc
-disc_server_deps = ble_discovery_deps + disc_coap_deps + disc_event_manager_deps
-disc_server_external_deps = disc_coap_external_deps
+disc_server_src =
+    ble_discovery_src + disc_coap_src + disc_event_manager_src + usb_disc_src
+disc_server_inc =
+    ble_discovery_inc + disc_coap_inc + disc_event_manager_inc + usb_disc_inc
+disc_server_deps = ble_discovery_deps + disc_coap_deps +
+                   disc_event_manager_deps + usb_disc_deps
+disc_server_external_deps = disc_coap_external_deps + usb_disc_external_deps
 disc_server_src += [
   "$dsoftbus_root_path/core/discovery/manager/src/disc_manager.c",
   "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_server.c",
