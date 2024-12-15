@@ -47,7 +47,6 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
 
-
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6
 #define META_SESSION "IShare"
@@ -1306,21 +1305,21 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
                 "totalRecv=%{public}d", channelId, bufferSize, totalRecvLen);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
-    
+
         if (TransTdcUpdateDataBufWInfo(channelId, buffer, recvLen) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "update channel data buf failed, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_CTRL, "update channel data buf failed. channelId=%{public}d", channelId);
             return SOFTBUS_TRANS_UPDATE_DATA_BUF_FAILED;
         }
         buffer += recvLen;
         totalRecvLen += recvLen;
     }
- 
+
     return SOFTBUS_OK;
 }
 
 /*
- *The negotiation message may be unpacked, and when obtaining the message,
- *it is necessary to first check whether the buffer of the channel already has data.
+ * The negotiation message may be unpacked, and when obtaining the message,
+ * it is necessary to first check whether the buffer of the channel already has data.
  */
 static int32_t TransReadDataLen(int32_t channelId, int32_t *pktDataLen, int32_t module, int32_t type)
 {
@@ -1345,7 +1344,7 @@ static int32_t TransReadDataLen(int32_t channelId, int32_t *pktDataLen, int32_t 
     const uint32_t maxDataLen = dataBuf->size - headSize;
 
     TdcPacketHead *pktHeadPtr = NULL;
-    //channel buffer already has header data
+    // channel buffer already has header data
     if (bufDataLen >= headSize) {
         bufDataLen -= headSize;
         pktHeadPtr = (TdcPacketHead *)(dataBuf->data);
@@ -1366,7 +1365,7 @@ static int32_t TransReadDataLen(int32_t channelId, int32_t *pktDataLen, int32_t 
     UnpackTdcPacketHead(&pktHead);
     if (pktHead.magicNumber != MAGIC_NUMBER || pktHead.dataLen > maxDataLen || pktHead.dataLen == 0) {
         TRANS_LOGE(TRANS_CTRL, "invalid packet head module=%{public}d, channelId=%{public}d, type=%{public}d, "
-        "magic=%{public}x, len=%{public}d", module, channelId, type, pktHead.magicNumber, pktHead.dataLen);
+            "magic=%{public}x, len=%{public}d", module, channelId, type, pktHead.magicNumber, pktHead.dataLen);
         return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
     }
     *pktDataLen = pktHead.dataLen;

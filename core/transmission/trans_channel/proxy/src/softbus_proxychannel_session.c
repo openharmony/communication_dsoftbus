@@ -22,7 +22,6 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
-#include "softbus_datahead_transform.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_property.h"
