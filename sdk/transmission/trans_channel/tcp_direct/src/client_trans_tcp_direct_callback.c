@@ -44,12 +44,9 @@ int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo
         case BUSINESS_TYPE_MESSAGE:
             type = TYPE_MESSAGE;
             break;
-        case BUSINESS_TYPE_BYTE:
+        default:
             type = TYPE_BYTES;
             break;
-        default:
-            TRANS_LOGE(TRANS_SDK, "unsupport businessType=%{public}d", channel->businessType);
-            return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
     return g_sessionCb.OnSessionOpened(sessionName, channel, type);
 }
