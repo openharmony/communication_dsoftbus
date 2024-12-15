@@ -87,10 +87,10 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
     }
     int32_t ret = ReCreateSessionServerToServer(sessionServerInfoList);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed\n");
+        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
         return ret;
     }
-    COMM_LOGD(COMM_SDK, "softbus server register service success\n");
+    COMM_LOGD(COMM_SDK, "softbus server register service success!\n");
     return SOFTBUS_OK;
 }
 

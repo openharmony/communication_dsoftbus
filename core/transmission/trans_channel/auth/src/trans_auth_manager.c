@@ -53,7 +53,7 @@ const char *g_serviceForAction[] = {
     "IShareAuthSession",
 };
 
-#define SERVICE_FOR_ACTION (sizeof(g_serviceForAction) / sizeof(g_serviceForAction[0]))
+#define SERVICE_FOR_ACTION_LEN (sizeof(g_serviceForAction) / sizeof(g_serviceForAction[0]))
 
 typedef struct {
     int32_t channelType;
@@ -276,7 +276,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
 {
     AuthChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed, auth=%{public}d", authId);
+        TRANS_LOGE(TRANS_SVC, "lock failed, authiD=%{public}d", authId);
         return SOFTBUS_LOCK_ERR;
     }
     bool exists = false;
@@ -386,8 +386,8 @@ static void TransAuthCloseChannel(int32_t authId, int32_t linkType, bool isClien
     TRANS_LOGI(TRANS_SVC, "authId=%{public}d, linkType=%{public}d, isClient=%{public}d", authId, linkType, isClient);
     if (linkType == LANE_HML_RAW && isClient) {
         AuthCloseChannel(authId, AUTH_RAW_P2P_CLIENT);
-    } else if (linkType == LANE_HML_RAW && ! isClient) {
-        AuthCloseChannel(authId, AUTH_RAW_P2P_CLIENT);
+    } else if (linkType == LANE_HML_RAW && !isClient) {
+        AuthCloseChannel(authId, AUTH_RAW_P2P_SERVER);
     } else {
         AuthCloseChannel(authId, AUTH);
     }
@@ -627,7 +627,7 @@ static void OnDisconnect(int32_t authId)
     }
     TRANS_LOGI(TRANS_SVC, "recv channel disconnect event. authId=%{public}d", authId);
 
-    //If it is an ishare session, clean up the auth manager
+    // If it is an ishare session, clean up the auth manager
     if (strcmp(dstInfo.appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
         DelAuthMetaManagerByConnectionId(authId);
     }
@@ -688,7 +688,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "invalid param.");
+        TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList");
         return SOFTBUS_LOCK_ERR;
     }
     AuthChannelInfo *item = NULL;
@@ -887,7 +887,7 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
         return NULL;
     }
     info->appInfo.myData.channelId = GenerateChannelId(true);
-    if (info->appInfo.myData.channelId < INVALID_CHANNEL_ID) {
+    if (info->appInfo.myData.channelId < 0) {
         TRANS_LOGE(TRANS_SVC, "channelId is invalid");
         goto EXIT_ERR;
     }
@@ -954,7 +954,7 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
 
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, channel->appInfo.peerNetWorkId,
         sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed, channelId=%{public}d", *channelId);
+        TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed");
     }
 
     if (strcpy_s(channel->appInfo.myData.addr, IP_LEN, connInfo->connInfo.rawWifiDirect.localIp) != EOK) {
@@ -1025,7 +1025,7 @@ int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnI
         TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannelWithPara TransFillAuthChannelInfo failed");
         return SOFTBUS_TRANS_AUTH_FILL_CHANINFO_FAIL;
     }
-    
+
     TransEventExtra extra = {
         .peerNetworkId = NULL,
         .calleePkg = NULL,

@@ -34,10 +34,13 @@ int32_t TransCloseUdpChannel(int32_t channelId);
 int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode);
 int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType);
 int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList);
+void NotifyWifiByAddScenario(StreamType streamType, int32_t pid);
+void NotifyWifiByDelScenario(StreamType streamType, int32_t pid);
 
 void ReleaseUdpChannelId(int32_t channelId);
 
 void TransUdpDeathCallback(const char *pkgName, int32_t pid);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
