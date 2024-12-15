@@ -339,9 +339,6 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
 
     SessionType type = TYPE_BUTT;
     switch (channel->businessType) {
-        case BUSINESS_TYPE_MESSAGE:
-            type = TYPE_MESSAGE;
-            break;
         case BUSINESS_TYPE_BYTE:
             type = TYPE_BYTES;
             break;
@@ -349,8 +346,8 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
             type = TYPE_FILE;
             break;
         default:
-            TRANS_LOGE(TRANS_SDK, "unsupport businessType=%{public}d", channel->businessType);
-            return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
+            type = TYPE_MESSAGE;
+            break;
     }
 
     ret = g_sessionCb.OnSessionOpened(sessionName, channel, type);
