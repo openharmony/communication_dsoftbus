@@ -39,6 +39,7 @@ ohos_fuzztest("QosReportFuzzTest") {
     "$dsoftbus_root_path/sdk/frame/common/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config/",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
   cflags = [
     "-g",
