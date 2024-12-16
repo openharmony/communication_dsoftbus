@@ -29,8 +29,9 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
-constexpr uint32_t LANE_REQ_ID = 111;
-constexpr uint32_t NEW_LANE_REQ_ID = 112;
+constexpr uint32_t LANE_REQ_ID_ONE = 111;
+constexpr uint32_t LANE_REQ_ID_TWO = 222;
+constexpr uint32_t LANE_REQ_ID_THREE = 333;
 constexpr int32_t CHANNEL_ID = 5;
 constexpr int32_t INTERVAL = 2;
 constexpr uint32_t LIST_SIZE = 10;
@@ -538,7 +539,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_LANE_DELETE_LANE_BUSINESS_INFO_001, TestSize.
     transObj->init(nullptr);
     NiceMock<TransLaneDepsInterfaceMock> transLaneMock;
     EXPECT_CALL(transLaneMock, DelLaneBusinessInfoItem).WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = transObj->freeLane(LANE_REQ_ID);
+    int32_t ret = transObj->freeLane(LANE_REQ_ID_ONE);
     EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
     transObj->deinit();
 }
@@ -560,17 +561,17 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_TARGET_LANE_TEST_001, TestSize.Level1)
     EXPECT_EQ(EOK, strcpy_s(allocInfo.commInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
     LaneAllocListener listener;
     (void)memset_s(&listener, sizeof(LaneAllocListener), 0, sizeof(LaneAllocListener));
-    int32_t ret = transObj->allocTargetLane(LANE_REQ_ID, nullptr, &listener);
+    int32_t ret = transObj->allocTargetLane(LANE_REQ_ID_ONE, nullptr, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = transObj->allocTargetLane(LANE_REQ_ID, &allocInfo, nullptr);
+    ret = transObj->allocTargetLane(LANE_REQ_ID_ONE, &allocInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = transObj->allocTargetLane(INVALID_LANE_REQ_ID, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     allocInfo.linkList.linkTypeNum = LANE_LINK_TYPE_BUTT;
-    ret = transObj->allocTargetLane(LANE_REQ_ID, &allocInfo, &listener);
+    ret = transObj->allocTargetLane(LANE_REQ_ID_ONE, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     allocInfo.type = LANE_TYPE_CTRL;
-    ret = transObj->allocTargetLane(LANE_REQ_ID, &allocInfo, &listener);
+    ret = transObj->allocTargetLane(LANE_REQ_ID_ONE, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     transObj->deinit();
 }
@@ -685,19 +686,19 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_RAW_LANE_TEST_001, TestSize.Level1)
     RawLaneAllocInfo allocInfo = { .type = LANE_TYPE_TRANS };
     LaneAllocListener listener;
     (void)memset_s(&listener, sizeof(LaneAllocListener), 0, sizeof(LaneAllocListener));
-    int32_t ret = transObj->allocRawLane(LANE_REQ_ID, &allocInfo, &listener);
+    int32_t ret = transObj->allocRawLane(LANE_REQ_ID_ONE, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-    ret = transObj->allocRawLane(LANE_REQ_ID, &allocInfo, nullptr);
+    ret = transObj->allocRawLane(LANE_REQ_ID_ONE, &allocInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = transObj->allocRawLane(LANE_REQ_ID, nullptr, &listener);
+    ret = transObj->allocRawLane(LANE_REQ_ID_ONE, nullptr, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     allocInfo.type = LANE_TYPE_CTRL;
-    ret = transObj->allocRawLane(LANE_REQ_ID, &allocInfo, &listener);
+    ret = transObj->allocRawLane(LANE_REQ_ID_ONE, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = UpdateReqListLaneId(LANE_REQ_ID, NEW_LANE_REQ_ID);
+    ret = UpdateReqListLaneId(LANE_REQ_ID_ONE, LANE_REQ_ID_TWO);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-    NotifyFreeLaneResult(LANE_REQ_ID, SOFTBUS_LOCK_ERR);
-    NotifyFreeLaneResult(NEW_LANE_REQ_ID, SOFTBUS_LOCK_ERR);
+    NotifyFreeLaneResult(LANE_REQ_ID_ONE, SOFTBUS_LOCK_ERR);
+    NotifyFreeLaneResult(LANE_REQ_ID_TWO, SOFTBUS_LOCK_ERR);
     transObj->deinit();
 }
 
@@ -723,19 +724,17 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_001, TestSize.Le
     resourceItem.clientRef = 1;
     MockAllocLaneByQos(mock, laneMock, resourceItem);
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessHml;
-    uint32_t laneReqId = 11;
     SetIsNeedCondWait();
-    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = transObj->freeLane(laneReqId);
+    ret = transObj->freeLane(LANE_REQ_ID_ONE);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    laneReqId = 12;
     SetIsNeedCondWait();
-    ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_TWO, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = transObj->freeLane(laneReqId);
+    ret = transObj->freeLane(LANE_REQ_ID_TWO);
     EXPECT_EQ(ret, SOFTBUS_OK);
     transObj->deinit();
 }
@@ -762,19 +761,17 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_002, TestSize.Le
     resourceItem.clientRef = 1;
     MockAllocLaneByQos(mock, laneMock, resourceItem);
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessHml;
-    uint32_t laneReqId = 21;
     SetIsNeedCondWait();
-    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = transObj->freeLane(laneReqId);
+    ret = transObj->freeLane(LANE_REQ_ID_ONE);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    laneReqId = 22;
     SetIsNeedCondWait();
-    ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_TWO, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = transObj->freeLane(laneReqId);
+    ret = transObj->freeLane(LANE_REQ_ID_TWO);
     EXPECT_EQ(ret, SOFTBUS_OK);
     transObj->deinit();
 }
@@ -791,7 +788,6 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_003, TestSize.Le
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->init(nullptr);
-    uint32_t laneReqId = 31;
     LaneAllocInfo allocInfo = {
         .type = LANE_TYPE_TRANS,
     };
@@ -804,10 +800,10 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_003, TestSize.Le
     MockAllocLaneByQos(mock, laneMock, resourceItem);
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessHml;
     SetIsNeedCondWait();
-    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = transObj->freeLane(laneReqId);
+    ret = transObj->freeLane(LANE_REQ_ID_ONE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     RemoveDelayDestroyMessage(LANE_ID_BASE);
     ret = UpdateReqListLaneId(LANE_ID_BASE, LANE_ID_BASE + 1);
@@ -870,15 +866,13 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_002, TestSize.Lev
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessBr;
     g_listenerCb.onLaneQosEvent = OnLaneQosEvent;
     SetIsNeedCondWait();
-    uint32_t laneReqIdDbBr = 21;
-    int32_t ret = transObj->allocLaneByQos(laneReqIdDbBr, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
     SetIsNeedCondWait();
-    uint32_t laneReqId10KBr = 22;
     allocInfo.qosRequire.minBW = QOS_BW_10K;
-    ret = transObj->allocLaneByQos(laneReqId10KBr, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_TWO, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
@@ -886,19 +880,19 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_002, TestSize.Lev
     info.type = LANE_WLAN_5G;
     ResetQosEventResult();
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
-    EXPECT_EQ(g_qosEvent[laneReqIdDbBr], false);
-    EXPECT_EQ(g_qosEvent[laneReqId10KBr], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_TWO], false);
     info.type = LANE_P2P;
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
-    EXPECT_EQ(g_qosEvent[laneReqIdDbBr], true);
-    EXPECT_EQ(g_qosEvent[laneReqId10KBr], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], true);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_TWO], false);
     info.type = LANE_HML;
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
-    EXPECT_EQ(g_qosEvent[laneReqIdDbBr], true);
-    EXPECT_EQ(g_qosEvent[laneReqId10KBr], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], true);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_TWO], false);
 
-    EXPECT_EQ(transObj->freeLane(laneReqIdDbBr), SOFTBUS_OK);
-    EXPECT_EQ(transObj->freeLane(laneReqId10KBr), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_ONE), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_TWO), SOFTBUS_OK);
     transObj->deinit();
 }
 
@@ -926,20 +920,17 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_003, TestSize.Lev
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessBr;
     g_listenerCb.onLaneQosEvent = OnLaneQosEvent;
     SetIsNeedCondWait();
-    uint32_t laneReqIdDbBr1 = 21;
-    int32_t ret = transObj->allocLaneByQos(laneReqIdDbBr1, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
     SetIsNeedCondWait();
-    uint32_t laneReqIdDbBr2 = 22;
-    ret = transObj->allocLaneByQos(laneReqIdDbBr2, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_TWO, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     SetIsNeedCondWait();
-    uint32_t laneReqIdDbBrC = 23;
     EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID_C));
-    ret = transObj->allocLaneByQos(laneReqIdDbBrC, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_THREE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
@@ -947,13 +938,13 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_003, TestSize.Lev
     info.type = LANE_HML;
     ResetQosEventResult();
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
-    EXPECT_EQ(g_qosEvent[laneReqIdDbBr1], true);
-    EXPECT_EQ(g_qosEvent[laneReqIdDbBr2], true);
-    EXPECT_EQ(g_qosEvent[laneReqIdDbBrC], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], true);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_TWO], true);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_THREE], false);
 
-    EXPECT_EQ(transObj->freeLane(laneReqIdDbBr1), SOFTBUS_OK);
-    EXPECT_EQ(transObj->freeLane(laneReqIdDbBr2), SOFTBUS_OK);
-    EXPECT_EQ(transObj->freeLane(laneReqIdDbBrC), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_ONE), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_TWO), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_THREE), SOFTBUS_OK);
     transObj->deinit();
 }
 
@@ -981,15 +972,13 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_004, TestSize.Lev
     g_listenerCb.onLaneAllocSuccess = OnLaneAllocSuccessWlan5G;
     g_listenerCb.onLaneQosEvent = OnLaneQosEvent;
     SetIsNeedCondWait();
-    uint32_t laneReqIdDb5G = 21;
-    int32_t ret = transObj->allocLaneByQos(laneReqIdDb5G, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
     SetIsNeedCondWait();
-    uint32_t laneReqId10K5G = 22;
     allocInfo.qosRequire.minBW = QOS_BW_10K;
-    ret = transObj->allocLaneByQos(laneReqId10K5G, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_TWO, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
@@ -997,11 +986,11 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_004, TestSize.Lev
     info.type = LANE_P2P;
     ResetQosEventResult();
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
-    EXPECT_EQ(g_qosEvent[laneReqIdDb5G], false);
-    EXPECT_EQ(g_qosEvent[laneReqId10K5G], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], false);
+    EXPECT_EQ(g_qosEvent[LANE_REQ_ID_TWO], false);
 
-    EXPECT_EQ(transObj->freeLane(laneReqIdDb5G), SOFTBUS_OK);
-    EXPECT_EQ(transObj->freeLane(laneReqId10K5G), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_ONE), SOFTBUS_OK);
+    EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_TWO), SOFTBUS_OK);
     transObj->deinit();
 }
 } // namespace OHOS
