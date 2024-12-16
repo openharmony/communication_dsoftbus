@@ -19,6 +19,7 @@
 #include "disc_coap.h"
 #include "disc_event.h"
 #include "disc_log.h"
+#include "disc_usb_dispatcher.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -39,6 +40,7 @@ static SoftBusList *g_discoveryInfoList = NULL;
 
 static DiscoveryFuncInterface *g_discCoapInterface = NULL;
 static DiscoveryFuncInterface *g_discBleInterface = NULL;
+static DiscoveryFuncInterface *g_discUsbInterface = NULL;
 
 static DiscInnerCallback g_discMgrMediumCb;
 
@@ -278,6 +280,10 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
                 SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, DISC_CONTROL, "all medium failed");
             return SOFTBUS_OK;
         }
+        case USB:
+            ret = CallSpecificInterfaceFunc(&(info->option), g_discUsbInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, ret);
+            return ret;
         default:
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -440,10 +446,12 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
-        SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= USB,
+        SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "medium is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq < FREQ_BUTT,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGW(!(info->medium == USB && info->mode == DISCOVER_MODE_ACTIVE),
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "usb is not support active mode");
 
     if (info->capabilityData == NULL) {
         if (info->dataLen == 0) {
@@ -1244,8 +1252,10 @@ int32_t DiscMgrInit(void)
 
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
     g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleInterface != NULL || g_discCoapInterface != NULL,
-        SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble and coap both init failed");
+    g_discUsbInterface = DiscUsbDispatcherInit(&g_discMgrMediumCb);
+
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleInterface != NULL || g_discCoapInterface != NULL ||
+        g_discUsbInterface != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble coap and usb init failed");
 
     g_publishInfoList = CreateSoftBusList();
     DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
@@ -1275,9 +1285,11 @@ void DiscMgrDeinit(void)
 
     g_discCoapInterface = NULL;
     g_discBleInterface = NULL;
+    g_discUsbInterface = NULL;
 
     DiscCoapDeinit();
     DiscBleDeinit();
+    DiscUsbDispatcherDeinit();
 
     g_isInited = false;
     DISC_LOGI(DISC_INIT, "disc manager deinit success");

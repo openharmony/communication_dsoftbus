@@ -22,13 +22,6 @@ bus_center_adapter_inc = [
 ]
 bus_center_adapter_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
-if (!defined(global_parts_info) ||
-    defined(global_parts_info.notification_common_event_service)) {
-  has_ces_part = true
-} else {
-  has_ces_part = false
-}
-
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     if (dsoftbus_feature_lnn_net) {
