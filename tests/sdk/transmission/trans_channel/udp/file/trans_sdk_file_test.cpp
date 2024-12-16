@@ -30,6 +30,9 @@
 
 using namespace testing::ext;
 
+#define TEST_SESSIONID 10
+#define TEST_CHANNELID 1025
+
 namespace OHOS {
 
 const uint32_t g_keyLen = 10;
@@ -938,7 +941,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level0)
     FileEvent event;
     msgData.clearPolicyFileList.fileNum = 3;
     DFileFileInfo *fileInfo =
-        (DFileFileInfo *)SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo));
+        static_cast<DFileFileInfo *>(SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo)));
     fileInfo[0].stat = FILE_STAT_COMPLETE;
     fileInfo[0].file = (char *)"file1";
     fileInfo[1].stat = FILE_STAT_NOT_COMPLETE;
@@ -994,7 +997,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest003, TestSize.Level0)
     FileEvent event;
     msgData.clearPolicyFileList.fileNum = 3;
     DFileFileInfo *fileInfo =
-        (DFileFileInfo *)SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo));
+        static_cast<DFileFileInfo *>(SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo)));
+    EXPECT_NE(nullptr, fileInfo);
     fileInfo[0].stat = FILE_STAT_COMPLETE;
     fileInfo[0].file = (char *)"file1";
     fileInfo[1].stat = FILE_STAT_COMPLETE;
@@ -1038,6 +1042,118 @@ void InitDFileMsg(DFileMsg *msgData)
     msgData->transferUpdate.totalBytes = 0;
     msgData->transferUpdate.transId = 0;
     msgData->rate = 0;
+}
+
+/**
+ * @tc.name: FillFileStatusListTest004
+ * @tc.desc: test fill file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level0)
+{
+    DFileMsg msgData;
+    msgData.clearPolicyFileList.fileNum = 3; // test value
+    DFileFileInfo *fileInfo =
+        static_cast<DFileFileInfo *>(SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo)));
+    EXPECT_NE(nullptr, fileInfo);
+    fileInfo[0].stat = FILE_STAT_COMPLETE;
+    fileInfo[0].file = (char *)"file1";
+    fileInfo[1].stat = FILE_STAT_COMPLETE;
+    fileInfo[1].file = (char *)"file2";
+    fileInfo[2].stat = FILE_STAT_COMPLETE;
+    fileInfo[2].file = (char *)"file3";
+    msgData.clearPolicyFileList.fileInfo = fileInfo;
+    int32_t sessionId = TEST_SESSIONID;
+    DFileMsgType msgType = DFILE_ON_FILE_SEND_SUCCESS;
+    FileListener* listener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
+    EXPECT_NE(nullptr, listener);
+    UdpChannel *channel = TransAddChannelTest();
+    FileSendErrorEvent(channel, listener, &msgData, msgType, sessionId);
+    listener->socketSendCallback = MockSocketSendCallback;
+    listener->socketRecvCallback = MockSocketRecvCallback;
+    listener->socketSendCallback = nullptr;
+    FileSendErrorEvent(channel, listener, &msgData, msgType, sessionId);
+
+    NotifySendResult(sessionId, msgType, nullptr, nullptr);
+
+    msgType = DFILE_ON_FILE_SEND_SUCCESS;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+
+    msgType = DFILE_ON_FILE_SEND_FAIL;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+
+    msgType = DFILE_ON_TRANS_IN_PROGRESS;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+
+    msgType = DFILE_ON_BIND;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+    SoftBusFree(listener);
+    SoftBusFree(fileInfo);
+}
+
+/**
+ * @tc.name: FillFileStatusListTest005
+ * @tc.desc: test fill file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level0)
+{
+    DFileMsg msgData;
+    msgData.clearPolicyFileList.fileNum = 3; // test value
+    DFileFileInfo *fileInfo =
+        static_cast<DFileFileInfo *>(SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo)));
+    EXPECT_NE(nullptr, fileInfo);
+    fileInfo[0].stat = FILE_STAT_COMPLETE;
+    fileInfo[0].file = (char *)"file1";
+    fileInfo[1].stat = FILE_STAT_COMPLETE;
+    fileInfo[1].file = (char *)"file2";
+    fileInfo[2].stat = FILE_STAT_COMPLETE;
+    fileInfo[2].file = (char *)"file3";
+    msgData.clearPolicyFileList.fileInfo = fileInfo;
+    int32_t sessionId = TEST_SESSIONID;
+    DFileMsgType msgType = DFILE_ON_FILE_SEND_SUCCESS;
+    FileListener* listener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
+    EXPECT_NE(nullptr, listener);
+    UdpChannel *channel = TransAddChannelTest();
+    FileSendErrorEvent(channel, listener, &msgData, msgType, sessionId);
+    listener->socketSendCallback = MockSocketSendCallback;
+    listener->socketRecvCallback = MockSocketRecvCallback;
+
+    NotifyRecvResult(sessionId, msgType, nullptr, nullptr);
+
+    msgType = DFILE_ON_FILE_LIST_RECEIVED;
+    NotifyRecvResult(sessionId, msgType, &msgData, listener);
+    msgType = DFILE_ON_FILE_RECEIVE_SUCCESS;
+    NotifyRecvResult(sessionId, msgType, &msgData, listener);
+    msgType = DFILE_ON_FILE_RECEIVE_FAIL;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+    msgType = DFILE_ON_TRANS_IN_PROGRESS;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+    msgType = DFILE_ON_BIND;
+    NotifySendResult(sessionId, msgType, &msgData, listener);
+
+    FileRecvErrorEvent(channel, listener, &msgData, msgType, sessionId);
+    listener->socketSendCallback = nullptr;
+    FileRecvErrorEvent(channel, listener, &msgData, msgType, sessionId);
+    SoftBusFree(listener);
+    SoftBusFree(fileInfo);
+}
+
+/**
+ * @tc.name: FillFileStatusListTest006
+ * @tc.desc: test fill file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest006, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint8_t tos = 1;
+    RenameHook(nullptr);
+    int32_t ret = NotifyTransLimitChanged(channelId, tos);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -1099,6 +1215,10 @@ HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level0)
     msgData.errorCode = NSTACKX_ENETDOWN;
     FillFileEventErrorCode(&msgData, &event);
     ASSERT_EQ(SOFTBUS_TRANS_FILE_NETWORK_ERROR, event.errorCode);
+
+    msgData.errorCode = NSTACKX_ENOENT;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_TRANS_FILE_NOT_FOUND, event.errorCode);
 
     msgData.errorCode = NSTACKX_EEXIST;
     FillFileEventErrorCode(&msgData, &event);
