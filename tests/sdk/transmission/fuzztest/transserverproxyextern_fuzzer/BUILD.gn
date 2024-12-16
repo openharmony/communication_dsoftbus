@@ -30,6 +30,7 @@ ohos_fuzztest("TransServerProxyExternFuzzTest") {
 
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/tests/common/include",
 
     "$dsoftbus_sdk_path/transmission/ipc/include",
   ]

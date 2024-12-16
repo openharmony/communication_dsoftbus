@@ -18,6 +18,7 @@
 #include <cstddef>
 
 #include "client_trans_session_service.h"
+#include "fuzz_data_generator.h"
 #include "session.h"
 
 namespace OHOS {
@@ -26,10 +27,15 @@ void QosReportTest(const uint8_t* data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t appType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t quality = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    int32_t appType = 0;
+    int32_t quality = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(appType);
+    GenerateInt32(quality);
     QosReport(channelId, appType, quality);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

@@ -17,6 +17,7 @@
 
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
+#include "fuzz_data_generator.h"
 #include "session.h"
 #include "softbus_trans_def.h"
 
@@ -54,8 +55,11 @@ void ClientAddAuthSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t sessionId = 0;
+    GenerateInt32(sessionId);
     ClientAddAuthSession(nullptr, &sessionId);
+    DataGenerator::Clear();
 }
 
 void ClientDeleteSessionTest(const uint8_t* data, size_t size)
@@ -63,18 +67,23 @@ void ClientDeleteSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t sessionId = 0;
+    GenerateInt32(sessionId);
     ClientDeleteSession(sessionId);
+    DataGenerator::Clear();
 }
 
 void ClientGetSessionDataTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
+    if ((data == nullptr) || (size < sizeof(int32_t) + sizeof(int))) {
         return;
     }
+    uint32_t offset = 0;
     int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    offset += sizeof(int32_t);
     char* testData = const_cast<char*>(reinterpret_cast<const char *>(data));
-    int* testInt = const_cast<int*>(reinterpret_cast<const int *>(data));
+    int* testInt = const_cast<int*>(reinterpret_cast<const int *>(data + offset));
     ClientGetSessionDataById(sessionId, testData, size, KEY_SESSION_NAME);
     ClientGetSessionIntegerDataById(sessionId, testInt, KEY_SESSION_NAME);
     ClientGetSessionSide(sessionId);
@@ -85,13 +94,16 @@ void ClientSetChannelBySessionIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t sessionId = 0;
+    GenerateInt32(sessionId);
     TransInfo transInfo = {
         .channelId = 0,
         .channelType = 0,
     };
 
     ClientSetChannelBySessionId(sessionId, &transInfo);
+    DataGenerator::Clear();
 }
 
 void ClientGetSessionCallbackTest(const uint8_t* data, size_t size)
@@ -99,11 +111,14 @@ void ClientGetSessionCallbackTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t sessionId = 0;
+    GenerateInt32(sessionId);
     const char* testSessionName = reinterpret_cast<const char *>(data);
 
     ClientGetSessionCallbackById(sessionId, &g_sessionlistener);
     ClientGetSessionCallbackByName(testSessionName, &g_sessionlistener);
+    DataGenerator::Clear();
 }
 
 void ClientTransOnLinkDownTest(const uint8_t* data, size_t size)
@@ -111,10 +126,13 @@ void ClientTransOnLinkDownTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
+    DataGenerator::Write(data, size);
+    int32_t routeType = 0;
+    GenerateInt32(routeType);
     const char* netWorkId = reinterpret_cast<const char *>(data);
-    int32_t routeType = *(reinterpret_cast<const int32_t *>(data));
 
     ClientTransOnLinkDown(netWorkId, routeType);
+    DataGenerator::Clear();
 }
 
 void ClientRemovePermissionTest(const uint8_t* data, size_t size)
@@ -129,9 +147,13 @@ void ClientGetFileConfigInfoByIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t* fileEncrypt = const_cast<int32_t*>(reinterpret_cast<const int32_t *>(data));
-    ClientGetFileConfigInfoById(sessionId, fileEncrypt, fileEncrypt, fileEncrypt);
+    DataGenerator::Write(data, size);
+    int32_t sessionId = 0;
+    int32_t fileEncrypt = 0;
+    GenerateInt32(sessionId);
+    GenerateInt32(fileEncrypt);
+    ClientGetFileConfigInfoById(sessionId, &fileEncrypt, &fileEncrypt, &fileEncrypt);
+    DataGenerator::Clear();
 }
 
 void GetEncryptByChannelIdTest(const uint8_t* data, size_t size)
@@ -139,10 +161,14 @@ void GetEncryptByChannelIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
     int32_t encryp = 0;
     GetEncryptByChannelId(channelId, channelType, &encryp);
+    DataGenerator::Clear();
 }
 
 void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
@@ -150,11 +176,15 @@ void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
     int32_t sessionId;
     bool isClosing = false;
     ClientGetSessionIdByChannelId(channelId, channelType, &sessionId, isClosing);
+    DataGenerator::Clear();
 }
 
 void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
@@ -163,8 +193,11 @@ void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
         return;
     }
     ChannelInfo channel;
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t sessionId = 0;
+    GenerateInt32(sessionId);
     ClientEnableSessionByChannelId(&channel, &sessionId);
+    DataGenerator::Clear();
 }
 
 } // namespace OHOS
