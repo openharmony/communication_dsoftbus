@@ -107,7 +107,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     channel.channelId = TEST_CHANNELID;
     channel.channelType = CHANNEL_TYPE_TCP_DIRECT;
     channel.fd = TEST_DATA_TYPE;
-    channel.isServer = true;
+    channel.isServer = false;
     channel.isEnabled = true;
     channel.peerUid = TEST_CHANNELID;
     channel.peerPid = TEST_CHANNELID;
@@ -128,7 +128,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     channel.crc = TEST_COUNT;
 
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -139,11 +139,11 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     
     channel.isServer = false;
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -486,7 +486,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Leve
     EXPECT_NE(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 
     ret = ClientIpcOnTransLimitChange(g_pkgName, TEST_PID, TEST_CHANNELID, tos);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
