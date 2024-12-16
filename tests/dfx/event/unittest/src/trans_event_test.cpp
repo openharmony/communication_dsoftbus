@@ -92,6 +92,9 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .businessId = 1,
         .businessType = 1,
         .sessionId = 1,
+        .minBW = 83886080,
+        .maxLatency = 4000,
+        .minLatency = 2000,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
@@ -139,8 +142,11 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .firstTokenName = "",
         .firstTokenId = 0,
         .firstTokenType = -1,
+        .minBW = 0,
+        .maxLatency = 0,
+        .minLatency = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode and firstTokenId is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 6; // result, errcode and firstTokenId is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

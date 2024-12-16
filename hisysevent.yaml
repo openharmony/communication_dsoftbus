@@ -237,6 +237,9 @@ TRANSPORT_BEHAVIOR:
   FIRST_TOKEN_NAME: { type: STRING, desc: first token name }
   FIRST_TOKEN_ID: { type: UINT64, desc: first token id }
   FIRST_TOKEN_TYPE: { type: INT32, desc: first token type }
+  MIN_BW: { type: INT32, desc: min bw }
+  MAX_LATENCY: { type: INT32, desc: max latency }
+  MIN_LATENCY: { type: INT32, desc: min latency }
 
 TRANSPORT_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: transport recurity audit }
