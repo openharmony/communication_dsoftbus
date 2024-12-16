@@ -42,6 +42,7 @@ typedef enum {
     EVENT_STAGE_APPROACH_BLE_INIT = 4,
     EVENT_STAGE_VLINK_BLE_INIT = 5,
     EVENT_STAGE_TOUCH_BLE_INIT = 6,
+    EVENT_STAGE_USB_INIT = 7,
 } DiscEventInitStage;
 
 typedef enum {
@@ -151,6 +152,8 @@ typedef enum {
     AUDIT_SCENE_BLE_SCAN = 4,
     AUDIT_SCENE_COAP_PUBLISH = 5,
     AUDIT_SCENE_COAP_DISCOVERY = 6,
+    AUDIT_SCENE_USB_PUBLISH = 7,
+    AUDIT_SCENE_USB_SUBSCRIBE = 8,
 } DiscAuditScene;
 
 typedef enum {
