@@ -276,7 +276,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
 {
     AuthChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed, authiD=%{public}d", authId);
+        TRANS_LOGE(TRANS_SVC, "lock failed, authID=%{public}d", authId);
         return SOFTBUS_LOCK_ERR;
     }
     bool exists = false;
