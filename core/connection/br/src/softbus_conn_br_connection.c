@@ -151,12 +151,13 @@ static int32_t StartBrClientConnect(ConnBrConnection *connection, const char *an
     if (socketHandle <= INVALID_SOCKET_HANDLE) {
         CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, connId=%{public}u, address=%{public}s",
             connection->connectionId, anomizeAddress);
+        int32_t errCode = socketHandle;
         ConnAlarmExtra extraAlarm = {
             .linkType = CONNECT_BR,
-            .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+            .errcode = errCode,
         };
         CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
-        return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+        return errCode;
     }
     if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, address=%{public}s", connection->connectionId,

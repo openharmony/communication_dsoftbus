@@ -74,8 +74,10 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
     }
     int ret = SocketConnectEx(&socketPara, &bdAddr, socketPsmValue, (BtSocketConnectionCallback *)connectCallback);
     if (ret < 0) {
+        int32_t errorCode = ret == BT_SOCKET_LIMITED_RESOURCES ? SOFTBUS_CONN_BR_SOCKET_LIMITED_RESOURCES :
+                                                                 SOFTBUS_CONN_BR_SOCKET_CONNECT_ERR;
         CONN_LOGE(CONN_BR, "connect failed, ret=%{public}d", ret);
-        return SOFTBUS_CONN_BR_SOCKET_CONNECT_ERR;
+        return errorCode;
     }
     CONN_LOGI(CONN_BR, "SocketConnectEx ok. clientId=%{public}d", ret);
     return ret;
