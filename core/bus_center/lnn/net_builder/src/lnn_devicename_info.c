@@ -296,6 +296,26 @@ static void HandlerGetDeviceName(const char *deviceName)
     SoftBusFree(info);
 }
 
+void LnnTrySyncDeviceName(void)
+{
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local devicename fail");
+        return;
+    }
+    char name[DEVICE_NAME_BUF_LEN] = {0};
+    if (LnnGetSettingDeviceName(name, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set device name fail");
+        return;
+    }
+    if (strcmp(localDevName, name) == 0) {
+        LNN_LOGI(LNN_BUILDER, "devicename not change no need sync");
+        return;
+    }
+    HandlerGetDeviceName(name);
+}
+
 static bool IsDeviceNeedSyncNickName(const char *networkId)
 {
     NodeInfo nodeInfo;
