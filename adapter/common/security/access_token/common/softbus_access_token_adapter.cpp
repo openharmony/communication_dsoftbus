@@ -74,9 +74,10 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
         if (isSystemApp) {
             return false;
         }
+        COMM_LOGI(COMM_ADAPTER, "The caller is a normal app");
+        return true;
     }
-    COMM_LOGI(COMM_ADAPTER, "The caller is a normal app");
-    return true;
+    return false;
 }
 
 bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission)
