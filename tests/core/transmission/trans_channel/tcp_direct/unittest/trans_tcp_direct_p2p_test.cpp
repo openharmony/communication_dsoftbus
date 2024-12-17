@@ -12,23 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <arpa/inet.h>
 #include <cstdint>
 #include <cstring>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <securec.h>
+#include <unistd.h>
+
 #include "auth_interface.h"
 #include "gtest/gtest.h"
-#include "trans_auth_message.h"
-#include "trans_tcp_direct_callback.h"
-#include "trans_tcp_direct_p2p.h"
-#include "trans_tcp_direct_p2p.c"
-#include "trans_tcp_direct_sessionconn.h"
-#include "softbus_def.h"
-#include "softbus_trans_def.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_trans_def.h"
+#include "trans_auth_message.h"
+#include "trans_tcp_direct_callback.h"
+#include "trans_tcp_direct_p2p.c"
+#include "trans_tcp_direct_p2p.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 using namespace testing::ext;
 
@@ -77,7 +79,7 @@ void TransTcpDirectP2pTest::TearDownTestCase(void)
 
 SessionConn *TestSetSessionConn()
 {
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
     if (conn == nullptr) {
         return nullptr;
     }
@@ -163,7 +165,7 @@ string TestGetMsgPack()
         cJSON_Delete(msg);
         return nullptr;
     }
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     if (appInfo == nullptr) {
         cJSON_Delete(msg);
         return nullptr;
@@ -214,11 +216,11 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
     ASSERT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = 1;
     // will free in ClearP2pSessionConn
-    ListNode *sessionConnList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    ListNode *sessionConnList = static_cast<ListNode *>(SoftBusCalloc(sizeof(ListNode)));
     ASSERT_NE(sessionConnList, nullptr);
     NotifyP2pSessionConnClear(NULL);
     ClearP2pSessionConn();
-    ListNode *testsessionConnList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    ListNode *testsessionConnList = static_cast<ListNode *>(SoftBusCalloc(sizeof(ListNode)));
     ASSERT_NE(testsessionConnList, nullptr);
     ret = CreatSessionConnList();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -267,7 +269,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnChannelOpenFailTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
-    OnChannelOpenFail(channelId, errCode);
+    EXPECT_NO_THROW(OnChannelOpenFail(channelId, errCode));
 }
 
 /**
@@ -361,7 +363,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     int64_t seq = 1;
     int32_t flags = MSG_FLAG_REQUEST;
     const char *str = "data";
-    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    AuthTransData *data = static_cast<AuthTransData *>(SoftBusCalloc(sizeof(AuthTransData)));
     data->module = MODULE_P2P_LINK;
     data->flag = FLAG_REPLY;
     data->seq = 1;
@@ -388,7 +390,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     if (appInfo == nullptr) {
         return ;
     }
@@ -439,11 +441,11 @@ HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     if (appInfo == nullptr) {
         return ;
     }
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
     if (conn == nullptr) {
         SoftBusFree(appInfo);
         appInfo = nullptr;
@@ -471,11 +473,11 @@ HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     if (appInfo == nullptr) {
         return ;
     }
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
     if (conn == nullptr) {
         SoftBusFree(appInfo);
         appInfo = nullptr;
@@ -555,10 +557,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     EXPECT_NE(appInfo, NULL);
 
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
     if (conn == NULL) {
         SoftBusFree(appInfo);
         appInfo = nullptr;
@@ -631,7 +633,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdByUuidTest001, TestSize.Level1)
 {
-    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransProxyGetAuthIdByUuid(conn);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);

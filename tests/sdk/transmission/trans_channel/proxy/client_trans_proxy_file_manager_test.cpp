@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include "securec.h"
+#include <gtest/gtest.h>
+#include <securec.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#include "client_trans_proxy_file_manager.c"
+#include "client_trans_file_listener.h"
 #include "client_trans_proxy_file_helper.c"
+#include "client_trans_proxy_file_manager.c"
 #include "client_trans_proxy_manager.c"
 #include "client_trans_session_manager.c"
 #include "client_trans_socket_manager.c"
-#include "client_trans_file_listener.h"
+#include "session.h"
+#include "softbus_access_token_test.h"
+#include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_frame.h"
-#include "session.h"
-#include "softbus_app_info.h"
-#include "softbus_access_token_test.h"
 
 #define TEST_FILE_LENGTH 10
 #define TEST_FILE_CNT 2
@@ -278,15 +278,15 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
 {
     int32_t channelId = 1;
     int32_t sessionId = 1;
-    int ret = ProcessRecvFileFrameData(sessionId, channelId, nullptr);
+    int32_t ret = ProcessRecvFileFrameData(sessionId, channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel = static_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
     ASSERT_TRUE(channel != nullptr);
     channel->channelId = 1;
     channel->isEncrypt = 0;
     channel->linkType = LANE_BR;
-    channel->sessionKey = (char *)g_sessionKey;
+    channel->sessionKey = const_cast<char *>(g_sessionKey);
     channel->osType = OH_TYPE;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -314,12 +314,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     int32_t channelId = 1;
     int32_t sessionId = 1;
 
-    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel = static_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
     ASSERT_TRUE(channel != nullptr);
     channel->channelId = 1;
     channel->isEncrypt = 0;
     channel->linkType = LANE_BR;
-    channel->sessionKey = (char *)g_sessionKey;
+    channel->sessionKey = const_cast<char *>(g_sessionKey);
     int32_t ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(channel);
@@ -578,7 +578,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, T
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, TestSize.Level0)
 {
-    SendListenerInfo *infoRear = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    SendListenerInfo *infoRear = static_cast<SendListenerInfo *>(SoftBusCalloc(sizeof(SendListenerInfo)));
     infoRear->sessionId = 1;
     infoRear->channelId = 1;
     infoRear->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
@@ -924,12 +924,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001,
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest001, TestSize.Level0)
 {
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    SendListenerInfo *info = static_cast<SendListenerInfo *>(SoftBusCalloc(sizeof(SendListenerInfo)));
     EXPECT_TRUE(info != nullptr);
     info->sessionId = 1;
     info->crc = 1;
     info->channelId = 1;
-    int ret = AddSendListenerInfo(info);
+    int32_t ret = AddSendListenerInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     int32_t sessionId = 1;
@@ -1213,7 +1213,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListT
 
     ReleaseRecipientRef(nullptr);
 
-    FileRecipientInfo *info = (FileRecipientInfo *)SoftBusCalloc(sizeof(FileRecipientInfo));
+    FileRecipientInfo *info = static_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
     info->objRefCount = 2,
     ReleaseRecipientRef(info);
 
@@ -1286,10 +1286,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest001, TestSize.Level0)
 {
     uint32_t dataLen = 0;
-    int ret = ProcessOneFrameCRC(nullptr, dataLen, nullptr);
+    int32_t ret = ProcessOneFrameCRC(nullptr, dataLen, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    uint8_t *emptyBuff = (uint8_t *)SoftBusCalloc(TEST_FILE_SIZE);
+    uint8_t *emptyBuff = static_cast<uint8_t *>(SoftBusCalloc(TEST_FILE_SIZE));
     if (emptyBuff == NULL) {
         return;
     }
@@ -1784,7 +1784,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyClearSendInfoTest001, 
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
     };
 
-    ClearSendInfo(&info);
+    EXPECT_NO_THROW(ClearSendInfo(&info));
 }
 
 /**
@@ -1822,7 +1822,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, Te
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathTest001, TestSize.Level0)
 {
     int32_t sessionId = TEST_SESSION_ID;
-    FileListener *fileListener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
+    FileListener *fileListener = static_cast<FileListener *>(SoftBusCalloc(sizeof(FileListener)));
 
     fileListener->socketRecvCallback = NULL;
     int ret = UpdateFileReceivePath(sessionId, fileListener);
@@ -1915,12 +1915,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level0)
     int32_t ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE, osType, &packetSize);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
-    ChannelInfo *channel1 = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel1 = static_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
     ASSERT_TRUE(channel1 != nullptr);
     channel1->channelId = 1;
     channel1->isEncrypt = 0;
     channel1->linkType = LANE_BR;
-    channel1->sessionKey = (char *)g_sessionKey;
+    channel1->sessionKey = const_cast<char *>(g_sessionKey);
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel1));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE + 1, osType, &packetSize);
@@ -1928,12 +1928,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level0)
     ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE - 1, osType, &packetSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ChannelInfo *channel2 = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel2 = static_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
     ASSERT_TRUE(channel2 != nullptr);
     channel2->channelId = 2;
     channel2->isEncrypt = 0;
     channel2->linkType = LANE_BLE_DIRECT;
-    channel2->sessionKey = (char *)g_sessionKey;
+    channel2->sessionKey = const_cast<char *>(g_sessionKey);
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel2));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckFrameLength(2, PROXY_BLE_MAX_PACKET_SIZE + 1, osType, &packetSize);
