@@ -1503,6 +1503,11 @@ int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, ui
 
 static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 {
+    if (strcmp(newInfo->networkId, oldInfo->networkId) == 0 || oldInfo->status != STATUS_ONLINE ||
+        !LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE)) {
+        oldInfo->stateVersion = newInfo->stateVersion;
+    }
+
     if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceName to distributed ledger fail");
     }
@@ -1533,7 +1538,6 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->connSubFeature = newInfo->connSubFeature;
     oldInfo->authCapacity = newInfo->authCapacity;
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
-    oldInfo->stateVersion = newInfo->stateVersion;
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
 }
