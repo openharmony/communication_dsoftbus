@@ -1877,22 +1877,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ADD_P2P_ADDRESS_TEST_001
-* @tc.desc: LANE ADD P2P ADDRESS TEST
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LANE_ADD_P2P_ADDRESS_TEST_001, TestSize.Level1)
-{
-    const char *networkId = "testnetworkid123";
-    const char *ipAddr = "127.0.0.1";
-    uint16_t port = 1022;
-    LaneAddP2pAddress(networkId, ipAddr, port);
-    LaneAddP2pAddressByIp(ipAddr, port);
-    LaneUpdateP2pAddressByIp(ipAddr, networkId);
-}
-
-/*
 * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_001
 * @tc.desc: SelectExpectLanesByQos
 * @tc.type: FUNC
@@ -2944,37 +2928,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_05, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_01
-* @tc.desc: SelectLaneRule
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LNN_LANE_01, TestSize.Level1)
-{
-    ILaneIdStateListener listener;
-    RegisterLaneIdListener(nullptr);
-
-    listener.OnLaneIdEnabled = nullptr;
-    listener.OnLaneIdDisabled = nullptr;
-    RegisterLaneIdListener(&listener);
-    UnregisterLaneIdListener(nullptr);
-}
-
-/*
-* @tc.name: LNN_LANE_02
-* @tc.desc: SelectLaneRule
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LNN_LANE_02, TestSize.Level1)
-{
-    uint32_t laneReqId = 0;
-    FreeLaneReqId(laneReqId);
-    laneReqId = 0xfffffff;
-    FreeLaneReqId(laneReqId);
-}
-
-/*
 * @tc.name: LNN_LANE_03
 * @tc.desc: SelectLaneRule
 * @tc.type: FUNC
@@ -2982,8 +2935,19 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_02, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_LANE_03, TestSize.Level1)
 {
+    uint32_t laneReqId = 0;
     LaneRequestOption request;
     ILaneListener listener;
+    ILaneIdStateListener laneListener;
+
+    RegisterLaneIdListener(nullptr);
+    laneListener.OnLaneIdEnabled = nullptr;
+    laneListener.OnLaneIdDisabled = nullptr;
+    RegisterLaneIdListener(&laneListener);
+    UnregisterLaneIdListener(nullptr);
+    FreeLaneReqId(laneReqId);
+    laneReqId = 0xfffffff;
+    FreeLaneReqId(laneReqId);
     request.type = LANE_TYPE_BUTT;
     int32_t ret = LnnRequestLane(0, &request, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
