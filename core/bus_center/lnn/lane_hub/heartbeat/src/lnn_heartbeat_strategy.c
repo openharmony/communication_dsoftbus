@@ -441,19 +441,19 @@ static int32_t RelayHeartbeatV1Split(
         if (splitHbType < HEARTBEAT_TYPE_MIN) {
             break;
         }
+        if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}u", splitHbType);
+            return SOFTBUS_NETWORK_POST_MSG_FAIL;
+        }
         if (i == sendCnt - 1) {
-            if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}u", splitHbType);
-                return SOFTBUS_NETWORK_POST_MSG_FAIL;
-            }
             msgPara->isSyncData = true;
-            msgPara->isNeedRestart = false;
-            if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara, i * HB_SEND_EACH_SEPARATELY_LEN) !=
-                SOFTBUS_OK) {
-                msgPara->isSyncData = false;
-                LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}u", splitHbType);
-                return SOFTBUS_NETWORK_POST_MSG_FAIL;
-            }
+        }
+        msgPara->isNeedRestart = false;
+        if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara, i * HB_SEND_EACH_SEPARATELY_LEN) !=
+            SOFTBUS_OK) {
+            msgPara->isSyncData = false;
+            LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}u", splitHbType);
+            return SOFTBUS_NETWORK_POST_MSG_FAIL;
         }
     }
     endData.hbType = registedHbType;
