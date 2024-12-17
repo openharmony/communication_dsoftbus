@@ -626,6 +626,11 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
     return GetNetBuilderDepsInterface()->LnnUpdateAccountInfo(info);
 }
 
+int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnUpdateRemoteDeviceName(info);
+}
+
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
 {
     return GetNetBuilderDepsInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);

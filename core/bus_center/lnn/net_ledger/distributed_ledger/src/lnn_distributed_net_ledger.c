@@ -736,7 +736,6 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 {
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
-    NodeInfo *oldInfo = NULL;
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
 
     UpdateNewNodeAccountHash(newInfo);
@@ -747,7 +746,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
-    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "no online node newInfo!");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -777,6 +776,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         return SOFTBUS_MEM_ERR;
     }
     oldInfo->accountId = newInfo->accountId;
+    oldInfo->userId = newInfo->userId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
@@ -1264,7 +1264,7 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
-        return REPORT_NONE;
+        return SOFTBUS_LOCK_ERR;
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL) {
@@ -1273,6 +1273,61 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
         oldInfo->userId = info->userId;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "info is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = NULL;
+    DoubleHashMap *map = NULL;
+    NodeInfo *oldInfo = NULL;
+    NodeBasicInfo basic;
+    (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    bool isNeedUpdate = false;
+    udid = LnnGetDeviceUdid(info);
+
+    map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+
+    do {
+        if (oldInfo == NULL) {
+            LNN_LOGE(LNN_LEDGER, "oldInfo is null");
+            break;
+        }
+        isNeedUpdate = (strcmp(oldInfo->deviceInfo.deviceName, info->deviceInfo.deviceName) != 0);
+        if (!isNeedUpdate) {
+            LNN_LOGI(LNN_LEDGER, "devicename not change");
+            break;
+        }
+        if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN,
+            info->deviceInfo.deviceName) != EOK) {
+            isNeedUpdate = false;
+            LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
+            break;
+        }
+        if (ConvertNodeInfoToBasicInfo(oldInfo, &basic) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "ConvertNodeInfoToBasicInfo fail");
+            isNeedUpdate = false;
+            break;
+        }
+    } while (false);
+
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    if (isNeedUpdate) {
+        char *anonyDeviceName = NULL;
+        Anonymize(basic.deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_LEDGER, "report deviceName update, name=%{public}s", AnonymizeWrapper(anonyDeviceName));
+        AnonymizeFree(anonyDeviceName);
+        LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
+    }
     return SOFTBUS_OK;
 }
 
