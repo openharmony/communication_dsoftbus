@@ -305,7 +305,7 @@ static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
         return SOFTBUS_OK;
     }
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data, ret=%{publid}d.", ret);
+        TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data, ret=%{public}d.", ret);
     }
     TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
     return ret;

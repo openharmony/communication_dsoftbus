@@ -36,7 +36,7 @@ typedef enum {
 bool IsIShareSession(const char *sessionName)
 {
     if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid sessionName");
+        TRANS_LOGE(TRANS_CTRL, "invalid sessionName.");
         return false;
     }
     regex_t regComp;
