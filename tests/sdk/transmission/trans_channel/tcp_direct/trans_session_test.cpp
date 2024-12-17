@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,9 @@
 #include <gtest/gtest.h>
 #include <string>
 
+#include "client_trans_session_manager.h"
+#include "client_trans_session_service.h"
+#include "client_trans_socket_manager.h"
 #include "dfs_session.h"
 #include "inner_session.h"
 #include "session.h"
@@ -23,9 +26,6 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "client_trans_session_manager.h"
-#include "client_trans_socket_manager.h"
-#include "client_trans_session_service.h"
 #include "trans_log.h"
 
 using namespace testing::ext;
@@ -91,7 +91,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
 {
     int32_t ret;
     int32_t sessionId = 1;
-    char *key = (char *)g_testData.c_str();
+    char *key = const_cast<char *>(g_testData.c_str());
     unsigned int len = strlen(key);
 
     ret = GetSessionKey(-1, key, len);
@@ -117,7 +117,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level0)
 {
     int32_t ret;
     int32_t sessionId = 1;
-    char *key = (char *)g_testData.c_str();
+    char *key = const_cast<char *>(g_testData.c_str());
     unsigned int len = strlen(key);
 
     ret = GetSessionKey(sessionId, key, len);

@@ -14,13 +14,15 @@
  */
 
 #include "evaluateqos_fuzzer.h"
+
 #include <memory>
-#include <string>
 #include <securec.h>
+#include <string>
+
 #include "socket.h"
 
 namespace OHOS {
-static std::string DEFAULT_SOCKET_PEER_NETWORKID =
+static std::string g_defaultSocketPeerNetworkid =
     "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm";
 void EvaluateQosTestWithNetworkId(const uint8_t *data, size_t size)
 {
@@ -39,9 +41,9 @@ void EvaluateQosTestWithNetworkId(const uint8_t *data, size_t size)
     }
 
     QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW, .value = 160 * 1024 * 1024},
-        {.qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = 10},
-        {.qos = QOS_TYPE_MIN_LATENCY, .value = 5},
+        { .qos = QOS_TYPE_MIN_BW,           .value = 160 * 1024 * 1024 },
+        { .qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = 10                },
+        { .qos = QOS_TYPE_MIN_LATENCY,      .value = 5                 },
     };
 
     (void)EvaluateQos(peerNetworkId.get(), DATA_TYPE_MESSAGE, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]));
@@ -59,12 +61,12 @@ void EvaluateQosTestWithDataType(const uint8_t *data, size_t size)
     }
 
     QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW, .value = 160 * 1024 * 1024},
-        {.qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = 10},
-        {.qos = QOS_TYPE_MIN_LATENCY, .value = 5},
+        { .qos = QOS_TYPE_MIN_BW,           .value = 160 * 1024 * 1024 },
+        { .qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = 10                },
+        { .qos = QOS_TYPE_MIN_LATENCY,      .value = 5                 },
     };
 
-    (void)EvaluateQos(DEFAULT_SOCKET_PEER_NETWORKID.c_str(), socketDataType, qosInfo,
+    (void)EvaluateQos(g_defaultSocketPeerNetworkid.c_str(), socketDataType, qosInfo,
         sizeof(qosInfo) / sizeof(qosInfo[0]));
 }
 
@@ -83,7 +85,7 @@ void EvaluateQosTestWithQosInfo(const uint8_t *data, size_t size)
     if (memcpy_s(qosInfo.get(), sizeof(QosTV) * count, data, sizeof(QosTV) * count) != EOK) {
         return;
     }
-    (void)EvaluateQos(DEFAULT_SOCKET_PEER_NETWORKID.c_str(), DATA_TYPE_MESSAGE, qosInfo.get(), count);
+    (void)EvaluateQos(g_defaultSocketPeerNetworkid.c_str(), DATA_TYPE_MESSAGE, qosInfo.get(), count);
 }
 } // namespace OHOS
 

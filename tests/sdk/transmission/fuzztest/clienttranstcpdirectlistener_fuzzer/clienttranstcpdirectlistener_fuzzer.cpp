@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 
 #include <securec.h>
 
-#include "client_trans_udp_manager.h"
-#include "client_trans_tcp_direct_manager.h"
-#include "client_trans_tcp_direct_listener.h"
-#include "client_trans_tcp_direct_callback.h"
 #include "client_trans_session_callback.h"
+#include "client_trans_tcp_direct_callback.h"
+#include "client_trans_tcp_direct_listener.h"
+#include "client_trans_tcp_direct_manager.h"
+#include "client_trans_udp_manager.h"
 #include "session.h"
 #include "softbus_error_code.h"
 
@@ -53,97 +53,97 @@ namespace OHOS {
         return 0;
     }
 
-    void TransTdcCreateListenerTest(const uint8_t* data, size_t size)
+    void TransTdcCreateListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcCreateListener((int32_t)size);
+        TransTdcCreateListener(static_cast<int32_t>(size));
     }
 
-    void TransTdcStopReadTest(const uint8_t* data, size_t size)
+    void TransTdcStopReadTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcStopRead((int32_t)size);
+        TransTdcStopRead(static_cast<int32_t>(size));
     }
 
-    void TransTdcSendBytesTest(const uint8_t* data, size_t size)
+    void TransTdcSendBytesTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        char tmp = *(reinterpret_cast<const char*>(data));
-        TransTdcSendBytes((int32_t)size, &tmp, (uint32_t)size);
+        char tmp = *(reinterpret_cast<const char *>(data));
+        TransTdcSendBytes(static_cast<int32_t>(size), &tmp, static_cast<uint32_t>(size));
     }
 
-    void TransTdcSendMessageTest(const uint8_t* data, size_t size)
+    void TransTdcSendMessageTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        char tmp = *(reinterpret_cast<const char*>(data));
-        TransTdcSendMessage((int32_t)size, &tmp, (uint32_t)size);
+        char tmp = *(reinterpret_cast<const char *>(data));
+        TransTdcSendMessage(static_cast<int32_t>(size), &tmp, static_cast<uint32_t>(size));
     }
 
-    void TransAddDataBufNodeTest(const uint8_t* data, size_t size)
+    void TransAddDataBufNodeTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransAddDataBufNode((int32_t)size, (int32_t)size);
+        TransAddDataBufNode(static_cast<int32_t>(size), static_cast<int32_t>(size));
     }
 
-    void TransDelDataBufNodeTest(const uint8_t* data, size_t size)
+    void TransDelDataBufNodeTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransDelDataBufNode((int32_t)size);
+        TransDelDataBufNode(static_cast<int32_t>(size));
     }
 
-    void TransTdcRecvDataTest(const uint8_t* data, size_t size)
+    void TransTdcRecvDataTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcRecvData((int32_t)size);
+        TransTdcRecvData(static_cast<int32_t>(size));
     }
 
-    void TransTdcGetInfoByIdTest(const uint8_t* data, size_t size)
+    void TransTdcGetInfoByIdTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcGetInfoById((int32_t)size, NULL);
+        TransTdcGetInfoById(static_cast<int32_t>(size), NULL);
     }
 
-    void TransTdcGetInfoByIdWithIncSeqTest(const uint8_t* data, size_t size)
+    void TransTdcGetInfoByIdWithIncSeqTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcGetInfoByIdWithIncSeq((int32_t)size, NULL);
+        TransTdcGetInfoByIdWithIncSeq(static_cast<int32_t>(size), NULL);
     }
 
-    void TransTdcGetInfoByFdTest(const uint8_t* data, size_t size)
+    void TransTdcGetInfoByFdTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcGetInfoByFd((int32_t)size, NULL);
+        TransTdcGetInfoByFd(static_cast<int32_t>(size), NULL);
     }
 
-    void TransTdcCloseChannelTest(const uint8_t* data, size_t size)
+    void TransTdcCloseChannelTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransTdcCloseChannel((int32_t)size);
+        TransTdcCloseChannel(static_cast<int32_t>(size));
     }
 
-    void ClientTransTdcOnChannelOpenedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnChannelOpenedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
@@ -155,12 +155,12 @@ namespace OHOS {
         ClientTransTdcOnChannelOpened(tmp, NULL);
     }
 
-    void TransDisableSessionListenerTest(const uint8_t* data, size_t size)
+    void TransDisableSessionListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransDisableSessionListener((int32_t)size);
+        TransDisableSessionListener(static_cast<int32_t>(size));
     }
 
     static void ClientFillSessionCallBack(IClientSessionCallBack *cb)
@@ -173,7 +173,7 @@ namespace OHOS {
         cb->OnGetSessionId = NULL;
         cb->OnQosEvent = NULL;
     }
-    void ClientTransTdcOnSessionOpenedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnSessionOpenedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
@@ -191,7 +191,7 @@ namespace OHOS {
         ClientTransTdcOnSessionOpened(tmp, &channel);
     }
 
-    void ClientTransTdcOnSessionClosedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnSessionClosedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -201,10 +201,10 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        ClientTransTdcOnSessionClosed((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
+        ClientTransTdcOnSessionClosed(static_cast<int32_t>(size), SHUTDOWN_REASON_UNKNOWN);
     }
 
-    void ClientTransTdcOnSessionOpenFailedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnSessionOpenFailedTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -214,10 +214,10 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        ClientTransTdcOnSessionOpenFailed((int32_t)size, (int32_t)size);
+        ClientTransTdcOnSessionOpenFailed(static_cast<int32_t>(size), static_cast<int32_t>(size));
     }
 
-    void ClientTransTdcOnDataReceivedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnDataReceivedTest(const uint8_t *data, size_t size)
     {
         #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
         if ((data == nullptr) || (size < PROXY_MAX_MESSAGE_LEN)) {
@@ -232,12 +232,12 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        ClientTransTdcOnDataReceived((int32_t)size, tmp, sizeof(tmp), TRANS_SESSION_MESSAGE);
+        ClientTransTdcOnDataReceived(static_cast<int32_t>(size), tmp, sizeof(tmp), TRANS_SESSION_MESSAGE);
     }
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::TransTdcCreateListenerTest(data, size);
     OHOS::TransTdcStopReadTest(data, size);

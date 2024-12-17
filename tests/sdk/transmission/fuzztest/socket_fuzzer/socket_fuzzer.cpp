@@ -14,17 +14,19 @@
  */
 
 #include "socket_fuzzer.h"
+
 #include <memory>
-#include <string>
 #include <securec.h>
+#include <string>
+
 #include "socket.h"
 
 namespace OHOS {
-static std::string DEFAULT_SOCKET_NAME = "com.communication.fuzz.socketName";
-static std::string DEFAULT_SOCKET_PEER_NAME = "com.communication.fuzz.peerName";
-static std::string DEFAULT_SOCKET_PEER_NETWORKID =
+static std::string g_defaultSocketName = "com.communication.fuzz.socketName";
+static std::string g_defaultSocketPeerName = "com.communication.fuzz.peerName";
+static std::string g_defaultSocketPeerNetworkid =
     "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm";
-static std::string DEFAULT_SOCKET_PKG_NAME = "com.communication.fuzz.pkgName";
+static std::string g_defaultSocketPkgName = "com.communication.fuzz.pkgName";
 
 void SocketTestWithName(const uint8_t *data, size_t size)
 {
@@ -48,9 +50,9 @@ void SocketTestWithName(const uint8_t *data, size_t size)
 
     SocketInfo info = {
         .name = socketName.get(),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PEER_NETWORKID.c_str()),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
+        .peerName = const_cast<char *>(g_defaultSocketPeerName.c_str()),
+        .peerNetworkId = const_cast<char *>(g_defaultSocketPeerNetworkid.c_str()),
+        .pkgName = const_cast<char *>(g_defaultSocketPkgName.c_str()),
         .dataType = DATA_TYPE_MESSAGE,
     };
 
@@ -78,10 +80,10 @@ void SocketTestWithPeerName(const uint8_t *data, size_t size)
     }
 
     SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
+        .name = const_cast<char *>(g_defaultSocketName.c_str()),
         .peerName = socketPeerName.get(),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PEER_NETWORKID.c_str()),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
+        .peerNetworkId = const_cast<char *>(g_defaultSocketPeerNetworkid.c_str()),
+        .pkgName = const_cast<char *>(g_defaultSocketPkgName.c_str()),
         .dataType = DATA_TYPE_MESSAGE,
     };
 
@@ -109,10 +111,10 @@ void SocketTestWithNetworkId(const uint8_t *data, size_t size)
     }
 
     SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
+        .name = const_cast<char *>(g_defaultSocketName.c_str()),
+        .peerName = const_cast<char *>(g_defaultSocketPeerName.c_str()),
         .peerNetworkId = socketNetworkId.get(),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
+        .pkgName = const_cast<char *>(g_defaultSocketPkgName.c_str()),
         .dataType = DATA_TYPE_MESSAGE,
     };
 
@@ -140,9 +142,9 @@ void SocketTestWithPkgName(const uint8_t *data, size_t size)
     }
 
     SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
+        .name = const_cast<char *>(g_defaultSocketName.c_str()),
+        .peerName = const_cast<char *>(g_defaultSocketPeerName.c_str()),
+        .peerNetworkId = const_cast<char *>(g_defaultSocketPkgName.c_str()),
         .pkgName = socketPkgName.get(),
         .dataType = DATA_TYPE_MESSAGE,
     };
@@ -162,10 +164,10 @@ void SocketTestWithDataType(const uint8_t *data, size_t size)
     }
 
     SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
+        .name = const_cast<char *>(g_defaultSocketName.c_str()),
+        .peerName = const_cast<char *>(g_defaultSocketPeerName.c_str()),
+        .peerNetworkId = const_cast<char *>(g_defaultSocketPkgName.c_str()),
+        .pkgName = const_cast<char *>(g_defaultSocketPkgName.c_str()),
         .dataType = socketDataType,
     };
 
