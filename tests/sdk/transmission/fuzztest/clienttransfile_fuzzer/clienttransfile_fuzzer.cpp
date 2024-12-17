@@ -21,6 +21,7 @@
 #include "client_trans_file.h"
 #include "client_trans_file_listener.h"
 #include "file_adapter.h"
+#include "fuzz_data_generator.h"
 #include "softbus_def.h"
 
 namespace OHOS {
@@ -111,8 +112,11 @@ namespace OHOS {
         }
 
         #define DEFAULT_KEY_LENGTH 32
-        int32_t len = *(reinterpret_cast<const int32_t*>(data));
+        DataGenerator::Write(data, size);
+        int32_t len = 0;
+        GenerateInt32(len);
         StartNStackXDFileServer(nullptr, data, DEFAULT_KEY_LENGTH, NULL, &len);
+        DataGenerator::Clear();
     }
 
     void TransDeleteFileListenerTest(const uint8_t* data, size_t size)

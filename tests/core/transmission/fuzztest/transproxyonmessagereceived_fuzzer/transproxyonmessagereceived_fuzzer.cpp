@@ -15,6 +15,7 @@
 
 #include "transproxyonmessagereceived_fuzzer.h"
 
+#include "fuzz_data_generator.h"
 #include "softbus_proxychannel_manager.h"
 
 namespace OHOS {
@@ -43,17 +44,21 @@ private:
 
 static void InitProxyMessageHead(const uint8_t *data, size_t size, ProxyMessageHead *proxyMessageHead)
 {
-    proxyMessageHead->type = *(reinterpret_cast<const uint8_t *>(data));
-    proxyMessageHead->cipher = *(reinterpret_cast<const uint8_t *>(data));
-    proxyMessageHead->myId = *(reinterpret_cast<const int16_t *>(data));
-    proxyMessageHead->peerId = *(reinterpret_cast<const int16_t *>(data));
-    proxyMessageHead->reserved = *(reinterpret_cast<const int16_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateUint8(proxyMessageHead->type);
+    GenerateUint8(proxyMessageHead->cipher);
+    GenerateInt16(proxyMessageHead->myId);
+    GenerateInt16(proxyMessageHead->peerId);
+    GenerateInt16(proxyMessageHead->reserved);
+    DataGenerator::Clear();
 }
 
 static void InitAuthHandle(const uint8_t *data, size_t size, AuthHandle *authHandle)
 {
-    authHandle->authId = *(reinterpret_cast<const int64_t *>(data));
-    authHandle->type = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateInt64(authHandle->authId);
+    GenerateUint32(authHandle->type);
+    DataGenerator::Clear();
 }
 
 static void InitProxyMessage(const uint8_t *data, size_t size, ProxyMessage *proxyMessage)
@@ -61,9 +66,11 @@ static void InitProxyMessage(const uint8_t *data, size_t size, ProxyMessage *pro
     InitProxyMessageHead(data, size, &proxyMessage->msgHead);
     proxyMessage->dateLen = size;
     proxyMessage->data = const_cast<char *>(reinterpret_cast<const char *>(data));
-    proxyMessage->connId = *(reinterpret_cast<const uint32_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateUint32(proxyMessage->connId);
+    GenerateInt32(proxyMessage->keyIndex);
+    DataGenerator::Clear();
     InitAuthHandle(data, size, &proxyMessage->authHandle);
-    proxyMessage->keyIndex = *(reinterpret_cast<const int32_t *>(data));
 }
 
 void TransProxyOnMessageReceivedTest(const uint8_t *data, size_t size)
