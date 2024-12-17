@@ -264,15 +264,10 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (optType) {
-        case OPT_TYPE_MAX_BUFFER:
-        case OPT_TYPE_FIRST_PACKAGE:
-        case OPT_TYPE_MAX_IDLE_TIMEOUT:
-            ret = SOFTBUS_NOT_IMPLEMENT;
-            break;
-        default:
-            ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
-            break;
+    if (optType >= OPT_TYPE_BEGIN && optType < OPT_TYPE_END) {
+        ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    } else {
+        ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
     }
     return ret;
 }
@@ -287,15 +282,10 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (optType) {
-        case OPT_TYPE_MAX_BUFFER:
-        case OPT_TYPE_FIRST_PACKAGE:
-        case OPT_TYPE_MAX_IDLE_TIMEOUT:
-            ret = SOFTBUS_NOT_IMPLEMENT;
-            break;
-        default:
-            ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
-            break;
+    if (optType >= OPT_TYPE_BEGIN && optType < OPT_TYPE_END) {
+        ret = GetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    } else {
+        ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
     }
     return ret;
 }
