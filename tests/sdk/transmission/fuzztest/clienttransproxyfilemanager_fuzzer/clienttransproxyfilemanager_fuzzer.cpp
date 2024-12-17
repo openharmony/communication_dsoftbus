@@ -28,6 +28,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "fuzz_data_generator.h"
 #include "securec.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"
@@ -48,16 +49,21 @@ void ClientTransProxyFileManagerTest(const uint8_t* data, size_t size)
         return;
     }
 
-    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
     const char **sFileList = nullptr;
     const char **dFileList = nullptr;
-    uint32_t fileCnt = *(reinterpret_cast<const uint32_t*>(data));
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t fileCnt = 0;
+    int32_t sessionId = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(sessionId);
+    GenerateUint32(fileCnt);
     const FileFrame oneFrame = {0};
 
     ProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
 
     ProcessRecvFileFrameData(sessionId, channelId, &oneFrame);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

@@ -36,6 +36,7 @@ ohos_fuzztest("SendFileFuzzTest") {
     "$dsoftbus_root_path/adapter/default_config/spec_config/",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
   cflags = [
     "-g",
