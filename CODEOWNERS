@@ -30,8 +30,8 @@ core/adapter/br/                wangjingen1@huawei.com
 core/connection/                songzhengteng@huawei.com
 core/connection/ble/            wangjingen1@huawei.com
 core/connection/br/             wangjingen1@huawei.com
-core/connection/wifi_direct/                wuchunbo1@huawei.com
-core/connection/wifi_direct_cpp/            wuchunbo1@huawei.com
+core/connection/wifi_direct/                songzhengteng@huawei.com
+core/connection/wifi_direct_cpp/            songzhengteng@huawei.com
 tests/adapter/bluetooth/        wangjingen1@huawei.com
 tests/adapter/fuzztest/softbussocketrecv_fuzzer/    songzhengteng@huawei.com
 tests/adapter/unittest/softbus_wifi_api_test.cpp    songzhengteng@huawei.com
@@ -39,8 +39,8 @@ tests/adapter/unittest/softbus_socket_test.cpp      songzhengteng@huawei.com
 tests/core/connection/          songzhengteng@huawei.com
 tests/core/connection/ble/      wangjingen1@huawei.com
 tests/core/connection/br/       wangjingen1@huawei.com
-tests/core/connection/wifi_direct/            wuchunbo1@huawei.com
-tests/core/connection/wifi_direct_cpp/        wuchunbo1@huawei.com
+tests/core/connection/wifi_direct/            songzhengteng@huawei.com
+tests/core/connection/wifi_direct_cpp/        songzhengteng@huawei.com
 
 [Disc]
 adapter/common/range/   fanjingya1@huawei.com
