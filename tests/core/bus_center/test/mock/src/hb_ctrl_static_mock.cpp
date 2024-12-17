@@ -181,5 +181,10 @@ int32_t LnnGenerateCeParams(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
 }
+
+void LnnTrySyncDeviceName(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnTrySyncDeviceName();
+}
 }
 } // namespace OHOS

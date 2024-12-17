@@ -66,6 +66,7 @@ public:
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
     virtual int32_t LnnGenerateCeParams(void) = 0;
+    virtual void LnnTrySyncDeviceName(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -101,6 +102,7 @@ public:
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
     MOCK_METHOD0(AuthLoadDeviceKey, void (void));
     MOCK_METHOD0(LnnGenerateCeParams, int32_t (void));
+    MOCK_METHOD0(LnnTrySyncDeviceName, void (void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

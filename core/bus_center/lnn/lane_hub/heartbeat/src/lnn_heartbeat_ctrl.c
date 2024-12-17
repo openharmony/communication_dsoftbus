@@ -31,6 +31,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
+#include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
@@ -825,6 +826,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
             LnnUpdateOhosAccount(true);
             HbConditionChanged(false);
+            LnnTrySyncDeviceName();
             if (IsHeartbeatEnable()) {
                 if (LnnStartHbByTypeAndStrategy(
                     HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
