@@ -1030,9 +1030,10 @@ HWTEST_F(ClientBusCentManagerTest, ADD_TIME_SYNC_CB_ITEM_Test_001, TestSize.Leve
 */
 HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Level1)
 {
-    EXPECT_NO_FATAL_FAILURE(FreeDiscPublishMsg(nullptr));
+    DiscPublishMsg *msg = nullptr;
+    EXPECT_NO_FATAL_FAILURE(FreeDiscPublishMsg(&msg));
 
-    DiscPublishMsg* msg = (DiscPublishMsg *)SoftBusCalloc(sizeof(DiscPublishMsg));
+    msg = (DiscPublishMsg *)SoftBusCalloc(sizeof(DiscPublishMsg));
     if (msg == nullptr) {
         COMM_LOGE(COMM_TEST, "msg calloc fail");
         return;
@@ -1064,9 +1065,10 @@ HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Leve
 */
 HWTEST_F(ClientBusCentManagerTest, FREE_DISC_SUBSCRIBE_MSG_Test_001, TestSize.Level1)
 {
-    EXPECT_NO_FATAL_FAILURE(FreeDiscSubscribeMsg(nullptr));
+    DiscSubscribeMsg *msg = nullptr;
+    EXPECT_NO_FATAL_FAILURE(FreeDiscSubscribeMsg(&msg));
 
-    DiscSubscribeMsg* msg = (DiscSubscribeMsg *)SoftBusCalloc(sizeof(DiscSubscribeMsg));
+    msg = (DiscSubscribeMsg *)SoftBusCalloc(sizeof(DiscSubscribeMsg));
     if (msg == nullptr) {
         COMM_LOGE(COMM_TEST, "msg calloc fail");
         return;
