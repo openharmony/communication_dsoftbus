@@ -216,7 +216,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest002, TestSize.Level1)
     cJSON_AddNumberToObject(msg, PEER_HANDLE_ID, 2);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = UnpackRequest(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     EXPECT_STREQ(appInfo->myData.sessionName, "BUS_NAME");
