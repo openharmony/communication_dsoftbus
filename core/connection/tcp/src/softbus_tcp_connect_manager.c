@@ -408,15 +408,14 @@ static void DelAllConnInfo(ListenerModule moduleId)
         CONN_LOGE(CONN_COMMON, "lock failed");
         return;
     }
+    ListNode waitDelete;
+    ListInit(&waitDelete);
     TcpConnInfoNode *item = NULL;
     TcpConnInfoNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.moduleId == (int32_t)moduleId) {
-            g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
-            (void)DelTrigger(moduleId, item->info.socketInfo.fd, RW_TRIGGER);
             ListDelete(&item->node);
-            ConnShutdownSocket(item->info.socketInfo.fd);
-            SoftBusFree(item);
+            ListAdd(&waitDelete, &item->node);
             g_tcpConnInfoList->cnt--;
         }
     }
@@ -425,6 +424,13 @@ static void DelAllConnInfo(ListenerModule moduleId)
     }
 
     SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &waitDelete, TcpConnInfoNode, node) {
+        ListDelete(&item->node);
+        (void)DelTrigger(moduleId, item->info.socketInfo.fd, RW_TRIGGER);
+        ConnShutdownSocket(item->info.socketInfo.fd);
+        g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
+        SoftBusFree(item);
+    }
 }
 
 uint32_t CalTcpConnectionId(int32_t fd)
