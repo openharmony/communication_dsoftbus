@@ -41,6 +41,7 @@ ohos_fuzztest("VtpStreamSocketFuzzTest") {
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "$dsoftbus_root_path/tests/common/include",
   ]
   cflags = [
     "-g",

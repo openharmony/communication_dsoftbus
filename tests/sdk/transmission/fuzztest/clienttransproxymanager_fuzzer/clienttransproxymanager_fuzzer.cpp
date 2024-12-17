@@ -28,6 +28,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
@@ -45,19 +46,25 @@ void ClientTransProxyManagerTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
-
+    DataGenerator::Write(data, size);
     char *sessionName = nullptr;
     ChannelInfo channel = {0};
-    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t channelId = 0;
     const void *clientData = nullptr;
-    uint32_t len = *(reinterpret_cast<const uint32_t*>(data));
-    int32_t pktType = *(reinterpret_cast<const int32_t*>(data));
-    int32_t type = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t len = 0;
+    int32_t pktType = 0;
+    int32_t type = 0;
     const char **sFileList = nullptr;
     const char **dFileList = nullptr;
-    uint32_t fileCnt = *(reinterpret_cast<const uint32_t*>(data));
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t fileCnt = 0;
+    int32_t sessionId = 0;
     const char *charData = nullptr;
+    GenerateInt32(channelId);
+    GenerateUint32(len);
+    GenerateInt32(pktType);
+    GenerateInt32(type);
+    GenerateUint32(fileCnt);
+    GenerateInt32(sessionId);
 
     ClientTransProxyOnChannelOpened(sessionName, &channel);
 
@@ -72,6 +79,7 @@ void ClientTransProxyManagerTest(const uint8_t* data, size_t size)
     TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
 
     ProcessFileFrameData(sessionId, channelId, charData, len, type);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

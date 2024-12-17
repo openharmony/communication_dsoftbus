@@ -36,6 +36,7 @@ ohos_fuzztest("ClientTransChannelCallbackFuzzTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   cflags = [
