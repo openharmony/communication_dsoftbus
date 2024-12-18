@@ -505,12 +505,12 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool IsHmlSupport(void)
+static HmlCapabilityCode GetHmlCapabilityCode(void)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     OHOS::SoftBus::InnerLink::LinkType type = OHOS::SoftBus::InnerLink::LinkType::HML;
     auto &entity = OHOS::SoftBus::EntityFactory::GetInstance().GetEntity(type);
-    return entity.SupportHml();
+    return entity.GetHmlCapabilityCode();
 }
 
 static bool IsWifiP2pEnabled(void)
@@ -603,7 +603,7 @@ static struct WifiDirectManager g_manager = {
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
-    .isHmlSupport = IsHmlSupport,
+    .getHmlCapabilityCode = GetHmlCapabilityCode,
 
     .init = Init,
     .notifyOnline = NotifyOnline,
