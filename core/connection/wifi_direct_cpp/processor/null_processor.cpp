@@ -22,8 +22,8 @@
 #include "wifi_direct_executor.h"
 
 namespace OHOS::SoftBus {
-NullProcessor::NullProcessor(const std::string &remoteDeviceId)
-    : WifiDirectProcessor(remoteDeviceId)
+NullProcessor::NullProcessor(const std::string &remoteDeviceId, const int32_t reason)
+    : WifiDirectProcessor(remoteDeviceId), reason_(reason)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "Create null processor, because do not have handle processpr");
 }
@@ -33,7 +33,7 @@ NullProcessor::NullProcessor(const std::string &remoteDeviceId)
     for (;;) {
         CONN_LOGI(CONN_WIFI_DIRECT, "null");
         executor_->WaitEvent().Handle<std::shared_ptr<ConnectCommand>>([this] (auto &command) {
-            command->OnFailure(SOFTBUS_CONN_NULL_PROCESSOR_ERR);
+            command->OnFailure(reason_);
             throw ProcessorTerminate();
         }).Handle<std::shared_ptr<DisconnectCommand>>([this] (auto &command) {
             command->OnSuccess();
