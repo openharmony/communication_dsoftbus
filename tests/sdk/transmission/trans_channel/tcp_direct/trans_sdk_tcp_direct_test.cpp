@@ -429,12 +429,12 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.
 
     int32_t ret = ClientTransTdcSetCallBack(&g_sessionCb);
     ret = ClientTransTdcOnSessionOpened(g_sessionName, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     info->isServer = true;
     info->channelType = CHANNEL_TYPE_AUTH;
     ret = ClientTransTdcOnSessionOpened(nullptr, info);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ClientTransTdcOnSessionOpened(g_sessionName, info);
     EXPECT_EQ(ret, SOFTBUS_OK);
