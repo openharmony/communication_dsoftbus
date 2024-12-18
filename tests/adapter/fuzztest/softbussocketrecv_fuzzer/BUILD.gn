@@ -25,6 +25,7 @@ ohos_fuzztest("SoftBusSocketRecvFuzzTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+    "$dsoftbus_root_path/tests/common/include",
   ]
   cflags = [
     "-g",
