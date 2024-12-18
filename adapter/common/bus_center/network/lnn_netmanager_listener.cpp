@@ -125,7 +125,7 @@ int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &if
 int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
-    char *anonyAddr = NULL;
+    char *anonyAddr = nullptr;
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
@@ -164,7 +164,7 @@ int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
 int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
-    char *anonyAddr = NULL;
+    char *anonyAddr = nullptr;
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
