@@ -85,6 +85,12 @@ enum WifiDirectBandWidth {
     BAND_WIDTH_BUTT = 0xFF,
 };
 
+typedef enum {
+    CONN_HML_CAP_UNKNOWN = -1,
+    CONN_HML_SUPPORT = 0,
+    CONN_HML_NOT_SUPPORT = 1,
+} HmlCapabilityCode;
+
 struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];
