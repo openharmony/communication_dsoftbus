@@ -394,7 +394,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
             break;
         }
         msgPara->nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(msgPara->addr.type);
-        if (LnnUpdateNodeInfo(msgPara->nodeInfo) != SOFTBUS_OK) {
+        if (LnnUpdateNodeInfo(msgPara->nodeInfo, msgPara->addr.type) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LnnUpdateNodeInfo failed");
         }
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm exist, ignore VerifyPass authId=%{public}" PRId64,
