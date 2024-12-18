@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 void UpdateDeviceName(void *p);
+void LnnTrySyncDeviceName(void);
 int32_t LnnInitDevicename(void);
 void LnnDeinitDevicename(void);
 
