@@ -1328,10 +1328,15 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, Aut
         LNN_LOGE(LNN_BUILDER, "nodeInfo or connAddr is null");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    uint32_t localAuthCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &localAuthCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local auth capability fail");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
     NodeInfo remoteInfo;
-    if (!IsSupportFeatureByCapability(nodeInfo->authCapacity, authCapability)) {
-        LNN_LOGI(LNN_BUILDER, "remote not support , no need to go online");
+    if (!IsSupportFeatureByCapability(nodeInfo->authCapacity, authCapability) ||
+        !IsSupportFeatureByCapability(localAuthCapability, authCapability)) {
+        LNN_LOGI(LNN_BUILDER, "local or remote not support, no need to go online");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     if (LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
@@ -1344,8 +1349,7 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, Aut
     uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     addr.type = CONNECTION_ADDR_BLE;
-    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac,
-        BT_MAC_LEN) != EOK) {
+    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac, BT_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
         return SOFTBUS_MEM_ERR;
     }

@@ -2334,6 +2334,13 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
     }
 }
 
+static void UpdateLocalAuthCapacity(NodeInfo *info)
+{
+    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID) {
+        info->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE));
+    }
+}
+
 static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
 {
     int32_t ret = InitOfflineCode(nodeInfo);
@@ -2349,6 +2356,7 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "init local device info error");
         return ret;
     }
+    UpdateLocalAuthCapacity(nodeInfo);
     ret = InitLocalVersionType(nodeInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local version type error");
