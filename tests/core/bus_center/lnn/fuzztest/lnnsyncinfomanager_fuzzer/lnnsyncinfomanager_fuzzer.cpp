@@ -13,21 +13,26 @@
  * limitations under the License.
  */
 
-#include "comm_log.h"
-#include "softbus_common.h"
-#include "lnn_sync_info_manager.h"
 #include <cstddef>
 #include <cstring>
+
+#include "comm_log.h"
+#include "fuzz_data_generator.h"
+#include "lnn_sync_info_manager.h"
 #include "securec.h"
+#include "softbus_common.h"
+
+using namespace std;
 
 namespace OHOS {
-    const uint8_t *g_baseFuzzData = nullptr;
-    size_t g_baseFuzzSize = 0;
-    size_t g_baseFuzzPos;
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
 
-template <class T> T GetData()
+template <class T>
+T GetData()
 {
-    T objetct{};
+    T objetct {};
     size_t objetctSize = sizeof(objetct);
     if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
         return objetct;
@@ -40,7 +45,7 @@ template <class T> T GetData()
     return objetct;
 }
 
-void LnnSendSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
+void LnnSendSyncInfoMsgFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is vaild!");
@@ -52,9 +57,10 @@ void LnnSendSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
     LnnSyncInfoType type = static_cast<LnnSyncInfoType>
     (GetData<int>() % (LNN_INFO_TYPE_COUNT - LNN_INFO_TYPE_CAPABILITY + 1));
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    const char *outData = reinterpret_cast<const char*>(data);
-    if (memcpy_s(&networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN) != EOK) {
-        COMM_LOGE(COMM_TEST, "memcpy_s networkId is failed!");
+    string outData;
+    GenerateString(outData);
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, outData.c_str()) != EOK) {
+        COMM_LOGE(COMM_TEST, "strcpy_s networkId is failed!");
         return;
     }
     networkId[NETWORK_ID_BUF_LEN - 1] = '\0';
@@ -63,7 +69,7 @@ void LnnSendSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
     LnnSendSyncInfoMsg(type, networkId, data, (uint32_t)size, complete);
 }
 
-void LnnSendP2pSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
+void LnnSendP2pSyncInfoMsgFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is vaild!");
@@ -73,8 +79,10 @@ void LnnSendP2pSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    const char *outData = reinterpret_cast<const char*>(data);
-    if (memcpy_s(&networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN) != EOK) {
+    string outData;
+    GenerateString(outData);
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, outData.c_str()) != EOK) {
+        COMM_LOGE(COMM_TEST, "strcpy_s networkId is failed!");
         return;
     }
     networkId[NETWORK_ID_BUF_LEN - 1] = '\0';
@@ -83,11 +91,20 @@ void LnnSendP2pSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
 }
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    if (data == nullptr || size == 0) {
+        return 0;
+    }
+
+    DataGenerator::Write(data, size);
+
     /* Run your code on data */
     OHOS::LnnSendSyncInfoMsgFuzzTest(data, size);
     OHOS::LnnSendP2pSyncInfoMsgFuzzTest(data, size);
+
+    DataGenerator::Clear();
+
     return 0;
 }
-}
+} // namespace OHOS
