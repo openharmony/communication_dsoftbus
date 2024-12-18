@@ -181,6 +181,7 @@ public:
     virtual const char *LnnPrintConnectionAddr(const ConnectionAddr *addr);
     virtual int32_t LnnUpdateGroupType(const NodeInfo *info);
     virtual int32_t LnnUpdateAccountInfo(const NodeInfo *info);
+    virtual int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info);
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
@@ -311,6 +312,7 @@ public:
     MOCK_METHOD1(LnnPrintConnectionAddr, const char *(const ConnectionAddr *));
     MOCK_METHOD1(LnnUpdateGroupType, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnUpdateRemoteDeviceName, int32_t(const NodeInfo *));
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());

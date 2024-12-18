@@ -31,6 +31,7 @@
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
 
 #define AUTH_APPID "softbus_auth"
@@ -482,6 +483,17 @@ static void OnDeviceNotTrusted(const char *udid)
     Anonymize(udid, &anonyUdid);
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "LnnGetRemoteNodeInfoById failed! ret=%{public}d", ret);
+        return;
+    }
+    if (nodeInfo.deviceInfo.osType == OH_OS_TYPE) {
+        AUTH_LOGI(AUTH_HICHAIN, "device is oh, ignore hichain event");
+        return;
+    }
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
         g_dataChangeListener.onDeviceNotTrusted(udid, GetActiveOsAccountIds());
     }
