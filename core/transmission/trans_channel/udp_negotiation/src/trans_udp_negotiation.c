@@ -26,11 +26,13 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_scenario_manager.h"
+#include "trans_bind_request_manager.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
@@ -575,6 +577,10 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
  * */
 static void ProcessAbnormalUdpChannelState(const AppInfo *info, int32_t errCode, bool needClose)
 {
+    if (errCode == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
+        (void)TransAddTimestampToList(
+            info->myData.sessionName, info->peerData.sessionName, info->peerNetWorkId, SoftBusGetSysTimeMs());
+    }
     if (info->udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
         (void)NotifyUdpChannelOpenFailed(info, errCode);
         (void)TransDelUdpChannel(info->myData.channelId);

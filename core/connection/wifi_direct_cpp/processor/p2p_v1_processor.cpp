@@ -1661,11 +1661,15 @@ int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const Nego
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "update interface failed, error=%{public}d", ret);
     std::string remoteMac = msg.GetLegacyP2pMac();
-    auto success = LinkManager::GetInstance().ProcessIfPresent(remoteMac, [localMac, localIp](InnerLink &link) {
-        link.SetLocalBaseMac(localMac);
-        link.SetLocalIpv4(localIp);
-        link.SetState(InnerLink::LinkState::CONNECTED);
-    });
+    std::string remoteIp = msg.GetLegacyP2pGoIp();
+    auto success = LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [localMac, localIp, remoteMac, remoteIp](InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetLocalBaseMac(localMac);
+            link.SetRemoteIpv4(remoteIp);
+            link.SetLocalIpv4(localIp);
+            link.SetState(InnerLink::LinkState::CONNECTED);
+        });
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectUtils::ToWifiDirectRole(myRole), localMac, msg.GetLegacyP2pGoMac());
@@ -1690,19 +1694,11 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, WifiDirectUtils::FrequencyToChannel(freq));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, errorcode=%{public}d", coexCode);
-    std::string remoteMac = msg.GetLegacyP2pMac();
-    std::string remoteIp = msg.GetLegacyP2pGoIp();
-    auto success = LinkManager::GetInstance().ProcessIfAbsent(
-        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [remoteMac, remoteIp](InnerLink &link) {
-            link.SetRemoteBaseMac(remoteMac);
-            link.SetRemoteIpv4(remoteIp);
-        });
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     P2pAdapter::ConnectParam params {};
     params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
     params.groupConfig = groupConfig;
     params.gcIp = gcIp;
+    params.goIp = msg.GetLegacyP2pGoIp();
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);

@@ -84,6 +84,8 @@ void AuthLaneTest::SetUpTestCase()
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnInitLnnLooper();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = InitLane();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     GTEST_LOG_(INFO) << "AuthLaneTest start";

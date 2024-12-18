@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "client_qos_manager.h"
+#include "fuzz_data_generator.h"
 #include "trans_server_proxy.h"
 
 namespace OHOS {
@@ -25,13 +26,19 @@ void ClientQosReportTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t chanType = *(reinterpret_cast<const int32_t*>(data));
-    int32_t appType = *(reinterpret_cast<const int32_t*>(data));
-    int32_t quality = *(reinterpret_cast<const int32_t*>(data));
+    int32_t channelId = 0;
+    int32_t chanType = 0;
+    int32_t appType = 0;
+    int32_t quality = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(chanType);
+    GenerateInt32(appType);
+    GenerateInt32(quality);
 
     ClientQosReport(channelId, chanType, appType, quality);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

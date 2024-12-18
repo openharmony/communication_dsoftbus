@@ -22,6 +22,7 @@
 #include "client_trans_tcp_direct_listener.h"
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_session_callback.h"
+#include "fuzz_data_generator.h"
 #include "session.h"
 #include "softbus_error_code.h"
 
@@ -58,8 +59,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t fd = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t fd = 0;
+        GenerateInt32(fd);
         TransTdcCreateListener(fd);
+        DataGenerator::Clear();
     }
 
     void TransTdcStopReadTest(const uint8_t* data, size_t size)
@@ -67,8 +71,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t fd = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t fd = 0;
+        GenerateInt32(fd);
         TransTdcStopRead(fd);
+        DataGenerator::Clear();
     }
 
     void TransTdcSendBytesTest(const uint8_t* data, size_t size)
@@ -94,9 +101,13 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-        int32_t fd = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        int32_t fd = 0;
+        GenerateInt32(channelId);
+        GenerateInt32(fd);
         TransAddDataBufNode(channelId, fd);
+        DataGenerator::Clear();
     }
 
     void TransDelDataBufNodeTest(const uint8_t* data, size_t size)
@@ -104,8 +115,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransDelDataBufNode(channelId);
+        DataGenerator::Clear();
     }
 
     void TransTdcRecvDataTest(const uint8_t* data, size_t size)
@@ -113,8 +127,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransTdcRecvData(channelId);
+        DataGenerator::Clear();
     }
 
     void TransTdcGetInfoByIdTest(const uint8_t* data, size_t size)
@@ -122,8 +139,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransTdcGetInfoById(channelId, NULL);
+        DataGenerator::Clear();
     }
 
     void TransTdcGetInfoByIdWithIncSeqTest(const uint8_t* data, size_t size)
@@ -131,8 +151,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransTdcGetInfoByIdWithIncSeq(channelId, NULL);
+        DataGenerator::Clear();
     }
 
     void TransTdcGetInfoByFdTest(const uint8_t* data, size_t size)
@@ -140,8 +163,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t fd = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t fd = 0;
+        GenerateInt32(fd);
         TransTdcGetInfoByFd(fd, NULL);
+        DataGenerator::Clear();
     }
 
     void TransTdcCloseChannelTest(const uint8_t* data, size_t size)
@@ -149,8 +175,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransTdcCloseChannel(channelId);
+        DataGenerator::Clear();
     }
 
     void ClientTransTdcOnChannelOpenedTest(const uint8_t* data, size_t size)
@@ -170,8 +199,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransDisableSessionListener(channelId);
+        DataGenerator::Clear();
     }
 
     static void ClientFillSessionCallBack(IClientSessionCallBack *cb)
@@ -212,8 +244,11 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         ClientTransTdcOnSessionClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
+        DataGenerator::Clear();
     }
 
     void ClientTransTdcOnSessionOpenFailedTest(const uint8_t* data, size_t size)
@@ -226,9 +261,13 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-        int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        int32_t errCode = 0;
+        GenerateInt32(channelId);
+        GenerateInt32(errCode);
         ClientTransTdcOnSessionOpenFailed(channelId, errCode);
+        DataGenerator::Clear();
     }
 
     void ClientTransTdcOnDataReceivedTest(const uint8_t* data, size_t size)

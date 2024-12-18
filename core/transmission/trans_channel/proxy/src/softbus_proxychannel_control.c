@@ -31,7 +31,7 @@
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
     uint32_t payLoadLen, int32_t priority)
 {
-    if (info == NULL) {
+    if (info == NULL || payLoad == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }

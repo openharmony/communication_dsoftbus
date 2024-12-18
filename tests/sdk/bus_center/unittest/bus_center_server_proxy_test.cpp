@@ -306,7 +306,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Leve
     const char *targetNetworkId = "111";
     const GearMode *mode = nullptr;
     int32_t ret = ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
 }
 
 /*

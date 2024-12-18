@@ -263,6 +263,11 @@ void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)
     return GetServiceInterface()->LnnNotifyOnlineNetType(networkId, addrType);
 }
 
+void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
+{
+    return GetServiceInterface()->LnnNotifyDeviceInfoChanged(state);
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {

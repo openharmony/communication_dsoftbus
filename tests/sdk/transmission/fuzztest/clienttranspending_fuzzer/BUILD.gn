@@ -28,6 +28,7 @@ ohos_fuzztest("ClientTransPendingFuzzTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   cflags = [

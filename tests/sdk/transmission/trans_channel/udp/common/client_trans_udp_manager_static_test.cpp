@@ -283,11 +283,11 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, Te
 
     udpChannel.isEnable = false;
     ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     udpChannel.isEnable = true;
     ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
 /**
