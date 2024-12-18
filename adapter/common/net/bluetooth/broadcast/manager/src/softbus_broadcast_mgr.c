@@ -972,7 +972,7 @@ static bool CheckNeedUpdateScan(int32_t listenerId, int32_t *liveListenerId)
 static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
     if (srcFilter->address != NULL) {
-        uint32_t addressLength = strlen((char *)srcFilter->address);
+        uint32_t addressLength = strlen((char *)srcFilter->address) + 1;
         dstFilter->address = (int8_t *)SoftBusCalloc(addressLength);
         DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->address != NULL &&
             memcpy_s(dstFilter->address, addressLength, srcFilter->address, addressLength) == EOK,
@@ -980,7 +980,7 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
     }
 
     if (srcFilter->deviceName != NULL) {
-        uint32_t deviceNameLength = strlen((char *)srcFilter->deviceName);
+        uint32_t deviceNameLength = strlen((char *)srcFilter->deviceName) + 1;
         dstFilter->deviceName = (int8_t *)SoftBusCalloc(deviceNameLength);
         DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->deviceName != NULL &&
             memcpy_s(dstFilter->deviceName, deviceNameLength, srcFilter->deviceName, deviceNameLength) == EOK,
