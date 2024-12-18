@@ -14,78 +14,69 @@
  */
 
 #include "ispassseqcheck_fuzzer.h"
+
 #include <cstddef>
+
+#include "fuzz_data_generator.h"
 #include "softbus_sequence_verification.h"
+
+using namespace std;
 
 namespace OHOS {
     constexpr size_t THRESHOLD = 10;
-    constexpr uint32_t NINE = 9;
+    constexpr uint32_t TEST_NUM = 4;
     constexpr int32_t MINSEQ = 2;
-    constexpr int32_t MAXSEQ = -2;
-    constexpr int32_t OFFSET = 4;
+    constexpr int32_t BURDEN_MINSEQ = -2;
+    constexpr int32_t MAXSEQ = 4;
+    constexpr int32_t BURDEN_MAXSEQ = -1;
     SeqVerifyInfo seqInfo;
     enum  CmdId {
         CMD_SOFTBUS_ONE,
         CMD_SOFTBUS_TWO,
         CMD_SOFTBUS_THREE,
+        CMD_SOFTBUS_FOUR,
     };
 
-    uint32_t Convert2Uint32(const uint8_t *ptr)
+    static void IsPassSeqCheckSwitch()
     {
-        if (ptr == nullptr) {
-            return 0;
-        }
-        /*
-        * Move the 0th digit 24 to the left, the first digit 16 to the left, the second digit 8 to the left,
-        * and the third digit no left
-        */
-        return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]);
-    }
-
-    static void IsPassSeqCheckSwitch(uint32_t cmd, const uint8_t *rawData)
-    {
-        int32_t seq = *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(rawData));
-        uint64_t bit = *const_cast<uint64_t *>(reinterpret_cast<const uint64_t *>(rawData));
-        cmd = cmd % NINE;
+        uint64_t bit = 0;
+        GenerateUint64(bit);
+        bit = bit % THRESHOLD;
+        uint32_t cmd = 0;
+        GenerateUint32(cmd);
+        cmd = cmd % TEST_NUM;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 seqInfo.minSeq = MINSEQ;
-                seqInfo.maxSeq = seq;
+                seqInfo.maxSeq = MAXSEQ;
                 seqInfo.recvBitmap = bit;
-                IsPassSeqCheck(&seqInfo, seq);
+                IsPassSeqCheck(&seqInfo, MINSEQ);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                seqInfo.minSeq = seq;
-                seqInfo.maxSeq = MAXSEQ;
+                seqInfo.minSeq = MINSEQ;
+                seqInfo.maxSeq = BURDEN_MAXSEQ;
                 seqInfo.recvBitmap = bit;
-                IsPassSeqCheck(&seqInfo, seq);
+                IsPassSeqCheck(&seqInfo, BURDEN_MINSEQ);
                 break;
             }
             case CMD_SOFTBUS_THREE: {
-                seqInfo.minSeq = seq;
-                seqInfo.maxSeq = seq;
+                seqInfo.minSeq = BURDEN_MINSEQ;
+                seqInfo.maxSeq = MAXSEQ;
                 seqInfo.recvBitmap = bit;
-                IsPassSeqCheck(&seqInfo, seq);
+                IsPassSeqCheck(&seqInfo, BURDEN_MINSEQ);
+                break;
+            }
+            case CMD_SOFTBUS_FOUR: {
+                seqInfo.minSeq = MINSEQ;
+                seqInfo.maxSeq = MINSEQ;
+                seqInfo.recvBitmap = bit;
+                IsPassSeqCheck(&seqInfo, MINSEQ);
                 break;
             }
             default:
                 break;
         }
-    }
-
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *rawData, size_t size)
-    {
-        (void)size;
-
-        if (rawData == nullptr) {
-            return false;
-        }
-        uint32_t cmd = Convert2Uint32(rawData);
-        rawData = rawData + OFFSET;
-
-        IsPassSeqCheckSwitch(cmd, rawData);
-        return true;
     }
 } // namespace OHOS
 
@@ -94,8 +85,11 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < OHOS::THRESHOLD) {
         return 0;
     }
+    DataGenerator::Write(data, size);
 
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    OHOS::IsPassSeqCheckSwitch();
+
+    DataGenerator::Clear();
     return 0;
 }
