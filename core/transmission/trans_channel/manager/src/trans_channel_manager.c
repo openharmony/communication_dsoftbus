@@ -36,6 +36,7 @@
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_auth_negotiation.h"
+#include "trans_bind_request_manager.h"
 #include "trans_channel_callback.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"
@@ -245,6 +246,9 @@ int32_t TransChannelInit(void)
     ret = TransUdpChannelInit(cb);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans udp channel init failed.");
 
+    ret = TransBindRequestManagerInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans bind request manager init failed.");
+
     ret = TransReqLanePendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans req lane pending init failed.");
 
@@ -286,6 +290,7 @@ void TransChannelDeinit(void)
     TransReqAuthPendingDeinit();
     TransAuthWithParaReqLanePendingDeinit();
     TransFreeLanePendingDeinit();
+    TransBindRequestManagerDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -345,6 +350,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (param == NULL || transInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetDeniedFlagByPeer(param->sessionName, param->peerSessionName, param->peerDeviceId)) {
+        TRANS_LOGE(TRANS_CTRL, "request denied: sessionId=%{public}d", param->sessionId);
+        return SOFTBUS_TRANS_BIND_REQUEST_DENIED;
     }
     char *tmpName = NULL;
     Anonymize(param->sessionName, &tmpName);
