@@ -19,6 +19,7 @@ group("unittest") {
 
   deps = [
     "trans_auth_negotiation_test:unittest",
+    "trans_bind_request_manager_test:unittest",
     "trans_channel_callback_test:unittest",
     "trans_channel_manager_mock_test:unittest",
     "trans_channel_manager_test:unittest",

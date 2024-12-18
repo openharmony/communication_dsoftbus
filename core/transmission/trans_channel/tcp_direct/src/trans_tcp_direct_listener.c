@@ -325,6 +325,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         TRANS_LOGE(TRANS_CTRL, "add trigger fail, module=%{public}d, fd=%{public}d", conn->listenMod, fd);
         return SOFTBUS_TRANS_ADD_TRIGGER_FAILED;
     }
+
     ret = StartVerifySession(conn);
     TransEventExtra extra = {
         .socketName = NULL,
