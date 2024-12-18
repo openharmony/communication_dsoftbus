@@ -24,14 +24,18 @@ using namespace std;
 namespace OHOS {
     void SendTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) {
             return;
         }
+        uint32_t offset = 0;
         Communication::SoftBus::HistoryStats stats;
         stats.periodFrameNum = *(reinterpret_cast<const int *>(data));
-        stats.avgFrameInterval = *(reinterpret_cast<const int *>(data));
-        stats.minFrameInterval = *(reinterpret_cast<const int *>(data));
-        stats.maxFrameInterval = *(reinterpret_cast<const int *>(data));
+        offset += sizeof(int);
+        stats.avgFrameInterval = *(reinterpret_cast<const int *>(data + offset));
+        offset += sizeof(int);
+        stats.minFrameInterval = *(reinterpret_cast<const int *>(data + offset));
+        offset += sizeof(int);
+        stats.maxFrameInterval = *(reinterpret_cast<const int *>(data + offset));
 
         Communication::SoftBus::StreamMsgManager streamMsgManager;
         streamMsgManager.Send((const Communication::SoftBus::HistoryStats &)stats);
@@ -39,14 +43,18 @@ namespace OHOS {
 
     void RecvTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) {
             return;
         }
+        uint32_t offset = 0;
         Communication::SoftBus::HistoryStats stats;
         stats.periodFrameNum = *(reinterpret_cast<const int *>(data));
-        stats.avgFrameInterval = *(reinterpret_cast<const int *>(data));
-        stats.minFrameInterval = *(reinterpret_cast<const int *>(data));
-        stats.maxFrameInterval = *(reinterpret_cast<const int *>(data));
+        offset += sizeof(int);
+        stats.avgFrameInterval = *(reinterpret_cast<const int *>(data + offset));
+        offset += sizeof(int);
+        stats.minFrameInterval = *(reinterpret_cast<const int *>(data + offset));
+        offset += sizeof(int);
+        stats.maxFrameInterval = *(reinterpret_cast<const int *>(data + offset));
 
         Communication::SoftBus::StreamMsgManager streamMsgManager;
         streamMsgManager.Recv((const Communication::SoftBus::HistoryStats &)stats);
@@ -54,14 +62,18 @@ namespace OHOS {
 
     void UpdateTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(int)) {
+        if (data == nullptr || size < sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) {
             return;
         }
+        uint32_t offset = 0;
         Communication::SoftBus::HistoryStats stats;
         stats.periodFrameNum = *(reinterpret_cast<const int *>(data));
-        stats.avgFrameInterval = *(reinterpret_cast<const int *>(data));
-        stats.minFrameInterval = *(reinterpret_cast<const int *>(data));
-        stats.maxFrameInterval = *(reinterpret_cast<const int *>(data));
+        offset += sizeof(int);
+        stats.avgFrameInterval = *(reinterpret_cast<const int *>(data + offset));
+        offset += sizeof(int);
+        stats.minFrameInterval = *(reinterpret_cast<const int *>(data + offset));
+        offset += sizeof(int);
+        stats.maxFrameInterval = *(reinterpret_cast<const int *>(data + offset));
 
         Communication::SoftBus::StreamMsgManager streamMsgManager;
         streamMsgManager.Update((const Communication::SoftBus::HistoryStats &)stats);

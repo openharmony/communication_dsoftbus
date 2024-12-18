@@ -27,6 +27,7 @@
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
+#include "fuzz_data_generator.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -68,24 +69,31 @@ void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
+    DataGenerator::Write(data, size);
 
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(data));
     ChannelInfo channel = { 0 };
-
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
-    int32_t messageType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t shutdownReason = *(reinterpret_cast<const int32_t *>(data));
-
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t errCode = 0;
+    int32_t messageType = 0;
+    int32_t shutdownReason = 0;
     char *networkId = const_cast<char *>(reinterpret_cast<const char *>(data));
-    int32_t routeType = *(reinterpret_cast<const int32_t *>(data));
-
-    int32_t eventId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t tvCount = *(reinterpret_cast<const int32_t *>(data));
+    int32_t routeType = 0;
+    int32_t eventId = 0;
+    int32_t tvCount = 0;
     QosTv tvList = {};
+    int32_t sessionId = 0;
 
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
+    GenerateInt32(errCode);
+    GenerateInt32(messageType);
+    GenerateInt32(shutdownReason);
+    GenerateInt32(routeType);
+    GenerateInt32(eventId);
+    GenerateInt32(tvCount);
+    GenerateInt32(sessionId);
 
     TransOnChannelOpened(sessionName, &channel);
 
@@ -102,6 +110,7 @@ void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
     TransSetChannelInfo(sessionName, sessionId, channelId, channelType);
 
     TransOnChannelBind(channelId, channelType);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

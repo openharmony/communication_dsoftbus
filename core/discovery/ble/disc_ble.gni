@@ -39,53 +39,73 @@ ble_discovery_external_deps = []
 if (support_i18n && qemu_arm_disable) {
   ble_discovery_external_deps += [ "i18n:intl_util" ]
 }
-
+ble_discovery_src = []
 if (!support_bluetooth) {
-  ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
-} else {
-  if (!dsoftbus_feature_disc_ble) {
-    ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
-  } else {
-    ble_discovery_src = [
-      "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
-      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
-      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_virtual.c",
+    "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c",
+    "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
+  ]
+}
+
+if (support_bluetooth && !dsoftbus_feature_disc_ble) {
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_virtual.c",
+  ]
+} else if (support_bluetooth && dsoftbus_feature_disc_ble) {
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+  ]
+  if (support_i18n && qemu_arm_disable) {
+    ble_discovery_src += [
+      "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
     ]
-    if (support_i18n && qemu_arm_disable) {
-      ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp" ]
-    } else {
-      ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
-    }
+  } else {
+    ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
   }
 }
 
-if (dsoftbus_feature_disc_ble && disc_enhanced) {
+if (support_bluetooth && dsoftbus_feature_disc_virtual_link_ble &&
+    disc_enhanced) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/virtual_link_ble/virtual_link_ble.gni")
 
   ble_discovery_src += vlink_sources
   ble_discovery_inc += vlink_include_dirs
   ble_discovery_deps += vlink_deps
-} else {
+} else if (support_bluetooth &&
+           (!dsoftbus_feature_disc_virtual_link_ble || !disc_enhanced)) {
   ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c" ]
 }
 
-if (disc_enhanced) {
+if (support_bluetooth && dsoftbus_feature_disc_approach && disc_enhanced) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/approach_ble/approach_ble.gni")
+
+  ble_discovery_src += approach_sources
+  ble_discovery_inc += approach_include_dirs
+  ble_discovery_deps += approach_deps
+} else if (support_bluetooth &&
+           (!dsoftbus_feature_disc_virtual_link_ble || !disc_enhanced)) {
+  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c" ]
+}
+
+if (disc_enhanced) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/share_ble.gni")
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/touch_ble/touch_ble.gni")
 
-  ble_discovery_src += share_sources + approach_sources + touch_sources
-  ble_discovery_inc +=
-      share_include_dirs + approach_include_dirs + touch_include_dirs
-  ble_discovery_deps += share_deps + approach_deps + touch_deps
+  ble_discovery_src += share_sources + touch_sources
+  ble_discovery_inc += share_include_dirs + touch_include_dirs
+  ble_discovery_deps += share_deps + touch_deps
 } else {
   ble_discovery_src += [
     "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c",
-    "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
     "$dsoftbus_root_path/core/discovery/ble/touch_ble/src/disc_touch_ble_virtual.c",
   ]
 }

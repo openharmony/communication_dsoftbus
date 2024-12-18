@@ -36,6 +36,7 @@
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_auth_negotiation.h"
+#include "trans_bind_request_manager.h"
 #include "trans_channel_callback.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"
@@ -245,6 +246,9 @@ int32_t TransChannelInit(void)
     ret = TransUdpChannelInit(cb);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans udp channel init failed.");
 
+    ret = TransBindRequestManagerInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans bind request manager init failed.");
+
     ret = TransReqLanePendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans req lane pending init failed.");
 
@@ -286,6 +290,7 @@ void TransChannelDeinit(void)
     TransReqAuthPendingDeinit();
     TransAuthWithParaReqLanePendingDeinit();
     TransFreeLanePendingDeinit();
+    TransBindRequestManagerDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -297,6 +302,30 @@ static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
     }
     TransGetTokenInfo(event->firstTokenId, appInfo->tokenName, sizeof(appInfo->tokenName), &event->firstTokenType);
     event->firstTokenName = appInfo->tokenName;
+}
+
+static void TransSetQosInfo(const QosTV *qos, uint32_t qosCount, TransEventExtra *extra)
+{
+    if (qosCount > QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_CTRL, "qos count error, qosCount=%{public}" PRIu32, qosCount);
+        return;
+    }
+
+    for (uint32_t i = 0; i < qosCount; i++) {
+        switch (qos[i].qos) {
+            case QOS_TYPE_MIN_BW:
+                extra->minBW = qos[i].value;
+                break;
+            case QOS_TYPE_MAX_LATENCY:
+                extra->maxLatency = qos[i].value;
+                break;
+            case QOS_TYPE_MIN_LATENCY:
+                extra->minLatency = qos[i].value;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 static bool IsLaneModuleError(int32_t errcode)
@@ -321,6 +350,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (param == NULL || transInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetDeniedFlagByPeer(param->sessionName, param->peerSessionName, param->peerDeviceId)) {
+        TRANS_LOGE(TRANS_CTRL, "request denied: sessionId=%{public}d", param->sessionId);
+        return SOFTBUS_TRANS_BIND_REQUEST_DENIED;
     }
     char *tmpName = NULL;
     Anonymize(param->sessionName, &tmpName);
@@ -354,6 +387,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TransSetFirstTokenInfo(appInfo, &extra);
+    TransSetQosInfo(param->qos, param->qosCount, &extra);
     extra.sessionId = param->sessionId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {

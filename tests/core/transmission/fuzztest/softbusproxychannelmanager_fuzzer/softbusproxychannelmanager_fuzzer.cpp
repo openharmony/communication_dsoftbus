@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <thread>
 
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_proxychannel_manager.h"
@@ -54,44 +55,60 @@ private:
 
 static void FillAppInfoPart(const uint8_t *data, size_t size, AppInfo *appInfo)
 {
-    appInfo->fileProtocol = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->autoCloseTime = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->myHandleId = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->peerHandleId = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->transFlag = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->authSeq = *(reinterpret_cast<const int64_t *>(data));
-    appInfo->linkType = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->connectType = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->channelType = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->errorCode = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->timeStart = *(reinterpret_cast<const int64_t *>(data));
-    appInfo->connectedStart = *(reinterpret_cast<const int64_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateInt32(appInfo->fd);
+    GenerateInt32(appInfo->fileProtocol);
+    GenerateInt32(appInfo->autoCloseTime);
+    GenerateInt32(appInfo->myHandleId);
+    GenerateInt32(appInfo->peerHandleId);
+    GenerateInt32(appInfo->transFlag);
+    GenerateInt64(appInfo->authSeq);
+    GenerateInt32(appInfo->linkType);
+    GenerateInt32(appInfo->connectType);
+    GenerateInt32(appInfo->channelType);
+    GenerateInt32(appInfo->errorCode);
+    GenerateInt64(appInfo->timeStart);
+    GenerateInt64(appInfo->connectedStart);
+    GenerateUint64(appInfo->callingTokenId);
+    GenerateBool(appInfo->isClient);
+    GenerateInt32(appInfo->osType);
+    GenerateUint32(appInfo->protocol);
+    GenerateInt32(appInfo->encrypt);
+    GenerateInt32(appInfo->algorithm);
+    GenerateInt32(appInfo->crc);
     appInfo->fastTransData = (reinterpret_cast<const uint8_t *>(data));
     appInfo->fastTransDataSize = size;
-    appInfo->callingTokenId = *(reinterpret_cast<const uint64_t *>(data));
-    appInfo->isClient = *(reinterpret_cast<const bool *>(data));
-    appInfo->osType = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Clear();
 }
 
 static void FillAppInfo(const uint8_t *data, size_t size, AppInfo *appInfo)
 {
-    appInfo->routeType = static_cast<RouteType>(*(reinterpret_cast<const int32_t *>(data)));
-    appInfo->businessType = static_cast<BusinessType>(*(reinterpret_cast<const int32_t *>(data)));
-    appInfo->streamType = static_cast<StreamType>(*(reinterpret_cast<const int32_t *>(data)));
-    appInfo->udpConnType = static_cast<UdpConnType>(*(reinterpret_cast<const int32_t *>(data)));
-    appInfo->udpChannelOptType = static_cast<UdpChannelOptType>(*(reinterpret_cast<const int32_t *>(data)));
-    appInfo->fd = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->appType = static_cast<AppType>(*(reinterpret_cast<const int32_t *>(data)));
-    appInfo->protocol = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->encrypt = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->algorithm = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->crc = *(reinterpret_cast<const int32_t *>(data));
+    int32_t cnt = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(cnt);
+    appInfo->routeType = static_cast<RouteType>(cnt);
+    GenerateInt32(cnt);
+    appInfo->businessType = static_cast<BusinessType>(cnt);
+    GenerateInt32(cnt);
+    appInfo->streamType = static_cast<StreamType>(cnt);
+    GenerateInt32(cnt);
+    appInfo->udpConnType = static_cast<UdpConnType>(cnt);
+    GenerateInt32(cnt);
+    appInfo->udpChannelOptType = static_cast<UdpChannelOptType>(cnt);
+    GenerateInt32(cnt);
+    appInfo->appType = static_cast<AppType>(cnt);
+
     FillAppInfoPart(data, size, appInfo);
+    DataGenerator::Clear();
 }
 
 static void FillConnectOption(const uint8_t *data, size_t size, ConnectOption *connInfo)
 {
-    connInfo->type = static_cast<ConnectType>(*(reinterpret_cast<const int32_t *>(data)));
+    int32_t cnt = 0;
+    DataGenerator::Write(data, size);
+    GenerateInt32(cnt);
+    connInfo->type = static_cast<ConnectType>(cnt);
+    DataGenerator::Clear();
 }
 
 static uint8_t *TestDataSwitch(const uint8_t *data, size_t size)
@@ -115,9 +132,12 @@ void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
 
     (void)TransProxyGetNewChanSeq(channelId);
+    DataGenerator::Clear();
 }
 
 void TransProxyOpenProxyChannelTest(const uint8_t *data, size_t size)
@@ -141,9 +161,12 @@ void TransProxyCloseProxyChannelTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
 
     (void)TransProxyCloseProxyChannel(channelId);
+    DataGenerator::Clear();
 }
 
 void TransProxyDelByConnIdTest(const uint8_t *data, size_t size)
@@ -151,9 +174,12 @@ void TransProxyDelByConnIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(uint32_t)) {
         return;
     }
+    DataGenerator::Write(data, size);
+    uint32_t connId = 0;
+    GenerateUint32(connId);
 
-    uint32_t connId = *(reinterpret_cast<const uint32_t *>(data));
     TransProxyDelByConnId(connId);
+    DataGenerator::Clear();
 }
 
 void TransProxyDelChanByReqIdTest(const uint8_t *data, size_t size)
@@ -161,10 +187,14 @@ void TransProxyDelChanByReqIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t reqId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t reqId = 0;
+    int32_t errCode = 0;
+    GenerateInt32(reqId);
+    GenerateInt32(errCode);
 
     TransProxyDelChanByReqId(reqId, errCode);
+    DataGenerator::Clear();
 }
 
 void TransProxyDelChanByChanIdTest(const uint8_t *data, size_t size)
@@ -172,9 +202,12 @@ void TransProxyDelChanByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t chanId = 0;
+    GenerateInt32(chanId);
 
     TransProxyDelChanByChanId(chanId);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetChanByChanIdTest(const uint8_t *data, size_t size)
@@ -182,10 +215,13 @@ void TransProxyGetChanByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t chanId = 0;
+    GenerateInt32(chanId);
     ProxyChannelInfo chan;
 
     (void)TransProxyGetChanByChanId(chanId, &chan);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetChanByReqIdTest(const uint8_t *data, size_t size)
@@ -193,10 +229,13 @@ void TransProxyGetChanByReqIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t reqId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t reqId = 0;
+    GenerateInt32(reqId);
     ProxyChannelInfo chan;
 
     (void)TransProxyGetChanByReqId(reqId, &chan);
+    DataGenerator::Clear();
 }
 
 void TransProxyOpenProxyChannelSuccessTest(const uint8_t *data, size_t size)
@@ -204,9 +243,12 @@ void TransProxyOpenProxyChannelSuccessTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
 
     TransProxyOpenProxyChannelSuccess(channelId);
+    DataGenerator::Clear();
 }
 
 void TransProxyOpenProxyChannelFailTest(const uint8_t *data, size_t size)
@@ -214,8 +256,13 @@ void TransProxyOpenProxyChannelFailTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    int32_t errCode = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(errCode);
+    DataGenerator::Clear();
+
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(data, size, &appInfo);
@@ -228,11 +275,14 @@ void TransProxyGetSessionKeyByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     uint32_t sessionKeySize = SESSION_KEY_LENGTH;
 
     (void)TransProxyGetSessionKeyByChanId(channelId, sessionKey, sessionKeySize);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetSendMsgChanInfoTest(const uint8_t *data, size_t size)
@@ -240,10 +290,13 @@ void TransProxyGetSendMsgChanInfoTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
     ProxyChannelInfo chan;
 
     (void)TransProxyGetSendMsgChanInfo(channelId, &chan);
+    DataGenerator::Clear();
 }
 
 void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
@@ -251,7 +304,10 @@ void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
+    DataGenerator::Clear();
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(data, size, &appInfo);
@@ -268,10 +324,14 @@ void TransProxyChanProcessByReqIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t reqId = *(reinterpret_cast<const int32_t *>(data));
-    uint32_t connId = *(reinterpret_cast<const uint32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t reqId = 0;
+    uint32_t connId = 0;
+    GenerateInt32(reqId);
+    GenerateUint32(connId);
 
     TransProxyChanProcessByReqId(reqId, connId);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetAuthIdTest(const uint8_t *data, size_t size)
@@ -279,10 +339,13 @@ void TransProxyGetAuthIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
     AuthHandle authHandle;
 
     (void)TransProxyGetAuthId(channelId, &authHandle);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetNameByChanIdTest(const uint8_t *data, size_t size)
@@ -290,13 +353,18 @@ void TransProxyGetNameByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
-    uint16_t pkgLen = *(reinterpret_cast<const uint16_t *>(data));
-    uint16_t sessionLen = *(reinterpret_cast<const uint16_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t chanId = 0;
+    uint16_t pkgLen = 0;
+    uint16_t sessionLen = 0;
+    GenerateInt32(chanId);
+    GenerateUint16(pkgLen);
+    GenerateUint16(sessionLen);
     char pkgName[MAX_PACKAGE_NAME_LEN];
     char sessionName[SESSION_NAME_SIZE_MAX];
 
     (void)TransProxyGetNameByChanId(chanId, pkgName, sessionName, pkgLen, sessionLen);
+    DataGenerator::Clear();
 }
 
 void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
@@ -304,9 +372,12 @@ void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
 
     (void)TransRefreshProxyTimesNative(channelId);
+    DataGenerator::Clear();
 }
 
 void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
@@ -315,11 +386,14 @@ void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
     if (dataWithEndCharacter == nullptr) {
         return;
     }
+    DataGenerator::Write(data, size);
+    int32_t pid = 0;
+    GenerateInt32(pid);
     char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    int32_t pid = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
 
     TransProxyDeathCallback(pkgName, pid);
     SoftBusFree(dataWithEndCharacter);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetAppInfoByChanIdTest(const uint8_t *data, size_t size)
@@ -327,10 +401,13 @@ void TransProxyGetAppInfoByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t chanId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t chanId = 0;
+    GenerateInt32(chanId);
     AppInfo appInfo;
 
     (void)TransProxyGetAppInfoByChanId(chanId, &appInfo);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetConnIdByChanIdTest(const uint8_t *data, size_t size)
@@ -338,10 +415,13 @@ void TransProxyGetConnIdByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
     int32_t connId;
 
     (void)TransProxyGetConnIdByChanId(channelId, &connId);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetConnOptionByChanIdTest(const uint8_t *data, size_t size)
@@ -349,10 +429,13 @@ void TransProxyGetConnOptionByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
     ConnectOption connOpt;
 
     (void)TransProxyGetConnOptionByChanId(channelId, &connOpt);
+    DataGenerator::Clear();
 }
 
 void TransProxyGetAppInfoTypeTest(const uint8_t *data, size_t size)
@@ -362,10 +445,13 @@ void TransProxyGetAppInfoTypeTest(const uint8_t *data, size_t size)
     }
 
     const char *identity = "test";
-    int16_t myId = *(reinterpret_cast<const int16_t *>(data));
+    DataGenerator::Write(data, size);
+    int16_t myId = 0;
+    GenerateInt16(myId);
     AppType appType;
 
     (void)TransProxyGetAppInfoType(myId, identity, &appType);
+    DataGenerator::Clear();
 }
 
 static void InitProxyChannelInfo(const uint8_t *data, size_t size, ProxyChannelInfo *proxyChannelInfo)
@@ -373,7 +459,9 @@ static void InitProxyChannelInfo(const uint8_t *data, size_t size, ProxyChannelI
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    proxyChannelInfo->channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateInt32(proxyChannelInfo->channelId);
+    DataGenerator::Clear();
 }
 
 void TransProxySpecialUpdateChanInfoTest(const uint8_t *data, size_t size)
@@ -389,8 +477,10 @@ void TransProxySpecialUpdateChanInfoTest(const uint8_t *data, size_t size)
 
 static void InitAuthHandle(const uint8_t *data, size_t size, AuthHandle *authHandle)
 {
-    authHandle->authId = *(reinterpret_cast<const int64_t *>(data));
-    authHandle->type = *(reinterpret_cast<const uint32_t *>(data));
+    DataGenerator::Write(data, size);
+    GenerateInt64(authHandle->authId);
+    GenerateUint32(authHandle->type);
+    DataGenerator::Clear();
 }
 
 void TransProxySetAuthHandleByChanIdTest(const uint8_t *data, size_t size)
@@ -398,8 +488,11 @@ void TransProxySetAuthHandleByChanIdTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
+    DataGenerator::Clear();
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     AuthHandle authHandle;
     InitAuthHandle(data, size, &authHandle);
 
@@ -411,9 +504,12 @@ void TransProxyNegoSessionKeySuccTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
 
     TransProxyNegoSessionKeySucc(channelId);
+    DataGenerator::Clear();
 }
 
 void TransProxyNegoSessionKeyFailTest(const uint8_t *data, size_t size)
@@ -421,10 +517,14 @@ void TransProxyNegoSessionKeyFailTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+    DataGenerator::Write(data, size);
+    int32_t channelId = 0;
+    int32_t errCode = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(errCode);
 
     TransProxyNegoSessionKeyFail(channelId, errCode);
+    DataGenerator::Clear();
 }
 
 void ProxyChannelListLockTest(const uint8_t *data, size_t size)

@@ -260,7 +260,7 @@ static int32_t TransProxyParseMessageNoDecrypt(ProxyMessage *msg)
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(len > PROXY_CHANNEL_HEAD_LEN,
-        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "parseMessage: invalid message len!");
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "parseMessage: invalid message len, len=%{public}d", len);
     int32_t ret = TransProxyParseMessageHead(data, len, msg);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {

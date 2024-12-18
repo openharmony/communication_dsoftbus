@@ -31,6 +31,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
@@ -38,6 +39,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "trans_bind_request_manager.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
@@ -632,6 +634,11 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         TRANS_LOGE(TRANS_CTRL,
             "receive err reply msg channelId=%{public}d, errCode=%{public}d, seq=%{public}" PRIu64,
             channelId, errCode, seq);
+        if (errCode == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
+            (void)TransAddTimestampToList(
+                conn.appInfo.myData.sessionName, conn.appInfo.peerData.sessionName,
+                conn.appInfo.peerNetWorkId, SoftBusGetSysTimeMs());
+        }
         return errCode;
     }
 

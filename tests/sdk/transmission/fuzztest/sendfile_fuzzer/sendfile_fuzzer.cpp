@@ -17,6 +17,7 @@
 
 #include <cstddef>
 
+#include "fuzz_data_generator.h"
 #include "session.h"
 
 namespace OHOS {
@@ -25,11 +26,15 @@ void SendFileTest(const uint8_t* data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
+    DataGenerator::Write(data, size);
     const char *sfileList[] = {};
     const char *dFileList[] = {};
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t fileCnt = *(reinterpret_cast<const int32_t *>(data));
+    int32_t sessionId = 0;
+    int32_t fileCnt = 0;
+    GenerateInt32(sessionId);
+    GenerateInt32(fileCnt);
     SendFile(sessionId, sfileList, dFileList, fileCnt);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 
