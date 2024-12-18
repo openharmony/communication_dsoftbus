@@ -24,7 +24,7 @@
 namespace OHOS::SoftBus {
 class NullProcessor : public WifiDirectProcessor {
 public:
-    explicit NullProcessor(const std::string &remoteDeviceId);
+    explicit NullProcessor(const std::string &remoteDeviceId, const int32_t reason);
 
     ~NullProcessor() override = default;
 
@@ -32,6 +32,9 @@ public:
     void HandleCommandAfterTerminate(WifiDirectCommand &command) override {};
 
     [[noreturn]] void Run() override;
+
+private:
+    int32_t reason_ = SOFTBUS_OK;
 };
 }
 #endif

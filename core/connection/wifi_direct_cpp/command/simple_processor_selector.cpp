@@ -33,8 +33,9 @@ std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const W
 std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const WifiDirectDisconnectInfo &info)
 {
     auto innerLink = LinkManager::GetInstance().GetLinkById(info.linkId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(innerLink != nullptr, std::make_shared<NullProcessor>(std::string()),
-        CONN_WIFI_DIRECT, "innerLink is nullptr, linkId=%{public}d", info.linkId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(innerLink != nullptr,
+        std::make_shared<NullProcessor>(std::string(), SOFTBUS_CONN_NULL_PROCESSOR_ERR), CONN_WIFI_DIRECT,
+        "innerLink is nullptr, linkId=%{public}d", info.linkId);
     auto remoteDeviceId = innerLink->GetRemoteDeviceId();
     return std::make_shared<P2pV1Processor>(remoteDeviceId);
 }
