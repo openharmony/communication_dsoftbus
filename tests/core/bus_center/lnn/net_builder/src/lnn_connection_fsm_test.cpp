@@ -181,10 +181,12 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
     connFsm3->isDead = false;
     ret = LnnSendAuthResultMsgToConnFsm(connFsm3, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    FsmStateMachine fsm;
-    connFsm3->fsm = fsm;
-    ret = LnnSendAuthResultMsgToConnFsm(connFsm3, retCode);
+    LnnConnectionFsm connFsm = {};
+    connFsm.fsm.looper = nullptr;
+    connFsm.isDead = false;
+    ret = LnnSendAuthResultMsgToConnFsm(&connFsm, retCode);
     EXPECT_TRUE(ret == SOFTBUS_AUTH_SEND_FAIL);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
 }
 
 /*
