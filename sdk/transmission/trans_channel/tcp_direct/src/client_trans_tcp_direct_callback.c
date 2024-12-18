@@ -39,6 +39,10 @@ int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb)
 
 int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel)
 {
+    if (sessionName == NULL || channel == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SessionType type = TYPE_BUTT;
     switch (channel->businessType) {
         case BUSINESS_TYPE_MESSAGE:
