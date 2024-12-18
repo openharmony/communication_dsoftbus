@@ -28,7 +28,6 @@
 #define LNN_HUKS_MAX_UPDATE_SIZE (8 * 1024)
 #define LNN_HUKS_MAX_OUTDATA_SIZE (LNN_HUKS_MAX_UPDATE_SIZE + LNN_HUKS_MAX_UPDATE_RESERVED)
 #define DEFAULT_ACCOUNT_ID 100
-#define DEVICE_INFO_MAX_SIZE_EXPANSION (5 * 102400) // 500k
 
 #define LNN_HUKS_IV_SIZE 16
 static uint8_t g_huksIv[LNN_HUKS_IV_SIZE] = {0};
@@ -648,8 +647,7 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
 int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    if (keyAlias == NULL || inData == NULL || outData == NULL || inData->size == 0 ||
-        inData->size > DEVICE_INFO_MAX_SIZE_EXPANSION) {
+    if (keyAlias == NULL || inData == NULL || outData == NULL || inData->size == 0) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -688,8 +686,7 @@ int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
 int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    if (keyAlias == NULL || inData == NULL || outData == NULL || inData->size == 0 ||
-        inData->size > DEVICE_INFO_MAX_SIZE_EXPANSION) {
+    if (keyAlias == NULL || inData == NULL || outData == NULL || inData->size == 0) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
