@@ -121,10 +121,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
 {
     LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, authId=%{public}" PRId64,
         requestId, authHandle.authId);
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "reAuth verify result error");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "reAuth verify result error");
     AuthRequest authRequest = { 0 };
     if (GetAuthRequest(requestId, &authRequest) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth request not found");
@@ -146,6 +143,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     if (connFsm != NULL && !connFsm->isDead && !LnnIsNeedCleanConnectionFsm(info, addr.type)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
             UpdateProfile(info);
+            LnnUpdateRemoteDeviceName(info);
             NodeInfo nodeInfo;
             (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
             (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
