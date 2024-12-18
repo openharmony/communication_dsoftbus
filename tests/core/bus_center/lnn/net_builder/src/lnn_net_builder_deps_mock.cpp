@@ -213,9 +213,9 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return GetNetBuilderDepsInterface()->LnnGetNodeInfoById(id, type);
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
 {
-    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo);
+    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo, connectionType);
 }
 
 int32_t LnnAddMetaInfo(NodeInfo *info)

@@ -732,25 +732,11 @@ static void CheckUserIdCheckSumChange(NodeInfo *oldInfo, const NodeInfo *newInfo
     }
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_t connectionType, char *deviceName)
 {
-    const char *udid = NULL;
-    DoubleHashMap *map = NULL;
-    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
-
-    UpdateNewNodeAccountHash(newInfo);
-    UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid, newInfo->userId);
-    udid = LnnGetDeviceUdid(newInfo);
-    map = &g_distributedNetLedger.distributedInfo;
-    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
-    if (oldInfo == NULL) {
-        LNN_LOGE(LNN_LEDGER, "no online node newInfo!");
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_NETWORK_MAP_GET_FAILED;
+    if (oldInfo == NULL || newInfo == NULL || deviceName == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return SOFTBUS_INVALID_PARAM;
     }
     if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
         oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
@@ -759,30 +745,103 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
     if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
-        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN,
+            newInfo->deviceInfo.unifiedDefaultName) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
     }
     if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy account hash failed");
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_MEM_ERR;
     }
     LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
     if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy ptk failed");
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_MEM_ERR;
     }
     oldInfo->accountId = newInfo->accountId;
     oldInfo->userId = newInfo->userId;
+    if (connectionType == CONNECTION_ADDR_BLE) {
+        oldInfo->localStateVersion = newInfo->localStateVersion;
+        oldInfo->stateVersion = newInfo->stateVersion;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType, char *deviceName)
+{
+    if (newInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    int32_t ret = SoftBusGenerateStrHash((const unsigned char *)newInfo->deviceInfo.deviceUdid,
+        strlen(newInfo->deviceInfo.deviceUdid), udidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate udidhash fail");
+        return ret;
+    }
+    ret = ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash,
+        SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
+        return ret;
+    }
+    ret = LnnRetrieveDeviceInfo(hashStr, &deviceInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "no this device info.");
+        return ret;
+    }
+    ret = UpdateRemoteNodeInfo(&deviceInfo, newInfo, connectionType, deviceName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = LnnSaveRemoteDeviceInfo(&deviceInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
+{
+    const char *udid = NULL;
+    DoubleHashMap *map = NULL;
+    NodeInfo *oldInfo = NULL;
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
+    UpdateNewNodeAccountHash(newInfo);
+    UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid, newInfo->userId);
+    udid = LnnGetDeviceUdid(newInfo);
+    map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (oldInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "no online node newInfo!");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_NETWORK_MAP_GET_FAILED;
+    }
+    int32_t ret = UpdateRemoteNodeInfo(oldInfo, newInfo, connectionType, deviceName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return ret;
+    }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
     }
     CheckUserIdCheckSumChange(oldInfo, newInfo);
-    return SOFTBUS_OK;
+    ret = RemoteNodeInfoRetrieve(newInfo, connectionType, deviceName);
+    return ret;
 }
 
 int32_t LnnAddMetaInfo(NodeInfo *info)
