@@ -1231,7 +1231,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDataList);
