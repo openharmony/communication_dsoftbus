@@ -55,7 +55,7 @@ void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
 
-void LnnDeInitNetManagerMonitorImpl(void);
+void LnnDeinitNetManagerMonitorImpl(void);
 
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle);
 

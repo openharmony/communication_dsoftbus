@@ -56,6 +56,7 @@ public:
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
+    virtual void LnnNotifyNetlinkStateChangeEvent(NetManagerIfnameState state, const char *ifName) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {
 public:
