@@ -930,4 +930,369 @@ HWTEST_F(TransTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
     SoftBusFree(info);
 }
+
+/**
+ * @tc.name: ClientTdcOnDataEventTest002
+ * @tc.desc: ClientTdcOnDataEvent, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level0)
+{
+    int32_t events = SOFTBUS_SOCKET_OUT;
+    int32_t channelId = 1;
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
+
+    info->channelId = channelId;
+    info->detail.fd = g_fd;
+
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    events = SOFTBUS_SOCKET_IN;
+    ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcCreateListenerWithoutAddTriggerTest001
+ * @tc.desc: TransTdcCreateListenerWithoutAddTrigger, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest001, TestSize.Level0)
+{
+    g_isInitedFlag = true;
+    int32_t fd = g_fd;
+
+    int32_t ret = TransTdcCreateListenerWithoutAddTrigger(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_isInitedFlag = false;
+    ret = TransTdcCreateListenerWithoutAddTrigger(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransTdcCloseFdTest001
+ * @tc.desc: TransTdcCloseFd, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcCloseFdTest001, TestSize.Level0)
+{
+    int32_t fd = -1;
+    TransTdcCloseFd(fd);
+    fd = 1000000;
+    TransTdcCloseFd(fd);
+    fd = g_fd;
+    TransTdcCloseFd(fd);
+    EXPECT_TRUE(fd);
+}
+
+/**
+ * @tc.name: UnpackTcpDataPacketHeadTest001
+ * @tc.desc: UnpackTcpDataPacketHead, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, UnpackTcpDataPacketHeadTest001, TestSize.Level0)
+{
+    TcpDataPacketHead data;
+    data.seq = 1;
+    UnpackTcpDataPacketHead(&data);
+    EXPECT_TRUE(data.seq);
+}
+
+/**
+ * @tc.name: CheckCollaborationSessionNameTest001
+ * @tc.desc: CheckCollaborationSessionName, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, CheckCollaborationSessionNameTest001, TestSize.Level0)
+{
+    const char *testSessionName = "ohos.collaborationcenter";
+    bool ret = CheckCollaborationSessionName(testSessionName);
+    EXPECT_EQ(ret, true);
+    const char *testSessionName1 = "NULL";
+    ret = CheckCollaborationSessionName(testSessionName1);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TransTdcProcessPostDataTest002
+ * @tc.desc: TransTdcProcessPostData, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest002, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    ChannelType channelType = CHANNEL_TYPE_TCP_DIRECT;
+    const char *data = "data";
+    uint32_t len = BUF_LEN;
+    int32_t flags = FLAG_ACK;
+
+    TcpDirectChannelInfo *channel = reinterpret_cast<TcpDirectChannelInfo *>(
+        SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelId = channelId;
+    channel->detail.channelType = channelType;
+
+    ClientSessionServer *serverNode = reinterpret_cast<ClientSessionServer *>(
+        SoftBusCalloc(sizeof(ClientSessionServer)));
+    ASSERT_NE(serverNode, nullptr);
+
+    SessionInfo *info = reinterpret_cast<SessionInfo *>(SoftBusCalloc(sizeof(SessionInfo)));
+    ASSERT_NE(info, nullptr);
+    info->channelId = channelId;
+    info->channelType = channelType;
+    ListInit(&serverNode->sessionList);
+    ListAdd(&serverNode->sessionList, &info->node);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &serverNode->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransTdcProcessPostData(channel, data, len, flags);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    SoftBusFree(channel);
+    SoftBusFree(info);
+    SoftBusFree(serverNode);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcSendBytesTest001
+ * @tc.desc: TransTdcSendBytes, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    const char *data = "data";
+    uint32_t len = BUF_LEN;
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
+
+    info->channelId = channelId;
+    info->detail.needRelease = true;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransTdcSendBytes(channelId, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_CLOSED_BY_ANOTHER_THREAD);
+
+    info->detail.needRelease = false;
+    ret = TransTdcSendBytes(channelId, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcSendMessageTest001
+ * @tc.desc: TransTdcSendMessage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcSendMessageTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    uint32_t len = BUF_LEN;
+    const char *data = "data";
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
+    info->channelId = channelId;
+    info->detail.needRelease = true;
+
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransTdcSendMessage(channelId, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_CLOSED_BY_ANOTHER_THREAD);
+
+    info->detail.needRelease = false;
+    ret = TransTdcSendMessage(channelId, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcProcessDataTest002
+ * @tc.desc: TransTdcProcessData, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t ret = TransTdcProcessData(channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
+
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
+    info->channelId = channelId;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    ret = TransTdcProcessData(channelId);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
+
+    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
+    ASSERT_NE(buf, nullptr);
+    g_tcpDataList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDataList, nullptr);
+    ret = TransTdcProcessData(channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+
+    TcpDataPacketHead *pktHead = reinterpret_cast<TcpDataPacketHead *>(SoftBusCalloc(sizeof(TcpDataPacketHead)));
+    ASSERT_NE(pktHead, nullptr);
+    pktHead->dataLen = 0;
+    pktHead->seq = 0;
+    pktHead->flags = 0;
+    buf->data = (char*)pktHead;
+    buf->channelId = channelId;
+    (void)SoftBusMutexLock(&g_tcpDataList->lock);
+    ListAdd(&g_tcpDataList->list, &buf->node);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
+
+    ret = TransTdcProcessData(channelId);
+    EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
+
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = TransTdcManagerInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransTdcProcessData(channelId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    SoftBusFree(info);
+    SoftBusFree(buf);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    DestroySoftBusList(g_tcpDataList);
+    g_tcpDirectChannelInfoList = NULL;
+    g_tcpDataList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcProcAllDataTest003
+ * @tc.desc: TransTdcProcAllData, use different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
+{
+    int32_t ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);;
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
+    ASSERT_NE(buf, nullptr);
+    g_tcpDataList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDataList, nullptr);
+
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);;
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    char testData[] = "data";
+    buf->channelId = TRANS_TEST_CHANNEL_ID;
+    buf->data = testData;
+    buf->w = testData;
+    (void)SoftBusMutexLock(&g_tcpDataList->lock);
+    ListAdd(&g_tcpDataList->list, &buf->node);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
+
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(buf);
+    DestroySoftBusList(g_tcpDataList);
+    g_tcpDataList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcProcAllDataTest004
+ * @tc.desc: TransTdcProcAllData, use different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
+{
+    int32_t channelId = TRANS_TEST_CHANNEL_ID;
+    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
+    ASSERT_NE(buf, nullptr);
+    g_tcpDataList = CreateSoftBusList();
+    ASSERT_NE(g_tcpDataList, nullptr);
+
+    TcpDataPacketHead *pktHead = reinterpret_cast<TcpDataPacketHead *>(SoftBusCalloc(sizeof(TcpDataPacketHead)));
+    ASSERT_NE(pktHead, nullptr);
+    pktHead->magicNumber = 0x01;
+    buf->channelId = channelId;
+    buf->data = (char *)pktHead;
+    buf->w = buf->data + DC_DATA_HEAD_SIZE - 1;
+    (void)SoftBusMutexLock(&g_tcpDataList->lock);
+    ListAdd(&g_tcpDataList->list, &buf->node);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
+
+    int32_t ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
+    buf->w = buf->data + DC_DATA_HEAD_SIZE;
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);
+
+    pktHead->magicNumber = MAGIC_NUMBER;
+    pktHead->dataLen = g_dataBufferMaxLen - DC_DATA_HEAD_SIZE + 1;
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    pktHead->dataLen = OVERHEAD_LEN;
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    pktHead->dataLen = 1;
+    buf->size = DC_DATA_HEAD_SIZE;
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    pktHead->dataLen = OVERHEAD_LEN + 1;
+    buf->size = DC_DATA_HEAD_SIZE;
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    pktHead->dataLen = 0;
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
+
+    SoftBusFree(buf);
+    DestroySoftBusList(g_tcpDataList);
+    g_tcpDataList = NULL;
+}
 }
