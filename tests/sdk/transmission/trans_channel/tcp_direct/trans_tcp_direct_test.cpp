@@ -941,7 +941,7 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level0)
 {
     int32_t events = SOFTBUS_SOCKET_OUT;
     int32_t channelId = 1;
-    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     ASSERT_NE(info, nullptr);
 
     g_tcpDirectChannelInfoList = CreateSoftBusList();
@@ -1045,15 +1045,17 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest002, TestSize.Level0)
     uint32_t len = BUF_LEN;
     int32_t flags = FLAG_ACK;
 
-    TcpDirectChannelInfo *channel = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    TcpDirectChannelInfo *channel = reinterpret_cast<TcpDirectChannelInfo *>(
+        SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     ASSERT_TRUE(channel != nullptr);
     channel->channelId = channelId;
     channel->detail.channelType = channelType;
 
-    ClientSessionServer *serverNode = (ClientSessionServer *)SoftBusCalloc(sizeof(ClientSessionServer));
+    ClientSessionServer *serverNode = reinterpret_cast<ClientSessionServer *>(
+        SoftBusCalloc(sizeof(ClientSessionServer)));
     ASSERT_NE(serverNode, nullptr);
 
-    SessionInfo *info = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
+    SessionInfo *info = reinterpret_cast<SessionInfo *>(SoftBusCalloc(sizeof(SessionInfo)));
     ASSERT_NE(info, nullptr);
     info->channelId = channelId;
     info->channelType = channelType;
@@ -1086,7 +1088,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level0)
     int32_t channelId = 1;
     const char *data = "data";
     uint32_t len = BUF_LEN;
-    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     ASSERT_NE(info, nullptr);
     g_tcpDirectChannelInfoList = CreateSoftBusList();
     ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
@@ -1119,7 +1121,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendMessageTest001, TestSize.Level0)
     int32_t channelId = 1;
     uint32_t len = BUF_LEN;
     const char *data = "data";
-    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     ASSERT_NE(info, nullptr);
     g_tcpDirectChannelInfoList = CreateSoftBusList();
     ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
@@ -1153,7 +1155,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level0)
     int32_t ret = TransTdcProcessData(channelId);
     EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
 
-    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     ASSERT_NE(info, nullptr);
     g_tcpDirectChannelInfoList = CreateSoftBusList();
     ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
@@ -1165,14 +1167,14 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level0)
     ret = TransTdcProcessData(channelId);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
-    ClientDataBuf *buf = (ClientDataBuf *)SoftBusCalloc(sizeof(ClientDataBuf));
+    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
     ASSERT_NE(buf, nullptr);
     g_tcpDataList = CreateSoftBusList();
     ASSERT_NE(g_tcpDataList, nullptr);
     ret = TransTdcProcessData(channelId);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
-    TcpDataPacketHead *pktHead = (TcpDataPacketHead *)SoftBusCalloc(sizeof(TcpDataPacketHead));
+    TcpDataPacketHead *pktHead = reinterpret_cast<TcpDataPacketHead *>(SoftBusCalloc(sizeof(TcpDataPacketHead)));
     ASSERT_NE(pktHead, nullptr);
     pktHead->dataLen = 0;
     pktHead->seq = 0;
@@ -1212,7 +1214,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
     int32_t ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);;
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
-    ClientDataBuf *buf = (ClientDataBuf *)SoftBusCalloc(sizeof(ClientDataBuf));
+    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
     ASSERT_NE(buf, nullptr);
     g_tcpDataList = CreateSoftBusList();
     ASSERT_NE(g_tcpDataList, nullptr);
@@ -1245,12 +1247,12 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
 {
     int32_t channelId = TRANS_TEST_CHANNEL_ID;
-    ClientDataBuf *buf = (ClientDataBuf *)SoftBusCalloc(sizeof(ClientDataBuf));
+    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
     ASSERT_NE(buf, nullptr);
     g_tcpDataList = CreateSoftBusList();
     ASSERT_NE(g_tcpDataList, nullptr);
 
-    TcpDataPacketHead *pktHead = (TcpDataPacketHead *)SoftBusCalloc(sizeof(TcpDataPacketHead));
+    TcpDataPacketHead *pktHead = reinterpret_cast<TcpDataPacketHead *>(SoftBusCalloc(sizeof(TcpDataPacketHead)));
     ASSERT_NE(pktHead, nullptr);
     pktHead->magicNumber = 0x01;
     buf->channelId = channelId;
