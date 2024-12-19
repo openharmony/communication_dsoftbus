@@ -40,16 +40,16 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     int32_t index = 0;
     int32_t transDomainBase = 0xd005740;
 
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[index], TRANS_SDK, transDomainBase, "TransSdk"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_SVC, ++transDomainBase, "TransSvc"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_INIT, ++transDomainBase, "TransInit"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_CTRL, ++transDomainBase, "TransCtrl"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_BYTES, ++transDomainBase, "TransBytes"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_FILE, ++transDomainBase, "TransFile"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_MSG, ++transDomainBase, "TransMsg"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_STREAM, ++transDomainBase, "TransStream"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_QOS, ++transDomainBase, "TransQos"));
-    EXPECT_NO_THROW(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_TEST, DOMAIN_ID_TEST, "TransTest"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[index], TRANS_SDK, transDomainBase, "TransSdk"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_SVC, ++transDomainBase, "TransSvc"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_INIT, ++transDomainBase, "TransInit"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_CTRL, ++transDomainBase, "TransCtrl"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_BYTES, ++transDomainBase, "TransBytes"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_FILE, ++transDomainBase, "TransFile"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_MSG, ++transDomainBase, "TransMsg"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_STREAM, ++transDomainBase, "TransStream"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_QOS, ++transDomainBase, "TransQos"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_TEST, DOMAIN_ID_TEST, "TransTest"));
 }
 
 /**
