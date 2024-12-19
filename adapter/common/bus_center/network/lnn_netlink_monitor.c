@@ -141,7 +141,7 @@ static void NotifyLinkUp(const char *ifName, struct nlmsghdr *nlh, struct ifinfo
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return;
     }
-    if (ifinfo->ifi_flags & IFF_LOWER_UP) {
+    if (nlh->nlmsg_type == RTM_NEWLINK && (ifinfo->ifi_flags & IFF_LOWER_UP)) {
         LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_LINK_UP, ifName);
     }
 }

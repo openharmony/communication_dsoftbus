@@ -55,6 +55,8 @@ void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
 
+void LnnDeInitNetManagerMonitorImpl(void);
+
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle);
 
 bool LnnQueryLocalScreenStatusOnce(bool notify);

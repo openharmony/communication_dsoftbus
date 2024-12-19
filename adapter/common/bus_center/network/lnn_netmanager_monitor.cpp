@@ -14,8 +14,6 @@
  */
 
 #include "lnn_netmanager_monitor.h"
-#include "net_conn_client.h"
-#include "net_interface_callback_stub.h"
 
 #include <cstring>
 #include <ctime>
@@ -30,6 +28,8 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
+#include "net_conn_client.h"
+#include "net_interface_callback_stub.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -61,8 +61,7 @@ public:
 
 static int32_t g_ethCount;
 static SoftBusMutex g_ethCountLock;
-static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback =
-    new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback = nullptr;
 
 NetInterfaceStateMonitor::NetInterfaceStateMonitor()
 {}
@@ -79,7 +78,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceChanged(const std::string &ifName, bool isUp)
+int32_t NetInterfaceStateMonitor::OnInterfaceChanged(const std::string &ifName, bool isUp)
 {
     return SOFTBUS_OK;
 }
@@ -182,7 +181,7 @@ int32_t ConfigNetLinkUp(const char *ifName)
 {
     if (ifName == nullptr) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInterfaceUp(ifName);
@@ -197,7 +196,7 @@ int32_t ConfigLocalIp(const char *ifName, const char *localIp)
 {
     if (ifName == nullptr || localIp == nullptr) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().SetNetInterfaceIpAddress(ifName, localIp);
@@ -212,7 +211,7 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
 {
     if (ifName == nullptr || destination == nullptr || gateway == nullptr) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().AddNetworkRoute(id, ifName, destination, gateway);
@@ -258,7 +257,7 @@ int32_t LnnInitNetManagerMonitorImpl(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeInitNetManagerMonitorImpl(void)
+void LnnDeInitNetManagerMonitorImpl(void)
 {
     if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
         delete (OHOS::BusCenter::g_netlinkCallback);
