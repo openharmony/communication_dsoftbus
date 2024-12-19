@@ -97,5 +97,10 @@ void LnnNotifyBtStateChangeEvent(void *state)
 {
     return GetNetworkInterface()->LnnNotifyBtStateChangeEvent(state);
 }
+
+void LnnNotifyNetlinkStateChangeEvent(NetManagerIfnameState state, const char *ifName)
+{
+    return GetNetworkInterface()->LnnNotifyNetlinkStateChangeEvent(state, ifName);
+}
 }
 }

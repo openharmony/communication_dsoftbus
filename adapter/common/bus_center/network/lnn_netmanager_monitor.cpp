@@ -257,7 +257,7 @@ int32_t LnnInitNetManagerMonitorImpl(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeInitNetManagerMonitorImpl(void)
+void LnnDeinitNetManagerMonitorImpl(void)
 {
     if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
         delete (OHOS::BusCenter::g_netlinkCallback);
