@@ -23,6 +23,13 @@ bool GetServerIsInit(void)
 {
     return true;
 }
+
+bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission)
+{
+    (void)tokenId;
+    (void)permission;
+    return true;
+}
 } // extern "C"
 
 namespace {
