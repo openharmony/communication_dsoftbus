@@ -148,7 +148,7 @@ static void NotifyNCMLinkUp(const char *ifName, struct nlmsghdr *nlh, struct ifi
         LNN_LOGI(LNN_BUILDER, "net interface is not ncm0");
         return;
     }
-    if (ifinfo->ifi_falgs & IFF_LOWER_UP) {
+    if (ifinfo->ifi_flags & IFF_LOWER_UP) {
         LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_LINK_UP, ifName);
     }
 }

@@ -31,7 +31,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
-#include "usb_channel_config.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_capability.h"
 #include "anonymizer.h"
@@ -63,19 +62,19 @@ static SoftBusMutex g_ethCountLock;
 NetInterfaceStateMonitor::NetInterfaceStateMonitor()
 {}
 
-NetInterfaceStateMonitor::OnInterfaceAdded(const std::string &ifName)
+int32_t NetInterfaceStateMonitor::OnInterfaceAdded(const std::string &ifName)
 {
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_ADDED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
-NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
+int32_t NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
 {
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_REMOVED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
-NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
+int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
 {
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -121,8 +120,8 @@ NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string &ifName,
     return SOFTBUS_OK;
 }
 
-NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
-    const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override
+int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
+    const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
     char *anonyAddr = nullptr;
     Anonymize(addr.c_str(), &anonyAddr);
@@ -199,7 +198,7 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
 
 static void LnnRegisterNetManager(void *param)
 {
-    (void)para;
+    (void)param;
     static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback =
         new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
     if (g_netlinkCallback == nullptr) {
@@ -212,7 +211,7 @@ static void LnnRegisterNetManager(void *param)
         delete (g_netlinkCallback);
         return;
     }
-    int32t ret =
+    int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(g_netlinkCallback);
     if (ret != NETMANAGER_OK) {
         delete g_netlinkCallback;
