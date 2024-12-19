@@ -76,6 +76,7 @@ public:
     MOCK_METHOD1(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void(void *));
+    MOCK_METHOD2(LnnNotifyNetlinkStateChangeEvent, void(NetManagerIfnameState, const char *));
 };
 } // namespace OHOS
 #endif // NET_WORK_MOCK_H
