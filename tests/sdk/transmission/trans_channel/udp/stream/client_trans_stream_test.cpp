@@ -24,6 +24,8 @@
 #include "softbus_adapter_mem.h"
 #include "trans_server_proxy.h"
 
+#define TEST_CHANNELID 1025
+
 using namespace testing::ext;
 namespace OHOS {
 class ClientTransStreamTest : public testing::Test {
@@ -274,5 +276,20 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
     channelId = 1;
     ret = TransCloseStreamChannel(channelId);
     EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
+
+    ret = OnStreamUdpChannelOpened(TEST_CHANNELID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    channelId = -1;
+    ret = TransSendStream(channelId, nullptr, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelId = TEST_CHANNELID;
+    ret = TransSendStream(channelId, nullptr, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelId = TEST_CHANNELID;
+    ret = TransSetStreamMultiLayer(channelId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // OHOS
