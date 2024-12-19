@@ -45,6 +45,7 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitDriverMonitorImpl,
     LnnInitBootEventMonitorImpl,
     LnnInitNetManagerMonitorImpl,
+    LnnDeInitNetManagerMonitorImpl,
 };
 
 static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
