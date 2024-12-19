@@ -47,6 +47,7 @@
     (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= sizeof(struct nlmsghdr)) && \
         ((int32_t)((nlh)->nlmsg_len) <= (len)))
 
+#define NCM_LINK_NAME "ncm0"
 #define DEFAULT_NETLINK_RECVBUF (32 * 1024)
 
 static int32_t g_netlinkFd = -1;
@@ -96,6 +97,20 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
     }
 }
 
+static void NotifyNCMLinkIpUpdated(const char *ifName, struct nlmsghdr *nlh)
+{
+    if (ifName == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (strlen(ifName) < strlen(NCM_LINK_NAME) || strcmp(ifName, NCM_LINK_NAME) != 0 ||
+        nlh->nlmsg_type != RTM_NEWADDR) {
+        LNN_LOGI(LNN_BUILDER, "net interface is not ncm0 or type is not NEWADDR");
+        return;
+    }
+    LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IP_UPDATED, ifName);
+}
+
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
@@ -110,6 +125,7 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         LNN_LOGE(LNN_BUILDER, "invalid iface index");
         return;
     }
+    NotifyNCMLinkIpUpdated(ifName, nlh);
     if (LnnGetNetIfTypeByName(ifName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
@@ -119,6 +135,21 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         LNN_LOGI(LNN_BUILDER, "network addr changed, ifName=%{public}s, netifType=%{public}d, callCount=%{public}u",
             ifName, type, callCount++);
         LnnNotifyAddressChangedEvent(ifName);
+    }
+}
+
+static void NotifyNCMLinkUp(const char *ifName, struct nlmsghdr *nlh, struct ifinfomsg *ifinfo)
+{
+    if (ifName == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (strlen(ifName) < strlen(NCM_LINK_NAME) || strcmp(ifName, NCM_LINK_NAME) != 0) {
+        LNN_LOGI(LNN_BUILDER, "net interface is not ncm0");
+        return;
+    }
+    if (ifinfo->ifi_falgs & IFF_LOWER_UP) {
+        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_LINK_UP, ifName);
     }
 }
 
@@ -136,7 +167,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         LNN_LOGE(LNN_BUILDER, "netlink msg is invalid");
         return;
     }
-
+    NotifyNCMLinkUp((const char *)RTA_DATA(tb[IFLA_IFNAME]), nlh, ifinfo);
     if (LnnGetNetIfTypeByName((const char *)RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
         return;
     }

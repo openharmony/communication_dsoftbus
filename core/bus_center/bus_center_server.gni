@@ -270,3 +270,18 @@ if (!oobe_enhanced) {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 }
+
+usb_channel_dir = "dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/src"
+usb_channel_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                              [
+                                "$native_source_path",
+                                "$usb_channel_dir"
+                              ],
+                              "value")
+
+if (usb_channel_enhanced) {
+  import("../../dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/usb_channel.gni")
+  bus_center_server_inc += usb_channel_enhance_inc
+  bus_center_server_inc += usb_channel_enhance_src
+  bus_center_server_external_deps += usb_channel_enhance_external_deps
+}
