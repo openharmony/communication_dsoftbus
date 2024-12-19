@@ -585,20 +585,9 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, TransTdcSendAckTest001, TestSize.Level0)
 {
     int32_t seq = 1;
-    TcpDirectChannelInfo *channel = (TcpDirectChannelInfo*)SoftBusMalloc(sizeof(TcpDirectChannelInfo));
-    ASSERT_TRUE(channel != nullptr);
-    (void)memset_s(channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    channel->channelId = 1;
-    (void)memcpy_s(channel->detail.sessionKey, SESSIONKEY_LEN, g_sessionkey, strlen(g_sessionkey));
-    channel->detail.channelType = CHANNEL_TYPE_TCP_DIRECT;
-    channel->detail.fd = g_fd;
-    channel->detail.sequence = 1;
-    int32_t ret = TransTdcSendAck(nullptr, seq);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = TransTdcSendAck(channel, seq);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
-    SoftBusFree(channel);
+    int32_t channelId = -1;
+    int32_t ret = TransTdcSendAck(channelId, seq);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
 }
 
 /**
