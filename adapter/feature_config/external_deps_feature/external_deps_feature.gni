@@ -1,0 +1,208 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Softbus defines features that depend on external components.When adding an external component,
+# you need to add the feature definition of the external component.
+
+declare_args() {
+  dsoftbus_feature_deps_ability_base = true
+  dsoftbus_feature_deps_ability_runtime = true
+  dsoftbus_feature_deps_access_token = true
+  dsoftbus_feature_deps_bluetooth = true
+  dsoftbus_feature_deps_bounds_checking_function = true
+  dsoftbus_feature_deps_bundle_framework = true
+  dsoftbus_feature_deps_common_event_service = true
+  dsoftbus_feature_deps_cJSON = true
+  dsoftbus_feature_deps_data_share = true
+  dsoftbus_feature_deps_kv_store = true
+  dsoftbus_feature_deps_device_auth = true
+  dsoftbus_feature_deps_device_info_manager = true
+  dsoftbus_feature_deps_device_certificate_manager = true
+  dsoftbus_feature_deps_drivers_interface_wlan = true
+  dsoftbus_feature_deps_json = true
+  dsoftbus_feature_deps_hicollie = true
+  dsoftbus_feature_deps_hisysevent = true
+  dsoftbus_feature_deps_hitrace = true
+  dsoftbus_feature_deps_hilog = true
+  dsoftbus_feature_deps_huks = true
+  dsoftbus_feature_deps_i18n = true
+  dsoftbus_feature_deps_init = true
+  dsoftbus_feature_deps_ipc = true
+  dsoftbus_feature_deps_openssl = true
+  dsoftbus_feature_deps_os_account = true
+  dsoftbus_feature_deps_relational_store = true
+  dsoftbus_feature_deps_c_utils = true
+  dsoftbus_feature_deps_safwk = true
+  dsoftbus_feature_deps_samgr = true
+  dsoftbus_feature_deps_sqlite = true
+  dsoftbus_feature_deps_wifi = true
+  dsoftbus_feature_deps_wifi_enhance = true
+  dsoftbus_feature_deps_netmanager_base = true
+  dsoftbus_feature_deps_mbedtls = true
+  dsoftbus_feature_deps_libcoap = true
+  dsoftbus_feature_deps_zlib = true
+  dsoftbus_feature_deps_libnl = true
+  dsoftbus_feature_deps_power_manager = true
+  dsoftbus_feature_deps_ffrt = true
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.ability_ability_base)) {
+  dsoftbus_feature_deps_ability_base = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.ability_ability_runtime)) {
+  dsoftbus_feature_deps_ability_runtime = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.security_access_token)) {
+  dsoftbus_feature_deps_access_token = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_bluetooth)) {
+  dsoftbus_feature_deps_bluetooth = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_bounds_checking_function)) {
+  dsoftbus_feature_deps_bounds_checking_function = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.bundlemanager_bundle_framework)) {
+  dsoftbus_feature_deps_bundle_framework = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.notification_common_event_service)) {
+  dsoftbus_feature_deps_common_event_service = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_cJSON)) {
+  dsoftbus_feature_deps_cJSON = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.distributeddatamgr_data_share)) {
+  dsoftbus_feature_deps_data_share = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.distributeddatamgr_kv_store)) {
+  dsoftbus_feature_deps_kv_store = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.security_device_auth)) {
+  dsoftbus_feature_deps_device_auth = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.deviceprofile_device_info_manager)) {
+  dsoftbus_feature_deps_device_info_manager = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.security_device_certificate_manager)) {
+  dsoftbus_feature_deps_device_certificate_manager = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.hdf_drivers_interface_wlan)) {
+  dsoftbus_feature_deps_drivers_interface_wlan = false
+}
+if (defined(global_parts_info) && !defined(global_parts_info.thirdparty_json)) {
+  dsoftbus_feature_deps_json = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.hiviewdfx_hicollie)) {
+  dsoftbus_feature_deps_hicollie = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.hiviewdfx_hisysevent)) {
+  dsoftbus_feature_deps_hisysevent = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.hiviewdfx_hitrace)) {
+  dsoftbus_feature_deps_hitrace = false
+}
+if (defined(global_parts_info) && !defined(global_parts_info.hiviewdfx_hilog)) {
+  dsoftbus_feature_deps_hilog = false
+}
+if (defined(global_parts_info) && !defined(global_parts_info.security_huks)) {
+  dsoftbus_feature_deps_huks = false
+}
+if (defined(global_parts_info) && !defined(global_parts_info.global_i18n)) {
+  dsoftbus_feature_deps_i18n = false
+}
+if (defined(global_parts_info) && !defined(global_parts_info.startup_init)) {
+  dsoftbus_feature_deps_init = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_ipc)) {
+  dsoftbus_feature_deps_ipc = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_openssl)) {
+  dsoftbus_feature_deps_openssl = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.account_os_account)) {
+  dsoftbus_feature_deps_os_account = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.distributeddatamgr_relational_store)) {
+  dsoftbus_feature_deps_relational_store = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.commonlibrary_c_utils)) {
+  dsoftbus_feature_deps_c_utils = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.systemabilitymgr_safwk)) {
+  dsoftbus_feature_deps_safwk = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.systemabilitymgr_samgr)) {
+  dsoftbus_feature_deps_samgr = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_sqlite)) {
+  dsoftbus_feature_deps_sqlite = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_wifi)) {
+  dsoftbus_feature_deps_wifi = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_wifi_enhance)) {
+  dsoftbus_feature_deps_wifi_enhance = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_netmanager_base)) {
+  dsoftbus_feature_deps_netmanager_base = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_mbedtls)) {
+  dsoftbus_feature_deps_mbedtls = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_libcoap)) {
+  dsoftbus_feature_deps_libcoap = false
+}
+if (defined(global_parts_info) && !defined(global_parts_info.thirdparty_zlib)) {
+  dsoftbus_feature_deps_zlib = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.thirdparty_libnl)) {
+  dsoftbus_feature_deps_libnl = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.powermgr_power_manager)) {
+  dsoftbus_feature_deps_power_manager = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.resourceschedule_ffrt)) {
+  dsoftbus_feature_deps_ffrt = false
+}
