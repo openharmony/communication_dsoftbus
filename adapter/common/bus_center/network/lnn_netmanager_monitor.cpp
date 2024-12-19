@@ -55,7 +55,6 @@ public:
     int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
     int32_t OnInterfaceAddressUpdated(
         const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override;
-
 };
 
 static int32_t g_ethCount;
@@ -123,7 +122,7 @@ NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string &ifName,
 }
 
 NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
-        const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override
+    const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override
 {
     char *anonyAddr = nullptr;
     Anonymize(addr.c_str(), &anonyAddr);

@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
