@@ -352,11 +352,11 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         }
     }
 
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     if (!isUsing) {
         TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
         TransProxyCloseConnChannel(connId, false);
     }
-    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 }
 
 static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
