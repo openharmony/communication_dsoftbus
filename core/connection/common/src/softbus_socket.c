@@ -26,6 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_watch_event_interface.h"
 
 #define HML_IPV4_ADDR_PREFIX "172.30."
 
@@ -136,49 +137,6 @@ int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, 
     return socketInterface->OpenClientSocket(option, bindAddr, isNonBlock);
 }
 
-static int WaitEvent(int fd, short events, int timeout)
-{
-    if (fd < 0) {
-        CONN_LOGE(CONN_COMMON, "invalid params. fd=%{public}d", fd);
-        return -1;
-    }
-    SoftBusSockTimeOut tv = { 0 };
-    tv.sec = 0;
-    tv.usec = timeout;
-    int rc = 0;
-    switch (events) {
-        case SOFTBUS_SOCKET_OUT: {
-            SoftBusFdSet writeSet;
-            SoftBusSocketFdZero(&writeSet);
-            SoftBusSocketFdSet(fd, &writeSet);
-            rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
-            if (rc < 0) {
-                break;
-            }
-            if (!SoftBusSocketFdIsset(fd, &writeSet)) {
-                CONN_LOGE(CONN_COMMON, "Enter SoftBusSocketFdIsset.");
-                rc = 0;
-            }
-            break;
-        }
-        case SOFTBUS_SOCKET_IN: {
-            SoftBusFdSet readSet;
-            SoftBusSocketFdZero(&readSet);
-            SoftBusSocketFdSet(fd, &readSet);
-            rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
-            if (rc < 0) {
-                break;
-            }
-            if (!SoftBusSocketFdIsset(fd, &readSet)) {
-                rc = 0;
-            }
-            break;
-        }
-        default:
-            break;
-    }
-    return rc;
-}
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 {
     if (fd < 0) {

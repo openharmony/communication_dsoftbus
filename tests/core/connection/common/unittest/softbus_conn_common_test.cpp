@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <sys/epoll.h>
+
 #include <pthread.h>
 #include <securec.h>
 
@@ -26,7 +28,7 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
-#include "softbus_utils.h"
+#include "softbus_watch_event_interface.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -223,11 +225,63 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
 
 /*
 * @tc.name: testBaseListener009
+* @tc.desc: test add del trigger
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
+{
+    int32_t module;
+    int32_t triggerType;
+    int32_t port = 6666;
+    SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+ 
+    int32_t fdArray[1024] = {0};
+    for (int32_t index = 0; index < 1024; index++) {
+        fdArray[index] = epoll_create(0);
+    }
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
+        LocalListenerInfo info = {
+            .type = CONNECT_TCP,
+            .socketOption = {.addr = "127.0.0.1",
+                             .port = port,
+                             .moduleId = static_cast<ListenerModule>(module),
+                             .protocol = LNN_PROTOCOL_IP}
+        };
+        EXPECT_EQ(port, StartBaseListener(&info, listener));
+        for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
+            EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module),
+                fdArray[1023], static_cast<TriggerType>(triggerType)));
+            EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module),
+                fdArray[1023], static_cast<TriggerType>(triggerType)));
+            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+                fdArray[1023], static_cast<TriggerType>(triggerType)));
+            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+                fdArray[1023], static_cast<TriggerType>(triggerType)));
+        }
+        EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+        ++port;
+    }
+    
+    for (int32_t index = 0; index < 1024; index++) {
+        SoftBusSocketClose(fdArray[index]);
+    }
+    free(listener);
+};
+
+/*
+* @tc.name: testBaseListener010
 * @tc.desc: test GetSoftbusBaseListener and set
 * @tc.type: FUNC
 * @tc.require: I5HSOL
 */
-HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener010, TestSize.Level1)
 {
     int32_t i;
     int32_t port = 6666;
@@ -271,33 +325,8 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener016, TestSize.Level1)
 };
 
 /*
- * @tc.name: testBaseListener017
- * @tc.desc: Test StartBaseClient, BaseListener not set, start failed.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The StartBaseClient operates normally.
- */
-HWTEST_F(SoftbusConnCommonTest, testBaseListener017, TestSize.Level1)
-{
-    SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    int32_t i;
-    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
-        EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i), listener));
-    }
-    free(listener);
-};
-
-/*
  * @tc.name: testBaseListener021
  * @tc.desc: Test StartBaseListener invalid input param const char *ip.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The StartBaseListener operates normally.
  */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener021, TestSize.Level1)
 {
@@ -305,20 +334,27 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener021, TestSize.Level1)
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
-    LocalListenerInfo info = {
-        .type = CONNECT_TCP,
-        .socketOption = {.addr = "",
-                         .port = 666,
-                         .moduleId = PROXY,
-                         .protocol = LNN_PROTOCOL_IP}
-    };
+ 
     int32_t i;
+    int32_t port = 6666;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
-        info.socketOption.moduleId = static_cast<ListenerModule>(i);
+        LocalListenerInfo info = {
+            .type = CONNECT_TCP,
+            .socketOption = {
+                .addr = "::1%lo",
+                .port = port,
+                .moduleId = static_cast<ListenerModule>(i),
+                .protocol = LNN_PROTOCOL_IP
+            }
+        };
+        EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i), listener));
         EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, StartBaseListener(&info, listener));
+        ASSERT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
+        port++;
     }
     free(listener);
 };
+
 
 /*
  * @tc.name: testBaseListener022
@@ -727,5 +763,153 @@ HWTEST_F(SoftbusConnCommonTest, SoftbusListenerNodeOp001, TestSize.Level1)
     DeinitBaseListener();
     ret = IsListenerNodeExist(module);
     EXPECT_EQ(false, ret);
+};
+
+static int32_t OnGetAllFdEvent(ListNode *list)
+{
+    return SOFTBUS_OK;
+}
+
+/*
+* @tc.name: AddEvent001
+* @tc.desc: test AddEvent001 param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, AddEvent001, TestSize.Level1)
+{
+    int32_t fd = -1;
+    int32_t ret = AddEvent(NULL, fd, READ_TRIGGER);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+ 
+    EventWatcher watcher = {0};
+    watcher.watcherId = -1;
+ 
+    ret = AddEvent(&watcher, fd, READ_TRIGGER);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: AddEvent002
+* @tc.desc: test AddEvent002 param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, AddEvent002, TestSize.Level1)
+{
+    int32_t fd = 1;
+    EventWatcher *watcher = RegisterEventWatcher(OnGetAllFdEvent);
+ 
+    int32_t ret = AddEvent(watcher, fd, READ_TRIGGER);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+ 
+    ret = AddEvent(watcher, -1, READ_TRIGGER);
+    EXPECT_TRUE(ret < 0);
+
+    CloseEventWatcher(watcher);
+};
+ 
+/*
+* @tc.name: ModifyEvent001
+* @tc.desc: test ModifyEvent001  param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ModifyEvent001, TestSize.Level1)
+{
+    int32_t fd = -1;
+ 
+    int32_t ret = ModifyEvent(NULL, fd, READ_TRIGGER);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+ 
+    EventWatcher watcher = {0};
+    watcher.watcherId = -1;
+    ret = ModifyEvent(&watcher, fd, EXCEPT_TRIGGER);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: ModifyEvent002
+* @tc.desc: test ModifyEvent002 param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ModifyEvent002, TestSize.Level1)
+{
+    int32_t fd = 1;
+    EventWatcher *watcher = RegisterEventWatcher(OnGetAllFdEvent);
+ 
+    AddEvent(watcher, fd, READ_TRIGGER);
+    int32_t ret = ModifyEvent(watcher, fd, WRITE_TRIGGER);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+ 
+    ret = ModifyEvent(watcher, -1, READ_TRIGGER);
+    EXPECT_TRUE(ret < 0);
+
+    CloseEventWatcher(watcher);
+};
+ 
+/*
+* @tc.name: RemoveEvent001
+* @tc.desc: test RemoveEvent001  param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, RemoveEvent001, TestSize.Level1)
+{
+    int32_t fd = -1;
+ 
+    int32_t ret = RemoveEvent(NULL, fd);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+ 
+    EventWatcher watcher = {0};
+    watcher.watcherId = -1;
+    ret = RemoveEvent(&watcher, fd);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: RemoveEvent002
+* @tc.desc: test RemoveEvent002 param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, RemoveEvent002, TestSize.Level1)
+{
+    int32_t fd = 1;
+    EventWatcher *watcher = RegisterEventWatcher(OnGetAllFdEvent);
+ 
+    AddEvent(watcher, fd, READ_TRIGGER);
+    int32_t ret = RemoveEvent(watcher, fd);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+ 
+    ret = RemoveEvent(watcher, -1);
+    EXPECT_TRUE(ret < 0);
+
+    CloseEventWatcher(watcher);
+};
+ 
+/*
+* @tc.name: WatchEvent001
+* @tc.desc: test WatchEvent001 param is error
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, WatchEvent001, TestSize.Level1)
+{
+    ListNode fdEventNode;
+    ListInit(&fdEventNode);
+ 
+    int32_t ret = WatchEvent(NULL, -1, &fdEventNode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+ 
+    EventWatcher watcher = {0};
+    watcher.watcherId = -1;
+    ret = WatchEvent(&watcher, -1, &fdEventNode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    watcher.watcherId = 1;
+    ret = WatchEvent(&watcher, -1, &fdEventNode);
+    EXPECT_TRUE(ret < 0);
 };
 }
