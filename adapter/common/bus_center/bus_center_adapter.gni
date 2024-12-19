@@ -35,7 +35,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
-        "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
+        "$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp",
       ]
     }
   } else if (ohos_kernel_type == "linux") {
@@ -50,7 +50,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
-        "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
+        "$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp",
       ]
     }
   } else if (ohos_kernel_type == "liteos_a") {
@@ -71,7 +71,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
-        "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
+        "$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp",
       ]
       bus_center_adapter_inc += [
         "//drivers/hdf_core/framework/core/shared/include",
@@ -90,20 +90,19 @@ if (defined(ohos_lite)) {
     bus_center_adapter_src += [
       "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor.cpp",
       "$adapter_bus_center_path/common_event/lnn_common_event_monitor.cpp",
-      "$adapter_bus_center_path/network/lnn_netmanager_listener.cpp",
+      "$adapter_bus_center_path/network/lnn_netmanager_monitor.cpp",
     ]
     bus_center_adapter_external_deps += [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
       "init:libbeget_proxy",
-      "netmanager_base:net_conn_manager_if",
       "power_manager:powermgr_client",
     ]
   } else {
     bus_center_adapter_src += [
       "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
       "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
-      "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
+      "$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp",
     ]
   }
   if (dsoftbus_feature_lnn_net) {
@@ -127,6 +126,15 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
     }
+  }
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.communication_netmanager_base)) {
+    bus_center_adapter_external_deps += [
+      "netmanager_base::net_conn_manager_if",
+    ]
+    bus_center_adapter_src += ["$adapter_bus_center_path/network/lnn_netmanager_monitor.cpp"]
+  } else {
+    bus_center_adapter_src += ["$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp"]
   }
 }
 
