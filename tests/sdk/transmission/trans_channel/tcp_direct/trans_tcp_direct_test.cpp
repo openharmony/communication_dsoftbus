@@ -998,6 +998,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcCloseFdTest001, TestSize.Level0)
     TransTdcCloseFd(fd);
     fd = g_fd;
     TransTdcCloseFd(fd);
+    EXPECT_TRUE(fd);
 }
 
 /**
@@ -1011,6 +1012,7 @@ HWTEST_F(TransTcpDirectTest, UnpackTcpDataPacketHeadTest001, TestSize.Level0)
     TcpDataPacketHead data;
     data.seq = 1;
     UnpackTcpDataPacketHead(&data);
+    EXPECT_TRUE(data.seq);
 }
 
 /**
