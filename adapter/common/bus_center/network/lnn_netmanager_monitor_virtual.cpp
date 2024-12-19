@@ -43,3 +43,8 @@ int32_t LnnInitNetManagerMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t LnnDeInitNetManagerMonitorImpl(void)
+{
+    return SOFTBUS_OK;
+}

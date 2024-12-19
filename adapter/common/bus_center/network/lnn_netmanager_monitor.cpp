@@ -14,28 +14,28 @@
  */
 
 #include "lnn_netmanager_monitor.h"
+#include "net_conn_client.h"
+#include "net_interface_callback_stub.h"
 
 #include <cstring>
 #include <ctime>
 #include <regex>
 #include <securec.h>
 
-#include "bus_center_manager.h"
+#include "anonymizer.h"
 #include "bus_center_event.h"
+#include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_event_monitor_impl.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "net_interface_callback_stub.h"
-#include "net_conn_client.h"
+#include "lnn_net_capability.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_error_code.h"
-#include "lnn_local_net_ledger.h"
-#include "lnn_net_capability.h"
-#include "anonymizer.h"
 #include "softbus_bus_center.h"
 #include "softbus_config_type.h"
+#include "softbus_error_code.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t NETMANAGER_OK = 0;
@@ -51,13 +51,18 @@ public:
 public:
     int32_t OnInterfaceAdded(const std::string &ifName) override;
     int32_t OnInterfaceRemoved(const std::string &ifName) override;
+    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
     int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
     int32_t OnInterfaceAddressUpdated(
+        const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override;
+    int32_t OnInterfaceAddressRemoved(
         const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override;
 };
 
 static int32_t g_ethCount;
 static SoftBusMutex g_ethCountLock;
+static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback =
+    new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
 
 NetInterfaceStateMonitor::NetInterfaceStateMonitor()
 {}
@@ -71,6 +76,11 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAdded(const std::string &ifName)
 int32_t NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
 {
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_REMOVED, ifName.c_str());
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetManagerListener::OnInterfaceChanged(const std::string &ifName, bool isUp)
+{
     return SOFTBUS_OK;
 }
 
@@ -160,11 +170,20 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     return SOFTBUS_OK;
 }
 
+int32_t NetInterfaceStateMonitor::OnInterfaceAddressRemoved(
+    const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
+{
+    return SOFTBUS_OK;
+}
 } // namespace BusCenter
 } // namespace OHOS
 
 int32_t ConfigNetLinkUp(const char *ifName)
 {
+    if (ifName == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
     int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInterfaceUp(ifName);
     if (ret != NETMANAGER_OK) {
@@ -176,6 +195,10 @@ int32_t ConfigNetLinkUp(const char *ifName)
 
 int32_t ConfigLocalIp(const char *ifName, const char *localIp)
 {
+    if (ifName == nullptr || localIp == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
     int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().SetNetInterfaceIpAddress(ifName, localIp);
     if (ret != NETMANAGER_OK) {
@@ -187,6 +210,10 @@ int32_t ConfigLocalIp(const char *ifName, const char *localIp)
 
 int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destination, const char *gateway)
 {
+    if (ifName == nullptr || destination == nullptr || gateway == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
     int32_t ret =
         OHOS::NetManagerStandard::NetConnClient::GetInstance().AddNetworkRoute(id, ifName, destination, gateway);
     if (ret != NETMANAGER_OK && ret != DUPLICATE_ROUTE) {
@@ -199,22 +226,21 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
 static void LnnRegisterNetManager(void *param)
 {
     (void)param;
-    static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback =
-        new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
-    if (g_netlinkCallback == nullptr) {
+    OHOS::BusCenter::g_netlinkCallback = new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+    if (OHOS::BusCenter::g_netlinkCallback == nullptr) {
         LNN_LOGE(LNN_INIT, "new NetInterfaceStateMonitor failed");
         return;
     }
     OHOS::BusCenter::g_ethCount = 0;
     if (SoftBusMutexInit(&OHOS::BusCenter::g_ethCountLock, nullptr) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init g_ethCountLock fail");
-        delete (g_netlinkCallback);
+        delete (OHOS::BusCenter::g_netlinkCallback);
         return;
     }
-    int32_t ret =
-        OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(g_netlinkCallback);
+    int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(
+        OHOS::BusCenter::g_netlinkCallback);
     if (ret != NETMANAGER_OK) {
-        delete g_netlinkCallback;
+        delete (OHOS::BusCenter::g_netlinkCallback);
         SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
         LNN_LOGE(LNN_INIT, "register netmanager callback failed with ret=%{public}d", ret);
     }
@@ -230,4 +256,13 @@ int32_t LnnInitNetManagerMonitorImpl(void)
         return SOFTBUS_NETWORK_MONITOR_INIT_FAIL;
     }
     return SOFTBUS_OK;
+}
+
+int32_t LnnDeInitNetManagerMonitorImpl(void)
+{
+    if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
+        delete (OHOS::BusCenter::g_netlinkCallback);
+        OHOS::BusCenter::g_netlinkCallback = nullptr;
+    }
+    (void)SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
 }
