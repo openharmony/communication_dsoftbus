@@ -645,7 +645,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestOutSessionNameTest00
 {
     char *mySessionName = nullptr;
     char *peerSessionName = nullptr;
-    EXPECT_NO_THROW(OpenDataBusRequestOutSessionName(mySessionName, peerSessionName));
+    EXPECT_NO_FATAL_FAILURE(OpenDataBusRequestOutSessionName(mySessionName, peerSessionName));
 }
 
 /**
