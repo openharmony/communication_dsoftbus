@@ -960,7 +960,7 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level0)
     events = SOFTBUS_SOCKET_IN;
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-
+    // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
 }
@@ -1194,7 +1194,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level0)
 
     ret = TransTdcProcessData(channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
-
+    // pktHead is deleted in the abnormal branch
     SoftBusFree(info);
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
@@ -1290,7 +1290,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
     pktHead->dataLen = 0;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
-
+    // pktHead is deleted in the abnormal branch
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDataList);
     g_tcpDataList = NULL;
