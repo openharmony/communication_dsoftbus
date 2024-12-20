@@ -79,6 +79,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
 int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult);
 void TransAsyncProxyChannelTask(int32_t channelId);
 
+int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
 #ifdef __cplusplus
 }
 #endif

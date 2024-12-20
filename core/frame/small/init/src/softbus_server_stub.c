@@ -206,6 +206,7 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_UNREG_DATA_LEVEL_CHANGE_CB, ServerUnregDataLevelChangeCb },
     { SERVER_SET_DATA_LEVEL, ServerSetDataLevel },
     { SERVER_RELEASE_RESOURCES, ServerReleaseResources },
+    { SERVER_PRIVILEGE_CLOSE_CHANNEL, ServerPrivilegeCloseChannel },
 };
 
 static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)

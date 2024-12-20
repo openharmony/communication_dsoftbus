@@ -166,14 +166,22 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t
 
 int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 {
+#define USER_SWITCH_OFFSET 10
+#define PRIVILEGE_CLOSE_OFFSET 11
     if (networkId == NULL) {
-        TRANS_LOGE(TRANS_SDK, "[client] network id is null.");
+        TRANS_LOGE(TRANS_SDK, "network id is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-    bool isUserSwitchEvent = (bool)((routeType >> 10) & 0xff);
+    bool isUserSwitchEvent = (bool)((routeType >> USER_SWITCH_OFFSET) & 0x1);
     if (isUserSwitchEvent) {
-        TRANS_LOGI(TRANS_SDK, "[client] user switch event.");
+        TRANS_LOGI(TRANS_SDK, "user switch event.");
         ClientTransOnUserSwitch();
+        return SOFTBUS_OK;
+    }
+    bool isPrivilegeClose = (bool)((routeType >> PRIVILEGE_CLOSE_OFFSET) & 0x1);
+    if (isPrivilegeClose) {
+        TRANS_LOGI(TRANS_SDK, "privilege close event.");
+        ClientTransOnPrivilegeClose(networkId);
         return SOFTBUS_OK;
     }
     ClientTransOnLinkDown(networkId, routeType);

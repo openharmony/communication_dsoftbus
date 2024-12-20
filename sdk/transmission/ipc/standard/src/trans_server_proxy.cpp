@@ -319,3 +319,15 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
 
     return proxy->ProcessInnerEvent(eventType, buf, len);
 }
+
+int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    if (peerNetworkId == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<TransServerProxy> proxy = GetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+    return proxy->PrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+}

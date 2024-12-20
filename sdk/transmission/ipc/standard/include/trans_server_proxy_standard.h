@@ -62,6 +62,7 @@ public:
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) override;
     int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) override;
+    int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };

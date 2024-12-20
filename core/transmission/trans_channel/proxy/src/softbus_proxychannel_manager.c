@@ -2243,3 +2243,23 @@ int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle
     TRANS_LOGE(TRANS_CTRL, "proxy channel not found by chanId, chanId=%{public}d", channelId);
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }
+
+int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid)
+{
+    if (privilegeCloseList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "privilegeCloseList is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    ProxyChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->appInfo.callingTokenId == tokenId && item->appInfo.myData.pid == pid) {
+            (void)PrivilegeCloseListAddItem(privilegeCloseList, item->appInfo.myData.pid, item->appInfo.myData.pkgName);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    return SOFTBUS_OK;
+}

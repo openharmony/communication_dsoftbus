@@ -900,3 +900,32 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
     }
     return SOFTBUS_OK;
 }
+
+void PrivilegeDestroyAllClientSession(
+    const ClientSessionServer *server, ListNode *destroyList, const char *peerNetworkId)
+{
+    if (server == NULL || destroyList == NULL || peerNetworkId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        if (strlen(peerNetworkId) != 0 && strcmp(sessionNode->info.peerDeviceId, peerNetworkId) != 0) {
+            continue;
+        }
+        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        if (destroyNode == NULL) {
+            continue;
+        }
+        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            ClientEmitFileEvent(sessionNode->channelId);
+        }
+        DestroySessionId();
+        ListDelete(&sessionNode->node);
+        ListAdd(destroyList, &(destroyNode->node));
+        SoftBusFree(sessionNode);
+    }
+}

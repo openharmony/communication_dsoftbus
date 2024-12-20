@@ -304,6 +304,8 @@ int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
 int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count);
 
 int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent);
+
+void ClientTransOnPrivilegeClose(const char *peerNetworkId);
 #ifdef __cplusplus
 }
 #endif
