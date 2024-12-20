@@ -18,7 +18,6 @@
 
 #include "broadcast_dfx_event.h"
 #include "disc_log.h"
-#include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
