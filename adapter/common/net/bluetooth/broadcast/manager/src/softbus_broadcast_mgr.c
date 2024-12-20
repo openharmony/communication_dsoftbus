@@ -213,7 +213,7 @@ static void DelayReportBroadcast(void *para)
     g_bcMaxNum = 0;
     g_bcOverMaxNum = 0;
     memset_s(g_bcManagerExtra, sizeof(g_bcManagerExtra), 0, sizeof(g_bcManagerExtra));
-    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
+    if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
         DELAY_TIME_DEFAULT) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BROADCAST, "DelayReportBroadcast failed, due to async callback fail");
     }
@@ -244,7 +244,7 @@ int32_t InitBroadcastMgr(void)
     g_btStateListenerId = ret;
     g_mgrInit = true;
 
-    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
+    if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
         DELAY_TIME_DEFAULT) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BROADCAST, "DelayReportBroadcast failed, due to async callback fail");
     }
