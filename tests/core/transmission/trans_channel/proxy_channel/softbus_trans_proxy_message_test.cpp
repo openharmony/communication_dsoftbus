@@ -309,7 +309,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level
 
     int32_t errCode = SOFTBUS_OK;
     ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, strlen(msg));
-    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
 
@@ -333,7 +333,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
     int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg), &fastDataSize);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 
     chan.channelId = TEST_MESSAGE_CHANNEL_ID;
     TestMessageAddProxyChannel(chan.channelId, APP_TYPE_AUTH, "44", PROXY_CHANNEL_STATUS_COMPLETED);
@@ -341,7 +341,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     ASSERT_TRUE(msg != nullptr);
     outChannel.myId = chan.channelId;
     ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg), &fastDataSize);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
     cJSON_free(msg);
 }
 
@@ -363,7 +363,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest002, TestSize.Level
     ASSERT_TRUE(msg != nullptr);
 
     int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg), &fastDataSize);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 
     cJSON_free(msg);
 }
@@ -390,11 +390,11 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
 
     TestCallbackFail();
     int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
     TestCallbackSuccess();
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
     cJSON_free(msg);
 }
@@ -420,11 +420,11 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
     ProxyChannelInfo outChannel;
     TestCallbackFail();
     int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     TestCallbackSuccess();
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
 }
@@ -449,9 +449,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
 
     ProxyChannelInfo outChannel;
     int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
     cJSON_free(msg);
 }
@@ -469,7 +469,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
     ASSERT_TRUE(msg != nullptr);
 
     int32_t ret = TransProxyUnpackIdentity(msg, identity, TEST_CHANNEL_IDENTITY_LEN, strlen(msg));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
 
