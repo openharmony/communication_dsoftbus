@@ -183,8 +183,8 @@ HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level0
  */
 HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
 {
-    g_channelStatisticsList = CreateSoftBusList();
-    ASSERT_NE(g_channelStatisticsList, nullptr);
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
     ASSERT_NE(newItem, nullptr);
     newItem->socketId = 1;
@@ -200,9 +200,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
     AddSocketResource(g_sessionName, rightChannel);
     EXPECT_NE(g_channelStatisticsList, nullptr);
     SoftBusFree(rightChannel);
-    SoftBusFree(newItem);
-    DestroySoftBusList(g_channelStatisticsList);
-    g_channelStatisticsList = NULL;
+    ClientTransStatisticsDeinit();
 }
 
 /**
@@ -218,8 +216,8 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Lev
     UpdateChannelStatistics(socketId, len);
     EXPECT_EQ(g_channelStatisticsList, nullptr);
 
-    g_channelStatisticsList = CreateSoftBusList();
-    ASSERT_NE(g_channelStatisticsList, nullptr);
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
     ASSERT_NE(newItem, nullptr);
     newItem->socketId = socketId;
@@ -230,9 +228,7 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Lev
     UpdateChannelStatistics(socketId, len);
     EXPECT_EQ(newItem->traffic, len);
 
-    SoftBusFree(newItem);
-    DestroySoftBusList(g_channelStatisticsList);
-    g_channelStatisticsList = NULL;
+    ClientTransStatisticsDeinit();
 }
 
 /**
@@ -285,8 +281,8 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
     DeleteSocketResourceByChannelId(channelId, channelType);
     EXPECT_EQ(g_channelStatisticsList, nullptr);
 
-    g_channelStatisticsList = CreateSoftBusList();
-    ASSERT_NE(g_channelStatisticsList, nullptr);
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
     ASSERT_NE(newItem, nullptr);
     newItem->channelId = channelId;
@@ -300,9 +296,7 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
     DeleteSocketResourceByChannelId(channelId, channelType);
     EXPECT_EQ(g_channelStatisticsList->cnt, 1);
 
-    SoftBusFree(newItem);
-    DestroySoftBusList(g_channelStatisticsList);
-    g_channelStatisticsList = NULL;
+    ClientTransStatisticsDeinit();
 }
 
 /**
@@ -316,8 +310,8 @@ HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize
     g_channelStatisticsList = NULL;
     ClientTransStatisticsDeinit();
 
-    g_channelStatisticsList = CreateSoftBusList();
-    ASSERT_NE(g_channelStatisticsList, nullptr);
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
     ASSERT_NE(newItem, nullptr);
     newItem->channelId = 1;
@@ -326,6 +320,5 @@ HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize
 
     ClientTransStatisticsDeinit();
     EXPECT_EQ(g_channelStatisticsList, NULL);
-    // newItem is deleted in the abnormal branch
 }
 } // namespace OHOS
