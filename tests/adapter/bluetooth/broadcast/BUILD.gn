@@ -43,11 +43,11 @@ ohos_unittest("SoftbusBroadcastMgrTest") {
   ]
 
   external_deps = [
+    "bluetooth:btframework",
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "bluetooth:btframework",
   ]
 }
 
