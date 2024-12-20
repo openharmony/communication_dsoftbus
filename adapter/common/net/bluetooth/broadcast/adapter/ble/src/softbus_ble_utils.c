@@ -27,6 +27,7 @@
 #define ID_LEN 2
 #define MANUFACTURE_DATA_LEN 1
 #define MANUFACTURE_DATA_ID 0x027D
+#define
 
 int32_t BtStatusToSoftBus(BtStatus btStatus)
 {
