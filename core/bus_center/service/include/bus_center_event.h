@@ -183,7 +183,7 @@ typedef enum {
     SOFTBUS_NETMANAGER_IFNAME_LINK_UP,
     SOFTBUS_NETMANAGER_IFNAME_IP_UPDATED,
     SOFTBUS_NETMANAGER_IFNAME_UNKNOWN,
-} NetManagerIfnameState;
+} NetManagerIfNameState;
 
 typedef struct {
     LnnEventBasicInfo basic;
@@ -339,7 +339,7 @@ void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType);
 
 void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state);
 
-void LnnNotifyNetlinkStateChangeEvent(NetManagerIfnameState state, const char *ifName);
+void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName);
 
 #ifdef __cplusplus
 }
