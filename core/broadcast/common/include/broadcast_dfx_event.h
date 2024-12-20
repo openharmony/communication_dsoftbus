@@ -22,7 +22,7 @@
 extern "C" {
 #endif
  
-#define DELAY_TIME_DEFAULT 30000
+#define DELAY_TIME_DEFAULT (60 * 60 * 1000)
 void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *extra, int32_t size);
 void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *extra, int32_t size);
  
