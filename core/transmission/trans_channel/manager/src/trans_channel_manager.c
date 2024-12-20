@@ -76,6 +76,12 @@ typedef enum {
     LOOP_LIMIT_CHANGE_MSG,
 } ChannelResultLoopMsg;
 
+typedef struct {
+    ListNode node;
+    int32_t pid;
+    char pkgName[PKG_NAME_SIZE_MAX];
+} PrivilegeCloseChannelInfo;
+
 static int32_t GenerateTdcChannelId()
 {
     int32_t channelId;
@@ -1045,4 +1051,58 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
         TRANS_LOGE(TRANS_CTRL, "report event failed, eventType=%{public}d", eventType);
     }
     return ret;
+}
+
+int32_t TransPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+#define PRIVILEGE_CLOSE_OFFSET 11
+    if (peerNetworkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    (void)TransTcpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    (void)TransProxyGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    (void)TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    LinkDownInfo info = {
+        .uuid = "",
+        .udid = "",
+        .peerIp = "",
+        .networkId = peerNetworkId,
+        .routeType = ROUTE_TYPE_ALL | 1 << PRIVILEGE_CLOSE_OFFSET,
+    };
+    PrivilegeCloseChannelInfo *pos = NULL;
+    PrivilegeCloseChannelInfo *tmp = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &privilegeCloseList, PrivilegeCloseChannelInfo, node) {
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
+        ListDelete(&(pos->node));
+        SoftBusFree(pos);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t PrivilegeCloseListAddItem(ListNode *privilegeCloseList, int32_t pid, const char *pkgName)
+{
+    if (privilegeCloseList == NULL || pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    PrivilegeCloseChannelInfo *exitItem = NULL;
+    LIST_FOR_EACH_ENTRY(exitItem, privilegeCloseList, PrivilegeCloseChannelInfo, node) {
+        if (strcmp(exitItem->pkgName, pkgName) == 0 && exitItem->pid == pid) {
+            return SOFTBUS_OK;
+        }
+    }
+    PrivilegeCloseChannelInfo *item = (PrivilegeCloseChannelInfo *)SoftBusCalloc(sizeof(PrivilegeCloseChannelInfo));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
+    if (strcpy_s(item->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        SoftBusFree(item);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    item->pid = pid;
+    ListInit(&(item->node));
+    ListAdd(privilegeCloseList, &(item->node));
+    TRANS_LOGI(TRANS_CTRL, "add success, pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+    return SOFTBUS_OK;
 }

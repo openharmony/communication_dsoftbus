@@ -52,6 +52,7 @@
 namespace OHOS {
     namespace {
         constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
+        constexpr int32_t DMS_CALLING_UID = 5522;
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
     }
@@ -161,6 +162,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
     memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
+    memberFuncMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = &SoftBusServerStub::PrivilegeCloseChannelInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -206,6 +208,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -1635,6 +1638,47 @@ int32_t SoftBusServerStub::ProcessInnerEventInner(MessageParcel &data, MessagePa
     int32_t ret = ProcessInnerEvent(eventType, buf, len);
     COMM_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, COMM_SVC, "process inner event failed! eventType=%{public}d", eventType);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::PrivilegeCloseChannelInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    int32_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    if (callingUid != DMS_CALLING_UID) {
+        COMM_LOGE(COMM_PERM, "uid check failed");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    uint64_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = SoftBusCheckDmsServerPermission(callingTokenId);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "check permission failed. ret=%{public}d", ret);
+        if (!reply.WriteInt32(ret)) {
+            COMM_LOGE(COMM_SVC, "write reply failed!");
+            return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+        }
+        return ret;
+    }
+    uint64_t tokenId;
+    if (!data.ReadUint64(tokenId)) {
+        COMM_LOGE(COMM_SVC, "read tokenId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t pid;
+    if (!data.ReadInt32(pid)) {
+        COMM_LOGE(COMM_SVC, "read pid failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    const char *peerNetworkId = data.ReadCString();
+    if (peerNetworkId == nullptr) {
+        COMM_LOGE(COMM_SVC, "network id is null!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    ret = PrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "write reply failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
     return SOFTBUS_OK;
 }
 } // namespace OHOS

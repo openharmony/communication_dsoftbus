@@ -79,3 +79,9 @@ void SoftBusGetTokenNameByTokenType(
     (void)tokenId;
     (void)tokenType;
 }
+
+int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
+{
+    (void)tokenId;
+    return SOFTBUS_PERMISSION_DENIED;
+}

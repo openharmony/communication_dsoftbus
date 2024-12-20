@@ -91,6 +91,8 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList);
 void FillDfsSocketParam(
     SessionParam *param, SessionAttribute *tmpAttr, ClientSessionServer *serverNode, SessionInfo *sessionNode);
 
+void PrivilegeDestroyAllClientSession(
+    const ClientSessionServer *server, ListNode *destroyList, const char *peerNetworkId);
 #ifdef __cplusplus
 }
 #endif
