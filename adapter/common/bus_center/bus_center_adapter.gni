@@ -130,8 +130,9 @@ if (defined(ohos_lite)) {
     bus_center_adapter_src +=
         [ "$adapter_bus_center_path/network/lnn_netmanager_monitor.cpp" ]
   } else {
-    bus_center_adapter_src +=
-      [ "$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp" ]
+    bus_center_adapter_src += [
+      "$adapter_bus_center_path/network/lnn_netmanager_monitor_virtual.cpp",
+    ]
   }
 }
 
