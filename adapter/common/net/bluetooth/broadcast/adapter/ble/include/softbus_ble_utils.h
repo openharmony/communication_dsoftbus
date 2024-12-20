@@ -24,6 +24,7 @@
 #ifndef SOFTBUS_BLE_UTILS_H
 #define SOFTBUS_BLE_UTILS_H
 
+#include ""
 #include "softbus_broadcast_adapter_interface.h"
 #include "c_header/ohos_bt_gatt.h"
 #include "c_header/ohos_bt_def.h"
