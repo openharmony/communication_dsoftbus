@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "bus_center_event.h"
 #include "lnn_bt_monitor.c"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_netlink_monitor.c"

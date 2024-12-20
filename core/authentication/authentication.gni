@@ -74,6 +74,7 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/adapter/common/include/",
       "$dsoftbus_root_path/core/adapter/huks/include/",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/include/",
     ]
   } else {
     auth_server_src += [

@@ -49,13 +49,13 @@ void LnnDeinitBtStateMonitorImpl(void);
 
 int32_t LnnInitNetManagerMonitorImpl(void);
 
-void LnnDeinitNetManagerMonitorImpl(void);
-
 void LnnDeinitProductMonitorImpl(void);
 
 void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
+
+void LnnDeinitNetManagerMonitorImpl(void);
 
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle);
 
