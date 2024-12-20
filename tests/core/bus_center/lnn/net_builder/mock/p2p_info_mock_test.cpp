@@ -67,19 +67,19 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
     int32_t ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetP2pRole(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetP2pRole(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetP2pMac(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetP2pMac(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetP2pGoMac(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetP2pGoMac(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetWifiDirectAddr(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetWifiDirectAddr(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
