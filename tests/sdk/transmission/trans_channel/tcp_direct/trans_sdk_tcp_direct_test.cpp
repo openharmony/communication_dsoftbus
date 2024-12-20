@@ -723,7 +723,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level0)
 
     TransTdcDelChannelInfo(channelId2, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
     TransTdcDelChannelInfo(channelId1, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
-
+    // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
 }
@@ -749,7 +749,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level0)
     ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
     TransTdcDelChannelInfo(channelId, errCode);
-
+    // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
 }
@@ -822,7 +822,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
     TransTdcCloseChannel(channelId);
-
+    // info is deleted in the abnormal branch
     SoftBusFree(channel);
     if (g_tcpDirectChannelInfoList != NULL) {
         DestroySoftBusList(g_tcpDirectChannelInfoList);
