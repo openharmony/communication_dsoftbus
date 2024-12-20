@@ -24,7 +24,7 @@
 #ifndef SOFTBUS_BLE_UTILS_H
 #define SOFTBUS_BLE_UTILS_H
 
-#include ""
+#include "message_handler.h"
 #include "softbus_broadcast_adapter_interface.h"
 #include "c_header/ohos_bt_gatt.h"
 #include "c_header/ohos_bt_def.h"
@@ -32,6 +32,8 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+typedef void (*BleAsyncCallbackFunc)(void *para);
 
 int32_t BtStatusToSoftBus(BtStatus btStatus);
 void SoftbusAdvParamToBt(const SoftbusBroadcastParam *src, BleAdvParams *dst);
@@ -44,6 +46,9 @@ int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow);
 uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen);
 uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen);
 int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst);
+int32_t BleAsyncCallbackHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback, void *para);
+int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis);
 
 void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len);
 
