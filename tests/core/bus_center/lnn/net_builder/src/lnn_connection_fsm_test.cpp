@@ -157,7 +157,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
     EXPECT_CALL(lnnConnMock, LnnPrintConnectionAddr).WillRepeatedly(Return(ip));
     ON_CALL(serviceMock, AuthGenRequestId).WillByDefault(Return(1));
-    EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
     ret = LnnSendJoinRequestToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -309,8 +309,10 @@ HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Le
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
-    EXPECT_CALL(lnnConnMock, LnnGenerateBtMacHash).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(lnnConnMock, LnnGenerateBtMacHash)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     PostPcOnlineUniquely(nullptr);
     NodeInfo *info = nullptr;
     info = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
@@ -510,8 +512,7 @@ HWTEST_F(LNNConnectionFsmTest, DFX_RECORD_LNN_ONLINE_TYPE_TEST_001, TestSize.Lev
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     ret = DfxRecordLnnOnlineType(&info);
     EXPECT_EQ(ret, ONLINE_TYPE_INVALID);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)
@@ -540,11 +541,15 @@ HWTEST_F(LNNConnectionFsmTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1
 {
     const char *udid = "testuuid";
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ReportResult(udid, REPORT_CHANGE);
     ReportResult(udid, REPORT_OFFLINE);
     ReportResult(udid, REPORT_NONE);
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     OnlineTrustGroupProc(udid);
     const char *udidHash = "testuuid";
     bool ret = IsEmptyShortHashStr(const_cast<char *>(udidHash));
@@ -634,7 +639,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_DEV_TYPE_FOR_DFX_TEST_001, TestSize.Level1)
     localInfo.deviceInfo.deviceTypeId = 1;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(localInfo), Return(SOFTBUS_OK)));
     LnnConntionInfo connInfo = {
         .nodeInfo = nullptr,
@@ -663,7 +668,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_INFO_TEST_001, TestSize.Level1)
     EXPECT_EQ(EOK, strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     LnnEventExtra extra;
     SetOnlineType(SOFTBUS_OK, &nodeInfo, extra);
-    SetOnlineType(SOFTBUS_ERR, &nodeInfo, extra);
+    SetOnlineType(SOFTBUS_INVALID_PARAM, &nodeInfo, extra);
     char udidData[UDID_BUF_LEN] = { 0 };
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     int32_t ret = GetPeerUdidInfo(&nodeInfo, udidData, peerUdidHash);
@@ -725,7 +730,7 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     ON_CALL(serviceMock, LnnNotifyLnnRelationChanged).WillByDefault(Return());
-    EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     LnnConntionInfo connInfo = {
         .infoReport.bleConnectReason = FIND_REMOTE_CIPHERKEY_FAILED,
         .nodeInfo = nullptr,
@@ -734,14 +739,18 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
     GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_OK);
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_OK));
     GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_OK);
-    GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_ERR);
+    GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_INVALID_PARAM);
     NodeInfo nodeInfo;
     connInfo.nodeInfo = &nodeInfo;
     EXPECT_CALL(lnnConnMock, LnnGetLocalNodeInfoSafe).WillRepeatedly(Return(SOFTBUS_OK));
     GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_OK);
-    GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_ERR);
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    GetConnectOnlineReason(&connInfo, &connOnlineReason, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetDeviceUdid).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(ledgerMock, LnnSetNodeOffline).WillRepeatedly(Return(REPORT_OFFLINE));
     EXPECT_CALL(lnnConnMock, DeleteFromProfile).WillRepeatedly(Return());
@@ -769,15 +778,15 @@ HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Lev
 {
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
     EXPECT_CALL(lnnConnMock, LnnLoadLocalBroadcastCipherKey)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnConnMock, LnnGetLocalBroadcastCipherKey)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnRecoveryBroadcastKey();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnRecoveryBroadcastKey();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnRecoveryBroadcastKey();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnRecoveryBroadcastKey();
@@ -842,7 +851,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001, TestSi
     EXPECT_EQ(EOK, memcpy_s(nodeInfo.softBusVersion, VERSION_MAX_LEN, SOFTBUSVERSION, strlen(SOFTBUSVERSION)));
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<2>(node), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnIsNodeOnline).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));

@@ -97,20 +97,22 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
     unsigned char *isSupportTopo = reinterpret_cast<unsigned char *>(const_cast<char *>("1"));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, SoftbusGetConfig)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<1>(*isNoSupportTopo), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<1>(*isSupportTopo), Return(SOFTBUS_OK)));
-    EXPECT_CALL(serviceMock, LnnRegisterEventHandler).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, LnnRegisterEventHandler)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, LnnUnregisterEventHandler).WillRepeatedly(Return());
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMock, LnnUnregSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitTopoManager();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnInitTopoManager();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     LnnDeinitTopoManager();
     ret = LnnInitTopoManager();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -282,7 +284,7 @@ HWTEST_F(LNNTopoManagerTest, PACK_ONE_LNN_RELATION_TEST_001, TestSize.Level1)
     unsigned char *randStr1 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR1));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(*randStr1), Return(SOFTBUS_OK)));
     const char *msg = PackOneLnnRelation(UDID, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
     EXPECT_EQ(msg, nullptr);
@@ -322,11 +324,13 @@ HWTEST_F(LNNTopoManagerTest, FORWARD_TOPO_MSG_TO_ALL_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     EXPECT_CALL(ledgerMock, LnnIsLSANode).WillOnce(Return(true)).WillRepeatedly(Return(false));
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ForwardTopoMsgToAll(NETWORK_ID, MSG, MSG_LEN);
     ForwardTopoMsgToAll(NETWORK_ID, MSG, MSG_LEN);
     ForwardTopoMsgToAll(NETWORK_ID, MSG, MSG_LEN);
@@ -347,7 +351,7 @@ HWTEST_F(LNNTopoManagerTest, TRY_CORRECT_RELATION_TEST_001, TestSize.Level1)
     uint8_t *relation = const_cast<uint8_t *>(NEW_RELATION_2);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<1>(*localUdid1), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<1>(*localUdid2), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(DoAll(SetArgPointee<2>(*relation), Return(SOFTBUS_OK)));
@@ -372,7 +376,7 @@ HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
     char *localUdid3 = const_cast<char *>(UDID_1);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<1>(*localUdid1), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(*localUdid2), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<1>(*localUdid3), Return(SOFTBUS_OK)));
@@ -416,7 +420,7 @@ HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
 HWTEST_F(LNNTopoManagerTest, ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     uint8_t *msg1 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_2));
     OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_CONNECTION_INFO, NETWORK_ID, msg1, strlen(MSG_2));
     OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg1, 0);
@@ -454,7 +458,7 @@ HWTEST_F(LNNTopoManagerTest, FILL_ALL_RELATION_TEST_001, TestSize.Level1)
     };
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnEventBasicInfo *info =
         reinterpret_cast<LnnEventBasicInfo *>(const_cast<LnnRelationChanedEventInfo *>(&eventInfo));
