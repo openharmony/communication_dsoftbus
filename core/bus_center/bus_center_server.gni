@@ -283,6 +283,6 @@ if (usb_channel_enhanced) {
   import(
       "../../dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/usb_channel.gni")
   bus_center_server_inc += usb_channel_enhance_inc
-  bus_center_server_inc += usb_channel_enhance_src
+  bus_center_server_src += usb_channel_enhance_src
   bus_center_server_external_deps += usb_channel_enhance_external_deps
 }
