@@ -870,7 +870,7 @@ void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyNetlinkStateChangeEvent(NetManagerIfnameState state, const char *ifName)
+void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName)
 {
     LNN_LOGD(LNN_EVENT, "notify net link state change");
     if (state < SOFTBUS_NETMANAGER_IFNAME_START || state >= SOFTBUS_NETMANAGER_IFNAME_UNKNOWN) {
