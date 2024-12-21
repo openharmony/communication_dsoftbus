@@ -111,19 +111,19 @@ HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
     ret = LnnInitLocalP2pInfo(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    EXPECT_CALL(netLedgerMock, LnnSetP2pRole(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetP2pRole(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetP2pMac(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetP2pMac(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetP2pGoMac(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetP2pGoMac(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    EXPECT_CALL(netLedgerMock, LnnSetWifiDirectAddr(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnSetWifiDirectAddr(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
@@ -166,7 +166,8 @@ HWTEST_F(LNNP2pInfoTest, IS_NEED_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(lnnServiceMock, IsFeatureSupport).WillRepeatedly(Return(true));
     int32_t osType = HO_OS_TYPE;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetOsTypeByNetworkId).WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_ERR)));
+    EXPECT_CALL(netLedgerMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_INVALID_PARAM)));
     ret = IsNeedSyncP2pInfo(&localInfo, &info);
     EXPECT_EQ(ret, true);
 }
@@ -190,8 +191,8 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
     };
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillOnce(Return(SOFTBUS_ERR));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ProcessSyncP2pInfo(nullptr);
     ProcessSyncWifiDirectAddr(nullptr);
     int32_t infoNum = 0;
@@ -208,11 +209,11 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(&info));
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(false));
     EXPECT_CALL(netLedgerMock, LnnGetOsTypeByNetworkId)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(HO_OS_TYPE), Return(SOFTBUS_ERR)));
+        .WillRepeatedly(DoAll(SetArgPointee<1>(HO_OS_TYPE), Return(SOFTBUS_INVALID_PARAM)));
     NiceMock<LnnServicetInterfaceMock> lnnServiceMock;
     EXPECT_CALL(lnnServiceMock, IsFeatureSupport).WillRepeatedly(Return(false));
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ProcessSyncP2pInfo(nullptr);
     ProcessSyncWifiDirectAddr(nullptr);
 }
@@ -273,7 +274,7 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Lev
     OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, nullptr, MSG, OK_MSG_LEN);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnSetDLWifiDirectAddr)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     OnReceiveWifiDirectSyncAddr(
         LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
@@ -291,10 +292,10 @@ HWTEST_F(LNNP2pInfoTest, LNN_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> lnnServiceMock;
     EXPECT_CALL(lnnServiceMock, LnnAsyncCallbackHelper)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncP2pInfo();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSyncP2pInfo();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -309,10 +310,10 @@ HWTEST_F(LNNP2pInfoTest, LNN_SYNC_WIFI_DIRECT_ADDR_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> lnnServiceMock;
     EXPECT_CALL(lnnServiceMock, LnnAsyncCallbackHelper)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncWifiDirectAddr();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSyncWifiDirectAddr();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
