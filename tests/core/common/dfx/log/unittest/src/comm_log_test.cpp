@@ -40,16 +40,26 @@ HWTEST_F(CommLogTest, CommLogTest001, TestSize.Level0)
     int32_t index = 0;
     int32_t commDomainBase = 0xd005700;
 
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[index], COMM_SDK, commDomainBase, "CommSdk"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_SVC, ++commDomainBase, "CommSvc"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_INIT, ++commDomainBase, "CommInit"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_DFX, ++commDomainBase, "CommDfx"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_EVENT, ++commDomainBase, "CommEvent"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_VERIFY, ++commDomainBase, "CommVerify"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_PERM, ++commDomainBase, "CommPerm"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_UTILS, ++commDomainBase, "CommUtils"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_ADAPTER, ++commDomainBase, "CommAdapter"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_TEST, DOMAIN_ID_TEST, "CommTest"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[index],
+        COMM_SDK, commDomainBase, "CommSdk"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_SVC, ++commDomainBase, "CommSvc"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_INIT, ++commDomainBase, "CommInit"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_DFX, ++commDomainBase, "CommDfx"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_EVENT, ++commDomainBase, "CommEvent"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_VERIFY, ++commDomainBase, "CommVerify"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_PERM, ++commDomainBase, "CommPerm"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_UTILS, ++commDomainBase, "CommUtils"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_ADAPTER, ++commDomainBase, "CommAdapter"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index],
+        COMM_TEST, DOMAIN_ID_TEST, "CommTest"));
 }
 
 /**
