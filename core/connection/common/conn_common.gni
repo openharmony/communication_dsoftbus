@@ -19,6 +19,12 @@ conn_common_src = [
   "$dsoftbus_root_path/core/connection/common/src/softbus_socket.c",
   "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
 ]
+if (!defined(ohos_lite)) {
+  conn_common_src += [ "$dsoftbus_root_path/core/connection/common/src/softbus_select_event_implement.c" ]
+} else {
+  conn_common_src += [ "$dsoftbus_root_path/core/connection/common/src/softbus_epoll_event_implement.c" ]
+}
+
 conn_common_inc = [
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/connection/common/include",
