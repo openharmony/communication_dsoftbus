@@ -143,7 +143,7 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
 
         switch (type) {
             case Serializable::ValueType::BOOL: {
-                Set(InterfaceInfoKey(key), *(bool *)(data));
+                Set(InterfaceInfoKey(key), *reinterpret_cast<bool *>(data));
                 break;
             }
             case Serializable::ValueType::INT: {

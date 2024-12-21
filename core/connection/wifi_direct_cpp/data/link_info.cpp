@@ -104,10 +104,10 @@ int LinkInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint
         auto valueType = keyTypeTable_[LinkInfoKey(key)];
         switch (valueType) {
             case Serializable::ValueType::BOOL:
-                Set(LinkInfoKey(key), *(bool *)(data));
+                Set(LinkInfoKey(key), *reinterpret_cast<bool *>(data));
                 break;
             case Serializable::ValueType::INT:
-                Set(LinkInfoKey(key), *(int *)(data));
+                Set(LinkInfoKey(key), *reinterpret_cast<int *>(data));
                 break;
             case Serializable::ValueType::STRING:
                 size = WifiDirectUtils::CalculateStringLength((char *)data, size);
