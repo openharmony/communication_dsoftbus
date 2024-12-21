@@ -74,16 +74,18 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(serviceMock, SoftBusHasWifiDirectCapability).WillRepeatedly(Return(true));
     EXPECT_CALL(serviceMock, SoftBusGetWifiInterfaceCoexistCap).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(serviceMock, LnnRegisterEventHandler)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnSyncInfoInterfaceMock> syncInfoMock;
-    EXPECT_CALL(syncInfoMock, LnnRegSyncInfoHandler).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(syncInfoMock, LnnRegSyncInfoHandler)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnHasCapability).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *networkId = NETWORKID;
     uint32_t capability = TYPE_128;
@@ -101,13 +103,15 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
     EXPECT_CALL(netLedgerMock, LnnHasCapability).WillOnce(Return(true)).WillRepeatedly(Return(false));
     HandlePeerNetCapchanged(networkId, capability);
-    EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, LnnNotifyBasicInfoChanged).WillRepeatedly(Return());
     UpdateNetworkInfo(UUID);
     UpdateNetworkInfo(UUID);
-    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
-    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
-    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
+    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_OK);
 }
 
@@ -121,7 +125,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1
 {
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     PostNetchangedInfo(nullptr, CONNECTION_ADDR_ETH);
     PostNetchangedInfo(nullptr, CONNECTION_ADDR_ETH);
@@ -155,9 +159,9 @@ HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
         .discoveryType = DISCOVERY_TYPE,
     };
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
-    EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(netLedgerMock, LnnSetDLConnCapability).WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, UpdateProfile).WillRepeatedly(Return());
