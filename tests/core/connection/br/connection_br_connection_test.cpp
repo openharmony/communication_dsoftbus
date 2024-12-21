@@ -272,7 +272,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection004, TestSize.Level1)
         .uuid = (char *)SOFTBUS_CHARA_CONN_UUID,
         .uuidLen = strlen(SOFTBUS_CHARA_CONN_UUID),
     };
-    BrConnectStatusCallback(&addr, uuid, result, status);
+    EXPECT_NO_FATAL_FAILURE(BrConnectStatusCallback(&addr, uuid, result, status));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection005, TestSize.Level1)
@@ -324,11 +324,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection008, TestSize.Level1)
     SoftBusMessage msg;
 
     msg.what = MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT;
-    BrConnectionMsgHandler(&msg);
+    EXPECT_NO_FATAL_FAILURE(BrConnectionMsgHandler(&msg));
     msg.what = MSG_CONNECTION_RETRY_NOTIFY_REFERENCE;
-    BrConnectionMsgHandler(&msg);
+    EXPECT_NO_FATAL_FAILURE(BrConnectionMsgHandler(&msg));
     msg.what = MSG_CONNECTION_RETRY_NOTIFY_REFERENCE + 1;
-    BrConnectionMsgHandler(&msg);
+    EXPECT_NO_FATAL_FAILURE(BrConnectionMsgHandler(&msg));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection009, TestSize.Level1)
@@ -389,6 +389,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection011, TestSize.Level1)
     ConnBrConnection *connection;
 
     connection = (ConnBrConnection *)SoftBusCalloc(sizeof(*connection));
+    ASSERT_NE(nullptr, connection);
     connection->connectProcessStatus = nullptr;
     ConnBrFreeConnection(connection);
 }
@@ -463,17 +464,15 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager001, TestSize.Level1)
     ConnectStatistics statistics;
     int32_t reason = 0;
 
-    DfxRecordBrConnectFail(reqId, pId, device, nullptr, reason);
-    DfxRecordBrConnectFail(reqId, pId, device, &statistics, reason);
+    EXPECT_NO_FATAL_FAILURE(DfxRecordBrConnectFail(reqId, pId, device, nullptr, reason));
+    EXPECT_NO_FATAL_FAILURE(DfxRecordBrConnectFail(reqId, pId, device, &statistics, reason));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
 {
     uint32_t pId = 0;
     ConnBrConnection *connection = static_cast<ConnBrConnection *>(SoftBusMalloc(sizeof(ConnBrConnection)));
-    if (connection == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
 
     ConnectStatistics statistics;
@@ -498,11 +497,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
     (void)strcpy_s(device.addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     ListInit(&device.requests);
     ListAdd(&device.requests, &request.node);
-    NotifyDeviceConnectResult(&device, nullptr, isReuse, reason);
+    EXPECT_NO_FATAL_FAILURE(NotifyDeviceConnectResult(&device, nullptr, isReuse, reason));
 
     (void)strcpy_s(device.addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     ListInit(&device.requests);
-    NotifyDeviceConnectResult(&device, &connection, isReuse, reason);
+    EXPECT_NO_FATAL_FAILURE(NotifyDeviceConnectResult(&device, &connection, isReuse, reason));
 
     request.requestId = 0;
     request.requestId = 0;
@@ -513,7 +512,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
     ListAdd(&device.requests, &request.node);
     reason = 1;
     isReuse = true;
-    NotifyDeviceConnectResult(&device, &connection, isReuse, reason);
+    EXPECT_NO_FATAL_FAILURE(NotifyDeviceConnectResult(&device, &connection, isReuse, reason));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager005, TestSize.Level1)
@@ -526,11 +525,13 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager005, TestSize.Level1)
     ListAdd(&(g_brManager.pendings->list), &(pending.node));
     (void)strcpy_s(info.addr, BT_MAC_LEN, addr);
     pending.pendInfo = &info;
-    SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
+    int32_t ret = SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
+
     g_brManagerAsyncHandler.handler.looper->PostMessageDelay = PostMessageDelay;
 
     info.firstStartTimestamp = 0xfffffffffffffff;
     info.firstDuration = 0x1;
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
@@ -541,10 +542,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
     (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
     ListInit(&(g_brManager.pendings->list));
     (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
-}
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager007, TestSize.Level1)
-{
     int ret;
     ConnBrDevice device;
     const char *anomizeAddress;
@@ -671,10 +669,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager015, TestSize.Level1)
     ConnBrConnection *target;
 
     SoftBusMutexDestroy(&g_brManager.connections->lock);
-    ClientConnectFailed(connectionId, error);
+    EXPECT_NO_FATAL_FAILURE(ClientConnectFailed(connectionId, error));
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
     target->connectionId = 1;
@@ -683,7 +682,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager015, TestSize.Level1)
     ListInit(&g_brManager.connections->list);
     ListTailInsert(&g_brManager.connections->list, &target->node);
     g_brManager.connecting = nullptr;
-    ClientConnectFailed(connectionId, error);
+    EXPECT_NO_FATAL_FAILURE(ClientConnectFailed(connectionId, error));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
@@ -695,6 +694,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
     target->connectionId = 0;
@@ -706,6 +706,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
     ListInit(&g_brManager.connections->list);
     ListTailInsert(&g_brManager.connections->list, &target->node);
     connectingDevice = reinterpret_cast<ConnBrDevice *>(SoftBusCalloc(sizeof(*connectingDevice)));
+    ASSERT_NE(nullptr, connectingDevice);
     (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abcde");
     ListInit(&connectingDevice->requests);
     g_brManager.connecting = connectingDevice;
@@ -724,6 +725,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager017, TestSize.Level1)
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
     target->connectionId = 0;
@@ -743,6 +745,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager018, TestSize.Level1)
 
     SoftBusMutexDestroy(&g_brManager.connections->lock);
     connectingDevice = reinterpret_cast<ConnBrDevice *>(SoftBusCalloc(sizeof(*connectingDevice)));
+    ASSERT_NE(nullptr, connectingDevice);
     (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abc");
     ListInit(&connectingDevice->requests);
     g_brManager.connecting = connectingDevice;
@@ -756,6 +759,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager019, TestSize.Level1)
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    ASSERT_NE(nullptr, head);
     head->flag = 0;
     head->module = 0;
     head->seq = 0;
@@ -774,6 +778,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager020, TestSize.Level1)
     EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(nullptr));
     SoftBusMutexDestroy(&g_brManager.connections->lock);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
     target->connectionId = 0;
@@ -783,6 +788,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager020, TestSize.Level1)
     ListTailInsert(&g_brManager.connections->list, &target->node);
 
     head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    ASSERT_NE(nullptr, head);
     head->flag = 0;
     head->module = MODULE_CONNECTION;
     head->seq = 0;
@@ -799,6 +805,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager021, TestSize.Level1)
 
     SoftBusMutexDestroy(&g_brManager.connections->lock);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
     target->connectionId = 0;
@@ -808,6 +815,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager021, TestSize.Level1)
     ListTailInsert(&g_brManager.connections->list, &target->node);
 
     head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    ASSERT_NE(nullptr, head);
     head->flag = 0;
     head->module = MODULE_NIP_BR_CHANNEL;
     head->seq = (int64_t)BR_NIP_SEQ;
@@ -824,6 +832,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
 
     SoftBusMutexDestroy(&g_brManager.connections->lock);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
     target->connectionId = 0;
@@ -833,6 +842,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
     ListTailInsert(&g_brManager.connections->list, &target->node);
 
     head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    ASSERT_NE(nullptr, head);
     head->flag = 0;
     head->module = MODULE_OLD_NEARBY;
     head->seq = (int64_t)BR_NIP_SEQ;
@@ -844,9 +854,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
 HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
 {
     ConnBrConnection *connection = static_cast<ConnBrConnection *>(SoftBusMalloc(sizeof(ConnBrConnection)));
-    if (connection == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, connection);
     connection->connectionId = 0;
     char data[DATASIZE] = { "{\
             \"ESSION_KEY\": \"sdadad\",\
@@ -875,6 +883,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager024, TestSize.Level1)
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
     target->connectionId = 0;
     target->objectRc = 10;
@@ -898,6 +907,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager025, TestSize.Level1)
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    ASSERT_NE(nullptr, target);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
     target->connectionId = 0;
     target->objectRc = 10;
@@ -907,6 +917,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager025, TestSize.Level1)
     ListTailInsert(&g_brManager.connections->list, &target->node);
 
     it = reinterpret_cast<ConnBrDevice *>(SoftBusCalloc(sizeof(*it)));
+    ASSERT_NE(nullptr, it);
     (void)strcpy_s(it->addr, BT_MAC_LEN, "abc");
     ListInit(&g_brManager.waitings);
     ListTailInsert(&g_brManager.waitings, &it->node);
@@ -922,7 +933,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager026, TestSize.Level1)
     (void)strcpy_s(unpendInfo.addr, BT_MAC_LEN, "abc");
     ListInit(&g_brManager.pendings->list);
     g_brManagerAsyncHandler.handler.looper->RemoveMessageCustom = RvMessageCustom;
-    UnpendConnection(unpendInfo.addr);
+    EXPECT_NO_FATAL_FAILURE(UnpendConnection(unpendInfo.addr));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager027, TestSize.Level1)
@@ -933,6 +944,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager027, TestSize.Level1)
     TransitionToState(target);
     target = BR_STATE_CONNECTING;
     TransitionToState(target);
+    EXPECT_NE(g_brManager.state, nullptr);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
@@ -1068,7 +1080,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager030, TestSize.Level1)
 
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     ListInit(&g_brManager.connections->list);
-    OnPostByteFinshed(connectionId, len, pid, flag, module, seq, error);
+    EXPECT_NO_FATAL_FAILURE(OnPostByteFinshed(connectionId, len, pid, flag, module, seq, error));
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager031, TestSize.Level1)
@@ -1108,7 +1120,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager033, TestSize.Level1)
     ListInit(&g_brManager.connections->list);
     connection->connectionId = 0;
     target.connectionId = 0;
-    ListTailInsert(&g_brManager.connections->list, &target.node);
+    EXPECT_NO_FATAL_FAILURE(ListTailInsert(&g_brManager.connections->list, &target.node));
     ConnBrRemoveConnection(connection);
 }
 
@@ -1122,7 +1134,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager034, TestSize.Level1)
     ListInit(&g_brManager.connections->list);
     connection->connectionId = 0;
     target.connectionId = 1;
-    ListTailInsert(&g_brManager.connections->list, &target.node);
+    EXPECT_NO_FATAL_FAILURE(ListTailInsert(&g_brManager.connections->list, &target.node));
     ConnBrRemoveConnection(connection);
 }
 
