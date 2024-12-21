@@ -337,8 +337,6 @@ typedef enum {
     USB = 3,
     /** HiLink */
     COAP1 = 4,
-    /** ACTION */
-    ACTION = 5,
     MEDIUM_BUTT
 } ExchangeMedium;
 
