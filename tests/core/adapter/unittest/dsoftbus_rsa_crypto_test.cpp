@@ -282,17 +282,17 @@ static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct 
 {
     if (HksInitParamSet(paramSet) != HKS_SUCCESS) {
         COMM_LOGE(COMM_TEST, "HksInitParamSet failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_HUKS_ERR;
     }
     if (HksAddParams(*paramSet, params, paramCount) != HKS_SUCCESS) {
         COMM_LOGE(COMM_TEST, "HksAddParams failed.");
         HksFreeParamSet(paramSet);
-        return SOFTBUS_ERR;
+        return SOFTBUS_HUKS_ERR;
     }
     if (HksBuildParamSet(paramSet) != HKS_SUCCESS) {
         COMM_LOGE(COMM_TEST, "HksBuildParamSet failed.");
         HksFreeParamSet(paramSet);
-        return SOFTBUS_ERR;
+        return SOFTBUS_HUKS_ERR;
     }
     return SOFTBUS_OK;
 }
