@@ -246,14 +246,14 @@ static SessionAttribute *BuildParamSessionAttribute(const SessionAttribute *attr
 static void InitSessionParam(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, SessionParam *param)
 {
-        param->sessionName = mySessionName,
-        param->peerSessionName = peerSessionName,
-        param->peerDeviceId = peerNetworkId,
-        param->groupId = groupId,
-        param->isQosLane = false,
-        param->qosCount = 0,
-        param->isAsync = false;
-        param->actionId = INVALID_ACTION_ID;
+    param->sessionName = mySessionName;
+    param->peerSessionName = peerSessionName;
+    param->peerDeviceId = peerNetworkId;
+    param->groupId = groupId;
+    param->isQosLane = false;
+    param->qosCount = 0;
+    param->isAsync = false;
+    param->actionId = INVALID_ACTION_ID;
 }
 
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
@@ -1248,10 +1248,8 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         TRANS_LOGI(TRANS_SDK, "Bind timeout Shutdown ok, no delete socket: socket=%{public}d", socket);
         return;
     }
-    ret = ClientDeleteSocketSession(socket);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ClientShutdown delete socket session server: ret=%{public}d", ret);
-    }
+    (void)ClientDeleteSocketSession(socket);
+
     TRANS_LOGI(TRANS_SDK, "Shutdown ok: socket=%{public}d", socket);
 }
 

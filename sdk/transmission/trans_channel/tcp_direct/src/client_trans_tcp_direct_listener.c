@@ -38,6 +38,8 @@ static SoftBusTcpListenerLock g_lock = {
     .lockInit = false,
 };
 
+static bool g_isInitedFlag = false;
+
 
 static void TdcLockInit(void)
 {
@@ -89,14 +91,13 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
 
 int32_t TransTdcCreateListener(int32_t fd)
 {
-    static bool isInitedFlag = false;
     TdcLockInit();
     if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (isInitedFlag == false) {
-        isInitedFlag = true;
+    if (g_isInitedFlag == false) {
+        g_isInitedFlag = true;
 
         static SoftbusBaseListener listener = {
             .onConnectEvent = ClientTdcOnConnectEvent,
@@ -113,6 +114,32 @@ int32_t TransTdcCreateListener(int32_t fd)
     SoftBusMutexUnlock(&g_lock.lock);
 
     return AddTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
+}
+
+int32_t TransTdcCreateListenerWithoutAddTrigger(int32_t fd)
+{
+    TdcLockInit();
+    if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!g_isInitedFlag) {
+        static SoftbusBaseListener listener = {
+            .onConnectEvent = ClientTdcOnConnectEvent,
+            .onDataEvent = ClientTdcOnDataEvent,
+        };
+        int32_t ret = StartBaseClient(DIRECT_CHANNEL_CLIENT, &listener);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "start sdk base listener failed, ret=%{public}d", ret);
+            SoftBusMutexUnlock(&g_lock.lock);
+            return ret;
+        }
+        g_isInitedFlag = true;
+        TRANS_LOGI(TRANS_SDK, "create sdk listener success.fd=%{public}d", fd);
+    }
+    SoftBusMutexUnlock(&g_lock.lock);
+
+    return SOFTBUS_OK;
 }
 
 void TransTdcCloseFd(int32_t fd)

@@ -688,7 +688,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList");
+        TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList.");
         return SOFTBUS_LOCK_ERR;
     }
     AuthChannelInfo *item = NULL;
@@ -953,7 +953,7 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
     channel->connOpt.socketOption.moduleId = AUTH_RAW_P2P_CLIENT;
 
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, channel->appInfo.peerNetWorkId,
-        sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
+            sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed");
     }
 
