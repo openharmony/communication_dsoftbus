@@ -21,8 +21,8 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
-#include "lnn_heartbeat_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
@@ -31,9 +31,9 @@
 #include "lnn_lane_listener.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_reliability.h"
-#include "lnn_lane_select.h"
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
+#include "lnn_select_rule.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -610,7 +610,7 @@ static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink lin
     }
     uint32_t resNum = 0;
     for (uint32_t i = 0; i < linkNum; i++) {
-        if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
+        if (LaneCheckLinkValid(networkId, optionalLink[i], LANE_T_BUTT) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "SpecifiedLink capcheck fail, linkType=%{public}d", optionalLink[i]);
             continue;
         }
