@@ -21,6 +21,7 @@ module_output_path = "dsoftbus/adapter"
 ohos_unittest("SoftbusBroadcastMgrTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_utils.c",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/manager/src/softbus_broadcast_mgr.c",
     "softbus_ble_mock.cpp",
     "softbus_broadcast_mgr_test.cpp",
@@ -43,7 +44,6 @@ ohos_unittest("SoftbusBroadcastMgrTest") {
   ]
 
   external_deps = [
-    "bluetooth:btframework",
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest_main",
