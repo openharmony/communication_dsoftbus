@@ -27,14 +27,6 @@
 #define ID_LEN 2
 #define MANUFACTURE_DATA_LEN 1
 #define MANUFACTURE_DATA_ID 0x027D
-#define BLE_ASYNC_CALLBACK_HANDLER_NAME "BleAsyncHandler"
-
-typedef struct {
-    SoftBusMessage msg;
-    SoftBusHandler handler;
-    BleAsyncCallbackFunc callback;
-    void *cbPara;
-} AsyncCallbackInfo;
 
 int32_t BtStatusToSoftBus(BtStatus btStatus)
 {
@@ -538,103 +530,4 @@ void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len
     DISC_LOGI(DISC_BLE_ADAPTER, "description=%{public}s, softbusData=%{public}s", description, softbusData);
 
     SoftBusFree(softbusData);
-}
-
-static void AsyncCallbackHandler(SoftBusMessage *msg)
-{
-    AsyncCallbackInfo *info = NULL;
-
-    if (msg == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail async callback recv null msg");
-        return;
-    }
-    info = (AsyncCallbackInfo *)msg->obj;
-    if (info == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail async callback recv null info");
-        return;
-    }
-    if (info->callback == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail async callback function is null");
-        return;
-    }
-    info->callback(info->cbPara);
-}
-
-static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
-{
-    AsyncCallbackInfo *info = NULL;
-
-    if (msg == NULL || msg->obj == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail: looper or callback is null");
-        return;
-    }
-    info = (AsyncCallbackInfo *)msg->obj;
-    SoftBusFree(info);
-}
-
-static void InitAsyncCallbackMessage(SoftBusMessage *msg, int32_t what, void *obj, SoftBusHandler *handler)
-{
-    msg->what = what;
-    msg->obj = obj;
-    msg->handler = handler;
-    msg->FreeMessage = FreeAsyncCallbackMessage;
-}
-
-static void InitAsyncCallbackHandler(SoftBusHandler *handler, SoftBusLooper *looper)
-{
-    handler->name = BLE_ASYNC_CALLBACK_HANDLER_NAME;
-    handler->looper = looper;
-    handler->HandleMessage = AsyncCallbackHandler;
-}
-
-static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper,
-    BleAsyncCallbackFunc callback, void *para, int32_t msgType)
-{
-    AsyncCallbackInfo *info = NULL;
-
-    info = SoftBusCalloc(sizeof(AsyncCallbackInfo));
-    if (info == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail to malloc async callback info");
-        return NULL;
-    }
-    info->callback = callback;
-    info->cbPara = para;
-    InitAsyncCallbackHandler(&info->handler, looper);
-    InitAsyncCallbackMessage(&info->msg, msgType, (void *)info, &info->handler);
-    return info;
-}
-
-int32_t BleAsyncCallbackHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback, void *para)
-{
-    AsyncCallbackInfo *info = NULL;
-
-    if (looper == NULL || callback == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail: looper or callback is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    info = CreateAsyncCallbackInfo(looper, callback, para, 0);
-    if (info == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail to create async callback info");
-        return SOFTBUS_MEM_ERR;
-    }
-    looper->PostMessage(looper, &info->msg);
-    return SOFTBUS_OK;
-}
-
-int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
-{
-    AsyncCallbackInfo *info = NULL;
-
-    if (looper == NULL || callback == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail: looper or callback is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    info = CreateAsyncCallbackInfo(looper, callback, para, 0);
-    if (info == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "fail to create async callback info");
-        return SOFTBUS_MEM_ERR;
-    }
-    looper->PostMessageDelay(looper, &info->msg, delayMillis);
-    return SOFTBUS_OK;
 }

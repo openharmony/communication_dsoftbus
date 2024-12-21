@@ -49,6 +49,11 @@ ohos_unittest("SoftbusBroadcastMgrTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+
+  if (support_bluetooth &&
+      (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 group("unittest") {

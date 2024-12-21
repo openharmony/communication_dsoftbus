@@ -246,7 +246,7 @@ int32_t InitBroadcastMgr(void)
 
     if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
         DELAY_TIME_DEFAULT) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BROADCAST, "DelayReportBroadcast failed, due to async callback fail");
+        DISC_LOGE(DISC_BROADCAST, "looper init failed");
     }
     SoftBusRegBcMgrVarDump((char *)REGISTER_INFO_MANAGER, &RegisterInfoDump);
     return SOFTBUS_OK;
@@ -1589,7 +1589,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     g_bcManager[bcId].minInterval = adapterParam.minInterval;
     g_bcManager[bcId].maxInterval = adapterParam.maxInterval;
     int32_t advHandle = 0;
-    BroadcastGetBroadcastHandle(bcId, &advHandle);
+    (void)BroadcastGetBroadcastHandle(bcId, &advHandle);
     g_bcManager[bcId].advHandle = advHandle;
     if (g_bcCurrentNum >= MAX_BLE_ADV_NUM) {
         g_bcOverMaxNum++;
