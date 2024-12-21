@@ -2992,7 +2992,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_03, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_ERR)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_INVALID_PARAM)));
     ret = FinalDecideLinkType("test", &linkList, listNum, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -3053,12 +3053,12 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_05, TestSize.Level1)
     request.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
 
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = DecideAvailableLane(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
     EXPECT_CALL(linkMock, LnnGetOsTypeByNetworkId)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = DecideAvailableLane(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
