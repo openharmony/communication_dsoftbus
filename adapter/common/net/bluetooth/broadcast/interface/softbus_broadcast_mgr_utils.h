@@ -12,3 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef SOFTBUS_BLE_MGR_UTILS_H
+#define SOFTBUS_BLE_MGR_UTILS_H
+
+#include "message_handler.h"
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+typedef void (*BleAsyncCallbackFunc)(void *para);
+
+int32_t BleAsyncCallbackHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback, void *para);
+int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis);
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* SOFTBUS_BLE_MGR_UTILS_H */
