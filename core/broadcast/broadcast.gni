@@ -14,7 +14,8 @@
 import("../../dsoftbus.gni")
 
 broadcast_inc = [ "$dsoftbus_root_path/core/broadcast/scheduler/interface" ]
-broadcast_src = []
+broadcast_src =
+    [ "$dsoftbus_root_path/core/broadcast/common/src/broadcast_dfx_event.c" ]
 broadcast_deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
 
 if (dsoftbus_feature_ex_kits) {
