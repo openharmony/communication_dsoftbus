@@ -69,3 +69,20 @@ int32_t LnnInitLocalP2pInfo(NodeInfo *info)
     (void)info;
     return SOFTBUS_OK;
 }
+
+void ClearLnnBleReportExtraMap(void)
+{
+    return;
+}
+
+void ClearPcRestrictMap(void)
+{
+    return;
+}
+
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

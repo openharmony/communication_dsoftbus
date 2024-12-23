@@ -33,7 +33,48 @@ void LnnDeinitNetworkManager(void)
 {
 }
 
-void LnnNotifyAllTypeOffline(ConnectionAddrType type)
+void RestartCoapDiscovery(void)
 {
+    return;
+}
+
+int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
+{
+    (void)ifName;
     (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
+{
+    (void)ifName;
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnGetDataShareInitResult(bool *isDataShareInit)
+{
+    (void)isDataShareInit;
+}
+
+void LnnSetUnlockState(void) {}
+
+bool LnnVisitNetif(VisitNetifCallback callback, void *data)
+{
+    (void)callback;
+    (void)data;
+    return false;
+}
+
+int32_t LnnRegistProtocol(LnnProtocolManager *impl)
+{
+    (void)impl;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
+{
+    (void)protocol;
+    (void)mode;
+    return UNUSE_BUTT;
 }

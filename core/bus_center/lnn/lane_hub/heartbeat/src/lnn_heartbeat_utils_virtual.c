@@ -56,3 +56,14 @@ bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit)
     return false;
 }
 
+bool LnnIsLocalSupportBurstFeature(void)
+{
+    return false;
+}
+
+int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
+{
+    (void)accountHash;
+    (void)len;
+    return SOFTBUS_OK;
+}
