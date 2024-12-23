@@ -21,7 +21,7 @@
 #include "comm_log.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
-#include "utils/wifi_direct_anonymous.h"
+#include "anonymizer.h"
 
 using namespace OHOS::Wifi;
 
@@ -46,6 +46,18 @@ int32_t WifiStatistic::GetWifiStatisticInfo(cJSON *json)
     return SOFTBUS_OK;
 }
 
+static std::string AnonymizeStr(const std::string &data)
+{
+    if (data.empty()) {
+        return "";
+    }
+    char *temp = nullptr;
+    Anonymize(data.c_str(), &temp);
+    std::string result = AnonymizeWrapper(temp);
+    AnonymizeFree(temp);
+    return result;
+}
+
 int32_t WifiStatistic::GetStaInfo(cJSON *json)
 {
     if (json == nullptr) {
@@ -66,8 +78,7 @@ int32_t WifiStatistic::GetStaInfo(cJSON *json)
     }
     (void)AddNumberToJsonObject(staJson, "IsStaExist", 1);
     (void)AddStringToJsonObject(staJson, "Name", wifiLinkedInfo.ssid.c_str());
-    (void)AddStringToJsonObject(staJson, "Mac",
-        OHOS::SoftBus::WifiDirectAnonymizeMac(wifiLinkedInfo.bssid).c_str());
+    (void)AddStringToJsonObject(staJson, "Mac", AnonymizeStr(wifiLinkedInfo.bssid).c_str());
     (void)AddNumberToJsonObject(staJson, "Freq", wifiLinkedInfo.frequency);
     (void)AddNumberToJsonObject(staJson, "chload", wifiLinkedInfo.chload);
 
@@ -109,8 +120,7 @@ int32_t WifiStatistic::GetSoftApInfo(cJSON *json)
     for (size_t i = 0; i < stationList.size(); i++) {
         cJSON *stationJson = cJSON_CreateObject();
         (void)AddStringToJsonObject(stationJson, "Name", stationList[i].deviceName.c_str());
-        (void)AddStringToJsonObject(stationJson, "Mac",
-            OHOS::SoftBus::WifiDirectAnonymizeMac(stationList[i].bssid).c_str());
+        (void)AddStringToJsonObject(stationJson, "Mac", AnonymizeStr(stationList[i].bssid).c_str());
         (void)cJSON_AddItemToArray(stationArray, stationJson);
     }
     (void)cJSON_AddItemToObject(softApJson, "StaDevList", stationArray);
@@ -143,7 +153,7 @@ int32_t WifiStatistic::GetP2PInfo(cJSON *json)
         cJSON *goJson = cJSON_CreateObject();
         (void)AddStringToJsonObject(goJson, "Name", groupInfo.GetOwner().GetDeviceName().c_str());
         (void)AddStringToJsonObject(goJson, "Mac",
-            OHOS::SoftBus::WifiDirectAnonymizeMac(groupInfo.GetOwner().GetRandomDeviceAddress()).c_str());
+            AnonymizeStr(groupInfo.GetOwner().GetRandomDeviceAddress()).c_str());
         (void)cJSON_AddItemToObject(p2pJson, "GOInfo", goJson);
         (void)cJSON_AddItemToObject(json, "P2PInfo", p2pJson);
         return SOFTBUS_OK;
@@ -155,7 +165,7 @@ int32_t WifiStatistic::GetP2PInfo(cJSON *json)
         cJSON *gcJson = cJSON_CreateObject();
         (void)AddStringToJsonObject(gcJson, "Name", gcList[i].GetDeviceName().c_str());
         (void)AddStringToJsonObject(gcJson, "Mac",
-            OHOS::SoftBus::WifiDirectAnonymizeMac(gcList[i].GetRandomDeviceAddress()).c_str());
+            AnonymizeStr(gcList[i].GetRandomDeviceAddress()).c_str());
         (void)cJSON_AddItemToArray(gcArray, gcJson);
     }
     (void)cJSON_AddItemToObject(p2pJson, "GCInfo", gcArray);

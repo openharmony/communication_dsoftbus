@@ -58,7 +58,7 @@ ohos_static_library("wifi_direct") {
 
   wifi_direct_connection_external_deps = []
 
-  if (dsoftbus_feature_conn_p2p == true &&
+  if (dsoftbus_feature_conn_pv1 == true &&
       softbus_communication_wifi_feature == true) {
     sanitize = {
       cfi = true
@@ -111,7 +111,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/wifi_direct_scheduler.cpp",
       "$wifi_direct_path/utils/wifi_direct_dfx.cpp",
     ]
-
+    defines += [ "DSOFTBUS_FEATURE_CONN_PV1" ]
     if (dsoftbus_feature_ex_kits == true) {
       import(
           "../../../dsoftbus_enhance/core/connection/wifi_direct_cpp/wifi_direct.gni")
@@ -120,6 +120,7 @@ ohos_static_library("wifi_direct") {
       wifi_direct_connection_src += wifi_direct_connection_enhance_src
       wifi_direct_connection_external_deps +=
           wifi_direct_connection_enhance_external_deps
+      defines += wifi_direct_enhance_defines
     }
 
     wifi_direct_connection_external_deps += [
