@@ -102,6 +102,7 @@ ohos_unittest("BusCenterUtilsTest") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
