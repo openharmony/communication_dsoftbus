@@ -953,7 +953,7 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
     channel->connOpt.socketOption.moduleId = AUTH_RAW_P2P_CLIENT;
 
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, channel->appInfo.peerNetWorkId,
-            sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
+        sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed");
     }
 
