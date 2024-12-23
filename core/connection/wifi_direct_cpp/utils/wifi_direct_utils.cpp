@@ -371,7 +371,8 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
 
     struct ifreq request { };
     (void)memset_s(&request, sizeof(request), 0, sizeof(request));
-    int32_t ret = strcpy_s(request.ifr_name, sizeof(request.ifr_name), (const char *)interface.c_str());
+    int32_t ret =
+        strcpy_s(request.ifr_name, sizeof(request.ifr_name), reinterpret_cast<const char *>(interface.c_str()));
     if (ret != EOK) {
         CONN_LOGW(CONN_WIFI_DIRECT, "copy interface name failed");
         close(socketFd);

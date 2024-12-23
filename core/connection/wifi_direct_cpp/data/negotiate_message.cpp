@@ -258,13 +258,13 @@ int NegotiateMessage::Unmarshalling(WifiDirectProtocol &protocol, const std::vec
         auto type = keyTypeTable_[static_cast<NegotiateMessageKey>(key)];
         switch (Serializable::ValueType(type)) {
             case Serializable::ValueType::BOOL:
-                Set(NegotiateMessageKey(key), *(bool *)(data));
+                Set(NegotiateMessageKey(key), *reinterpret_cast<bool *>(data));
                 break;
             case Serializable::ValueType::INT:
-                Set(NegotiateMessageKey(key), *(int *)(data));
+                Set(NegotiateMessageKey(key), *reinterpret_cast<int *>(data));
                 break;
             case Serializable::ValueType::UINT:
-                Set(NegotiateMessageKey(key), *(uint32_t *)(data));
+                Set(NegotiateMessageKey(key), *reinterpret_cast<uint32_t *>(data));
                 break;
             case Serializable::ValueType::STRING:
                 size = WifiDirectUtils::CalculateStringLength((char *)data, size);
