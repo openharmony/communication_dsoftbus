@@ -1149,8 +1149,8 @@ static int32_t TransProxySendHandShakeMsgWhenInner(uint32_t connId, ProxyChannel
         TransProxyFastDataRecv(chan);
     }
     chan->appInfo.myHandleId = 0;
-    int32_t ret = SOFTBUS_OK;
-    if ((ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
+    int32_t ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
             TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, connId);
         (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
