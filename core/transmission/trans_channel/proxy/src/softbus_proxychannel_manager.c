@@ -1142,19 +1142,20 @@ static void FillProxyHandshakeExtra(
 
 static int32_t TransProxySendHandShakeMsgWhenInner(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
 {
-    if (chan->appInfo.appType == APP_TYPE_INNER) {
-        if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
-            TransProxyFastDataRecv(chan);
-        }
-        chan->appInfo.myHandleId = 0;
-        int32_t ret = SOFTBUS_OK;
-        if ((ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
-            TRANS_LOGE(
-                TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, connId);
-            (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
-            TransProxyDelChanByChanId(chan->channelId);
-            return ret;
-        }
+    if (chan->appInfo.appType != APP_TYPE_INNER) {
+        return SOFTBUS_OK;
+    }
+    if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
+        TransProxyFastDataRecv(chan);
+    }
+    chan->appInfo.myHandleId = 0;
+    int32_t ret = SOFTBUS_OK;
+    if ((ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, connId);
+        (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
     }
     return SOFTBUS_OK;
 }
