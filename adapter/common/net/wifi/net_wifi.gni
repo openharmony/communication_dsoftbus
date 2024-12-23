@@ -20,15 +20,18 @@ adapter_wifi_inc = [ "$softbus_adapter_wifi_path/include" ]
 adapter_wifi_external_deps = []
 
 if (defined(ohos_lite) || softbus_communication_wifi_feature == false) {
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame) {
     adapter_wifi_src += [
       "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",
     ]
   }
 } else {
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_wifi) {
     adapter_wifi_src +=
         [ "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter.c" ]
     adapter_wifi_external_deps += [ "wifi:wifi_sdk" ]
+  } else if (!dsoftbus_feature_lnn_wifi) {
+    adapter_wifi_src +=
+        [ "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter.c" ]
   }
 }
