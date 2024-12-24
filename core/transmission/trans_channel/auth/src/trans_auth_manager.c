@@ -688,7 +688,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList");
+        TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList.");
         return SOFTBUS_LOCK_ERR;
     }
     AuthChannelInfo *item = NULL;

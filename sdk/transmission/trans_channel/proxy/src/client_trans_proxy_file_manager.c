@@ -730,7 +730,7 @@ static int32_t SendSingleFile(const SendListenerInfo *sendInfo, const char *sour
         TRANS_LOGE(TRANS_FILE, "sourfile or dstfile is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{private}s, dstFile=%{public}s", sendInfo->channelId,
+    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{private}s, dstFile=%{private}s", sendInfo->channelId,
         sourceFile, destFile);
 
     int32_t ret = FileToFrameAndSendFile((SendListenerInfo *)sendInfo, sourceFile, destFile);
@@ -831,7 +831,7 @@ static int32_t ProxyStartSendFile(
         ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(
-                TRANS_FILE, "send file failed. sendFile=%{public}s, ret=%{public}" PRId32, sFileList[index], ret);
+                TRANS_FILE, "send file failed. sendFile=%{private}s, ret=%{public}" PRId32, sFileList[index], ret);
             return SOFTBUS_FILE_ERR;
         }
     }
@@ -1780,13 +1780,13 @@ static int32_t ProcessCrcCheckSumData(int32_t sessionId, const FileFrame *frame)
     int32_t result = UnpackFileCrcCheckSum(recipient, (FileFrame *)frame);
     TRANS_LOGE(TRANS_FILE, "verification crc check sum, ret=%{public}d", result);
     int32_t ret = SendFileTransResult(recipient->channelId, frame->seq, result, IS_RECV_RESULT);
-    ReleaseRecipientRef(recipient);
     if (result != SOFTBUS_OK || ret != SOFTBUS_OK) {
         SetRecipientRecvState(recipient, TRANS_FILE_RECV_ERR_STATE);
         DelRecipient(sessionId);
         return SOFTBUS_FILE_ERR;
     }
     SetRecipientRecvState(recipient, TRANS_FILE_RECV_IDLE_STATE);
+    ReleaseRecipientRef(recipient);
     return SOFTBUS_OK;
 }
 
