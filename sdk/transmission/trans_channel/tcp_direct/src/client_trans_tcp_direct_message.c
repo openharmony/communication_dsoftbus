@@ -223,8 +223,8 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
     }
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoByIdWithIncSeq failed, channelId=%{public}d.", channelId);
+    if (TransTdcGetInfoIncFdRefById(channelId, &channel, true) == NULL) {
+        TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoIncFdRefById failed, channelId=%{public}d.", channelId);
         return SOFTBUS_TRANS_TDC_GET_INFO_FAILED;
     }
     if (channel.detail.needRelease) {
@@ -251,7 +251,7 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
 
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoIncFdRefById(channelId, &channel, true) == NULL) {
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
     int32_t sequence = channel.detail.sequence;
@@ -275,14 +275,21 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
     return ProcPendingPacket(channelId, sequence, PENDING_TYPE_DIRECT);
 }
 
-static int32_t TransTdcSendAck(TcpDirectChannelInfo *channel, int32_t seq)
+static int32_t TransTdcSendAck(int32_t channelId, int32_t seq)
 {
-    if (channel == NULL) {
-        TRANS_LOGE(TRANS_SDK, "channel is null.");
-        return SOFTBUS_INVALID_PARAM;
+    TcpDirectChannelInfo channel;
+    (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
+    if (TransTdcGetInfoIncFdRefById(channelId, &channel, false) == NULL) {
+        TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoIncFdRefById failed, channelId=%{public}d.", channelId);
+        return SOFTBUS_TRANS_TDC_GET_INFO_FAILED;
     }
-
-    return TransTdcProcessPostData(channel, (char*)(&seq), ACK_SIZE, FLAG_ACK);
+    if (channel.detail.needRelease) {
+        TRANS_LOGE(TRANS_SDK, "trans tdc channel need release, cancel sendMessage, channelId=%{public}d.", channelId);
+        return SOFTBUS_TRANS_TDC_CHANNEL_CLOSED_BY_ANOTHER_THREAD;
+    }
+    int32_t ret = TransTdcProcessPostData(&channel, (char *)(&seq), ACK_SIZE, FLAG_ACK);
+    TransUpdateFdState(channel.channelId);
+    return ret;
 }
 
 static uint32_t TransGetDataBufSize(void)
@@ -411,7 +418,7 @@ static int32_t TransTdcProcessDataByFlag(
             TransTdcSetPendingPacket(channel->channelId, plain, plainLen);
             return SOFTBUS_OK;
         case FLAG_MESSAGE:
-            TransTdcSendAck(channel, seqNum);
+            TransTdcSendAck(channel->channelId, seqNum);
             return ClientTransTdcOnDataReceived(channel->channelId, plain, plainLen, TRANS_SESSION_MESSAGE);
         default:
             TRANS_LOGE(TRANS_SDK, "unknown flag=%{public}d.", flag);
