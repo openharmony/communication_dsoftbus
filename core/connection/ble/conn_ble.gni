@@ -14,21 +14,6 @@
 import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../../dsoftbus.gni")
 
-native_source_path = rebase_path("$dsoftbus_root_path")
-conn_ble_dir = "dsoftbus_enhance/core/connection/ble_direct"
-enhanced_conn_ble = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                [
-                                  "$native_source_path",
-                                  "$conn_ble_dir",
-                                ],
-                                "value")
-conn_coc_dir = "dsoftbus_enhance/core/connection/coc"
-enhanced_conn_coc = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                [
-                                  "$native_source_path",
-                                  "$conn_coc_dir",
-                                ],
-                                "value")
 ble_connection_external_deps = []
 if (!support_bluetooth) {
   ble_connection_src = [
@@ -72,16 +57,16 @@ if (!support_bluetooth) {
       "$dsoftbus_root_path/core/connection/ble/src",
       "$dsoftbus_root_path/core/common/include",
     ]
-    if (enhanced_conn_ble == true) {
+    if (dsoftbus_feature_conn_ble_direct) {
       import(
           "../../../dsoftbus_enhance/core/connection/ble_direct/ble_direct.gni")
 
-      ble_connection_src += ble_direct_connection_src
       ble_connection_inc += ble_direct_connection_inc
+      ble_connection_src += ble_direct_connection_src
     } else {
       ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
     }
-    if (enhanced_conn_coc == true) {
+    if (dsoftbus_feature_conn_coc) {
       ble_connection_src += [
         "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/ble_protocol_interface_factory.c",
         "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_adapter_coc.c",
@@ -90,7 +75,10 @@ if (!support_bluetooth) {
       ble_connection_inc +=
           [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/include" ]
     } else {
-      ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c" ]
+      ble_connection_src += [
+        "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c",
+        "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_coc_virtual.c",
+      ]
     }
     ble_connection_src += adapter_ble_src
     ble_connection_inc += adapter_ble_inc
