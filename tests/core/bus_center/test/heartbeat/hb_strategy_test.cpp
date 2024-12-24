@@ -486,7 +486,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_DIRECT_SEND_STRATEGY_TEST_01, TestSize.Level
     obj.isDirectBoardcast = true;
     ret = DirectAdvSendStrategy(&hbFsm, (void *)&obj);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = DirectAdvSendStrategy(&hbFsm, (void *)&obj);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR);
 }
@@ -523,12 +523,12 @@ HWTEST_F(HeartBeatStrategyTest, LNN_FIXED_PERIOD_SEND_STRATEGY_TEST_01, TestSize
     obj.strategyType = STRATEGY_HB_SEND_FIXED_PERIOD;
     obj.hbType = HEARTBEAT_TYPE_BLE_V1;
     obj.isDirectBoardcast = false;
-    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = FixedPeriodSendStrategy(&hbFsm, (void *)&obj);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbMock, LnnPostNextSendOnceMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostNextSendOnceMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = FixedPeriodSendStrategy(&hbFsm, (void *)&obj);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -548,7 +548,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SINGLE_SEND_STRATEGY_TEST_01, TestSize.Level
     obj.strategyType = STRATEGY_HB_SEND_SINGLE;
     obj.hbType = HEARTBEAT_TYPE_BLE_V1;
     obj.isDirectBoardcast = false;
-    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = SingleSendStrategy(&hbFsm, (void *)&obj);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -568,12 +568,12 @@ HWTEST_F(HeartBeatStrategyTest, LNN_PROCESS_BEAT_STRATEGY_TEST_01, TestSize.Leve
     obj.hbType = HEARTBEAT_TYPE_BLE_V0;
     obj.isDirectBoardcast = true;
     obj.strategyType = STRATEGY_HB_SEND_DIRECT;
-    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = ProcessSendOnceStrategy(&hbFsm, &obj, NULL);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR);
     obj.isDirectBoardcast = false;
     obj.strategyType = STRATEGY_HB_SEND_SINGLE;
-    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = ProcessSendOnceStrategy(&hbFsm, &obj, NULL);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_SEND_ERR);
     obj.isRelay = true;
@@ -676,7 +676,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V1_SPLIT_TEST_01, TestSize.L
     int32_t ret = RelayHeartbeatV1Split(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = RelayHeartbeatV1Split(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
@@ -707,9 +707,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V0_SPLIT_OLD_TEST_01, TestSi
     int32_t ret = RelayHeartbeatV0SplitOld(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     SendEachOnce(&hbFsm, &obj, &endData, &delayTime, 11);
-    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = RelayHeartbeatV0SplitOld(&hbFsm, &obj, false, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbMock, LnnPostSendEndMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
