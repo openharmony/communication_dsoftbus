@@ -32,11 +32,11 @@ declare_args() {
   dsoftbus_feature_conn_tcp_comm = false
   dsoftbus_feature_conn_pv1 = false
 
-  #  dsoftbus_feature_conn_br = false
-  dsoftbus_feature_conn_gatt = false
+  dsoftbus_feature_conn_br = false
+  dsoftbus_feature_conn_ble = false
   dsoftbus_feature_conn_coc = false
 
-  #  dsoftbus_feature_conn_ble_direct = false
+  dsoftbus_feature_conn_ble_direct = false
   dsoftbus_feature_conn_pv2 = false
   dsoftbus_feature_conn_hv1 = false
   dsoftbus_feature_conn_hv2 = false
