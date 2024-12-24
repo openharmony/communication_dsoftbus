@@ -126,6 +126,7 @@ static void OnQosEvent(int32_t sessionId, int32_t eventId, int32_t tvCount, cons
 {
     TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%{public}d", sessionId);
 }
+
 static ISessionListener g_sessionlistener = {
     .OnSessionOpened = OnSessionOpened,
     .OnSessionClosed = OnSessionClosed,
@@ -133,6 +134,41 @@ static ISessionListener g_sessionlistener = {
     .OnMessageReceived = OnMessageReceived,
     .OnStreamReceived = OnStreamReceived,
     .OnQosEvent = OnQosEvent,
+};
+
+static void OnFile(int32_t socketId, FileEvent *event)
+{
+    TRANS_LOGI(TRANS_TEST, "session on file event, sessionId=%{public}d", socketId);
+}
+
+static void OnShutDown(int32_t socketId, ShutdownReason reason)
+{
+    TRANS_LOGI(TRANS_TEST, "session shutdown, socketId=%{public}d", socketId);
+}
+
+static void OnBindSucc(int32_t socketId, PeerSocketInfo info)
+{
+    TRANS_LOGI(TRANS_TEST, "session on bind, socketId=%{public}d", socketId);
+}
+
+static bool OnNegotiate(int32_t socketId, PeerSocketInfo info)
+{
+    TRANS_LOGI(TRANS_TEST, "session on bind, socketId=%{public}d", socketId);
+    return true;
+}
+
+static ISocketListener g_socketlistener = {
+    .OnBind = OnBindSucc,
+    .OnShutdown = OnShutDown,
+    .OnFile = OnFile,
+    .OnNegotiate = OnNegotiate,
+};
+
+static ISocketListener g_testSocketlistener = {
+    .OnBind = nullptr,
+    .OnShutdown = OnShutDown,
+    .OnFile = OnFile,
+    .OnNegotiate = nullptr,
 };
 
 static void TestGenerateCommParam(SessionParam *sessionParam)
@@ -359,7 +395,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestS
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_NO_INIT);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     RelesseChannInfo(channel);
@@ -622,7 +658,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest12, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_NO_INIT);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
@@ -710,5 +746,264 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest15, TestS
     lifecycle.sessionState = SESSION_STATE_INIT;
     ret = HandleSyncBindSuccess(1, &lifecycle);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest16
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest16, TestSize.Level1)
+{
+    int32_t channelId = -1;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    int32_t sessionId;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = true;
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    channelId = TRANS_TEST_CHANNEL_ID;
+    ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, nullptr, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, nullptr, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest17
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest17, TestSize.Level1)
+{
+    int32_t channelId = -1;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    int32_t sessionId;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = true;
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    session->isClosing = true;
+
+    int32_t ret = GetSocketCallbackAdapterByUdpChannelId(channelId,
+        channelType, &sessionId, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    channelId = TRANS_TEST_CHANNEL_ID;
+    ret = GetSocketCallbackAdapterByUdpChannelId(channelId, channelType, nullptr, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketCallbackAdapterByUdpChannelId(channelId, channelType, &sessionId, nullptr, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketCallbackAdapterByUdpChannelId(channelId, channelType, &sessionId, &sessionCallback, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketCallbackAdapterByUdpChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = GetSocketCallbackAdapterByUdpChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest18
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest18, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    int32_t socketId = TRANS_TEST_SESSION_ID;
+
+    int32_t ret = TransOnBindSuccess(socketId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOnBindSuccess(socketId, &g_testSocketlistener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOnBindSuccess(socketId, &g_socketlistener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransOnBindSuccess(socketId, &g_socketlistener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest19
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest19, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    int32_t socketId = TRANS_TEST_SESSION_ID;
+
+    int32_t ret = TransOnNegotiate(socketId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOnNegotiate(socketId, &g_testSocketlistener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransOnNegotiate(socketId, &g_socketlistener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransOnNegotiate(socketId, &g_socketlistener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ret = HandleServerOnNegotiate(socketId, &g_socketlistener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest20
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest20, TestSize.Level1)
+{
+    int32_t socketId = TRANS_TEST_SESSION_ID;
+    bool isServer = true;
+    SessionListenerAdapter sessionCallback;
+    memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+
+    int32_t ret = HandleCacheQosEvent(socketId, sessionCallback, isServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    isServer = false;
+    ret = HandleCacheQosEvent(socketId, sessionCallback, isServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = HandleOnBindSuccess(socketId, sessionCallback, isServer);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest21
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest21, TestSize.Level1)
+{
+    int32_t channelId = TRANS_TEST_CHANNEL_ID;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+
+    int32_t ret = ClientTransOnChannelBind(channelId, channelType);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest22
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest22, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    bool isSocket =  true;
+
+    int32_t ret = ClientTransIfChannelForSocket(nullptr, &isSocket);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientTransIfChannelForSocket(g_sessionName, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientTransIfChannelForSocket(g_sessionName, &isSocket);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientTransIfChannelForSocket(g_sessionName, &isSocket);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest23
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    int32_t channelId = TRANS_TEST_CHANNEL_ID;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    QoSEvent event = QOS_NOT_SATISFIED;
+    QosTV qos;
+    uint32_t count = 0;
+
+    int32_t ret = ClientTransOnQos(channelId, channelType, event, nullptr, count);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientTransOnQos(channelId, channelType, event, &qos, count);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientTransOnQos(channelId, channelType, event, &qos, count);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
 }
 }

@@ -973,6 +973,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
     ListNode destroyList;
     DestroyAllClientSession(nullptr, &destroyList);
     DestroyAllClientSession(server, nullptr);
+    DestroyAllClientSession(server, &destroyList);
     SoftBusFree(server);
     char sessionName[SESSION_NAME_SIZE_MAX + 2] = {0};
     memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);
@@ -981,6 +982,12 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
     char pkgName[PKG_NAME_SIZE_MAX + 2] = {0};
     memset_s(pkgName, sizeof(pkgName), 'B', PKG_NAME_SIZE_MAX + 1);
     server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, pkgName, &g_sessionlistener);
+    EXPECT_TRUE(server == NULL);
+    server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, nullptr, pkgName, &g_sessionlistener);
+    EXPECT_TRUE(server == NULL);
+    server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, nullptr, &g_sessionlistener);
+    EXPECT_TRUE(server == NULL);
+    server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, pkgName, nullptr);
     EXPECT_TRUE(server == NULL);
 }
 
@@ -1034,6 +1041,9 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest29, TestSize.Level1)
     EXPECT_TRUE(session != NULL);
     SoftBusFree(session);
 
+    session = CreateNewSession(nullptr);
+    EXPECT_TRUE(session == NULL);
+
     char sessionName[SESSION_NAME_SIZE_MAX + 2] = {0};
     memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);
     sessionParam->peerSessionName = (const char*)sessionName;
@@ -1084,5 +1094,306 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
 
     DeleteSessionServerAndSession(g_sessionName, sessionId);
+}
+
+/**
+ * @tc.name: TransClientSessionTest31
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest31, TestSize.Level1)
+{
+    SessionInfo *sessionNode = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
+    ASSERT_TRUE(sessionNode != NULL);
+    ClientSessionServer *SessionServer = GetNewSessionServer(SEC_TYPE_PLAINTEXT,
+        g_sessionName, g_pkgName, &g_sessionlistener);
+    ASSERT_TRUE(SessionServer != NULL);
+    sessionNode->sessionId = TRANS_TEST_SESSION_ID;
+    sessionNode->channelId = TRANS_TEST_CHANNEL_ID;
+    sessionNode->channelType = CHANNEL_TYPE_BUTT;
+    sessionNode->isAsync = true;
+    sessionNode->lifecycle.condIsWaiting = true;
+    SessionServer->listener.isSocketListener = true;
+
+    DestroySessionInfo *destroyInfo = CreateDestroySessionNode(nullptr, SessionServer);
+    EXPECT_TRUE(destroyInfo == NULL);
+    destroyInfo = CreateDestroySessionNode(sessionNode, nullptr);
+    EXPECT_TRUE(destroyInfo == NULL);
+    destroyInfo = CreateDestroySessionNode(sessionNode, SessionServer);
+    ASSERT_TRUE(destroyInfo != NULL);
+    ClientDestroySession(nullptr, SHUTDOWN_REASON_USER_SWICTH);
+    SoftBusFree(destroyInfo);
+    SoftBusFree(sessionNode);
+    SoftBusFree(SessionServer);
+}
+
+/**
+ * @tc.name: TransClientSessionTest32
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest32, TestSize.Level1)
+{
+    SessionInfo *sessionNode = CreateNonEncryptSessionInfo(nullptr);
+    EXPECT_TRUE(sessionNode == NULL);
+    char sessionName[SESSION_NAME_SIZE_MAX + TRANS_TEST_ADDR_INFO_NUM] = {0};
+    memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);
+    sessionNode = CreateNonEncryptSessionInfo(sessionName);
+    EXPECT_TRUE(sessionNode == NULL);
+}
+
+/**
+ * @tc.name: TransClientSessionTest33
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest33, TestSize.Level1)
+{
+    int32_t channelId = TRANS_TEST_CHANNEL_ID;
+    char myIp[IP_LEN] = {0};
+    memcpy_s(myIp, IP_LEN, TRANS_TEST_CONN_IP, IP_LEN);
+    int32_t ipLen = IP_LEN;
+    int32_t ret = ClientTransGetTdcIp(channelId, myIp, ipLen);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    ret = ClientTransGetUdpIp(channelId, myIp, ipLen);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransClientSessionTest34
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest34, TestSize.Level1)
+{
+    char myIp[IP_LEN] = {0};
+    memcpy_s(myIp, IP_LEN, TRANS_TEST_CONN_IP, IP_LEN);
+    bool ret = ClientTransCheckHmlIp(myIp);
+    EXPECT_FALSE(ret);
+    memcpy_s(myIp, IP_LEN, TRANS_TEST_BR_MAC, IP_LEN);
+    ret = ClientTransCheckHmlIp(myIp);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: TransClientSessionTest35
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest35, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *info = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(info != NULL);
+    int32_t connType = TRANS_CONN_HML;
+    int32_t routeType = WIFI_P2P_REUSE;
+    bool ret = ClientTransCheckNeedDel(info, routeType, connType);
+    EXPECT_FALSE(ret);
+    routeType = ROUTE_TYPE_ALL;
+    info->channelType = CHANNEL_TYPE_UDP;
+    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    EXPECT_FALSE(ret);
+    info->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    EXPECT_FALSE(ret);
+    info->channelType = CHANNEL_TYPE_AUTH;
+    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    EXPECT_TRUE(ret);
+    info->channelType = CHANNEL_TYPE_BUTT;
+    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    EXPECT_FALSE(ret);
+    SoftBusFree(sessionParam);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransClientSessionTest36
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest36, TestSize.Level1)
+{
+    ClientSessionServer server;
+    char networkId[DEVICE_ID_SIZE_MAX] = {0};
+    ASSERT_TRUE(networkId != NULL);
+    int32_t type = 1;
+    ListNode destroyList;
+    DestroyClientSessionByNetworkId(nullptr, networkId, type, &destroyList);
+    DestroyClientSessionByNetworkId(&server, nullptr, type, &destroyList);
+    DestroyClientSessionByNetworkId(&server, networkId, type, nullptr);
+    SessionServerInfo *info = CreateSessionServerInfoNode(nullptr);
+    ASSERT_TRUE(info == NULL);
+}
+
+/**
+ * @tc.name: TransClientSessionTest37
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest37, TestSize.Level1)
+{
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    memset_s(sessionName, SESSION_NAME_SIZE_MAX, 'A', SESSION_NAME_SIZE_MAX - 1);
+    SoftBusSecType type = SEC_TYPE_PLAINTEXT;
+    ClientSessionServer *server = GetNewSocketServer(type, nullptr, pkgName);
+    ASSERT_TRUE(server == NULL);
+    server = GetNewSocketServer(type, sessionName, nullptr);
+    ASSERT_TRUE(server == NULL);
+    bool ret = IsDistributedDataSession(nullptr);
+    EXPECT_FALSE(ret);
+    ret = IsDistributedDataSession(sessionName);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TransClientSessionTest38
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest38, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.info.flag = COMMON_VIDEO_STREAM;
+    sessionInfo.isEncyptedRawStream = true;
+    int dataType = RAW_STREAM;
+    bool isEncyptedRawStream = true;
+    bool ret = IsDifferentDataType(nullptr, dataType, isEncyptedRawStream);
+    EXPECT_FALSE(ret);
+    ret = IsDifferentDataType(&sessionInfo, dataType, isEncyptedRawStream);
+    EXPECT_TRUE(ret);
+    sessionInfo.info.flag = RAW_STREAM;
+    ret = IsDifferentDataType(&sessionInfo, dataType, isEncyptedRawStream);
+    EXPECT_FALSE(ret);
+    dataType = COMMON_VIDEO_STREAM;
+    sessionInfo.info.flag = COMMON_VIDEO_STREAM;
+    ret = IsDifferentDataType(&sessionInfo, dataType, isEncyptedRawStream);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TransClientSessionTest39
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest39, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *info = CreateNewSocketSession(nullptr);
+    ASSERT_TRUE(info == NULL);
+    info = CreateNewSocketSession(sessionParam);
+    ASSERT_TRUE(info != NULL);
+    SoftBusFree(sessionParam);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransClientSessionTest40
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest40, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *info = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(info != NULL);
+    ClientSessionServer serverNode;
+    SessionAttribute tmpAttr;
+    int32_t ret = CheckBindSocketInfo(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckBindSocketInfo(info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    info->info.flag = 0;
+    ret = CheckBindSocketInfo(info);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    info->info.flag = TYPE_BUTT;
+    ret = CheckBindSocketInfo(info);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    FillSessionParam(nullptr, &tmpAttr, &serverNode, info);
+    FillSessionParam(sessionParam, nullptr, &serverNode, info);
+    FillSessionParam(sessionParam, &tmpAttr, nullptr, info);
+    FillSessionParam(sessionParam, &tmpAttr, &serverNode, nullptr);
+    SoftBusFree(sessionParam);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransClientSessionTest41
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest41, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *info = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(info != NULL);
+    ClientSessionServer serverNode;
+    int32_t socket = 1;
+    int32_t retOut = 0;
+    int32_t socketId[5] = {0};
+    uint32_t capacity = 1;
+    uint32_t num = 1;
+    ClientConvertRetVal(socket, &retOut);
+    bool ret = CleanUpTimeoutAuthSession(socket);
+    ASSERT_FALSE(ret);
+    ClientCheckWaitTimeOut(nullptr, info, socketId, capacity, &num);
+    ClientCheckWaitTimeOut(&serverNode, nullptr, socketId, capacity, &num);
+    ClientCheckWaitTimeOut(&serverNode, info, nullptr, capacity, &num);
+    ClientCheckWaitTimeOut(&serverNode, info, socketId, capacity, nullptr);
+    ClientCheckWaitTimeOut(&serverNode, info, socketId, capacity, &num);
+    ClientCleanUpWaitTimeoutSocket(nullptr, num);
+    ClientCleanUpWaitTimeoutSocket(socketId, num);
+    SoftBusFree(sessionParam);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransClientSessionTest42
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest42, TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    int32_t ret = ClientDeleteSocketSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *info = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(info != NULL);
+    ClientSessionServer serverNode;
+    SessionAttribute tmpAttr;
+    ListNode destroyList;
+    FillDfsSocketParam(nullptr, &tmpAttr, &serverNode, info);
+    FillDfsSocketParam(sessionParam, nullptr, &serverNode, info);
+    FillDfsSocketParam(sessionParam, &tmpAttr, nullptr, info);
+    FillDfsSocketParam(sessionParam, &tmpAttr, &serverNode, nullptr);
+    FillDfsSocketParam(sessionParam, &tmpAttr, &serverNode, info);
+    ClientUpdateIdleTimeout(nullptr, info, &destroyList);
+    ClientUpdateIdleTimeout(&serverNode, nullptr, &destroyList);
+    ClientUpdateIdleTimeout(&serverNode, info, nullptr);
+    SoftBusFree(sessionParam);
+    SoftBusFree(info);
 }
 }
