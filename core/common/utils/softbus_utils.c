@@ -637,3 +637,85 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     }
     return SOFTBUS_OK;
 }
+
+static int32_t checkParamIsNull(uint8_t *buf, int32_t *offSet)
+{
+    if (buf == NULL) {
+        COMM_LOGE(COMM_UTILS, "param buf is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (offSet == NULL) {
+        COMM_LOGE(COMM_UTILS, "param offSet is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data)
+{
+    int32_t ret = checkParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (dataLen < *offSet + sizeof(data)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *((int32_t *)(buf + *offSet)) = data;
+    *offSet += sizeof(data);
+    return SOFTBUS_OK;
+}
+
+int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t data)
+{
+    int32_t ret = checkParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (dataLen < *offSet + sizeof(data)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *(buf + *offSet) = data;
+    *offSet += sizeof(data);
+    return SOFTBUS_OK;
+}
+
+
+int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t *data)
+{
+    int32_t ret = checkParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (dataLen < *offSet + sizeof(*data)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *data = *((int32_t *)(buf + *offSet));
+    *offSet += sizeof(*data);
+    return SOFTBUS_OK;
+}
+
+int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data)
+{
+    int32_t ret = checkParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (dataLen < *offSet + sizeof(*data)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *data = *(buf + *offSet);
+    *offSet += sizeof(*data);
+    return SOFTBUS_OK;
+}

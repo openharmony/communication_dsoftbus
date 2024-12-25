@@ -35,6 +35,7 @@ ohos_fuzztest("ClientTransProxyManagerFuzzTest") {
     "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   cflags = [

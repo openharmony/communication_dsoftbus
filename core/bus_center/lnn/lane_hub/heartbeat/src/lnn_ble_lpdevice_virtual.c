@@ -83,3 +83,8 @@ void AsyncSetBleBroadcastTimeStamp(const char *networkId)
 {
     (void)networkId;
 }
+
+void SendCleanMsgToMlps(uint32_t cleanType)
+{
+    (void)cleanType;
+}

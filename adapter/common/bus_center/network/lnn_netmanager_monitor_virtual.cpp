@@ -9,7 +9,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permission and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -17,11 +17,32 @@
 
 #include "softbus_error_code.h"
 
+int32_t ConfigNetLinkUp(const char *ifName)
+{
+    (void)ifName;
+    return SOFTBUS_OK;
+}
+
+int32_t ConfigLocalIp(const char *ifName, const char *localIp)
+{
+    (void)ifName;
+    (void)localIp;
+    return SOFTBUS_OK;
+}
+
+int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destination, const char *gateway)
+{
+    (void)id;
+    (void)ifName;
+    (void)destination;
+    (void)gateway;
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitNetManagerMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
 
 void LnnDeinitNetManagerMonitorImpl(void)
-{
-}
+{}

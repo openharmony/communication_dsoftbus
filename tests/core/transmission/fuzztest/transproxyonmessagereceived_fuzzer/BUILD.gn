@@ -32,6 +32,7 @@ ohos_fuzztest("TransProxyOnMessageReceivedFuzzTest") {
     "$dsoftbus_core_path/transmission/common/include",
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   cflags = [
@@ -48,7 +49,20 @@ ohos_fuzztest("TransProxyOnMessageReceivedFuzzTest") {
     "$dsoftbus_core_path/frame:softbus_server",
   ]
 
-  external_deps = [ "hilog:libhilog" ]
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "hilog:libhilog",
+      "ipc:ipc_single",
+    ]
+  } else {
+    external_deps = [
+      "dsoftbus:softbus_client",
+      "hilog:libhilog",
+      "ipc:ipc_single",
+    ]
+  }
 }
 
 group("fuzztest") {

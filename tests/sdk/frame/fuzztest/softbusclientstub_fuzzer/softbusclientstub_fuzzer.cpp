@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "client_trans_channel_manager.h"
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_stub.h"
 
@@ -176,10 +177,14 @@ bool OnChannelOpenFailedInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t errCode = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
+    GenerateInt32(errCode);
 
     MessageParcel datas;
     MessageParcel reply;
@@ -189,6 +194,7 @@ bool OnChannelOpenFailedInnerTest(const uint8_t *data, size_t size)
     datas.WriteInt32(channelType);
     datas.WriteInt32(errCode);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_OPENFAILED, datas, reply, option);
+    DataGenerator::Clear();
 
     return true;
 }
@@ -226,10 +232,14 @@ bool OnChannelClosedInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t messageType = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t messageType = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
+    GenerateInt32(messageType);
 
     MessageParcel datas;
     MessageParcel reply;
@@ -239,6 +249,7 @@ bool OnChannelClosedInnerTest(const uint8_t *data, size_t size)
     datas.WriteInt32(channelType);
     datas.WriteInt32(messageType);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_CLOSED, datas, reply, option);
+    DataGenerator::Clear();
 
     return true;
 }
@@ -249,10 +260,14 @@ bool OnChannelMsgReceivedInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t type = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t type = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
+    GenerateInt32(type);
 
     MessageParcel datas;
     MessageParcel reply;
@@ -264,6 +279,7 @@ bool OnChannelMsgReceivedInnerTest(const uint8_t *data, size_t size)
     datas.WriteRawData(data, size);
     datas.WriteInt32(type);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, datas, reply, option);
+    DataGenerator::Clear();
 
     return true;
 }
@@ -274,14 +290,17 @@ bool OnChannelQosEventInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    int32_t eventId = *(reinterpret_cast<const int32_t *>(data));
-    WifiChannelQuality wifiChannelInfo = {
-        .channel = size,
-        .score = size,
-    };
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t eventId = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
+    GenerateInt32(eventId);
+    WifiChannelQuality wifiChannelInfo = { 0 };
+    GenerateInt32(wifiChannelInfo.channel);
+    GenerateInt32(wifiChannelInfo.score);
     QosTv qosTv = {
         .type = WIFI_CHANNEL_QUALITY,
         .info.wifiChannelInfo = wifiChannelInfo,
@@ -297,6 +316,7 @@ bool OnChannelQosEventInnerTest(const uint8_t *data, size_t size)
     datas.WriteInt32(sizeof(qosTv));
     datas.WriteRawData(&qosTv, sizeof(qosTv));
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_QOSEVENT, datas, reply, option);
+    DataGenerator::Clear();
 
     return true;
 }
@@ -659,9 +679,12 @@ bool OnClientTransLimitChangeInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    uint8_t tos = *(reinterpret_cast<const uint8_t *>(data));
+    int32_t channelId = 0;
+    uint8_t tos = 0;
+    GenerateInt32(channelId);
+    GenerateUint8(tos);
 
     MessageParcel datas;
     MessageParcel reply;
@@ -670,6 +693,7 @@ bool OnClientTransLimitChangeInnerTest(const uint8_t *data, size_t size)
     datas.WriteInt32(channelId);
     datas.WriteUint8(tos);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_TRANS_LIMIT_CHANGE, datas, reply, option);
+    DataGenerator::Clear();
 
     return true;
 }
@@ -684,11 +708,15 @@ bool SetChannelInfoInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
+    int32_t sessionId = 0;
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    GenerateInt32(sessionId);
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    int32_t sessionId = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
 
     MessageParcel datas;
     MessageParcel reply;
@@ -700,6 +728,7 @@ bool SetChannelInfoInnerTest(const uint8_t *data, size_t size)
     datas.WriteInt32(channelType);
     softBusClientStub->OnRemoteRequest(CLIENT_SET_CHANNEL_INFO, datas, reply, option);
     SoftBusFree(dataWithEndCharacter);
+    DataGenerator::Clear();
 
     return true;
 }
@@ -710,9 +739,12 @@ bool OnChannelBindInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
         return false;
     }
+    DataGenerator::Write(data, size);
 
-    int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
 
     MessageParcel datas;
     MessageParcel reply;
@@ -721,6 +753,7 @@ bool OnChannelBindInnerTest(const uint8_t *data, size_t size)
     datas.WriteInt32(channelId);
     datas.WriteInt32(channelType);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_BIND, datas, reply, option);
+    DataGenerator::Clear();
 
     return true;
 }

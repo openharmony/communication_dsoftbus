@@ -80,10 +80,9 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
     EXPECT_EQ(EOK, strcpy_s(result5->ssid, WIFI_MAX_SSID_LEN, TEST_SSID));
     NiceMock<LnnServicetInterfaceMock> LnnServiceMock;
     EXPECT_CALL(LnnServiceMock, SoftBusGetWifiDeviceConfig)
-        .WillOnce(
-            DoAll(SetArgPointee<0>(*result1), SetArgPointee<1>(INVALID_WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_ERR)))
-        .WillOnce(
-            DoAll(SetArgPointee<0>(*result2), SetArgPointee<1>(INVALID_WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(
+            SetArgPointee<0>(*result1), SetArgPointee<1>(INVALID_WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_INVALID_PARAM)))
+        .WillOnce(DoAll(SetArgPointee<0>(*result2), SetArgPointee<1>(INVALID_WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<0>(*result3), SetArgPointee<1>(WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<0>(*result4), SetArgPointee<1>(WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<0>(*result5), SetArgPointee<1>(WIFI_MAX_CONFIG_SIZE), Return(SOFTBUS_OK)));
@@ -93,15 +92,15 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
     ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
     EXPECT_EQ(ret, SOFTBUS_GET_WIFI_DEVICE_CONFIG_FAIL);
     EXPECT_CALL(LnnServiceMock, SoftBusDisconnectDevice)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(LnnServiceMock, SoftBusConnectToDevice)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -115,17 +114,21 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
 HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> LedgerMock;
-    EXPECT_CALL(LedgerMock, LnnSetDLBssTransInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(LedgerMock, LnnSetDLBssTransInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<LnnSyncInfoInterfaceMock> SyncInfoMock;
-    EXPECT_CALL(SyncInfoMock, LnnSendSyncInfoMsg).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(SyncInfoMock, LnnSendSyncInfoMsg)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     BssTransInfo transInfo;
     (void)memset_s(&transInfo, sizeof(BssTransInfo), 0, sizeof(BssTransInfo));
     EXPECT_EQ(EOK, strcpy_s(transInfo.ssid, WIFI_SSID_LEN, TEST_VALID_PEER_NETWORKID1));
     EXPECT_EQ(EOK, strcpy_s((char *)transInfo.targetBssid, WIFI_MAC_LEN, TEST_VALID_PEER_NETWORKID2));
     int32_t ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, &transInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, &transInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, &transInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnSendTransReq(nullptr, &transInfo);
@@ -144,7 +147,7 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_DEVICE_NAME_TEST_001, TestSize.Level
 {
     NiceMock<LnnNetLedgertInterfaceMock> LedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> SyncInfoMock;
-    EXPECT_CALL(LedgerMock, LnnConvertDlId).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(LedgerMock, LnnConvertDlId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(SyncInfoMock, LnnRegSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_OK));
     OnReceiveDeviceName(LNN_INFO_TYPE_DEVICE_NAME, nullptr, nullptr, TEST_VALID_UDID_LEN);
     uint8_t msg[WIFI_SSID_LEN] = { 1, 2, 3, 4, 5 };
@@ -164,15 +167,17 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001, TestSize.Lev
 {
     NiceMock<LnnNetLedgertInterfaceMock> LedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> SyncInfoMock;
-    EXPECT_CALL(LedgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(LedgerMock, LnnSetDLDeviceInfoName).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(SyncInfoMock, LnnRegSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(LedgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(LedgerMock, LnnSetDLDeviceInfoName)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(SyncInfoMock, LnnRegSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OnReceiveTransReqMsg(LNN_INFO_TYPE_TOPO_UPDATE, nullptr, nullptr, TEST_VALID_UDID_LEN);
     OnReceiveTransReqMsg(LNN_INFO_TYPE_BSS_TRANS, nullptr, nullptr, TEST_VALID_UDID_LEN);
     OnReceiveTransReqMsg(LNN_INFO_TYPE_BSS_TRANS, nullptr, nullptr, TEST_VALID_UDID_LEN);
     OnReceiveTransReqMsg(LNN_INFO_TYPE_BSS_TRANS, nullptr, nullptr, TEST_VALID_UDID_LEN);
     int32_t ret = LnnInitOffline();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -184,7 +189,7 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001, TestSize.Lev
 HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_BR_OFFLINE_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> LedgerMock;
-    EXPECT_CALL(LedgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(LedgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(LedgerMock, LnnGetCnnCode)
         .WillOnce(Return(INVALID_CONNECTION_CODE_VALUE))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -214,8 +219,7 @@ HWTEST_F(LNNSyncInfoItemTest, FILL_TARGET_WIFI_CONFIG_TEST_001, TestSize.Level1)
     EXPECT_EQ(EOK, strcpy_s(conWifiConf.preSharedKey, WIFI_MAX_KEY_LEN, TEST_PRE_SHARED_KEY));
     SoftBusWifiDevConf targetWifiConf;
     (void)memset_s(&targetWifiConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
-    const unsigned char *targetBssid =
-        reinterpret_cast<const unsigned char *>(const_cast<char *>(TEST_PRE_SHARED_KEY));
+    const unsigned char *targetBssid = reinterpret_cast<const unsigned char *>(const_cast<char *>(TEST_PRE_SHARED_KEY));
     int32_t ret = FillTargetWifiConfig(targetBssid, TEST_SSID, &conWifiConf, &targetWifiConf);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

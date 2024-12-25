@@ -96,6 +96,18 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
     }
 }
 
+static void NotifyIpUpdated(const char *ifName, struct nlmsghdr *nlh)
+{
+    if (ifName == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+
+    if (nlh->nlmsg_type == RTM_NEWADDR) {
+        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IP_UPDATED, ifName);
+    }
+}
+
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
@@ -110,6 +122,7 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         LNN_LOGE(LNN_BUILDER, "invalid iface index");
         return;
     }
+    NotifyIpUpdated(ifName, nlh);
     if (LnnGetNetIfTypeByName(ifName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
@@ -119,6 +132,17 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         LNN_LOGI(LNN_BUILDER, "network addr changed, ifName=%{public}s, netifType=%{public}d, callCount=%{public}u",
             ifName, type, callCount++);
         LnnNotifyAddressChangedEvent(ifName);
+    }
+}
+
+static void NotifyLinkUp(const char *ifName, struct nlmsghdr *nlh, struct ifinfomsg *ifinfo)
+{
+    if (ifName == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (nlh->nlmsg_type == RTM_NEWLINK && (ifinfo->ifi_flags & IFF_LOWER_UP)) {
+        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_LINK_UP, ifName);
     }
 }
 
@@ -136,7 +160,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         LNN_LOGE(LNN_BUILDER, "netlink msg is invalid");
         return;
     }
-
+    NotifyLinkUp((const char *)RTA_DATA(tb[IFLA_IFNAME]), nlh, ifinfo);
     if (LnnGetNetIfTypeByName((const char *)RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
         return;
     }

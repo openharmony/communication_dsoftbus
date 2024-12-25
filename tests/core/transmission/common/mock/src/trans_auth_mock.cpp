@@ -243,5 +243,11 @@ int32_t LnnFreeLane(uint32_t laneReqId)
 {
     return GetTransAuthInterface()->LnnFreeLane(laneReqId);
 }
+
+int32_t LnnGetNetworkIdByUdidHash(
+    const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline)
+{
+    return GetTransAuthInterface()->LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, buf, len, needOnline);
+}
 }
 }

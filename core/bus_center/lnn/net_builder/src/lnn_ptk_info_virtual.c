@@ -25,7 +25,7 @@ void LnnLoadPtkInfo(void)
 int32_t UpdateLocalPtkIfValid(char *udid)
 {
     (void)udid;
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnGenerateLocalPtk(char *udid, char *uuid)

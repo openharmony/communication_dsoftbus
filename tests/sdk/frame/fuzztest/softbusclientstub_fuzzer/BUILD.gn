@@ -25,6 +25,7 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
   include_dirs = [
     "$dsoftbus_sdk_path/frame/standard/include",
     "$dsoftbus_sdk_path/transmission/trans_channel/manager/include/",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   cflags = [

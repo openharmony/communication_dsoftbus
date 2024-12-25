@@ -54,7 +54,7 @@ void SoftBusMessageOpenChannelTest::SetUpTestCase(void)
 void SoftBusMessageOpenChannelTest::TearDownTestCase(void)
 {}
 
-char *TestGetMsgPack()
+char *TestGetMsgPack(ApiVersion apiVersion)
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == nullptr) {
@@ -69,8 +69,8 @@ char *TestGetMsgPack()
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
-    appInfo->myData.apiVersion = API_V2;
-    appInfo->peerData.apiVersion = API_V2;
+    appInfo->myData.apiVersion = apiVersion;
+    appInfo->peerData.apiVersion = apiVersion;
     (void)memcpy_s(appInfo->myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName, (strlen(g_sessionName)+1));
     (void)memcpy_s(appInfo->myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
     if (TransAuthChannelMsgPack(msg, appInfo) != SOFTBUS_OK) {
@@ -170,7 +170,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
 {
     int32_t ret = UnpackRequest(NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    char *mag = TestGetMsgPack();
+    char *mag = TestGetMsgPack(API_V2);
     cJSON *json = cJSON_Parse(mag);
     EXPECT_NE(json, nullptr);
     ret = UnpackRequest(json, NULL);
@@ -185,12 +185,50 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
     EXPECT_EQ(EOK, res);
     ret = UnpackRequest(json, appInfo);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
+    char *msg = TestGetMsgPack(API_V1);
+    cJSON *json1 = cJSON_Parse(msg);
+    EXPECT_NE(json1, nullptr);
+    ret = UnpackRequest(json1, appInfo);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
+    cJSON_Delete(json);
+    cJSON_Delete(json1);
 }
 
+/**
+ * @tc.name: UnpackRequest002
+ * @tc.desc: UnpackRequest001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest002, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    cJSON_AddStringToObject(msg, BUS_NAME, "BUS_NAME");
+    cJSON_AddStringToObject(msg, GROUP_ID, "GROUP_ID");
+    cJSON_AddStringToObject(msg, SESSION_KEY, "SESSION_KEY");
+    cJSON_AddNumberToObject(msg, MTU_SIZE, 1000);
+    cJSON_AddNumberToObject(msg, UID, 100);
+    cJSON_AddNumberToObject(msg, PID, 200);
+    cJSON_AddNumberToObject(msg, MY_HANDLE_ID, 1);
+    cJSON_AddNumberToObject(msg, PEER_HANDLE_ID, 2);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    int32_t ret = UnpackRequest(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_STREQ(appInfo->myData.sessionName, "BUS_NAME");
+    EXPECT_STREQ(appInfo->groupId, "GROUP_ID");
+    EXPECT_STREQ(appInfo->sessionKey, "");
+    EXPECT_EQ(appInfo->peerData.dataConfig, 1000);
+    EXPECT_EQ(appInfo->peerData.uid, 100);
+    EXPECT_EQ(appInfo->peerData.pid, 200);
+    EXPECT_EQ(appInfo->myHandleId, 2);
+    EXPECT_EQ(appInfo->peerHandleId, 1);
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
 /**
  * @tc.name: PackReply001
  * @tc.desc: PackReply001, use the wrong parameter.
@@ -235,7 +273,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReply001, TestSize.Level1)
     int32_t ret = UnpackReply(NULL, NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    char *mag = TestGetMsgPack();
+    char *mag = TestGetMsgPack(API_V2);
     cJSON *json = cJSON_Parse(mag);
     ret = UnpackReply(json, NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -253,6 +291,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReply001, TestSize.Level1)
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
+    cJSON_Delete(json);
 }
 
 /**
@@ -267,7 +306,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReplyErrCode001, TestSize.Level1)
     int32_t ret = UnpackReplyErrCode(NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    char *mag = TestGetMsgPack();
+    char *mag = TestGetMsgPack(API_V2);
     cJSON *json = cJSON_Parse(mag);
     ret = UnpackReplyErrCode(json, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -278,6 +317,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReplyErrCode001, TestSize.Level1)
     errCode = 1;
     ret = UnpackReplyErrCode(json, &errCode);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    cJSON_Delete(json);
 }
 
 /**
@@ -291,7 +331,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackFirstData001, TestSize.Level1)
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
 
-    char *mag = TestGetMsgPack();
+    char *mag = TestGetMsgPack(API_V2);
     cJSON *json = cJSON_Parse(mag);
     EXPECT_NE(json, nullptr);
 
@@ -348,7 +388,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackFirstData001, TestSize.Level1)
     ret = UnpackFirstData(appInfo, json);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
-    char *mag = TestGetMsgPack();
+    char *mag = TestGetMsgPack(API_V2);
     cJSON *json1 = cJSON_Parse(mag);
     EXPECT_NE(json, nullptr);
     ret = UnpackFirstData(appInfo, json1);

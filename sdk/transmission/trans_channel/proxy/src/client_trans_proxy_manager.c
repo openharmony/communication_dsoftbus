@@ -337,7 +337,20 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
         return ret;
     }
 
-    ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE);
+    SessionType type = TYPE_BUTT;
+    switch (channel->businessType) {
+        case BUSINESS_TYPE_BYTE:
+            type = TYPE_BYTES;
+            break;
+        case BUSINESS_TYPE_FILE:
+            type = TYPE_FILE;
+            break;
+        default:
+            type = TYPE_MESSAGE;
+            break;
+    }
+
+    ret = g_sessionCb.OnSessionOpened(sessionName, channel, type);
     if (ret != SOFTBUS_OK) {
         (void)ClientTransProxyDelChannelInfo(channel->channelId);
         char *tmpName = NULL;
@@ -566,6 +579,10 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
 static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *data, uint32_t len)
 {
     PacketHead head;
+    if (len < sizeof(PacketHead)) {
+        TRANS_LOGE(TRANS_SDK, "check len failed, len=%{public}d", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy packetHead failed");
         return SOFTBUS_MEM_ERR;

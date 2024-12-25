@@ -22,9 +22,10 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <string>
+#include "securec.h"
 
 #include "client_trans_proxy_file_common.h"
-#include "securec.h"
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
@@ -38,18 +39,26 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(uint64_t))) {
         return;
     }
+    DataGenerator::Write(data, size);
 
     char *filePath = nullptr;
     char *absPath = nullptr;
     char *destFile = nullptr;
-    uint64_t index = *(reinterpret_cast<const uint64_t*>(data));
-    uint64_t frameNumber = *(reinterpret_cast<const uint64_t*>(data));
-    uint32_t bufferSize = *(reinterpret_cast<const uint32_t*>(data));
-    int32_t fileCount = *(reinterpret_cast<const int32_t*>(data));
+    uint64_t index = 0;
+    uint64_t frameNumber = 0;
+    uint32_t bufferSize = 0;
+    int32_t fileCount = 0;
     char *path = nullptr;
-    int32_t fd = *(reinterpret_cast<const int32_t*>(data));
-    int32_t type = *(reinterpret_cast<const int32_t*>(data));
-    bool isBlock = *(reinterpret_cast<const bool*>(data));
+    int32_t fd = 0;
+    int32_t type = 0;
+    bool isBlock = 0;
+    GenerateUint64(index);
+    GenerateUint64(frameNumber);
+    GenerateUint32(bufferSize);
+    GenerateInt32(fileCount);
+    GenerateInt32(fd);
+    GenerateInt32(type);
+    GenerateBool(isBlock);
 
     IsPathValid(filePath);
 
@@ -66,6 +75,7 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
     FileLock(fd, type, isBlock);
 
     FileUnLock(fd);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

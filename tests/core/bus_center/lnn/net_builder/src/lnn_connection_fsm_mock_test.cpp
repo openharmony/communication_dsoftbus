@@ -195,7 +195,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnAuthtInterfaceMock> authtMock;
     EXPECT_CALL(serviceMock, AuthGenRequestId).WillRepeatedly(Return(REQUEST_ID));
-    EXPECT_CALL(authtMock, AuthStartVerify).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(authtMock, AuthStartVerify).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     bool ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
@@ -214,8 +214,10 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnAuthtInterfaceMock> authtMock;
-    EXPECT_CALL(authtMock, AuthGetVersion).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(serviceMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authtMock, AuthGetVersion).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, AuthGetDeviceUuid)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t *retCode = nullptr;
     retCode = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
@@ -318,9 +320,9 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnIsNodeOnline).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netLedgerMock, LnnIsNodeOnline).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     bool ret1 =
         CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);

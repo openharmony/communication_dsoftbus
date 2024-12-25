@@ -901,6 +901,7 @@ bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
         TRANS_LOGE(TRANS_SDK, "copy sessionName failed");
         return false;
     }
+    newSessionName[len] = '\0';
     return true;
 }
 

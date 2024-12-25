@@ -98,6 +98,14 @@ int32_t StringToUpperCase(const char *str, char *buf, int32_t size);
 
 int32_t StringToLowerCase(const char *str, char *buf, int32_t size);
 
+int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data);
+
+int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t data);
+
+int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t *data);
+
+int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data);
+
 void SetSignalingMsgSwitchOn(void);
 void SetSignalingMsgSwitchOff(void);
 bool GetSignalingMsgSwitch(void);

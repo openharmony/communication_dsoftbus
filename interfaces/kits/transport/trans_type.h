@@ -42,6 +42,12 @@ typedef enum {
     DATA_TYPE_BUTT,
 } TransDataType;
 
+typedef enum {
+    EVENT_TYPE_CHANNEL_OPENED,
+    EVENT_TYPE_TRANS_LIMIT_CHANGE,
+    EVENT_TYPE_BUTT,
+} TransEventType;
+
 /**
  * @brief Defines the description of the socket.
  *
@@ -132,6 +138,7 @@ typedef enum {
     QOS_TYPE_FIRST_PACKAGE,     /**< @reserved First packet size. */
     QOS_TYPE_MAX_IDLE_TIMEOUT,  /**< Maximum idle time. */
     QOS_TYPE_TRANS_RELIABILITY, /**< @reserved Transmission reliability. */
+    QOS_TYPE_TRANS_CONTINUOUS,   /**< Continuous transmission */
     QOS_TYPE_BUTT,
 } QosType;
 

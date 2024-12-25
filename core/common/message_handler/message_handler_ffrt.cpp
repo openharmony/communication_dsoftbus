@@ -168,7 +168,7 @@ static void DumpMsgInfo(const SoftBusMessage *msg)
 
 static void UpdateHandlingMsg(const SoftBusMessage *currentMsg, const SoftBusLooper *looper)
 {
-    if (looper->queue == nullptr || currentMsg->handler == nullptr) {
+    if (looper->queue == nullptr || currentMsg->handler == nullptr || currentMsg->handler->name == nullptr) {
         COMM_LOGE(COMM_UTILS, "invalid para when update handling msg");
         return;
     }
@@ -177,7 +177,7 @@ static void UpdateHandlingMsg(const SoftBusMessage *currentMsg, const SoftBusLoo
         SoftBusFree(tmpMsg->handler);
         tmpMsg->handler = nullptr;
     }
-    tmpMsg->handler = (char *)SoftBusCalloc(strlen(currentMsg->handler->name) + 1);
+    tmpMsg->handler = static_cast<char *>(SoftBusCalloc(strlen(currentMsg->handler->name) + 1));
     if (tmpMsg->handler == nullptr) {
         COMM_LOGE(COMM_UTILS, "calloc fail when update handling msg");
         return;

@@ -28,7 +28,7 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-#define TEST_CHANNELID 5
+#define TEST_CHANNELID 1030
 #define ERR_CHANNELID (-1)
 #define TEST_COUNT 2
 #define STREAM_DATA_LENGTH 10
@@ -283,11 +283,11 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, Te
 
     udpChannel.isEnable = false;
     ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     udpChannel.isEnable = true;
     ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
 /**
@@ -430,5 +430,27 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest004, TestS
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
     ret = OnRawStreamEncryptOptGet(channelId, &encrypt);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+}
+
+/**
+ * @tc.name: TransUdpChannelSetStreamMultiLayer
+ * @tc.desc: TransUdpChannelSetStreamMultiLayer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, TestSize.Level0)
+{
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    udpChannel.channelId = TEST_CHANNELID;
+    udpChannel.isEnable = false;
+
+    ClientTransAddUdpChannel(&udpChannel);
+    int32_t ret = TransUdpChannelSetStreamMultiLayer(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_DISABLE, ret);
+
+    udpChannel.isEnable = true;
+    ret = TransUdpChannelSetStreamMultiLayer(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS

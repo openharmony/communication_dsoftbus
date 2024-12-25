@@ -79,6 +79,7 @@ ohos_unittest("TransProxyChannelTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
 }
@@ -133,6 +134,59 @@ ohos_unittest("SoftbusTransProxyManagerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("SoftbusTransProxyMessageTest") {
+  module_out_path = module_output_path
+  sources = trans_comm_mock_src
+  sources += [ "softbus_trans_proxy_message_test.cpp" ]
+
+  include_dirs = [
+    "$softbus_adapter_common/include",
+
+    "$dsoftbus_core_path/adapter/transmission/include",
+    "$dsoftbus_core_path/authentication/include",
+    "$dsoftbus_core_path/authentication/interface",
+    "$dsoftbus_test_path/core/transmission/common/mock/include",
+
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
+
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
+
+    "$dsoftbus_core_path/bus_center/service/include",
+
+    "$dsoftbus_core_path/common/security/permission/include",
+
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/transmission/interface",
+
+    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
+    "$dsoftbus_core_path/transmission/trans_channel/proxy/src",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+
+    "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel",
+    "$dsoftbus_core_path/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_core_path/connection/interface",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -153,6 +207,7 @@ ohos_unittest("SoftbusProxyChannelManagerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -213,6 +268,7 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -454,6 +510,7 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -514,6 +571,7 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -570,6 +628,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -587,6 +646,7 @@ group("unittest") {
     ":SoftbusProxyTransceiverTest",
     ":SoftbusTransProxyChannelManagerTest",
     ":SoftbusTransProxyManagerTest",
+    ":SoftbusTransProxyMessageTest",
     ":TransProxyChannelTest",
   ]
 }

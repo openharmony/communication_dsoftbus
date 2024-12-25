@@ -58,7 +58,7 @@ static IServerDiscInnerCallback g_discInnerCb = {
 
 static int32_t LnnCoapTest(void)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 static int32_t LnnCoapFuncTest(void)
@@ -97,9 +97,9 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
     bool isInnerRequest = false;
     DiscManagerInterfaceMock discMock;
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
     int32_t ret = LnnPublishService(pkgName, &info, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
 }
 
 /*
@@ -117,16 +117,16 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level
     int32_t ret = 0;
 
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
-    EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
     EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnPublishService(pkgName, &info, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -146,14 +146,14 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
     DiscManagerInterfaceMock discMock;
     int32_t ret = 0;
 
-    EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
-    EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_OK));
@@ -179,20 +179,20 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Lev
         .serverCb = g_discInnerCb,
     };
     (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
-    EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL);
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
-    EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
@@ -213,14 +213,14 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
     DiscManagerInterfaceMock discMock;
     int32_t ret = 0;
 
-    EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
-    EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
@@ -315,18 +315,18 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.
 {
     DiscManagerInterfaceMock discMock;
     int32_t ret;
-    EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStartCoapDiscovery();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(discMock, DiscStartAdvertise).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartAdvertise).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStartCoapDiscovery();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartAdvertise).WillOnce(Return(SOFTBUS_OK));
     ret = LnnStartCoapDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopCoapDiscovery();
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_OK));
@@ -344,13 +344,13 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Le
 {
     DiscManagerInterfaceMock discMock;
     int32_t ret;
-    EXPECT_CALL(discMock, DiscStartScan).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscStartScan).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStartCoapPublish();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscStartScan).WillOnce(Return(SOFTBUS_OK));
     ret = LnnStartCoapPublish();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopCoapPublish();
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_OK));

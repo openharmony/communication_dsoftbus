@@ -175,7 +175,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups(
     if (!g_isFlage) {
         AUTH_LOGI(AUTH_TEST, "getRelatedGroups test return false");
         g_isFlage = true;
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_GROUP_TYPE_FAIL;
     }
     char data = 'A';
     if (g_isReturnDeviceNum) {
@@ -197,7 +197,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     JsonObj *obj = JSON_CreateObject();
     if (obj == NULL) {
         AUTH_LOGI(AUTH_TEST, "create jsonObject err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (!JSON_AddStringToObject(obj, "groupName", "mygroup<256>E469") ||
         !JSON_AddStringToObject(obj, "groupId", "1D77EBFF0349B27EED57014DD7B2449A") ||
@@ -205,7 +205,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
         !JSON_AddInt32ToObject(obj, "groupType", GROUP_TYPE_POINT_TO_POINT) ||
         !JSON_AddInt32ToObject(obj, "groupVisibility", GROUP_VISIBILITY_INVALID)) {
         JSON_Delete(obj);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     char* jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
@@ -224,18 +224,18 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
     JsonObj *obj = JSON_CreateObject();
     if (obj == NULL) {
         AUTH_LOGI(AUTH_TEST, "create jsonObject err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (!JSON_AddStringToObject(obj, "authId", "ABCDEDF00ABCDE0021DD55ACFF")) {
         JSON_Delete(obj);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     char* jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
     if (!g_isReturnTrue) {
         g_isReturnTrue = true;
         JSON_Delete(obj);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     JSON_Delete(obj);
     return SOFTBUS_OK;

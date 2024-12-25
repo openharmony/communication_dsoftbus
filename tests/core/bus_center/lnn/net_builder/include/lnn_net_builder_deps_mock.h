@@ -93,7 +93,7 @@ public:
     virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
         LnnSyncInfoMsgComplete complete);
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
-    virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
+    virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType);
     virtual int32_t LnnAddMetaInfo(NodeInfo *info);
     virtual int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t num);
     virtual int32_t LnnConvertDlId(
@@ -184,6 +184,7 @@ public:
     virtual const char *LnnPrintConnectionAddr(const ConnectionAddr *addr);
     virtual int32_t LnnUpdateGroupType(const NodeInfo *info);
     virtual int32_t LnnUpdateAccountInfo(const NodeInfo *info);
+    virtual int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info);
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
@@ -200,6 +201,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual void RegisterOOBEMonitor(void *p);
     virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
+    virtual int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
@@ -239,7 +241,7 @@ public:
     MOCK_METHOD5(
         LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
-    MOCK_METHOD1(LnnUpdateNodeInfo, int32_t(NodeInfo *));
+    MOCK_METHOD2(LnnUpdateNodeInfo, int32_t(NodeInfo *, int32_t));
     MOCK_METHOD1(LnnAddMetaInfo, int32_t(NodeInfo *));
     MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t(const char *, int64_t *, uint32_t));
     MOCK_METHOD5(LnnConvertDlId, int32_t(const char *, IdCategory, IdCategory, char *, uint32_t));
@@ -327,6 +329,7 @@ public:
     MOCK_METHOD1(LnnPrintConnectionAddr, const char *(const ConnectionAddr *));
     MOCK_METHOD1(LnnUpdateGroupType, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnUpdateRemoteDeviceName, int32_t(const NodeInfo *));
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
@@ -347,6 +350,7 @@ public:
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool(const NodeInfo *));
+    MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));

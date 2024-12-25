@@ -431,15 +431,8 @@ static void TransHandleAuthChannelSetupProcess(TransEventExtra *extra, int32_t a
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
     ret = NotifyOpenAuthChannelSuccess(appInfo, true);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
+        TRANS_LOGE(TRANS_SVC, "Notify Open Auth Channel send request failed, ret=%{public}d", ret);
         TransPostAuthChannelErrMsg(authId, ret, "NotifyOpenAuthChannelSuccess failed");
-        TransHandleErrorAndCloseChannel(extra, authId, appInfo->linkType, appInfo->isClient, ret);
-        return;
-    }
-    ret = TransPostAuthChannelMsg(appInfo, authId, AUTH_CHANNEL_REPLY);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "send reply failed");
-        TransPostAuthChannelErrMsg(authId, ret, "send reply failed");
         TransHandleErrorAndCloseChannel(extra, authId, appInfo->linkType, appInfo->isClient, ret);
         return;
     }
@@ -465,6 +458,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         extra.localUdid = localUdid;
     }
     AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo, len);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "unpackRequest failed");
@@ -1285,4 +1279,117 @@ int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo)
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     TRANS_LOGE(TRANS_SVC, "auth channel is not exit");
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
+static int32_t TransSetAuthChannelReplyCnt(int32_t channelId)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_authChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_authChannelList is NULL");
+    int32_t ret = SoftBusMutexLock(&g_authChannelList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    AuthChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (item->appInfo.myData.channelId == channelId) {
+            item->appInfo.waitOpenReplyCnt = CHANNEL_OPEN_SUCCESS;
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "Auth channel not find: channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
+int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult)
+{
+    AuthChannelInfo info;
+    (void)memset_s(&info, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
+    int32_t ret = GetAuthChannelInfoByChanId(channelId, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get auth channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    ret = TransSetAuthChannelReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "update cnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .channelType = CHANNEL_TYPE_AUTH,
+        .authId = info.authId,
+        .result = EVENT_STAGE_RESULT_OK,
+        .channelId = info.appInfo.myData.channelId,
+        .socketName = info.appInfo.myData.sessionName,
+        .peerUdid = info.appInfo.peerData.deviceId,
+    };
+    if (openResult != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "open auth channel failed, openResult=%{public}d", openResult);
+        TransPostAuthChannelErrMsg(info.authId, openResult, "open auth channel failed");
+        TransHandleErrorAndCloseChannel(&extra, info.authId, info.appInfo.linkType, info.appInfo.isClient, openResult);
+        return SOFTBUS_OK;
+    }
+    ret = TransPostAuthChannelMsg(&info.appInfo, info.authId, AUTH_CHANNEL_REPLY);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "send reply failed, ret=%{public}d", ret);
+        TransHandleErrorAndCloseChannel(&extra, info.authId, info.appInfo.linkType, info.appInfo.isClient, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransCheckAuthChannelOpenStatus(int32_t channelId, int32_t *curCount)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_authChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_authChannelList is null");
+    int32_t ret = SoftBusMutexLock(&g_authChannelList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    AuthChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (item->appInfo.myData.channelId == channelId) {
+            if (item->appInfo.waitOpenReplyCnt != CHANNEL_OPEN_SUCCESS) {
+                item->appInfo.waitOpenReplyCnt++;
+            }
+            *curCount = item->appInfo.waitOpenReplyCnt;
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "Auth channel not find: channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
+void TransAsyncAuthChannelTask(int32_t channelId)
+{
+    int32_t curCount = 0;
+    int32_t ret = TransCheckAuthChannelOpenStatus(channelId, &curCount);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "check auth channel open failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return;
+    }
+    if (curCount == CHANNEL_OPEN_SUCCESS) {
+        TRANS_LOGI(TRANS_CTRL, "open auth channel success, channelId=%{public}d", channelId);
+        return;
+    }
+    AuthChannelInfo info;
+    (void)memset_s(&info, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
+    ret = GetAuthChannelInfoByChanId(channelId, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get auth channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return;
+    }
+    if (curCount >= LOOPER_REPLY_CNT_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "open auth channel timeout, channelId=%{public}d", channelId);
+        TransPostAuthChannelErrMsg(
+            info.authId,  SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, "open auth channel failed");
+        DelAuthChannelInfoByAuthId(info.authId);
+        TransAuthCloseChannel(info.authId, info.appInfo.linkType, info.isClient);
+        return;
+    }
+    TRANS_LOGI(TRANS_CTRL, "Open channelId=%{public}d not finished, generate new task and waiting", channelId);
+    uint32_t delayTime = (curCount <= LOOPER_SEPARATE_CNT) ? FAST_INTERVAL_MILLISECOND : SLOW_INTERVAL_MILLISECOND;
+    TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_AUTH, delayTime);
 }

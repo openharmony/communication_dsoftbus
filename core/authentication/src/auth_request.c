@@ -35,7 +35,7 @@ static AuthRequest *FindAuthRequestByRequestId(uint64_t requestId)
     return NULL;
 }
 
-static uint32_t GetAuthRequestWaitNum(const AuthRequest *request)
+static uint32_t GetAuthRequestWaitNum(const AuthRequest *request, ListNode *waitNotifyList)
 {
     uint32_t num = 0;
     AuthRequest *item = NULL;
@@ -55,11 +55,15 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request)
             num++;
             continue;
         }
-        if (CheckAuthConnCallback(&item->connCb)) {
-            item->connCb.onConnOpenFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
-        } else if (CheckVerifyCallback(&item->verifyCb)) {
-            item->verifyCb.onVerifyFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        AuthRequest *tmpRequest = (AuthRequest *)SoftBusCalloc(sizeof(AuthRequest));
+        if (tmpRequest == NULL) {
+            AUTH_LOGI(AUTH_CONN, "malloc fail, notify requested=%{public}d", item->requestId);
+            continue;
         }
+        tmpRequest->requestId = item->requestId;
+        tmpRequest->connCb = item->connCb;
+        tmpRequest->verifyCb = item->verifyCb;
+        ListTailInsert(waitNotifyList, &tmpRequest->node);
         ListDelete(&item->node);
         SoftBusFree(item);
         num++;
@@ -82,8 +86,20 @@ uint32_t AddAuthRequest(const AuthRequest *request)
     }
     newRequest->addTime = GetCurrentTimeMs();
     ListTailInsert(&g_authRequestList, &newRequest->node);
-    uint32_t waitNum = GetAuthRequestWaitNum(newRequest);
+    ListNode waitNotifyList = {&waitNotifyList, &waitNotifyList};
+    uint32_t waitNum = GetAuthRequestWaitNum(newRequest, &waitNotifyList);
     ReleaseAuthLock();
+    AuthRequest *item = NULL;
+    AuthRequest *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &waitNotifyList, AuthRequest, node) {
+        if (CheckAuthConnCallback(&item->connCb)) {
+            item->connCb.onConnOpenFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        } else if (CheckVerifyCallback(&item->verifyCb)) {
+            item->verifyCb.onVerifyFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        }
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
     return waitNum;
 }
 

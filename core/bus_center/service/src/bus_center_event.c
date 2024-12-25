@@ -859,6 +859,35 @@ void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
+void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
+{
+    if (state < SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED || state >= SOFTBUS_LOCAL_DEVICE_INFO_UNKNOWN) {
+        LNN_LOGW(LNN_EVENT, "bad deviceInfo state=%{public}d", state);
+        return;
+    }
+    LNN_LOGI(LNN_EVENT, "notify deviceInfo state change");
+    LnnDeviceInfoChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_INFO_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName)
+{
+    LNN_LOGD(LNN_EVENT, "notify net link state change");
+    if (state < SOFTBUS_NETMANAGER_IFNAME_START || state >= SOFTBUS_NETMANAGER_IFNAME_UNKNOWN) {
+        LNN_LOGW(LNN_EVENT, "bad OOBEState=%{public}d", state);
+        return;
+    }
+    LnnMonitorNetlinkStateInfo event = {.basic.event = LNN_EVENT_NET_LINK_STATE_CHANGE, .status = state};
+    if (ifName != NULL) {
+        int32_t ret = strcpy_s(event.ifName, sizeof(event.ifName), ifName);
+        if (ret != EOK) {
+            LNN_LOGE(LNN_EVENT, "copy ifName failed with ret=%{public}d", ret);
+            return;
+        }
+    }
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;

@@ -160,6 +160,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
+    memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -204,6 +205,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -1609,6 +1611,30 @@ int32_t SoftBusServerStub::GetBusCenterExObjInner(MessageParcel &data, MessagePa
             return SOFTBUS_TRANS_PROXY_WRITEOBJECT_FAILED;
         }
     }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ProcessInnerEventInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t eventType = 0;
+    if (!data.ReadInt32(eventType)) {
+        COMM_LOGE(COMM_SVC, "read eventType failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    uint32_t len = 0;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "read len failed!");
+        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+    auto rawData = data.ReadRawData(len);
+    if (rawData == NULL) {
+        COMM_LOGE(COMM_SVC, "read rawData failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint8_t *buf = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(rawData));
+    int32_t ret = ProcessInnerEvent(eventType, buf, len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, COMM_SVC, "process inner event failed! eventType=%{public}d", eventType);
     return SOFTBUS_OK;
 }
 } // namespace OHOS

@@ -20,6 +20,7 @@
 #include <string>
 #include "client_trans_pending.h"
 #include "common_list.h"
+#include "fuzz_data_generator.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -32,17 +33,23 @@ void ClientTransPendingTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(uint64_t))) {
         return;
     }
+    DataGenerator::Write(data, size);
 
-    uint32_t id = *(reinterpret_cast<const uint32_t*>(data));
-    uint64_t seq = *(reinterpret_cast<const uint64_t*>(data));
-    uint32_t waitMillis = *(reinterpret_cast<const uint32_t*>(data));
-    bool isDelete = *(reinterpret_cast<const bool*>(data));
+    uint32_t id = 0;
+    uint64_t seq = 0;
+    uint32_t waitMillis = 0;
+    bool isDelete = 0;
     TransPendData pendDate = {0};
+    GenerateUint32(id);
+    GenerateUint64(seq);
+    GenerateUint32(waitMillis);
+    GenerateBool(isDelete);
 
     CreatePendingPacket(id, seq);
     DeletePendingPacket(id, seq);
     GetPendingPacketData(id, seq, waitMillis, isDelete, &pendDate);
     SetPendingPacketData(id, seq, &pendDate);
+    DataGenerator::Clear();
 }
 } // namespace OHOS
 

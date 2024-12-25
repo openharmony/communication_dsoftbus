@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "fuzz_data_generator.h"
 #include "vtp_stream_socket.h"
 #include "stream_common.h"
 #include "stream_common_data.h"
@@ -118,12 +119,16 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(size_t)) {
             return;
         }
-        size_t inlen = *(reinterpret_cast<const size_t *>(data));
-        size_t outlen = *(reinterpret_cast<const size_t *>(data));
-        const void *in = reinterpret_cast<const void *>(data);
+        DataGenerator::Write(data, size);
+        int64_t inlen = 0;
+        int64_t outlen = 0;
+        GenerateInt64(inlen);
+        GenerateInt64(outlen);
+        const void *in = reinterpret_cast<const void *>(data + 1);
         void *out = const_cast<void *>(reinterpret_cast<const void *>(data));
 
         vtpStreamSocket.Encrypt(in, inlen, out, outlen);
+        DataGenerator::Clear();
     }
 
     void VtpDecrypt(const uint8_t* data, size_t size)
@@ -131,12 +136,16 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(size_t)) {
             return;
         }
-        size_t inlen = *(reinterpret_cast<const size_t *>(data));
-        size_t outlen = *(reinterpret_cast<const size_t *>(data));
-        const void *in = reinterpret_cast<const void *>(data);
+        DataGenerator::Write(data, size);
+        int64_t inlen = 0;
+        int64_t outlen = 0;
+        GenerateInt64(inlen);
+        GenerateInt64(outlen);
+        const void *in = reinterpret_cast<const void *>(data + 1);
         void *out = const_cast<void *>(reinterpret_cast<const void *>(data));
 
         vtpStreamSocket.Decrypt(in, inlen, out, outlen);
+        DataGenerator::Clear();
     }
 }
 

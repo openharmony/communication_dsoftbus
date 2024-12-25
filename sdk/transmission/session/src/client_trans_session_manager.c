@@ -2491,3 +2491,67 @@ int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType)
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }
+
+int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    if (socket <= 0 || qos == NULL || count == 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    if (sessionNode->lifecycle.sessionState == SESSION_STATE_CALLBACK_FINISHED) {
+        UnlockClientSessionServerList();
+        return SOFTBUS_TRANS_NO_NEED_CACHE_QOS_EVENT;
+    }
+    for (uint32_t i = 0; i < count; i++) {
+        sessionNode->cachedQosEvent.qos[i].qos = qos[i].qos;
+        sessionNode->cachedQosEvent.qos[i].value = qos[i].value;
+    }
+    sessionNode->cachedQosEvent.count = count;
+    sessionNode->cachedQosEvent.event = event;
+    UnlockClientSessionServerList();
+    TRANS_LOGI(TRANS_SDK, "cache qos event success, socket=%{public}d", socket);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent)
+{
+    if (socket <= 0 || cachedQosEvent == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    ret = memcpy_s(cachedQosEvent, sizeof(CachedQosEvent), &sessionNode->cachedQosEvent, sizeof(CachedQosEvent));
+    if (ret != EOK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "copy cachedQosEvent failed, ret=%{public}d", ret);
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)memset_s(&sessionNode->cachedQosEvent, sizeof(CachedQosEvent), 0, sizeof(CachedQosEvent));
+    UnlockClientSessionServerList();
+    TRANS_LOGI(TRANS_SDK, "get cached qos event success, socket=%{public}d", socket);
+    return SOFTBUS_OK;
+}

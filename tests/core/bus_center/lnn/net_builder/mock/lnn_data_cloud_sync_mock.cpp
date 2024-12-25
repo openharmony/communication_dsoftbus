@@ -194,9 +194,9 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return GetNetBuilderDepsInterface()->LnnGetNodeInfoById(id, type);
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
 {
-    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo);
+    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo, connectionType);
 }
 
 int32_t LnnAddMetaInfo(NodeInfo *info)
@@ -624,6 +624,11 @@ int32_t LnnUpdateGroupType(const NodeInfo *info)
 int32_t LnnUpdateAccountInfo(const NodeInfo *info)
 {
     return GetNetBuilderDepsInterface()->LnnUpdateAccountInfo(info);
+}
+
+int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnUpdateRemoteDeviceName(info);
 }
 
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)

@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "bus_center_event.h"
 #include "lnn_bt_monitor.c"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_netlink_monitor.c"
@@ -131,7 +132,7 @@ HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1
     LnnOnBtStateChanged(listenerId, state);
     state = TEST_STATE4;
     LnnOnBtStateChanged(listenerId, state);
-    EXPECT_CALL(networkMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(networkMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     LnnOnBtStateChanged(listenerId, state);
     LnnOnBtAclStateChanged(listenerId, &addr, aclState, 0);
     aclState = TEST_ACL_STATE2;

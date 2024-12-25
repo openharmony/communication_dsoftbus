@@ -295,7 +295,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSiz
 
 /*
  * @tc.name: ServerIpcShiftLNNGear_TEST_001
- * @tc.desc: ServerIpcShiftLNNGear return value is equal to SOFTBUS_ERR
+ * @tc.desc: ServerIpcShiftLNNGear return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -306,7 +306,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Leve
     const char *targetNetworkId = "111";
     const GearMode *mode = nullptr;
     int32_t ret = ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
 }
 
 /*

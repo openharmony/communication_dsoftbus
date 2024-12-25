@@ -884,4 +884,43 @@ int32_t TransServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType d
 
     return ret;
 }
+
+int32_t TransServerProxy::ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "remote is null");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_SDK, "write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+
+    if (!data.WriteInt32(eventType)) {
+        TRANS_LOGE(TRANS_SDK, "write eventType failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+
+    if (!data.WriteUint32(len)) {
+        TRANS_LOGE(TRANS_SDK, "write len failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+
+    if (!data.WriteRawData(buf, len)) {
+        TRANS_LOGE(TRANS_SDK, "write buf failed!");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    int32_t ret = remote->SendRequest(SERVER_PROCESS_INNER_EVENT, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

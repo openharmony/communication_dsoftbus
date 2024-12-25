@@ -2497,7 +2497,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     EXPECT_NE(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
 }

@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-#include "auth_interface.h"
-#include "comm_log.h"
-#include "softbus_adapter_mem.h"
-#include "lnn_net_builder.h"
 #include <cstddef>
 #include <cstring>
+
+#include "auth_interface.h"
+#include "comm_log.h"
+#include "fuzz_data_generator.h"
+#include "lnn_net_builder.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
+
+using namespace std;
 
 namespace OHOS {
     const uint8_t *g_baseFuzzData = nullptr;
@@ -47,13 +51,13 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
+    int32_t testData = 0;
+    GenerateInt32(testData);
     AuthLinkType authLinkType = static_cast<AuthLinkType>
-    (GetData<int>() % (AUTH_LINK_TYPE_MAX - AUTH_LINK_TYPE_WIFI + 1));
-    uint64_t authId = *(reinterpret_cast<const uint64_t*>(data));
+    (testData % AUTH_LINK_TYPE_MAX);
+    uint64_t authId = 0;
+    GenerateUint64(authId);
     AuthHandle authHandle = { .authId = authId, .type = authLinkType};
 
     const AuthTransData *outData = reinterpret_cast<const AuthTransData*>(data);
@@ -78,22 +82,20 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
+    int32_t testData = 0;
+    GenerateInt32(testData);
+    AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
+    uint64_t authId = 0;
+    GenerateUint64(authId);
+    AuthHandle authHandle = { .authId = authId, .type = authLinkType };
 
-    AuthLinkType authLinkType = static_cast<AuthLinkType>
-    (GetData<int>() % (AUTH_LINK_TYPE_MAX - AUTH_LINK_TYPE_WIFI + 1));
-    uint64_t authId = *(reinterpret_cast<const uint64_t*>(data));
-    AuthHandle authHandle = { .authId = authId, .type = authLinkType};
-   
     uint8_t *outData = nullptr;
-    outData =  (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    outData =  (uint8_t *)SoftBusCalloc(sizeof(size));
     if (outData == nullptr) {
         COMM_LOGE(COMM_TEST, "outData is NULL, SoftBusMalloc failed!");
         return false;
     }
-    uint32_t outLen = 0;
+    uint32_t outLen = size;
     AuthDecrypt(&authHandle, data, size, outData, &outLen);
     AuthEncrypt(&authHandle, data, size, outData, &outLen);
     SoftBusFree(outData);
@@ -147,12 +149,12 @@ void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
         COMM_LOGE(COMM_TEST, "data is NULL or size is invalid");
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    uint32_t connectionId = GetData<uint32_t>();
-    int32_t callingPid = GetData<int32_t>();
-    uint32_t requestId = GetData<uint32_t>();
+    uint32_t connectionId = 0;
+    GenerateUint32(connectionId);
+    int32_t callingPid = 0;
+    GenerateInt32(callingPid);
+    uint32_t requestId = 0;
+    GenerateUint32(requestId);
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
     AuthKeyInfo authKeyInfo = *const_cast<AuthKeyInfo *>(reinterpret_cast<const AuthKeyInfo *>(data));
     AuthMetaStartVerify(connectionId, &authKeyInfo, requestId, callingPid, authVerifyCallback);
@@ -161,12 +163,21 @@ void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    if (data == nullptr || size == 0) {
+        return 0;
+    }
+
+    DataGenerator::Write(data, size);
+
     /* Run your code on data */
     OHOS::AuthDataFuzzTest(data, size);
     OHOS::AuthCryptFuzzTest(data, size);
     OHOS::AuthFlushDeviceFuzzTest(data, size);
     OHOS::AuthStartVerifyFuzzTest(data, size);
     OHOS::AuthMetaStartVerifyFuzzTest(data, size);
+
+    DataGenerator::Clear();
+    
     return 0;
 }
 }
