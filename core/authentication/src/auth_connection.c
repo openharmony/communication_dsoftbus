@@ -274,7 +274,7 @@ static int32_t GetAuthTimeoutErrCode(AuthLinkType type, int32_t *errCode)
         case AUTH_LINK_TYPE_P2P:
             return SOFTBUS_AUTH_P2P_CONN_TIMEOUT;
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            return SOFTBUS_AUTH_ENHANCEDP2P_CONN_TIMEOUT;
+            return SOFTBUS_AUTH_ENHANCEP2P_CONN_TIMEOUT;
         default:
             AUTH_LOGE(AUTH_CONN, "auth conn timeout type=%{public}d", type);
     }
@@ -295,7 +295,7 @@ static void HandleConnConnectTimeout(const void *para)
     }
     int32_t errCode = SOFTBUS_AUTH_CONN_TIMEOUT;
     AuthRequest request = { 0 };
-    if (GetgAuthRequest(requestId, &request) == SOFTBUS_OK) {
+    if (GetAuthRequest(requestId, &request) == SOFTBUS_OK) {
         errCode = GetAuthTimeoutErrCode(request.connInfo.type, &errCode);
         AUTH_LOGE(AUTH_CONN, "errCode=%{public}d", errCode);
     }
