@@ -95,7 +95,7 @@ int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener)
     return SOFTBUS_NOT_FIND;
 }
 
-TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirectChannelInfo *info)
+TcpDirectChannelInfo *TransTdcGetInfoIncFdRefById(int32_t channelId, TcpDirectChannelInfo *info, bool withSeq)
 {
     if (!CheckInfoAndMutexLock(info)) {
         return NULL;
@@ -105,7 +105,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
             (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
-            item->detail.sequence++;
+            item->detail.sequence = withSeq ? (item->detail.sequence + 1) : (item->detail.sequence);
             item->detail.fdRefCnt++;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return item;
@@ -245,10 +245,13 @@ static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
             } else {
                 TransTdcReleaseFd(item->detail.fd);
             }
-            ListDelete(&item->node);
-            (void)SoftBusMutexDestroy(&(item->detail.fdLock));
-            SoftBusFree(item);
-            item = NULL;
+            item->detail.needRelease = true;
+            if (item->detail.fdRefCnt <= 0) {
+                (void)SoftBusMutexDestroy(&(item->detail.fdLock));
+                ListDelete(&item->node);
+                SoftBusFree(item);
+                item = NULL;
+            }
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
             return;

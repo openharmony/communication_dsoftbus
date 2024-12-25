@@ -980,6 +980,41 @@ static void CheckUserIdCheckSumChange(HbRespData *hbResp, NodeInfo *nodeInfo)
     }
 }
 
+static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespData *hbResp)
+{
+    if (device == NULL || remoteInfo == NULL || hbResp == NULL) {
+        LNN_LOGD(LNN_HEART_BEAT, "invalid param");
+        return false;
+    }
+
+    if (!LnnIsNodeOnline(remoteInfo)) {
+        return false;
+    }
+    if ((int32_t)hbResp->stateVersion == remoteInfo->stateVersion) {
+        return false;
+    }
+
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfo(device->devId, &cacheInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "retrieve device info fail");
+        return false;
+    }
+
+    if (strcmp(cacheInfo.networkId, remoteInfo->networkId) == 0) {
+        return false;
+    }
+    char *cacheNetworkId = NULL;
+    char *remoteNetworkId = NULL;
+    Anonymize(cacheInfo.networkId, &cacheNetworkId);
+    Anonymize(remoteInfo->networkId, &remoteNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "cacheNetworkId=%{public}s; remoteNetworkId=%{public}s",
+        AnonymizeWrapper(cacheNetworkId), AnonymizeWrapper(remoteNetworkId));
+    AnonymizeFree(cacheNetworkId);
+    AnonymizeFree(remoteNetworkId);
+    return true;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -1009,7 +1044,8 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         CheckUserIdCheckSumChange(hbResp, &nodeInfo);
         if (isDirectlyHb || (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
-            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN))) {
+            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN) &&
+            !IsNetworkIdChange(device, &nodeInfo, hbResp))) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }

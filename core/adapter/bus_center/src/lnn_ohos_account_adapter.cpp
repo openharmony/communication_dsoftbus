@@ -111,7 +111,7 @@ int32_t GetActiveOsAccountIds(void)
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountId);
     if (ret != SOFTBUS_OK || accountId.empty()) {
         LNN_LOGE(LNN_STATE, "QueryActiveOsAccountIds failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
     }
     LNN_LOGD(LNN_STATE, "account id=%{public}d", accountId[0]);
     return accountId[0];
@@ -120,7 +120,7 @@ int32_t GetActiveOsAccountIds(void)
 bool IsActiveOsAccountUnlocked(void)
 {
     int32_t osAccountId = GetActiveOsAccountIds();
-    if (osAccountId == SOFTBUS_ERR) {
+    if (osAccountId == SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED) {
         LNN_LOGE(LNN_STATE, "accountId is invalid");
         return false;
     }

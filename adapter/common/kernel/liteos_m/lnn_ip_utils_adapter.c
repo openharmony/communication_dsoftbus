@@ -34,7 +34,7 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     netif = netif_find(ifName);
     if (netif == NULL) {
         COMM_LOGE(COMM_ADAPTER, "netif is NULL!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NETIF_NOT_FOUND;
     }
 #ifdef HISPARK_PEGASUS_USE_NETIF_GET_ADDR
     netifapi_netif_get_addr(netif, ipAddr, netMask, NULL);
@@ -44,18 +44,18 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 #endif
     if (ipAddr == NULL || netMask == NULL) {
         COMM_LOGE(COMM_ADAPTER, "ipAddr or netMask is NULL!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NETIF_IP4_INFO_NULL;
     }
     ipStr = ip4addr_ntoa(ipAddr);
     if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "copy ip failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (netmask != NULL) {
         netMaskStr = ip4addr_ntoa(netMask);
         if (strncpy_s(netmask, len, netMaskStr, strlen(netMaskStr)) != EOK) {
             COMM_LOGE(COMM_ADAPTER, "copy netmask failed!");
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
     }
     return SOFTBUS_OK;

@@ -205,6 +205,7 @@
     "SESSION_NAME": "ohos.msdp.user_status_awareness.*",
     "REGEXP": "true",
     "DEVID": "UUID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "system_app",
@@ -363,6 +364,17 @@
     ]
   },
   {
+    "SESSION_NAME": "carservice.distributedengine.rescueassist",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "PKG_NAME": "carservice.distributedengine",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "^com.*security.devicesec",
     "REGEXP": "true",
     "DEVID": "UDID",
@@ -490,6 +502,19 @@
     "APP_INFO": [
       {
         "PKG_NAME": "com.huawei.systemserver",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "notification_service.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.distributed_notification",
+        "UID": "5523",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }

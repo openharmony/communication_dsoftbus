@@ -29,6 +29,8 @@
 #include "trans_pending_pkt.h"
 #include "trans_server_proxy.h"
 
+#define LIMIT_CHANGE_INFO_NUM 2
+
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
 
@@ -715,6 +717,37 @@ void TransUdpDeleteFileListener(const char *sessionName)
     return TransDeleteFileListener(sessionName);
 }
 
+static int32_t TransSendLimitChangeDataToCore(int32_t channelId, uint8_t tos, int32_t setTosResult)
+{
+    uint32_t len = sizeof(uint32_t) * LIMIT_CHANGE_INFO_NUM + sizeof(uint8_t);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc buf failed, channelId=%{public}d", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t offSet = 0;
+    int32_t ret = SOFTBUS_OK;
+    ret = WriteInt32ToBuf(buf, len, &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write channelId=%{public}d to buf failed! ret=%{public}d", channelId, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteUint8ToBuf(buf, len, &offSet, tos);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write tos=%{public}d to buf failed! ret=%{public}d", tos, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, len, &offSet, setTosResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write setTosResult=%{public}d to buf failed! ret=%{public}d", setTosResult, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    return ServerIpcProcessInnerEvent(EVENT_TYPE_TRANS_LIMIT_CHANGE, buf, len);
+}
+
 int32_t TransLimitChange(int32_t channelId, uint8_t tos)
 {
     if (tos != FILE_PRIORITY_BK && tos != FILE_PRIORITY_BE) {
@@ -741,12 +774,8 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
         .valLen = sizeof(uint8_t),
         .value = (uint64_t)&dfileTos,
     };
-    ret = NSTACKX_DFileSetSessionOpt(channel.dfileId, &dfileOpt);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "NSTACKX_DFileSetOpt, channelId=%{public}d, ret=%{public}d, tos=%{public}hhu", channelId,
-            ret, tos);
-        return ret;
-    }
+    int32_t setTosResult = NSTACKX_DFileSetSessionOpt(channel.dfileId, &dfileOpt);
+    ret = TransSendLimitChangeDataToCore(channelId, tos, setTosResult);
     return ret;
 }
 

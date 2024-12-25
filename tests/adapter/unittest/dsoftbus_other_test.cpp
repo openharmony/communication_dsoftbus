@@ -60,7 +60,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
     char ip[32] = "0";
     int32_t len = 10;
     int32_t ret = GetNetworkIpByIfName(ifName, ip, netmask, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_IOCTL_FAIL, ret);
 }
 
 /*
@@ -94,7 +94,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
     char ip[32] = "0";
     int32_t len = 10;
     int32_t ret = GetNetworkIpByIfName(ifName, ip, NULL, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_IOCTL_FAIL, ret);
 }
 
 /**
@@ -110,6 +110,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
     int32_t maxLen = 100;
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
     EXPECT_EQ(SOFTBUS_OK, ret);
+
     ret = SoftBusReadFullFile(g_FileName, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -201,7 +202,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(0);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -238,7 +239,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(12);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -251,7 +252,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(256);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -264,7 +265,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(0);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 
@@ -277,7 +278,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(22);
-    EXPECT_TRUE(ret != NULL);
+    EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
 }
 

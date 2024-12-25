@@ -96,6 +96,9 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.businessId);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.businessType);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.sessionId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.minBW);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.maxLatency);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.minLatency);
     EXPECT_EQ(++index, validSize);
     return true;
 }

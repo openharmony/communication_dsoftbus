@@ -48,6 +48,7 @@ ohos_fuzztest("SoftBusServerStub2FuzzTest") {
 
   external_deps = [
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",

@@ -24,6 +24,7 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "softbus_error_code.h"
+#include "usb_mock.h"
 
 using namespace testing::ext;
 using testing::Return;
@@ -108,6 +109,9 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
     CoapMock coapMock;
     coapMock.SetupStub();
     EXPECT_CALL(coapMock, DiscCoapInit).WillRepeatedly(Return(nullptr));
+    UsbMock usbMock;
+    usbMock.SetupStub();
+    EXPECT_CALL(usbMock, DiscUsbDispatcherInit).WillRepeatedly(Return(nullptr));
 
     EXPECT_NE(DiscMgrInit(), SOFTBUS_OK);
     DISC_LOGI(DISC_TEST, "DiscManagerInit001 end ----");
@@ -126,6 +130,8 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit002, TestSize.Level1)
     bleMock.SetupStub();
     CoapMock coapMock;
     coapMock.SetupStub();
+    UsbMock usbMock;
+    usbMock.SetupStub();
 
     EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     DISC_LOGI(DISC_TEST, "DiscManagerInit002 end ----");
@@ -471,7 +477,7 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
     EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_INVALID_PARAM);
 
     info.mode = DISCOVER_MODE_PASSIVE;
-    info.medium = USB;
+    info.medium = COAP1;
     EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_INVALID_PARAM);
 
     info.medium = BLE;
@@ -844,6 +850,8 @@ HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
     bleMock.SetupStub();
     CoapMock coapMock;
     coapMock.SetupStub();
+    UsbMock usbMock;
+    usbMock.SetupStub();
 
     EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     DiscMgrDeinit();

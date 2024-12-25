@@ -17,7 +17,7 @@
 #include <sys/socket.h>
 
 #include "client_trans_tcp_direct_message.h"
-#include "client_trans_tcp_direct_manager.h"
+#include "client_trans_tcp_direct_manager.c"
 #include "client_trans_file_listener.h"
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_session_callback.h"
@@ -370,7 +370,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level0)
 
 /**
  * @tc.name: TransTdcGetInfoByIdWithIncSeqTest008
- * @tc.desc: TransTdcGetInfoByIdWithIncSeq, use the wrong parameter.
+ * @tc.desc: TransTdcGetInfoIncFdRefById, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -386,14 +386,14 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.L
     int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoByIdWithIncSeq(channelId, nullptr);
+    TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, nullptr, true);
     EXPECT_TRUE(item == nullptr);
 
-    item = TransTdcGetInfoByIdWithIncSeq(channelId, info);
+    item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item == nullptr);
 
     channelId = INVALID_VALUE;
-    item = TransTdcGetInfoByIdWithIncSeq(channelId, info);
+    item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item == nullptr);
 
     SoftBusFree(info);
@@ -429,12 +429,12 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.
 
     int32_t ret = ClientTransTdcSetCallBack(&g_sessionCb);
     ret = ClientTransTdcOnSessionOpened(g_sessionName, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     info->isServer = true;
     info->channelType = CHANNEL_TYPE_AUTH;
     ret = ClientTransTdcOnSessionOpened(nullptr, info);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ClientTransTdcOnSessionOpened(g_sessionName, info);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -661,11 +661,362 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level0)
  */
 HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020, TestSize.Level0)
 {
-    int32_t fd = SOFTBUS_INVALID_PARAM;
+    int32_t fd = g_fd;
     int32_t ret = TransTdcCreateListenerWithoutAddTrigger(fd);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    fd = g_fd;
-    ret = TransTdcCreateListenerWithoutAddTrigger(fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ClientTransCheckTdcChannelExist001
+ * @tc.desc: ClientTransCheckTdcChannelExist, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, ClientTransCheckTdcChannelExist001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t ret = ClientTransCheckTdcChannelExist(1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->channelId = channelId;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    ret = ClientTransCheckTdcChannelExist(channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST);
+
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcDelChannelInfo001
+ * @tc.desc: TransTdcDelChannelInfo, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level0)
+{
+    int32_t channelId1 = 1;
+    int32_t channelId2 = 2;
+    TransTdcDelChannelInfo(1, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
+    EXPECT_TRUE(g_tcpDirectChannelInfoList == NULL);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->channelId = channelId1;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    TransTdcDelChannelInfo(channelId2, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
+    TransTdcDelChannelInfo(channelId1, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
+    // info is deleted in the abnormal branch
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcDelChannelInfo002
+ * @tc.desc: TransTdcDelChannelInfo, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t errCode = 1;
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+    info->channelId = channelId;
+
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    TransTdcDelChannelInfo(channelId, errCode);
+    // info is deleted in the abnormal branch
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransUpdateFdState001
+ * @tc.desc: TransUpdateFdState, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransUpdateFdState001, TestSize.Level0)
+{
+    int32_t channelId1 = 1;
+    int32_t channelId2 = 2;
+    int32_t fdRefCnt = 3;
+    TransUpdateFdState(channelId1);
+    EXPECT_TRUE(g_tcpDirectChannelInfoList == NULL);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->channelId = channelId1;
+    info->detail.fdRefCnt = fdRefCnt;
+    info->detail.needRelease = true;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    
+    TransUpdateFdState(channelId2);
+    EXPECT_TRUE(info->detail.fdRefCnt == fdRefCnt);
+    TransUpdateFdState(channelId1);
+    EXPECT_TRUE(info != NULL);
+    info->detail.needRelease = false;
+    TransUpdateFdState(channelId1);
+    EXPECT_TRUE(info != NULL);
+    TransUpdateFdState(channelId1);
+
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcCloseChannelTest003
+ * @tc.desc: TransTdcCloseChannel, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    ChannelInfo *channel = TestGetChannelInfo();
+    ASSERT_TRUE(channel != nullptr);
+
+    TransTdcManagerInit(&g_sessionCb);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    info->channelId = channelId;
+    info->detail.fdRefCnt = 0;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    TransTdcCloseChannel(channelId);
+    // info is deleted in the abnormal branch
+    SoftBusFree(channel);
+    if (g_tcpDirectChannelInfoList != NULL) {
+        DestroySoftBusList(g_tcpDirectChannelInfoList);
+        g_tcpDirectChannelInfoList = NULL;
+    }
+}
+
+/**
+ * @tc.name: TransDisableSessionListenerTest006
+ * @tc.desc: TransDisableSessionListener, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest006, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t errFd = -1;
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    info->channelId = channelId;
+    info->detail.fd = errFd;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransDisableSessionListener(channelId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+    info->detail.fd = g_fd;
+
+    ret = TransDisableSessionListener(channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransDisableSessionListenerTest007
+ * @tc.desc: TransDisableSessionListener, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest007, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    info->channelId = channelId;
+    info->detail.fd = g_fd;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransDisableSessionListener(channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransTdcGetInfoByIdTest007
+ * @tc.desc: TransTdcGetInfoById, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->channelId = channelId;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    TcpDirectChannelInfo *item = TransTdcGetInfoById(1, info);
+    EXPECT_TRUE(item != nullptr);
+
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcSetListenerStateById001
+ * @tc.desc: TransTdcSetListenerStateById, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcSetListenerStateById001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t invalidChannelId = 2;
+    int32_t ret = TransTdcSetListenerStateById(1, true);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->channelId = channelId;
+    info->detail.needStopListener = false;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    ret = TransTdcSetListenerStateById(channelId, true);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = TransTdcSetListenerStateById(invalidChannelId, true);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+
+    ret = TransTdcSetListenerStateById(channelId, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcGetInfoByFdTest001
+ * @tc.desc: TransTdcGetInfoByFd, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level0)
+{
+    int32_t testFd = 123;
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    ChannelInfo *channel = TestGetChannelInfo();
+    ASSERT_TRUE(channel != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->detail.fd = testFd;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    TcpDirectChannelInfo *item = TransTdcGetInfoByFd(testFd, info);
+    EXPECT_TRUE(item != nullptr);
+
+    SoftBusFree(info);
+    SoftBusFree(channel);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
+}
+
+/**
+ * @tc.name: TransTdcGetInfoByIdWithIncSeqTest001
+ * @tc.desc: TransTdcGetInfoIncFdRefById, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    ChannelInfo *channel = TestGetChannelInfo();
+    ASSERT_TRUE(channel != nullptr);
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+
+    info->channelId = channelId;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, info, true);
+    EXPECT_TRUE(item != nullptr);
+
+    SoftBusFree(info);
+    SoftBusFree(channel);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = NULL;
 }
 } // namespace OHOS

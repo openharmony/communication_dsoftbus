@@ -84,12 +84,13 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 int32_t LnnUpdateNetworkId(const NodeInfo *newInfo);
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType);
 int32_t LnnAddMetaInfo(NodeInfo *info);
 int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type);
 int32_t UpdateGroupType(NodeInfo *info);
 int32_t LnnUpdateGroupType(const NodeInfo *info);
 int32_t LnnUpdateAccountInfo(const NodeInfo *info);
+int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info);
 int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
 int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort);
 int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);

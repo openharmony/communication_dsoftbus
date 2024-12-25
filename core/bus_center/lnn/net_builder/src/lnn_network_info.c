@@ -43,6 +43,7 @@
 #define BITS 8
 #define BITLEN 4
 #define STRING_INTERFACE_BUFFER_LEN 16
+#define DP_INACTIVE_DEFAULT_USERID (-1)
 
 static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
@@ -642,6 +643,17 @@ static uint8_t *ConvertUserIdToMsg(int32_t userId)
 
 void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
 {
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "LnnGetRemoteNodeInfoById failed! ret=%{public}d", ret);
+        return;
+    }
+    if (userId != DP_INACTIVE_DEFAULT_USERID && nodeInfo.userId != 0 && nodeInfo.userId != userId) {
+        LNN_LOGI(LNN_BUILDER, "ledger userid=%{public}d, inactive userid=%{public}d", nodeInfo.userId, userId);
+        return;
+    }
     uint8_t *msg = ConvertUserIdToMsg(userId);
     if (msg == NULL) {
         return;

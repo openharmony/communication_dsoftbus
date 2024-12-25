@@ -59,17 +59,17 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicIn
 {
     if (info == NULL || infoNum == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == NULL) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -213,9 +213,9 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return GetNetBuilderDepsInterface()->LnnGetNodeInfoById(id, type);
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
 {
-    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo);
+    return GetNetBuilderDepsInterface()->LnnUpdateNodeInfo(newInfo, connectionType);
 }
 
 int32_t LnnAddMetaInfo(NodeInfo *info)
@@ -645,6 +645,11 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
     return GetNetBuilderDepsInterface()->LnnUpdateAccountInfo(info);
 }
 
+int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnUpdateRemoteDeviceName(info);
+}
+
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
 {
     return GetNetBuilderDepsInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);
@@ -725,6 +730,11 @@ void RegisterOOBEMonitor(void *p)
 bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
 {
     return GetNetBuilderDepsInterface()->CheckRemoteBasicInfoChanged(newNodeInfo);
+}
+
+int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability)
+{
+    return GetNetBuilderDepsInterface()->ProcessBleOnline(nodeInfo, connAddr, authCapability);
 }
 
 int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)

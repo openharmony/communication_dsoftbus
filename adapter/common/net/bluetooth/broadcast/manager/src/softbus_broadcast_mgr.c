@@ -16,6 +16,7 @@
 #include "securec.h"
 #include <unistd.h>
 
+#include "broadcast_dfx_event.h"
 #include "disc_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -23,13 +24,17 @@
 #include "softbus_ble_gatt.h"
 #include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_manager.h"
+#include "softbus_broadcast_mgr_utils.h"
 #include "softbus_broadcast_utils.h"
 #include "softbus_error_code.h"
+#include "softbus_event.h"
 #include "legacy/softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
 
 #define BC_WAIT_TIME_MS 50
 #define BC_WAIT_TIME_SEC 1
+#define BC_DFX_REPORT_NUM 4
+#define MAX_BLE_ADV_NUM 7
 #define MGR_TIME_THOUSAND_MULTIPLIER 1000LL
 #define BC_WAIT_TIME_MICROSEC (BC_WAIT_TIME_MS * MGR_TIME_THOUSAND_MULTIPLIER)
 
@@ -53,6 +58,9 @@ typedef struct {
     bool isStarted;
     BaseServiceType srvType;
     int32_t adapterBcId;
+    int32_t advHandle;
+    int32_t minInterval;
+    int32_t maxInterval;
     SoftBusCond cond;
     BroadcastCallback *bcCallback;
     int64_t time;
@@ -83,6 +91,10 @@ typedef struct {
     ScanCallback *scanCallback;
 } ScanManager;
 
+static int32_t g_bcMaxNum = 0;
+static int32_t g_bcCurrentNum = 0;
+static int32_t g_bcOverMaxNum = 0;
+static DiscEventExtra g_bcManagerExtra[BC_NUM_MAX] = { 0 };
 static BroadcastManager g_bcManager[BC_NUM_MAX];
 static ScanManager g_scanManager[SCAN_NUM_MAX];
 
@@ -127,6 +139,9 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
         SoftBusMutexUnlock(&g_bcLock);
         (void)g_interface[g_interfaceId]->StopBroadcasting(bcManager->adapterBcId);
         DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK, DISC_BROADCAST, "bcLock mutex error");
+        if (bcManager->isAdvertising) {
+            g_bcCurrentNum--;
+        }
         bcManager->isAdvertising = false;
         bcManager->isStarted = false;
         bcManager->time = 0;
@@ -177,6 +192,33 @@ static int32_t BcManagerLockInit(void)
     return SOFTBUS_OK;
 }
 
+static void DelayReportBroadcast(void *para)
+{
+    DiscEventExtra extra = { 0 };
+    for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
+        if (g_bcManagerExtra[managerId].isOn == 1) {
+            extra.startTime = g_bcManagerExtra[managerId].startTime;
+            extra.advHandle = g_bcManagerExtra[managerId].advHandle;
+            extra.serverType = g_bcManagerExtra[managerId].serverType;
+            extra.minInterval = g_bcManagerExtra[managerId].minInterval;
+            extra.maxInterval = g_bcManagerExtra[managerId].maxInterval;
+            extra.bcOverMaxCnt = g_bcOverMaxNum;
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}d, advHandle=%{public}d, serverType=%{public}s, "
+                "minInterval=%{public}d, maxInterval=%{public}d, bcOverMaxCnt=%{public}d", extra.startTime,
+                extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval, extra.bcOverMaxCnt);
+            DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
+        }
+    }
+ 
+    g_bcMaxNum = 0;
+    g_bcOverMaxNum = 0;
+    memset_s(g_bcManagerExtra, sizeof(g_bcManagerExtra), 0, sizeof(g_bcManagerExtra));
+    if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
+        DELAY_TIME_DEFAULT) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BROADCAST, "DelayReportBroadcast failed, due to async callback fail");
+    }
+}
+
 int32_t InitBroadcastMgr(void)
 {
     DISC_LOGI(DISC_BROADCAST, "init enter");
@@ -202,6 +244,10 @@ int32_t InitBroadcastMgr(void)
     g_btStateListenerId = ret;
     g_mgrInit = true;
 
+    if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
+        DELAY_TIME_DEFAULT) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BROADCAST, "looper init failed");
+    }
     SoftBusRegBcMgrVarDump((char *)REGISTER_INFO_MANAGER, &RegisterInfoDump);
     return SOFTBUS_OK;
 }
@@ -262,6 +308,48 @@ static char *GetSrvType(BaseServiceType srvType)
     return g_srvTypeMap[srvType].service;
 }
 
+static void ReportCurrentBroadcast(void)
+{
+    DiscEventExtra extra = { 0 };
+    for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
+        if (g_bcManager[managerId].isAdvertising) {
+            extra.startTime = g_bcManager[managerId].time;
+            extra.advHandle = g_bcManager[managerId].advHandle;
+            extra.serverType = GetSrvType(g_bcManager[managerId].srvType);
+            extra.minInterval = g_bcManager[managerId].minInterval;
+            extra.maxInterval = g_bcManager[managerId].maxInterval;
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}d, advHandle=%{public}d, serverType=%{public}s, "
+                "minInterval=%{public}d, maxInterval=%{public}d, ", extra.startTime,
+                extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval);
+            DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
+        }
+    }
+}
+ 
+static void UpdateBcMaxExtra(void)
+{
+    if (g_bcCurrentNum > BC_DFX_REPORT_NUM) {
+        ReportCurrentBroadcast();
+    }
+ 
+    if (g_bcCurrentNum < g_bcMaxNum) {
+        return;
+    }
+ 
+    g_bcMaxNum = g_bcCurrentNum;
+    memset_s(g_bcManagerExtra, sizeof(g_bcManagerExtra), 0, sizeof(g_bcManagerExtra));
+    for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
+        if (g_bcManager[managerId].isAdvertising) {
+            g_bcManagerExtra[managerId].isOn = 1;
+            g_bcManagerExtra[managerId].startTime = g_bcManager[managerId].time;
+            g_bcManagerExtra[managerId].advHandle = g_bcManager[managerId].advHandle;
+            g_bcManagerExtra[managerId].serverType = GetSrvType(g_bcManager[managerId].srvType);
+            g_bcManagerExtra[managerId].minInterval = g_bcManager[managerId].minInterval;
+            g_bcManagerExtra[managerId].maxInterval = g_bcManager[managerId].maxInterval;
+        }
+    }
+}
+
 static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
 {
     static uint32_t callCount = 0;
@@ -285,7 +373,11 @@ static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
         DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d,"
             "callCount=%{public}u", GetSrvType(bcManager->srvType), managerId, adapterBcId, status, callCount++);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
+            if (!bcManager->isAdvertising) {
+                g_bcCurrentNum++;
+            }
             bcManager->isAdvertising = true;
+            UpdateBcMaxExtra();
             SoftBusCondSignal(&bcManager->cond);
         }
         BroadcastCallback callback = *(bcManager->bcCallback);
@@ -317,6 +409,9 @@ static void BcStopBroadcastingCallback(int32_t adapterBcId, int32_t status)
         DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d",
             GetSrvType(bcManager->srvType), managerId, adapterBcId, status);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
+            if (bcManager->isAdvertising) {
+                g_bcCurrentNum--;
+            }
             bcManager->isAdvertising = false;
             bcManager->time = 0;
             SoftBusCondSignal(&bcManager->cond);
@@ -972,7 +1067,7 @@ static bool CheckNeedUpdateScan(int32_t listenerId, int32_t *liveListenerId)
 static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
     if (srcFilter->address != NULL) {
-        uint32_t addressLength = strlen((char *)srcFilter->address);
+        uint32_t addressLength = strlen((char *)srcFilter->address) + 1;
         dstFilter->address = (int8_t *)SoftBusCalloc(addressLength);
         DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->address != NULL &&
             memcpy_s(dstFilter->address, addressLength, srcFilter->address, addressLength) == EOK,
@@ -980,7 +1075,7 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
     }
 
     if (srcFilter->deviceName != NULL) {
-        uint32_t deviceNameLength = strlen((char *)srcFilter->deviceName);
+        uint32_t deviceNameLength = strlen((char *)srcFilter->deviceName) + 1;
         dstFilter->deviceName = (int8_t *)SoftBusCalloc(deviceNameLength);
         DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->deviceName != NULL &&
             memcpy_s(dstFilter->deviceName, deviceNameLength, srcFilter->deviceName, deviceNameLength) == EOK,
@@ -1491,9 +1586,18 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[g_interfaceId]->StartBroadcasting(g_bcManager[bcId].adapterBcId, &adapterParam, &softbusBcData);
     g_bcManager[bcId].time = MgrGetSysTime();
+    g_bcManager[bcId].minInterval = adapterParam.minInterval;
+    g_bcManager[bcId].maxInterval = adapterParam.maxInterval;
+    int32_t advHandle = 0;
+    (void)BroadcastGetBroadcastHandle(bcId, &advHandle);
+    g_bcManager[bcId].advHandle = advHandle;
+    if (g_bcCurrentNum >= MAX_BLE_ADV_NUM) {
+        g_bcOverMaxNum++;
+    }
     if (ret != SOFTBUS_OK) {
         callback.OnStartBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
         DISC_LOGE(DISC_BROADCAST, "call from adapter failed");
+        ReportCurrentBroadcast();
         ReleaseSoftbusBroadcastData(&softbusBcData);
         return ret;
     }

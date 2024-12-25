@@ -1,0 +1,49 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../dsoftbus.gni")
+
+native_source_path = rebase_path("$dsoftbus_root_path")
+
+usb_disc_inc = [
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/discovery/usb/disc_usb/include",
+  "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+]
+
+if (dsoftbus_feature_disc_usb && has_ces_part) {
+  dsoftbus_feature_disc_usb_support = true
+} else {
+  dsoftbus_feature_disc_usb_support = false
+}
+
+usb_disc_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+usb_disc_external_deps = []
+
+usb_disc_src = []
+if (!dsoftbus_feature_disc_usb_support) {
+  usb_disc_src += [
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/src/disc_usb_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/usb/disc_usb/src/disc_usb_virtual.c",
+  ]
+} else {
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/usb/disc_usb/disc_usb.gni")
+
+  usb_disc_src += [ "$dsoftbus_root_path/core/discovery/usb/dispatcher/src/disc_usb_dispatcher.c" ]
+
+  usb_disc_src += usb_discovery_sources
+  usb_disc_inc += usb_discovery_dirs
+  usb_disc_deps += usb_discovery_deps
+  usb_disc_external_deps += usb_discovery_external_deps
+}

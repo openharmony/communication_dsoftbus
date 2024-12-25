@@ -672,3 +672,44 @@ int32_t TransGetPidByChanId(int32_t channelId, int32_t channelType, int32_t *pid
     TRANS_LOGE(TRANS_SVC, "can not find pid by channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
 }
+
+int32_t TransTdcUpdateReplyCnt(int32_t channelId)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, " g_sessionConnList lock fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            connInfo->appInfo.waitOpenReplyCnt = CHANNEL_OPEN_SUCCESS;
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, " g_sessionConnList lock fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            if (connInfo->appInfo.waitOpenReplyCnt != CHANNEL_OPEN_SUCCESS) {
+                connInfo->appInfo.waitOpenReplyCnt++;
+            }
+            *curCount = connInfo->appInfo.waitOpenReplyCnt;
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_CTRL, "session conn item not found by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}

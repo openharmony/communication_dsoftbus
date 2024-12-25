@@ -17,8 +17,9 @@
 
 #include <securec.h>
 
-#include "session.h"
 #include "client_trans_udp_manager.h"
+#include "fuzz_data_generator.h"
+#include "session.h"
 #include "softbus_adapter_mem.h"
 
 #define STR_LEN 100000
@@ -33,8 +34,11 @@ namespace OHOS {
         ChannelInfo channel = {0};
         channel.channelType = CHANNEL_TYPE_UDP;
         channel.businessType = BUSINESS_TYPE_STREAM;
-        int32_t udpPort = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t udpPort = 0;
+        GenerateInt32(udpPort);
         TransOnUdpChannelOpened((char *)data, &channel, &udpPort);
+        DataGenerator::Clear();
     }
 
     void TransOnUdpChannelOpenFailedTest(const uint8_t* data, size_t size)
@@ -42,9 +46,13 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-        int32_t errCode = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        int32_t errCode = 0;
+        GenerateInt32(channelId);
+        GenerateInt32(errCode);
         TransOnUdpChannelOpenFailed(channelId, errCode);
+        DataGenerator::Clear();
     }
 
     void TransOnUdpChannelClosedTest(const uint8_t* data, size_t size)
@@ -52,8 +60,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         TransOnUdpChannelClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
+        DataGenerator::Clear();
     }
 
     void TransOnUdpChannelQosEventTest(const uint8_t* data, size_t size)
@@ -61,11 +72,15 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-        int32_t eventId = *(reinterpret_cast<const int32_t *>(data));
-        int32_t tvCount = *(reinterpret_cast<const int32_t *>(data));
+        int32_t channelId = 0;
+        int32_t eventId = 0;
+        int32_t tvCount = 0;
+        GenerateInt32(channelId);
+        GenerateInt32(eventId);
+        GenerateInt32(tvCount);
         QosTv tvList;
         TransOnUdpChannelQosEvent(channelId, eventId, tvCount, &tvList);
+        DataGenerator::Clear();
     }
 
     void ClientTransCloseUdpChannelTest(const uint8_t* data, size_t size)
@@ -73,8 +88,11 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         ClientTransCloseUdpChannel(channelId, SHUTDOWN_REASON_UNKNOWN);
+        DataGenerator::Clear();
     }
 
     void TransUdpChannelSendStreamTest(const uint8_t* data, size_t size)
@@ -90,7 +108,9 @@ namespace OHOS {
             SoftBusFree(ptr);
             return;
         }
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        GenerateInt32(channelId);
         StreamData streamdata = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
             .bufLen = size,
@@ -99,22 +119,22 @@ namespace OHOS {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
             .bufLen = size,
         };
-        TV tv = {
-            .type = *(reinterpret_cast<const int32_t *>(ptr)),
-            .value = *(reinterpret_cast<const int64_t *>(ptr)),
-        };
+        TV tv = { 0 };
+        GenerateInt32(tv.type);
+        GenerateInt64(tv.value);
         StreamFrameInfo param = {
-            .frameType = *(reinterpret_cast<const int32_t *>(ptr)),
-            .timeStamp = *(reinterpret_cast<const int32_t *>(ptr)),
-            .seqNum = *(reinterpret_cast<const int32_t *>(ptr)),
-            .seqSubNum = *(reinterpret_cast<const int32_t *>(ptr)),
-            .level = *(reinterpret_cast<const int32_t *>(ptr)),
-            .bitMap = *(reinterpret_cast<const int32_t *>(ptr)),
             .tvCount = 1,
             .tvList = &tv,
         };
+        GenerateInt32(param.frameType);
+        GenerateInt64(param.timeStamp);
+        GenerateInt32(param.seqNum);
+        GenerateInt32(param.seqSubNum);
+        GenerateInt32(param.level);
+        GenerateInt32(param.bitMap);
         TransUdpChannelSendStream(channelId, &streamdata, &ext, &param);
         SoftBusFree(ptr);
+        DataGenerator::Clear();
     }
 
     void TransUdpChannelSendFileTest(const uint8_t* data, size_t size)
@@ -128,9 +148,13 @@ namespace OHOS {
             "/data/richu-002.jpg",
             "/data/richu-003.jpg",
         };
-        int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
-        int32_t fileCnt = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t channelId = 0;
+        int32_t fileCnt = 0;
+        GenerateInt32(channelId);
+        GenerateInt32(fileCnt);
         TransUdpChannelSendFile(channelId, sfileList, NULL, fileCnt);
+        DataGenerator::Clear();
     }
 
     void TransGetUdpChannelByFileIdTest(const uint8_t* data, size_t size)
@@ -138,9 +162,12 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
-        int32_t dfileId = *(reinterpret_cast<const int32_t *>(data));
+        DataGenerator::Write(data, size);
+        int32_t dfileId = 0;
+        GenerateInt32(dfileId);
         UdpChannel udpChannel;
         TransGetUdpChannelByFileId(dfileId, &udpChannel);
+        DataGenerator::Clear();
     }
 
     void TransUdpDeleteFileListenerlTest(const uint8_t* data, size_t size)

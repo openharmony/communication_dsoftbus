@@ -78,22 +78,19 @@ static SoftBusHandlerWrapper g_brConnectionAsyncHandler = {
 
 static int32_t g_readBufferCapacity = -1;
 static int32_t g_mtuSize = -1;
-static int32_t LoopRead(uint32_t connectionId)
+static int32_t LoopRead(ConnBrConnection *connection)
 {
-    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, INVALID_SOCKET_HANDLE, CONN_BR,
-        "get connection failed, connId=%{public}u", connectionId);
     LimitedBuffer *buffer = NULL;
     int32_t status = ConnNewLimitedBuffer(&buffer, g_readBufferCapacity);
     if (status != SOFTBUS_OK) {
-        ConnBrReturnConnection(&connection);
         return status;
     }
 
     while (true) {
         status = SoftBusMutexLock(&connection->lock);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "try to get lock failed, connId=%{public}u, err=%{public}d", connectionId, status);
+            CONN_LOGE(CONN_BR, "try to get lock failed, connId=%{public}u, err=%{public}d",
+                connection->connectionId, status);
             break;
         }
         int32_t socketHandle = connection->socketHandle;
@@ -104,15 +101,14 @@ static int32_t LoopRead(uint32_t connectionId)
             break;
         }
         uint8_t *data = NULL;
-        int32_t dataLen = ConnBrTransReadOneFrame(connectionId, socketHandle, buffer, &data);
+        int32_t dataLen = ConnBrTransReadOneFrame(connection->connectionId, socketHandle, buffer, &data);
         if (dataLen < 0) {
             status = dataLen;
             break;
         }
-        g_eventListener.onDataReceived(connectionId, data, dataLen);
+        g_eventListener.onDataReceived(connection->connectionId, data, dataLen);
     }
     ConnDeleteLimitedBuffer(&buffer);
-    ConnBrReturnConnection(&connection);
     return status;
 }
 
@@ -168,12 +164,13 @@ static int32_t StartBrClientConnect(ConnBrConnection *connection, const char *an
     if (socketHandle <= INVALID_SOCKET_HANDLE) {
         CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, connId=%{public}u, address=%{public}s",
             connection->connectionId, anomizeAddress);
+        int32_t errCode = socketHandle;
         ConnAlarmExtra extraAlarm = {
             .linkType = CONNECT_BR,
-            .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+            .errcode = errCode,
         };
         CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
-        return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+        return errCode;
     }
     if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, address=%{public}s", connection->connectionId,
@@ -220,7 +217,7 @@ static void *StartClientConnect(void *connectCtx)
         CONN_LOGI(CONN_BR, "connect ok, id=%{public}u, address=%{public}s, socket=%{public}d",
             connection->connectionId, anomizeAddress, connection->socketHandle);
         g_eventListener.onClientConnected(connection->connectionId);
-        ret = LoopRead(connection->connectionId);
+        ret = LoopRead(connection);
         CONN_LOGD(CONN_BR, "br client loop read exit, connId=%{public}u, address=%{public}s, socketHandle=%{public}d, "
             "error=%{public}d", connection->connectionId, anomizeAddress, connection->socketHandle, ret);
 
@@ -286,7 +283,7 @@ static void *StartServerServe(void *serveCtx)
     do {
         CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, socketHandle);
         g_eventListener.onServerAccepted(connection->connectionId);
-        int32_t ret = LoopRead(connection->connectionId);
+        int32_t ret = LoopRead(connection);
         CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
             connection->connectionId, socketHandle, ret);
 

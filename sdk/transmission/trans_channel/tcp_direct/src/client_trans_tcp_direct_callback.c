@@ -39,7 +39,20 @@ int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb)
 
 int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel)
 {
-    return g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_BYTES);
+    if (sessionName == NULL || channel == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SessionType type = TYPE_BUTT;
+    switch (channel->businessType) {
+        case BUSINESS_TYPE_MESSAGE:
+            type = TYPE_MESSAGE;
+            break;
+        default:
+            type = TYPE_BYTES;
+            break;
+    }
+    return g_sessionCb.OnSessionOpened(sessionName, channel, type);
 }
 
 int32_t ClientTransTdcOnSessionClosed(int32_t channelId, ShutdownReason reason)

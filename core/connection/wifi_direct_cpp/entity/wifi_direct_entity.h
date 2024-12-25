@@ -16,16 +16,17 @@
 #define WIFI_DIRECT_ENTITY_H
 
 #include "conn_log.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectEntity {
 public:
     virtual void DisconnectLink(const std::string &remoteMac) = 0;
     virtual void DestroyGroupIfNeeded() = 0;
-    virtual bool SupportHml()
+    virtual HmlCapabilityCode GetHmlCapabilityCode()
     {
         CONN_LOGW(CONN_WIFI_DIRECT, "not support");
-        return false;
+        return CONN_HML_NOT_SUPPORT;
     }
 };
 }

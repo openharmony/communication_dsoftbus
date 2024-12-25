@@ -83,7 +83,6 @@ if (defined(ohos_lite)) {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = [
-        "$dsoftbus_root_path/adapter/common/bus_center/network/lnn_netmanager_listener_virtual.cpp",
         "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_strategy_virtual.c",
         "bus_center_sdk_refresh_small_test.cpp",
       ]
@@ -246,7 +245,6 @@ if (defined(ohos_lite)) {
   ohos_unittest("ClientBusCentManagerTest") {
     module_out_path = module_output_path
     sources = [
-      "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
       "client_bus_center_manager_mock.cpp",
       "client_bus_center_manager_test.cpp",
     ]

@@ -50,29 +50,29 @@ using namespace testing::ext;
 
 static int32_t InitServer()
 {
-    if (ConnServerInit() == SOFTBUS_ERR) {
+    if (ConnServerInit() != SOFTBUS_OK) {
         printf("softbus conn server init failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_INTERNAL_ERR;
     }
-    if (AuthInit() == SOFTBUS_ERR) {
+    if (AuthInit() != SOFTBUS_OK) {
         printf("softbus auth init failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_INIT_FAIL;
     }
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         printf("init local net ledger fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitDistributedLedger() != SOFTBUS_OK) {
         printf("init distributed net ledger fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
         printf("init event monitor failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_EVENT_MONITER_INIT_FAILED;
     }
     if (LnnInitNetworkManager() != SOFTBUS_OK) {
         printf("init lnn network manager fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MANAGER_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -112,42 +112,42 @@ static int32_t SetIpaddr(const std::string &ip)
     struct ifreq ifr;
     if (memset_s((void *)&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
         printf("memset_s 1 fail\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (memset_s((void *)&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
         printf("memset_s 3 fail\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     sockFd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockFd < 0) {
         printf("could not create IP socket\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CREATE_SOCKET_FAILED;
     }
     if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), "eth0", strlen("eth0")) != EOK) {
         printf("strncpy_s fail\n");
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     addr.sin_family = AF_INET;
     if (inet_pton(AF_INET, ip.c_str(), &(addr.sin_addr)) <= 0) {
         printf("inet_pton fail for ip\n");
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_INET_PTON_FAILED;
     }
     (void)memcpy_s(&ifr.ifr_addr, sizeof(addr), &addr, sizeof(addr));
     if (ioctl(sockFd, SIOCSIFADDR, &ifr) < 0) {
         printf("error to set interface address, error: %s\n", strerror(errno));
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADAPTER_ERR;
     }
 
     ifr.ifr_flags |= IFF_UP | IFF_RUNNING;
     if (ioctl(sockFd, SIOCSIFFLAGS, &ifr) < 0) {
         printf("error to set eth0 up\n");
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADAPTER_ERR;
     }
     close(sockFd);
     return SOFTBUS_OK;
@@ -159,31 +159,31 @@ static int32_t SetIpDown()
     struct ifreq ifr;
     if (memset_s((void *)&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
         printf("memset_s 1 fail\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     sockFd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockFd < 0) {
         printf("could not create IP socket\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_CREATE_SOCKET_FAILED;
     }
     if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), "eth0", strlen("eth0")) != EOK) {
         printf("strncpy_s fail\n");
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     if (ioctl(sockFd, SIOCGIFFLAGS, &ifr) < 0) {
         printf("error to get eth0 flags\n");
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADAPTER_ERR;
     }
 
     ifr.ifr_flags &= ~(IFF_UP);
     if (ioctl(sockFd, SIOCSIFFLAGS, &ifr) < 0) {
         printf("error to set eth0 down\n");
         close(sockFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADAPTER_ERR;
     }
     close(sockFd);
     return SOFTBUS_OK;

@@ -106,6 +106,9 @@ typedef struct {
     int32_t businessId;        // BUSSINESS_ID
     int32_t businessType;      // BUSINESS_TYPE
     int32_t sessionId;         // SESSION_ID
+    int32_t minBW;             // MIN_BW
+    int32_t maxLatency;        // MAX_LATENCY
+    int32_t minLatency;        // MIN_LATENCY
 } TransEventExtra;
 
 typedef enum {

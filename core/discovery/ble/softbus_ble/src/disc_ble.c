@@ -20,6 +20,7 @@
 
 #include "anonymizer.h"
 #include "broadcast_scheduler.h"
+#include "broadcast_dfx_event.h"
 #include "common_list.h"
 #include "disc_ble_constant.h"
 #include "disc_ble_utils.h"
@@ -92,8 +93,32 @@ typedef enum {
     PROCESS_TIME_OUT,
     RECOVERY,
     TURN_OFF,
+    DFX_DELAY_RECORD,
     BR_STATE_CHANGED,
 } DiscBleMessage;
+
+typedef enum {
+    CAST_EVENT,
+    OSD_EVENT,
+    DVKIT_EVENT,
+} EventType;
+ 
+typedef enum {
+    CAST_EVENT_CON,
+    CAST_EVENT_NON,
+    OSD_EVENT_CON,
+    OSD_EVENT_NON,
+    DVKIT_EVENT_CON,
+    DVKIT_EVENT_NON,
+    MAX_DISC_EVENT,
+} DiscBleEventType;
+ 
+typedef enum {
+    SCAN_CAST_EVENT,
+    SCAN_DVKIT_EVENT,
+    SCAN_OSD_EVENT,
+    MAX_SCAN_EVENT,
+} ScanBleEventType;
 
 typedef struct {
     bool isAdvertising;
@@ -174,6 +199,10 @@ static DiscBleListener g_bleListener = {
     .scanListenerId = -1
 };
 
+static DiscEventExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
+static DiscEventExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
+static int32_t g_bleOldCap = 0;
+
 // g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
     1 << CASTPLUS_CAPABILITY_BITMAP |
@@ -214,6 +243,9 @@ static int32_t BleInfoDump(int fd);
 static int32_t BleAdvertiserDump(int fd);
 static int32_t RecvMessageInfoDump(int fd);
 static void DiscBleSetScanFilter(int32_t listenerId, int32_t type);
+static void BleEventExtraInit(void);
+static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap);
+static void CalcCount(int32_t adv, uint32_t capabilityBitmap, bool result);
 
 // This function is used to compatibled with mobile phone, will remove later
 static int ConvertCapBitMap(int oldCap)
@@ -561,6 +593,21 @@ static void ProcessDistributePacket(const BroadcastReportInfo *reportInfo)
     }
 }
 
+static void AccumulateBleScanNum(uint32_t capabilityBitmap)
+{
+    uint32_t tempCap = 0;
+    DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
+    if (tempCap & 1 << CASTPLUS_CAPABILITY_BITMAP) {
+        g_bleScanExtra[SCAN_CAST_EVENT].scanCount++;
+    }
+    if (tempCap & 1 << DVKIT_CAPABILITY_BITMAP) {
+        g_bleScanExtra[SCAN_DVKIT_EVENT].scanCount++;
+    }
+    if (tempCap & 1 << OSD_CAPABILITY_BITMAP) {
+        g_bleScanExtra[SCAN_OSD_EVENT].scanCount++;
+    }
+}
+
 static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *reportInfo)
 {
     (void)listenerId;
@@ -572,6 +619,7 @@ static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *rep
     if ((reportInfo->packet.bcData.id == SERVICE_UUID) && (advData[POS_BUSINESS] == DISTRIBUTE_BUSINESS)) {
         SignalingMsgPrint("ble adv rcv", advData, reportInfo->packet.bcData.payloadLen, DISC_BLE);
         ProcessDistributePacket(reportInfo);
+        AccumulateBleScanNum((uint32_t)advData[POS_CAPABLITY]);
     } else {
         DISC_LOGI(DISC_BLE, "ignore other business");
     }
@@ -939,6 +987,135 @@ static void DfxRecordAdevertiserEnd(int32_t adv, int32_t reason)
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
 }
 
+static void BleEventExtraInit(void)
+{
+    for (int32_t i = 0; i < MAX_DISC_EVENT; i++) {
+        g_bleDiscExtra[i].discType = BLE + 1;
+        g_bleDiscExtra[i].minInterval = ADV_INTERNAL;
+        g_bleDiscExtra[i].maxInterval = ADV_INTERNAL;
+    }
+    for (int32_t i = 0; i < MAX_SCAN_EVENT; i++) {
+        g_bleScanExtra[i].scanType = BLE + 1;
+    }
+ 
+    g_bleDiscExtra[CAST_EVENT_CON].broadcastType = CON_ADV_ID + 1;
+    g_bleDiscExtra[CAST_EVENT_CON].capabilityBit = CASTPLUS_CAPABILITY_BITMAP;
+    g_bleDiscExtra[CAST_EVENT_NON].broadcastType = NON_ADV_ID + 1;
+    g_bleDiscExtra[CAST_EVENT_NON].capabilityBit = CASTPLUS_CAPABILITY_BITMAP;
+    g_bleDiscExtra[OSD_EVENT_CON].broadcastType = CON_ADV_ID + 1;
+    g_bleDiscExtra[OSD_EVENT_CON].capabilityBit = OSD_CAPABILITY_BITMAP;
+    g_bleDiscExtra[OSD_EVENT_NON].broadcastType = NON_ADV_ID + 1;
+    g_bleDiscExtra[OSD_EVENT_NON].capabilityBit = OSD_CAPABILITY_BITMAP;
+    g_bleDiscExtra[DVKIT_EVENT_CON].broadcastType = CON_ADV_ID + 1;
+    g_bleDiscExtra[DVKIT_EVENT_CON].capabilityBit = DVKIT_CAPABILITY_BITMAP;
+    g_bleDiscExtra[DVKIT_EVENT_NON].broadcastType = NON_ADV_ID + 1;
+    g_bleDiscExtra[DVKIT_EVENT_NON].capabilityBit = DVKIT_CAPABILITY_BITMAP;
+    g_bleScanExtra[SCAN_CAST_EVENT].capabilityBit = CASTPLUS_CAPABILITY_BITMAP;
+    g_bleScanExtra[SCAN_DVKIT_EVENT].capabilityBit = DVKIT_CAPABILITY_BITMAP;
+    g_bleScanExtra[SCAN_OSD_EVENT].capabilityBit = OSD_CAPABILITY_BITMAP;
+}
+ 
+static void ClearDiscEventExtra(int32_t index)
+{
+    for (int32_t i = 0; i < index; i++) {
+        g_bleDiscExtra[i].successCnt = 0;
+        g_bleDiscExtra[i].failCnt = 0;
+        g_bleDiscExtra[i].costTime = 0;
+    }
+}
+ 
+static void ClearScanEventExtra(int32_t index)
+{
+    for (int32_t i = 0; i < index; i++) {
+        g_bleScanExtra[i].scanCount = 0;
+    }
+}
+ 
+static void DfxDelayRecord(const SoftBusMessage *msg)
+{
+    BroadcastDiscEvent(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, g_bleDiscExtra, MAX_DISC_EVENT);
+    BroadcastScanEvent(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, g_bleScanExtra, MAX_SCAN_EVENT);
+    ClearDiscEventExtra(MAX_DISC_EVENT);
+    ClearScanEventExtra(MAX_SCAN_EVENT);
+ 
+    SoftBusMessage *dfxmsg = CreateBleHandlerMsg(DFX_DELAY_RECORD, 0, 0, NULL);
+    if (dfxmsg == NULL) {
+        DISC_LOGE(DISC_BLE, "create msg fail");
+    }
+    g_discBleHandler.looper->PostMessageDelay(g_discBleHandler.looper, dfxmsg, DELAY_TIME_DEFAULT);
+}
+ 
+static void CalcCount(int32_t adv, uint32_t capabilityBitmap, bool result)
+{
+    uint32_t tempCap = 0;
+    DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
+    if (adv == CON_ADV_ID) {
+        if (tempCap & 1 << CASTPLUS_CAPABILITY_BITMAP) {
+            result ? g_bleDiscExtra[CAST_EVENT_CON].successCnt++ : g_bleDiscExtra[CAST_EVENT_CON].failCnt++;
+        }
+        if (tempCap & 1 << OSD_CAPABILITY_BITMAP) {
+            result ? g_bleDiscExtra[OSD_EVENT_CON].successCnt++ : g_bleDiscExtra[OSD_EVENT_CON].failCnt++;
+        }
+        if (tempCap & 1 << DVKIT_CAPABILITY_BITMAP) {
+            result ? g_bleDiscExtra[DVKIT_EVENT_CON].successCnt++ : g_bleDiscExtra[DVKIT_EVENT_CON].failCnt++;
+        }
+    }
+    if (adv == NON_ADV_ID) {
+        if (tempCap & 1 << CASTPLUS_CAPABILITY_BITMAP) {
+            result ? g_bleDiscExtra[CAST_EVENT_NON].successCnt++ : g_bleDiscExtra[CAST_EVENT_NON].failCnt++;
+        }
+        if (tempCap & 1 << OSD_CAPABILITY_BITMAP) {
+            result ? g_bleDiscExtra[OSD_EVENT_NON].successCnt++ : g_bleDiscExtra[OSD_EVENT_NON].failCnt++;
+        }
+        if (tempCap & 1 << DVKIT_CAPABILITY_BITMAP) {
+            result ? g_bleDiscExtra[DVKIT_EVENT_NON].successCnt++ : g_bleDiscExtra[DVKIT_EVENT_NON].failCnt++;
+        }
+    }
+}
+ 
+static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
+{
+    uint32_t tempCap = 0;
+    DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
+    uint64_t stamptime = SoftBusGetSysTimeMs();
+ 
+    const uint32_t event[] = {
+        adv == CON_ADV_ID ? CAST_EVENT_CON : CAST_EVENT_NON,
+        adv == CON_ADV_ID ? OSD_EVENT_CON : OSD_EVENT_NON,
+        adv == CON_ADV_ID ? DVKIT_EVENT_CON : DVKIT_EVENT_NON
+    };
+ 
+    if ((tempCap & (1 << CASTPLUS_CAPABILITY_BITMAP)) && g_bleDiscExtra[event[CAST_EVENT]].isOn == 0) {
+        g_bleDiscExtra[event[CAST_EVENT]].startTime = stamptime;
+        g_bleDiscExtra[event[CAST_EVENT]].isOn = 1;
+    } else if (((tempCap & 1 << CASTPLUS_CAPABILITY_BITMAP) == 0) && g_bleDiscExtra[event[CAST_EVENT]].isOn == 1) {
+        g_bleDiscExtra[event[CAST_EVENT]].stopTime = stamptime;
+        g_bleDiscExtra[event[CAST_EVENT]].isOn = 0;
+        g_bleDiscExtra[event[CAST_EVENT]].costTime +=
+            (g_bleDiscExtra[event[CAST_EVENT]].stopTime - g_bleDiscExtra[event[CAST_EVENT]].startTime);
+    }
+ 
+    if ((tempCap & (1 << OSD_CAPABILITY_BITMAP)) && g_bleDiscExtra[event[OSD_EVENT]].isOn == 0) {
+        g_bleDiscExtra[event[OSD_EVENT]].startTime = stamptime;
+        g_bleDiscExtra[event[OSD_EVENT]].isOn = 1;
+    } else if (((tempCap & 1 << OSD_CAPABILITY_BITMAP) == 0) && g_bleDiscExtra[event[OSD_EVENT]].isOn == 1) {
+        g_bleDiscExtra[event[OSD_EVENT]].stopTime = stamptime;
+        g_bleDiscExtra[event[OSD_EVENT]].isOn = 0;
+        g_bleDiscExtra[event[OSD_EVENT]].costTime +=
+            (g_bleDiscExtra[event[OSD_EVENT]].stopTime - g_bleDiscExtra[event[OSD_EVENT]].startTime);
+    }
+ 
+    if ((tempCap & (1 << DVKIT_CAPABILITY_BITMAP)) && g_bleDiscExtra[event[DVKIT_EVENT]].isOn == 0) {
+        g_bleDiscExtra[event[DVKIT_EVENT]].startTime = stamptime;
+        g_bleDiscExtra[event[DVKIT_EVENT]].isOn = 1;
+    } else if (((tempCap & 1 << DVKIT_CAPABILITY_BITMAP) == 0) && g_bleDiscExtra[event[DVKIT_EVENT]].isOn == 1) {
+        g_bleDiscExtra[event[DVKIT_EVENT]].stopTime = stamptime;
+        g_bleDiscExtra[event[DVKIT_EVENT]].isOn = 0;
+        g_bleDiscExtra[event[DVKIT_EVENT]].costTime +=
+            (g_bleDiscExtra[event[DVKIT_EVENT]].stopTime - g_bleDiscExtra[event[DVKIT_EVENT]].startTime);
+    }
+}
+
 static int32_t StartAdvertiser(int32_t adv)
 {
     DISC_LOGD(DISC_BLE, "enter");
@@ -973,10 +1150,13 @@ static int32_t StartAdvertiser(int32_t adv)
     ret = SchedulerStartBroadcast(advertiser->channel, contentType, &advParam, &packet);
     if (ret != SOFTBUS_OK) {
         DfxRecordAdevertiserEnd(adv, ret);
+        CalcCount(adv, advertiser->deviceInfo.capabilityBitmap[0], false);
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "start adv failed, adv=%{public}d", adv);
         return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
     }
+    CalcCount(adv, advertiser->deviceInfo.capabilityBitmap[0], true);
+    CalcDurationTime(adv, advertiser->deviceInfo.capabilityBitmap[0]);
     DfxRecordAdevertiserEnd(adv, SOFTBUS_OK);
     UpdateInfoManager(adv, false);
     DestroyBleConfigAdvData(&packet);
@@ -1007,8 +1187,11 @@ static int32_t UpdateAdvertiser(int32_t adv)
 {
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, StopAdvertiser(adv),
-        DISC_BLE, "advertiser adv GetConDeviceInfo failed. adv=%{public}d", adv);
+    if (ret != SOFTBUS_OK) {
+        CalcDurationTime(adv, advertiser->deviceInfo.capabilityBitmap[0]);
+        DISC_LOGE(DISC_BLE, "advertiser adv GetConDeviceInfo failed. adv=%{public}d", adv);
+        StopAdvertiser(adv);
+    }
     BroadcastData broadcastData = {};
     ret = GetBroadcastData(&advertiser->deviceInfo, adv, &broadcastData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,  SOFTBUS_DISCOVER_BLE_GET_BROADCAST_DATA_FAIL,
@@ -1021,10 +1204,13 @@ static int32_t UpdateAdvertiser(int32_t adv)
     BuildAdvParam(&advParam);
     ret = SchedulerUpdateBroadcast(advertiser->channel, &advParam, &packet);
     if (ret != SOFTBUS_OK) {
+        CalcCount(adv, advertiser->deviceInfo.capabilityBitmap[0], false);
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed, ret=%{public}d", ret);
         return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
     }
+    CalcCount(adv, advertiser->deviceInfo.capabilityBitmap[0] - g_bleOldCap, true);
+    CalcDurationTime(adv, advertiser->deviceInfo.capabilityBitmap[0]);
     UpdateInfoManager(adv, false);
     DestroyBleConfigAdvData(&packet);
     return SOFTBUS_OK;
@@ -1244,6 +1430,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
+    g_bleOldCap = oldCap;
     int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
         int32_t status = RegisterCapability(&g_bleInfoManager[index], &regOption);
@@ -1261,6 +1448,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         g_bleInfoManager[index].needUpdateCap = true;
     }
     int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
+    BleEventExtraInit();
     DISC_LOGI(DISC_BLE, "ble discovery request summary, action: isStart=%{public}d, publishFlags=%{public}d, "
         "activeFlags=%{public}d, oldCap=%{public}d, newCap=%{public}d, "
         "oldRangingRefCount=%{public}d, newRangingRefCount=%{public}d, needUpdateCap=%{public}d",
@@ -1811,6 +1999,9 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
         case BR_STATE_CHANGED:
             OnBrStateChanged(msg);
             break;
+        case DFX_DELAY_RECORD:
+            DfxDelayRecord(msg);
+            break;
         default:
             DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
             break;
@@ -1921,6 +2112,8 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
         return NULL;
     }
 
+    SoftBusMessage *msg = CreateBleHandlerMsg(DFX_DELAY_RECORD, 0, 0, NULL);
+    g_discBleHandler.looper->PostMessageDelay(g_discBleHandler.looper, msg, DELAY_TIME_DEFAULT);
     SoftBusRegDiscVarDump((char *)BLE_INFO_MANAGER, &BleInfoDump);
     SoftBusRegDiscVarDump((char *)BlE_ADVERTISER, &BleAdvertiserDump);
     SoftBusRegDiscVarDump((char *)RECV_MESSAGE_INFO, &RecvMessageInfoDump);

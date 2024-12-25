@@ -9,41 +9,46 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permission and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-#include "lnn_event_monitor_impl.h"
+#include "lnn_netmanager_monitor.h"
 
-#include <cstdint>
-#include <string>
+#include <cstring>
+#include <ctime>
+#include <regex>
+#include <securec.h>
 
 #include "anonymizer.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_event_monitor_impl.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "net_conn_client.h"
 #include "net_interface_callback_stub.h"
-#include "net_manager_constants.h"
-#include "singleton.h"
+#include "softbus_adapter_file.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_config_type.h"
 #include "softbus_error_code.h"
 
+static const int32_t DELAY_LEN = 1000;
+static const int32_t NETMANAGER_OK = 0;
+static const int32_t DUPLICATE_ROUTE = -17;
+
 namespace OHOS {
-namespace LnnNetManager {
-using namespace OHOS::NetManagerStandard;
-
-class LnnNetManagerListener : public NetInterfaceStateCallbackStub {
+namespace BusCenter {
+class NetInterfaceStateMonitor : public OHOS::NetManagerStandard::NetInterfaceStateCallbackStub {
 public:
-    LnnNetManagerListener() = default;
-    ~LnnNetManagerListener() = default;
-    LnnNetManagerListener(const LnnNetManagerListener &) = delete;
-    LnnNetManagerListener &operator=(const LnnNetManagerListener &) = delete;
+    explicit NetInterfaceStateMonitor();
+    virtual ~NetInterfaceStateMonitor() = default;
 
+public:
     int32_t OnInterfaceAdded(const std::string &ifName) override;
     int32_t OnInterfaceRemoved(const std::string &ifName) override;
     int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
@@ -56,27 +61,29 @@ public:
 
 static int32_t g_ethCount;
 static SoftBusMutex g_ethCountLock;
-static OHOS::sptr<OHOS::NetManagerStandard::NetInterfaceStateCallbackStub> g_lnnNetManagerListener = nullptr;
+static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback = nullptr;
 
-int32_t LnnNetManagerListener::OnInterfaceAdded(const std::string &ifName)
+NetInterfaceStateMonitor::NetInterfaceStateMonitor()
+{}
+
+int32_t NetInterfaceStateMonitor::OnInterfaceAdded(const std::string &ifName)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s", ifName.c_str());
+    LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_ADDED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceRemoved(const std::string &ifName)
+int32_t NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s", ifName.c_str());
+    LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_REMOVED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceChanged(const std::string &ifName, bool isUp)
+int32_t NetInterfaceStateMonitor::OnInterfaceChanged(const std::string &ifName, bool isUp)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
+int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
 {
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -122,10 +129,10 @@ int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &if
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
+int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
-    char *anonyAddr = NULL;
+    char *anonyAddr = nullptr;
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
@@ -161,60 +168,100 @@ int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
     LNN_LOGI(LNN_BUILDER, "local ledger netCapability=%{public}u", netCapability);
     return SOFTBUS_OK;
 }
-int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(
+
+int32_t NetInterfaceStateMonitor::OnInterfaceAddressRemoved(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
-    char *anonyAddr = NULL;
-    Anonymize(addr.c_str(), &anonyAddr);
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
-    AnonymizeFree(anonyAddr);
+    return SOFTBUS_OK;
+}
+} // namespace BusCenter
+} // namespace OHOS
+
+int32_t ConfigNetLinkUp(const char *ifName)
+{
+    if (ifName == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret =
+        OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInterfaceUp(ifName);
+    if (ret != NETMANAGER_OK) {
+        LNN_LOGE(LNN_BUILDER, "up net interface %{public}s failed with ret=%{public}d", ifName, ret);
+        return SOFTBUS_NETWORK_CONFIG_NETLINK_UP_FAIL;
+    }
     return SOFTBUS_OK;
 }
 
-} // namespace LnnNetManager
-} // namespace OHOS
-static void RegEthernetEvent(void *para)
+int32_t ConfigLocalIp(const char *ifName, const char *localIp)
 {
-    (void)para;
-    OHOS::LnnNetManager::g_lnnNetManagerListener = new (std::nothrow) OHOS::LnnNetManager::LnnNetManagerListener;
-    if (OHOS::LnnNetManager::g_lnnNetManagerListener == nullptr) {
-        LNN_LOGE(LNN_BUILDER, "new lnnNetManagerListener fail");
+    if (ifName == nullptr || localIp == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret =
+        OHOS::NetManagerStandard::NetConnClient::GetInstance().SetNetInterfaceIpAddress(ifName, localIp);
+    if (ret != NETMANAGER_OK) {
+        LNN_LOGE(LNN_BUILDER, "config net interface %{public}s ip failed with ret=%{public}d", ifName, ret);
+        return SOFTBUS_NETWORK_CONFIG_NETLINK_IP_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destination, const char *gateway)
+{
+    if (ifName == nullptr || destination == nullptr || gateway == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret =
+        OHOS::NetManagerStandard::NetConnClient::GetInstance().AddNetworkRoute(id, ifName, destination, gateway);
+    if (ret != NETMANAGER_OK && ret != DUPLICATE_ROUTE) {
+        LNN_LOGE(LNN_BUILDER, "config net interface %{public}s route failed with ret=%{public}d", ifName, ret);
+        return SOFTBUS_NETWORK_CONFIG_NETLINK_ROUTE_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+static void LnnRegisterNetManager(void *param)
+{
+    (void)param;
+    OHOS::BusCenter::g_netlinkCallback = new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+    if (OHOS::BusCenter::g_netlinkCallback == nullptr) {
+        LNN_LOGE(LNN_INIT, "new NetInterfaceStateMonitor failed");
         return;
     }
-    OHOS::LnnNetManager::g_ethCount = 0;
-    if (SoftBusMutexInit(&OHOS::LnnNetManager::g_ethCountLock, nullptr) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "init g_ethCountLock fail");
-        delete (OHOS::LnnNetManager::g_lnnNetManagerListener);
+    OHOS::BusCenter::g_ethCount = 0;
+    if (SoftBusMutexInit(&OHOS::BusCenter::g_ethCountLock, nullptr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init g_ethCountLock fail");
+        delete (OHOS::BusCenter::g_netlinkCallback);
         return;
     }
     int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(
-        OHOS::LnnNetManager::g_lnnNetManagerListener);
-    if (ret != OHOS::NetManagerStandard::NETMANAGER_EXT_SUCCESS) {
-        LNN_LOGE(LNN_BUILDER, "RegisterIfacesStateChanged fail, ret=%{public}d", ret);
-        SoftBusMutexDestroy(&OHOS::LnnNetManager::g_ethCountLock);
-        delete (OHOS::LnnNetManager::g_lnnNetManagerListener);
-        return;
+        OHOS::BusCenter::g_netlinkCallback);
+    if (ret != NETMANAGER_OK) {
+        delete (OHOS::BusCenter::g_netlinkCallback);
+        SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
+        LNN_LOGE(LNN_INIT, "register netmanager callback failed with ret=%{public}d", ret);
     }
-    LNN_LOGI(LNN_BUILDER, "RegisterIfacesStateChanged succ");
+    LNN_LOGI(LNN_INIT, "LnnRegisterNetManager succ");
 }
 
 int32_t LnnInitNetManagerMonitorImpl(void)
 {
-    const int32_t DELAY_LEN = 1000;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, RegEthernetEvent, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnRegisterNetManager, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail. ret=%{public}d", ret);
-        return ret;
+        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
+        return SOFTBUS_NETWORK_MONITOR_INIT_FAIL;
     }
     return SOFTBUS_OK;
 }
 
 void LnnDeinitNetManagerMonitorImpl(void)
 {
-    if (OHOS::LnnNetManager::g_lnnNetManagerListener != nullptr) {
-        delete (OHOS::LnnNetManager::g_lnnNetManagerListener);
-        OHOS::LnnNetManager::g_lnnNetManagerListener = nullptr;
+    if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
+        delete (OHOS::BusCenter::g_netlinkCallback);
+        OHOS::BusCenter::g_netlinkCallback = nullptr;
     }
-    (void)SoftBusMutexDestroy(&OHOS::LnnNetManager::g_ethCountLock);
+    (void)SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
 }

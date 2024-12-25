@@ -31,6 +31,7 @@
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
 
 #define AUTH_APPID "softbus_auth"
@@ -66,7 +67,7 @@ typedef struct {
 
 static TrustDataChangeListener g_dataChangeListener;
 
-static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClient)
+static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClient, int32_t userId)
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
@@ -82,6 +83,9 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
         AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
         cJSON_Delete(msg);
         return NULL;
+    }
+    if (userId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", userId)) {
+        AUTH_LOGE(AUTH_HICHAIN, "add json userId fail");
     }
 #ifdef AUTH_ACCOUNT
     AUTH_LOGI(AUTH_HICHAIN, "in account auth mode");
@@ -479,6 +483,17 @@ static void OnDeviceNotTrusted(const char *udid)
     Anonymize(udid, &anonyUdid);
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "LnnGetRemoteNodeInfoById failed! ret=%{public}d", ret);
+        return;
+    }
+    if (nodeInfo.deviceInfo.osType == OH_OS_TYPE) {
+        AUTH_LOGI(AUTH_HICHAIN, "device is oh, ignore hichain event");
+        return;
+    }
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
         g_dataChangeListener.onDeviceNotTrusted(udid, GetActiveOsAccountIds());
     }
@@ -513,13 +528,13 @@ void UnregTrustDataChangeListener(void)
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
+int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int32_t userId)
 {
     if (udid == NULL || uid == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *authParams = GenDeviceLevelParam(udid, uid, true);
+    char *authParams = GenDeviceLevelParam(udid, uid, true, userId);
     if (authParams == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_CREATE_JSON_ERR;

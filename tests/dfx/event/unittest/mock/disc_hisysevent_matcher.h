@@ -56,7 +56,7 @@ MATCHER_P2(DiscValidParamArrayMatcher, inExtra, validSize, "disc valid param arr
     MatchDiscEventNameTypeExtraInt32Param(params, index, extra.result);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.initType);
-    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.serverType);
+    MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.serverType);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.interFuncType);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.capabilityBit);
     MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.capabilityData);

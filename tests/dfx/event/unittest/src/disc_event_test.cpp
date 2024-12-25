@@ -62,7 +62,7 @@ HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
         .result = 1,
         .errcode = 2,
         .initType = 3,
-        .serverType = 4,
+        .serverType = "",
         .interFuncType = 5,
         .capabilityBit = 6,
         .capabilityData = "testCapabilityData",
@@ -108,7 +108,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
         .result = -1,  // valid
         .errcode = -2, // valid
         .initType = -3,
-        .serverType = -4,
+        .serverType = "",
         .interFuncType = -5,
         .capabilityBit = -6,
         .capabilityData = "",
