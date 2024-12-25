@@ -19,6 +19,7 @@
 
 #include "auth_common.h"
 #include "auth_log.h"
+#include "auth_request.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
@@ -261,6 +262,25 @@ const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *h
     return (data + offset);
 }
 
+static int32_t GetAuthTimeoutErrCode(AuthLinkType type, int32_t *errCode)
+{
+    switch (type) {
+        case AUTH_LINK_TYPE_WIFI:
+            return SOFTBUS_AUTH_WIFI_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_BR:
+            return SOFTBUS_AUTH_BR_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_BLE:
+            return SOFTBUS_AUTH_BLE_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_P2P:
+            return SOFTBUS_AUTH_P2P_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            return SOFTBUS_AUTH_ENHANCEDP2P_CONN_TIMEOUT;
+        default:
+            AUTH_LOGE(AUTH_CONN, "auth conn timeout type=%{public}d", type);
+    }
+    return SOFTBUS_AUTH_CONN_TIMEOUT;
+}
+
 /* EVENT_CONNECT_TIMEOUT */
 static void HandleConnConnectTimeout(const void *para)
 {
@@ -273,7 +293,13 @@ static void HandleConnConnectTimeout(const void *para)
         SocketDisconnectDevice(module, item->fd);
         DelConnRequest(item);
     }
-    NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
+    int32_t errCode = SOFTBUS_AUTH_CONN_TIMEOUT;
+    AuthRequest request = { 0 };
+    if (GetgAuthRequest(requestId, &request) == SOFTBUS_OK) {
+        errCode = GetAuthTimeoutErrCode(request.connInfo.type, &errCode);
+        AUTH_LOGE(AUTH_CONN, "errCode=%{public}d", errCode);
+    }
+    NotifyClientConnected(requestId, 0, errCode, NULL);
 }
 
 static void PostConnConnectTimeout(uint32_t requestId, AuthLinkType type)
