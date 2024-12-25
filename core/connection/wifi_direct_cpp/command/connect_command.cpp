@@ -12,21 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "connect_command.h"
 
 #include <cstring>
-
-#include "conn_log.h"
-
+#include "connect_command.h"
 #include "channel/auth_negotiate_channel.h"
 #include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
+#include "conn_log.h"
 #include "data/link_manager.h"
+#include "dfx/wifi_direct_dfx.h"
 #include "event/wifi_direct_event_dispatcher.h"
 #include "processor_selector_factory.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
-#include "utils/wifi_direct_dfx.h"
 #include "wifi_direct_scheduler_factory.h"
 
 namespace OHOS::SoftBus {

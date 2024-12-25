@@ -20,10 +20,10 @@
 #include <queue>
 #include <thread>
 
-#include "processor/wifi_direct_processor.h"
+#include "dfx/wifi_direct_trace.h"
 #include "event/wifi_direct_event_receiver.h"
 #include "event/wifi_direct_event_sender.h"
-#include "utils/wifi_direct_trace.h"
+#include "processor/wifi_direct_processor.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectScheduler;
