@@ -86,6 +86,9 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/data/link_manager.cpp",
       "$wifi_direct_path/data/negotiate_message.cpp",
       "$wifi_direct_path/data/wifi_config_info.cpp",
+      "$wifi_direct_path/dfx/duration_statistic.cpp",
+      "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
+      "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
       "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
       "$wifi_direct_path/entity/p2p_available_state.cpp",
       "$wifi_direct_path/entity/p2p_connect_state.cpp",
@@ -100,8 +103,6 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/protocol/json_protocol.cpp",
       "$wifi_direct_path/protocol/tlv_protocol.cpp",
       "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
-      "$wifi_direct_path/utils/duration_statistic.cpp",
-      "$wifi_direct_path/utils/wifi_direct_trace.cpp",
       "$wifi_direct_path/utils/wifi_direct_utils.cpp",
       "$wifi_direct_path/wifi_direct_executor.cpp",
       "$wifi_direct_path/wifi_direct_initiator.cpp",
@@ -109,7 +110,6 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/wifi_direct_manager.cpp",
       "$wifi_direct_path/wifi_direct_role_option.cpp",
       "$wifi_direct_path/wifi_direct_scheduler.cpp",
-      "$wifi_direct_path/utils/wifi_direct_dfx.cpp",
     ]
 
     if (dsoftbus_feature_ex_kits == true) {

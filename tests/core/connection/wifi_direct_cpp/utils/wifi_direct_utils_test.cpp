@@ -15,21 +15,21 @@
 
 #define private   public
 #define protected public
-#include "duration_statistic.h"
-#include "wifi_direct_dfx.h"
+#include "dfx/duration_statistic.h"
+#include "dfx/wifi_direct_dfx.h"
 #undef protected
 #undef private
 
-#include "data/link_manager.h"
-#include "net_conn_client.h"
-#include "wifi_direct_mock.h"
-#include "wifi_direct_utils.h"
-#include "wifi_direct_anonymous.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <securec.h>
 #include <string>
+#include "data/link_manager.h"
+#include "net_conn_client.h"
+#include "wifi_direct_anonymous.h"
+#include "wifi_direct_mock.h"
+#include "wifi_direct_utils.h"
 
 using namespace testing::ext;
 using testing::_;
