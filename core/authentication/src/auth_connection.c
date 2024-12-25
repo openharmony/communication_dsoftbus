@@ -262,7 +262,7 @@ const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *h
     return (data + offset);
 }
 
-static int32_t GetAuthTimeoutErrCode(AuthLinkType type, int32_t *errCode)
+static int32_t GetAuthTimeoutErrCode(AuthLinkType type)
 {
     switch (type) {
         case AUTH_LINK_TYPE_WIFI:
@@ -296,7 +296,7 @@ static void HandleConnConnectTimeout(const void *para)
     int32_t errCode = SOFTBUS_AUTH_CONN_TIMEOUT;
     AuthRequest request = { 0 };
     if (GetAuthRequest(requestId, &request) == SOFTBUS_OK) {
-        errCode = GetAuthTimeoutErrCode(request.connInfo.type, &errCode);
+        errCode = GetAuthTimeoutErrCode(request.connInfo.type);
         AUTH_LOGE(AUTH_CONN, "errCode=%{public}d", errCode);
     }
     NotifyClientConnected(requestId, 0, errCode, NULL);
