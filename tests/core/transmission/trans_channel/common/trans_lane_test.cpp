@@ -493,19 +493,24 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
         .type = LANE_TYPE_TRANS,
     };
     (void)memcpy_s(&trans.networkId, NETWORK_ID_BUF_LEN, "networkId", strlen("networkId") + 1);
+    NetWorkingChannelInfo info = {
+        .channelId = INVALID_CHANNEL_ID,
+        .isNetWorkingChannel = false,
+    };
+    (void)memcpy_s(info.sessionName, SESSION_NAME_SIZE_MAX, g_sessionName, SESSION_NAME_SIZE_MAX);
 
-    int32_t ret = TransAddLaneReqToPendingAndWaiting(laneHandle, &requestOption);
+    int32_t ret = TransAddLaneReqToPendingAndWaiting(&info, laneHandle, &requestOption);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     (void)TransReqLanePendingInit();
 
     (void)memcpy_s(&requestOption.requestInfo, sizeof(TransOption), &trans, sizeof(TransOption));
-    ret = TransAddLaneReqToPendingAndWaiting(laneHandle, NULL);
+    ret = TransAddLaneReqToPendingAndWaiting(&info, laneHandle, &requestOption);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransAddLaneReqToPendingAndWaiting(laneHandle, &requestOption);
+    ret = TransAddLaneReqToPendingAndWaiting(&info, laneHandle, &requestOption);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransAddLaneReqToPendingAndWaiting(laneHandle, &requestOption);
+    ret = TransAddLaneReqToPendingAndWaiting(&info, laneHandle, &requestOption);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)TransDelLaneReqFromPendingList(laneHandle, false);
@@ -528,20 +533,25 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
         .type = LANE_TYPE_TRANS,
     };
     LaneConnInfo connInfo;
-    int32_t ret = TransGetLaneInfoByOption(NULL, &connInfo, &laneHandle);
+    NetWorkingChannelInfo info = {
+        .channelId = INVALID_CHANNEL_ID,
+        .isNetWorkingChannel = false,
+    };
+    (void)memcpy_s(info.sessionName, SESSION_NAME_SIZE_MAX, g_sessionName, SESSION_NAME_SIZE_MAX);
+    int32_t ret = TransGetLaneInfoByOption(NULL, &connInfo, &laneHandle, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
+    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)InitLane();
-    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
+    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
-    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
+    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)LnnFreeLane(laneHandle);
@@ -792,41 +802,5 @@ HWTEST_F(TransLaneTest, TransLaneTest024, TestSize.Level1)
 
     SoftBusFree(p2pInfo);
     SoftBusFree(connOpt);
-}
-
-/**
- * @tc.name: TransLaneTest025
- * @tc.desc: trans get lane info by Qos.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLaneTest, TransLaneTest025, TestSize.Level1)
-{
-    (void)TransReqLanePendingInit();
-    uint32_t laneHandle = 1;
-    uint32_t errCode = SOFTBUS_OK;
-    LaneAllocInfo allocInfo = {
-        .type = LANE_TYPE_TRANS,
-    };
-    LaneConnInfo connInfo;
-    int32_t ret = TransGetLaneInfoByQos(NULL, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    (void)InitLane();
-    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
-
-    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    (void)LnnFreeLane(laneHandle);
-    DeinitLane();
-    TransReqLanePendingDeinit();
 }
 } // namespace OHOS

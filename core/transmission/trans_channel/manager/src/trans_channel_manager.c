@@ -34,6 +34,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_qos.h"
 #include "softbus_utils.h"
+#include "trans_auth_lane_pending_ctl.h"
 #include "trans_auth_manager.h"
 #include "trans_auth_negotiation.h"
 #include "trans_bind_request_manager.h"
