@@ -107,7 +107,7 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2pForWatch, TestSize.Le
     EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
         .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_PAD_ID), Return(SOFTBUS_OK)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_UNKNOW_ID), Return(SOFTBUS_OK)));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
