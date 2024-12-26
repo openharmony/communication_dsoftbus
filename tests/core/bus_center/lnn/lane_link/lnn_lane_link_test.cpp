@@ -45,10 +45,12 @@ constexpr int32_t LANEREQID15 = 15;
 constexpr int32_t LANEVALUE = 3;
 constexpr int32_t DB_MAGIC_NUMBER = 0x5A5A5A5A;
 constexpr int32_t MESH_MAGIC_NUMBER = 0xA5A5A5A5;
-constexpr int32_t SOFTBUS_LNN_PTK_NOT_MATCH  = (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + 4);
 
+static SoftBusCond g_cond = {0};
+static SoftBusMutex g_lock = {0};
 static bool g_isRawHmlResuse = true;
 int32_t g_laneLinkResult = SOFTBUS_INVALID_PARAM;
+static bool g_isNeedCondWait = true;
 int32_t g_connFailReason = ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT;
 
 class LNNLaneLinkTest : public testing::Test {
@@ -73,10 +75,58 @@ void LNNLaneLinkTest::TearDownTestCase()
 
 void LNNLaneLinkTest::SetUp()
 {
+    (void)SoftBusMutexInit(&g_lock, nullptr);
+    (void)SoftBusCondInit(&g_cond);
 }
 
 void LNNLaneLinkTest::TearDown()
 {
+    (void)SoftBusCondDestroy(&g_cond);
+    (void)SoftBusMutexDestroy(&g_lock);
+}
+
+static void CondSignal(void)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(ERROR) << "mutex lock fail";
+        return;
+    }
+    if (SoftBusCondSignal(&g_cond) != SOFTBUS_OK) {
+        GTEST_LOG_(ERROR) << "cond signal fail";
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    g_isNeedCondWait = false;
+    (void)SoftBusMutexUnlock(&g_lock);
+}
+
+static void CondWait(void)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(ERROR) << "mutex lock fail";
+        return;
+    }
+    if (!g_isNeedCondWait) {
+        GTEST_LOG_(ERROR) << "has cond signal, no need cond wait";
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    if (SoftBusCondWait(&g_cond, &g_lock, nullptr) != SOFTBUS_OK) {
+        GTEST_LOG_(ERROR) << "cond wait fail";
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lock);
+}
+
+static void SetIsNeedCondWait(bool isNeedWait)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(ERROR) << "mutex lock fail";
+        return;
+    }
+    g_isNeedCondWait = isNeedWait;
+    (void)SoftBusMutexUnlock(&g_lock);
 }
 
 static void OnLaneLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
@@ -85,6 +135,7 @@ static void OnLaneLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneL
     (void)linkType;
     (void)linkInfo;
     g_laneLinkResult = SOFTBUS_OK;
+    CondSignal();
     return;
 }
 
@@ -94,6 +145,7 @@ static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType
     (void)reason;
     (void)linkType;
     g_laneLinkResult = SOFTBUS_LANE_BUILD_LINK_FAIL;
+    CondSignal();
     return;
 }
 
@@ -460,9 +512,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_001, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -508,9 +561,11 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_002, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
+    EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -556,7 +611,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_003, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -598,9 +652,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_004, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -642,7 +697,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_005, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -689,9 +743,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -737,9 +792,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_LANE_BUILD_LINK_FAIL)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -784,7 +840,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -826,7 +881,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -876,9 +930,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_001, TestSize.Level1)
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -929,13 +984,15 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_002, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel(requestId, _, _, NotNull()))
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpened);
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
+    CondWait();
+    EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -985,9 +1042,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_003, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineCloseChannelDelay).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -1026,8 +1084,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_004, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, AuthGetConnInfoByType)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(linkMock.ActionOfConnOpened)
@@ -1039,9 +1097,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_004, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -1087,9 +1146,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -1138,9 +1198,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -1187,9 +1248,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -1245,9 +1307,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_008, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
     LnnDisconnectP2pWithoutLnn(laneReqId);
@@ -1303,9 +1366,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_009, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
@@ -1358,9 +1422,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_001, TestSize.Level1)
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -1410,9 +1475,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_002, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDestroyP2p();
 }
@@ -1463,9 +1529,10 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_003, TestSize.Level1)
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDestroyP2p();
 }
 
@@ -1516,11 +1583,15 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(Return(SOFTBUS_LANE_BUILD_LINK_FAIL))
+        .WillOnce(Return(SOFTBUS_LANE_BUILD_LINK_FAIL))
+        .WillRepeatedly(linkMock.ActionOfConnOpened);
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
+    CondWait();
+    EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -1552,7 +1623,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelDetect_001, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
-        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<LANE_MOCK_PARAM3>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -1573,10 +1644,14 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelDetect_001, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, LaneDetectReliability).WillOnce(Return(SOFTBUS_LANE_DETECT_FAIL))
+        .WillOnce(Return(SOFTBUS_LANE_DETECT_FAIL))
+        .WillRepeatedly(laneLinkMock.ActionOfDetectFail);
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
+    CondWait();
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
@@ -2160,9 +2235,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_RAW_HML_TEST_001, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(isMateExist), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(!isMateExist), Return(SOFTBUS_OK)));
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -2196,9 +2272,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_RAW_HML_TEST_002, TestSize.Level1)
     g_manager.connectDevice = ConnectDeviceRawHml;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -2233,9 +2310,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_DISCONN_TEST_001, TestSize.Level1)
     g_manager.disconnectDevice = DisconnectDeviceSuccess;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -2270,9 +2348,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_DISCONN_TEST_002, TestSize.Level1)
     g_manager.disconnectDevice = DisconnectDeviceFail;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -2315,9 +2394,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_DISCONN_TEST_003, TestSize.Level1)
     EXPECT_CALL(laneMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(laneMock.ActionOfConnOpened);
     EXPECT_CALL(laneMock, AuthCloseConn).WillRepeatedly(Return());
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -2360,9 +2440,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_DISCONN_TEST_004, TestSize.Level1)
     EXPECT_CALL(laneMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(laneMock.ActionOfConnOpenFailed);
     EXPECT_CALL(laneMock, AuthCloseConn).WillRepeatedly(Return());
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
@@ -2404,128 +2485,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_DISCONN_TEST_005, TestSize.Level1)
     EXPECT_CALL(laneMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(laneMock.ActionOfConnOpened);
     EXPECT_CALL(laneMock, AuthCloseConn).WillRepeatedly(Return());
 
+    SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
-    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
-    LnnDestroyP2p();
-}
-
-/*
-* @tc.name: LNN_LANE_LINK_CONNDEVICE_TEST_001
-* @tc.desc: test wifi directConnect fail, reason = SOFTBUS_LNN_PTK_NOT_MATCH
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_CONNDEVICE_TEST_001, TestSize.Level1)
-{
-    LinkRequest request = {};
-    EXPECT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
-    request.linkType = LANE_HML;
-    request.pid = ASYNCFAIL;
-    request.triggerLinkTime = SoftBusGetSysTimeMs();
-    request.availableLinkTime = DEFAULT_LINK_LATENCY;
-    request.actionAddr = 1;
-    uint32_t laneReqId = 10;
-    int32_t value = 3;
-    g_connFailReason = SOFTBUS_LNN_PTK_NOT_MATCH;
-
-    NiceMock<LaneDepsInterfaceMock> laneMock;
-    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
-    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneLinkMock, LnnSyncPtk).WillRepeatedly(Return(SOFTBUS_OK));
-    g_manager.connectDevice = ConnectDevice;
-    g_manager.disconnectDevice = DisconnectDevice;
-    g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
-    EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-
-    int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
-    LnnDestroyP2p();
-}
-
-/*
-* @tc.name: LNN_LANE_LINK_CONNDEVICE_TEST_002
-* @tc.desc: test wifiDirectConnect fail with resuse, reason = SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_CONNDEVICE_TEST_002, TestSize.Level1)
-{
-    LinkRequest request = {};
-    EXPECT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
-    request.linkType = LANE_HML;
-    request.pid = ASYNCFAIL;
-    request.triggerLinkTime = SoftBusGetSysTimeMs();
-    request.availableLinkTime = DEFAULT_LINK_LATENCY;
-    request.actionAddr = 1;
-    uint32_t laneReqId = 10;
-    int32_t value = 3;
-    g_connFailReason = SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED;
-
-    NiceMock<LaneDepsInterfaceMock> laneMock;
-    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
-    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
-    g_manager.connectDevice = ConnectDevice;
-    g_manager.disconnectDevice = DisconnectDevice;
-    g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
-    EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
-
-    int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
-    LnnDestroyP2p();
-}
-
-/*
-* @tc.name: LNN_LANE_LINK_CONNDEVICE_TEST_003
-* @tc.desc: test wifiDirectConnect fail, reason = SOFTBUS_CONN_HV3_WAIT_CONNECTION_TIMEOUT
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_CONNDEVICE_TEST_003, TestSize.Level1)
-{
-    LinkRequest request = {};
-    EXPECT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
-    request.linkType = LANE_HML_RAW;
-    request.pid = ASYNCFAIL;
-    request.triggerLinkTime = SoftBusGetSysTimeMs();
-    request.availableLinkTime = DEFAULT_LINK_LATENCY;
-    request.actionAddr = 1;
-    uint32_t laneReqId = 10;
-    int32_t value = 3;
-    g_connFailReason = SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT;
-
-    NiceMock<LaneDepsInterfaceMock> laneMock;
-    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
-    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
-    g_manager.connectDevice = ConnectDevice;
-    g_manager.disconnectDevice = DisconnectDevice;
-    g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
-    EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneMock, LnnRequestCheckOnlineStatus).WillRepeatedly(Return(SOFTBUS_OK));
-
-    int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }
