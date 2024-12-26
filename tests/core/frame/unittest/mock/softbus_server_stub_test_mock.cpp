@@ -102,5 +102,9 @@ bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid)
 {
     return GetSoftbusServerStubTestInterface()->CheckUidAndPid(sessionName, callingUid, callingPid);
 }
+int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
+{
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckDmsServerPermission(tokenId);
+}
 }
 }

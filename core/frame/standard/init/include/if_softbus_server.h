@@ -75,6 +75,7 @@ public:
     virtual int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) = 0;
     virtual int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) = 0;
+    virtual int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

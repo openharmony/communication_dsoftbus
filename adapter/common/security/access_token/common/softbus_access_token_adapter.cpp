@@ -29,6 +29,7 @@
 
 constexpr int32_t JUDG_CNT = 1;
 const std::string SAMGR_PROCESS_NAME = "samgr";
+const std::string DMS_PROCESS_NAME = "distributedsched";
 static PermissionChangeCb g_permissionChangeCb = nullptr;
 
 namespace OHOS {
@@ -222,6 +223,23 @@ void SoftBusGetTokenNameByTokenType(
             break;
         }
     }
+}
+
+int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
+{
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
+    if (tokenType != ATokenTypeEnum::TOKEN_NATIVE) {
+        COMM_LOGE(COMM_PERM, "not native call");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    NativeTokenInfo nativeTokenInfo;
+    int32_t result = AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+    if (result == SOFTBUS_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME) {
+        return SOFTBUS_OK;
+    }
+    COMM_LOGE(COMM_PERM,
+        "check dms server permission failed, processName=%{private}s", nativeTokenInfo.processName.c_str());
+    return SOFTBUS_PERMISSION_DENIED;
 }
 }
 } // namespace OHOS

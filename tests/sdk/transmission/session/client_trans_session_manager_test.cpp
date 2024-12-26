@@ -1143,6 +1143,10 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
     ret = GetSocketLifecycleAndSessionNameBySessionId(1, sessionName, &lifecycle);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ASSERT_EQ(lifecycle.sessionState, SESSION_STATE_CANCELLING);
+    int32_t osType;
+    ret = ClientGetChannelOsTypeBySessionId(1, &osType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    (void)ClientTransOnPrivilegeClose(g_networkId);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);

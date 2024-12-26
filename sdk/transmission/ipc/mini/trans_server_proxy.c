@@ -143,3 +143,11 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
 {
     return TransProcessInnerEvent(eventType, buf, len);
 }
+
+int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    (void)tokenId;
+    (void)pid;
+    (void)peerNetworkId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

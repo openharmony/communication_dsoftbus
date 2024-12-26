@@ -280,4 +280,12 @@ int32_t SoftBusServerProxyFrame::ProcessInnerEvent(int32_t eventType, uint8_t *b
     (void)len;
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    (void)tokenId;
+    (void)pid;
+    (void)peerNetworkId;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

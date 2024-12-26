@@ -817,3 +817,28 @@ int32_t TransSetTos(int32_t channelId, uint8_t tos)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
+int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid)
+{
+    if (privilegeCloseList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "privilegeCloseList is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    UdpChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (item->info.callingTokenId == tokenId && item->info.myData.pid == pid) {
+            (void)PrivilegeCloseListAddItem(privilegeCloseList, item->info.myData.pid, item->info.myData.pkgName);
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    return SOFTBUS_OK;
+}
