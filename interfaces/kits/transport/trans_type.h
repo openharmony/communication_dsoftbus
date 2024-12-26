@@ -139,6 +139,7 @@ typedef enum {
     QOS_TYPE_FIRST_PACKAGE,     /**< @reserved First packet size. */
     QOS_TYPE_MAX_IDLE_TIMEOUT,  /**< Maximum idle time. */
     QOS_TYPE_TRANS_RELIABILITY, /**< @reserved Transmission reliability. */
+    QOS_TYPE_TRANS_CONTINUOUS,   /**< Continuous transmission */
     QOS_TYPE_BUTT,
 } QosType;
 
@@ -255,9 +256,11 @@ typedef struct {
  * @version 2.0
  */
 typedef enum {
-    OPT_TYPE_MAX_BUFFER,       /**< @reserved Maximum cache. */
-    OPT_TYPE_FIRST_PACKAGE,    /**< @reserved First packet size. */
-    OPT_TYPE_MAX_IDLE_TIMEOUT, /**< @reserved Maximum idle time. */
+    OPT_TYPE_BEGIN,
+    OPT_TYPE_MAX_BUFFER = OPT_TYPE_BEGIN,  /**< @reserved Maximum cache. */
+    OPT_TYPE_FIRST_PACKAGE,                /**< @reserved First packet size. */
+    OPT_TYPE_MAX_IDLE_TIMEOUT,             /**< @reserved Maximum idle time. */
+    OPT_TYPE_END,
 } OptType;
 
 /**

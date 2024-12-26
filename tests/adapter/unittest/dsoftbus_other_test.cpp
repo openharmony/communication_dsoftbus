@@ -60,7 +60,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
     char ip[32] = "0";
     int32_t len = 10;
     int32_t ret = GetNetworkIpByIfName(ifName, ip, netmask, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_IOCTL_FAIL, ret);
 }
 
 /*
@@ -94,7 +94,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
     char ip[32] = "0";
     int32_t len = 10;
     int32_t ret = GetNetworkIpByIfName(ifName, ip, NULL, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_IOCTL_FAIL, ret);
 }
 
 /**

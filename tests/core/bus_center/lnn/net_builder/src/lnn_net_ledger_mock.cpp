@@ -52,17 +52,17 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info
 {
     if (info == NULL || infoNum == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == NULL) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGI(LNN_TEST, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -72,11 +72,11 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(
 {
     if (srcId == NULL || dstIdBuf == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGI(LNN_TEST, "memcpy dstIdBuf fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -86,11 +86,11 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(
 {
     if (srcId == NULL || dstIdBuf == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s(dstIdBuf, dstIdBufLen, peerId.c_str()) != EOK) {
         LNN_LOGI(LNN_TEST, "memcpy dstIdBuf fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -99,17 +99,17 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInf
 {
     if (info == NULL || infoNum == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == NULL) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGE(LNN_TEST, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -118,21 +118,21 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1(NodeBasicIn
 {
     if (info == NULL || infoNum == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = LNN_MOCK_ONLINE_NODE_CNT;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == NULL) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
         LNN_LOGI(LNN_TEST, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s((*info + 1)->networkId, sizeof((*info + 1)->networkId), peerId.c_str(), peerId.length() + 1) != EOK) {
         LNN_LOGI(LNN_TEST, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -142,7 +142,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation(
 {
     if (len <= CONNECTION_ADDR_BR) {
         LNN_LOGW(LNN_TEST, "set relation fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
     return SOFTBUS_OK;
@@ -153,7 +153,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1(
 {
     if (len <= CONNECTION_ADDR_BR) {
         LNN_LOGW(LNN_TEST, "set relation fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
     relation[CONNECTION_ADDR_BLE] = LNN_RELATION_JOIN_THREAD;
@@ -190,17 +190,17 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, cha
 {
     if (key == STRING_KEY_NET_IF_NAME) {
         if (strcpy_s(info, len, "deviceName") != EOK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
         return SOFTBUS_OK;
     }
     if (key == STRING_KEY_WLAN_IP) {
         if (strcpy_s(info, len, "127.0.0.2") != EOK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(
@@ -209,7 +209,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(
     (void)uuid;
     if (authHandle == NULL) {
         LNN_LOGW(LNN_TEST, "invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     authHandle->authId = 1;
     authHandle->type = AUTH_LINK_TYPE_BLE;

@@ -581,11 +581,15 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
 
     info->evt = FT_EVT_FRAME_STATS;
     ret = vtpStreamSocket->FillpStatistics(fd, info);
-    EXPECT_EQ(0, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     info->evt = FT_EVT_TRAFFIC_DATA;
     ret = vtpStreamSocket->FillpStatistics(fd, info);
-    EXPECT_EQ(0, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    info->evt = FT_EVT_MAX;
+    ret = vtpStreamSocket->FillpStatistics(fd, info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     vtpStreamSocket->FillpAppStatistics();
 

@@ -149,4 +149,176 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Lev
 
     ClientTransStatisticsDeinit();
 }
+
+/**
+ * @tc.name: CreateSocketResourceTest001
+ * @tc.desc: CreateSocketResource, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level0)
+{
+    SocketResource *item = nullptr;
+    const char *sessionName = "sessionName";
+    ChannelInfo *channel = TestGetRightChannelInfo();
+    CreateSocketResource(item, sessionName, channel);
+    EXPECT_EQ(item, nullptr);
+    item = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    uint64_t laneId = 1;
+    int32_t channelId = 1;
+    int32_t channelType = CHANNEL_TYPE_UDP;
+    channel->laneId = laneId;
+    channel->channelId = channelId;
+    channel->channelType = channelType;
+    CreateSocketResource(item, sessionName, channel);
+    EXPECT_NE(item, nullptr);
+    SoftBusFree(item);
+}
+
+/**
+ * @tc.name: AddSocketResourceTest002
+ * @tc.desc: AddSocketResource, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
+{
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    ASSERT_NE(newItem, nullptr);
+    newItem->socketId = 1;
+    ListInit(&newItem->node);
+    ListAdd(&g_channelStatisticsList->list, &newItem->node);
+
+    g_channelStatisticsList->cnt = static_cast<int32_t>(MAX_SOCKET_RESOURCE_NUM);
+    ChannelInfo *rightChannel = TestGetRightChannelInfo();
+    AddSocketResource(g_sessionName, rightChannel);
+
+    g_channelStatisticsList->cnt = static_cast<int32_t>(MAX_SOCKET_RESOURCE_NUM - 1);
+    rightChannel->channelId = -1;
+    AddSocketResource(g_sessionName, rightChannel);
+    EXPECT_NE(g_channelStatisticsList, nullptr);
+    SoftBusFree(rightChannel);
+    ClientTransStatisticsDeinit();
+}
+
+/**
+ * @tc.name: UpdateChannelStatisticsTest002
+ * @tc.desc: UpdateChannelStatistics, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Level0)
+{
+    int32_t socketId = 1;
+    int64_t len = 1;
+    UpdateChannelStatistics(socketId, len);
+    EXPECT_EQ(g_channelStatisticsList, nullptr);
+
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    ASSERT_NE(newItem, nullptr);
+    newItem->socketId = socketId;
+    newItem->traffic = 0;
+    ListInit(&newItem->node);
+    ListAdd(&g_channelStatisticsList->list, &newItem->node);
+
+    UpdateChannelStatistics(socketId, len);
+    EXPECT_EQ(newItem->traffic, len);
+
+    ClientTransStatisticsDeinit();
+}
+
+/**
+ * @tc.name: PackStatisticsTest001
+ * @tc.desc: PackStatistics, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, PackStatisticsTest001, TestSize.Level0)
+{
+    int32_t ret = PackStatistics(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    cJSON *json = cJSON_CreateObject();
+    SocketResource *resource = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    ret = PackStatistics(json, resource);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    cJSON_Delete(json);
+    SoftBusFree(resource);
+}
+
+/**
+ * @tc.name: CloseChannelAndSendStatisticsTest001
+ * @tc.desc: CloseChannelAndSendStatistics, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSize.Level0)
+{
+    CloseChannelAndSendStatistics(nullptr);
+    SocketResource *resource = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    CloseChannelAndSendStatistics(resource);
+    EXPECT_NE(resource, nullptr);
+    SoftBusFree(resource);
+}
+
+/**
+ * @tc.name: DeleteSocketResourceByChannelIdTest002
+ * @tc.desc: DeleteSocketResourceByChannelId, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, TestSize.Level0)
+{
+    int32_t channelId = -1;
+    int32_t channelType = CHANNEL_TYPE_UDP;
+    int32_t socketId = 1;
+    int64_t len = 1;
+    DeleteSocketResourceByChannelId(channelId, channelType);
+    channelId = 1;
+    DeleteSocketResourceByChannelId(channelId, channelType);
+    EXPECT_EQ(g_channelStatisticsList, nullptr);
+
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    ASSERT_NE(newItem, nullptr);
+    newItem->channelId = channelId;
+    newItem->channelType = channelType;
+    newItem->socketId = socketId;
+    ListInit(&newItem->node);
+    ListAdd(&g_channelStatisticsList->list, &newItem->node);
+    g_channelStatisticsList->cnt = 1;
+
+    UpdateChannelStatistics(socketId, len);
+    DeleteSocketResourceByChannelId(channelId, channelType);
+    EXPECT_EQ(g_channelStatisticsList->cnt, 1);
+
+    ClientTransStatisticsDeinit();
+}
+
+/**
+ * @tc.name: ClientTransStatisticsDeinitTest001
+ * @tc.desc: ClientTransStatisticsDeinit, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize.Level0)
+{
+    g_channelStatisticsList = NULL;
+    ClientTransStatisticsDeinit();
+
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    ASSERT_NE(newItem, nullptr);
+    newItem->channelId = 1;
+    ListInit(&newItem->node);
+    ListAdd(&g_channelStatisticsList->list, &newItem->node);
+
+    ClientTransStatisticsDeinit();
+    EXPECT_EQ(g_channelStatisticsList, NULL);
+}
 } // namespace OHOS

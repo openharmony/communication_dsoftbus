@@ -72,6 +72,7 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
         }
+        DataGenerator::Write(data, size);
         int32_t channelId = 0;
         int32_t eventId = 0;
         int32_t tvCount = 0;

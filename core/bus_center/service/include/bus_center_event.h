@@ -57,6 +57,7 @@ typedef enum {
     LNN_EVENT_DATA_SHARE_STATE_CHANGE,
     LNN_EVENT_NODE_NET_TYPE,
     LNN_EVENT_DEVICE_INFO_CHANGED,
+    LNN_EVENT_NET_LINK_STATE_CHANGE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -175,6 +176,15 @@ typedef enum {
     SOFTBUS_LP_EVENT_UNKNOWN,
 } SoftBusLpEventType;
 
+typedef enum {
+    SOFTBUS_NETMANAGER_IFNAME_START,
+    SOFTBUS_NETMANAGER_IFNAME_ADDED,
+    SOFTBUS_NETMANAGER_IFNAME_REMOVED,
+    SOFTBUS_NETMANAGER_IFNAME_LINK_UP,
+    SOFTBUS_NETMANAGER_IFNAME_IP_UPDATED,
+    SOFTBUS_NETMANAGER_IFNAME_UNKNOWN,
+} NetManagerIfNameState;
+
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
@@ -261,6 +271,12 @@ typedef struct {
     uint8_t status;
 } LnnDeviceInfoChangeEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    uint8_t status;
+    char ifName[NET_IF_NAME_LEN];
+} LnnMonitorNetlinkStateInfo;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 int32_t LnnInitBusCenterEvent(void);
@@ -322,6 +338,8 @@ void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
 void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType);
 
 void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state);
+
+void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName);
 
 #ifdef __cplusplus
 }

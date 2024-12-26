@@ -48,6 +48,7 @@ int32_t SwtichHeartbeatReportChannel(bool isToAP, uint16_t scanInterval, uint16_
 bool IsSupportLpFeature(void);
 void SetLpKeepAliveState(void *para);
 void AsyncSetBleBroadcastTimeStamp(const char *networkId);
+void SendCleanMsgToMlps(uint32_t cleanType);
 
 #ifdef __cplusplus
 }

@@ -703,12 +703,12 @@ int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const c
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (item->laneId == oldLaneId) {
-            item->laneId = newLaneId;
             if (strcpy_s(item->link.peerUdid, UDID_BUF_LEN, peerUdid) != EOK) {
                 LNN_LOGE(LNN_LANE, "strcpy udid fail");
                 LaneUnlock();
                 return SOFTBUS_STRCPY_ERR;
             }
+            item->laneId = newLaneId;
             LNN_LOGI(LNN_LANE, "find and refresh oldLaneId=%{public}" PRIu64 ", newLaneId=%{public}" PRIu64,
                 oldLaneId, newLaneId);
             LaneUnlock();

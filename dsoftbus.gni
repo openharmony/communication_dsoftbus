@@ -20,6 +20,15 @@ dsoftbus_test_path = "${dsoftbus_root_path}/tests"
 dsoftbus_test_dfx_path = "${dsoftbus_test_path}/dfx"
 dsoftbus_fuzz_out_path = "dsoftbus/soft_bus"
 
+import("adapter/feature_config/external_deps_feature/external_deps_feature.gni")
+import("adapter/feature_config/inner_feature/conn_inner_feature.gni")
+import("adapter/feature_config/inner_feature/disc_inner_feature.gni")
+import("adapter/feature_config/inner_feature/lnn_inner_feature.gni")
+import("adapter/feature_config/inner_feature/softbus_common_feature.gni")
+import("adapter/feature_config/inner_feature/t2stack_inner_feature.gni")
+import("adapter/feature_config/inner_feature/trans_inner_feature.gni")
+import("adapter/feature_config/public_feature/public_feature.gni")
+
 declare_args() {
   softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
   softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"

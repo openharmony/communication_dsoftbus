@@ -453,8 +453,13 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - appInfo->timeStart);
         goto EXIT_ERR;
     }
-    TransUpdateSocketChannelInfoBySession(
-        param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType);
+    if (TransUpdateSocketChannelInfoBySession(
+        param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType) != SOFTBUS_OK) {
+        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL,
+            GetSoftbusRecordTimeMillis() - appInfo->timeStart);
+        TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
+        goto EXIT_ERR;
+    }
     TransSetSocketChannelStateByChannel(
         transInfo->channelId, transInfo->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     if (TransLaneMgrAddLane(transInfo, &connInfo, laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {

@@ -305,6 +305,10 @@ int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, ui
 
 int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent);
 
+int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *maxIdleTime);
+
+int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime);
+
 void ClientTransOnPrivilegeClose(const char *peerNetworkId);
 #ifdef __cplusplus
 }
