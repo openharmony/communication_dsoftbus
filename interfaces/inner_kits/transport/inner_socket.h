@@ -130,6 +130,19 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
  * @version 2.0
  */
 int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
+
+/**
+ * @brief privilege shutdown session only dms service can call.
+ *
+ * @param tokenId Indicates the token of channel creater.
+ * @param pid Indicates the pid of channel creater.
+ * @param peerNetworkId Indicates the peer device network id. empty mean all peer device
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t PrivilegeShutdown(uint64_t tokenId, int32_t pid, const char *peerNetworkId);
 #ifdef __cplusplus
 }
 #endif

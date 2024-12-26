@@ -922,4 +922,22 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById003, TestSize.Level
     ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
+
+/**
+ * @tc.name: TransUdpGetPrivilegeCloseList001
+ * @tc.desc: TransUdpGetPrivilegeCloseList Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseList001, TestSize.Level1)
+{
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = TransUdpGetPrivilegeCloseList(nullptr, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
 }

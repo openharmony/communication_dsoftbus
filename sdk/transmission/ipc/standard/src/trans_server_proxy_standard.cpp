@@ -923,4 +923,48 @@ int32_t TransServerProxy::ProcessInnerEvent(int32_t eventType, uint8_t *buf, uin
     }
     return SOFTBUS_OK;
 }
+
+int32_t TransServerProxy::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "remote is null");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_SDK, "write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+
+    if (!data.WriteUint64(tokenId)) {
+        TRANS_LOGE(TRANS_SDK, "write tokenId failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        TRANS_LOGE(TRANS_SDK, "write pid failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+
+    if (!data.WriteCString(peerNetworkId)) {
+        TRANS_LOGE(TRANS_SDK, "write peerNetworkId failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_PRIVILEGE_CLOSE_CHANNEL, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "request failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    if (!reply.ReadInt32(ret)) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos read ret failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    return ret;
+}
 } // namespace OHOS

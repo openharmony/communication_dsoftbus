@@ -47,7 +47,7 @@ void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb);
 int32_t SoftBusGetAccessTokenType(uint64_t tokenId);
 void SoftBusGetTokenNameByTokenType(
     char *tokenName, int32_t nameLen, uint64_t tokenId, SoftBusAccessTokenType tokenType);
-
+int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId);
 #ifdef __cplusplus
 #if __cplusplus
 }

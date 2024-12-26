@@ -289,3 +289,17 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
     }
     return ret;
 }
+
+int32_t PrivilegeShutdown(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    if (peerNetworkId == NULL || strlen(peerNetworkId) >= DEVICE_ID_SIZE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *tmpPeerNetworkId = NULL;
+    Anonymize(peerNetworkId, &tmpPeerNetworkId);
+    TRANS_LOGI(TRANS_SDK, "tokenId=%{private}" PRId64 ", pid=%{public}d, networkId=%{public}s", tokenId, pid,
+        AnonymizeWrapper(tmpPeerNetworkId));
+    AnonymizeFree(tmpPeerNetworkId);
+    return ServerIpcPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+}

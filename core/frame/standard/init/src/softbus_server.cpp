@@ -432,4 +432,13 @@ int32_t SoftBusServer::ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32
 {
     return TransProcessInnerEvent(eventType, buf, len);
 }
+
+int32_t SoftBusServer::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    if (peerNetworkId == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return TransPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+}
 } // namespace OHOS

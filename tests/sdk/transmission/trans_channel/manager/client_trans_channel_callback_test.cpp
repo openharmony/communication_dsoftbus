@@ -188,10 +188,14 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSi
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize.Level0)
 {
+#define PRIVILEGE_CLOSE_CHANNEL 11
     int32_t ret = TransOnChannelLinkDown(nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOnChannelLinkDown(g_networkid, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelLinkDown(g_networkid, 0 | 1 << PRIVILEGE_CLOSE_CHANNEL);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
