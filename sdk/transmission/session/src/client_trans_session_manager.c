@@ -2572,3 +2572,62 @@ int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQo
     TRANS_LOGI(TRANS_SDK, "get cached qos event success, socket=%{public}d", socket);
     return SOFTBUS_OK;
 }
+
+int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *optValue)
+{
+    if (socket < 0 || optValue == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (sessionNode->role == SESSION_ROLE_CLIENT) {
+        *optValue = sessionNode->maxIdleTime;
+    } else {
+        ret = SOFTBUS_NOT_IMPLEMENT;
+    }
+    UnlockClientSessionServerList();
+    return ret;
+}
+
+int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
+{
+    if (socket < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (sessionNode->role == SESSION_ROLE_CLIENT) {
+        sessionNode->maxIdleTime = maxIdleTime;
+    } else {
+        ret = SOFTBUS_NOT_IMPLEMENT;
+    }
+    UnlockClientSessionServerList();
+    return ret;
+}

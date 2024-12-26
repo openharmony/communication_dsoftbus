@@ -153,7 +153,7 @@ static int32_t DisconnectDevice2(struct WifiDirectDisconnectInfo *info, struct W
 {
     (void)info;
     (void)callback;
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 static int32_t CancelConnectDevice(const struct WifiDirectConnectInfo *info)

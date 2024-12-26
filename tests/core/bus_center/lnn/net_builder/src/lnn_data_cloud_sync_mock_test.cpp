@@ -67,7 +67,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBCipherInfoSyncToCache_Test_001, TestSize.Le
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnSetRemoteBroadcastCipherInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(DataCloudSyncMock, ConvertHexStringToBytes)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     char fieldName[FIELDNAME_MAX_LEN] = { 0 };
     NodeInfo cacheInfo;
@@ -81,7 +81,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBCipherInfoSyncToCache_Test_001, TestSize.Le
     EXPECT_EQ(DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, valueLength, udid), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_BROADCAST_CIPHER_IV));
     EXPECT_CALL(DataCloudSyncMock, ConvertHexStringToBytes)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(
         DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, valueLength, udid), SOFTBUS_KV_CONVERT_BYTES_FAILED);
@@ -129,7 +129,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBConnectMacInfoSyncToCache_Test_001, TestSiz
 {
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, ConvertHexStringToBytes)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     char fieldName[FIELDNAME_MAX_LEN] = { 0 };
     NodeInfo cacheInfo;
@@ -145,7 +145,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBConnectMacInfoSyncToCache_Test_001, TestSiz
     EXPECT_EQ(DBConnectMacInfoSyncToCache(&cacheInfo, fieldName, value, valueLength), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DEVICE_PUB_MAC));
     EXPECT_CALL(DataCloudSyncMock, ConvertHexStringToBytes)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(DBConnectMacInfoSyncToCache(&cacheInfo, fieldName, value, valueLength), SOFTBUS_KV_CONVERT_BYTES_FAILED);
     EXPECT_EQ(DBConnectMacInfoSyncToCache(&cacheInfo, fieldName, value, valueLength), SOFTBUS_OK);
@@ -367,13 +367,13 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
     const char *key = "key1#key2#key3";
     const char *value = "value1#value2#value3";
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_ERR);
+    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
 }
 
@@ -502,7 +502,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Lev
         .WillOnce(Return(SOFTBUS_ENCRYPT_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(DataCloudSyncMock, LnnRetrieveDeviceInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(DataCloudSyncMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     char deviceUdid[UDID_BUF_LEN] = { 0 };
@@ -560,20 +560,20 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     PrintSyncNodeInfo(&cacheInfo);
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnUnPackCloudSyncDeviceInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<1>(cacheInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(DataCloudSyncMock, LnnGenerateHexStringHash)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(DataCloudSyncMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(DataCloudSyncMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *key = "key";
     const char *value = TMPMSG;
-    EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_ERR);
+    EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
-    EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_ERR);
+    EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_OK);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(key, value), SOFTBUS_OK);
     EXPECT_EQ(LnnDBDataChangeSyncToCacheInner(nullptr, value), SOFTBUS_INVALID_PARAM);
@@ -595,12 +595,12 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
     const char key[] = "key";
     const char value[] = "value";
     size_t valueLength = strlen(value);
-    EXPECT_EQ(LnnLedgerDataChangeSyncToDB(key, value, valueLength), SOFTBUS_ERR);
+    EXPECT_EQ(LnnLedgerDataChangeSyncToDB(key, value, valueLength), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnLedgerDataChangeSyncToDB(key, value, valueLength), SOFTBUS_OK);
     EXPECT_EQ(LnnLedgerDataChangeSyncToDB(nullptr, value, valueLength), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnLedgerDataChangeSyncToDB(key, nullptr, valueLength), SOFTBUS_INVALID_PARAM);
@@ -621,10 +621,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
     ASSERT_TRUE(syncInfo.broadcastCipherKey != nullptr);
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnPackCloudSyncDeviceInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalBroadcastCipherInfo)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(syncInfo), Return(SOFTBUS_OK)));
     cJSON *json = cJSON_CreateObject();
     ASSERT_TRUE(json != nullptr);

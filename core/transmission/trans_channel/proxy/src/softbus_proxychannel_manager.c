@@ -352,11 +352,11 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         }
     }
 
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     if (!isUsing) {
         TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
         TransProxyCloseConnChannel(connId, false);
     }
-    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 }
 
 static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
@@ -1140,17 +1140,33 @@ static void FillProxyHandshakeExtra(
     }
 }
 
+static int32_t TransProxySendHandShakeMsgWhenInner(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
+{
+    if (chan->appInfo.appType != APP_TYPE_INNER) {
+        return SOFTBUS_OK;
+    }
+    if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
+        TransProxyFastDataRecv(chan);
+    }
+    chan->appInfo.myHandleId = 0;
+    int32_t ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, connId);
+        (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
-    if (msg == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_CTRL, "invalid param");
     TRANS_LOGI(TRANS_CTRL, "recv Handshake myChannelId=%{public}d, peerChannelId=%{public}d", msg->msgHead.myId,
         msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     TRANS_CHECK_AND_RETURN_LOGW(!(chan == NULL), TRANS_CTRL, "proxy handshake calloc failed.");
-
     int32_t ret = TransProxyFillChannelInfo(msg, chan);
     if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED) &&
         (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
@@ -1161,7 +1177,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     TransEventExtra extra = { 0 };
     FillProxyHandshakeExtra(&extra, chan, tmpSocketName, &nodeInfo);
-
     chan->connId = msg->connId;
     int32_t proxyChannelId = chan->channelId;
     if (ret != SOFTBUS_OK) {
@@ -1181,6 +1196,10 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
         (void)TransProxyAckHandshake(chan->connId, chan, ret);
         TransProxyDelChanByChanId(proxyChannelId);
+        goto EXIT_ERR;
+    }
+    ret = TransProxySendHandShakeMsgWhenInner(msg->connId, chan, SOFTBUS_OK);
+    if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);

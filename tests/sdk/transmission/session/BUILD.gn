@@ -94,6 +94,11 @@ ohos_unittest("TransClientSessionServiceTest") {
 }
 
 ohos_unittest("TransClientSessionCallbackTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "client_trans_session_callback_test.cpp" ]
 
@@ -184,6 +189,11 @@ ohos_unittest("TransClientMsgServiceTest") {
 }
 
 ohos_unittest("TransClientSessionTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "client_trans_session_test.cpp" ]
 
@@ -286,6 +296,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":TransClientMsgServiceTest",
+    ":TransClientSessionCallbackTest",
     ":TransClientSessionManagerTest",
     ":TransClientSessionServiceTest",
     ":TransClientSocketServiceTest",

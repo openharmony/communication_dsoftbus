@@ -370,7 +370,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level0)
 
 /**
  * @tc.name: TransTdcGetInfoByIdWithIncSeqTest008
- * @tc.desc: TransTdcGetInfoByIdWithIncSeq, use the wrong parameter.
+ * @tc.desc: TransTdcGetInfoIncFdRefById, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -386,14 +386,14 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.L
     int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoByIdWithIncSeq(channelId, nullptr);
+    TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, nullptr, true);
     EXPECT_TRUE(item == nullptr);
 
-    item = TransTdcGetInfoByIdWithIncSeq(channelId, info);
+    item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item == nullptr);
 
     channelId = INVALID_VALUE;
-    item = TransTdcGetInfoByIdWithIncSeq(channelId, info);
+    item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item == nullptr);
 
     SoftBusFree(info);
@@ -723,7 +723,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level0)
 
     TransTdcDelChannelInfo(channelId2, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
     TransTdcDelChannelInfo(channelId1, SOFTBUS_TRANS_NEGOTIATE_REJECTED);
-
+    // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
 }
@@ -749,7 +749,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level0)
     ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
     TransTdcDelChannelInfo(channelId, errCode);
-
+    // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
 }
@@ -822,7 +822,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
     TransTdcCloseChannel(channelId);
-
+    // info is deleted in the abnormal branch
     SoftBusFree(channel);
     if (g_tcpDirectChannelInfoList != NULL) {
         DestroySoftBusList(g_tcpDirectChannelInfoList);
@@ -990,7 +990,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level0)
 
 /**
  * @tc.name: TransTdcGetInfoByIdWithIncSeqTest001
- * @tc.desc: TransTdcGetInfoByIdWithIncSeq, use the wrong parameter.
+ * @tc.desc: TransTdcGetInfoIncFdRefById, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -1011,7 +1011,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.L
     ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoByIdWithIncSeq(channelId, info);
+    TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item != nullptr);
 
     SoftBusFree(info);

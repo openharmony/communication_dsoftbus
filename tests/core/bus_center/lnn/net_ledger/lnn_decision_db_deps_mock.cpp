@@ -45,7 +45,7 @@ int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(
         callback(para);
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 extern "C" {

@@ -53,7 +53,7 @@ void TransTdcCloseChannel(int32_t channelId);
 
 TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info);
 TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info);
-TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirectChannelInfo *info);
+TcpDirectChannelInfo *TransTdcGetInfoIncFdRefById(int32_t channelId, TcpDirectChannelInfo *info, bool withSeq);
 
 int32_t TransTdcManagerInit(const IClientSessionCallBack *callback);
 void TransTdcManagerDeinit(void);

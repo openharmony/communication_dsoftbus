@@ -38,7 +38,9 @@ extern "C" {
 DISC_ASSIGNER(Errcode, Result, result)
 DISC_ASSIGNER(Errcode, Errcode, errcode)
 DISC_ASSIGNER(Int32, InitType, initType)
-DISC_ASSIGNER(Int32, ServerType, serverType)
+DISC_ASSIGNER(String, ServerType, serverType)
+DISC_ASSIGNER(Int32, AdvHandle, advHandle)
+DISC_ASSIGNER(Int32, BcOverMaxCnt, bcOverMaxCnt)
 DISC_ASSIGNER(Int32, InterFuncType, interFuncType)
 DISC_ASSIGNER(Int32, CapabilityBit, capabilityBit)
 DISC_ASSIGNER(LongString, CapabilityData, capabilityData)
@@ -47,10 +49,16 @@ DISC_ASSIGNER(Int32, IpLinkStatus, ipLinkStatus)
 DISC_ASSIGNER(Int32, CoapChangeType, coapChangeType)
 DISC_ASSIGNER(Int32, BroadcastType, broadcastType)
 DISC_ASSIGNER(Int32, BroadcastFreq, broadcastFreq)
+DISC_ASSIGNER(Int32, MinInterval, minInterval)
+DISC_ASSIGNER(Int32, MaxInterval, maxInterval)
 DISC_ASSIGNER(Int32, ScanType, scanType)
+DISC_ASSIGNER(Int32, ScanCount, scanCount)
 DISC_ASSIGNER(String, ScanCycle, scanCycle)
 DISC_ASSIGNER(Int32, DiscType, discType)
 DISC_ASSIGNER(Int32, DiscMode, discMode)
+DISC_ASSIGNER(Int32, SuccessCnt, successCnt)
+DISC_ASSIGNER(Int32, FailCnt, failCnt)
+DISC_ASSIGNER(Int32, StartTime, startTime)
 DISC_ASSIGNER(Int32, CostTime, costTime)
 DISC_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
 DISC_ASSIGNER(AnonymizeString, PeerIp, peerIp)
@@ -62,12 +70,14 @@ DISC_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 DISC_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 DISC_ASSIGNER(String, CallerPkg, callerPkg)
 
-#define DISC_ASSIGNER_SIZE 26 // Size of g_discAssigners
+#define DISC_ASSIGNER_SIZE 34 // Size of g_discAssigners
 static HiSysEventParamAssigner g_discAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  DiscAssignerResult         },
     { "ERROR_CODE",           HISYSEVENT_INT32,  DiscAssignerErrcode        },
     { "INIT_TYPE",            HISYSEVENT_INT32,  DiscAssignerInitType       },
-    { "SERVER_TYPE",          HISYSEVENT_INT32,  DiscAssignerServerType     },
+    { "SERVER_TYPE",          HISYSEVENT_STRING, DiscAssignerServerType     },
+    { "ADV_HANDLE",           HISYSEVENT_INT32,  DiscAssignerAdvHandle      },
+    { "BC_OVERMAX_CNT",       HISYSEVENT_INT32,  DiscAssignerBcOverMaxCnt   },
     { "INTERFACE_FUNC_TYPE",  HISYSEVENT_INT32,  DiscAssignerInterFuncType  },
     { "CAPABILITY_BIT",       HISYSEVENT_INT32,  DiscAssignerCapabilityBit  },
     { "CAPABILITY_DATA",      HISYSEVENT_STRING, DiscAssignerCapabilityData },
@@ -76,11 +86,17 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "COAP_CHANGE_TYPE",     HISYSEVENT_INT32,  DiscAssignerCoapChangeType },
     { "BROADCAST_TYPE",       HISYSEVENT_INT32,  DiscAssignerBroadcastType  },
     { "BROADCAST_FREQ",       HISYSEVENT_INT32,  DiscAssignerBroadcastFreq  },
+    { "MIN_INTERVAL",         HISYSEVENT_INT32,  DiscAssignerMinInterval    },
+    { "MAX_INTERVAL",         HISYSEVENT_INT32,  DiscAssignerMaxInterval    },
     { "SCAN_TYPE",            HISYSEVENT_INT32,  DiscAssignerScanType       },
+    { "SCAN_COUNT",           HISYSEVENT_INT32,  DiscAssignerScanCount      },
     { "SCAN_CYCLE",           HISYSEVENT_STRING, DiscAssignerScanCycle      },
     { "DISC_TYPE",            HISYSEVENT_INT32,  DiscAssignerDiscType       },
     { "DISC_MODE",            HISYSEVENT_INT32,  DiscAssignerDiscMode       },
-    { "FIRST_DISCOVERY_TIME", HISYSEVENT_INT32,  DiscAssignerCostTime       },
+    { "SUCCESS_CNT",          HISYSEVENT_INT32,  DiscAssignerSuccessCnt     },
+    { "FAIL_CNT",             HISYSEVENT_INT32,  DiscAssignerFailCnt        },
+    { "START_TIME",           HISYSEVENT_INT32,  DiscAssignerStartTime      },
+    { "COST_TIME",            HISYSEVENT_INT32,  DiscAssignerCostTime       },
     { "LOCAL_NET_ID",         HISYSEVENT_STRING, DiscAssignerLocalNetworkId },
     { "PEER_IP",              HISYSEVENT_STRING, DiscAssignerPeerIp         },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, DiscAssignerPeerBrMac      },

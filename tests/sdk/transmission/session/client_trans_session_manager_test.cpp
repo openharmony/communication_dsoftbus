@@ -309,6 +309,38 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSiz
 }
 
 /**
+ * @tc.name: GetMaxIdleTimeBySocket01
+ * @tc.desc: Transmission sdk session manager get opt.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, GetMaxIdleTimeBySocket01, TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != NULL);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_GT(sessionId, 0);
+    uint32_t optValueValid = 10000;
+    ret = SetMaxIdleTimeBySocket(sessionId, optValueValid);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    uint32_t getValue = 0;
+    ret = GetMaxIdleTimeBySocket(sessionId, &getValue);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = ClientDeleteSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
  * @tc.name: TransClientAddSessionOutOfMaxTest01
  * @tc.desc: Transmission sdk session manager add session out of maxmum.
  * @tc.type: FUNC

@@ -295,7 +295,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSiz
 
 /*
  * @tc.name: ServerIpcShiftLNNGear_TEST_001
- * @tc.desc: ServerIpcShiftLNNGear return value is equal to SOFTBUS_ERR
+ * @tc.desc: ServerIpcShiftLNNGear return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
  * @tc.require:
  */

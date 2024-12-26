@@ -33,6 +33,10 @@ typedef enum {
     EVENT_SCENE_COAP = 6,
     EVENT_SCENE_RESERVED_7 = 7,
     EVENT_SCENE_RESERVED_8 = 8,
+    EVENT_SCENE_RESERVED_9 = 9,
+    EVENT_SCENE_RESERVED_10 = 10,
+    EVENT_SCENE_RESERVED_11 = 11,
+    EVENT_SCENE_RESERVED_12 = 12,
 } DiscEventScene;
 
 typedef enum {
@@ -63,12 +67,23 @@ typedef enum {
 } DiscEventBleStage;
 
 typedef enum {
+    EVENT_STAGE_TOUCH_DISC = 1,
+    EVENT_STAGE_TOUCH_SCAN = 2,
+} DiscEventTouchBleStage;
+ 
+typedef enum {
+    EVENT_STAGE_VLINK_SCAN = 1,
+} DiscEventVlinkStage;
+
+typedef enum {
     EVENT_STAGE_SHARE_BLE_PROCESS = 1,
     EVENT_STAGE_SHARE_BLE_UPDATE_DEVICE = 2,
 } DiscEventShareBleStage;
 
 typedef enum {
     EVENT_STAGE_APPROACH_BLE_PROCESS = 1,
+    EVENT_STAGE_APPROACH_DISC = 2,
+    EVENT_STAGE_APPROACH_SCAN = 3,
 } DiscEventApproachBleStage;
 
 typedef enum {
@@ -87,6 +102,7 @@ typedef enum {
     EVENT_STAGE_ADV_REPLACE = 3,
     EVENT_STAGE_SCAN_START = 4,
     EVENT_STAGE_ONLINE_STATE = 5,
+    EVENT_STAGE_ADV = 6,
 } DiscEventBroadcastStage;
 
 typedef enum {
@@ -97,10 +113,13 @@ typedef enum {
 } DiscServerType;
 
 typedef struct {
+    int32_t isOn;                // BROADCAST_STATUS
     int32_t result;              // STAGE_RES
     int32_t errcode;             // ERROR_CODE
     int32_t initType;            // INIT_TYPE
-    int32_t serverType;          // SERVER_TYPE
+    const char *serverType;      // SERVER_TYPE
+    int32_t advHandle;           // ADV_HANDLE
+    int32_t bcOverMaxCnt;        // BROADCAST_OVER_MAX_COUNT
     int32_t interFuncType;       // INTERFACE_FUNC_TYPE
     int32_t capabilityBit;       // CAPABILITY_BIT
     const char *capabilityData;  // CAPABILITY_DATA
@@ -109,11 +128,18 @@ typedef struct {
     int32_t coapChangeType;      // COAP_CHANGE_TYPE
     int32_t broadcastType;       // BROADCAST_TYPE
     int32_t broadcastFreq;       // BROADCAST_FREQ
+    int32_t minInterval;         // MIN_INTERVAL
+    int32_t maxInterval;         // MAX_INTERVAL
     int32_t scanType;            // SCAN_TYPE
+    int32_t scanCount;           // SCAN_COUNT
     const char *scanCycle;       // SCAN_CYCLE
     int32_t discType;            // DISC_TYPE
     int32_t discMode;            // DISC_MODE
-    int32_t costTime;            // FIRST_DISCOVERY_TIME
+    int32_t startTime;           // BROADCAST_START_TIME
+    int32_t stopTime;            // BROADCAST_STOP_TIME
+    int32_t costTime;            // COST_TIME
+    int32_t successCnt;          // SUCCESS_COUNT
+    int32_t failCnt;             // FAIL_COUNT
     const char *localNetworkId;  // LOCAL_NET_ID
     const char *peerIp;          // PEER_IP
     const char *peerBrMac;       // PEER_BR_MAC

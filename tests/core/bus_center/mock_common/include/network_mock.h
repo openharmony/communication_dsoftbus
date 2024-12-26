@@ -56,6 +56,7 @@ public:
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
+    virtual void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {
 public:
@@ -75,6 +76,7 @@ public:
     MOCK_METHOD1(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void(void *));
+    MOCK_METHOD2(LnnNotifyNetlinkStateChangeEvent, void(NetManagerIfNameState, const char *));
 };
 } // namespace OHOS
 #endif // NET_WORK_MOCK_H

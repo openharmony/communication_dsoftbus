@@ -86,6 +86,8 @@ public:
     virtual int32_t LnnRequestLane(uint32_t laneReqId,
         const LaneRequestOption *request, const ILaneListener *listener) = 0;
     virtual int32_t LnnFreeLane(uint32_t laneReqId) = 0;
+    virtual int32_t LnnGetNetworkIdByUdidHash(
+        const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline) = 0;
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
@@ -145,6 +147,7 @@ public:
     MOCK_METHOD1(ApplyLaneReqId, uint32_t (LaneType));
     MOCK_METHOD3(LnnRequestLane, int32_t (uint32_t, const LaneRequestOption *, const ILaneListener *));
     MOCK_METHOD1(LnnFreeLane, int32_t (uint32_t laneReqId));
+    MOCK_METHOD5(LnnGetNetworkIdByUdidHash, int32_t (const uint8_t *, uint32_t, char *, uint32_t, bool));
 };
 } // namespace OHOS
 #endif // TRANS_AUTH_MOCK_H

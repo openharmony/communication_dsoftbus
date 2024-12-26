@@ -89,6 +89,15 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
         return WIFI_DIRECT_ROLE_GC;
     }
 
+    if (IsGcPreferred(remoteDevTypeId)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote device prefers Gc");
+        return WIFI_DIRECT_ROLE_GO;
+    }
+
+    if (IsGcPreferred(localDevTypeId)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "local device prefers Gc");
+        return WIFI_DIRECT_ROLE_GC;
+    }
     return WIFI_DIRECT_ROLE_AUTO;
 }
 
@@ -101,5 +110,10 @@ bool WifiDirectRoleOption::IsPowerAlwaysOn(int32_t devTypeId)
 bool WifiDirectRoleOption::IsGoPreferred(int32_t devTypeId)
 {
     return devTypeId == TYPE_PAD_ID;
+}
+
+bool WifiDirectRoleOption::IsGcPreferred(int32_t devTypeId)
+{
+    return devTypeId == TYPE_WATCH_ID;
 }
 }  // namespace OHOS::SoftBus

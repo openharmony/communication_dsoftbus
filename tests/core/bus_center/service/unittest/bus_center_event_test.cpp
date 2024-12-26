@@ -104,7 +104,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest001, TestSize.Level1)
     LnnEventHandler handler = NULL;
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
     EXPECT_CALL(BusCenterEventMock, SetDefaultQdisc()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     LnnNotifyOnlineState(isOnline, info);
     LnnNotifyMigrate(isOnline, info);
     NodeBasicInfo info2 = {
@@ -159,7 +159,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest002, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest003, TestSize.Level1)
 {
     const char *networkId = nullptr;
-    int32_t retCode = SOFTBUS_ERR;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
     ConnectionAddr *addr = NULL;
     LnnEventType event = LNN_EVENT_TYPE_MAX;
     LnnEventHandler handler = NULL;
@@ -183,7 +183,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest004, TestSize.Level1)
     const char *pkgName = nullptr;
     int32_t pid = 1000;
     const TimeSyncResultInfo *info = nullptr;
-    int32_t retCode = SOFTBUS_ERR;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
     LnnEventType event = LNN_EVENT_NETWORK_STATE_CHANGED;
     LnnEventHandler handler = OnNetworkStateChange;
 
@@ -241,7 +241,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest008, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterEventTest009
-* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_ERR.
+* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -345,7 +345,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest015, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterEventTest016
-* @tc.desc: Verify the LnnNotifyAddressChangedEvent function return value equal SOFTBUS_ERR.
+* @tc.desc: Verify the LnnNotifyAddressChangedEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -437,7 +437,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest019, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterEventTest020
-* @tc.desc: Verify the LnnNotifyLpReportEvent function return value equal SOFTBUS_ERR.
+* @tc.desc: Verify the LnnNotifyLpReportEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -475,7 +475,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest021, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterEventTest022
-* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_ERR.
+* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -526,7 +526,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest024, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterEventTest005
-* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_ERR.
+* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -566,7 +566,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterEventTest013
-* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_ERR.
+* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -751,7 +751,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest035, TestSize.Level1)
     ret = LnnRegisterEventHandler(event, handler);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_NO_FATAL_FAILURE(LnnUnregisterEventHandler(event, handler));
-    EXPECT_NO_FATAL_FAILURE(LnnDeinitBusCenterEvent());
+    EXPECT_EQ(rdt, SOFTBUS_OK);
 }
 
 /*
@@ -769,7 +769,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest036, TestSize.Level1)
         .deviceName = "testDeviceName",
         .deviceTypeId = 1,
     };
-    EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_NO_FATAL_FAILURE(LnnNotifyOnlineState(isOnline, &info));
 }
 
