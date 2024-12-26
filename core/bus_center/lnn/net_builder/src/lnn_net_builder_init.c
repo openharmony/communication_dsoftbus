@@ -574,6 +574,7 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
 
 static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
 {
+    LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "NodeInfo is NULL");
     AuthConnInfo connInfo;
     DeviceVerifyPassMsgPara *para = NULL;
     LNN_LOGI(LNN_BUILDER, "verify passed passively, authId=%{public}" PRId64, authHandle.authId);
@@ -599,7 +600,7 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         }
     } else {
         para->addr.type = CONNECTION_ADDR_BR;
-        if (info != NULL && strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, info->connectInfo.macAddr) != EOK) {
+        if (strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, info->connectInfo.macAddr) != EOK) {
             LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
         }
     }
