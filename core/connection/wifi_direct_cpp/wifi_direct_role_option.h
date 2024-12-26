@@ -34,7 +34,7 @@ private:
     WifiDirectRole GetExpectedP2pRole(const std::string &netWorkId);
     bool IsPowerAlwaysOn(int32_t devTypeId);
     bool IsGoPreferred(int32_t devTypeId);
-    bool IsGcPreferred(int32_t devTypeI);
+    bool IsGcPreferred(int32_t devTypeId);
 };
 }  // namespace OHOS::SoftBus
 #endif
