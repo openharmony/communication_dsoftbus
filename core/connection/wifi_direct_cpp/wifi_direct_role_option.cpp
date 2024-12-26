@@ -63,16 +63,20 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
         ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get local dev type id failed");
     CONN_LOGD(CONN_WIFI_DIRECT, "localDevTypeId=0x%{public}03X", localDevTypeId);
 
-    if (IsPowerAlwaysOn(localDevTypeId)) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "local device's power is always-on");
-        return WIFI_DIRECT_ROLE_GO;
-    }
-
     int32_t remoteDevTypeId = 0;
     ret = LnnGetRemoteNumInfo(netWorkId.data(), NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get remote dev type id failed");
     CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%{public}03X", remoteDevTypeId);
+    if (remoteDevTypeId == TYPE_TV_ID) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote device is TV");
+        return WIFI_DIRECT_ROLE_GC;
+    }
+
+    if (IsPowerAlwaysOn(localDevTypeId)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "local device's power is always-on");
+        return WIFI_DIRECT_ROLE_GO;
+    }
 
     if (IsPowerAlwaysOn(remoteDevTypeId)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remote device's power is always-on");
