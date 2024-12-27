@@ -309,4 +309,16 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt002, TestSize.Level1)
     ret = GetSocketOpt(socketId, level, optType, temp, optValueSizeValid);
     ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
+
+/**
+ * @tc.name: RegisterRelationChecker001
+ * @tc.desc: call RegisterRelationChecker function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker001, TestSize.Level1)
+{
+    int32_t ret = RegisterRelationChecker(nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

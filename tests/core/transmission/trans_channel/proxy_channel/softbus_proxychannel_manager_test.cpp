@@ -1948,7 +1948,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest002, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
     appInfo.peerData.dataConfig = 0;
     int32_t errorCode = SOFTBUS_OK;
-    TransProxyReportAuditEvent(errorCode);
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ASSERT_TRUE(nullptr != chan);
+    TransProxyReportAuditEvent(chan, AUDIT_EVENT_PACKETS_ERROR, errorCode);
     ret = TransProxyFillDataConfig(&appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

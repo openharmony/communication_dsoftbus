@@ -20,6 +20,8 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_network_manager.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_config_type.h"
 #include "softbus_error_code.h"
@@ -29,16 +31,21 @@
 #include "softbus_qos.h"
 #include "softbus_wifi_api_adapter.h"
 #include "trans_auth_manager.h"
+#include "trans_client_proxy.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 #include "wifi_direct_manager.h"
+
+#define DMS_UID 5522
+#define DMS_SESSIONNAME "ohos.distributedschedule.dms.connect"
 
 typedef struct {
     int32_t channelType;
@@ -624,4 +631,86 @@ TransDeviceState TransGetDeviceState(const char *networkId)
         return DEVICE_STATE_REMOTE_WIFI_HALF_OFF;
     }
     return DEVICE_STATE_NOT_CARE;
+}
+
+static int32_t GetSinkRelation(const AppInfo *appInfo, CollabInfo *sinkInfo)
+{
+    int32_t ret = TransGetTokenIdBySessionName(appInfo->myData.sessionName, &sinkInfo->tokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenId failed.");
+        return ret;
+    }
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, sinkInfo->deviceId, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed.");
+        return ret;
+    }
+    ret = GetCurrentAccount(&sinkInfo->accountId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get current account failed.");
+        sinkInfo->accountId = INVALID_ACCOUNT_ID;
+    }
+    sinkInfo->pid = appInfo->myData.pid;
+    sinkInfo->userId = TransGetForegroundUserId();
+    if (sinkInfo->userId == INVALID_USER_ID) {
+        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
+        return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
+{
+    sourceInfo->tokenId = appInfo->callingTokenId;
+    sourceInfo->pid = appInfo->peerData.pid;
+    sourceInfo->accountId = appInfo->peerData.accountId;
+    sourceInfo->userId = appInfo->peerData.userId;
+    char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
+    (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, netWorkId, NETWORK_ID_BUF_LEN);
+    (void)LnnGetRemoteStrInfo(netWorkId, STRING_KEY_DEV_UDID, sourceInfo->deviceId, UDID_BUF_LEN);
+}
+
+int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType)
+{
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    int32_t ret = GetSinkRelation(appInfo, &sinkInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get sink relation failed.");
+        return ret;
+    }
+    if (!SoftBusCheckIsApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
+        TRANS_LOGE(TRANS_CTRL, "check is not app.");
+        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
+    }
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    GetSourceRelation(appInfo, &sourceInfo);
+    if (sourceInfo.userId == DEFAULT_USER_ID) {
+        TRANS_LOGE(TRANS_CTRL, "userId is invalid.");
+        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
+    }
+
+    int32_t pid = 0;
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    ret = TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &pid, pkgName, PKG_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "TransGetPidAndPkgName fail ret=%{public}d.", ret);
+        return ret;
+    }
+
+    TransInfo transInfo = { .channelId = channelId, .channelType = channelType };
+    ret = ClientIpcCheckCollabRelation(pkgName, pid, &sourceInfo, &sinkInfo, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL,
+            "channelId=%{public}d check Collaboration relation fail, ret=%{public}d.", transInfo.channelId, ret);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d check Collaboration relationship success.", transInfo.channelId);
+    return SOFTBUS_OK;
 }

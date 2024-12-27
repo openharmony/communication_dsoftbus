@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,25 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef TRANS_SESSION_ACCOUNT_ADAPTER_H
+#define TRANS_SESSION_ACCOUNT_ADAPTER_H
 
-#ifndef TRANS_CLIENT_STUB_H
-#define TRANS_CLIENT_STUB_H
-
-#include "serializer.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply);
-int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply);
-int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply);
-int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply);
-int32_t ClientSetChannelInfo(IpcIo *data, IpcIo *reply);
-int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply);
-int32_t ClientCheckCollabRelation(IpcIo *data, IpcIo *reply);
+#define INVALID_ACCOUNT_ID 0
+#define INVALID_USER_ID (-1)
+#define DEFAULT_USER_ID 0
+
+int32_t TransGetForegroundUserId(void);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* TRANS_SESSION_ACCOUNT_ADAPTER_H */

@@ -114,10 +114,10 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->type = SEC_TYPE_CIPHERTEXT;
     newNode->uid = uid;
     newNode->pid = pid;
-    uint64_t callingTokenId = 0;
-    int32_t ret = TransGetCallingFullTokenId(&callingTokenId);
+
+    int32_t ret = TransGetCallingFullTokenId(&newNode->tokenId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get callingTokenId failed");
-    int32_t tokenType = SoftBusGetAccessTokenType(callingTokenId);
+    int32_t tokenType = SoftBusGetAccessTokenType(newNode->tokenId);
     newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
         CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
     ret = TransSessionServerAddItem(newNode);

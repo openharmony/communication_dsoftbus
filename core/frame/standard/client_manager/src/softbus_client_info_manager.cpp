@@ -135,7 +135,7 @@ sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::s
     if (iter != range.second) {
         return iter->second.second.first;
     }
-    COMM_LOGE(COMM_SVC, "GetSoftbusClientProxy with pid is nullptr\n");
+    COMM_LOGE(COMM_SVC, "GetSoftbusClientProxy with pid=%{public}d is nullptr.", pid);
     return nullptr;
 }
 

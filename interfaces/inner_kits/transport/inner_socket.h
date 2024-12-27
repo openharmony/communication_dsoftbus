@@ -143,6 +143,43 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
  * @version 2.0
  */
 int32_t PrivilegeShutdown(uint64_t tokenId, int32_t pid, const char *peerNetworkId);
+
+/**
+ * @brief Defines socket bind relation checker
+ *
+ * When a socket is binding, relation checker will be called to check the feature ability relation.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    /**
+     * @brief Called when a socket is binding
+     *
+     * When a socket is bind, sink side will to call this function to check feature ability relation.
+     *
+     * @param sourceInfo Indicates the source Collab info.
+     * @param sinkInfo Indicates the sink Collab info.
+     *
+     * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+     *
+     * @since 2.0
+     * @version 2.0
+    */
+    int32_t (*CheckCollabRelation)(CollabInfo sourceInfo, CollabInfo sinkInfo);
+} IFeatureAbilityRelationChecker;
+
+/**
+ * @brief Register feature ability relation checker.
+ *
+ * @param relationChecker relation checker.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t RegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker);
 #ifdef __cplusplus
 }
 #endif

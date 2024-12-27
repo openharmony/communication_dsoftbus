@@ -23,6 +23,7 @@ extern "C" {
 #define MAX_MAC_LEN  18
 #define MAX_IP_LEN  46
 #define MAX_PATH_LEN 4096
+#define DEVICE_ID_LEN_MAX 65
 
 /**
  * @brief Enumerates the data types.
@@ -45,6 +46,7 @@ typedef enum {
 typedef enum {
     EVENT_TYPE_CHANNEL_OPENED,
     EVENT_TYPE_TRANS_LIMIT_CHANGE,
+    EVENT_TYPE_COLLAB_CHECK,
     EVENT_TYPE_BUTT,
 } TransEventType;
 
@@ -309,6 +311,20 @@ typedef struct {
 } FrameEvtCbInfo;
 
 typedef int (*OnFrameEvt)(int fd, const FrameEvtCbInfo *info);
+
+/**
+ * @brief Enumerate Collab Info.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    char deviceId[DEVICE_ID_LEN_MAX];
+    int32_t userId;
+    int64_t accountId;
+    uint64_t tokenId;
+    int32_t pid;
+} CollabInfo;
 #ifdef __cplusplus
 }
 #endif

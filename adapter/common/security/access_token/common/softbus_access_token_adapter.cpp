@@ -23,6 +23,7 @@
 #include "native_token_info.h"
 #include "perm_state_change_callback_customize.h"
 #include "privacy_kit.h"
+#include "regex.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
@@ -31,6 +32,13 @@ constexpr int32_t JUDG_CNT = 1;
 const std::string SAMGR_PROCESS_NAME = "samgr";
 const std::string DMS_PROCESS_NAME = "distributedsched";
 static PermissionChangeCb g_permissionChangeCb = nullptr;
+const char *g_sessionName[] = {
+    "DBinder*",
+    "hiview*",
+    "com.ohos.plrdtest.hongyan*",
+    "ObjectstoreDB*",
+};
+constexpr int32_t SESSION_NAME_NUM = sizeof(g_sessionName) / sizeof(g_sessionName[0]);
 
 namespace OHOS {
 using namespace Security::AccessToken;
@@ -240,6 +248,39 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
     COMM_LOGE(COMM_PERM,
         "check dms server permission failed, processName=%{private}s", nativeTokenInfo.processName.c_str());
     return SOFTBUS_PERMISSION_DENIED;
+}
+
+static bool CheckSessionName(const char *src, const char *dst)
+{
+    regex_t regComp;
+    if (regcomp(&regComp, src, REG_EXTENDED | REG_NOSUB) != REG_OK) {
+        COMM_LOGE(COMM_PERM, "regcomp failed.");
+        return false;
+    }
+    bool compare = regexec(&regComp, dst, 0, nullptr, 0) == REG_OK;
+    regfree(&regComp);
+    return compare;
+}
+
+bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
+{
+    if (sessionName == nullptr) {
+        COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
+        return false;
+    }
+
+    for (uint32_t i = 0; i < SESSION_NAME_NUM; i++) {
+        if (CheckSessionName(g_sessionName[i], sessionName)) {
+            return false;
+        }
+    }
+
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
+    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
+        return false;
+    }
+    COMM_LOGI(COMM_ADAPTER, "The caller is an app");
+    return true;
 }
 }
 } // namespace OHOS
