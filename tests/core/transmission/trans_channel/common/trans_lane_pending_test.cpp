@@ -18,6 +18,7 @@
 
 #include "trans_lane_pending_ctl.c"
 #include "trans_lane_pending_test_mock.h"
+#include "trans_auth_lane_pending_ctl.c"
 
 using namespace testing;
 using namespace testing::ext;

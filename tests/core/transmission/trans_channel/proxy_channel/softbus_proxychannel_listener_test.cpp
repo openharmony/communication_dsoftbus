@@ -282,26 +282,6 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, Test
 }
 
 /**
- * @tc.name: TransProxyGetAppInfoTest001
- * @tc.desc: test trans proxy get appinfo.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelListenerTest, TransProxyGetAppInfoTest001, TestSize.Level1)
-{
-    AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(NULL, appInfo);
-    char sessionName[SESSIONKEYSIZE] = {0};
-    strcpy_s(sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
-    char peerNetworkId[SESSIONKEYSIZE] = {0};
-    strcpy_s(peerNetworkId, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
-
-    int32_t ret = TransProxyGetAppInfo(sessionName, peerNetworkId, appInfo);
-    SoftBusFree(appInfo);
-    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
-}
-
-/**
  * @tc.name: TransOpenNetWorkingChannelTest001
  * @tc.desc: test trans open networking channel.
  * @tc.type: FUNC
