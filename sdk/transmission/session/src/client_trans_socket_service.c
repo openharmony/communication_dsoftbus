@@ -264,15 +264,10 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (optType) {
-        case OPT_TYPE_MAX_BUFFER:
-        case OPT_TYPE_FIRST_PACKAGE:
-        case OPT_TYPE_MAX_IDLE_TIMEOUT:
-            ret = SOFTBUS_NOT_IMPLEMENT;
-            break;
-        default:
-            ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
-            break;
+    if (optType >= OPT_TYPE_BEGIN && optType < OPT_TYPE_END) {
+        ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    } else {
+        ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
     }
     return ret;
 }
@@ -287,15 +282,33 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (optType) {
-        case OPT_TYPE_MAX_BUFFER:
-        case OPT_TYPE_FIRST_PACKAGE:
-        case OPT_TYPE_MAX_IDLE_TIMEOUT:
-            ret = SOFTBUS_NOT_IMPLEMENT;
-            break;
-        default:
-            ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
-            break;
+    if (optType >= OPT_TYPE_BEGIN && optType < OPT_TYPE_END) {
+        ret = GetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    } else {
+        ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
     }
     return ret;
+}
+
+int32_t PrivilegeShutdown(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    if (peerNetworkId == NULL || strlen(peerNetworkId) >= DEVICE_ID_SIZE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *tmpPeerNetworkId = NULL;
+    Anonymize(peerNetworkId, &tmpPeerNetworkId);
+    TRANS_LOGI(TRANS_SDK, "tokenId=%{private}" PRId64 ", pid=%{public}d, networkId=%{public}s", tokenId, pid,
+        AnonymizeWrapper(tmpPeerNetworkId));
+    AnonymizeFree(tmpPeerNetworkId);
+    return ServerIpcPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+}
+
+int32_t RegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker)
+{
+    if (relationChecker == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid relationChecker.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientRegisterRelationChecker(relationChecker);
 }

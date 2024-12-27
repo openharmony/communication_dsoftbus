@@ -28,6 +28,7 @@
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "fuzz_data_generator.h"
+#include <fuzzer/FuzzedDataProvider.h>
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -66,11 +67,12 @@ private:
 void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
 {
 #define TEST_DATA_LENGTH 1024
+#define NETWORKID_LENGTH 65
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
     DataGenerator::Write(data, size);
-
+    FuzzedDataProvider dataProvider(data, size);
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(data));
     ChannelInfo channel = { 0 };
     int32_t channelId = 0;
@@ -78,7 +80,7 @@ void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
     int32_t errCode = 0;
     int32_t messageType = 0;
     int32_t shutdownReason = 0;
-    char *networkId = const_cast<char *>(reinterpret_cast<const char *>(data));
+    std::string networkId = dataProvider.ConsumeRandomLengthString(NETWORKID_LENGTH - 1);
     int32_t routeType = 0;
     int32_t eventId = 0;
     int32_t tvCount = 0;
@@ -101,7 +103,7 @@ void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
 
     TransOnChannelClosed(channelId, channelType, messageType, (ShutdownReason)shutdownReason);
 
-    TransOnChannelLinkDown(networkId, routeType);
+    TransOnChannelLinkDown(networkId.c_str(), routeType);
 
     TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, (void *)data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
 

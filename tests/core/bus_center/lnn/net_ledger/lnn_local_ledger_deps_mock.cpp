@@ -48,22 +48,22 @@ static LocalLedgerDepsInterfaceMock *GetLocalLedgerDepsInterface()
 int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == nullptr) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
             if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
             if (strncpy_s(value, len, DEFAULT_DEVICE_UDID, UDID_BUF_LEN) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case COMM_DEVICE_KEY_DEVTYPE:
             if (strncpy_s(value, len, DEFAULT_DEVICE_TYPE, strlen(DEFAULT_DEVICE_TYPE)) != EOK) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         default:
@@ -74,7 +74,7 @@ int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceK
 
 int32_t LocalLedgerDepsInterfaceMock::LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_INVALID_PARAM;
     if (cb != nullptr) {
         ret = cb(SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO_FD);
     }

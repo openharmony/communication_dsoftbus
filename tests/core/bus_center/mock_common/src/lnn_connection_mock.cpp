@@ -163,7 +163,7 @@ int32_t LnnConnectInterfaceMock::ActionOfConnPostBytes(uint32_t connectionId, Co
     g_encryptData = data->buf;
     if (strcpy_s(g_encryptData, TEST_DATA_LEN, data->buf) != SOFTBUS_OK) {
         LNN_LOGE(LNN_TEST, "strcpy failed in conn post bytes");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }

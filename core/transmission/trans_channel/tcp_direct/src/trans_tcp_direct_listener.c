@@ -20,6 +20,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -32,6 +33,7 @@
 #include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 
@@ -85,30 +87,16 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
-static int32_t StartVerifySession(SessionConn *conn)
+static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)
 {
-    TRANS_LOGI(TRANS_CTRL, "verify enter. channelId=%{public}d, fd=%{public}d", conn->channelId, conn->appInfo.fd);
-    if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL,
-            "Generate SessionKey failed channelId=%{public}d, fd=%{public}d",
-            conn->channelId, conn->appInfo.fd);
-        return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
-    }
-    SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
-
-    bool isAuthServer = false;
-    uint32_t cipherFlag = FLAG_WIFI;
-    bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
-    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
-        TRANS_LOGE(TRANS_CTRL,
-            "get cipher flag failed channelId=%{public}d, fd=%{public}d",
-            conn->channelId, conn->appInfo.fd);
-        return SOFTBUS_TRANS_GET_CIPHER_FAILED;
-    }
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
+    if (GetCurrentAccount(&conn->appInfo.myData.accountId) != SOFTBUS_OK) {
+        conn->appInfo.myData.accountId = INVALID_ACCOUNT_ID;
+    }
+    conn->appInfo.myData.userId = TransGetForegroundUserId();
 
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
@@ -129,6 +117,36 @@ static int32_t StartVerifySession(SessionConn *conn)
     }
     int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
     cJSON_free(bytes);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL,
+            "TransTdc post bytes failed channelId=%{public}d, fd=%{public}d, ret=%{public}d",
+            conn->channelId, conn->appInfo.fd, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t StartVerifySession(SessionConn *conn)
+{
+    TRANS_LOGI(TRANS_CTRL, "verify enter. channelId=%{public}d, fd=%{public}d", conn->channelId, conn->appInfo.fd);
+    if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL,
+            "Generate SessionKey failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
+        return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
+    }
+    SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
+
+    bool isAuthServer = false;
+    uint32_t cipherFlag = FLAG_WIFI;
+    bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
+    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
+        TRANS_LOGE(TRANS_CTRL,
+            "get cipher flag failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
+        return SOFTBUS_TRANS_GET_CIPHER_FAILED;
+    }
+    int32_t ret = TransPostBytes(conn, isAuthServer, cipherFlag);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
             "TransTdc post bytes failed channelId=%{public}d, fd=%{public}d, ret=%{public}d",

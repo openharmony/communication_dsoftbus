@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "lnn_decision_db.h"
+#include "message_handler.h"
 #include "softbus_feature_config.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "trans_auth_message.h"
@@ -31,6 +32,7 @@ namespace OHOS {
 
 #define PID 2024
 #define UID 4000
+constexpr int32_t DELAY_TIME = 100;
 
 static int32_t g_port = 6000;
 static const char *g_pkgName = "dms";
@@ -59,6 +61,7 @@ void TransTcpDirectMessageTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     TransProxyPipelineInit();
+    (void)LooperInit();
 }
 
 void TransTcpDirectMessageTest::TearDownTestCase(void)
@@ -67,6 +70,7 @@ void TransTcpDirectMessageTest::TearDownTestCase(void)
     AuthDeinit();
     BusCenterServerDeinit();
     TransServerDeinit();
+    LooperDeinit();
 }
 
 SessionConn *TestSetSessionConn()
@@ -648,5 +652,44 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, Test
     SoftBusFree(con2);
     SoftBusFree(con3);
     SoftBusFree(channelId);
+}
+
+/**
+ * @tc.name: TransDealTdcCheckCollabResult001
+ * @tc.desc: check collab result.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, TransDealTdcCheckCollabResult001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    
+    TransChannelResultLoopInit();
+    TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_TCP_DIRECT, DELAY_TIME);
+    int32_t checkResult = SOFTBUS_OK;
+    int32_t ret = TransDealTdcCheckCollabResult(channelId, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransDealTdcCheckCollabResult002
+ * @tc.desc: check collab result.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, TransDealTdcCheckCollabResult002, TestSize.Level1)
+{
+    const IServerChannelCallBack *cb = TransServerGetChannelCb();
+    int32_t ret = TransTcpDirectInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionConn *conn = TestSetSessionConn();
+    ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t checkResult = SOFTBUS_ERR;
+    ret = TransDealTdcCheckCollabResult(conn->channelId, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+
+    TransTcpDirectDeinit();
 }
 } // namespace OHOS

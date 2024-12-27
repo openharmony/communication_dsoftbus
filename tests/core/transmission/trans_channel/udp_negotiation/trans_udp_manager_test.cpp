@@ -922,4 +922,57 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById003, TestSize.Level
     ret = TransUdpGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
+
+/**
+ * @tc.name: TransUdpGetPrivilegeCloseList001
+ * @tc.desc: TransUdpGetPrivilegeCloseList Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseList001, TestSize.Level1)
+{
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = TransUdpGetPrivilegeCloseList(nullptr, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: TransUdpResetReplyCnt001
+ * @tc.desc: reset reply count
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpResetReplyCnt001, TestSize.Level1)
+{
+    int32_t ret = TransUdpResetReplyCnt(TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/**
+ * @tc.name: TransUdpResetReplyCnt002
+ * @tc.desc: reset reply count
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpResetReplyCnt002, TestSize.Level1)
+{
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpResetReplyCnt(TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    UdpChannelInfo *channel = static_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpResetReplyCnt(TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+}
 }

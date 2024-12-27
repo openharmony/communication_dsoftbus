@@ -772,4 +772,29 @@ HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level0)
     qos = nullptr;
     ASSERT_TRUE(qos == nullptr);
 }
+
+/**
+ * @tc.name: ServerIpcPrivilegeCloseChannel001
+ * @tc.desc: ServerIpcPrivilegeCloseChannel, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransIpcStandardTest, ServerIpcPrivilegeCloseChannel001, TestSize.Level0)
+{
+    uint64_t tokenId = 0;
+    int32_t pid = 0;
+    
+    int32_t ret = ServerIpcPrivilegeCloseChannel(tokenId, pid, g_networkId);
+    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
+
+    ret = TransServerProxyInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    ret = ServerIpcPrivilegeCloseChannel(tokenId, pid, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ServerIpcPrivilegeCloseChannel(tokenId, pid, g_networkId);
+    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
+    TransClientDeinit();
+}
 }
