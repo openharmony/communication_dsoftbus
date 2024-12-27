@@ -41,6 +41,7 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
 int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult);
 void TransAsyncTcpDirectChannelTask(int32_t channelId);
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult);
 
 #ifdef __cplusplus
 }

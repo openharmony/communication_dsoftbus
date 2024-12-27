@@ -49,6 +49,8 @@ int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t ch
 int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid);
 void RegisterPermissionChangeCallback(void);
 int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos, uint32_t count);
+int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, const TransInfo *transInfo);
 
 #ifdef __cplusplus
 }

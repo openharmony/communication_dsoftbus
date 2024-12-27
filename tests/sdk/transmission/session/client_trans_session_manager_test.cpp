@@ -111,6 +111,12 @@ static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int 
     TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
+static int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+{
+    TRANS_LOGI(TRANS_TEST, "call check collab relation func");
+    return SOFTBUS_OK;
+}
+
 static SessionInfo *GenerateSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo*)SoftBusMalloc(sizeof(SessionInfo));
@@ -156,6 +162,10 @@ static ISessionListener g_sessionlistener = {
     .OnSessionClosed = OnSessionClosed,
     .OnBytesReceived = OnBytesReceived,
     .OnMessageReceived = OnMessageReceived,
+};
+
+static IFeatureAbilityRelationChecker g_relationChecker = {
+    .CheckCollabRelation = CheckCollabRelation,
 };
 
 /**
@@ -1589,5 +1599,34 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest51, TestSiz
     ClientTransOnUserSwitch();
     TransServerDeinit();
     ClientTransOnUserSwitch();
+}
+
+/*
+ * @tc.name: TransClientSessionManagerTest52
+ * @tc.desc: Call RelationChecker for invalid param..
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest52, TestSize.Level1)
+{
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    const int32_t channelId = 1;
+    const int32_t channelType = 1;
+    int32_t ret = ClientRegisterRelationChecker(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = ClientRegisterRelationChecker(&g_relationChecker);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_NO_FATAL_FAILURE(DestroyRelationChecker());
 }
 }

@@ -537,4 +537,38 @@ HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level0)
     ret = ClientIpcChannelOnQos(&data, QOS_SATISFIED, qos, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: ClientIpcCheckCollabRelationTest001
+ * @tc.desc: ClientIpcCheckCollabRelation test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Level0)
+{
+    int32_t pid = 0;
+    CollabInfo sourceInfo = {
+        .accountId = 0,
+        .deviceId = "ABCDE",
+        .pid = 0,
+        .tokenId = 0,
+        .userId = 0,
+    };
+    CollabInfo sinkInfo = {
+        .accountId = 0,
+        .deviceId = "ABCDE",
+        .pid = 0,
+        .tokenId = 0,
+        .userId = 0,
+    };
+    TransInfo transInfo = {
+        .channelId = 0,
+        .channelType = 0,
+    };
+    int32_t ret = ClientIpcCheckCollabRelation(nullptr, pid, &sourceInfo, &sinkInfo, &transInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcCheckCollabRelation(g_pkgName, pid, &sourceInfo, &sinkInfo, &transInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
+}
 } // namespace OHOS

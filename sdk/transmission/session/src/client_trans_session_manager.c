@@ -280,6 +280,7 @@ void TransClientDeinit(void)
     }
     UnlockClientSessionServerList();
     ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
+    DestroyRelationChecker();
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
