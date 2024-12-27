@@ -43,6 +43,8 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid);
 int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort);
 int32_t SendReplyErrInfo(int32_t errCode, char* errDesc, AuthHandle authHandle, int64_t seq);
 
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

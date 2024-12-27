@@ -33,6 +33,8 @@
 #define BITS 8
 #define REPORT_INFO_NUM 3
 #define RERORT_UDP_INFO_NUM 4
+#define REPORT_SYN_INFO_NUM 3
+#define SYN_INFO_LEN (sizeof(uint32_t) * REPORT_SYN_INFO_NUM)
 
 static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t channelType, int32_t openResult)
 {
@@ -166,14 +168,22 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t
 
 int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 {
+#define USER_SWITCH_OFFSET 10
+#define PRIVILEGE_CLOSE_OFFSET 11
     if (networkId == NULL) {
-        TRANS_LOGE(TRANS_SDK, "[client] network id is null.");
+        TRANS_LOGE(TRANS_SDK, "network id is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-    bool isUserSwitchEvent = (bool)((routeType >> 10) & 0xff);
+    bool isUserSwitchEvent = (bool)((routeType >> USER_SWITCH_OFFSET) & 0x1);
     if (isUserSwitchEvent) {
-        TRANS_LOGI(TRANS_SDK, "[client] user switch event.");
+        TRANS_LOGI(TRANS_SDK, "user switch event.");
         ClientTransOnUserSwitch();
+        return SOFTBUS_OK;
+    }
+    bool isPrivilegeClose = (bool)((routeType >> PRIVILEGE_CLOSE_OFFSET) & 0x1);
+    if (isPrivilegeClose) {
+        TRANS_LOGI(TRANS_SDK, "privilege close event.");
+        ClientTransOnPrivilegeClose(networkId);
         return SOFTBUS_OK;
     }
     ClientTransOnLinkDown(networkId, routeType);
@@ -293,4 +303,39 @@ int32_t TransOnChannelBind(int32_t channelId, int32_t channelType)
 int32_t TransOnChannelOnQos(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count)
 {
     return GetClientSessionCb()->OnQos(channelId, channelType, event, qos, count);
+}
+
+static int32_t TransSendCollabResult(int32_t channelId, int32_t channelType, int32_t checkResult)
+{
+    uint8_t buf[SYN_INFO_LEN] = { 0 };
+    int32_t offSet = 0;
+    int32_t ret = WriteInt32ToBuf(buf, sizeof(buf), &offSet, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "write channelId=%{public}d to buf failed, ret=%{public}d.", channelId, ret);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, sizeof(buf), &offSet, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "write channelType=%{public}d to buf failed, ret=%{public}d.", channelType, ret);
+        return ret;
+    }
+    ret = WriteInt32ToBuf(buf, sizeof(buf), &offSet, checkResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "write CheckResult=%{public}d to buf failed, ret=%{public}d.", checkResult, ret);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d send collaboration result.", channelId);
+    return ServerIpcProcessInnerEvent(EVENT_TYPE_COLLAB_CHECK, buf, SYN_INFO_LEN);
+}
+
+int32_t TransOnCheckCollabRelation(
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+{
+    if (sourceInfo == NULL || sinkInfo == NULL) {
+        TRANS_LOGE(TRANS_MSG, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t checkResult = ClientTransCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
+    int32_t ret = TransSendCollabResult(channelId, channelType, checkResult);
+    return ret;
 }

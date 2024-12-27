@@ -710,6 +710,30 @@ int32_t TransUdpUpdateReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
+int32_t TransUdpResetReplyCnt(int32_t channelId)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.myData.channelId == channelId) {
+            udpChannelNode->info.waitOpenReplyCnt = 0;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "not found udpChannelNode by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort)
 {
     if (g_udpChannelMgr == NULL) {
@@ -817,3 +841,28 @@ int32_t TransSetTos(int32_t channelId, uint8_t tos)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
+int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid)
+{
+    if (privilegeCloseList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "privilegeCloseList is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    UdpChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (item->info.callingTokenId == tokenId && item->info.myData.pid == pid) {
+            (void)PrivilegeCloseListAddItem(privilegeCloseList, item->info.myData.pid, item->info.myData.pkgName);
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    return SOFTBUS_OK;
+}

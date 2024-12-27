@@ -84,6 +84,9 @@ public:
     virtual int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
 
+    virtual int32_t OnCheckCollabRelation(
+        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
+
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
 };

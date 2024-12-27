@@ -154,7 +154,7 @@ namespace OHOS {
         DataGenerator::Write(data, size);
         int32_t channelId = 0;
         GenerateInt32(channelId);
-        TransTdcGetInfoByIdWithIncSeq(channelId, NULL);
+        TransTdcGetInfoIncFdRefById(channelId, NULL, true);
         DataGenerator::Clear();
     }
 

@@ -62,6 +62,8 @@ public:
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
     int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
+    int32_t OnCheckCollabRelation(
+        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -88,6 +90,7 @@ private:
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnCheckCollabRelationInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

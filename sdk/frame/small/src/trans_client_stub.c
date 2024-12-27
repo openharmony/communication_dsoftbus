@@ -15,6 +15,8 @@
 
 #include "trans_client_stub.h"
 
+#include <securec.h>
+
 #include "client_trans_channel_callback.h"
 #include "ipc_skeleton.h"
 #include "softbus_error_code.h"
@@ -155,4 +157,41 @@ int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply)
         COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d, channelId=%{public}d.", ret, channelId);
     }
     return ret;
+}
+
+static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
+{
+    size_t size = 0;
+    ReadInt64(data, &info->accountId);
+    ReadUint64(data, &info->tokenId);
+    ReadInt32(data, &info->userId);
+    ReadInt32(data, &info->pid);
+    char *deviceId = (char *)ReadString(data, &size);
+    COMM_CHECK_AND_RETURN_RET_LOGE(deviceId != NULL, SOFTBUS_IPC_ERR, COMM_SDK, "read deviceId failed.");
+    if (strcpy_s(info->deviceId, size, deviceId) != EOK) {
+        COMM_LOGI(COMM_SDK, "strcpy_s failed to copy deviceId.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientCheckCollabRelation(IpcIo *data, IpcIo *reply)
+{
+    if (data == NULL) {
+        COMM_LOGI(COMM_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    (void)reply;
+    CollabInfo sourceInfo = { 0 };
+    CollabInfo sinkInfo = { 0 };
+    int32_t ret = ReadCollabInfo(data, &sourceInfo);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read sourceInfo failed.");
+    ret = ReadCollabInfo(data, &sinkInfo);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read sinkInfo failed.");
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    ReadInt32(data, &channelId);
+    ReadInt32(data, &channelType);
+    (void)TransOnCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    return SOFTBUS_OK;
 }

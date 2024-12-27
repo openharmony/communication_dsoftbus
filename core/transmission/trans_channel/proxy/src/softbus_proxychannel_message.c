@@ -20,6 +20,8 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -31,6 +33,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
+
 
 static _Atomic int32_t g_proxyPktHeadSeq = 2048;
 
@@ -420,6 +424,21 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
     return SOFTBUS_OK;
 }
 
+static void TransProxyCheckIsApp(AppInfo *appInfo, cJSON *root)
+{
+    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+        return;
+    }
+
+    if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
+        appInfo->myData.accountId = INVALID_ACCOUNT_ID;
+        TRANS_LOGE(TRANS_CTRL, "get current account failed.");
+    }
+    appInfo->myData.userId = TransGetForegroundUserId();
+    (void)AddNumber64ToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
+    (void)AddNumberToJsonObject(root, JSON_KEY_USER_ID, appInfo->myData.userId);
+}
+
 static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInfo *appInfo, cJSON *root)
 {
     int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64->sessionKeyBase64,
@@ -446,6 +465,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
         TRANS_LOGE(TRANS_CTRL, "proxy channel pack fast data failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
+    TransProxyCheckIsApp(appInfo, root);
     (void)AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
@@ -783,6 +803,8 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     if (!GetJsonObjectNumber64Item(root, JSON_KEY_CALLING_TOKEN_ID, (int64_t *)&appInfo->callingTokenId)) {
         appInfo->callingTokenId = TOKENID_NOT_SET;
     }
+    (void)GetJsonObjectSignedNumber64Item(root, JSON_KEY_ACCOUNT_ID, &(appInfo->peerData.accountId));
+    (void)GetJsonObjectNumberItem(root, JSON_KEY_USER_ID, &(appInfo->peerData.userId));
     return SOFTBUS_OK;
 }
 

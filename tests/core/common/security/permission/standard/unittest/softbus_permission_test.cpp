@@ -159,4 +159,17 @@ HWTEST_F(SoftbusPermissionTest, CheckDynamicPermissionTest001, TestSize.Level0)
     int32_t ret = SoftBusCheckDynamicPermission(invalidTokenId);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
+
+/**
+ * @tc.name:CheckDmsServerPermissionTest001
+ * @tc.desc: check dms server permission test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, CheckDmsServerPermissionTest001, TestSize.Level0)
+{
+    uint64_t invalidTokenId = 0;
+    int32_t ret = SoftBusCheckDmsServerPermission(invalidTokenId);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+}
 } // namespace OHOS

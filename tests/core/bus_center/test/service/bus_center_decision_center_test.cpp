@@ -89,7 +89,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test02, TestSize.L
     NodeBasicInfo info;
     int32_t ret = InitDecisionCenter();
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
-    EXPECT_CALL(busCenterDecisionCenterMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(busCenterDecisionCenterMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     LnnDCProcessOnlineState(isOnline, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -120,7 +120,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test03, TestSize.L
 HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
-    EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t errorCode = HCI_ERR_BR_CONN_ACL_RECREATE;
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -167,7 +167,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_03, TestSize.Le
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t errorCode = HCI_ERR_BR_CONN_ACL_RECREATE;
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -253,7 +253,7 @@ HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_04, TestSize.
     option->type = CONNECT_BR;
     (void)strcpy_s(option->brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnDCReportConnectException(option, errorCode);
     SoftBusFree(option);
@@ -309,7 +309,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_02, TestSi
     option.type = CONNECT_BR;
     (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetNetworkIdByBtMac)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnDCReportConnectException(&option, errorCode);
     EXPECT_EQ(ret, SOFTBUS_OK);

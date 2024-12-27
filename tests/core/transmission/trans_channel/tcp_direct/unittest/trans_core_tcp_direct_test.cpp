@@ -661,4 +661,31 @@ HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest002, TestSize.Level1)
     ret = TransDelTcpChannelInfoByChannelId(invalidChannelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 }
+
+/**
+ * @tc.name: TransTcpGetPrivilegeCloseList001
+ * @tc.desc: test TransTcpGetPrivilegeCloseList with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransTcpGetPrivilegeCloseList001, TestSize.Level1)
+{
+    TcpChannelInfo *info = (TcpChannelInfo *)SoftBusCalloc(sizeof(TcpChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->channelId = 1;
+    info->businessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = TransAddTcpChannelInfo(info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    ret = TransTcpGetPrivilegeCloseList(nullptr, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTcpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDelTcpChannelInfoByChannelId(info->channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 }

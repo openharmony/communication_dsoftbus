@@ -262,3 +262,19 @@ int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos
 
     return clientProxy->OnClientChannelOnQos(data->msgChannelId, data->msgChannelType, event, qos, count);
 }
+
+int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, const TransInfo *transInfo)
+{
+    if (pkgName == nullptr || sourceInfo == nullptr || sinkInfo == nullptr || transInfo == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+    
+    return clientProxy->OnCheckCollabRelation(sourceInfo, sinkInfo, transInfo->channelId, transInfo->channelType);
+}

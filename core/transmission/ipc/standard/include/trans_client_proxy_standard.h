@@ -52,6 +52,8 @@ public:
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
     int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
+    int32_t OnCheckCollabRelation(
+        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channeltype) override;
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;

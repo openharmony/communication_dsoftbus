@@ -21,6 +21,7 @@
 #include "lnn_lane_interface.h"
 #include "session.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus
@@ -37,23 +38,10 @@ typedef struct {
 } ActionAddr;
 
 typedef struct {
-    ParaType type;
-    union {
-        ActionAddr action;
-    };
-    bool enable160M;
-} LinkPara;
-typedef struct {
-    bool bSucc;
-    bool isFinished;
-    char *sessionName;
-    int32_t errCode;
-    uint32_t laneReqId;
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    bool isNetWorkingChannel;
     int32_t channelId;
-    ListNode node;
-    LinkPara linkPara;
-    LaneConnInfo connInfo;
-} TransAuthWithParaNode;
+} NetWorkingChannelInfo;
 
 int32_t TransReqLanePendingInit(void);
 void TransReqLanePendingDeinit(void);
@@ -66,19 +54,11 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
 int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle);
 int32_t TransAsyncGetLaneInfo(
     const SessionParam *param, uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart);
-int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo, uint32_t *laneHandle);
-int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *connInfo, uint32_t *laneHandle);
+int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
+    uint32_t *laneHandle, NetWorkingChannelInfo *info);
 bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode);
 int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
-int32_t TransAuthWithParaReqLanePendingInit(void);
-void TransAuthWithParaReqLanePendingDeinit(void);
-int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessionName,
-    const LinkPara *linkPara, int32_t channelId);
-int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId);
-int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWithParaNode *paraNode);
-int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, const LaneConnInfo *connInfo,
-    int32_t errCode);
 
 int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
 #ifdef __cplusplus
