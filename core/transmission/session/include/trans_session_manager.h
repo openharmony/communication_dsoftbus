@@ -38,6 +38,7 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     int32_t uid;
     int32_t pid;
+    uint64_t tokenId;
     CallerType callerType;
 } SessionServer;
 
@@ -61,6 +62,10 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
     const char *peerIp, int32_t routeType);
 
 bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid);
+
+int32_t TransGetPidAndPkgName(const char *sessionName, const int32_t uid, int32_t *pid, char *pkgName, uint32_t len);
+
+int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId);
 
 #ifdef __cplusplus
 }

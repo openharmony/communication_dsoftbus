@@ -91,6 +91,8 @@ int32_t TransUdpGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *
 
 int32_t TransUdpUpdateReplyCnt(int32_t channelId);
 
+int32_t TransUdpResetReplyCnt(int32_t channelId);
+
 int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort);
 
 void TransAsyncUdpChannelTask(int32_t channelId);

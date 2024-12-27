@@ -23,6 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_transceiver.h"
 #include "softbus_qos.h"
 
 namespace OHOS {

@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <stdatomic.h>
 
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -121,7 +122,10 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
     (void)AddNumber64ToJsonObject(json, JSON_KEY_CALLING_TOKEN_ID, (int64_t)appInfo->callingTokenId);
-
+    if (SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+        (void)AddNumber64ToJsonObject(json, ACCOUNT_ID, appInfo->myData.accountId);
+        (void)AddNumberToJsonObject(json, USER_ID, appInfo->myData.userId);
+    }
     return SOFTBUS_OK;
 }
 
@@ -223,6 +227,8 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
+    (void)GetJsonObjectSignedNumber64Item(msg, ACCOUNT_ID, &appInfo->peerData.accountId);
+    (void)GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId);
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||

@@ -699,6 +699,24 @@ int32_t TransTdcUpdateReplyCnt(int32_t channelId)
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t TransTdcResetReplyCnt(int32_t channelId)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            connInfo->appInfo.waitOpenReplyCnt = 0;
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_SVC, "can not find by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {

@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "bus_center_manager.h"
 #include "lnn_lane.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"

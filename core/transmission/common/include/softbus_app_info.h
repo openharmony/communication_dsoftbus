@@ -89,7 +89,9 @@ typedef struct {
     int port;
     ApiVersion apiVersion;
     uint32_t dataConfig;
+    int32_t userId;
     int64_t channelId;
+    int64_t accountId;
 } AppInfoData;
 
 typedef struct {

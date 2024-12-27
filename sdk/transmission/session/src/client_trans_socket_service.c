@@ -303,3 +303,12 @@ int32_t PrivilegeShutdown(uint64_t tokenId, int32_t pid, const char *peerNetwork
     AnonymizeFree(tmpPeerNetworkId);
     return ServerIpcPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
 }
+
+int32_t RegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker)
+{
+    if (relationChecker == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid relationChecker.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientRegisterRelationChecker(relationChecker);
+}

@@ -73,13 +73,15 @@ int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *ap
 int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo);
 int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle);
 
-void TransProxyNegoSessionKeySucc(int32_t channelId);
-void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
-
 int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult);
 void TransAsyncProxyChannelTask(int32_t channelId);
 
 int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
+
+int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
+int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannelInfo *chan);
+
+int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult);
 #ifdef __cplusplus
 }
 #endif

@@ -230,6 +230,22 @@ void TransCheckChannelOpenToLooperDelay(int32_t channelId, int32_t channelType, 
     g_channelResultHandler.looper->PostMessageDelay(g_channelResultHandler.looper, msg, delayTime);
 }
 
+static int32_t RemoveMessageDestroy(const SoftBusMessage *msg, void *data)
+{
+    int32_t channelId = *(int32_t *)data;
+    if (msg->what == LOOP_CHANNEL_OPEN_MSG && channelId == (int32_t)msg->arg1) {
+        TRANS_LOGE(TRANS_CTRL, "remove delay check channel opened message succ, channelId=%{public}d.", channelId);
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_INVALID_PARAM;
+}
+
+void TransCheckChannelOpenRemoveFromLooper(int32_t channelId)
+{
+    g_channelResultHandler.looper->RemoveMessageCustom(
+        g_channelResultHandler.looper, &g_channelResultHandler, RemoveMessageDestroy, &channelId);
+}
+
 int32_t TransChannelInit(void)
 {
     IServerChannelCallBack *cb = TransServerGetChannelCb();
@@ -1035,6 +1051,54 @@ static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
     }
 }
 
+static int32_t GetCollabCheckResultFromBuf(uint8_t *buf,
+    int32_t *channelId, int32_t *channelType, int32_t *checkResult, uint32_t len)
+{
+    int32_t offset = 0;
+    int32_t ret = ReadInt32FromBuf(buf, len, &offset, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed.");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offset, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelType from buf failed.");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offset, checkResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get checkResult from buf failed.");
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
+{
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t checkResult = 0;
+    int32_t ret = GetCollabCheckResultFromBuf(buf, &channelId, &channelType, &checkResult, len);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            ret = TransDealProxyCheckCollabResult(channelId, checkResult);
+            break;
+        case CHANNEL_TYPE_TCP_DIRECT:
+            ret = TransDealTdcCheckCollabResult(channelId, checkResult);
+            break;
+        case CHANNEL_TYPE_UDP:
+            ret = TransDealUdpCheckCollabResult(channelId, checkResult);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error.", channelType);
+            ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    return ret;
+}
+
 int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
 {
     if (buf == NULL) {
@@ -1048,6 +1112,9 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
             break;
         case EVENT_TYPE_TRANS_LIMIT_CHANGE:
             TransReportLimitChangeInfo(buf, len);
+            break;
+        case EVENT_TYPE_COLLAB_CHECK:
+            ret = TransReportCheckCollabInfo(buf, len);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);

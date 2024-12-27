@@ -187,4 +187,15 @@ int32_t ISoftBusClient::OnClientChannelOnQos(
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+int32_t ISoftBusClient::OnCheckCollabRelation(
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+{
+    (void)sourceInfo;
+    (void)sinkInfo;
+    (void)channelId;
+    (void)channelType;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

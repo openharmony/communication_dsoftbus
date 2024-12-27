@@ -15,14 +15,18 @@
 
 #include "trans_udp_negotiation_exchange.h"
 
-#include "regex.h"
 #include <securec.h>
-#include "softbus_message_open_channel.h"
+
+#include "lnn_ohos_account_adapter.h"
+#include "regex.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
+#include "softbus_message_open_channel.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 #include "trans_udp_channel_manager.h"
 
 #define BASE64_SESSION_KEY_LEN 45
@@ -150,6 +154,9 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
                 appInfo->callingTokenId = TOKENID_NOT_SET;
             }
             (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
+            (void)GetJsonObjectNumberItem(msg, "USER_ID", &appInfo->peerData.userId);
+            (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
+            (void)GetJsonObjectSignedNumber64Item(msg, "ACCOUNT_ID", &appInfo->peerData.accountId);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
@@ -166,6 +173,24 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
+{
+    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+        return;
+    }
+    int64_t accountId = 0;
+    if (GetCurrentAccount(&accountId) != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "GetCurrentAccount failed.");
+        accountId = INVALID_ACCOUNT_ID;
+    }
+    int32_t userId = TransGetForegroundUserId();
+    if (userId == INVALID_USER_ID) {
+        TRANS_LOGW(TRANS_CTRL, "GetCurrentAccount failed.");
+    }
+    (void)AddNumberToJsonObject(msg, "USER_ID", userId);
+    (void)AddNumber64ToJsonObject(msg, "ACCOUNT_ID", accountId);
+}
+
 int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "pack request udp info in negotiation.");
@@ -180,6 +205,8 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
             (void)AddNumber64ToJsonObject(msg, "CALLING_TOKEN_ID", (int64_t)appInfo->callingTokenId);
             (void)AddNumberToJsonObject(msg, "LINK_TYPE", appInfo->linkType);
+            (void)AddStringToJsonObject(msg, "DEVICE_ID", appInfo->myData.deviceId);
+            (void)TransAddJsonUserIdAndAccountId(appInfo, msg);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);

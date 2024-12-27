@@ -410,4 +410,42 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
     }
     TransSessionMgrDeinit();
 }
+
+/**
+ * @tc.name: TransSessionManagerTest16
+ * @tc.desc: Transmission session manager test .
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest16, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    SessionServer *sessionServer = BuildSessionServer();
+    EXPECT_TRUE(sessionServer != nullptr);
+    sessionServer->pid = TRANS_TEST_INVALID_PID;
+    sessionServer->uid = 0;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+
+    int32_t pid = 0;
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    ret = TransGetPidAndPkgName(g_sessionName, 0, &pid, pkgName, PKG_NAME_SIZE_MAX);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    char sessionNme0[SESSION_NAME_SIZE_MAX] = {0};
+    ret = sprintf_s(sessionNme0, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, 0);
+    EXPECT_GT(ret, 0);
+    ret = TransGetPidAndPkgName(sessionNme0, 0, &pid, pkgName, PKG_NAME_SIZE_MAX);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_PID_FAILED, ret);
+
+    uint64_t tokenId = 0;
+    ret = TransGetTokenIdBySessionName(g_sessionName, &tokenId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetTokenIdBySessionName(sessionNme0, &tokenId);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
+
+    ret = TransSessionServerDelItem(g_sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
 }
