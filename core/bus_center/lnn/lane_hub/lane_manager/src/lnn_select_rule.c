@@ -583,7 +583,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
     }
 }
 
-static bool IsWatchDevice(const char *networkId)
+static bool IsExistWatchDevice(const char *networkId)
 {
     int32_t localDevTypeId = TYPE_UNKNOW_ID;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
@@ -610,7 +610,7 @@ static bool IsWatchDevice(const char *networkId)
 
 static bool IsSupportWifiDirect(const char *networkId)
 {
-    if (IsWatchDevice(networkId)) {
+    if (IsExistWatchDevice(networkId)) {
         return false;
     }
     uint64_t localFeature = 0;
@@ -929,7 +929,7 @@ static void DecideLinksWithDevice(const char *networkId, const LaneSelectParam *
         LNN_LOGE(LNN_LANE, "link num exceed lisk list");
         return;
     }
-    if (!IsWatchDevice(networkId)) {
+    if (!IsExistWatchDevice(networkId)) {
         return;
     }
     uint32_t num = 0;
@@ -977,4 +977,40 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
         return GetErrCodeOfRequest(networkId, request);
     }
     return ret;
+}
+
+int32_t DecideRueseLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList)
+{
+    if (networkId == NULL || request == NULL || recommendList == NULL ||
+        recommendList->linkTypeNum != 0) {
+        LNN_LOGE(LNN_LANE, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsExistWatchDevice(networkId)) {
+        LNN_LOGE(LNN_LANE, "reuse best effort only support watch");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneLinkType reuseLink = LANE_BR;
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    int32_t ret = FindLaneResourceByLinkType(peerUdid, reuseLink, &resourceItem);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkType=%{public}d not support reuse", reuseLink);
+        return ret;
+    }
+    ret = LaneCheckLinkValid(networkId, reuseLink, request->transType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkType=%{public}d no capability", reuseLink);
+        return ret;
+    }
+    LNN_LOGI(LNN_LANE, "linkType=%{public}d exist reuse laneId=%{public}" PRIu64 "",
+        reuseLink, resourceItem.laneId);
+    recommendList->linkType[(recommendList->linkTypeNum)++] = reuseLink;
+    return SOFTBUS_OK;
 }
