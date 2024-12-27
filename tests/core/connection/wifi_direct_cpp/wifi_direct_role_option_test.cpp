@@ -53,7 +53,7 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2p, TestSize.Level1)
     expectedRole = WIFI_DIRECT_API_ROLE_NONE;
     isStrict = true;
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
@@ -63,8 +63,6 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2p, TestSize.Level1)
     isStrict = true;
     EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
         .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_TV_ID), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
-        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
@@ -73,20 +71,42 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2p, TestSize.Level1)
     expectedRole = WIFI_DIRECT_API_ROLE_NONE;
     isStrict = true;
     EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_2IN1_ID), Return(SOFTBUS_OK)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_UNKNOW_ID), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
-        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_TV_ID), Return(SOFTBUS_OK)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_TV_ID), Return(SOFTBUS_OK)));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
     EXPECT_EQ(expectedRole, WIFI_DIRECT_API_ROLE_GC);
+}
+
+/*
+ * @tc.name: TestWDConnectTypeNegoP2pForWatch
+ * @tc.desc: check GetExpectedRole method,when type is WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P and devType is watch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2pForPad, TestSize.Level1)
+{
+    std::string netWorkId = "12345";
+    uint32_t expectedRole = WIFI_DIRECT_API_ROLE_NONE;
+    bool isStrict = true;
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_PAD_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)));
+    WifiDirectRoleOption::GetInstance().GetExpectedRole(
+        netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
+    EXPECT_EQ(isStrict, false);
+    EXPECT_EQ(expectedRole, WIFI_DIRECT_API_ROLE_GO);
 
     expectedRole = WIFI_DIRECT_API_ROLE_NONE;
     isStrict = true;
     EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_PHONE_ID), Return(SOFTBUS_OK)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_UNKNOW_ID), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
-        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_2IN1_ID), Return(SOFTBUS_OK)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_PAD_ID), Return(SOFTBUS_OK)));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
@@ -120,7 +140,7 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2pForWatch, TestSize.Le
     EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
         .WillOnce(testing::DoAll(testing::SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_UNKNOW_ID), Return(SOFTBUS_OK)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(TYPE_PAD_ID), Return(SOFTBUS_OK)));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
