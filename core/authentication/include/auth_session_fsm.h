@@ -134,7 +134,7 @@ int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, co
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
-int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect);
 int32_t AuthNotifyRequestVerify(int64_t authSeq);
 AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer, bool isConnectSide);
 void AuthSessionFsmExit(void);
