@@ -18,8 +18,11 @@
 
 #include "auth_common.h"
 #include "bus_center_event.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_json_utils.h"
 #include "softbus_qos.h"
+#include "trans_session_account_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.c"

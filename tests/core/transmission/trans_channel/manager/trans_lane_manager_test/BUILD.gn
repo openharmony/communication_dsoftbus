@@ -23,6 +23,7 @@ ohos_unittest("TransLaneManagerTest") {
   include_dirs = [
     "unittest/common/",
 
+    "$dsoftbus_core_path/adapter/bus_center/include",
     "$dsoftbus_core_path/authentication/interface",
 
     "$dsoftbus_core_path/bus_center/interface",
@@ -37,7 +38,8 @@ ohos_unittest("TransLaneManagerTest") {
 
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
-
+    "$dsoftbus_core_path/transmission/ipc/include",
+    "$dsoftbus_core_path/transmission/session/cpp/include",
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
     "$dsoftbus_core_path/transmission/trans_channel/common/include",

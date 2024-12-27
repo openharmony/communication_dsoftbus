@@ -77,6 +77,8 @@ void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVe
 
 TransDeviceState TransGetDeviceState(const char *networkId);
 
+int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

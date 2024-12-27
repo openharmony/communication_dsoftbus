@@ -87,6 +87,8 @@ void TransAsyncChannelOpenTaskManager(int32_t channelId, int32_t channelType);
 int32_t TransPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId);
 
 int32_t PrivilegeCloseListAddItem(ListNode *privilegeCloseList, int32_t pid, const char *pkgName);
+
+void TransCheckChannelOpenRemoveFromLooper(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

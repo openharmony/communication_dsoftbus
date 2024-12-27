@@ -57,6 +57,7 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_core_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
@@ -148,6 +149,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
 
+    "$dsoftbus_core_path/adapter/bus_center/include",
     "$dsoftbus_core_path/adapter/transmission/include",
     "$dsoftbus_core_path/authentication/include",
     "$dsoftbus_core_path/authentication/interface",
@@ -168,6 +170,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
     "$dsoftbus_core_path/discovery/manager/include",
     "$dsoftbus_core_path/transmission/interface",
 
+    "$dsoftbus_core_path/transmission/session/cpp/include",
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/common/include",
     "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
@@ -246,6 +249,7 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
