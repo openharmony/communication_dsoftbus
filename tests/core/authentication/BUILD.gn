@@ -1073,7 +1073,6 @@ group("unittest") {
     ":AuthEnhanceMockTest",
     ":AuthHichainMockTest",
     ":AuthHichainTest",
-    ":AuthLaneTest",
     ":AuthManagerTest",
     ":AuthNormalizeRequestTest",
     ":AuthOtherTest",
@@ -1085,6 +1084,9 @@ group("unittest") {
     ":AuthTest",
     ":AuthTestCallBackTest",
   ]
+  if (dsoftbus_feature_lnn_lane_mgr) {
+    deps += [ ":AuthLaneTest" ]
+  }
 }
 
 group("fuzztest") {

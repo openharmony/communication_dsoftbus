@@ -20,6 +20,7 @@
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 
+#ifdef ENABLE_FEATURE_LNN_BLE
 static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
 {
     (void)callback;
@@ -82,10 +83,15 @@ static LnnHeartbeatMediumMgr g_bleMgr = {
     .onStopHbByType = StopBleHeartbeat,
     .deinit = DeinitBleHeartbeat,
 };
+#endif
 
 int32_t LnnRegistBleHeartbeatMediumMgr(void)
 {
+#ifdef ENABLE_FEATURE_LNN_BLE
     return LnnRegistHeartbeatMediumMgr(&g_bleMgr);
+#else
+    return SOFTBUS_OK;
+#endif
 }
 
 int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type)
@@ -138,5 +144,23 @@ int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len)
     (void)deviceInfo;
     (void)advUserId;
     (void)len;
+    return SOFTBUS_OK;
+}
+
+int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *randPos, int32_t num)
+{
+    (void)min;
+    (void)max;
+    (void)seed;
+    (void)randPos;
+    (void)num;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnCtrlLNNBleHb(const char *pkgname, int32_t strategy, int32_t timeout)
+{
+    (void)pkgname;
+    (void)strategy;
+    (void)timeout;
     return SOFTBUS_OK;
 }

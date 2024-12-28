@@ -10,3 +10,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+declare_args() {
+  dsoftbus_feature_ip_auth = true
+  dsoftbus_feature_auth_account = false
+  if (defined(ohos_lite)) {
+    dsoftbus_feature_lnn_wifiservice_dependence = false
+  } else {
+    dsoftbus_feature_lnn_wifiservice_dependence = true
+  }
+}

@@ -168,6 +168,8 @@ group("unittest") {
   deps = [
     ":TransLaneCommonTest",
     ":TransLanePendingTest",
-    ":TransLaneTest",
   ]
+  if (dsoftbus_feature_lnn_lane_mgr) {
+    deps += [ ":TransLaneTest" ]
+  }
 }

@@ -37,7 +37,7 @@ group("unittest") {
       "ble:ConnectionBleTest",
     ]
   }
-  if (dsoftbus_feature_conn_tcp) {
+  if (dsoftbus_feature_conn_tcp_comm && dsoftbus_feature_conn_tcp_proxy) {
     deps += [ "tcp:TcpManagerTest" ]
   }
 

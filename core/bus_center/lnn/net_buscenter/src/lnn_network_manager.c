@@ -677,12 +677,15 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
 
 static int32_t RegistProtocolManager(void)
 {
-    int32_t ret = RegistIPProtocolManager();
+    int32_t ret = SOFTBUS_NOT_IMPLEMENT;
+#ifdef ENABLE_FEATURE_LNN_WIFI
+    ret = RegistIPProtocolManager();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "regist ip protocol manager failed, ret=%{public}d", ret);
         return ret;
     }
     LNN_LOGI(LNN_BUILDER, "IP protocol registed.");
+#endif
     ret = RegistBtProtocolManager();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "regist bt protocol manager failed, ret=%{public}d", ret);
@@ -754,11 +757,13 @@ int32_t LnnInitNetworkManager(void)
         LNN_LOGE(LNN_BUILDER, "register group change listener fail");
         return ret;
     }
+#ifdef ENABLE_FEATURE_LNN_WIFI
     ret = LnnInitPhysicalSubnetManager();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "init subnet manager failed, ret=%{public}d", ret);
         return ret;
     }
+#endif
     ProtocolType type = 0;
     if (!LnnVisitProtocol(GetAllProtocols, &type)) {
         LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
@@ -843,7 +848,9 @@ void LnnDeinitNetworkManager(void)
     if (LnnClearNetConfigList() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "deinit network manager failed");
     }
+#ifdef ENABLE_FEATURE_LNN_WIFI
     LnnDeinitPhysicalSubnetManager();
+#endif
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
         if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->deinit == NULL) {
             continue;

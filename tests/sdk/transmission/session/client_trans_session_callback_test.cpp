@@ -33,6 +33,8 @@
 #include "softbus_conn_interface.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "session_ipc_adapter.h"
+#include "session_set_timer.h"
 #include "trans_session_service.h"
 
 #define TRANS_TEST_SESSION_ID 10
@@ -45,6 +47,7 @@
 #define TRANS_TEST_EVENT_ID 1
 #define TRANS_TEST_TV_COUNT 1
 #define TRANS_TEST_AUTH_DATA "test auth message data"
+#define DFX_TIMERS_S 15
 
 #define TRANS_TEST_INVALID_CHANNEL_ID (-1)
 
@@ -1005,5 +1008,44 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestS
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: SetTimerTest001
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, SetTimerTest001, TestSize.Level1)
+{
+    int32_t ret = SetTimer(nullptr, DFX_TIMERS_S);
+    EXPECT_EQ(ret, INVALID);
+
+    ret = SetTimer("OnChannelOpened", DFX_TIMERS_S);
+    EXPECT_NE(ret, INVALID);
+    CancelTimer(INVALID);
+    CancelTimer(DFX_TIMERS_S);
+}
+
+/**
+ * @tc.name: SoftBusGetSelfTokenIdTest001
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, SoftBusGetSelfTokenIdTest001, TestSize.Level1)
+{
+    int32_t ret = SoftBusGetSelfTokenId(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SoftBusGetCallingFullTokenId(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SoftBusGetCallingTokenId(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    uint32_t tokenId = 1;
+    ret = SoftBusGetCallingTokenId(&tokenId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

@@ -45,9 +45,9 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const 
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void AuthHandleLeaveLNN(int64_t authId)
+void AuthHandleLeaveLNN(AuthHandle authHandle)
 {
-    (void)authId;
+    (void)authHandle;
     return;
 }
 
@@ -145,7 +145,6 @@ void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, Aut
     (void)type;
     (void)isMeta;
     (void)authHandle;
-    return AUTH_INVALID_ID;
 }
 
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
@@ -175,9 +174,9 @@ uint32_t AuthGetDecryptSize(uint32_t inLen)
     return 0;
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
-    (void)authId;
+    (void)authHandle;
     (void)inData;
     (void)inLen;
     (void)outData;
@@ -185,9 +184,9 @@ int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
-    (void)authId;
+    (void)authHandle;
     (void)inData;
     (void)inLen;
     (void)outData;
@@ -202,9 +201,9 @@ int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
-    (void)authId;
+    (void)authHandle;
     (void)connInfo;
     return SOFTBUS_NOT_IMPLEMENT;
 }
@@ -247,4 +246,20 @@ int32_t AuthInit(void)
 void AuthDeinit(void)
 {
     return;
+}
+
+int32_t RegTrustListenerOnHichainSaStart(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+bool IsAuthHasTrustedRelation(void)
+{
+    return false;
+}
+
+bool AuthIsPotentialTrusted(const DeviceInfo *device)
+{
+    (void)device;
+    return false;
 }

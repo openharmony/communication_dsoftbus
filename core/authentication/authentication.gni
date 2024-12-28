@@ -37,8 +37,9 @@ auth_server_inc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/core/bus_center/utils/include/",
+  "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
 ]
-if (dsoftbus_feature_lnn_net) {
+if (dsoftbus_feature_lnn_frame) {
   auth_server_src = [
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
@@ -58,29 +59,18 @@ if (dsoftbus_feature_lnn_net) {
   if (enhanced) {
     auth_server_src += [
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_device_common_key.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_manager.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_ptk_proc.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/auth_account.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_instance.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message_hml.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_utils.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_generate_attest.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_validate_attest.c",
     ]
     auth_server_inc += [
       "$dsoftbus_root_path/adapter/common/include/",
       "$dsoftbus_root_path/core/adapter/huks/include/",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/include/",
     ]
   } else {
     auth_server_src += [
       "$authentication_path/src/virtual/auth_attest_virtual.c",
       "$authentication_path/src/virtual/auth_device_common_key_virtual.c",
-      "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
       "$authentication_path/src/virtual/customized_security_protocol_virtual.c",
       "$authentication_path/src/virtual/auth_meta_ptk_proc_virtual.c",
     ]
@@ -93,23 +83,51 @@ if (dsoftbus_feature_lnn_net) {
   }
 } else {
   auth_server_src = [
+    "$authentication_path/src/virtual/auth_device_common_key_virtual.c",
     "$authentication_path/src/virtual/auth_interface_virtual.c",
     "$authentication_path/src/virtual/auth_tcp_connection_virtual.c",
     "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
     "$authentication_path/src/virtual/auth_meta_ptk_proc_virtual.c",
   ]
 }
+
+if (dsoftbus_feature_lnn_meta_node && enhanced) {
+  auth_server_src += [
+    "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_manager.c",
+    "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_ptk_proc.c",
+  ]
+} else if (dsoftbus_feature_lnn_frame) {
+  auth_server_src +=
+      [ "$authentication_path/src/virtual/auth_meta_manager_virtual.c" ]
+}
+
+if (enhanced) {
+  if (dsoftbus_feature_lnn_ccmp) {
+    auth_server_src += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/auth_account.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_instance.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message_hml.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_utils.c",
+    ]
+  } else {
+    auth_server_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_virtual.c" ]
+  }
+}
+
 auth_server_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 auth_server_ex_deps = []
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     auth_server_inc += [ "//base/security/device_auth/interfaces/inner_api" ]
-    if (dsoftbus_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_frame) {
       auth_server_deps += [ "//base/security/device_auth/services:deviceauth" ]
     }
   } else {
     auth_server_inc += [ "//third_party/cJSON" ]
-    if (dsoftbus_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_frame) {
       auth_server_deps +=
           [ "//base/security/device_auth/services:deviceauth_sdk" ]
     }
