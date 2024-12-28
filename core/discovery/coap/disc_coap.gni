@@ -27,6 +27,7 @@ disc_coap_inc = [
   ]
 disc_coap_deps = []
 disc_coap_src = []
+disc_coap_external_deps += [ "cJSON:cjson" ]
 
 disc_coap_deps += [
     "$dsoftbus_dfx_path:softbus_dfx",
@@ -40,7 +41,6 @@ if (dsoftbus_feature_inner_disc_coap == true) {
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_nstackx_adapter.c",
   ]
 
-  disc_coap_external_deps += [ "cJSON:cjson" ]
   if (dsoftbus_feature_ex_kits) {
     import(
         "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/coap_enhance.gni")
