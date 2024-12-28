@@ -280,6 +280,7 @@ void TransClientDeinit(void)
     }
     UnlockClientSessionServerList();
     ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
+    DestroyRelationChecker();
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
@@ -2492,6 +2493,23 @@ int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType)
     return SOFTBUS_OK;
 }
 
+void ClientTransOnPrivilegeClose(const char *peerNetworkId)
+{
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    TRANS_LOGD(TRANS_SDK, "recv privilege close event, clear all socket");
+    ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        PrivilegeDestroyAllClientSession(serverNode, &destroyList, peerNetworkId);
+    }
+    UnlockClientSessionServerList();
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_PRIVILEGE_SHUTDOWN);
+}
+
 int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count)
 {
     if (socket <= 0 || qos == NULL || count == 0) {
@@ -2554,4 +2572,63 @@ int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQo
     UnlockClientSessionServerList();
     TRANS_LOGI(TRANS_SDK, "get cached qos event success, socket=%{public}d", socket);
     return SOFTBUS_OK;
+}
+
+int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *optValue)
+{
+    if (socket < 0 || optValue == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (sessionNode->role == SESSION_ROLE_CLIENT) {
+        *optValue = sessionNode->maxIdleTime;
+    } else {
+        ret = SOFTBUS_NOT_IMPLEMENT;
+    }
+    UnlockClientSessionServerList();
+    return ret;
+}
+
+int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
+{
+    if (socket < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (sessionNode->role == SESSION_ROLE_CLIENT) {
+        sessionNode->maxIdleTime = maxIdleTime;
+    } else {
+        ret = SOFTBUS_NOT_IMPLEMENT;
+    }
+    UnlockClientSessionServerList();
+    return ret;
 }

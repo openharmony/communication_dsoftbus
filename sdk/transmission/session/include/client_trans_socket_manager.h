@@ -16,8 +16,8 @@
 #ifndef CLIENT_TRANS_SESSION_OPERATE_H
 #define CLIENT_TRANS_SESSION_OPERATE_H
 
+#include "inner_socket.h"
 #include "session.h"
-#include "socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 #include "client_trans_session_adapter.h"
@@ -91,6 +91,15 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList);
 void FillDfsSocketParam(
     SessionParam *param, SessionAttribute *tmpAttr, ClientSessionServer *serverNode, SessionInfo *sessionNode);
 
+void PrivilegeDestroyAllClientSession(
+    const ClientSessionServer *server, ListNode *destroyList, const char *peerNetworkId);
+
+int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker);
+
+int32_t ClientTransCheckCollabRelation(
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
+
+void DestroyRelationChecker(void);
 #ifdef __cplusplus
 }
 #endif

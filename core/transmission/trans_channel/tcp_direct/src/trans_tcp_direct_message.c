@@ -45,6 +45,7 @@
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
+#include "trans_session_manager.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
@@ -863,6 +864,34 @@ static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
     return SOFTBUS_OK;
 }
 
+static int32_t TransTdcCheckCollabRelation(const AppInfo *appInfo, int32_t channelId, char *ret)
+{
+    OpenDataBusRequestOutSessionName(appInfo->myData.sessionName, appInfo->peerData.sessionName);
+    TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
+        appInfo->myData.pid, appInfo->peerData.pid);
+    
+    char *errDesc = NULL;
+    int32_t errCode = CheckCollabRelation(appInfo, channelId, CHANNEL_TYPE_TCP_DIRECT);
+    if (errCode == SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+        errCode = NotifyChannelOpened(channelId);
+        if (errCode != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "Notify SDK Channel Opened Failed, ret=%{public}d", errCode);
+            errDesc = (char *)"Notify SDK Channel Opened Failed";
+            goto ERR_EXIT;
+        }
+    } else if (errCode != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "CheckCollabRelation Failed, ret=%{public}d", errCode);
+        errDesc = (char *)"CheckCollabRelation Failed";
+        goto ERR_EXIT;
+    }
+    return SOFTBUS_OK;
+ERR_EXIT:
+    if (strcpy_s(ret, MAX_ERRDESC_LEN, errDesc) != EOK) {
+        TRANS_LOGW(TRANS_CTRL, "strcpy failed");
+    }
+    return errCode;
+}
+
 static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t channelId, char *errDesc)
 {
     char *ret = NULL;
@@ -899,13 +928,8 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
         goto ERR_EXIT;
     }
 
-    OpenDataBusRequestOutSessionName(appInfo->myData.sessionName, appInfo->peerData.sessionName);
-    TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
-        appInfo->myData.pid, appInfo->peerData.pid);
-    errCode = NotifyChannelOpened(channelId);
+    errCode = TransTdcCheckCollabRelation(appInfo, channelId, ret);
     if (errCode != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Notify SDK Channel Opened Failed");
-        ret = (char *)"Notify SDK Channel Opened Failed";
         goto ERR_EXIT;
     }
 
@@ -1534,4 +1558,62 @@ void TransAsyncTcpDirectChannelTask(int32_t channelId)
     TRANS_LOGI(TRANS_CTRL, "Open channelId=%{public}d not finished, generate new task and waiting", channelId);
     uint32_t delayTime = (curCount <= LOOPER_SEPARATE_CNT) ? FAST_INTERVAL_MILLISECOND : SLOW_INTERVAL_MILLISECOND;
     TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_TCP_DIRECT, delayTime);
+}
+
+static int32_t TransTdcPostErrorMsg(uint64_t *seq, uint32_t *flags, int32_t channelId, int32_t errCode)
+{
+    int32_t ret = TransSrvGetSeqAndFlagsByChannelId(seq, flags, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get seq and flags by channelId=%{public}d failed.", channelId);
+        return ret;
+    }
+    char *desc = (char *)"Open tdc channel failed.";
+    if (OpenDataBusRequestError(channelId, *seq, desc, errCode, *flags) != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "OpenDataBusRequestError failed.");
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult)
+{
+    uint32_t tranFlags = 0;
+    uint64_t seq = 0;
+    SessionConn conn = { 0 };
+    int32_t ret = GetSessionConnById(channelId, &conn);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get session conn by channelId=%{public}d failed.", channelId);
+        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
+    }
+    ret = TransTdcUpdateReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "update waitOpenReplyCnt failed, channelId=%{public}d.", channelId);
+        goto ERR_EXIT;
+    }
+    // Remove old check tasks.
+    TransCheckChannelOpenRemoveFromLooper(channelId);
+    if (checkResult != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "check Collab relation failed, checkResult=%{public}d.", checkResult);
+        ret = checkResult;
+        goto ERR_EXIT;
+    }
+    // Reset the check count to 0.
+    ret = TransTdcResetReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        goto ERR_EXIT;
+    }
+    ret = NotifyChannelOpened(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Notify sdk channelId=%{public}d opened failed ret=%{public}d.", channelId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+
+ERR_EXIT:
+    ret = TransTdcPostErrorMsg(&seq, &tranFlags, channelId, ret);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    CloseTcpDirectFd(conn.appInfo.fd);
+    TransDelSessionConnById(channelId);
+    return ret;
 }

@@ -111,6 +111,12 @@ static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int 
     TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
+static int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+{
+    TRANS_LOGI(TRANS_TEST, "call check collab relation func");
+    return SOFTBUS_OK;
+}
+
 static SessionInfo *GenerateSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo*)SoftBusMalloc(sizeof(SessionInfo));
@@ -156,6 +162,10 @@ static ISessionListener g_sessionlistener = {
     .OnSessionClosed = OnSessionClosed,
     .OnBytesReceived = OnBytesReceived,
     .OnMessageReceived = OnMessageReceived,
+};
+
+static IFeatureAbilityRelationChecker g_relationChecker = {
+    .CheckCollabRelation = CheckCollabRelation,
 };
 
 /**
@@ -306,6 +316,38 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSiz
         ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, sessionNme);
         EXPECT_EQ(ret,  SOFTBUS_OK);
     }
+}
+
+/**
+ * @tc.name: GetMaxIdleTimeBySocket01
+ * @tc.desc: Transmission sdk session manager get opt.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, GetMaxIdleTimeBySocket01, TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != NULL);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_GT(sessionId, 0);
+    uint32_t optValueValid = 10000;
+    ret = SetMaxIdleTimeBySocket(sessionId, optValueValid);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    uint32_t getValue = 0;
+    ret = GetMaxIdleTimeBySocket(sessionId, &getValue);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = ClientDeleteSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    SoftBusFree(sessionParam);
 }
 
 /**
@@ -1111,6 +1153,10 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
     ret = GetSocketLifecycleAndSessionNameBySessionId(1, sessionName, &lifecycle);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ASSERT_EQ(lifecycle.sessionState, SESSION_STATE_CANCELLING);
+    int32_t osType;
+    ret = ClientGetChannelOsTypeBySessionId(1, &osType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    (void)ClientTransOnPrivilegeClose(g_networkId);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
@@ -1553,5 +1599,34 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest51, TestSiz
     ClientTransOnUserSwitch();
     TransServerDeinit();
     ClientTransOnUserSwitch();
+}
+
+/*
+ * @tc.name: TransClientSessionManagerTest52
+ * @tc.desc: Call RelationChecker for invalid param..
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest52, TestSize.Level1)
+{
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    const int32_t channelId = 1;
+    const int32_t channelType = 1;
+    int32_t ret = ClientRegisterRelationChecker(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = ClientRegisterRelationChecker(&g_relationChecker);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_NO_FATAL_FAILURE(DestroyRelationChecker());
 }
 }

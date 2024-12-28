@@ -28,6 +28,7 @@ int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply);
 int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply);
 int32_t ClientSetChannelInfo(IpcIo *data, IpcIo *reply);
 int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply);
+int32_t ClientCheckCollabRelation(IpcIo *data, IpcIo *reply);
 
 #ifdef __cplusplus
 }

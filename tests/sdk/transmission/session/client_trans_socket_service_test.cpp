@@ -19,7 +19,6 @@
 
 #include "inner_socket.h"
 #include "socket.h"
-#include "inner_socket.h"
 #include "softbus_error_code.h"
 
 #define SOCKET_NAME_MAX_LEN          255
@@ -288,5 +287,38 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetSocketOpt(socket, levelValid, optTypeValid, temp, optValueSizeValid);
     ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetSocketOpt002
+ * @tc.desc: call GetSocketOpt function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, GetSocketOpt002, TestSize.Level1)
+{
+    OptLevel level = OPT_LEVEL_SOFTBUS;
+    OptType optType = OPT_TYPE_MAX_BUFFER;
+    int socketId = 1;
+    uint32_t optValueValid = 0;
+    void *temp = &optValueValid;
+    int32_t valueSize = sizeof(uint32_t);
+    int32_t *optValueSizeValid = &valueSize;
+    int32_t ret = SetSocketOpt(socketId, level, optType, temp, valueSize);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = GetSocketOpt(socketId, level, optType, temp, optValueSizeValid);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
+
+/**
+ * @tc.name: RegisterRelationChecker001
+ * @tc.desc: call RegisterRelationChecker function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker001, TestSize.Level1)
+{
+    int32_t ret = RegisterRelationChecker(nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

@@ -852,4 +852,99 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConnTest001, TestSize.Le
     int32_t ret = NotifyChannelBind(channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
+
+/**
+ * @tc.name: TransSrvGetSeqAndFlagsByChannelIdTest001
+ * @tc.desc: TransSrvGetSeqAndFlagsByChannelId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetSeqAndFlagsByChannelIdTest001, TestSize.Level1)
+{
+    uint64_t seq = 1;
+    uint32_t flags = 1;
+    int32_t channelId = 1;
+    int32_t ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = TransSrvDataListInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+}
+
+/**
+ * @tc.name: TransSrvGetSeqAndFlagsByChannelIdTest002
+ * @tc.desc: TransSrvGetSeqAndFlagsByChannelId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetSeqAndFlagsByChannelIdTest002, TestSize.Level1)
+{
+    uint64_t seq = 1;
+    uint32_t flags = 1;
+    int32_t channelId = 1;
+    int32_t fd = 1;
+    int32_t openResult = 1;
+    int32_t ret = TransSrvDataListInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSrvAddDataBufNode(channelId, fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    TransProcessAsyncOpenTdcChannelFailed(conn, openResult, seq, flags);
+    TransCleanTdcSource(channelId);
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TransDealTdcChannelOpenResultTest001
+ * @tc.desc: TransDealTdcChannelOpenResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, TestSize.Level1)
+{
+    int32_t openResult = 1;
+    int32_t channelId = 1;
+    int32_t fd = 1;
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+    ret = TransSrvAddDataBufNode(channelId, fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: TransAsyncTcpDirectChannelTaskTest001
+ * @tc.desc: TransAsyncTcpDirectChannelTask
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    TransAsyncTcpDirectChannelTask(channelId);
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransAsyncTcpDirectChannelTask(channelId);
+    conn->appInfo.waitOpenReplyCnt = CHANNEL_OPEN_SUCCESS;
+    TransAsyncTcpDirectChannelTask(channelId);
+    conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
+    TransAsyncTcpDirectChannelTask(channelId);
+    conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
+    TransAsyncTcpDirectChannelTask(channelId);
+    TransDelSessionConnById(channelId);
+}
 }

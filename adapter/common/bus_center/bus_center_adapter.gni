@@ -24,7 +24,7 @@ bus_center_adapter_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    if (dsoftbus_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_frame) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
         "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
       ]
     }
   } else if (ohos_kernel_type == "linux") {
-    if (dsoftbus_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_frame) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
         "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -58,7 +58,7 @@ if (defined(ohos_lite)) {
       "//drivers/hdf_core/framework/include/core",
       "//drivers/hdf_core/framework/ability/sbuf/include",
     ]
-    if (dsoftbus_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_frame) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_hdf_driver_monitor.c",
         "$adapter_bus_center_path/driver/lnn_hdf_driver_request.c",
@@ -101,7 +101,7 @@ if (defined(ohos_lite)) {
       "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
     ]
   }
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame) {
     bus_center_adapter_src += [
       "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
       "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -136,7 +136,7 @@ if (defined(ohos_lite)) {
   }
 }
 
-if (dsoftbus_feature_lnn_net) {
+if (dsoftbus_feature_lnn_frame) {
   if (support_bluetooth &&
       (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
     bus_center_adapter_src +=

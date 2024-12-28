@@ -31,7 +31,7 @@
 #include "comm_log.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
-#include "utils/wifi_direct_anonymous.h"
+#include "anonymizer.h"
 
 using namespace OHOS::Bluetooth;
 
@@ -93,6 +93,18 @@ int32_t BtStatistic::GetBtStatisticInfo(cJSON *json)
     return SOFTBUS_OK;
 }
 
+static std::string AnonymizeStr(const std::string &data)
+{
+    if (data.empty()) {
+        return "";
+    }
+    char *temp = nullptr;
+    Anonymize(data.c_str(), &temp);
+    std::string result = AnonymizeWrapper(temp);
+    AnonymizeFree(temp);
+    return result;
+}
+
 static void AddDevicesToArray(
     cJSON *json, const std::vector<OHOS::Bluetooth::BluetoothRemoteDevice>& devices, uint32_t profileId)
 {
@@ -103,8 +115,7 @@ static void AddDevicesToArray(
     for (size_t i = 0; i < devices.size(); i++) {
         cJSON *deviceJson = cJSON_CreateObject();
         (void)AddStringToJsonObject(deviceJson, "Name", devices[i].GetDeviceName().c_str());
-        (void)AddStringToJsonObject(deviceJson, "Mac",
-            OHOS::SoftBus::WifiDirectAnonymizeMac(devices[i].GetDeviceAddr()).c_str());
+        (void)AddStringToJsonObject(deviceJson, "Mac", AnonymizeStr(devices[i].GetDeviceAddr()).c_str());
         (void)AddNumberToJsonObject(deviceJson, "Profile", static_cast<int32_t>(profileId));
         if (profileId == PROFILE_ID_A2DP_SRC) {
             (void)AddStringToJsonObject(deviceJson, "IsPlaying",
