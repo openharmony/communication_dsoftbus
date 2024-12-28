@@ -40,6 +40,7 @@
 static const int32_t DELAY_LEN = 1000;
 static const int32_t NETMANAGER_OK = 0;
 static const int32_t DUPLICATE_ROUTE = -17;
+static const int32_t MAX_RETRY_COUNT = 20;
 
 namespace OHOS {
 namespace BusCenter {
@@ -61,6 +62,7 @@ public:
 
 static int32_t g_ethCount;
 static SoftBusMutex g_ethCountLock;
+static int32_t g_retry = 0;
 static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback = nullptr;
 
 NetInterfaceStateMonitor::NetInterfaceStateMonitor()
@@ -225,23 +227,38 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
 static void LnnRegisterNetManager(void *param)
 {
     (void)param;
-    OHOS::BusCenter::g_netlinkCallback = new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+    if (OHOS::BusCenter::g_retry >= MAX_RETRY_COUNT) {
+        LNN_LOGE(LNN_INIT, "retry is max size");
+        if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
+            delete (OHOS::BusCenter::g_netlinkCallback);
+            OHOS::BusCenter::g_netlinkCallback = nullptr;
+        }
+        return;
+    }
+    if (OHOS::BusCenter::g_netlinkCallback == nullptr) {
+        OHOS::BusCenter::g_netlinkCallback = new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+    }
     if (OHOS::BusCenter::g_netlinkCallback == nullptr) {
         LNN_LOGE(LNN_INIT, "new NetInterfaceStateMonitor failed");
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnRegisterNetManager, NULL, DELAY_LEN);
+        ++OHOS::BusCenter::g_retry;
         return;
     }
     OHOS::BusCenter::g_ethCount = 0;
     if (SoftBusMutexInit(&OHOS::BusCenter::g_ethCountLock, nullptr) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init g_ethCountLock fail");
-        delete (OHOS::BusCenter::g_netlinkCallback);
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnRegisterNetManager, NULL, DELAY_LEN);
+        ++OHOS::BusCenter::g_retry;
         return;
     }
     int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(
         OHOS::BusCenter::g_netlinkCallback);
     if (ret != NETMANAGER_OK) {
-        delete (OHOS::BusCenter::g_netlinkCallback);
         SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
         LNN_LOGE(LNN_INIT, "register netmanager callback failed with ret=%{public}d", ret);
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnRegisterNetManager, NULL, DELAY_LEN);
+        ++OHOS::BusCenter::g_retry;
+        return;
     }
     LNN_LOGI(LNN_INIT, "LnnRegisterNetManager succ");
 }
