@@ -261,5 +261,10 @@ void RegisterNameMonitor(void)
 {
     return HeartBeatCtrlStaticInterface()->RegisterNameMonitor();
 }
+
+int32_t LnnSyncBleOfflineMsg(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnSyncBleOfflineMsg();
+}
 }
 } // namespace OHOS

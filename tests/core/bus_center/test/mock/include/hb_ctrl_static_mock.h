@@ -31,6 +31,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_fast_offline.h"
 
 namespace OHOS {
 class HeartBeatCtrlStaticInterface {
@@ -86,6 +87,7 @@ public:
     virtual void LnnUpdateDeviceName(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
     virtual void RegisterNameMonitor(void) = 0;
+    virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -138,6 +140,7 @@ public:
     MOCK_METHOD0(LnnUpdateDeviceName, void(void));
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
     MOCK_METHOD0(RegisterNameMonitor, void(void));
+    MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H
