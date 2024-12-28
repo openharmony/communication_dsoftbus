@@ -12,20 +12,7 @@
 # limitations under the License.
 
 declare_args() {
-
-  dsoftbus_feature_protocol_newip = false
-
-  dsoftbus_feature_trans_udp = false
-  dsoftbus_feature_trans_udp_stream = false
-  dsoftbus_feature_trans_udp_file = false
-
-  dsoftbus_feature_qos = false
-
   dsoftbus_feature_build_shared_sdk = false
 
   dsoftbus_feature_encrypt = 0
-
-  dsoftbus_feature_proxy_file = false
-
-  dsoftbus_feature_wifi_notify = false
 }

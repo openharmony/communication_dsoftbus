@@ -13,18 +13,7 @@
 
 import("../../../dsoftbus.gni")
 disc_coap_external_deps = []
-disc_coap_inc = []
-disc_coap_deps = []
-disc_coap_src = []
-
-if (dsoftbus_feature_inner_disc_coap == true) {
-  disc_coap_src += [
-    "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
-    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap.c",
-    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_nstackx_adapter.c",
-  ]
-
-  disc_coap_inc += [
+disc_coap_inc = [
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/coap/interface",
     "$dsoftbus_root_path/core/discovery/coap/common/include",
@@ -36,6 +25,16 @@ if (dsoftbus_feature_inner_disc_coap == true) {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/common/include",
   ]
+disc_coap_deps = []
+disc_coap_src = []
+
+if (dsoftbus_feature_inner_disc_coap == true) {
+  disc_coap_src += [
+    "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
+    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap.c",
+    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_nstackx_adapter.c",
+  ]
+
   disc_coap_external_deps += [ "cJSON:cjson" ]
   if (dsoftbus_feature_ex_kits) {
     import(
@@ -53,10 +52,10 @@ if (dsoftbus_feature_inner_disc_coap == true) {
   ]
 } else {
   if (dsoftbus_feature_ex_kits) {
-    disc_coap_inc += [ "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/share/include" ]
-    disc_coap_src += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/share/virtual/disc_coap_share_virtual.c"
+    disc_coap_inc += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/share/include",
     ]
+    disc_coap_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/share/virtual/disc_coap_share_virtual.c" ]
   }
   disc_coap_src += [
     "$dsoftbus_root_path/core/discovery/coap/interface/disc_coap_virtual.c",
