@@ -28,6 +28,11 @@ disc_coap_inc = [
 disc_coap_deps = []
 disc_coap_src = []
 
+disc_coap_deps += [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+  ]
+
 if (dsoftbus_feature_inner_disc_coap == true) {
   disc_coap_src += [
     "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
@@ -46,10 +51,7 @@ if (dsoftbus_feature_inner_disc_coap == true) {
     disc_coap_src += [ "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap_capability.c" ]
   }
 
-  disc_coap_deps += [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-  ]
+  
 } else {
   if (dsoftbus_feature_ex_kits) {
     disc_coap_inc += [
