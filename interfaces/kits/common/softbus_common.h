@@ -580,6 +580,10 @@ typedef enum {
     REQUEST_DISABLE_BLE_DISCOVERY = 100,
     /* Restore ble */
     REQUEST_ENABLE_BLE_DISCOVERY,
+    /* Same accout device suppress ble */
+    SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY,
+    /* Same accout device restore ble */
+    SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY,
 } StrategyForBle;
 
 #ifdef __cplusplus
