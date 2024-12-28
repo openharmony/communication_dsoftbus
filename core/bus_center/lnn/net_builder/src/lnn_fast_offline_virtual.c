@@ -60,3 +60,8 @@ int32_t LnnSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_
     LNN_LOGI(LNN_BUILDER, "not implement");
     return SOFTBUS_OK;
 }
+
+int32_t LnnSyncBleOfflineMsg(void)
+{
+    return SOFTBUS_OK;
+}
