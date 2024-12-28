@@ -228,7 +228,9 @@ static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
 
 void NstackInitHiEvent(void)
 {
+#ifdef DFILE_OPEN
     NSTACKX_DFileSetEventFunc(NULL, DFileHiEventCb);
+#endif
     if (NSTACKX_DFinderSetEventFunc(NULL, DFinderHiEventCb) != 0) {
         COMM_LOGE(COMM_DFX, "NSTACKX_DFinderSetEventFunc failed!");
     }

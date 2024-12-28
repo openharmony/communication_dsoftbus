@@ -184,6 +184,12 @@ if (defined(ohos_lite)) {
     ]
     if (!enhanced) {
       cflags += [ "-DFILLP_ENHANCED" ]
+      if (dsoftbus_feature_dfile) {
+        cflags += [ "-DDFILE_OPEN" ]
+      }
+      if (dsoftbus_feature_vtp) {
+        cflags += [ "-DDFILLP_OPEN" ]
+      }
       public_deps += [
         "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
         "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
