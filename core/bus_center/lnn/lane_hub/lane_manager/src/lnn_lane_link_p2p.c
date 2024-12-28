@@ -825,9 +825,20 @@ static void DelGuideInfoItem(uint32_t laneReqId, LaneLinkType linkType)
     LinkUnlock();
 }
 
+static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
+{
+    WdGuideInfo guideInfo = { 0 };
+    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
+        return SOFTBUS_LANE_NOT_FOUND;
+    }
+    *guideType = guideInfo.guideList[guideInfo.guideIdx];
+    return SOFTBUS_OK;
+}
+
 static int32_t GetFirstGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
 {
-    WdGuideInfo guideInfo = {0};
+    WdGuideInfo guideInfo = { 0 };
     if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get guide channel info fail.");
         return SOFTBUS_LANE_NOT_FOUND;
@@ -858,6 +869,22 @@ static int32_t UpdateReason(const AuthLinkType authType, const WdGuideType guide
     return reason;
 }
 
+static void DfxReportWdResult(const P2pLinkReqList *reqInfo, const LaneLinkInfo *linkInfo,
+    WdGuideType guideType, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    extra.errcode = reason;
+    extra.laneReqId = reqInfo->laneRequestInfo.laneReqId;
+    extra.guideType = (int32_t)guideType;
+    if (reqInfo->p2pInfo.reuseOnly) {
+        extra.isWifiDirectReuse = true;
+    }
+    if (linkInfo != NULL) {
+        extra.bandWidth = linkInfo->linkInfo.p2p.bw;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+}
+
 static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "type=%{public}d, requestId=%{public}u, reason=%{public}d", type, requestId, reason);
@@ -886,6 +913,7 @@ static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t rea
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannel(reqInfo.proxyChannelInfo.channelId);
     }
+    DfxReportWdResult(&reqInfo, NULL, guideType, reason);
 }
 
 void NotifyLinkFailForForceDown(uint32_t requestId, int32_t reason)
@@ -935,6 +963,11 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
         LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}u", type, requestId);
         return;
     }
+    WdGuideType guideType = LANE_CHANNEL_BUTT;
+    if (GetCurrentGuideType(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType,
+        &guideType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "not found current guide type, requestId=%{public}u", reqInfo.laneRequestInfo.laneReqId);
+    }
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     LaneLinkType throryLinkType = reqInfo.laneRequestInfo.linkType;
@@ -961,6 +994,7 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannelDelay(reqInfo.proxyChannelInfo.channelId);
     }
+    DfxReportWdResult(&reqInfo, linkInfo, guideType, SOFTBUS_OK);
 }
 
 static int32_t AddRawLinkInfo(uint32_t p2pRequestId, int32_t linkId, LaneLinkInfo *linkInfo)
@@ -1416,17 +1450,6 @@ static void HandleGuideChannelAsyncFail(AsyncResultType type, uint32_t requestId
     LNN_LOGI(LNN_LANE, "handle guide channel async fail, type=%{public}d, laneReqId=%{public}u, linkType=%{public}d",
         type, laneReqId, linkType);
     HandleGuideChannelRetry(laneReqId, linkType, reason);
-}
-
-static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
-{
-    WdGuideInfo guideInfo = {0};
-    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
-        return SOFTBUS_LANE_NOT_FOUND;
-    }
-    *guideType = guideInfo.guideList[guideInfo.guideIdx];
-    return SOFTBUS_OK;
 }
 
 static int32_t HandleWifiDirectConflict(uint32_t p2pRequestId, LinkConflictType conflictType)

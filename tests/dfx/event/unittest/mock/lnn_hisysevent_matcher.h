@@ -106,6 +106,13 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.p2pChannelId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.staChannelId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.apChannelId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.laneReqId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.minBW);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.maxLaneLatency);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.minLaneLatency);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.isWifiDirectReuse);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.bandWidth);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.guideType);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
