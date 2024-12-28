@@ -10,3 +10,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import("../external_deps_feature/external_deps_feature.gni")
+import("../public_feature/public_feature.gni")
+
+declare_args() {
+  dsoftbus_feature_inner_coap = true
+}
+
+# not dep need set false
+if (dsoftbus_feature_coap) {
+  if (!dsoftbus_feature_deps_wifi) {
+    dsoftbus_feature_inner_coap = false
+  }
+} else {
+  dsoftbus_feature_inner_coap = false
+}
