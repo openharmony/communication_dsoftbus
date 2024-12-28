@@ -190,6 +190,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
