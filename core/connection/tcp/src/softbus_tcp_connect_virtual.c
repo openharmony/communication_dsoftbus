@@ -15,6 +15,7 @@
 
 #include "softbus_error_code.h"
 #include "softbus_tcp_connect_manager.h"
+#include "softbus_adapter_mem.h"
 
 uint32_t CalTcpConnectionId(int32_t fd)
 {
@@ -22,7 +23,7 @@ uint32_t CalTcpConnectionId(int32_t fd)
     return 0;
 }
 
-int32_t TcpGetConnNum(void)
+uint32_t TcpGetConnNum(void)
 {
     return 0;
 }
@@ -47,13 +48,14 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_OK;
 }
 
-int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
+int32_t TcpPostBytes(
+    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq)
 {
     (void)connectionId;
-    (void)data;
     (void)len;
     (void)pid;
     (void)flag;
+    SoftBusFree(data);
     return SOFTBUS_OK;
 }
 

@@ -18,11 +18,6 @@ declare_args() {
   dsoftbus_feature_disc_approach = false
   dsoftbus_feature_disc_virtual_link_ble = false
 
-  dsoftbus_feature_conn_tcp = true
-  dsoftbus_feature_conn_br = false
-  dsoftbus_feature_conn_ble = false
-  dsoftbus_feature_conn_legacy = true
-
   dsoftbus_feature_protocol_newip = false
 
   dsoftbus_feature_trans_udp = false
