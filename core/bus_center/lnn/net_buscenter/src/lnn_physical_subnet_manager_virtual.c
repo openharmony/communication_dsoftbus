@@ -12,27 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "lnn_heartbeat_strategy.h"
+#include "lnn_physical_subnet_manager.h"
 
 #include "softbus_error_code.h"
 
-int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager)
 {
-    (void)hbType;
-    (void)strategyType;
-    (void)isRelay;
+    (void)manager;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 {
-    (void)msgPara;
+    (void)type;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnStartHeartbeat(uint64_t delayMillis)
+void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType type, void *status)
 {
-    (void)delayMillis;
-    return SOFTBUS_OK;
+    (void)ifName;
+    (void)type;
+    (void)status;
+}
+
+bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
+{
+    (void)callback;
+    (void)data;
+    return false;
+}
+
+void LnnNotifyAllTypeOffline(ConnectionAddrType type)
+{
+    (void)type;
 }

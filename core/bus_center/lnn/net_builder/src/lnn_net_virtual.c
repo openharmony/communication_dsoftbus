@@ -13,26 +13,18 @@
  * limitations under the License.
  */
 
-#include "lnn_heartbeat_strategy.h"
+#include "lnn_network_info.h"
+#include "lnn_devicename_info.h"
 
-#include "softbus_error_code.h"
-
-int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
 {
-    (void)hbType;
-    (void)strategyType;
-    (void)isRelay;
-    return SOFTBUS_NOT_IMPLEMENT;
+    (void)userId;
+    (void)udid;
+    return;
 }
 
-int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+void UpdateDeviceName(void *p)
 {
-    (void)msgPara;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int32_t LnnStartHeartbeat(uint64_t delayMillis)
-{
-    (void)delayMillis;
-    return SOFTBUS_OK;
+    (void)p;
+    return;
 }

@@ -28,7 +28,6 @@
     "features": [
       "dsoftbus_feature_conn_legacy",
       "dsoftbus_feature_conn_ble",
-      "dsoftbus_feature_lnn_net",
       "dsoftbus_get_devicename",
       "dsoftbus_feature_product_config_path",
       "dsoftbus_feature_lnn_wifiservice_dependence",

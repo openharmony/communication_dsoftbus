@@ -21,13 +21,13 @@ adapter_hdi_external_deps = []
 
 if (defined(ohos_lite) || (defined(global_parts_info) && !defined(
                                global_parts_info.hdf_drivers_interface_wlan))) {
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame) {
     adapter_hdi_src += [
       "$softbus_adapter_hdi_path/common/softbus_adapter_wlan_extend_virtual.c",
     ]
   }
 } else {
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame) {
     adapter_hdi_src +=
         [ "$softbus_adapter_hdi_path/common/softbus_adapter_wlan_extend.c" ]
 
