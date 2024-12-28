@@ -124,15 +124,18 @@ if (defined(ohos_lite)) {
 
 defines += [ "OPENSSL_NO_FILENAMES" ]
 
-if (dsoftbus_feature_disc_notification && dsoftbus_feature_inner_disc_broadcast) {
+if (dsoftbus_feature_disc_notification &&
+    dsoftbus_feature_inner_disc_broadcast) {
   defines += [ "ENABLE_NOTIFICATION_TX" ]
 }
 
-if (dsoftbus_feature_disc_notification_rx && dsoftbus_feature_inner_disc_broadcast) {
+if (dsoftbus_feature_disc_notification_rx &&
+    dsoftbus_feature_inner_disc_broadcast) {
   defines += [ "ENABLE_NOTIFICATION_RX" ]
 }
 
-if (dsoftbus_feature_disc_notification && dsoftbus_feature_inner_disc_broadcast) {
+if (dsoftbus_feature_disc_notification &&
+    dsoftbus_feature_inner_disc_broadcast) {
   defines += [ "ENABLE_LINK_BLE" ]
 }
 

@@ -255,6 +255,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+#ifdef ENABLE_DISC_SHARE_COAP
 /*
  * @tc.name: TestDiscCoapAdapterRegCapaData001
  * @tc.desc: Test DiscCoapRegisterCapabilityData should return SOFTBUS_OK when DiscNstackxInit has started
@@ -278,6 +279,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapaData001, TestSize.Lev
     ret = DiscCoapRegisterCapabilityData(capabilityData, dataLen, capability);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+#endif /* ENABLE_DISC_SHARE_COAP */
 
 /*
  * @tc.name: TestDiscCoapAdapterStartDisc001

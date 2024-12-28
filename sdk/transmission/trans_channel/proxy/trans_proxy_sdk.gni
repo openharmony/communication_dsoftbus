@@ -18,7 +18,7 @@ trans_proxy_channel_sdk_src = [
   "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_pending.c",
 ]
 
-if (dsoftbus_feature_proxy_file == true) {
+if (dsoftbus_feature_trans_proxy_file == true) {
   trans_proxy_channel_sdk_src += [
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager.c",

@@ -17,7 +17,8 @@ import("$udp_sdk_path/transmission/trans_channel/udp/stream/stream_sdk.gni")
 import("../../../../dsoftbus.gni")
 
 dsoftbus_udp_sdk_path = "$dsoftbus_sdk_path/transmission/trans_channel/udp"
-if (dsoftbus_feature_trans_udp == true) {
+if (dsoftbus_feature_trans_udp == true &&
+    (dsoftbus_feature_dfile == true || dsoftbus_feature_vtp == true)) {
   trans_udp_channel_sdk_src =
       [ "$dsoftbus_udp_sdk_path/common/src/client_trans_udp_manager.c" ]
 } else {
