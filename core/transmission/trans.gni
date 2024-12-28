@@ -114,7 +114,7 @@ if (defined(ohos_lite)) {
 }
 
 if (dsoftbus_feature_wifi_notify == true &&
-    softbus_communication_wifi_feature == true) {
+    softbus_communication_wifi_feature == true && !defined(ohos_lite)) {
   trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/src/softbus_scenario_manager.c" ]
   trans_session_external_deps += [ "wifi:wifi_sdk" ]
 } else {

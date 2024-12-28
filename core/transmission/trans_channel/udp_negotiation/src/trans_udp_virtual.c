@@ -71,3 +71,27 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
     (void)pid;
     return;
 }
+
+int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+{
+    (void)info;
+    (void)eventId;
+    (void)tvCount;
+    (void)tvList;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort)
+{
+    (void)channelId;
+    (void)openResult;
+    (void)udpPort;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult)
+{
+    (void)channelId;
+    (void)checkResult;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

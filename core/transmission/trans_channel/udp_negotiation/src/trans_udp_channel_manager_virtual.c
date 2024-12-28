@@ -23,3 +23,79 @@ int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
     (void)appInfo;
     return SOFTBUS_TRANS_UDP_PREPARE_APP_INFO_FAILED;
 }
+
+bool IsUdpRecoveryTransLimit(void)
+{
+    return false;
+}
+
+int32_t UdpChannelFileTransLimit(const ChannelInfo *channel, uint8_t tos)
+{
+    (void)channel;
+    (void)tos;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t UdpChannelFileTransRecoveryLimit(uint8_t tos)
+{
+    (void)tos;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransDelUdpChannel(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+SoftBusList *GetUdpChannelMgrHead(void)
+{
+    return NULL;
+}
+
+int32_t GetUdpChannelLock(void)
+{
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+void ReleaseUdpChannelLock(void)
+{
+}
+
+int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
+{
+    (void)channelId;
+    (void)channel;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+void TransAsyncUdpChannelTask(int32_t channelId)
+{
+    (void)channelId;
+}
+
+int32_t TransSetTos(int32_t channelId, uint8_t tos)
+{
+    (void)channelId;
+    (void)tos;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransUdpGetIpAndConnectTypeById(int32_t channelId, char *localIp, char *remoteIp, uint32_t maxIpLen,
+    int32_t *connectType)
+{
+    (void)channelId;
+    (void)localIp;
+    (void)remoteIp;
+    (void)maxIpLen;
+    (void)connectType;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid)
+{
+    (void)privilegeCloseList;
+    (void)tokenId;
+    (void)pid;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
