@@ -26,7 +26,6 @@
     ],
     "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
     "features": [
-      "dsoftbus_feature_conn_legacy",
       "dsoftbus_feature_conn_ble",
       "dsoftbus_get_devicename",
       "dsoftbus_feature_product_config_path",
@@ -51,7 +50,6 @@
       "dsoftbus_feature_conn_tcp_comm",
       "dsoftbus_feature_conn_pv1",
       "dsoftbus_feature_conn_br",
-      "dsoftbus_feature_conn_gatt",
       "dsoftbus_feature_conn_coc",
       "dsoftbus_feature_conn_ble_direct",
       "dsoftbus_feature_conn_pv2",
