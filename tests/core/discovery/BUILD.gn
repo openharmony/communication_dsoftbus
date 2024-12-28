@@ -26,7 +26,7 @@ has_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
 group("unittest") {
   testonly = true
   deps = [ "manager/unittest:unittest" ]
-  if (support_bluetooth && dsoftbus_feature_disc_ble) {
+  if (dsoftbus_feature_disc_ble && dsoftbus_feature_inner_disc_ble) {
     deps += [
       "ble/dispatcher:unittest",
       "ble/softbus_ble:unittest",
@@ -34,7 +34,7 @@ group("unittest") {
       "ipc:unittest",
     ]
   }
-  if (dsoftbus_feature_disc_coap) {
+  if (dsoftbus_feature_disc_coap && dsoftbus_feature_inner_disc_coap) {
     deps += [
       "coap/common/unittest:unittest",
       "coap/nstackx_adapter_mock:unittest",

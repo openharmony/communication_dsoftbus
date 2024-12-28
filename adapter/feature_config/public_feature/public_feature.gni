@@ -12,22 +12,21 @@
 # limitations under the License.
 
 declare_args() {
-  #  dsoftbus_feature_disc_ble = false
-  #  dsoftbus_feature_disc_coap = false
+  dsoftbus_feature_disc_ble = false
+  dsoftbus_feature_disc_coap = false
   dsoftbus_feature_disc_lnn_coap = false
   dsoftbus_feature_disc_share_ble = false
   dsoftbus_feature_disc_share_coap = false
-
-  #  dsoftbus_feature_disc_approach = false
+  dsoftbus_feature_disc_approach = false
   dsoftbus_feature_disc_notification = false
+  dsoftbus_feature_disc_notification_rx = false
   dsoftbus_feature_disc_link_ble = false
-
-  #  dsoftbus_feature_disc_virtual_link_ble = false
+  dsoftbus_feature_disc_virtual_link_ble = false
   dsoftbus_feature_disc_lnn_hb = false
   dsoftbus_feature_disc_touch = false
   dsoftbus_feature_disc_sle = false
+  dsoftbus_feature_disc_usb = false
 
-  #  dsoftbus_feature_disc_usb = false
   dsoftbus_feature_conn_tcp_proxy = false
   dsoftbus_feature_conn_tcp_comm = false
   dsoftbus_feature_conn_pv1 = false

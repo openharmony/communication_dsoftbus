@@ -14,26 +14,26 @@
 import("../../dsoftbus.gni")
 
 broadcast_inc = [ "$dsoftbus_root_path/core/broadcast/scheduler/interface" ]
-broadcast_src =
-    [ "$dsoftbus_root_path/core/broadcast/common/src/broadcast_dfx_event.c" ]
-broadcast_deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+broadcast_src = []
+broadcast_deps = []
 
-if (dsoftbus_feature_ex_kits) {
-  import(
+if (dsoftbus_feature_inner_disc_broadcast) {
+  broadcast_src += [ "$dsoftbus_root_path/core/broadcast/common/src/broadcast_dfx_event.c" ]
+  broadcast_deps += [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+
+  if (dsoftbus_feature_ex_kits) {
+    import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/broadcast/broadcast_enhance.gni")
 
-  broadcast_inc += broadcast_enhance_inc
-  broadcast_src += broadcast_enhance_src
-} else {
-  broadcast_inc += [
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
-    "$dsoftbus_root_path/core/broadcast/scheduler/include",
-  ]
-  if (support_bluetooth && dsoftbus_feature_disc_ble) {
-    broadcast_src += [
-      "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler.c",
-    ]
+    broadcast_inc += broadcast_enhance_inc
+    broadcast_src += broadcast_enhance_src
   } else {
-    broadcast_src += [ "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler_virtual.c" ]
+    broadcast_inc += [
+      "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+      "$dsoftbus_root_path/core/broadcast/scheduler/include",
+    ]
+    broadcast_src += [ "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler.c" ]
   }
+} else {
+  broadcast_src += [ "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler_virtual.c" ]
 }

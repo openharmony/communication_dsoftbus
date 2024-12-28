@@ -123,6 +123,30 @@ if (defined(ohos_lite)) {
 
 defines += [ "OPENSSL_NO_FILENAMES" ]
 
+if (dsoftbus_feature_disc_notification && dsoftbus_feature_inner_disc_broadcast) {
+  defines += [ "ENABLE_NOTIFICATION_TX" ]
+}
+
+if (dsoftbus_feature_disc_notification_rx && dsoftbus_feature_inner_disc_broadcast) {
+  defines += [ "ENABLE_NOTIFICATION_RX" ]
+}
+
+if (dsoftbus_feature_disc_notification && dsoftbus_feature_inner_disc_broadcast) {
+  defines += [ "ENABLE_LINK_BLE" ]
+}
+
+if (dsoftbus_feature_disc_coap && dsoftbus_feature_inner_disc_coap) {
+  defines += [ "ENABLE_DISC_COAP" ]
+}
+
+if (dsoftbus_feature_disc_lnn_coap && dsoftbus_feature_inner_disc_coap) {
+  defines += [ "ENABLE_DISC_LNN_COAP" ]
+}
+
+if (dsoftbus_feature_disc_share_coap && dsoftbus_feature_inner_disc_coap) {
+  defines += [ "ENABLE_DISC_SHARE_COAP" ]
+}
+
 if (defined(global_parts_info) &&
     !defined(global_parts_info.distributeddatamgr_kv_store)) {
   dsoftbus_feature_lnn_cloud_sync = false
