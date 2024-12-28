@@ -13,26 +13,11 @@
  * limitations under the License.
  */
 
-#include "lnn_heartbeat_strategy.h"
-
 #include "softbus_error_code.h"
+#include "conn_log.h"
 
-int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+int32_t ConnCocGetServerPsm(void)
 {
-    (void)hbType;
-    (void)strategyType;
-    (void)isRelay;
+    CONN_LOGE(CONN_BLE, "not support");
     return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
-{
-    (void)msgPara;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int32_t LnnStartHeartbeat(uint64_t delayMillis)
-{
-    (void)delayMillis;
-    return SOFTBUS_OK;
 }

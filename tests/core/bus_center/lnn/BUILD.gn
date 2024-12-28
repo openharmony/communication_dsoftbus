@@ -1182,7 +1182,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_manager.c" ]
   } else {
@@ -1329,7 +1329,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
-  if (dsoftbus_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_frame) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_manager.c" ]
   } else {
@@ -2595,15 +2595,9 @@ group("unittest") {
     ":LNNHuksUtilsTest",
     ":LNNIpNetworkImplMockTest",
     ":LNNLaneExtMockTest",
-    ":LNNLaneLinkConflictTest",
     ":LNNLaneLinkExtTest",
-    ":LNNLaneLinkTest",
-    ":LNNLaneLinkWifiDirectTest",
-    ":LNNLaneListenerTest",
-    ":LNNLaneMockTest",
     ":LNNLaneQueryTest",
     ":LNNLedgerMockTest",
-    ":LNNMetaNodeLedgerTest",
     ":LNNNetBuilderMockTest",
     ":LNNNetBuilderTest",
     ":LNNNetLedgerCommonTest",
@@ -2615,12 +2609,24 @@ group("unittest") {
     ":LNNSyncInfoItemTest",
     ":LNNSyncInfoManagerTest",
     ":LNNTopoManagerTest",
-    ":LNNTransLaneMockTest",
-    ":LaneTest",
     ":LedgerLaneHubTest",
     ":NetBuilderTest",
     ":NetLedgerTest",
   ]
+  if (dsoftbus_feature_lnn_lane_mgr) {
+    deps += [
+      ":LNNLaneLinkConflictTest",
+      ":LNNLaneLinkTest",
+      ":LNNLaneLinkWifiDirectTest",
+      ":LNNLaneListenerTest",
+      ":LNNLaneMockTest",
+      ":LNNTransLaneMockTest",
+      ":LaneTest",
+    ]
+  }
+  if (dsoftbus_feature_lnn_meta_node) {
+    deps += [ ":LNNMetaNodeLedgerTest" ]
+  }
   if (!defined(ohos_lite) && enhanced_test) {
     deps += [ ":LNNDbMockTest" ]
   }

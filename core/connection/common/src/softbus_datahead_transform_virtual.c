@@ -13,26 +13,24 @@
  * limitations under the License.
  */
 
-#include "lnn_heartbeat_strategy.h"
+#include "softbus_datahead_transform.h"
 
-#include "softbus_error_code.h"
+#include "conn_log.h"
 
-int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+void PackConnPktHead(ConnPktHead *data)
 {
-    (void)hbType;
-    (void)strategyType;
-    (void)isRelay;
-    return SOFTBUS_NOT_IMPLEMENT;
+    (void)data;
+    CONN_LOGE(CONN_COMMON, "not support");
 }
 
-int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
+void UnpackConnPktHead(ConnPktHead *data)
 {
-    (void)msgPara;
-    return SOFTBUS_NOT_IMPLEMENT;
+    (void)data;
+    CONN_LOGE(CONN_COMMON, "not support");
 }
 
-int32_t LnnStartHeartbeat(uint64_t delayMillis)
+void PackProxyMessageHead(ProxyMessageHead *msg)
 {
-    (void)delayMillis;
-    return SOFTBUS_OK;
+    (void)msg;
+    CONN_LOGE(CONN_COMMON, "not support");
 }
