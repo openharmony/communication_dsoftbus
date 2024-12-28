@@ -93,7 +93,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
-    if (support_bluetooth &&
+    if (dsoftbus_feature_deps_bluetooth &&
         (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
       sources += [ "disc_sdk_test_bt_status.c" ]
       external_deps += [ "bluetooth:btframework" ]
