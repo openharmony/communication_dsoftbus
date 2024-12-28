@@ -21,6 +21,7 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_feature_config.h"
+#include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
 
@@ -141,10 +142,13 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest03, TestSize.Level1)
  */
 HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
 {
-    int32_t ret = TransSessionServerDelItem(NULL);
+    int32_t ret = TransSessionServerDelItem(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ret = TransGetCallingFullTokenId(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
