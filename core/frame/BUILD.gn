@@ -45,6 +45,7 @@ if (defined(ohos_lite)) {
     static_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
       defines += DISC_SERVER_DEFINES
+      defines += CONN_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
@@ -121,6 +122,7 @@ if (defined(ohos_lite)) {
     shared_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
       defines += DISC_SERVER_DEFINES
+      defines += CONN_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
@@ -234,6 +236,7 @@ if (defined(ohos_lite)) {
 
     defines += AUTH_SERVER_DEFINES
     defines += DISC_SERVER_DEFINES
+    defines += CONN_SERVER_DEFINES
     defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
     include_dirs += [
