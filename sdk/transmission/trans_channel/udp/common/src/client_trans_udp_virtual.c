@@ -101,3 +101,50 @@ int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel)
     (void)udpChannel;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t TransLimitChange(int32_t channelId, uint8_t tos)
+{
+    (void)channelId;
+    (void)tos;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId)
+{
+    (void)channelId;
+    (void)sessionId;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ClientEmitFileEvent(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransUdpOnCloseAckReceived(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType)
+{
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransSetUdpChannelRenameHook(int32_t channelId, OnRenameFileCallback onRenameFile)
+{
+    (void)channelId;
+    (void)onRenameFile;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optValue)
+{
+    (void)channelId;
+    (void)optValue;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
