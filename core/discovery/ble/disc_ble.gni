@@ -34,9 +34,8 @@ if (support_i18n && qemu_arm_disable) {
   ble_discovery_external_deps += [ "i18n:intl_util" ]
 }
 ble_discovery_src = []
-if (dsoftbus_feature_deps_bluetooth) {
-  ble_discovery_deps += [ "$dsoftbus_dfx_path:softbus_dfx" ]
-}
+
+ble_discovery_deps += [ "$dsoftbus_dfx_path:softbus_dfx" ]
 
 if (!dsoftbus_feature_inner_disc_ble) {
   ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
