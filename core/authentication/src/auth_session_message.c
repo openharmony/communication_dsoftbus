@@ -49,10 +49,10 @@
 #include "softbus_json_utils.h"
 #include "softbus_socket.h"
 
-#define FLAG_COMPRESS_DEVICE_INFO 1
+#define FLAG_COMPRESS_DEVICE_INFO   1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
-#define FLAG_RELAY_DEVICE_INFO 1
-#define DEVICE_ID_STR_LEN 64 // for bt v1
+#define FLAG_RELAY_DEVICE_INFO      1
+#define DEVICE_ID_STR_LEN           64 // for bt v1
 
 static int32_t UnPackBtDeviceIdV1(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
@@ -89,7 +89,7 @@ static int32_t PostBtV1DevId(int64_t authSeq, const AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "client don't send Bt-v1 devId");
         return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
-    char uuid[UUID_BUF_LEN] = {0};
+    char uuid[UUID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get uuid fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
@@ -208,8 +208,8 @@ static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionIn
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_POST, extra);
 }
 
-static void SetCompressFlagByAuthInfo(const AuthSessionInfo *info, char *msg, int32_t *compressFlag,
-    uint8_t **compressData, uint32_t *compressLen)
+static void SetCompressFlagByAuthInfo(
+    const AuthSessionInfo *info, char *msg, int32_t *compressFlag, uint8_t **compressData, uint32_t *compressLen)
 {
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
         AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
@@ -309,7 +309,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         }
         AUTH_LOGI(AUTH_FSM, "after decompress, datalen=%{public}d", decompressLen);
     }
-    DevInfoData devInfo = {NULL, 0, info->connInfo.type, info->version};
+    DevInfoData devInfo = { NULL, 0, info->connInfo.type, info->version };
     if ((decompressData != NULL) && (decompressLen != 0)) {
         devInfo.msg = (const char *)decompressData;
         devInfo.len = decompressLen;
@@ -452,8 +452,8 @@ static bool IsEmptyShortHashStr(char *udidHash)
         AUTH_LOGE(AUTH_FSM, "udidHash len is 0");
         return true;
     }
-    uint8_t emptyHash[SHORT_HASH_LEN] = {0};
-    char emptyHashStr[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    uint8_t emptyHash[SHORT_HASH_LEN] = { 0 };
+    char emptyHashStr[UDID_SHORT_HASH_HEX_STR + 1] = { 0 };
     if (ConvertBytesToHexString(emptyHashStr, UDID_SHORT_HASH_HEX_STR + 1, emptyHash, SHORT_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return false;
@@ -471,7 +471,7 @@ static int32_t GetLocalUdidHash(char *udid, char *udidHash, uint32_t len)
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint8_t hash[UDID_HASH_LEN] = {0};
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
     if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid), (unsigned char *)hash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "restore manager fail because generate strhash");
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
@@ -488,8 +488,8 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     if (info->isServer && strlen(info->udid) == 0) {
         info->localState = AUTH_STATE_UNKNOW;
-        AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 ", udid is null update local auth state=%{public}d",
-            authSeq, info->localState);
+        AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 ", udid is null update local auth state=%{public}d", authSeq,
+            info->localState);
         return SOFTBUS_OK;
     }
     if (info->peerState == AUTH_STATE_COMPATIBLE) {
@@ -502,7 +502,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 " local auth state=%{public}d", authSeq, info->localState);
         return SOFTBUS_OK;
     }
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
@@ -513,8 +513,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "get local udid hash fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
-    if (!GetUdidShortHash(info, udidHash, SHA_256_HEX_HASH_LEN) ||
-        IsEmptyShortHashStr(udidHash)) {
+    if (!GetUdidShortHash(info, udidHash, SHA_256_HEX_HASH_LEN) || IsEmptyShortHashStr(udidHash)) {
         AUTH_LOGI(AUTH_FSM, "unknow peer udidHash");
         info->localState = AUTH_STATE_UNKNOW;
     } else if (memcmp(localUdidHash, udidHash, SHORT_HASH_LEN) < 0) {
