@@ -248,6 +248,9 @@ ohos_unittest("HeartBeatFSMTest") {
 
 ohos_unittest("HeartBeatStrategyTest") {
   module_out_path = module_output_path
+  if (dsoftbus_feature_lnn_ble) {
+    cflags = [ "-DENABLE_FEATURE_LNN_BLE" ]
+  }
   sources = [
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_strategy_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_fsm_strategy_mock.cpp",
@@ -747,12 +750,16 @@ group("unittest") {
     ":BusCenterDecisionCenterTest",
     ":BusCenterIpcTest",
     ":ClientProxyTest",
-    ":HeartBeatCtrlStaticTest",
-    ":HeartBeatCtrlTest",
-    ":HeartBeatFSMTest",
     ":HeartBeatMediumStaticTest",
-    ":HeartBeatMediumTest",
-    ":HeartBeatStrategyTest",
-    ":HeartBeatUtilsTest",
   ]
+  if (dsoftbus_feature_lnn_ble) {
+    deps += [
+      ":HeartBeatCtrlStaticTest",
+      ":HeartBeatCtrlTest",
+      ":HeartBeatFSMTest",
+      ":HeartBeatMediumTest",
+      ":HeartBeatStrategyTest",
+      ":HeartBeatUtilsTest",
+    ]
+  }
 }

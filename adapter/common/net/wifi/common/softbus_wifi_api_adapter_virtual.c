@@ -112,3 +112,8 @@ bool SoftBusIsWifiP2pEnabled(void)
 {
     return true;
 }
+
+bool SoftBusIsHotspotActive(void)
+{
+    return false;
+}
