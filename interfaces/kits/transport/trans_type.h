@@ -23,6 +23,7 @@ extern "C" {
 #define MAX_MAC_LEN  18
 #define MAX_IP_LEN  46
 #define MAX_PATH_LEN 4096
+#define DEVICE_ID_LEN_MAX 65
 
 /**
  * @brief Enumerates the data types.
@@ -45,6 +46,7 @@ typedef enum {
 typedef enum {
     EVENT_TYPE_CHANNEL_OPENED,
     EVENT_TYPE_TRANS_LIMIT_CHANGE,
+    EVENT_TYPE_COLLAB_CHECK,
     EVENT_TYPE_BUTT,
 } TransEventType;
 
@@ -96,6 +98,7 @@ typedef enum {
     SHUTDOWN_REASON_LNN_OFFLINE,   /**< Shutdown for offline */
     SHUTDOWN_REASON_LINK_DOWN,     /**< Shutdown for link down */
     SHUTDOWN_REASON_USER_SWICTH,   /**< Shutdown for user switch */
+    SHUTDOWN_REASON_PRIVILEGE_SHUTDOWN, /**< Shutdown for privilege shutdown */
 } ShutdownReason;
 
 /**
@@ -255,9 +258,11 @@ typedef struct {
  * @version 2.0
  */
 typedef enum {
-    OPT_TYPE_MAX_BUFFER,       /**< @reserved Maximum cache. */
-    OPT_TYPE_FIRST_PACKAGE,    /**< @reserved First packet size. */
-    OPT_TYPE_MAX_IDLE_TIMEOUT, /**< @reserved Maximum idle time. */
+    OPT_TYPE_BEGIN,
+    OPT_TYPE_MAX_BUFFER = OPT_TYPE_BEGIN,  /**< @reserved Maximum cache. */
+    OPT_TYPE_FIRST_PACKAGE,                /**< @reserved First packet size. */
+    OPT_TYPE_MAX_IDLE_TIMEOUT,             /**< @reserved Maximum idle time. */
+    OPT_TYPE_END,
 } OptType;
 
 /**
@@ -306,6 +311,20 @@ typedef struct {
 } FrameEvtCbInfo;
 
 typedef int (*OnFrameEvt)(int fd, const FrameEvtCbInfo *info);
+
+/**
+ * @brief Enumerate Collab Info.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    char deviceId[DEVICE_ID_LEN_MAX];
+    int32_t userId;
+    int64_t accountId;
+    uint64_t tokenId;
+    int32_t pid;
+} CollabInfo;
 #ifdef __cplusplus
 }
 #endif

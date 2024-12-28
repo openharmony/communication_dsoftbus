@@ -31,6 +31,7 @@
 #include "softbus_utils.h"
 #include "softbus_adapter_mem.h"
 #include "trans_channel_common.h"
+#include "trans_channel_manager.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
@@ -358,49 +359,8 @@ int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, con
     return ret;
 }
 
-static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNetworkId, AppInfo *appInfo)
-{
-    int ret = SOFTBUS_TRANS_GET_APP_INFO_FAILED;
-    int32_t osType = 0;
-    GetOsTypeByNetworkId(peerNetworkId, &osType);
-    appInfo->osType = osType;
-    appInfo->appType = APP_TYPE_INNER;
-    appInfo->myData.apiVersion = API_V2;
-    appInfo->autoCloseTime = 0;
-    ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);
-        return ret;
-    }
-    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s my sessionName failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    appInfo->peerData.apiVersion = API_V2;
-    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s peer sessionName failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(appInfo->peerNetWorkId, sizeof(appInfo->peerNetWorkId), peerNetworkId) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s peerNetworkId failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-
-    ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get remote node uuid err. ret=%{public}d", ret);
-        return SOFTBUS_GET_REMOTE_UUID_ERR;
-    }
-
-    GetRemoteUdidWithNetworkId(peerNetworkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
-    TransGetRemoteDeviceVersion(peerNetworkId, CATEGORY_NETWORK_ID, appInfo->peerVersion, sizeof(appInfo->peerVersion));
-
-    return SOFTBUS_OK;
-}
-
-static int32_t TransGetConnectOption(
-    const char *peerNetworkId, ConnectOption *connOpt, const LanePreferredLinkList *preferred)
+static int32_t TransGetConnectOption(const char *sessionName, const char *peerNetworkId,
+    const LanePreferredLinkList *preferred, int32_t channelId)
 {
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
     LaneConnInfo connInfo;
@@ -423,14 +383,15 @@ static int32_t TransGetConnectOption(
         }
         option.requestInfo.trans.expectedLink.linkTypeNum = preferred->linkTypeNum;
     }
-    if (TransGetLaneInfoByOption(&option, &connInfo, &laneHandle) != SOFTBUS_OK) {
+    NetWorkingChannelInfo info = {
+        .channelId = channelId,
+        .isNetWorkingChannel = true,
+    };
+    (void)memcpy_s(info.sessionName, SESSION_NAME_SIZE_MAX, sessionName, SESSION_NAME_SIZE_MAX);
+    if (TransGetLaneInfoByOption(&option, &connInfo, &laneHandle, &info) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     TRANS_LOGI(TRANS_CTRL, "net channel lane info. laneHandle=%{public}u, type=%{public}d", laneHandle, connInfo.type);
-    if (TransGetConnectOptByConnInfo(&connInfo, connOpt) != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-    LnnFreeLane(laneHandle);
     return SOFTBUS_OK;
 EXIT_ERR:
     if (laneHandle != 0) {
@@ -443,27 +404,21 @@ EXIT_ERR:
 int32_t TransOpenNetWorkingChannel(
     const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred)
 {
-    AppInfo appInfo;
-    ConnectOption connOpt;
-    int32_t channelId = INVALID_CHANNEL_ID;
-
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
-        return channelId;
-    }
-    if (TransGetConnectOption(peerNetworkId, &connOpt, preferred) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "networking get connect option fail");
-        return channelId;
-    }
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    if (TransProxyGetAppInfo(sessionName, peerNetworkId, &appInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "networking get app info fail");
-        return channelId;
+        return INVALID_CHANNEL_ID;
     }
 
-    if (TransProxyOpenProxyChannel(&appInfo, &connOpt, &channelId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "networking open channel fail");
-        channelId = INVALID_CHANNEL_ID;
+    int32_t channelId = GenerateChannelId(false);
+    if (channelId <= INVALID_CHANNEL_ID) {
+        TRANS_LOGE(TRANS_CTRL, "generate channelid failed");
+        return INVALID_CHANNEL_ID;
+    }
+
+    if (TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId) != SOFTBUS_OK) {
+        ReleaseProxyChannelId(channelId);
+        TRANS_LOGE(TRANS_CTRL, "networking get connect option fail");
+        return channelId;
     }
     return channelId;
 }

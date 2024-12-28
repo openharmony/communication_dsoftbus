@@ -25,6 +25,8 @@ extern "C" {
 
 int32_t SetExtSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize);
 int32_t GetExtSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
+int32_t SetCommonSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize);
+int32_t GetCommonSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
 #ifdef __cplusplus
 }
 #endif

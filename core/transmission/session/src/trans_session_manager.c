@@ -428,3 +428,76 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     }
     TransListDelete(&sessionServerList);
 }
+
+int32_t TransGetPidAndPkgName(const char *sessionName, int32_t uid, int32_t *pid, char *pkgName, uint32_t len)
+{
+    if (sessionName == NULL || pid == NULL || pkgName == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (len == 0 || len > PKG_NAME_SIZE_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "pkgName len is invalid.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0 && pos->uid == uid) {
+            *pid = pos->pid;
+            int32_t ret = strcpy_s(pkgName, len, pos->pkgName);
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            if (ret != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%{public}d.", ret);
+                return SOFTBUS_STRCPY_ERR;
+            }
+            return SOFTBUS_OK;
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s uid=%{public}d not found.", AnonymizeWrapper(tmpName), uid);
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_GET_PID_FAILED;
+}
+
+int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
+{
+    if (sessionName == NULL || tokenId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            *tokenId = pos->tokenId;
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}

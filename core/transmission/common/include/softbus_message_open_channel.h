@@ -43,6 +43,8 @@
 #define FIRST_DATA "FIRST_DATA"
 #define FIRST_DATA_SIZE "FIRST_DATA_SIZE"
 #define JSON_KEY_CALLING_TOKEN_ID "CALLING_TOKEN_ID"
+#define ACCOUNT_ID "ACCOUNT_ID"
+#define USER_ID "USER_ID"
 
 #ifdef __cplusplus
 extern "C" {

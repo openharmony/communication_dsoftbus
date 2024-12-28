@@ -114,11 +114,11 @@ tests/core/bus_center/utils/                 fengyonghui@huawei.com
 interfaces/kits/bus_center/     zhangshaojie3@huawei.com
 
 [Trans]
-core/adapter/transmission/      jiazhenyu1@huawei.com baiyuxin3@huawei.com
-core/transmission/              jiazhenyu1@huawei.com baiyuxin3@huawei.com
-sdk/transmission/               jiazhenyu1@huawei.com baiyuxin3@huawei.com
-tests/core/transmission/        jiazhenyu1@huawei.com baiyuxin3@huawei.com
-tests/sdk/transmission/         jiazhenyu1@huawei.com baiyuxin3@huawei.com
+core/adapter/transmission/      jiazhenyu1@huawei.com baiyuxin6@huawei.com
+core/transmission/              jiazhenyu1@huawei.com baiyuxin6@huawei.com
+sdk/transmission/               jiazhenyu1@huawei.com baiyuxin6@huawei.com
+tests/core/transmission/        jiazhenyu1@huawei.com baiyuxin6@huawei.com
+tests/sdk/transmission/         jiazhenyu1@huawei.com baiyuxin6@huawei.com
 
 [TransInterface]
 interfaces/inner_kits/transport/    wuchengwen4@huawei.com

@@ -38,6 +38,7 @@
 #define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
 
 #define DISTRIBUTED_DATA_SESSION "distributeddata-default"
+static IFeatureAbilityRelationChecker *g_relationChecker = NULL;
 
 bool IsValidSessionParam(const SessionParam *param)
 {
@@ -899,4 +900,86 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+void PrivilegeDestroyAllClientSession(
+    const ClientSessionServer *server, ListNode *destroyList, const char *peerNetworkId)
+{
+    if (server == NULL || destroyList == NULL || peerNetworkId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        if (strlen(peerNetworkId) != 0 && strcmp(sessionNode->info.peerDeviceId, peerNetworkId) != 0) {
+            continue;
+        }
+        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        if (destroyNode == NULL) {
+            continue;
+        }
+        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            ClientEmitFileEvent(sessionNode->channelId);
+        }
+        DestroySessionId();
+        ListDelete(&sessionNode->node);
+        ListAdd(destroyList, &(destroyNode->node));
+        SoftBusFree(sessionNode);
+    }
+}
+
+int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker)
+{
+    if (relationChecker == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid parameter.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_relationChecker == NULL) {
+        g_relationChecker = (IFeatureAbilityRelationChecker *)SoftBusCalloc(sizeof(IFeatureAbilityRelationChecker));
+        if (g_relationChecker == NULL) {
+            TRANS_LOGE(TRANS_SDK, "malloc failed.");
+            return SOFTBUS_MALLOC_ERR;
+        }
+    } else {
+        TRANS_LOGI(TRANS_SDK, "overwrite relation checker.");
+    }
+    int32_t ret = memcpy_s(g_relationChecker, sizeof(IFeatureAbilityRelationChecker),
+        relationChecker, sizeof(IFeatureAbilityRelationChecker));
+    if (ret != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy_s relationChecker failed, ret=%{public}d", ret);
+        return SOFTBUS_MEM_ERR;
+    }
+    TRANS_LOGI(TRANS_SDK, "register relation checker success.");
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransCheckCollabRelation(
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+{
+    if (sourceInfo == NULL || sinkInfo == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid parameter.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_relationChecker == NULL || g_relationChecker->CheckCollabRelation == NULL) {
+        TRANS_LOGE(TRANS_SDK, "extern checker is null or not registered.");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ret = g_relationChecker->CheckCollabRelation(*sourceInfo, *sinkInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "channelId=%{public}d check Collab relation fail, ret=%{public}d", channelId, ret);
+        return SOFTBUS_TRANS_CHECK_RELATION_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+void DestroyRelationChecker(void)
+{
+    if (g_relationChecker == NULL) {
+        return;
+    }
+    SoftBusFree(g_relationChecker);
+    g_relationChecker= NULL;
 }

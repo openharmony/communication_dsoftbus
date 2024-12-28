@@ -792,4 +792,43 @@ HWTEST_F(TransChannelManagerTest, TransGetAndComparePid001, TestSize.Level1)
     ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_AUTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: TransPrivilegeCloseChannel001
+ * @tc.desc: TransPrivilegeCloseChannel Test
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransPrivilegeCloseChannel001, TestSize.Level1)
+{
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    int32_t ret = TransPrivilegeCloseChannel(tokenId, pid, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: PrivilegeCloseListAddItem Test
+ * @tc.desc: PrivilegeCloseListAddItem001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, PrivilegeCloseListAddItem001, TestSize.Level1)
+{
+    int32_t pid = 0;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = PrivilegeCloseListAddItem(nullptr, pid, g_pkgName);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = PrivilegeCloseListAddItem(&privilegeCloseList, pid, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = PrivilegeCloseListAddItem(&privilegeCloseList, pid, g_pkgName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = PrivilegeCloseListAddItem(&privilegeCloseList, pid, g_pkgName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    PrivilegeCloseChannelInfo *pos = NULL;
+    PrivilegeCloseChannelInfo *tmp = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &privilegeCloseList, PrivilegeCloseChannelInfo, node) {
+        ListDelete(&(pos->node));
+        SoftBusFree(pos);
+    }
+}
 } // OHOS

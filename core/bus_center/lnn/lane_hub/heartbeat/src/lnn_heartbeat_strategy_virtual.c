@@ -30,3 +30,9 @@ int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
     (void)msgPara;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnStartHeartbeat(uint64_t delayMillis)
+{
+    (void)delayMillis;
+    return SOFTBUS_OK;
+}

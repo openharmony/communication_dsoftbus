@@ -100,3 +100,11 @@ void RegisterPermissionChangeCallback(void)
 {
     return;
 }
+
+int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, const TransInfo *transInfo)
+{
+    (void)pkgName;
+    (void)pid;
+    return TransOnCheckCollabRelation(sourceInfo, sinkInfo, transInfo->channelId, transInfo->channelType);
+}

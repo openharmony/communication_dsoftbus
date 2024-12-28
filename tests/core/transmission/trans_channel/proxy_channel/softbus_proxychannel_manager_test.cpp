@@ -1948,7 +1948,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest002, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
     appInfo.peerData.dataConfig = 0;
     int32_t errorCode = SOFTBUS_OK;
-    TransProxyReportAuditEvent(errorCode);
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ASSERT_TRUE(nullptr != chan);
+    TransProxyReportAuditEvent(chan, AUDIT_EVENT_PACKETS_ERROR, errorCode);
     ret = TransProxyFillDataConfig(&appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -2072,5 +2074,35 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackRightMsg001, T
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ReleaseChannelInfo(chan);
     SoftBusFree(msg);
+}
+
+/**
+ * @tc.name: TransProxyGetPrivilegeCloseList001
+ * @tc.desc: TransProxyGetPrivilegeCloseList Test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chan);
+    chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
+    chan->reqId = TEST_VALID_REQ;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    chan->connId = TEST_VALID_CONN_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t channelId = TEST_PARSE_MESSAGE_CHANNEL;
+
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    ret = TransProxyGetPrivilegeCloseList(nullptr, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransProxyGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransProxyDelByChannelId(channelId, chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
