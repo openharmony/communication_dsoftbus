@@ -20,6 +20,7 @@ declare_args() {
 
   #  dsoftbus_feature_disc_approach = false
   dsoftbus_feature_disc_notification = false
+  dsoftbus_feature_disc_notification_rx = false
   dsoftbus_feature_disc_link_ble = false
 
   #  dsoftbus_feature_disc_virtual_link_ble = false

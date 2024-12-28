@@ -41,6 +41,7 @@
       "dsoftbus_feature_disc_share_coap",
       "dsoftbus_feature_disc_approach",
       "dsoftbus_feature_disc_notification",
+      "dsoftbus_feature_disc_notification_rx",
       "dsoftbus_feature_disc_link_ble",
       "dsoftbus_feature_disc_virtual_link_ble",
       "dsoftbus_feature_disc_lnn_hb",
