@@ -50,7 +50,7 @@ static int32_t SoftBusNStackDstreamDumpHander(int fd, int32_t argc, const char *
         COMM_LOGE(COMM_DFX, "SoftBusNStackDstreamDumpHander invalid input");
         return SOFTBUS_INVALID_PARAM;
     }
-#ifdef FILLP_ENHANCED
+#ifdef FILLP_OPEN
     if (FtDfxHiDumper((uint32_t)argc, argv, &fd, SoftBufNstackDumpFunc) != 0) {
         COMM_LOGE(COMM_DFX, "call FtDfxHiDumper failed!");
         return SOFTBUS_NSTACK_DUMP_ERR;
@@ -64,7 +64,7 @@ static int32_t SoftBusNStackDfileDumpHander(int fd, int32_t argc, const char **a
         COMM_LOGE(COMM_DFX, "SoftBusNStackDfileDumpHander invalid input");
         return SOFTBUS_INVALID_PARAM;
     }
-#ifdef FILLP_ENHANCED
+#ifdef DFILE_OPEN
     if (NSTACKX_DFileDump((uint32_t)argc, argv, &fd, SoftBufNstackDumpFunc) != 0) {
         COMM_LOGE(COMM_DFX, "call NSTACKX_DFileDump failed!");
         return SOFTBUS_NSTACK_DUMP_ERR;
