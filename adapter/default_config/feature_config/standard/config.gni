@@ -12,15 +12,7 @@
 # limitations under the License.
 
 declare_args() {
-  dsoftbus_feature_disc_ble = false
-  dsoftbus_feature_disc_coap = true
-  dsoftbus_feature_disc_usb = false
-  dsoftbus_feature_disc_approach = false
-  dsoftbus_feature_disc_virtual_link_ble = false
-
   dsoftbus_feature_build_shared_sdk = true
 
   dsoftbus_feature_encrypt = 1
-
-  dsoftbus_feature_ex_kits = false
 }

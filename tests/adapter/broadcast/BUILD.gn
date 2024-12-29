@@ -41,7 +41,7 @@ if (!defined(ohos_lite)) {
     "hilog:libhilog",
   ]
 
-  if (support_bluetooth &&
+  if (dsoftbus_feature_deps_bluetooth &&
       (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
     bc_gatt_test_external_deps += [ "bluetooth:btframework" ]
   }
@@ -69,7 +69,7 @@ if (!defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = []
-    if (support_bluetooth &&
+    if (dsoftbus_feature_deps_bluetooth &&
         (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
       deps += [
         ":SoftbusBleGattTest",
