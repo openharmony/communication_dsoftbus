@@ -14,55 +14,6 @@
 DSOFTBUS_ROOT_PATH = "./../../.."
 import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
-NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
-fillp_source = [
-  "src/app_lib/src/api.c",
-  "src/app_lib/src/epoll_app.c",
-  "src/app_lib/src/fillp_stack_app_config.c",
-  "src/app_lib/src/fillp_stack_app_config_in.c",
-  "src/app_lib/src/socket_app.c",
-  "src/app_lib/src/spunge_app.c",
-  "src/app_lib/src/socket_opt.c",
-  "src/app_lib/src/fillp_dfx.c",
-  "src/fillp_lib/src/fillp_buf_item.c",
-  "src/fillp_lib/src/fillp_cookie.c",
-  "src/fillp_lib/src/fillp_stack_config.c",
-  "src/fillp_lib/src/fillp_stack_config_in.c",
-  "src/fillp_lib/src/hmac.c",
-  "src/fillp_lib/src/net.c",
-  "src/fillp_lib/src/pcb.c",
-  "src/fillp_lib/src/res.c",
-  "src/fillp_lib/src/sha256.c",
-  "src/fillp_lib/src/spunge_core.c",
-  "src/fillp_lib/src/spunge_stack.c",
-  "src/fillp_lib/src/sysio.c",
-  "src/fillp_lib/src/sysio_udp.c",
-  "src/fillp_lib/src/fillp/fillp.c",
-  "src/fillp_lib/src/fillp/fillp_common.c",
-  "src/fillp_lib/src/fillp/fillp_conn.c",
-  "src/fillp_lib/src/fillp/fillp_flow_control_alg0.c",
-  "src/fillp_lib/src/fillp/fillp_flow_control.c",
-  "src/fillp_lib/src/fillp/fillp_input.c",
-  "src/fillp_lib/src/fillp/fillp_output.c",
-  "src/fillp_lib/src/fillp/fillp_pcb.c",
-  "src/fillp_lib/src/fillp/fillp_timer.c",
-  "src/fillp_lib/src/fillp/fillp_frame.c",
-  "src/fillp_lib/src/fillp/fillp_mgt_msg_log.c",
-  "src/public/src/callbacks.c",
-  "src/public/src/dympool.c",
-  "src/public/src/epoll.c",
-  "src/public/src/fillp_os.c",
-  "src/public/src/lf_ring.c",
-  "src/public/src/log.c",
-  "src/public/src/rb_tree.c",
-  "src/public/src/skiplist.c",
-  "src/public/src/socket_common.c",
-  "src/public/src/spunge.c",
-  "src/public/src/spunge_mem.c",
-  "src/public/src/spunge_message.c",
-  "src/public/src/timing_wheel.c",
-]
-
 fillp_include = [
   "include",
   "src/app_lib/include",
@@ -88,10 +39,62 @@ if (defined(ohos_lite)) {
     cflags = fillp_cflags
     cflags += [ "-Wall" ]
     include_dirs = fillp_include
-    sources = fillp_source
-    deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
-
+    sources = []
+    deps = []
+    external_deps = []
+    if (dsoftbus_feature_vtp) {
+      sources += [
+        "src/app_lib/src/api.c",
+        "src/app_lib/src/epoll_app.c",
+        "src/app_lib/src/fillp_dfx.c",
+        "src/app_lib/src/fillp_stack_app_config.c",
+        "src/app_lib/src/fillp_stack_app_config_in.c",
+        "src/app_lib/src/socket_app.c",
+        "src/app_lib/src/socket_opt.c",
+        "src/app_lib/src/spunge_app.c",
+        "src/fillp_lib/src/fillp/fillp.c",
+        "src/fillp_lib/src/fillp/fillp_common.c",
+        "src/fillp_lib/src/fillp/fillp_conn.c",
+        "src/fillp_lib/src/fillp/fillp_flow_control.c",
+        "src/fillp_lib/src/fillp/fillp_flow_control_alg0.c",
+        "src/fillp_lib/src/fillp/fillp_frame.c",
+        "src/fillp_lib/src/fillp/fillp_input.c",
+        "src/fillp_lib/src/fillp/fillp_mgt_msg_log.c",
+        "src/fillp_lib/src/fillp/fillp_output.c",
+        "src/fillp_lib/src/fillp/fillp_pcb.c",
+        "src/fillp_lib/src/fillp/fillp_timer.c",
+        "src/fillp_lib/src/fillp_buf_item.c",
+        "src/fillp_lib/src/fillp_cookie.c",
+        "src/fillp_lib/src/fillp_stack_config.c",
+        "src/fillp_lib/src/fillp_stack_config_in.c",
+        "src/fillp_lib/src/hmac.c",
+        "src/fillp_lib/src/net.c",
+        "src/fillp_lib/src/pcb.c",
+        "src/fillp_lib/src/res.c",
+        "src/fillp_lib/src/sha256.c",
+        "src/fillp_lib/src/spunge_core.c",
+        "src/fillp_lib/src/spunge_stack.c",
+        "src/fillp_lib/src/sysio.c",
+        "src/fillp_lib/src/sysio_udp.c",
+        "src/public/src/callbacks.c",
+        "src/public/src/dympool.c",
+        "src/public/src/epoll.c",
+        "src/public/src/fillp_os.c",
+        "src/public/src/lf_ring.c",
+        "src/public/src/log.c",
+        "src/public/src/rb_tree.c",
+        "src/public/src/skiplist.c",
+        "src/public/src/socket_common.c",
+        "src/public/src/spunge.c",
+        "src/public/src/spunge_mem.c",
+        "src/public/src/spunge_message.c",
+        "src/public/src/timing_wheel.c",
+      ]
+      deps += [
+        "$DSOFTBUS_ROOT_PATH/components/nstackx/nstackx_util:nstackx_util.open",
+      ]
+      external_deps += [ "bounds_checking_function:libsec_shared" ]
+    }
     if (ohos_kernel_type == "liteos_a") {
       cflags += [ "-DNSTACKX_WITH_LITEOS" ]
     } else {
@@ -118,9 +121,62 @@ if (defined(ohos_lite)) {
     ]
 
     include_dirs = fillp_include
-    sources = fillp_source
-    deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    sources = []
+    deps = []
+    external_deps = []
+    if (dsoftbus_feature_vtp) {
+      sources += [
+        "src/app_lib/src/api.c",
+        "src/app_lib/src/epoll_app.c",
+        "src/app_lib/src/fillp_dfx.c",
+        "src/app_lib/src/fillp_stack_app_config.c",
+        "src/app_lib/src/fillp_stack_app_config_in.c",
+        "src/app_lib/src/socket_app.c",
+        "src/app_lib/src/socket_opt.c",
+        "src/app_lib/src/spunge_app.c",
+        "src/fillp_lib/src/fillp/fillp.c",
+        "src/fillp_lib/src/fillp/fillp_common.c",
+        "src/fillp_lib/src/fillp/fillp_conn.c",
+        "src/fillp_lib/src/fillp/fillp_flow_control.c",
+        "src/fillp_lib/src/fillp/fillp_flow_control_alg0.c",
+        "src/fillp_lib/src/fillp/fillp_frame.c",
+        "src/fillp_lib/src/fillp/fillp_input.c",
+        "src/fillp_lib/src/fillp/fillp_mgt_msg_log.c",
+        "src/fillp_lib/src/fillp/fillp_output.c",
+        "src/fillp_lib/src/fillp/fillp_pcb.c",
+        "src/fillp_lib/src/fillp/fillp_timer.c",
+        "src/fillp_lib/src/fillp_buf_item.c",
+        "src/fillp_lib/src/fillp_cookie.c",
+        "src/fillp_lib/src/fillp_stack_config.c",
+        "src/fillp_lib/src/fillp_stack_config_in.c",
+        "src/fillp_lib/src/hmac.c",
+        "src/fillp_lib/src/net.c",
+        "src/fillp_lib/src/pcb.c",
+        "src/fillp_lib/src/res.c",
+        "src/fillp_lib/src/sha256.c",
+        "src/fillp_lib/src/spunge_core.c",
+        "src/fillp_lib/src/spunge_stack.c",
+        "src/fillp_lib/src/sysio.c",
+        "src/fillp_lib/src/sysio_udp.c",
+        "src/public/src/callbacks.c",
+        "src/public/src/dympool.c",
+        "src/public/src/epoll.c",
+        "src/public/src/fillp_os.c",
+        "src/public/src/lf_ring.c",
+        "src/public/src/log.c",
+        "src/public/src/rb_tree.c",
+        "src/public/src/skiplist.c",
+        "src/public/src/socket_common.c",
+        "src/public/src/spunge.c",
+        "src/public/src/spunge_mem.c",
+        "src/public/src/spunge_message.c",
+        "src/public/src/timing_wheel.c",
+      ]
+      deps += [
+        "$DSOFTBUS_ROOT_PATH/components/nstackx/nstackx_util:nstackx_util.open",
+      ]
+      external_deps += [ "bounds_checking_function:libsec_shared" ]
+    }
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
     }
