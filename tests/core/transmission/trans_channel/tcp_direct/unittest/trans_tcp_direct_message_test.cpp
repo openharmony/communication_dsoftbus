@@ -648,9 +648,9 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, Test
     EXPECT_EQ(count, 2);
     EXPECT_EQ(channelId[0], 1);
     EXPECT_EQ(channelId[1], 2);
-    SoftBusFree(con);
-    SoftBusFree(con2);
-    SoftBusFree(con3);
+    TransDelSessionConnById(con->channelId);
+    TransDelSessionConnById(con2->channelId);
+    TransDelSessionConnById(con3->channelId);
     SoftBusFree(channelId);
 }
 
