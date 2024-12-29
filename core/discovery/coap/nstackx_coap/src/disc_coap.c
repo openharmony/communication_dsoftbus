@@ -74,7 +74,7 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
     return SOFTBUS_OK;
 }
 
-static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapBitmap[], DiscCoapInfo *info,
+static int32_t UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapBitmap[], DiscCoapInfo *info,
     uint32_t count)
 {
     if (info == NULL || capBitmapNum == 0 || capBitmapNum > CAPABILITY_NUM || count > MAX_CAP_NUM) {
@@ -202,9 +202,39 @@ static bool CheckParam(const PublishOption *pubOption, const SubscribeOption *su
     return true;
 }
 
+static bool CheckFeature(const PublishOption *option)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, false, DISC_COAP, "option is null");
+    uint32_t capabilityBit = option->capabilityBitmap[0];
+    switch (capabilityBit) {
+        case 1 << DDMP_CAPABILITY_BITMAP:
+#ifdef ENABLE_DISC_LNN_COAP
+            return true;
+#else
+            DISC_LOGW(DISC_COAP, "coap publish not support lnn");
+            return false;
+#endif /* ENABLE_DISC_LNN_COAP */
+        case 1 << SHARE_CAPABILITY_BITMAP:
+#ifdef ENABLE_DISC_SHARE_COAP
+            return true;
+#else
+            DISC_LOGW(DISC_COAP, "coap publish not support share");
+            return false;
+#endif /* ENABLE_DISC_SHARE_COAP */
+        default:
+#ifdef ENABLE_DISC_COAP
+            return true;
+#else
+            DISC_LOGW(DISC_COAP, "coap publish not support");
+            return false;
+#endif /* ENABLE_DISC_COAP */
+    }
+}
+
 static int32_t Publish(const PublishOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(option, NULL, true), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckFeature(option), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "publish mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
     if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
@@ -223,10 +253,12 @@ static int32_t Publish(const PublishOption *option, bool isActive)
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         goto PUB_FAIL;
     }
+#ifdef ENABLE_DISC_SHARE_COAP
     if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
         DISC_LOGW(DISC_COAP, "register capability data to dfinder failed.");
         goto PUB_FAIL;
     }
+#endif /* ENABLE_DISC_SHARE_COAP */
     if (isActive) {
         DiscCoapOption discCoapOption;
         DiscOption discOption = {
@@ -278,6 +310,7 @@ static int32_t CoapStartScan(const PublishOption *option)
 static int32_t UnPublish(const PublishOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(option, NULL, true), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckFeature(option), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "unPublish mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
 

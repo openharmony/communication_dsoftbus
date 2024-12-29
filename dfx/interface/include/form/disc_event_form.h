@@ -102,7 +102,6 @@ typedef enum {
     EVENT_STAGE_ADV_REPLACE = 3,
     EVENT_STAGE_SCAN_START = 4,
     EVENT_STAGE_ONLINE_STATE = 5,
-    EVENT_STAGE_ADV = 6,
 } DiscEventBroadcastStage;
 
 typedef enum {
