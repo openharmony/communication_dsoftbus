@@ -30,6 +30,21 @@
 
 #define OH_OS_TYPE 10
 
+int32_t CheckSendLenForBooster(unsigned int len)
+{
+    uint32_t dataConfig = INVALID_DATA_CONFIG;
+    int32_t ret = SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH,  (unsigned char *)&dataConfig, sizeof(dataConfig));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get config failed");
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    if (len > dataConfig) {
+        TRANS_LOGE(TRANS_SDK, "send data over limit.len=%{public}u", len);
+        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
+    }
+    return SOFTBUS_OK;
+}
+
 int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len, int32_t businessType)
 {
     uint32_t dataConfig = INVALID_DATA_CONFIG;
@@ -92,17 +107,22 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     if ((osType == OH_OS_TYPE) && (businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
         (channelType != CHANNEL_TYPE_AUTH)) {
         TRANS_LOGE(TRANS_BYTES,
-            "BusinessType no match, businessType=%{public}d,  sessionId=%{public}d", businessType, sessionId);
+            "BusinessType no match, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
-    int checkRet = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_BYTE);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(checkRet == SOFTBUS_OK, checkRet,
-        TRANS_BYTES, "CheckSendLen fail, len=%{public}u,  sessionId=%{public}d", len, sessionId);
-
+    if (osType != OH_OS_TYPE && businessType == BUSINESS_TYPE_MESSAGE) {
+        ret = CheckSendLenForBooster(len);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_BYTES, "CheckSendLenForBooster fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
+    } else {
+        ret = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_BYTE);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_BYTES, "CheckSendLen fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
+    }
     if (enableStatus != ENABLE_STATUS_SUCCESS) {
         TRANS_LOGE(TRANS_BYTES,
-            "Enable status fail, len=%{public}u,  sessionId=%{public}d", len, sessionId);
+            "Enable status fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
