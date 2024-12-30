@@ -26,7 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
-#define SESSION_KEY_MAX_NUM 10
+#define SESSION_KEY_MAX_NUM   10
 #define LAST_USE_THRESHOLD_MS (30 * 1000L) /* 30s */
 
 typedef struct {
@@ -334,8 +334,8 @@ int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, Aut
         SetAuthLinkType(&item->type, type);
         item->lastUseTime = GetCurrentTimeMs();
         item->useTime[type] = item->lastUseTime;
-        AUTH_LOGI(AUTH_FSM, "sessionKey add type, index=%{public}d, newType=%{public}d, type=%{public}u",
-            index, type, item->type);
+        AUTH_LOGI(AUTH_FSM, "sessionKey add type, index=%{public}d, newType=%{public}d, type=%{public}u", index, type,
+            item->type);
         return SOFTBUS_OK;
     }
     AUTH_LOGI(AUTH_FSM, "not found sessionKey, index=%{public}d", index);
@@ -405,8 +405,8 @@ void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLin
         }
         ClearAuthLinkType(&item->type, type);
         if (item->type == 0) {
-            AUTH_LOGI(AUTH_FSM, "remove sessionkey, type=%{public}d, index=%{public}d, authId=%{public}" PRId64,
-                type, item->index, authId);
+            AUTH_LOGI(AUTH_FSM, "remove sessionkey, type=%{public}d, index=%{public}d, authId=%{public}" PRId64, type,
+                item->index, authId);
             ListDelete(&item->node);
             SoftBusFree(item);
         } else {
@@ -415,11 +415,11 @@ void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLin
     }
 }
 
-int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t *outData, uint32_t *outLen)
+int32_t EncryptData(
+    const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t *outData, uint32_t *outLen)
 {
-    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || inDataInfo->inLen == 0 ||
-        outData == NULL || *outLen < (inDataInfo->inLen + ENCRYPT_OVER_HEAD_LEN)) {
+    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || inDataInfo->inLen == 0 || outData == NULL ||
+        *outLen < (inDataInfo->inLen + ENCRYPT_OVER_HEAD_LEN)) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -432,15 +432,15 @@ int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataI
     }
     /* pack key index */
     *(uint32_t *)outData = SoftBusHtoLl((uint32_t)index);
-    AesGcmCipherKey cipherKey = {.keyLen = sessionKey.len};
+    AesGcmCipherKey cipherKey = { .keyLen = sessionKey.len };
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.value, sessionKey.len) != EOK) {
         AUTH_LOGE(AUTH_FSM, "set key fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, inDataInfo->inData, inDataInfo->inLen,
-        outData + ENCRYPT_INDEX_LEN, outLen, index);
+    int32_t ret = SoftBusEncryptDataWithSeq(
+        &cipherKey, inDataInfo->inData, inDataInfo->inLen, outData + ENCRYPT_INDEX_LEN, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%{public}d", ret);
@@ -450,8 +450,8 @@ int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataI
     return SOFTBUS_OK;
 }
 
-int32_t DecryptData(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t *outData, uint32_t *outLen)
+int32_t DecryptData(
+    const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t *outData, uint32_t *outLen)
 {
     if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || outData == NULL ||
         inDataInfo->inLen <= ENCRYPT_OVER_HEAD_LEN || *outLen < (inDataInfo->inLen - ENCRYPT_OVER_HEAD_LEN)) {
@@ -465,7 +465,7 @@ int32_t DecryptData(const SessionKeyList *list, AuthLinkType type, const InDataI
         AUTH_LOGE(AUTH_FSM, "get key fail");
         return SOFTBUS_DECRYPT_ERR;
     }
-    AesGcmCipherKey cipherKey = {.keyLen = sessionKey.len};
+    AesGcmCipherKey cipherKey = { .keyLen = sessionKey.len };
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.value, sessionKey.len) != EOK) {
         AUTH_LOGE(AUTH_FSM, "set key fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
@@ -482,11 +482,11 @@ int32_t DecryptData(const SessionKeyList *list, AuthLinkType type, const InDataI
     return SOFTBUS_OK;
 }
 
-int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t **outData, uint32_t *outLen)
+int32_t EncryptInner(
+    const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t **outData, uint32_t *outLen)
 {
-    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || inDataInfo->inLen == 0 ||
-        outData == NULL || outLen == NULL) {
+    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || inDataInfo->inLen == 0 || outData == NULL ||
+        outLen == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -506,8 +506,8 @@ int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InData
     return SOFTBUS_OK;
 }
 
-int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t **outData, uint32_t *outLen)
+int32_t DecryptInner(
+    const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t **outData, uint32_t *outLen)
 {
     if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL ||
         inDataInfo->inLen <= ENCRYPT_OVER_HEAD_LEN || outData == NULL || outLen == NULL) {
@@ -566,8 +566,8 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
         .isFastAuth = false,
     };
     if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type]) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64,
-            authHandle.authId);
+        AUTH_LOGI(
+            AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64, authHandle.authId);
     }
     DelDupAuthManager(auth);
 }
