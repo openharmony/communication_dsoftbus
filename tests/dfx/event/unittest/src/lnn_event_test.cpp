@@ -64,6 +64,19 @@ static LnnEventExtra validExtra = {
     .isWifiDirectReuse = 35,
     .bandWidth = 36,
     .guideType = 37,
+    .laneStage = 38,
+    .laneHandle = 39,
+    .rttLevel = 40,
+    .transType = 41,
+    .localDynamicCap = 42,
+    .remoteDynamicCap = 43,
+    .isGuideRetry = 44,
+    .wifiDetectState = 45,
+    .wifiDetectTime = 46,
+    .buildLinkTime = 47,
+    .isHmlReuse = 48,
+    .isDelayFree = 49,
+    .freeLinkTime = 50,
     .peerDeviceInfo = "testPeerDeviceInfo",
     .peerIp = "10.11.12.1",
     .peerBrMac = "dd:15:bc:b9:f2:04",
@@ -118,6 +131,19 @@ static LnnEventExtra invalidExtra = {
     .isWifiDirectReuse = -35,
     .bandWidth = -36,
     .guideType = -37,
+    .laneStage = -38,
+    .laneHandle = -39,
+    .rttLevel = -40,
+    .transType = -41,
+    .localDynamicCap = -42,
+    .remoteDynamicCap = -43,
+    .isGuideRetry = -44,
+    .wifiDetectState = -45,
+    .wifiDetectTime = -46,
+    .buildLinkTime = -47,
+    .isHmlReuse = -48,
+    .isDelayFree = -49,
+    .freeLinkTime = -50,
     .peerDeviceInfo = "",
     .peerIp = "",
     .peerBrMac = "",
@@ -149,7 +175,7 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
         .onlineNum = -1, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 10;
+    constexpr int32_t VALID_EXTRA_SIZE = 26;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -186,7 +212,7 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
 HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 {
     constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode, authId is valid
-    constexpr int32_t VALID_EXTRA_MATCHER_SIZE = 9;
+    constexpr int32_t VALID_EXTRA_MATCHER_SIZE = 25;
     HiSysEventMock mock;
     EXPECT_CALL(mock, HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME),
         Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), LnnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE),
@@ -204,7 +230,7 @@ HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
 {
     LnnEventExtra emptyExtra = { 0 };
     constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode, authId is valid
-    constexpr int32_t VALID_EXTRA_MATCHER_SIZE = 9;
+    constexpr int32_t VALID_EXTRA_MATCHER_SIZE = 25;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

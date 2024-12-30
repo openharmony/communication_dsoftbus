@@ -79,6 +79,11 @@ typedef enum {
 
 typedef enum {
     EVENT_STAGE_LANE_CONFLICT = 1,
+    EVENT_STAGE_LANE_DECIDE_FAIL,
+    EVENT_STAGE_LANE_BUILD_SUCC,
+    EVENT_STAGE_LANE_BUILD_FAIL,
+    EVENT_STAGE_LANE_FREE_SUCC,
+    EVENT_STAGE_LANE_FREE_FAIL,
 } LnnEventLaneStage;
 
 typedef enum {
@@ -154,7 +159,7 @@ typedef struct {
     int32_t onlineType;         // ONLINE_TYPE
     int32_t osType;             // OS_TYPE
     uint32_t connOnlineReason;  // CONN_ONLINE_REASON
-    int32_t laneId;             // LANE_ID
+    int64_t laneId;             // LANE_ID
     int32_t chanReqId;          // CHAN_REQ_ID
     int32_t connReqId;          // CONN_REQ_ID
     int32_t strategy;           // STRATEGY_FOR_LNN_BLE
@@ -175,6 +180,19 @@ typedef struct {
     int32_t isWifiDirectReuse;  // IS_WIFI_DIRECT_REUSE
     int32_t bandWidth;          // BAND_WIDTH
     int32_t guideType;          // GUIDE_TYPE
+    int32_t laneStage;          // LANE_STAGE
+    int32_t laneHandle;         // LANE_HANDLE
+    int32_t rttLevel;           // RTT_LEVEL
+    int32_t transType;          // TRANS_TYPE
+    int32_t localDynamicCap;    // LOCAL_DYNAMIC_CAP
+    int32_t remoteDynamicCap;   // REMOTE_DYNAMIC_CAP
+    int32_t isGuideRetry;       // IS_GUIDE_RETRY
+    int32_t wifiDetectState;    // WIFI_DETECT_STATE
+    int64_t wifiDetectTime;     // WIFI_DETECT_TIME
+    int64_t buildLinkTime;      // BUILD_LINK_TIME
+    int32_t isHmlReuse;         // IS_HML_REUSE
+    int32_t isDelayFree;        // IS_DELAY_FREE
+    int64_t freeLinkTime;       // FREE_LINK_TIME
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

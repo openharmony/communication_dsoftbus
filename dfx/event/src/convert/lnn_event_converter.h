@@ -50,7 +50,7 @@ LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
 LNN_ASSIGNER(Int32, OnlineType, onlineType)
 LNN_ASSIGNER(Errcode, OsType, osType)
 LNN_ASSIGNER(Errcode, ConnOnlineReason, connOnlineReason)
-LNN_ASSIGNER(Int32, LaneId, laneId)
+LNN_ASSIGNER(Int64, LaneId, laneId)
 LNN_ASSIGNER(Int32, ChanReqId, chanReqId)
 LNN_ASSIGNER(Int32, ConnReqId, connReqId)
 LNN_ASSIGNER(Int32, Strategy, strategy)
@@ -71,6 +71,19 @@ LNN_ASSIGNER(Int32, MinLaneLatency, minLaneLatency)
 LNN_ASSIGNER(Errcode, IsWifiDirectReuse, isWifiDirectReuse)
 LNN_ASSIGNER(Errcode, BandWidth, bandWidth)
 LNN_ASSIGNER(Errcode, GuideType, guideType)
+LNN_ASSIGNER(Int32, LaneStage, laneStage)
+LNN_ASSIGNER(Int32, LaneHandle, laneHandle)
+LNN_ASSIGNER(Errcode, RttLevel, rttLevel)
+LNN_ASSIGNER(Errcode, TransType, transType)
+LNN_ASSIGNER(Errcode, LocalDynamicCap, localDynamicCap)
+LNN_ASSIGNER(Errcode, RemoteDynamicCap, remoteDynamicCap)
+LNN_ASSIGNER(Errcode, IsGuideRetry, isGuideRetry)
+LNN_ASSIGNER(Errcode, WifiDetectState, wifiDetectState)
+LNN_ASSIGNER(Int64, WifiDetectTime, wifiDetectTime)
+LNN_ASSIGNER(Int64, BuildLinkTime, buildLinkTime)
+LNN_ASSIGNER(Errcode, IsHmlReuse, isHmlReuse)
+LNN_ASSIGNER(Errcode, IsDelayFree, isDelayFree)
+LNN_ASSIGNER(Int64, FreeLinkTime, freeLinkTime)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -86,7 +99,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 51 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 64 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -125,6 +138,19 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "IS_WIFI_DIRECT_REUSE", HISYSEVENT_INT32,  LnnAssignerIsWifiDirectReuse},
     { "BAND_WIDTH",           HISYSEVENT_INT32,  LnnAssignerBandWidth        },
     { "GUIDE_TYPE",           HISYSEVENT_INT32,  LnnAssignerGuideType        },
+    { "LANE_STAGE",           HISYSEVENT_INT32, LnnAssignerLaneStage         },
+    { "LANE_HANDLE",          HISYSEVENT_INT32, LnnAssignerLaneHandle        },
+    { "QOS_RTT_LEVEL",        HISYSEVENT_INT32, LnnAssignerRttLevel          },
+    { "TRANS_TYPE",           HISYSEVENT_INT32, LnnAssignerTransType         },
+    { "LOCAL_CAP",            HISYSEVENT_INT32, LnnAssignerLocalDynamicCap   },
+    { "REMOTE_CAP",           HISYSEVENT_INT32, LnnAssignerRemoteDynamicCap  },
+    { "IS_GUIDE_RETRY",       HISYSEVENT_INT32, LnnAssignerIsGuideRetry      },
+    { "WIFI_DETECT_STATE",    HISYSEVENT_INT32, LnnAssignerWifiDetectState   },
+    { "WIFI_DETECT_TIME",     HISYSEVENT_UINT64, LnnAssignerWifiDetectTime   },
+    { "BUILD_LINK_TIME",      HISYSEVENT_UINT64, LnnAssignerBuildLinkTime    },
+    { "IS_HML_REUSE",         HISYSEVENT_INT32, LnnAssignerIsHmlReuse        },
+    { "IS_DELAY_FREE",        HISYSEVENT_INT32, LnnAssignerIsDelayFree       },
+    { "FREE_LINK_TIME",       HISYSEVENT_UINT64, LnnAssignerFreeLinkTime     },
     { "PEER_DEV_INFO",        HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
     { "PEER_IP",              HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, LnnAssignerPeerBrMac        },

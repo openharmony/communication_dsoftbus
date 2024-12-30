@@ -23,6 +23,7 @@
 #include "auth_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane.h"
+#include "lnn_lane_dfx.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"

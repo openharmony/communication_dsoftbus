@@ -92,7 +92,7 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.onlineType);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.osType);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.connOnlineReason);
-    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.laneId);
+    MatchLnnEventNameTypeExtraInt64Param(params, ++index, extra.laneId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.chanReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.strategy);
@@ -113,6 +113,19 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.isWifiDirectReuse);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.bandWidth);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.guideType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.laneStage);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.laneHandle);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.rttLevel);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.transType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.localDynamicCap);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.remoteDynamicCap);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.isGuideRetry);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.wifiDetectState);
+    MatchLnnEventNameTypeExtraInt64Param(params, ++index, extra.wifiDetectTime);
+    MatchLnnEventNameTypeExtraInt64Param(params, ++index, extra.buildLinkTime);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.isHmlReuse);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.isDelayFree);
+    MatchLnnEventNameTypeExtraInt64Param(params, ++index, extra.freeLinkTime);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);

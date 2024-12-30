@@ -51,11 +51,14 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t de
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+int32_t PostNotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode, uint64_t delayMillis);
 void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId);
-void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode);
+TransReqInfo* UpdateRequestNotifyFreeBylaneReqId(uint32_t laneReqId, bool isNotifyFree);
 int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo);
+int32_t UpdateFreeLaneStatus(uint32_t laneReqId);
+int32_t DeleteRequestNode(uint32_t laneReqId);
 
 #ifdef __cplusplus
 }
