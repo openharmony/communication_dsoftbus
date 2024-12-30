@@ -22,6 +22,17 @@
 extern "C" {
 #endif
 
+typedef enum {
+    LANE_ACTIVE_AUTH_TRIGGER = 0x0,
+    LANE_BLE_TRIGGER,
+    LANE_ACTIVE_AUTH_NEGO,
+    LANE_ACTIVE_BR_NEGO,
+    LANE_PROXY_AUTH_NEGO,
+    LANE_NEW_AUTH_NEGO,
+    LANE_ACTION_TRIGGER,
+    LANE_CHANNEL_BUTT,
+} WdGuideType;
+
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
 int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId);
 void LnnDestroyP2p(void);

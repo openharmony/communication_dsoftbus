@@ -20,6 +20,7 @@
 
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_score_virtual.c"
+#include "lnn_trans_free_lane.h"
 #include "lnn_trans_lane.h"
 #include "lnn_trans_lane_deps_mock.h"
 #include "softbus_adapter_thread.h"
