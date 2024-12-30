@@ -330,3 +330,43 @@ void RegisterPermissionChangeCallback(void)
 {
     return;
 }
+
+int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, const TransInfo *transInfo)
+{
+    if (pkgName == NULL || sourceInfo == NULL || sinkInfo == NULL || transInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    (void)pid;
+    TRANS_LOGI(TRANS_CTRL, "check Collab relation ipc server push.");
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteInt64(&io, sourceInfo->accountId);
+    WriteUint64(&io, sourceInfo->tokenId);
+    WriteInt32(&io, sourceInfo->userId);
+    WriteInt32(&io, sourceInfo->pid);
+    WriteString(&io, sourceInfo->deviceId);
+    WriteInt64(&io, sinkInfo->accountId);
+    WriteUint64(&io, sinkInfo->tokenId);
+    WriteInt32(&io, sinkInfo->userId);
+    WriteInt32(&io, sinkInfo->pid);
+    WriteString(&io, sinkInfo->deviceId);
+    WriteInt32(&io, transInfo->channelId);
+    WriteInt32(&io, transInfo->channelType);
+    SvcIdentity svc = {0};
+    int32_t ret = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get svc failed, ret=%{public}d", ret);
+        return ret;
+    }
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    ret = SendRequest(svc, CLIENT_CHECK_COLLAB_RELATION, &io, NULL, option, NULL);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "SendRequest failed, ret=%{public}d", ret);
+    }
+    return ret;
+}

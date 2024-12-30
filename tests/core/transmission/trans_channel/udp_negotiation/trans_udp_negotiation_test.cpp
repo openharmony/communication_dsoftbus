@@ -334,4 +334,66 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
     ret = TransUdpChannelMgrInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: TransDealUdpCheckCollabResult001
+ * @tc.desc: Check collab result, invalid channelId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult001, TestSize.Level1)
+{
+    int32_t checkResult = SOFTBUS_OK;
+    int32_t ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransDealUdpCheckCollabResult002
+ * @tc.desc: Check collab result, check result is ok.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult002, TestSize.Level1)
+{
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    EXPECT_TRUE(newChannel != NULL);
+    newChannel->seq = 1;
+    newChannel->info.myData.channelId = TEST_CHANNEL_ID;
+    int32_t res = strcpy_s(newChannel->info.myData.pkgName, sizeof(newChannel->info.myData.pkgName),
+                       g_pkgName);
+    newChannel->info.myData.pid = INVALID_PID;
+    EXPECT_EQ(res, EOK);
+    int32_t checkResult = SOFTBUS_OK;
+    int32_t ret = TransAddUdpChannel(newChannel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ReleaseUdpChannelId(TEST_CHANNEL_ID);
+}
+
+/**
+ * @tc.name: TransDealUdpCheckCollabResult003
+ * @tc.desc: Check collab result, check result is err.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Level1)
+{
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    EXPECT_TRUE(newChannel != NULL);
+    newChannel->seq = 1;
+    newChannel->info.myData.channelId = TEST_CHANNEL_ID;
+    int32_t ret = strcpy_s(newChannel->info.myData.pkgName, sizeof(newChannel->info.myData.pkgName), g_pkgName);
+    newChannel->info.myData.pid = INVALID_PID;
+    EXPECT_EQ(ret, EOK);
+    int32_t checkResult = SOFTBUS_ERR;
+    ret = TransAddUdpChannel(newChannel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ReleaseUdpChannelId(TEST_CHANNEL_ID);
+}
 }

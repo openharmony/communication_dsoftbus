@@ -14,6 +14,7 @@
  */
 
 #include "lnn_distributed_net_ledger.h"
+#include "bus_center_manager.h"
 
 #include "lnn_log.h"
 #include "softbus_error_code.h"
@@ -105,4 +106,113 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     (void)id;
     (void)type;
     return true;
+}
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    (void)id;
+    (void)type;
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnRemoveNode(const char *udid)
+{
+    (void)udid;
+}
+
+int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
+{
+    (void)newInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
+{
+    (void)newInfo;
+    (void)udid;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetDLDeviceNickNameByUdid(const char *udid, const char *name)
+{
+    (void)udid;
+    (void)name;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey)
+{
+    (void)udid;
+    (void)cipherKey;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv)
+{
+    (void)udid;
+    (void)cipherIv;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion)
+{
+    (void)udid;
+    (void)stateVersion;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
+{
+    (void)udid;
+    (void)name;
+    return false;
+}
+
+int32_t LnnSetDLUnifiedDeviceName(const char *udid, const char *name)
+{
+    (void)udid;
+    (void)name;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name)
+{
+    (void)udid;
+    (void)name;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    (void)key;
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
+{
+    (void)networkId;
+    (void)authCapacity;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    (void)networkId;
+    (void)osType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum)
+{
+    (void)nodeNum;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *connSubFeature)
+{
+    (void)udidHashStr;
+    (void)connSubFeature;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

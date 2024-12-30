@@ -20,6 +20,7 @@
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
 #include "message_handler.h"
+#include "session_set_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_feature_config.h"
@@ -1198,5 +1199,115 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
 
     TransSessionMgrDeinit();
     TransAuthDeinit();
+}
+
+/**
+ * @tc.name: TransAuthFillDataConfigTest001
+ * @tc.desc: TransAuthFillDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthFillDataConfigTest001, TestSize.Level1)
+{
+    int32_t ret = GetAuthChannelLock();
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ReleaseAuthChannelLock();
+    ret = TransAuthFillDataConfig(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    EXPECT_NE(appInfo, nullptr);
+
+    ret = TransAuthFillDataConfig(appInfo);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransAuthProcessDataConfigTest001
+ * @tc.desc: TransAuthFillDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthProcessDataConfigTest001, TestSize.Level1)
+{
+    int32_t ret = TransAuthProcessDataConfig(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->businessType = BUSINESS_TYPE_FILE;
+    ret = TransAuthProcessDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->businessType = BUSINESS_TYPE_MESSAGE;
+    appInfo->peerData.dataConfig = 1;
+    ret = TransAuthProcessDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->businessType = BUSINESS_TYPE_MESSAGE;
+    appInfo->peerData.dataConfig = 0;
+    ret = TransAuthProcessDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    FillExtraByAuthChannelErrorEnd(nullptr, nullptr, 1);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransFillAuthChannelInfoTest001
+ * @tc.desc: TransAuthFillDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransFillAuthChannelInfoTest001, TestSize.Level1)
+{
+    int32_t ret = TransFillAuthChannelInfo(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    AuthChannelInfo *channel = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
+    EXPECT_NE(channel, nullptr);
+    LaneConnInfo *connInfo = static_cast<LaneConnInfo *>(SoftBusCalloc(sizeof(LaneConnInfo)));
+    EXPECT_NE(channel, nullptr);
+    int32_t channelId = TRANS_TEST_CHANNEL_ID;
+    ret = TransFillAuthChannelInfo(channel, connInfo, &channelId);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channel);
+    SoftBusFree(connInfo);
+}
+
+/**
+ * @tc.name: TransOpenAuthMsgChannelWithParaTest001
+ * @tc.desc: TransAuthFillDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelWithParaTest001, TestSize.Level1)
+{
+    int32_t ret = TransOpenAuthMsgChannelWithPara(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = CheckIsWifiAuthChannel(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ConnectOption *connInfo = static_cast<ConnectOption *>(SoftBusCalloc(sizeof(ConnectOption)));
+    EXPECT_NE(connInfo, nullptr);
+    connInfo->socketOption.moduleId = 1;
+    ret = CheckIsWifiAuthChannel(connInfo);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    SoftBusFree(connInfo);
+}
+
+/**
+ * @tc.name: TransSetAuthChannelReplyCntTest001
+ * @tc.desc: TransAuthFillDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest001, TestSize.Level1)
+{
+    int32_t ret = TransSetAuthChannelReplyCnt(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

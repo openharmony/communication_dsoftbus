@@ -103,13 +103,12 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
 
 bool WifiDirectRoleOption::IsPowerAlwaysOn(int32_t devTypeId)
 {
-    return devTypeId == TYPE_TV_ID || devTypeId == TYPE_CAR_ID || devTypeId == TYPE_SMART_DISPLAY_ID ||
-           devTypeId == TYPE_PC_ID || devTypeId == TYPE_2IN1_ID;
+    return devTypeId == TYPE_TV_ID || devTypeId == TYPE_CAR_ID || devTypeId == TYPE_SMART_DISPLAY_ID;
 }
 
 bool WifiDirectRoleOption::IsGoPreferred(int32_t devTypeId)
 {
-    return devTypeId == TYPE_PAD_ID;
+    return devTypeId == TYPE_PAD_ID || devTypeId == TYPE_PC_ID || devTypeId == TYPE_2IN1_ID;
 }
 
 bool WifiDirectRoleOption::IsGcPreferred(int32_t devTypeId)

@@ -391,6 +391,13 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
     }
     tcpChannelInfo->timeStart = channel->timeStart;
     tcpChannelInfo->linkType = channel->linkType;
+    SessionConn conn = { 0 };
+    if (GetSessionConnById(channel->channelId, &conn) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to get callingTokenId, channelId=%{public}d", channel->channelId);
+        SoftBusFree(tcpChannelInfo);
+        return NULL;
+    }
+    tcpChannelInfo->callingTokenId = conn.appInfo.callingTokenId;
     return tcpChannelInfo;
 }
 
@@ -692,6 +699,24 @@ int32_t TransTdcUpdateReplyCnt(int32_t channelId)
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t TransTdcResetReplyCnt(int32_t channelId)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            connInfo->appInfo.waitOpenReplyCnt = 0;
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_SVC, "can not find by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -712,4 +737,28 @@ int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount)
     ReleaseSessionConnLock();
     TRANS_LOGE(TRANS_CTRL, "session conn item not found by channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid)
+{
+    if (privilegeCloseList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "privilegeCloseList is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp channel info list hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_tcpChannelInfoList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    TcpChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
+        if (item->callingTokenId == tokenId && item->pid == pid) {
+            (void)PrivilegeCloseListAddItem(privilegeCloseList, item->pid, item->pkgName);
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+    return SOFTBUS_OK;
 }

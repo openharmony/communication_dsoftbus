@@ -12,40 +12,7 @@
 # limitations under the License.
 
 declare_args() {
-  dsoftbus_feature_disc_ble = false
-  dsoftbus_feature_disc_coap = true
-  dsoftbus_feature_disc_usb = false
-  dsoftbus_feature_disc_approach = false
-  dsoftbus_feature_disc_virtual_link_ble = false
-
-  dsoftbus_feature_conn_tcp = true
-  dsoftbus_feature_conn_br = false
-  dsoftbus_feature_conn_ble = false
-  dsoftbus_feature_conn_p2p = false
-  dsoftbus_feature_conn_legacy = true
-
-  dsoftbus_feature_protocol_newip = false
-
-  dsoftbus_feature_trans_udp = true
-  dsoftbus_feature_trans_udp_stream = false
-  dsoftbus_feature_trans_udp_file = true
-
-  dsoftbus_feature_ip_auth = true
-  dsoftbus_feature_auth_account = false
-
-  dsoftbus_feature_lnn_net = true
-  dsoftbus_feature_lnn_time_sync = true
-  dsoftbus_feature_lnn_heartbeat = false
-  dsoftbus_feature_lnn_meta_node = false
-  dsoftbus_feature_qos = false
-  dsoftbus_feature_lnn_wifiservice_dependence = false
-
   dsoftbus_feature_build_shared_sdk = true
 
   dsoftbus_feature_encrypt = 0
-
-  dsoftbus_feature_ex_kits = false
-  dsoftbus_feature_proxy_file = true
-
-  dsoftbus_feature_wifi_notify = false
 }

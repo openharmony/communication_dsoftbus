@@ -62,6 +62,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] = &SoftBusClientStub::OnClientTransLimitChangeInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
     memberFuncMap_[CLIENT_CHANNEL_ON_QOS] = &SoftBusClientStub::OnChannelOnQosInner;
+    memberFuncMap_[CLIENT_CHECK_COLLAB_RELATION] = &SoftBusClientStub::OnCheckCollabRelationInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -728,6 +729,48 @@ int32_t SoftBusClientStub::OnChannelBindInner(MessageParcel &data, MessageParcel
         "OnChannelBind failed! ret=%{public}d, channelId=%{public}d, channelType=%{public}d",
         ret, channelId, channelType);
 
+    return SOFTBUS_OK;
+}
+
+static int32_t MessageParcelReadCollabInfo(MessageParcel &data, CollabInfo &info)
+{
+    READ_PARCEL_WITH_RET(data, Int64, info.accountId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint64, info.tokenId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, info.userId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, info.pid, SOFTBUS_IPC_ERR);
+    char *deviceId = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(deviceId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read deviceId failed");
+    if (strcpy_s(info.deviceId, sizeof(info.deviceId), deviceId) != EOK) {
+        COMM_LOGE(COMM_SDK, "strcpy_s failed to copy deviceId");
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnCheckCollabRelation(
+    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+{
+    if (sourceInfo == nullptr || sinkInfo == nullptr) {
+        COMM_LOGE(COMM_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return TransOnCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
+}
+
+int32_t SoftBusClientStub::OnCheckCollabRelationInner(MessageParcel &data, MessageParcel &reply)
+{
+    CollabInfo sourceInfo;
+    CollabInfo sinkInfo;
+    int32_t ret = MessageParcelReadCollabInfo(data, sourceInfo);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read source info failed");
+    ret = MessageParcelReadCollabInfo(data, sinkInfo);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read sink info failed");
+    int32_t channelId;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
+    int32_t channelType;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelType), SOFTBUS_IPC_ERR, COMM_SDK, "read channelType failed");
+    ret = OnCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, COMM_SDK, "CheckCollabRelation failed! ret=%{public}d.", ret);
     return SOFTBUS_OK;
 }
 

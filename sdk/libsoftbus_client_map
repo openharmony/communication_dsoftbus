@@ -175,6 +175,8 @@
         "UnRegisterFileSchema";
         "SoftBusDFileSetSessionOpt";
         "CtrlLNNBleHb";
+        "PrivilegeShutdown";
+        "RegisterRelationChecker";
     local:
         *;
 };

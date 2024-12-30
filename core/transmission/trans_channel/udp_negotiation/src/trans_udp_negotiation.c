@@ -34,6 +34,7 @@
 #include "softbus_scenario_manager.h"
 #include "trans_bind_request_manager.h"
 #include "trans_channel_common.h"
+#include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
@@ -341,11 +342,16 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
         return SOFTBUS_TRANS_UDP_SERVER_ADD_CHANNEL_FAILED;
     }
 
-    ret = NotifyUdpChannelOpened(appInfo, true);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
-        return ret;
+    ret = CheckCollabRelation(appInfo, udpChannelId, CHANNEL_TYPE_UDP);
+    if (ret == SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+        ret = NotifyUdpChannelOpened(appInfo, true);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
+            return ret;
+        }
+        return SOFTBUS_OK;
     }
+
     return SOFTBUS_OK;
 }
 
@@ -1295,6 +1301,52 @@ int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int
 ERR_EXIT:
     ProcessAbnormalUdpChannelState(&channel.info, ret, false);
     ReportUdpRequestHandShakeReplyEvent(&channel.info, &extra, EVENT_STAGE_RESULT_FAILED, ret);
+    if (SendReplyErrInfo(ret, errDesc, channel.authHandle, channel.seq) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
+    }
+    return ret;
+}
+
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult)
+{
+    char *errDesc = NULL;
+    UdpChannelInfo channel = { 0 };
+    int32_t ret = TransGetUdpChannelById(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get udp channel failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+    ret = TransUdpUpdateReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", channelId);
+        errDesc = (char *)"TransUdpUpdateReplyCnt failed";
+        goto ERR_EXIT;
+    }
+    // Remove old check tasks.
+    TransCheckChannelOpenRemoveFromLooper(channelId);
+    if (checkResult != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", channelId);
+        ret = checkResult;
+        errDesc = (char *)"check Collab failed";
+        goto ERR_EXIT;
+    }
+    // Reset the check count to 0.
+    ret = TransUdpResetReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        errDesc = (char *)"TransUdpResetReplyCnt failed";
+        goto ERR_EXIT;
+    }
+
+    ret = NotifyUdpChannelOpened(&channel.info, true);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Trans on channel opened failed ret=%{public}d", ret);
+        errDesc = (char *)"NotifyUdpChannelOpened failed";
+        goto ERR_EXIT;
+    }
+    return SOFTBUS_OK;
+
+ERR_EXIT:
+    (void)TransDelUdpChannel(channelId);
     if (SendReplyErrInfo(ret, errDesc, channel.authHandle, channel.seq) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
     }

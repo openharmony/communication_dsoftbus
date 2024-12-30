@@ -48,6 +48,13 @@ trans_session_inc += [
   "$dsoftbus_root_path/core/transmission/session/cpp/include",
 ]
 
+if (softbus_os_account) {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_account_adapter.cpp" ]
+  trans_session_external_deps += [ "os_account:os_account_innerkits" ]
+} else {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_account_adapter_virtual.c" ]
+}
+
 if (enhanced_qos_info) {
   trans_session_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/common/src/trans_qos_info.c" ]
   trans_session_inc +=
@@ -107,7 +114,7 @@ if (defined(ohos_lite)) {
 }
 
 if (dsoftbus_feature_wifi_notify == true &&
-    softbus_communication_wifi_feature == true) {
+    softbus_communication_wifi_feature == true && !defined(ohos_lite)) {
   trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/src/softbus_scenario_manager.c" ]
   trans_session_external_deps += [ "wifi:wifi_sdk" ]
 } else {

@@ -478,3 +478,25 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
     }
     return ret;
 }
+
+int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteUint64(&request, tokenId);
+    WriteInt32(&request, pid);
+    WriteString(&request, peerNetworkId);
+    int32_t ret = SOFTBUS_NO_INIT;
+    /* sync */
+    if (g_serverProxy == NULL) {
+        TRANS_LOGE(TRANS_SDK, "server proxy not init");
+        return ret;
+    }
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PRIVILEGE_CLOSE_CHANNEL, &request, &ret, ProxyCallback);
+    if (ans != EC_SUCCESS) {
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
+    }
+    return ret;
+}

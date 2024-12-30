@@ -188,10 +188,14 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSi
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize.Level0)
 {
+#define PRIVILEGE_CLOSE_CHANNEL 11
     int32_t ret = TransOnChannelLinkDown(nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOnChannelLinkDown(g_networkid, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelLinkDown(g_networkid, 0 | 1 << PRIVILEGE_CLOSE_CHANNEL);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -317,4 +321,23 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Lev
     ret = TransOnChannelBind(channelId, CHANNEL_TYPE_BUTT);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
+
+/**
+ * @tc.name: TransOnCheckCollabRelationTest001
+ * @tc.desc: trans on channel bind test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest001, TestSize.Level0)
+{
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    const int32_t channelId = 1;
+    const int32_t channelType = 1;
+    int32_t ret = TransOnCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
 } // namespace OHOS

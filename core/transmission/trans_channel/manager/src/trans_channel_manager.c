@@ -34,6 +34,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_qos.h"
 #include "softbus_utils.h"
+#include "trans_auth_lane_pending_ctl.h"
 #include "trans_auth_manager.h"
 #include "trans_auth_negotiation.h"
 #include "trans_bind_request_manager.h"
@@ -75,6 +76,12 @@ typedef enum {
     LOOP_CHANNEL_OPEN_MSG,
     LOOP_LIMIT_CHANGE_MSG,
 } ChannelResultLoopMsg;
+
+typedef struct {
+    ListNode node;
+    int32_t pid;
+    char pkgName[PKG_NAME_SIZE_MAX];
+} PrivilegeCloseChannelInfo;
 
 static int32_t GenerateTdcChannelId()
 {
@@ -221,6 +228,22 @@ void TransCheckChannelOpenToLooperDelay(int32_t channelId, int32_t channelType, 
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "msg create failed");
 
     g_channelResultHandler.looper->PostMessageDelay(g_channelResultHandler.looper, msg, delayTime);
+}
+
+static int32_t RemoveMessageDestroy(const SoftBusMessage *msg, void *data)
+{
+    int32_t channelId = *(int32_t *)data;
+    if (msg->what == LOOP_CHANNEL_OPEN_MSG && channelId == (int32_t)msg->arg1) {
+        TRANS_LOGE(TRANS_CTRL, "remove delay check channel opened message succ, channelId=%{public}d.", channelId);
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_INVALID_PARAM;
+}
+
+void TransCheckChannelOpenRemoveFromLooper(int32_t channelId)
+{
+    g_channelResultHandler.looper->RemoveMessageCustom(
+        g_channelResultHandler.looper, &g_channelResultHandler, RemoveMessageDestroy, &channelId);
 }
 
 int32_t TransChannelInit(void)
@@ -1028,6 +1051,54 @@ static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
     }
 }
 
+static int32_t GetCollabCheckResultFromBuf(uint8_t *buf,
+    int32_t *channelId, int32_t *channelType, int32_t *checkResult, uint32_t len)
+{
+    int32_t offset = 0;
+    int32_t ret = ReadInt32FromBuf(buf, len, &offset, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed.");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offset, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelType from buf failed.");
+        return ret;
+    }
+    ret = ReadInt32FromBuf(buf, len, &offset, checkResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get checkResult from buf failed.");
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
+{
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t checkResult = 0;
+    int32_t ret = GetCollabCheckResultFromBuf(buf, &channelId, &channelType, &checkResult, len);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            ret = TransDealProxyCheckCollabResult(channelId, checkResult);
+            break;
+        case CHANNEL_TYPE_TCP_DIRECT:
+            ret = TransDealTdcCheckCollabResult(channelId, checkResult);
+            break;
+        case CHANNEL_TYPE_UDP:
+            ret = TransDealUdpCheckCollabResult(channelId, checkResult);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error.", channelType);
+            ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    return ret;
+}
+
 int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
 {
     if (buf == NULL) {
@@ -1042,6 +1113,9 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
         case EVENT_TYPE_TRANS_LIMIT_CHANGE:
             TransReportLimitChangeInfo(buf, len);
             break;
+        case EVENT_TYPE_COLLAB_CHECK:
+            ret = TransReportCheckCollabInfo(buf, len);
+            break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);
             ret = SOFTBUS_TRANS_MSG_INVALID_EVENT_TYPE;
@@ -1050,4 +1124,58 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
         TRANS_LOGE(TRANS_CTRL, "report event failed, eventType=%{public}d", eventType);
     }
     return ret;
+}
+
+int32_t TransPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId)
+{
+#define PRIVILEGE_CLOSE_OFFSET 11
+    if (peerNetworkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    (void)TransTcpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    (void)TransProxyGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    (void)TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    LinkDownInfo info = {
+        .uuid = "",
+        .udid = "",
+        .peerIp = "",
+        .networkId = peerNetworkId,
+        .routeType = ROUTE_TYPE_ALL | 1 << PRIVILEGE_CLOSE_OFFSET,
+    };
+    PrivilegeCloseChannelInfo *pos = NULL;
+    PrivilegeCloseChannelInfo *tmp = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &privilegeCloseList, PrivilegeCloseChannelInfo, node) {
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
+        ListDelete(&(pos->node));
+        SoftBusFree(pos);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t PrivilegeCloseListAddItem(ListNode *privilegeCloseList, int32_t pid, const char *pkgName)
+{
+    if (privilegeCloseList == NULL || pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    PrivilegeCloseChannelInfo *exitItem = NULL;
+    LIST_FOR_EACH_ENTRY(exitItem, privilegeCloseList, PrivilegeCloseChannelInfo, node) {
+        if (strcmp(exitItem->pkgName, pkgName) == 0 && exitItem->pid == pid) {
+            return SOFTBUS_OK;
+        }
+    }
+    PrivilegeCloseChannelInfo *item = (PrivilegeCloseChannelInfo *)SoftBusCalloc(sizeof(PrivilegeCloseChannelInfo));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
+    if (strcpy_s(item->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        SoftBusFree(item);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    item->pid = pid;
+    ListInit(&(item->node));
+    ListAdd(privilegeCloseList, &(item->node));
+    TRANS_LOGI(TRANS_CTRL, "add success, pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+    return SOFTBUS_OK;
 }

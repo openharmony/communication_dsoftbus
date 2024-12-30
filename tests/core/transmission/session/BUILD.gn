@@ -35,6 +35,7 @@ ohos_unittest("TransSessionManagerTest") {
 
     "$dsoftbus_core_path/transmission/common/include",
     "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/session/cpp/include",
   ]
 
   deps = [

@@ -27,12 +27,14 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
+#include "lnn_connection_fsm.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_fast_offline.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
@@ -54,9 +56,9 @@
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_utils.h"
-#include "lnn_connection_fsm.h"
 
 #define HB_LOOPBACK_IP "127.0.0.1"
+#define INVALID_DELAY_TIME (-1)
 
 typedef struct {
     SoftBusBtState btState;
@@ -277,27 +279,81 @@ static void RequestEnableDiscovery(void *para)
     HbConditionChanged(false);
 }
 
-void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
+static void RequestDisableDiscovery(int64_t timeout)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
-    if (strategy == REQUEST_DISABLE_BLE_DISCOVERY) {
-        if (g_hbConditionState.isRequestDisable) {
-            LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
-            return;
-        }
+    if (g_hbConditionState.isRequestDisable) {
+        LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
+        return;
+    }
+    if (timeout != INVALID_DELAY_TIME) {
         uint64_t time = GetDisEnableBleDiscoveryTime((uint64_t)timeout);
         if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RequestEnableDiscovery, NULL, time) !=
             SOFTBUS_OK) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled fail, due to async callback fail");
             return;
         }
-        g_hbConditionState.isRequestDisable = true;
-        LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled");
-        HbConditionChanged(false);
-    } else if (strategy == REQUEST_ENABLE_BLE_DISCOVERY) {
-        RequestEnableDiscovery(NULL);
-    } else {
-        LNN_LOGE(LNN_HEART_BEAT, "error strategy, not need to deal. strategy=%{public}d", strategy);
+    }
+    g_hbConditionState.isRequestDisable = true;
+    LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled");
+    HbConditionChanged(false);
+}
+
+static void SameAccountDevRequestEnableDiscovery(void *para)
+{
+    if (LnnIsDefaultOhosAccount()) {
+        LNN_LOGW(LNN_HEART_BEAT, "can not request enable because default account");
+        return;
+    }
+    RequestEnableDiscovery(para);
+}
+
+static int32_t SameAccountDevDisableDiscoveryProcess(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "enter");
+    int32_t infoNum = 0;
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    }
+    if (info == NULL || infoNum == 0) {
+        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
+        return SOFTBUS_NO_ONLINE_DEVICE;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (int32_t i = 0; i < infoNum; ++i) {
+        if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+            continue;
+        }
+        if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BLE)) {
+            LnnSyncBleOfflineMsg();
+            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_BLE);
+        }
+    }
+    SoftBusFree(info);
+    return SOFTBUS_OK;
+}
+
+void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
+    switch (strategy) {
+        case REQUEST_DISABLE_BLE_DISCOVERY:
+            RequestDisableDiscovery(timeout);
+            break;
+        case REQUEST_ENABLE_BLE_DISCOVERY:
+            RequestEnableDiscovery(NULL);
+            break;
+        case SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY:
+            RequestDisableDiscovery(INVALID_DELAY_TIME);
+            SameAccountDevDisableDiscoveryProcess();
+            break;
+        case SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY:
+            SameAccountDevRequestEnableDiscovery(NULL);
+            break;
+        default:
+            LNN_LOGE(LNN_HEART_BEAT, "error strategy, not need to deal. strategy=%{public}d", strategy);
     }
 }
 
