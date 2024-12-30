@@ -59,11 +59,18 @@ LNN_ASSIGNER(Errcode, TriggerReason, triggerReason)
 LNN_ASSIGNER(Int64, AuthSeq, authSeq)
 LNN_ASSIGNER(Errcode, OnlineDevCnt, onlineDevCnt)
 LNN_ASSIGNER(Int32, Interval, interval)
-LNN_ASSIGNER(Int32, LaneLinkType, laneLinkType)
+LNN_ASSIGNER(Errcode, LaneLinkType, laneLinkType)
 LNN_ASSIGNER(Int32, HmlChannelId, hmlChannelId)
 LNN_ASSIGNER(Int32, P2pChannelId, p2pChannelId)
 LNN_ASSIGNER(Int32, StaChannelId, staChannelId)
 LNN_ASSIGNER(Int32, ApChannelId, apChannelId)
+LNN_ASSIGNER(Int32, LaneReqId, laneReqId)
+LNN_ASSIGNER(Int32, MinBW, minBW)
+LNN_ASSIGNER(Int32, MaxLaneLatency, maxLaneLatency)
+LNN_ASSIGNER(Int32, MinLaneLatency, minLaneLatency)
+LNN_ASSIGNER(Errcode, IsWifiDirectReuse, isWifiDirectReuse)
+LNN_ASSIGNER(Errcode, BandWidth, bandWidth)
+LNN_ASSIGNER(Errcode, GuideType, guideType)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -79,7 +86,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 44 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 51 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -111,6 +118,13 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "P2P_CHANNEL_ID",       HISYSEVENT_INT32,  LnnAssignerP2pChannelId     },
     { "STA_CHANNEL_ID",       HISYSEVENT_INT32,  LnnAssignerStaChannelId     },
     { "AP_CHANNEL_ID",        HISYSEVENT_INT32,  LnnAssignerApChannelId      },
+    { "LANE_REQ_ID",          HISYSEVENT_INT32,  LnnAssignerLaneReqId        },
+    { "MIN_BW",               HISYSEVENT_INT32,  LnnAssignerMinBW            },
+    { "MAX_LANE_LATENCY",     HISYSEVENT_INT32,  LnnAssignerMaxLaneLatency   },
+    { "MIN_LANE_LATENCY",     HISYSEVENT_INT32,  LnnAssignerMinLaneLatency   },
+    { "IS_WIFI_DIRECT_REUSE", HISYSEVENT_INT32,  LnnAssignerIsWifiDirectReuse},
+    { "BAND_WIDTH",           HISYSEVENT_INT32,  LnnAssignerBandWidth        },
+    { "GUIDE_TYPE",           HISYSEVENT_INT32,  LnnAssignerGuideType        },
     { "PEER_DEV_INFO",        HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
     { "PEER_IP",              HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, LnnAssignerPeerBrMac        },

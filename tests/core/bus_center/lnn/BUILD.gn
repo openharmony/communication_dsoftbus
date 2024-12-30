@@ -1421,6 +1421,7 @@ ohos_unittest("LNNLaneExtMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
   ]
 
@@ -1531,6 +1532,7 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
   ]
 
@@ -1613,6 +1615,7 @@ ohos_unittest("LNNLaneQueryTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
   ]
 
@@ -1701,6 +1704,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
   ]
 
   deps = [
@@ -1787,6 +1791,7 @@ ohos_unittest("LNNLaneLinkExtTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
   ]
 
   deps = [
@@ -1905,6 +1910,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
@@ -2058,6 +2064,7 @@ ohos_unittest("LNNLaneListenerTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
   ]
 
   deps = [
