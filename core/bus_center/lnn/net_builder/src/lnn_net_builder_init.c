@@ -574,6 +574,7 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
 
 static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
 {
+    LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "NodeInfo is NULL");
     AuthConnInfo connInfo;
     DeviceVerifyPassMsgPara *para = NULL;
     LNN_LOGI(LNN_BUILDER, "verify passed passively, authId=%{public}" PRId64, authHandle.authId);

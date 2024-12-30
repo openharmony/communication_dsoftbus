@@ -33,9 +33,9 @@
 #include "trans_event.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
-#include "utils/wifi_direct_anonymous.h"
 #include "wifi_statistic.h"
 #include "bt_statistic.h"
+#include "anonymizer.h"
 
 using namespace OHOS::SoftBus;
 
@@ -87,15 +87,27 @@ using InstantRemoteInfo = struct {
     ListNode channels;
 };
 
+static std::string AnonymizeStr(const std::string &data)
+{
+    if (data.empty()) {
+        return "";
+    }
+    char *temp = nullptr;
+    Anonymize(data.c_str(), &temp);
+    std::string result = AnonymizeWrapper(temp);
+    AnonymizeFree(temp);
+    return result;
+}
+
 static void InstPackAndAnonymizeStringIfNotNull(cJSON *json, std::string &str, const char *key, bool isDeviceId)
 {
     if (json == NULL || str.empty() || key == NULL) {
         return;
     }
     if (isDeviceId) {
-        (void)AddStringToJsonObject(json, key, WifiDirectAnonymizeDeviceId(str).c_str());
+        (void)AddStringToJsonObject(json, key, AnonymizeStr(str).c_str());
     } else {
-        (void)AddStringToJsonObject(json, key, WifiDirectAnonymizeMac(str).c_str());
+        (void)AddStringToJsonObject(json, key, AnonymizeStr(str).c_str());
     }
 }
 
@@ -116,6 +128,7 @@ static int32_t InstSetPeerDeviceIdForRemoteInfo(std::string &dst, const std::str
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_CONN_PV1
 static void InstUpdateRemoteInfoByInnerLink(InstantRemoteInfo *remoteInfo,
     const InnerLinkBasicInfo &link, const std::string &remoteUuid)
 {
@@ -144,6 +157,7 @@ static void InstUpdateRemoteInfoByInnerLink(InstantRemoteInfo *remoteInfo,
         InstSetPeerDeviceIdForRemoteInfo(remoteInfo->hmlIp, link.remoteIpv4);
     }
 }
+#endif
 
 static InstantRemoteInfo *InstCreateAndAddRemoteInfo(SoftBusList *remoteChannelInfoList, bool matched)
 {
@@ -165,6 +179,7 @@ static InstantRemoteInfo *InstCreateAndAddRemoteInfo(SoftBusList *remoteChannelI
     return rInfo;
 }
 
+#ifdef DSOFTBUS_FEATURE_CONN_PV1
 static void InstAddRemoteInfoByLinkManager(SoftBusList *remoteChannelInfoList)
 {
     std::vector<InnerLinkBasicInfo> links;
@@ -191,6 +206,7 @@ static void InstAddRemoteInfoByLinkManager(SoftBusList *remoteChannelInfoList)
     }
     links.clear();
 }
+#endif
 
 static int32_t InstGetIpFromLinkTypeOrConnectType(const InstantRemoteInfo *remoteInfo, int32_t linkType,
     int32_t connectType)
@@ -891,7 +907,9 @@ static void InstGetRemoteInfo(cJSON *json)
     if (ret != SOFTBUS_OK) {
         (void)AddNumberToJsonObject(json, "Bus_center_fault", ret);
     }
+    #ifdef DSOFTBUS_FEATURE_CONN_PV1
     InstAddRemoteInfoByLinkManager(remoteChannelInfoList);
+    #endif
     InstUpdateRemoteInfoBySessionConn(remoteChannelInfoList);
     InstUpdateRemoteInfoByTcpChannel(remoteChannelInfoList);
     InstUpdateRemoteInfoByUdpChannel(remoteChannelInfoList);

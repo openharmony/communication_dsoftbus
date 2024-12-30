@@ -373,3 +373,39 @@ int32_t ServerReleaseResources(IpcIo *req, IpcIo *reply)
     int32_t ret = TransReleaseUdpResources(channelId);
     return ret;
 }
+
+int32_t ServerPrivilegeCloseChannel(IpcIo *req, IpcIo *reply)
+{
+#define DMS_CALLING_UID 5522
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
+    if (req == NULL || reply == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t callingUid = GetCallingUid();
+    if (callingUid != DMS_CALLING_UID) {
+        TRANS_LOGE(TRANS_CTRL, "uid check failed");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    int32_t ret;
+    uint64_t tokenId = 0;
+    int32_t pid = 0;
+    const char *peerNetworkId = NULL;
+    uint32_t size;
+    if (ReadUint64(req, &tokenId)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read tokenId");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (ReadInt32(req, &pid)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read pid");
+        return SOFTBUS_IPC_ERR;
+    }
+    peerNetworkId = (const char*)ReadString(req, &size);
+    if (peerNetworkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "peerNetWorkId is null");
+        return SOFTBUS_IPC_ERR;
+    }
+    ret = TransPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+    WriteInt32(reply, ret);
+    return ret;
+}

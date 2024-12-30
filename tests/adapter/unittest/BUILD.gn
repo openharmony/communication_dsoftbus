@@ -356,7 +356,7 @@ if (defined(ohos_lite)) {
     if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
       deps += [ ":AdapterDsoftbusWifiTest" ]
     }
-    if (!defined(ohos_lite) && dsoftbus_feature_lnn_net == true &&
+    if (!defined(ohos_lite) && dsoftbus_feature_lnn_frame == true &&
         support_bluetooth && dsoftbus_feature_conn_ble) {
       deps += [ ":AdapterDsoftbusNetworkTest" ]
     }

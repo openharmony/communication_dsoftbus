@@ -1726,4 +1726,33 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest044, TestSize.Level1)
     int32_t ret = softBusServer->GetBusCenterExObjInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: SoftbusServerStubTest045
+ * @tc.desc: Verify the PrivilegeCloseChannelInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    uint64_t tokenId = 0;
+    int32_t pid = 0;
+    MessageParcel datas;
+    MessageParcel reply;
+
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckDmsServerPermission)
+        .WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->PrivilegeCloseChannelInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+
+    datas.WriteUint64(tokenId);
+    datas.WriteInt32(pid);
+    datas.WriteCString(networkId);
+    ret = softBusServer->PrivilegeCloseChannelInner(datas, reply);
+    EXPECT_NE(SOFTBUS_PERMISSION_DENIED, ret);
+}
 }

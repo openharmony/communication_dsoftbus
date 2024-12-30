@@ -26,6 +26,7 @@ bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/core/bus_center/interface",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/discovery/interface",
@@ -46,15 +47,7 @@ bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/core/frame:softbus_server",
 ]
 
-if (dsoftbus_feature_lnn_meta_node) {
-  bus_center_meta_node_sdk_test_src = [ "bus_center_meta_node_sdk_test.cpp" ]
-}
-
-if (dsoftbus_feature_lnn_heartbeat) {
-  bus_center_heartbeat_sdk_test_src = [
-    "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
-    "bus_center_heartbeat_sdk_test.cpp",
-  ]
+if (dsoftbus_feature_lnn_ble) {
   bus_center_sdk_test_inc += [
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -66,7 +59,6 @@ if (dsoftbus_feature_lnn_heartbeat) {
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -190,7 +182,10 @@ if (defined(ohos_lite)) {
 
   ohos_unittest("BusCenterHeartbeatSdkTest") {
     module_out_path = module_output_path
-    sources = bus_center_heartbeat_sdk_test_src
+    sources = [
+      "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
+      "bus_center_heartbeat_sdk_test.cpp",
+    ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
@@ -217,7 +212,7 @@ if (defined(ohos_lite)) {
 
   ohos_unittest("BusCenterMetaNodeSdkTest") {
     module_out_path = module_output_path
-    sources = bus_center_meta_node_sdk_test_src
+    sources = [ "bus_center_meta_node_sdk_test.cpp" ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
@@ -390,7 +385,6 @@ if (defined(ohos_lite)) {
     deps = []
     if (dsoftbus_access_token_feature) {
       deps += [
-        ":BusCenterHeartbeatSdkTest",
         ":BusCenterMetaNodeSdkTest",
         ":BusCenterSdkTest",
         ":BusCenterServerProxyStandardTest",
@@ -400,6 +394,9 @@ if (defined(ohos_lite)) {
         ":ClientBusCenterSdkTest",
         ":ClientBusMangerTest",
       ]
+    }
+    if (dsoftbus_feature_lnn_ble) {
+      deps += [ ":BusCenterHeartbeatSdkTest" ]
     }
   }
 }

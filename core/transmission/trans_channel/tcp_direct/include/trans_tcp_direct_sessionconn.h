@@ -70,6 +70,7 @@ typedef struct {
     char peerIp[IP_LEN];
     int64_t timeStart;
     int32_t linkType;
+    uint64_t callingTokenId;
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -138,6 +139,9 @@ int32_t TransTdcUpdateReplyCnt(int32_t channelId);
 
 int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount);
 
+int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
+
+int32_t TransTdcResetReplyCnt(int32_t channelId);
 #ifdef __cplusplus
 #if __cplusplus
 }

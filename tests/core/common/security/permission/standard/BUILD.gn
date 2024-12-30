@@ -73,6 +73,9 @@ ohos_unittest("SoftbusPermissionACLTest") {
         "access_token:libtoken_setproc",
       ]
     }
+    if (softbus_os_account) {
+      external_deps += [ "os_account:os_account_innerkits" ]
+    }
     if (!defined(global_parts_info) ||
         defined(global_parts_info.ability_ability_runtime)) {
       external_deps += [ "ability_runtime:app_manager" ]

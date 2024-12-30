@@ -713,4 +713,112 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_CLOUD_SYNC_HEARTBEAT_TEST_001, Tes
     EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
 }
+
+/*
+ * @tc.name: LNN_REQUEST_BLE_DISCOVERY_PROCESS_TEST_001
+ * @tc.desc: LnnRequestBleDiscoveryProcess test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REQUEST_BLE_DISCOVERY_PROCESS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    NiceMock<BleMock> bleMock;
+    EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(LnnRequestBleDiscoveryProcess(SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY, 0));
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnRequestBleDiscoveryProcess(SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY, 0));
+    EXPECT_CALL(hbStaticMock, LnnHbMediumMgrInit).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnStartHeartbeatFrameDelay();
+    EXPECT_NE(ret, SOFTBUS_OK);
+    g_hbConditionState.isRequestDisable = true;
+    EXPECT_NO_FATAL_FAILURE(LnnRequestBleDiscoveryProcess(SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY, 0));
+    EXPECT_NO_FATAL_FAILURE(LnnRequestBleDiscoveryProcess(SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY, 0));
+}
+
+/*
+ * @tc.name: SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_001
+ * @tc.desc: SameAccountDevDisableDiscoveryProcess test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    int32_t ret = SameAccountDevDisableDiscoveryProcess();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_002
+ * @tc.desc: SameAccountDevDisableDiscoveryProcess test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NodeBasicInfo *info = nullptr;
+    int32_t infoNum = 0;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
+        SetArgPointee<1>(infoNum), Return(SOFTBUS_INVALID_PARAM)));
+    int32_t ret = SameAccountDevDisableDiscoveryProcess();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
+        SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    ret = SameAccountDevDisableDiscoveryProcess();
+    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
+}
+
+/*
+ * @tc.name: SAME_ACCOUNT_DEV_REQUEST_ENABLE_DISCOVERY_TEST_001
+ * @tc.desc: SameAccountDevRequestEnableDiscovery test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_REQUEST_ENABLE_DISCOVERY_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    g_hbConditionState.isRequestDisable = false;
+    EXPECT_NO_FATAL_FAILURE(SameAccountDevRequestEnableDiscovery(nullptr));
+    g_hbConditionState.isRequestDisable = true;
+    EXPECT_NO_FATAL_FAILURE(SameAccountDevRequestEnableDiscovery(nullptr));
+}
+
+/*
+ * @tc.name: REQUEST_DISABLE_DISCOVERY_TEST_001
+ * @tc.desc: RequestDisableDiscovery test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, REQUEST_DISABLE_DISCOVERY_TEST_001, TestSize.Level1)
+{
+    NiceMock<BleMock> bleMock;
+    EXPECT_CALL(bleMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_DISABLE));
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
+    EXPECT_CALL(hbStaticMock, AuthHasTrustedRelation).WillRepeatedly(Return(TRUSTED_RELATION_YES));
+    EXPECT_CALL(hbStaticMock, IsEnableSoftBusHeartbeat).WillRepeatedly(Return(true));
+    g_hbConditionState.isRequestDisable = false;
+    int64_t modeDuration = -1;
+    EXPECT_NO_FATAL_FAILURE(RequestDisableDiscovery(modeDuration));
+    g_hbConditionState.isRequestDisable = true;
+    EXPECT_NO_FATAL_FAILURE(RequestDisableDiscovery(modeDuration));
+}
 } // namespace OHOS

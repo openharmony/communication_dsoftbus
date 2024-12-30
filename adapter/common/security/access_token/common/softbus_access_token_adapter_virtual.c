@@ -79,3 +79,16 @@ void SoftBusGetTokenNameByTokenType(
     (void)tokenId;
     (void)tokenType;
 }
+
+int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
+{
+    (void)tokenId;
+    return SOFTBUS_PERMISSION_DENIED;
+}
+
+bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
+{
+    (void)fullTokenId;
+    (void)sessionName;
+    return false;
+}

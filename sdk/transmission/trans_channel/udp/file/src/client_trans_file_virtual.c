@@ -79,3 +79,11 @@ int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dF
     (void)fileCnt;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback, bool isReceiver)
+{
+    (void)sessionName;
+    (void)fileCallback;
+    (void)isReceiver;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

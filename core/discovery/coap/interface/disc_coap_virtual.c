@@ -14,6 +14,7 @@
  */
 
 #include "disc_coap.h"
+#include "stddef.h"
 
 DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
 {

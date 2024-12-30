@@ -280,6 +280,7 @@ void TransClientDeinit(void)
     }
     UnlockClientSessionServerList();
     ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
+    DestroyRelationChecker();
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
@@ -2490,6 +2491,23 @@ int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType)
 
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
+}
+
+void ClientTransOnPrivilegeClose(const char *peerNetworkId)
+{
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    TRANS_LOGD(TRANS_SDK, "recv privilege close event, clear all socket");
+    ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        PrivilegeDestroyAllClientSession(serverNode, &destroyList, peerNetworkId);
+    }
+    UnlockClientSessionServerList();
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_PRIVILEGE_SHUTDOWN);
 }
 
 int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count)
