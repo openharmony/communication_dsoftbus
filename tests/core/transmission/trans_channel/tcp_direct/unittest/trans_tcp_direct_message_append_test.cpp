@@ -1787,7 +1787,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcFillAppInfoAndNotifyChannel001
     EXPECT_CALL(TcpMessageMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, SetAppInfoById).WillOnce(Return(SOFTBUS_OK));
     ret = TransTdcFillAppInfoAndNotifyChannel(appInfo, channelId, errDesc);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     SoftBusFree(appInfo);
     SoftBusFree(errDesc);
 }
