@@ -134,8 +134,7 @@ if (dsoftbus_feature_disc_notification_rx &&
   defines += [ "ENABLE_NOTIFICATION_RX" ]
 }
 
-if (dsoftbus_feature_disc_notification &&
-    dsoftbus_feature_inner_disc_broadcast) {
+if (dsoftbus_feature_disc_link_ble && dsoftbus_feature_inner_disc_broadcast) {
   defines += [ "ENABLE_LINK_BLE" ]
 }
 
@@ -178,4 +177,25 @@ if (dsoftbus_feature_lnn_wifi) {
 
 if (dsoftbus_feature_lnn_ble) {
   defines += [ "ENABLE_FEATURE_LNN_BLE" ]
+}
+
+if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
+    dsoftbus_feature_conn_tcp_comm) {
+  defines += [ "DSOFTBUS_FEATURE_CONN_PV1" ]
+  if (dsoftbus_feature_conn_pv2 && dsoftbus_feature_conn_pv1) {
+    defines += [ "DSOFTBUS_FEATURE_CONN_PV2" ]
+  }
+  if (dsoftbus_feature_conn_action) {
+    defines += [ "DSOFTBUS_FEATURE_CONN_ACTION" ]
+    if (dsoftbus_feature_conn_hv2 && dsoftbus_feature_disc_link_ble) {
+      defines += [ "DSOFTBUS_FEATURE_CONN_HV2" ]
+      if (dsoftbus_feature_conn_hv1 && dsoftbus_feature_conn_pv2 &&
+          dsoftbus_feature_conn_pv1) {
+        defines += [ "DSOFTBUS_FEATURE_CONN_HV1" ]
+      }
+      if (dsoftbus_feature_conn_hv2c) {
+        defines += [ "DSOFTBUS_FEATURE_CONN_HV2C" ]
+      }
+    }
+  }
 }
