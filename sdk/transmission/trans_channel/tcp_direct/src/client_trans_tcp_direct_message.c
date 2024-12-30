@@ -429,7 +429,7 @@ static int32_t TransTdcProcessDataByFlag(
 static int32_t TransTdcProcessData(int32_t channelId)
 {
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get key fail. channelId=%{public}d ", channelId);
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
