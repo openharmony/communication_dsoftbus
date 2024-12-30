@@ -128,6 +128,7 @@ public:
 
     void SetIsAvailable(bool value);
     bool IsAvailable() const;
+    void RefreshIsAvailable();
 
     void SetPhysicalRate(int value);
     int GetPhysicalRate() const;

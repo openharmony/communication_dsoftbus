@@ -368,6 +368,22 @@ bool InterfaceInfo::IsAvailable() const
     return Get(InterfaceInfoKey::IS_AVAILABLE, true);
 }
 
+void InterfaceInfo::RefreshIsAvailable()
+{
+    if (!IsEnable()) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "isEnable=0, interface name=%{public}s", GetName().c_str());
+        SetIsAvailable(false);
+        return;
+    }
+
+    if (GetRole() == LinkInfo::LinkMode::GC) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "already gc");
+        SetIsAvailable(false);
+        return;
+    }
+    SetIsAvailable(true);
+}
+
 void InterfaceInfo::SetPhysicalRate(int value)
 {
     Set(InterfaceInfoKey::PHYSICAL_RATE, value);
