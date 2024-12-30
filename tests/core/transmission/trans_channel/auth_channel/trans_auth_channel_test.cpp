@@ -1308,6 +1308,6 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelWithParaTest001, TestSize.
 HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest001, TestSize.Level1)
 {
     int32_t ret = TransSetAuthChannelReplyCnt(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

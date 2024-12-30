@@ -234,7 +234,8 @@ int32_t SoftBusServerStub::OnRemoteRequest(
         if ((permission != nullptr) &&
             (!SoftBusCheckIsAccessAndRecordAccessToken(callingTokenId, permission))) {
             SoftbusReportPermissionFaultEvt(code);
-            COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
+            COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s, tokenId=%{public}d",
+                permission, callingTokenId);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
             TransAlarmExtra extra = {
                 .callerPid = (int32_t)callingPid,

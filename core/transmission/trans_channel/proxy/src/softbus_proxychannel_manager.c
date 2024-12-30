@@ -1968,6 +1968,7 @@ static void TransProxyManagerDeinitInner(void)
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 
     DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = NULL;
 }
 
 void TransProxyManagerDeinit(void)

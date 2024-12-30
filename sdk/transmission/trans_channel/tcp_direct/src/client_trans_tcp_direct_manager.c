@@ -49,10 +49,10 @@ static bool CheckInfoAndMutexLock(TcpDirectChannelInfo *info)
     return true;
 }
 
-TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info)
+int32_t TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info)
 {
     if (!CheckInfoAndMutexLock(info)) {
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
 
     TcpDirectChannelInfo *item = NULL;
@@ -60,12 +60,12 @@ TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInf
         if (item->channelId == channelId) {
             (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            return item;
+            return SOFTBUS_OK;
         }
     }
 
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-    return NULL;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener)
@@ -116,10 +116,10 @@ TcpDirectChannelInfo *TransTdcGetInfoIncFdRefById(int32_t channelId, TcpDirectCh
     return NULL;
 }
 
-TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info)
+int32_t TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info)
 {
     if (!CheckInfoAndMutexLock(info)) {
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
 
     TcpDirectChannelInfo *item = NULL;
@@ -127,12 +127,12 @@ TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info
         if (item->detail.fd == fd) {
             (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            return item;
+            return SOFTBUS_OK;
         }
     }
 
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-    return NULL;
+    return SOFTBUS_NOT_FIND;
 }
 
 void TransTdcCloseChannel(int32_t channelId)
@@ -292,8 +292,8 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
 
     TcpDirectChannelInfo info;
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    TcpDirectChannelInfo *res = TransTdcGetInfoById(channel->channelId, &info);
-    if (res == NULL) {
+    ret = TransTdcGetInfoById(channel->channelId, &info);
+    if (ret != SOFTBUS_OK) {
         DelTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channel->channelId);
         (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
@@ -423,7 +423,7 @@ int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
@@ -441,7 +441,7 @@ int32_t TransTdcGetHandle(int32_t channelId, int *handle)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
@@ -452,7 +452,7 @@ int32_t TransTdcGetHandle(int32_t channelId, int *handle)
 int32_t TransDisableSessionListener(int32_t channelId)
 {
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }

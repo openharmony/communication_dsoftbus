@@ -322,15 +322,15 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest006, TestSize.Level0)
     int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoById(channelId, nullptr);
-    EXPECT_TRUE(item == nullptr);
+    int32_t item = TransTdcGetInfoById(channelId, nullptr);
+    EXPECT_NE(item, SOFTBUS_OK);
 
     item = TransTdcGetInfoById(channelId, info);
-    EXPECT_TRUE(item == nullptr);
+    EXPECT_NE(item, SOFTBUS_OK);
 
     channelId = INVALID_VALUE;
     item = TransTdcGetInfoById(channelId, info);
-    EXPECT_TRUE(item == nullptr);
+    EXPECT_NE(item, SOFTBUS_OK);
 
     SoftBusFree(info);
     SoftBusFree(channel);
@@ -354,15 +354,15 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level0)
     int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoByFd(fd, nullptr);
-    EXPECT_TRUE(item == nullptr);
+    int32_t item = TransTdcGetInfoByFd(fd, nullptr);
+    EXPECT_NE(item, SOFTBUS_OK);
 
     item = TransTdcGetInfoByFd(fd, info);
-    EXPECT_TRUE(item == nullptr);
+    EXPECT_NE(item, SOFTBUS_OK);
 
     fd = 1;
     item = TransTdcGetInfoByFd(fd, info);
-    EXPECT_TRUE(item == nullptr);
+    EXPECT_NE(item, SOFTBUS_OK);
 
     SoftBusFree(info);
     SoftBusFree(channel);
@@ -909,8 +909,8 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level0)
     ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoById(1, info);
-    EXPECT_TRUE(item != nullptr);
+    int32_t item = TransTdcGetInfoById(1, info);
+    EXPECT_EQ(item, SOFTBUS_OK);
 
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
@@ -979,8 +979,8 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level0)
     ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
-    TcpDirectChannelInfo *item = TransTdcGetInfoByFd(testFd, info);
-    EXPECT_TRUE(item != nullptr);
+    int32_t item = TransTdcGetInfoByFd(testFd, info);
+    EXPECT_EQ(item, SOFTBUS_OK);
 
     SoftBusFree(info);
     SoftBusFree(channel);
