@@ -24,6 +24,7 @@ ohos_fuzztest("ClientTransTcpDirectListenerFuzzTest") {
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/inner_communication",
+    "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
