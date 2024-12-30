@@ -77,7 +77,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
     if (fd >= 0) {
         TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
         DelTrigger(node->listenMod, fd, RW_TRIGGER);
-        TransTdcSocketReleaseFd(fd);
+        TransTdcSocketReleaseFd(node->listenMod, fd);
     }
 }
 
@@ -246,7 +246,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
             AnonymizeFree(anonymizePkgName);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
-            TransTdcSocketReleaseFd(item->appInfo.fd);
+            TransTdcSocketReleaseFd(item->listenMod, item->appInfo.fd);
             SoftBusFree(item);
             continue;
         }
