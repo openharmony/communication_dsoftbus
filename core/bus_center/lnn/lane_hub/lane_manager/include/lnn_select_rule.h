@@ -56,6 +56,8 @@ int32_t DecideCustomLink(const char *networkId, CustomQos customQos, LaneLinkTyp
 int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
     uint32_t listNum, LanePreferredLinkList *recommendList);
 int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTransType transType);
+int32_t DecideRueseLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList);
 
 #ifdef __cplusplus
 }
