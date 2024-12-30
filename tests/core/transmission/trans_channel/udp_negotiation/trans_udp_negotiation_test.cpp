@@ -388,11 +388,11 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Lev
     int32_t ret = strcpy_s(newChannel->info.myData.pkgName, sizeof(newChannel->info.myData.pkgName), g_pkgName);
     newChannel->info.myData.pid = INVALID_PID;
     EXPECT_EQ(ret, EOK);
-    int32_t checkResult = SOFTBUS_ERR;
+    int32_t checkResult = SOFTBUS_COND_INIT_FAILED;
     ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_COND_INIT_FAILED);
 
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
