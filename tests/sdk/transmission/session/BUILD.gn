@@ -17,6 +17,11 @@ import("../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("TransClientSessionManagerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
   module_out_path = module_output_path
   sources = [ "client_trans_session_manager_test.cpp" ]
 

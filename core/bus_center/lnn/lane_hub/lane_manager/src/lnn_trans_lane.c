@@ -22,6 +22,8 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
+#include "lnn_event_form.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
@@ -977,6 +979,26 @@ static void UpdateReqInfoWithLaneReqId(uint32_t laneReqId, uint64_t laneId)
     Unlock();
 }
 
+static void DfxReportLinkResult(uint32_t laneReqId, LaneLinkType linkType, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    extra.errcode = reason;
+    extra.laneReqId = laneReqId;
+    extra.laneLinkType = linkType;
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+}
+
+static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneReqId)
+{
+    LaneLinkNodeInfo *linkNode = NULL;
+    LIST_FOR_EACH_ENTRY(linkNode, &g_multiLinkList, LaneLinkNodeInfo, node) {
+        if (linkNode->laneReqId == laneReqId) {
+            return linkNode;
+        }
+    }
+    return NULL;
+}
+
 static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const LaneLinkInfo *info)
 {
     UpdateReqInfoWithLaneReqId(laneReqId, laneId);
@@ -1013,6 +1035,7 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
         AddLaneBusinessInfoItem(laneType, laneId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "create laneBusinessInfo fail, laneReqId=%{public}u", laneReqId);
     }
+    DfxReportLinkResult(laneReqId, info->type, SOFTBUS_OK);
 }
 
 static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
@@ -1034,18 +1057,21 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
     } else {
         reqInfo.extraInfo.listener.onLaneRequestFail(laneReqId, reason);
     }
-    DeleteRequestNode(laneReqId);
-}
-
-static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneReqId)
-{
-    LaneLinkNodeInfo *linkNode = NULL;
-    LIST_FOR_EACH_ENTRY(linkNode, &g_multiLinkList, LaneLinkNodeInfo, node) {
-        if (linkNode->laneReqId == laneReqId) {
-            return linkNode;
-        }
+    LaneLinkType laneType;
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
     }
-    return NULL;
+    LaneLinkNodeInfo *nodeInfo = GetLaneLinkNodeWithoutLock(laneReqId);
+    if (nodeInfo == NULL || nodeInfo->linkList == NULL) {
+        LNN_LOGE(LNN_LANE, "get lane link node info fail, laneReqId=%{public}u", laneReqId);
+        Unlock();
+        return;
+    }
+    laneType = nodeInfo->linkList->linkType[0];
+    Unlock();
+    DfxReportLinkResult(laneReqId, laneType, reason);
+    DeleteRequestNode(laneReqId);
 }
 
 static int32_t GetErrCodeWithLock(uint32_t laneReqId)

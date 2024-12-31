@@ -151,6 +151,13 @@ BUSCENTER_BEHAVIOR:
   P2P_CHANNEL_ID: { type: INT32, desc: p2p channel id }
   STA_CHANNEL_ID: { type: INT32, desc: sta channel id }
   AP_CHANNEL_ID: { type: INT32, desc: ap channel id }
+  LANE_REQ_ID: { type: INT32, desc: lane request id }
+  MIN_BW: { type: INT32, desc: lane qos info min bw }
+  MAX_LANE_LATENCY: { type: INT32, desc: lane qos info max lane letency }
+  MIN_LANE_LATENCY: { type: INT32, desc: lane qos info min lane letency }
+  IS_WIFI_DIRECT_REUSE: { type: INT32, desc: lane is wifi direct reuse }
+  BAND_WIDTH: { type: INT32, desc: lane band width }
+  GUIDE_TYPE: { type: INT32, desc: lane guide type }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }

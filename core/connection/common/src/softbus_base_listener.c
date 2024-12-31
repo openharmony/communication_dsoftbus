@@ -799,7 +799,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
             CONN_LOGW(CONN_COMMON, "fd node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d",
                 module, fd, trigger);
             // consider delete trigger success,
-            status = SOFTBUS_OK;
+            status = SOFTBUS_NOT_FIND;
             break;
         }
 

@@ -30,11 +30,11 @@
 #include "softbus_tcp_socket.h"
 #include "trans_lane_manager.h"
 
-#define MAGIC_NUMBER  0xBABEFACE
-#define AUTH_PKT_HEAD_LEN 24
+#define MAGIC_NUMBER             0xBABEFACE
+#define AUTH_PKT_HEAD_LEN        24
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
-#define TCP_KEEPALIVE_TOS_VAL 180
-#define RECV_DATA_TIMEOUT (2 * 1000 * 1000)
+#define TCP_KEEPALIVE_TOS_VAL    180
+#define RECV_DATA_TIMEOUT        (2 * 1000 * 1000)
 
 typedef struct {
     int32_t keepaliveIdle;
@@ -59,7 +59,7 @@ static InnerChannelListener g_listener[] = {
     },
 };
 
-static SocketCallback g_callback = {NULL, NULL, NULL};
+static SocketCallback g_callback = { NULL, NULL, NULL };
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
@@ -75,8 +75,7 @@ static uint32_t GetSocketPktSize(uint32_t len)
     return AUTH_PKT_HEAD_LEN + len;
 }
 
-static int32_t PackSocketPkt(const SocketPktHead *pktHead, const uint8_t *data,
-    uint8_t *buf, uint32_t size)
+static int32_t PackSocketPkt(const SocketPktHead *pktHead, const uint8_t *data, uint8_t *buf, uint32_t size)
 {
     if (size < GetSocketPktSize(pktHead->len)) {
         AUTH_LOGE(AUTH_CONN, "buffer not enough.");
@@ -151,8 +150,7 @@ static uint32_t ModuleToDataType(int32_t module)
     return DATA_TYPE_CONNECTION;
 }
 
-static void NotifyDataReceived(ListenerModule module, int32_t fd,
-    const SocketPktHead *pktHead, const uint8_t *data)
+static void NotifyDataReceived(ListenerModule module, int32_t fd, const SocketPktHead *pktHead, const uint8_t *data)
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
         NotifyChannelDataReceived(fd, pktHead, data);
@@ -176,11 +174,11 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
 
 static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *head)
 {
-    uint8_t buf[AUTH_PKT_HEAD_LEN] = {0};
+    uint8_t buf[AUTH_PKT_HEAD_LEN] = { 0 };
     uint32_t offset = 0;
     while (offset < AUTH_PKT_HEAD_LEN) {
-        ssize_t recvLen = ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset),
-            RECV_DATA_TIMEOUT);
+        ssize_t recvLen =
+            ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
             (void)DelTrigger(module, fd, READ_TRIGGER);
@@ -236,7 +234,7 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
-    SocketPktHead head = {0};
+    SocketPktHead head = { 0 };
     int32_t ret = RecvPacketHead(module, fd, &head);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -370,8 +368,8 @@ static int32_t AuthTcpCreateListener(ListenerModule module, int32_t fd, TriggerT
     return AddTrigger(module, fd, trigger);
 }
 
-static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32_t port, ListenerModule module,
-    bool isBlockMode)
+static int32_t SocketConnectInner(
+    const char *localIp, const char *peerIp, int32_t port, ListenerModule module, bool isBlockMode)
 {
     if (localIp == NULL || peerIp == NULL) {
         AUTH_LOGE(AUTH_CONN, "ip is invalid param.");
@@ -379,12 +377,7 @@ static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32
     }
     ConnectOption option = {
         .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "",
-            .port = port,
-            .moduleId = module,
-            .protocol = LNN_PROTOCOL_IP
-        }
+        .socketOption = { .addr = "", .port = port, .moduleId = module, .protocol = LNN_PROTOCOL_IP }
     };
     if (strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), peerIp) != EOK) {
         AUTH_LOGE(AUTH_CONN, "copy remote ip fail.");
@@ -420,19 +413,13 @@ int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *peerIp, in
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 {
     CHECK_NULL_PTR_RETURN_VALUE(ip, AUTH_INVALID_FD);
-    char localIp[MAX_ADDR_LEN] = {0};
+    char localIp[MAX_ADDR_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local ip fail.");
         return AUTH_INVALID_FD;
     }
     ConnectOption option = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "",
-            .port = port,
-            .moduleId = AUTH,
-            .protocol = LNN_PROTOCOL_IP
-        }
+        .type = CONNECT_TCP, .socketOption = { .addr = "", .port = port, .moduleId = AUTH, .protocol = LNN_PROTOCOL_IP }
     };
     if (strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), ip) != EOK) {
         AUTH_LOGE(AUTH_CONN, "copy remote ip fail.");
@@ -467,8 +454,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     return fd;
 }
 
-int32_t NipSocketConnectDevice(ListenerModule module,
-    const char *addr, int32_t port, bool isBlockMode)
+int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode)
 {
     if (addr == NULL) {
         AUTH_LOGE(AUTH_CONN, "addr is invalid param.");
@@ -476,12 +462,7 @@ int32_t NipSocketConnectDevice(ListenerModule module,
     }
     ConnectOption option = {
         .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "",
-            .port = port,
-            .moduleId = module,
-            .protocol = LNN_PROTOCOL_NIP
-        }
+        .socketOption = { .addr = "", .port = port, .moduleId = module, .protocol = LNN_PROTOCOL_NIP }
     };
     if (strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), addr) != EOK) {
         AUTH_LOGE(AUTH_CONN, "copy remote ip fail.");
@@ -581,8 +562,7 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
 }
 
 /* Auth Channel */
-static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head,
-    const uint8_t *data)
+static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data)
 {
     uint32_t i;
     AuthChannelListener *listener = NULL;
@@ -597,7 +577,7 @@ static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *he
         return;
     }
 
-    AuthChannelData channelData = {0};
+    AuthChannelData channelData = { 0 };
     channelData.module = head->module;
     channelData.seq = head->seq;
     channelData.flag = head->flag;

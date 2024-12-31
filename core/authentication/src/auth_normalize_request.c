@@ -19,14 +19,14 @@
 
 #include "anonymizer.h"
 #include "auth_common.h"
-#include "auth_manager.h"
 #include "auth_log.h"
+#include "auth_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
 #define UDID_SHORT_HASH_STR 16
 
-static ListNode g_normalizeRequestList = {&g_normalizeRequestList, &g_normalizeRequestList};
+static ListNode g_normalizeRequestList = { &g_normalizeRequestList, &g_normalizeRequestList };
 
 static uint32_t GetSameRequestNum(char *udidHash)
 {
@@ -45,8 +45,7 @@ static uint32_t GetSameRequestNum(char *udidHash)
     return num;
 }
 
-static int32_t GetRequestListByUdidHash(char *udidHash, bool isNeedClear,
-    NormalizeRequest **requests, uint32_t *num)
+static int32_t GetRequestListByUdidHash(char *udidHash, bool isNeedClear, NormalizeRequest **requests, uint32_t *num)
 {
     if (udidHash == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "udidHash is null or len < SHORT_HASH_LEN");
@@ -96,8 +95,8 @@ static int32_t FindAndDelNormalizeRequest(int64_t authSeq, NormalizeRequest *req
     return SOFTBUS_AUTH_NOT_FOUND;
 }
 
-static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, NormalizeRequest *request,
-    NormalizeRequest **requests, uint32_t *num)
+static int32_t GetNormalizeRequestList(
+    int64_t authSeq, bool isNeedClear, NormalizeRequest *request, NormalizeRequest **requests, uint32_t *num)
 {
     if (num == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -189,8 +188,7 @@ void NotifyNormalizeRequestSuccess(int64_t authSeq, bool isSupportNego)
         if (isSupportNego && requests[i].connInfo.type == request.connInfo.type) {
             continue;
         }
-        AUTH_LOGI(AUTH_HICHAIN, "notify AuthSessionSaveSessionKey: authSeq=%{public}" PRId64,
-            requests[i].authSeq);
+        AUTH_LOGI(AUTH_HICHAIN, "notify AuthSessionSaveSessionKey: authSeq=%{public}" PRId64, requests[i].authSeq);
         (void)AuthNotifyRequestVerify(requests[i].authSeq);
     }
     SoftBusFree(requests);

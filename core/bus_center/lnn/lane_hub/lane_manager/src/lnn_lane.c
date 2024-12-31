@@ -19,10 +19,13 @@
 #include <string.h>
 
 #include "anonymizer.h"
+#include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
+#include "lnn_event_form.h"
 #include "lnn_lane_assign.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
@@ -302,6 +305,21 @@ void FreeLaneReqId(uint32_t laneReqId)
     return DestroyLaneReqId(laneReqId);
 }
 
+static void DfxReportSelectLaneResult(uint32_t laneReqId, const LaneAllocInfo *allocInfo, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    extra.errcode = reason;
+    extra.laneReqId = laneReqId;
+    extra.minBW = allocInfo->qosRequire.minBW;
+    extra.maxLaneLatency = allocInfo->qosRequire.maxLaneLatency;
+    extra.minLaneLatency = allocInfo->qosRequire.minLaneLatency;
+    int32_t discoveryType = 0;
+    if (LnnGetRemoteNumInfo(allocInfo->networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) == SOFTBUS_OK) {
+        extra.onlineType = discoveryType;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+}
+
 static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
 {
     if (!AllocInfoCheck(allocInfo, listener)) {
@@ -321,8 +339,10 @@ static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, 
     int32_t result = g_laneObject[allocInfo->type]->allocLaneByQos(laneReqId, allocInfo, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc lane fail, laneReqId=%{public}u, result=%{public}d", laneReqId, result);
+        DfxReportSelectLaneResult(laneReqId, allocInfo, result);
         return result;
     }
+    DfxReportSelectLaneResult(laneReqId, allocInfo, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 

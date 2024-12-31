@@ -915,6 +915,9 @@ void PrivilegeDestroyAllClientSession(
         if (strlen(peerNetworkId) != 0 && strcmp(sessionNode->info.peerDeviceId, peerNetworkId) != 0) {
             continue;
         }
+        if (sessionNode->isServer) {
+            continue;
+        }
         TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
@@ -956,6 +959,18 @@ int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationCh
     return SOFTBUS_OK;
 }
 
+static void PrintCollabInfo(const CollabInfo *info, char *role)
+{
+    char *tmpDeviceId = NULL;
+    Anonymize(info->deviceId, &tmpDeviceId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s deviceId=%{public}s", role, AnonymizeWrapper(tmpDeviceId));
+    AnonymizeFree(tmpDeviceId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s userId=%{public}d", role, info->userId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s pid=%{public}d", role, info->pid);
+    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}" PRId64, role, info->accountId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s tokenId=%{public}" PRIu64, role, info->tokenId);
+}
+
 int32_t ClientTransCheckCollabRelation(
     const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
@@ -969,9 +984,13 @@ int32_t ClientTransCheckCollabRelation(
     }
     int32_t ret = g_relationChecker->CheckCollabRelation(*sourceInfo, *sinkInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "channelId=%{public}d check Collab relation fail, ret=%{public}d", channelId, ret);
+        TRANS_LOGE(TRANS_SDK,
+            "channelId=%{public}d check collaboration relation fail, ret=%{public}d", channelId, ret);
+        PrintCollabInfo(sourceInfo, (char *)"source");
+        PrintCollabInfo(sinkInfo, (char *)"sink");
         return SOFTBUS_TRANS_CHECK_RELATION_FAIL;
     }
+    TRANS_LOGI(TRANS_SDK, "check collaboration relation success.");
     return SOFTBUS_OK;
 }
 

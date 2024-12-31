@@ -1139,11 +1139,13 @@ ohos_unittest("LNNNetLedgerCommonTest") {
   sources = [
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager_virtual.cpp",
     "net_ledger/lnn_ledger_common_test.cpp",
+    "net_ledger/lnn_net_ledger_common_mock.cpp",
   ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
@@ -1156,6 +1158,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
@@ -1283,10 +1286,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
 
 ohos_unittest("LNNMetaNodeLedgerTest") {
   module_out_path = module_output_path
-  sources = [
-    "net_ledger/lnn_ledger_common_test.cpp",
-    "net_ledger/lnn_meta_node_ledger_test.cpp",
-  ]
+  sources = [ "net_ledger/lnn_meta_node_ledger_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -1421,6 +1421,7 @@ ohos_unittest("LNNLaneExtMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
   ]
 
@@ -1531,6 +1532,7 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
   ]
 
@@ -1613,6 +1615,7 @@ ohos_unittest("LNNLaneQueryTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
   ]
 
@@ -1701,6 +1704,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
   ]
 
   deps = [
@@ -1787,6 +1791,7 @@ ohos_unittest("LNNLaneLinkExtTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
   ]
 
   deps = [
@@ -1905,6 +1910,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
@@ -2058,6 +2064,7 @@ ohos_unittest("LNNLaneListenerTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/dfx/interface/include/form",
   ]
 
   deps = [

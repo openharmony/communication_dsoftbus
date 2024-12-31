@@ -144,6 +144,10 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, c
  */
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId);
 
+int32_t DiscMgrEventInit(void);
+
+void DiscMgrEventDeinit(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
