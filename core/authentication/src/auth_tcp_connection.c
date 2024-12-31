@@ -180,7 +180,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
         ssize_t recvLen =
             ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
         if (recvLen < 0) {
-            AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
+            AUTH_LOGE(AUTH_CONN, "recv head fail.");
             (void)DelTrigger(module, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
             return SOFTBUS_INVALID_DATA_HEAD;
@@ -201,7 +201,7 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
     while (offset < len) {
         ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), 0);
         if (recvLen < 0) {
-            AUTH_LOGE(AUTH_CONN, "recv data fail. ret=%{public}d", ConnGetSocketError(fd));
+            AUTH_LOGE(AUTH_CONN, "recv data fail.");
             SoftBusFree(data);
             return NULL;
         }
