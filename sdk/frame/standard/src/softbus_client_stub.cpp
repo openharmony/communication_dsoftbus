@@ -179,6 +179,8 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
     READ_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_IPC_ERR);
     channel->groupId = (char *)data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel->keyLen <= SESSION_KEY_LENGTH, SOFTBUS_IPC_ERR, COMM_SDK,
+        "channel->keyLen invalid");
     READ_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_IPC_ERR);
     channel->sessionKey = (char *)data.ReadRawData(channel->keyLen);
     COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read rawData failed");
@@ -218,7 +220,11 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
 
     ChannelInfo channel = { 0 };
     int32_t ret = MessageParcelRead(data, &channel);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read channel info failed");
+    if (ret != SOFTBUS_OK) {
+        (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+        COMM_LOGE(COMM_SDK, "read channel info failed");
+        return ret;
+    }
 
     ret = OnChannelOpened(sessionName, &channel);
     COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(ret), SOFTBUS_IPC_ERR, COMM_SDK, "write reply failed");
@@ -325,8 +331,8 @@ int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessagePa
         data.ReadInt32(eventId), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read eventId failed");
 
     int32_t tvCount;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(tvCount) && tvCount > 0, SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK,
-        "read tv failed! count=%{public}d", tvCount);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(tvCount) && tvCount > 0 && tvCount <= STREAM_TRAFFIC_STASTICS,
+        SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read tv failed! count=%{public}d", tvCount);
 
     QosTv *tvList = (QosTv *)data.ReadRawData(sizeof(QosTv) * tvCount);
     COMM_CHECK_AND_RETURN_RET_LOGE(
