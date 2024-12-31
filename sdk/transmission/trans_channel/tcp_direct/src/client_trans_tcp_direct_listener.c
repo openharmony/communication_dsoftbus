@@ -162,18 +162,15 @@ void TransTdcCloseFd(int32_t fd)
     ConnCloseSocket(fd);
 }
 
-void TransTdcReleaseFd(int32_t fd)
+void TransTdcReleaseFd(ListenerModule module, int32_t fd)
 {
     if (fd < 0) {
         TRANS_LOGI(TRANS_SDK, "fd less than zero");
         return;
     }
-    DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
-    if (ConnGetSocketError(fd) == SOFTBUS_CONN_BAD_FD) {
-        TRANS_LOGI(TRANS_SDK, "fd is bad fd=%{public}d", fd);
-        return;
+    if (DelTrigger(module, fd, RW_TRIGGER) != SOFTBUS_NOT_FIND) {
+        ConnShutdownSocket(fd);
     }
-    ConnShutdownSocket(fd);
 }
 
 int32_t TransTdcStopRead(int32_t fd)

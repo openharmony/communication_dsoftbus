@@ -278,7 +278,10 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     }
     LanePreferredLinkList laneLinkList = {0};
     int32_t ret = SOFTBUS_LANE_SELECT_FAIL;
-    if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
+    if (request->qosRequire.reuseBestEffort) {
+        LNN_LOGI(LNN_LANE, "select lane by reuse best effort");
+        ret = DecideRueseLane(networkId, request, &laneLinkList);
+    } else if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
         request->qosRequire.minLaneLatency == 0) {
         LNN_LOGI(LNN_LANE, "select lane by default linkList");
         ret = DecideDefaultLink(networkId, request->transType, laneLinkList.linkType, &(laneLinkList.linkTypeNum));

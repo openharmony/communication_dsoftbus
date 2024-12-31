@@ -1179,6 +1179,9 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocEx
             case QOS_TYPE_TRANS_CONTINUOUS:
                 qosInfo->continuousTask = (param->qos[i].value != 0) ? true : false;
                 break;
+            case QOS_TYPE_REUSE_BE:
+                qosInfo->reuseBestEffort = (param->qos[i].value != 0) ? true : false;
+                break;
             default:
                 GetExtQosInfo(param, qosInfo, i, extendInfo);
                 break;

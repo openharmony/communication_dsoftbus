@@ -168,6 +168,13 @@ typedef struct {
     int32_t p2pChannelId;       // P2P_CHANNEL_ID
     int32_t staChannelId;       // STA_CHANNEL_ID
     int32_t apChannelId;        // AP_CHANNEL_ID
+    int32_t laneReqId;          // LANE_REQ_ID
+    int32_t minBW;              // MIN_BW
+    int32_t maxLaneLatency;     // MAX_LANE_LATENCY
+    int32_t minLaneLatency;     // MIN_LANE_LATENCY
+    int32_t isWifiDirectReuse;  // IS_WIFI_DIRECT_REUSE
+    int32_t bandWidth;          // BAND_WIDTH
+    int32_t guideType;          // GUIDE_TYPE
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

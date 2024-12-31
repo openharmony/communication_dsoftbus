@@ -142,6 +142,7 @@ typedef enum {
     QOS_TYPE_MAX_IDLE_TIMEOUT,  /**< Maximum idle time. */
     QOS_TYPE_TRANS_RELIABILITY, /**< @reserved Transmission reliability. */
     QOS_TYPE_TRANS_CONTINUOUS,   /**< Continuous transmission */
+    QOS_TYPE_REUSE_BE,           /**< Best Effort Reuse >**/
     QOS_TYPE_BUTT,
 } QosType;
 
