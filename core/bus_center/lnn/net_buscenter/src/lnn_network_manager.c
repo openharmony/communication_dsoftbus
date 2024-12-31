@@ -82,6 +82,8 @@ static SoftBusUserState g_backgroundState = SOFTBUS_USER_FOREGROUND;
 
 int32_t RegistIPProtocolManager(void);
 int32_t RegistNewIPProtocolManager(void);
+int32_t LnnInitUsbChannelManager(void);
+void LnnDeinitUsbChannelManager(void);
 
 int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
 {
@@ -92,6 +94,16 @@ int32_t __attribute__((weak)) RegistBtProtocolManager(void)
 {
     LNN_LOGW(LNN_BUILDER, "regist virtual bt protocol manager");
     return SOFTBUS_OK;
+}
+
+int32_t __attribute__((weak)) LnnInitUsbChannelManager(void)
+{
+    LNN_LOGW(LNN_BUILDER, "regist virtual usb channel manager");
+    return SOFTBUS_OK;
+}
+
+void __attribute__((weak)) LnnDeinitUsbChannelManager(void)
+{
 }
 
 static LnnNetIfManagerBuilder g_netifBuilders[LNN_MAX_NUM_TYPE] = {0};
@@ -764,6 +776,11 @@ int32_t LnnInitNetworkManager(void)
         return ret;
     }
 #endif
+    ret = LnnInitUsbChannelManager();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "init usb channel manager failed, ret=%{public}d", ret);
+        return ret;
+    }
     ProtocolType type = 0;
     if (!LnnVisitProtocol(GetAllProtocols, &type)) {
         LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
@@ -851,6 +868,7 @@ void LnnDeinitNetworkManager(void)
 #ifdef ENABLE_FEATURE_LNN_WIFI
     LnnDeinitPhysicalSubnetManager();
 #endif
+    LnnDeinitUsbChannelManager();
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
         if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->deinit == NULL) {
             continue;
