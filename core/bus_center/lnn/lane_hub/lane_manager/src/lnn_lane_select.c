@@ -34,8 +34,6 @@
 #include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
-#define DB_MAGIC_NUMBER 0x5A5A5A5A
-#define MESH_MAGIC_NUMBER 0xA5A5A5A5
 
 static char *GetLinkTypeStrng(LaneLinkType preferredLink)
 {

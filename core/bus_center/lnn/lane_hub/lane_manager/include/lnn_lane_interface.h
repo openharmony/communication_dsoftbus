@@ -28,6 +28,8 @@ extern "C" {
 
 #define INVALID_LANE_REQ_ID 0
 #define INVALID_LANE_ID 0
+#define DB_MAGIC_NUMBER 0x5A5A5A5A
+#define MESH_MAGIC_NUMBER 0xA5A5A5A5
 
 typedef enum {
     LANE_BR = 0x0,

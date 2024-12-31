@@ -56,7 +56,6 @@ constexpr uint32_t DEFAULT_LANE_RESOURCE_LANE_REF = 0;
 constexpr uint32_t LOW_BW = 384 * 1024;
 constexpr uint32_t MID_BW = 30 * 1024 * 1024;
 constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
-constexpr uint32_t MESH_MAGIC_NUMBER = 0x5A5A5A5A;
 constexpr uint32_t PORT_A = 22;
 constexpr uint32_t PORT_B = 25;
 constexpr uint32_t FD = 888;
@@ -902,6 +901,42 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_013, TestSize.Level1)
 
     LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_BYTE, LOW_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
+        DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    allocInfo.qosRequire.continuousTask = true;
+    SetIsNeedCondWait();
+    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForBr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    SetIsNeedCondWait();
+    ret = laneManager->lnnFreeLane(laneReqId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+}
+
+/*
+* @tc.name: LANE_ALLOC_Test_016
+* @tc.desc: lane alloc for continuous task(lowBw and remote is hoos, expect link is br)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_016, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    mock.SetDefaultResultForAlloc(15, 15, 0x3F7EA, 0x3F7EA);
+    EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+
+    LaneAllocInfo allocInfo = {};
+    ASSERT_EQ(strncpy_s(allocInfo.extendInfo.peerBleMac, MAX_MAC_LEN,
+        PEER_MAC, strlen(PEER_MAC)), EOK);
+    CreateAllocInfoForAllocTest(LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     allocInfo.qosRequire.continuousTask = true;
     SetIsNeedCondWait();
