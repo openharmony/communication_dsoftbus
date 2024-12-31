@@ -254,7 +254,7 @@ SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
 static int32_t ClientTransGetTdcIp(int32_t channelId, char *myIp, int32_t ipLen)
 {
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "not found Tdc channel by channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
