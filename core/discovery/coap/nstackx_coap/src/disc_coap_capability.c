@@ -46,27 +46,27 @@ int32_t DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySet
     DISC_CHECK_AND_RETURN_RET_LOGW(discSet != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discSet is NULL");
     switch (capability) {
         case 1 << DDMP_CAPABILITY_BITMAP:
-#ifdef ENABLE_DISC_LNN_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_LNN_COAP
             discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_AUTONET;
             break;
 #else
             return SOFTBUS_INVALID_PARAM;
-#endif /* ENABLE_DISC_LNN_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_LNN_COAP */
         case 1 << SHARE_CAPABILITY_BITMAP:
-#ifdef ENABLE_DISC_SHARE_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
             discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_STRATEGY;
             break;
 #else
             return SOFTBUS_INVALID_PARAM;
-#endif /* ENABLE_DISC_SHARE_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
         default:
-#ifdef ENABLE_DISC_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_COAP
             DISC_LOGW(DISC_COAP, "use the default bType, capability=%{public}u", capability);
             discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
             break;
 #else
             return SOFTBUS_INVALID_PARAM;
-#endif /* ENABLE_DISC_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_COAP */
     }
     return SOFTBUS_OK;
 }

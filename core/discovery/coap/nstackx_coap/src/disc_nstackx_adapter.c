@@ -56,7 +56,7 @@ static SoftBusMutex g_localDeviceInfoLock = {0};
 static SoftBusMutex g_discCoapInnerCbLock = {0};
 static int32_t NstackxLocalDevInfoDump(int fd);
 
-#if defined(ENABLE_DISC_LNN_COAP) || defined(ENABLE_DISC_SHARE_COAP)
+#if defined(DSOFTBUS_FEATURE_DISC_LNN_COAP) || defined(DSOFTBUS_FEATURE_DISC_SHARE_COAP)
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
 {
     settings->businessData = NULL;
@@ -80,11 +80,11 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
 EXIT:
     return SOFTBUS_STRCPY_ERR;
 }
-#endif /* ENABLE_DISC_LNN_COAP || ENABLE_DISC_SHARE_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_LNN_COAP || DSOFTBUS_FEATURE_DISC_SHARE_COAP */
 
 int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
 {
-#if defined(ENABLE_DISC_LNN_COAP) || defined(ENABLE_DISC_SHARE_COAP)
+#if defined(DSOFTBUS_FEATURE_DISC_LNN_COAP) || defined(DSOFTBUS_FEATURE_DISC_SHARE_COAP)
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo, SOFTBUS_INVALID_PARAM, DISC_COAP, "DiscRsp devInfo is null");
     NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
@@ -105,7 +105,7 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     return ret;
 #else
     return SOFTBUS_OK;
-#endif /* ENABLE_DISC_LNN_COAP || ENABLE_DISC_SHARE_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_LNN_COAP || DSOFTBUS_FEATURE_DISC_SHARE_COAP */
 }
 
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
@@ -269,17 +269,17 @@ int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap
         return SOFTBUS_STRCPY_ERR;
     }
     // capabilityData can be NULL, it will be check in this func
-#ifdef ENABLE_DISC_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_COAP
     ret = DiscCoapFillServiceData(option, serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, allCap);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "fill service data failed. ret=%{public}d", ret);
-#endif /* ENABLE_DISC_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_COAP */
     ret = NSTACKX_RegisterServiceData(serviceData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
         "register service data to nstackx failed. ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
-#ifdef ENABLE_DISC_SHARE_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
 {
     if (capabilityData == NULL || dataLen == 0) {
@@ -310,7 +310,7 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     SoftBusFree(registerCapaData);
     return SOFTBUS_OK;
 }
-#endif /* ENABLE_DISC_SHARE_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
 
 static bool IsNetworkValid(void)
 {
