@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#include "wifi_direct_manager.h"
 #include <atomic>
 #include <list>
 #include <mutex>
 #include <securec.h>
-#include "conn_log.h"
-#include "softbus_error_code.h"
-#include "wifi_direct_initiator.h"
-#include "wifi_direct_scheduler_factory.h"
-#include "data/link_manager.h"
-#include "utils/wifi_direct_utils.h"
-#include "utils/wifi_direct_anonymous.h"
+#include "wifi_direct_manager.h"
 #include "adapter/p2p_adapter.h"
-#include "utils/duration_statistic.h"
-#include "conn_event.h"
-#include "wifi_direct_role_option.h"
-#include "command/processor_selector_factory.h"
-#include "entity/entity_factory.h"
 #include "auth_interface.h"
-#include "utils/wifi_direct_dfx.h"
+#include "command/processor_selector_factory.h"
+#include "conn_event.h"
+#include "conn_log.h"
+#include "data/link_manager.h"
+#include "dfx/duration_statistic.h"
+#include "dfx/wifi_direct_dfx.h"
+#include "entity/entity_factory.h"
+#include "softbus_error_code.h"
+#include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_utils.h"
+#include "wifi_direct_initiator.h"
+#include "wifi_direct_role_option.h"
+#include "wifi_direct_scheduler_factory.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::list<WifiDirectStatusListener> g_listeners;
