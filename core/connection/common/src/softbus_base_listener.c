@@ -1013,7 +1013,6 @@ static void ProcessServerAcceptEvent(
                     status = ProcessSpecifiedServerAcceptEvent(
                         node->module, listenFd, connectType, socketIf, listener, wakeupTrace);
                 }
-                it->eventProcessed = true;
             }
         }
         switch (status) {
@@ -1060,7 +1059,6 @@ static void ProcessFdEvent(SoftbusListenerNode *node, struct FdNode fdEvent,
                     wakeupTrace, node->module, fdEvent.fd, fdEvent.triggerSet);
                 DispatchFdEvent(fdEvent.fd, node->module, SOFTBUS_SOCKET_EXCEPTION, listener, wakeupTrace);
             }
-            it->eventProcessed = true;
         }
     }
 }
@@ -1101,14 +1099,6 @@ static void ProcessEvent(ListNode *fdNode, const WatchThreadState *watchState, i
         }
         ProcessSpecifiedListenerNodeEvent(node, fdNode, wakeupTrace);
         ReturnListenerNode(&node);
-    }
-    struct FdNode *it = NULL;
-    LIST_FOR_EACH_ENTRY(it, fdNode, struct FdNode, node) {
-        if (it->eventProcessed == false) {
-            CONN_LOGE(CONN_COMMON, "fd is not exist, remove fd event, fd=%{public}d, trigger=%{public}d",
-                it->fd, it->triggerSet);
-            (void)RemoveEvent(g_eventWatcher, it->fd);
-        }
     }
 }
 
