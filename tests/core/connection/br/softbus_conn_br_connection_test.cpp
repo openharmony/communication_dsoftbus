@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "br_mock.h"
+#include "softbus_conn_br_connection_mock.h"
 #include "softbus_conn_br_connection.h"
 #include "softbus_conn_br_manager.h"
 #include "softbus_conn_br_trans.h"
