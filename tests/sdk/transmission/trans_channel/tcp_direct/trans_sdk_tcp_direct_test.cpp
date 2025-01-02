@@ -512,9 +512,13 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcStopReadTest0014, TestSize.Level0)
     int32_t fd = INVALID_VALUE;
     int32_t ret = TransTdcStopRead(fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    fd = g_fd;
+    fd = g_fd + 1;
+    ret = TransTdcCreateListener(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransTdcStopRead(fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransTdcStopRead(fd);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**
