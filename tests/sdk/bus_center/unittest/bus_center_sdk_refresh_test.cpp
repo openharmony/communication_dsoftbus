@@ -44,7 +44,7 @@ public:
 
 void BusCenterSdkRefresh::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("busCenterTest");
 }
 
 void BusCenterSdkRefresh::TearDownTestCase(void) { }

@@ -184,7 +184,7 @@ void DistributeStreamTest::TearDown()
 
 void DistributeStreamTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("distributed_stream_test");
+    SetAccessTokenPermission("distributed_stream_test");
 
     // 获取在线设备
     NodeBasicInfo *onlineDevices = nullptr;

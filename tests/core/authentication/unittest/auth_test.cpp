@@ -65,7 +65,7 @@ public:
 
 void AuthTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("AuthTest");
+    SetAccessTokenPermission("AuthTest");
 }
 
 void AuthTest::TearDownTestCase() { }

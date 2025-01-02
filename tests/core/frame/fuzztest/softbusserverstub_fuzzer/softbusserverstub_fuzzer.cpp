@@ -103,7 +103,7 @@ static bool SendRequestByCommand(const uint8_t *data, size_t size, uint32_t comm
     datas.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     return object->SendRequest(command, datas, reply, option) == ERR_NONE;
 }
 
@@ -534,7 +534,7 @@ bool JoinMetaNodeFuzzTest(const uint8_t *data, size_t size)
     datas.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     if (object->SendRequest(SERVER_JOIN_METANODE, datas, reply, option) != ERR_NONE) {
         return false;
     }
@@ -1184,7 +1184,7 @@ bool CheckOpenSessionPermissionFuzzTest(const uint8_t *data, size_t size)
         size >= INT32_MAX - 1) {
         return false;
     }
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     char mySessionName[SESSION_NAME_SIZE_MAX] = "com.test.trans.session";
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "com.test.trans.session.sendfile";
     char peerDeviceId[DEVICE_ID_SIZE_MAX] = "com.test.trans.session.sendfile";
@@ -1237,7 +1237,7 @@ bool EvaLuateQosInnerFuzzTest(const uint8_t *data, size_t size)
     datas.WriteBuffer(data, qosCount);
     MessageParcel reply;
     MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
@@ -1262,7 +1262,7 @@ bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t *data, size_t size)
     datas.WriteBuffer(data, qosCount);
     MessageParcel reply;
     MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
@@ -1286,7 +1286,7 @@ bool EvaLuateQosInnerDataTypeFuzzTest(const uint8_t *data, size_t size)
     datas.WriteBuffer(data, qosCount);
     MessageParcel reply;
     MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
@@ -1309,7 +1309,7 @@ bool EvaLuateQosInnerQosCountFuzzTest(const uint8_t *data, size_t size)
     datas.WriteBuffer(data, size);
     MessageParcel reply;
     MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
