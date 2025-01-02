@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "connection_ble_manager_mock.h"
+#include "softbus_conn_ble_manager_mock.h"
 
 using namespace testing;
 using namespace testing::ext;

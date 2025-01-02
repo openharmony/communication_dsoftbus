@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "connection_ble_client_mock.h"
+#include "softbus_conn_ble_client_mock.h"
 #include "softbus_adapter_mem.h"
 
 using namespace testing;
