@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "connection_br_mock.h"
+#include "softbus_conn_br_manager_mock.h"
 #include "softbus_conn_br_trans.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -629,7 +629,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket006, TestSize.Level1)
     uint32_t id = 1;
     int64_t seq = 1000;
     uint32_t waitMillis = 1000;
-    void *data = NULL;
+    void *data = nullptr;
 
     ret = ConnBrInitBrPendingPacket();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -696,7 +696,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket008, TestSize.Level1)
     int32_t ret;
     uint32_t id = 1;
     int64_t seq = 1000;
-    void *data = NULL;
+    void *data = nullptr;
     ConnBrConnection connection;
 
     NiceMock<ConnectionBrInterfaceMock> brMock;
@@ -748,7 +748,7 @@ HWTEST_F(ConnectionBrTest, testBrQueue001, TestSize.Level1)
 HWTEST_F(ConnectionBrTest, testBrQueue002, TestSize.Level1)
 {
     int32_t ret;
-    void *msg = NULL;
+    void *msg = nullptr;
     SendBrQueueNode queueNode;
 
     ret = ConnBrInnerQueueInit();

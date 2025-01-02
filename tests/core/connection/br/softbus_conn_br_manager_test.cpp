@@ -20,7 +20,7 @@
 #include <securec.h>
 
 #include "common_list.h"
-#include "connection_br_mock.h"
+#include "softbus_conn_br_manager_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_br_connection.c"
 #include "softbus_conn_br_manager.c"
@@ -587,24 +587,23 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
     (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     pending.pendInfo = &pendInfo;
     ListAdd(&(g_brManager.pendings->list), &(pending.node));
-    bool ret = CheckPending(addrress);
-    EXPECT_EQ(false, ret);
+    bool ret1 = CheckPending(addrress);
+    EXPECT_EQ(false, ret1);
 
-    int32_t ret;
     ConnBrDevice device;
     const char *anomizeAddress;
 
     (void)strcpy_s(device.addr, BT_MAC_LEN, "abc");
     anomizeAddress = "123";
     SoftBusMutexDestroy(&g_brManager.connections->lock);
-    ret = ConnectDeviceDirectly(&device, anomizeAddress);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t ret2 = ConnectDeviceDirectly(&device, anomizeAddress);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret2);
 
     (void)strcpy_s(device.addr, BT_MAC_LEN, "abc");
     anomizeAddress = "123";
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
-    ret = ConnectDeviceDirectly(&device, anomizeAddress);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret2 = ConnectDeviceDirectly(&device, anomizeAddress);
+    EXPECT_EQ(SOFTBUS_OK, ret2);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager008, TestSize.Level1)

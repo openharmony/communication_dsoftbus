@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "br_mock.h"
+#include "softbus_conn_br_connection_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
