@@ -44,7 +44,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         GetAllMetaNodeInfo(reinterpret_cast<const char *>(tmp), info, &infoNum);
         free(tmp);
         return true;

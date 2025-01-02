@@ -86,7 +86,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         GenRanDiscInfo(tmp, size);
         int32_t ret = RefreshLNN(reinterpret_cast<const char *>(tmp), &g_sInfo, &g_refreshCb);
         if (ret == SOFTBUS_OK) {

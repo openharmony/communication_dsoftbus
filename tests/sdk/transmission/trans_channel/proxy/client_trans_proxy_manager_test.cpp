@@ -168,7 +168,7 @@ void ClientTransProxyManagerTest::SetUpTestCase(void)
 {
     int32_t ret = ClientTransProxyInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
 }
 void ClientTransProxyManagerTest::TearDownTestCase(void) {}
 

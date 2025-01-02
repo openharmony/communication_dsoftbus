@@ -89,7 +89,7 @@ void SoftbusServerStubTest::TearDownTestCase(void)
 
 SessionParam *GenerateSessionParam()
 {
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     EXPECT_NE(nullptr, sessionParam);
     SessionAttribute attr;

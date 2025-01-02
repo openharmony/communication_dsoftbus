@@ -181,7 +181,7 @@ public:
 
 void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
     g_fileTest = fopen(g_testProxyFileList[0], "w+");
     EXPECT_NE(g_fileTest, nullptr);
 
