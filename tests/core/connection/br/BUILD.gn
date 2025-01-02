@@ -64,8 +64,8 @@ ohos_unittest("BrConnTest") {
     "hilog:libhilog",
   ]
   sources = [
-    "$dsoftbus_root_path/tests/core/connection/br/mock/connection_br_mock.cpp",
-    "connection_br_connection_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_manager_mock.cpp",
+    "softbus_conn_br_manager_test.cpp",
   ]
 }
 
@@ -86,8 +86,8 @@ ohos_unittest("ConnectionBrTest") {
     "hilog:libhilog",
   ]
   sources = [
-    "$dsoftbus_root_path/tests/core/connection/br/mock/connection_br_mock.cpp",
-    "connection_br_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_manager_mock.cpp",
+    "softbus_conn_br_trans_test.cpp",
   ]
 }
 
@@ -126,8 +126,8 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
-    "$dsoftbus_root_path/tests/core/connection/br/mock/br_mock.cpp",
-    "br_connection_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_connection_mock.cpp",
+    "softbus_conn_br_connection_test.cpp",
   ]
 }
 
