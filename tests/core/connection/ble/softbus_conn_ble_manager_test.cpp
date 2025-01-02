@@ -20,7 +20,7 @@
 #include <securec.h>
 
 #include "ble_protocol_interface_factory.h"
-#include "connection_ble_manager_mock.h"
+#include "softbus_conn_ble_manager_mock.h"
 #include "softbus_adapter_ble_conflict.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
