@@ -42,7 +42,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         int32_t ret = GetAllNodeDeviceInfo(reinterpret_cast<const char *>(tmp), &info, &infoNum);
         if (ret == SOFTBUS_OK && info != nullptr) {
             FreeNodeInfo(info);

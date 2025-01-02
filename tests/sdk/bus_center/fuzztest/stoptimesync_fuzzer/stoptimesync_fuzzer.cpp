@@ -40,7 +40,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         StopTimeSync(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp));
         free(tmp);
         return true;
