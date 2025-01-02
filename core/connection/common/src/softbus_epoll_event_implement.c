@@ -192,6 +192,8 @@ static int32_t WaitEpollReadyEvent(struct epoll_event fdEvent, int32_t fd, int32
     struct epoll_event events = {0};
     ret = SoftBusSocketEpollWait(epollFd, &events, 1, timeoutMs);
     SoftBusSocketClose(epollFd);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret >= 0 || errno != EINTR, SOFTBUS_ADAPTER_SOCKET_EINTR,
+        CONN_COMMON, "epoll wait is interrupted");
     return ret;
 }
 
