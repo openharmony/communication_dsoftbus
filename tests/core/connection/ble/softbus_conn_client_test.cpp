@@ -29,7 +29,7 @@
 #include "bus_center_info_key.h"
 #include "softbus_conn_ble_manager.h"
 #include "ble_protocol_interface_factory.h"
-#include "connection_ble_client_mock.h"
+#include "softbus_conn_ble_client_mock.h"
 
 using namespace testing::ext;
 using namespace testing;
