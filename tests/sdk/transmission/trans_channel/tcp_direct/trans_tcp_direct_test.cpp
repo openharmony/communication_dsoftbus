@@ -84,7 +84,7 @@ void TransTcpDirectTest::SetUpTestCase(void)
 {
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret,  SOFTBUS_OK);
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
 }
 
 void TransTcpDirectTest::TearDownTestCase(void)

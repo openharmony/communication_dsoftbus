@@ -40,7 +40,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         StopRefreshLNN(reinterpret_cast<const char *>(tmp),
                        *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(tmp)));
         free(tmp);

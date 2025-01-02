@@ -53,7 +53,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         StartTimeSync(reinterpret_cast<const char *>(tmp),
                       reinterpret_cast<const char *>(tmp), timeAccuracy, period, &g_timeSyncCb);
         free(tmp);

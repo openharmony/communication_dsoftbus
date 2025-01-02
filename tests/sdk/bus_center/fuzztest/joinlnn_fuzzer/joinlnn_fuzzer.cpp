@@ -68,7 +68,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         GenRandAddr(data, size);
         JoinLNN(reinterpret_cast<const char *>(tmp), &addr, OnJoinLNNResult);
         LeaveLNN(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp), OnLeaveLNNResult);
