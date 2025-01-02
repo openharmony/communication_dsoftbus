@@ -587,22 +587,14 @@ static bool IsExistWatchDevice(const char *networkId)
 {
     int32_t localDevTypeId = TYPE_UNKNOW_ID;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get local deviceTypeId fail, ret=%{public}d", ret);
-        return false;
-    }
-    if (localDevTypeId == TYPE_WATCH_ID) {
-        LNN_LOGI(LNN_LANE, "local is device");
+    if (ret == SOFTBUS_OK && localDevTypeId == TYPE_WATCH_ID) {
+        LNN_LOGI(LNN_LANE, "local is watch");
         return true;
     }
     int32_t remoteDevTypeId = TYPE_UNKNOW_ID;
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote deviceTypeId fail, ret=%{public}d", ret);
-        return false;
-    }
-    if (remoteDevTypeId == TYPE_WATCH_ID) {
-        LNN_LOGI(LNN_LANE, "remote is device");
+    if (ret == SOFTBUS_OK && remoteDevTypeId == TYPE_WATCH_ID) {
+        LNN_LOGI(LNN_LANE, "remote is watch");
         return true;
     }
     return false;
