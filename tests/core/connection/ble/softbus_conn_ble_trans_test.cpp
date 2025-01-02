@@ -20,7 +20,7 @@
 #include <securec.h>
 #include "softbus_error_code.h"
 #include "softbus_conn_ble_trans.h"
-#include "connection_ble_trans_mock.h"
+#include "softbus_conn_ble_trans_mock.h"
 #include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_adapter_mem.h"

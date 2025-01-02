@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "connection_ble_mock.h"
+#include "softbus_conn_ble_connection_mock.h"
 
 #include <cstdio>
 #include <cstring>

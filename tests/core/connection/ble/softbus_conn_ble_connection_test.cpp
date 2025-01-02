@@ -17,7 +17,7 @@
 #include <cstring>
 #include <gtest/gtest.h>
 #include <securec.h>
-#include "connection_ble_mock.h"
+#include "softbus_conn_ble_connection_mock.h"
 #include "common_list.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"

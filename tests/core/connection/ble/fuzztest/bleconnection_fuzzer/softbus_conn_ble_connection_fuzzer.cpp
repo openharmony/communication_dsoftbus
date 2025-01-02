@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "bleconnection_fuzzer.h"
+#include "softbus_conn_ble_connection_fuzzer.h"
 
 #include <vector>
 #include <securec.h>
