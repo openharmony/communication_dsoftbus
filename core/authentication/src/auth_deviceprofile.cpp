@@ -238,7 +238,51 @@ static bool IsSameAccount(int64_t accountId)
     return false;
 }
 
-static void InsertDpSameAccount(const std::string peerUdid, int32_t peerUserId)
+static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int32_t peerUserId)
+{
+    if (peerUserId == 0) {
+        // old acl dp userid is -1, use -1 to match acl
+        peerUserId = -1;
+        LNN_LOGI(LNN_STATE, "peer device is old version");
+    }
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return GET_ALL_ACL_FAIL;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return GET_ALL_ACL_IS_EMPTY;
+    }
+
+    UpdateDpAclResult updateResult = UPDATE_ACL_NOT_MATCH;
+    int32_t localUserId = GetActiveOsAccountIds();
+    for (auto &aclProfile :aclProfiles) {
+        if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+            aclProfile.GetTrustDeviceId().empty() ||
+            aclProfile.GetTrustDeviceId() != peerUdid ||
+            aclProfile.GetBindType() != (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
+            aclProfile.GetAccesser().GetAccesserUserId() != localUserId ||
+            aclProfile.GetAccessee().GetAccesseeUserId() != peerUserId) {
+            continue;
+        }
+        char *anonyUdid = nullptr;
+        Anonymize(peerUdid.c_str(), &anonyUdid);
+        LNN_LOGI(LNN_STATE, "dp has acl. udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d, "
+            "Status=%{public}d", AnonymizeWrapper(anonyUdid), localUserId, peerUserId, aclProfile.GetStatus());
+        AnonymizeFree(anonyUdid);
+        if (aclProfile.GetStatus() != (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE) {
+            aclProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
+            ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile ret=%{public}d", ret);
+        }
+        updateResult = UPDATE_ACL_SUCC;
+    }
+    return updateResult;
+}
+
+static void InsertDpSameAccountAcl(const std::string peerUdid, int32_t peerUserId)
 {
     OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
     OHOS::DistributedDeviceProfile::Accesser accesser;
@@ -291,7 +335,10 @@ void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUs
     }
     std::string peerUdid(deviceId);
     if (IsSameAccount(accountId)) {
-        InsertDpSameAccount(peerUdid, peerUserId);
+        UpdateDpAclResult ret = UpdateDpSameAccountAcl(peerUdid, peerUserId);
+        if (ret != UPDATE_ACL_SUCC) {
+            InsertDpSameAccountAcl(peerUdid, peerUserId);
+        }
     }
 }
 
