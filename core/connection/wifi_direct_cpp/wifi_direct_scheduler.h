@@ -21,14 +21,15 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include "wifi_direct_types.h"
-#include "wifi_direct_executor.h"
-#include "command/wifi_direct_command.h"
 #include "command/connect_command.h"
+#include "command/wifi_direct_command.h"
+#include "dfx/processor_snapshot.h"
 #include "event/wifi_direct_event_wrapper.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_executor.h"
 #include "wifi_direct_executor_factory.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectSchedulerFactory;
@@ -158,6 +159,8 @@ public:
         auto iterator = executors_.find(remoteDeviceId);
         return iterator != executors_.end();
     }
+
+    void Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots);
 
 protected:
     int ScheduleActiveCommand(const std::shared_ptr<WifiDirectCommand> &command,

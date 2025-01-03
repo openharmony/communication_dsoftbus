@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef WIFI_DIRECT_TRACE_H
-#define WIFI_DIRECT_TRACE_H
+#ifndef P2P_ENTITY_SNAPSHOT_H
+#define P2P_ENTITY_SNAPSHOT_H
 
+#include <list>
+#include <nlohmann/json.hpp>
 #include <string>
 
-namespace OHOS::SoftBus {
-class WifiDirectTrace {
-public:
-    static void StartTrace(const std::string &requestDeviceId, const std::string &receiverDeviceId);
-    static void StopTrace();
-    static void SetRequestId(uint64_t requestId);
-};
+#include "entity/p2p_entity.h"
+#include "wifi_direct_snapshot.h"
 
+namespace OHOS::SoftBus {
+class P2pEntity;
+class P2pEntitySnapshot : WifiDirectSnapshot {
+public:
+    friend P2pEntity;
+    void Marshalling(nlohmann::json &output) override;
+
+private:
+    std::string state_;
+    int frequency_;
+    std::string joiningClients_;
+};
 } // namespace OHOS::SoftBus
-#endif // WIFI_DIRECT_TRACE_H
+#endif
