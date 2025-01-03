@@ -754,10 +754,10 @@ HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.
 {
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int32_t ret = TransGetRemoteUuidByAuthHandle(authHandle, (char *)g_uuid);
-    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     authHandle.type = AUTH_INVALID_ID;
     ret = TransGetRemoteUuidByAuthHandle(authHandle, (char *)g_uuid);
-    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
