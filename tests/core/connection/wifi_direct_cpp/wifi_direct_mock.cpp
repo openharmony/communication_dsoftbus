@@ -490,5 +490,9 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
     thread.detach();
     return WIFI_SUCCESS;
 }
+
+void WifiDirectHidumper::HidumperInit() { }
+using Hidumper = std::function<int()>;
+void WifiDirectHidumper::Register(const Hidumper &hidumper) { }
 } // namespace OHOS::SoftBus
 // namespace OHOS::SoftBus

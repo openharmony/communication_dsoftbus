@@ -26,6 +26,7 @@
 
 #include "adapter/p2p_adapter.h"
 #include "channel/auth_negotiate_channel.h"
+#include "dfx/p2p_entity_snapshot.h"
 #include "p2p_available_state.h"
 #include "p2p_broadcast_receiver.h"
 #include "p2p_create_group_state.h"
@@ -46,6 +47,7 @@ struct ClientJoinEvent {
     std::string remoteMac_;
 };
 
+class P2pEntitySnapshot;
 class P2pEntity : public WifiDirectEntity {
 public:
     static constexpr int TIMEOUT_WAIT_CLIENT_JOIN_MS = 10000;
@@ -89,6 +91,8 @@ public:
 
     void UpdateInterfaceManagerWhenStateChanged(P2pState state);
     static void Listener(BroadcastReceiverAction action, const struct BroadcastParam &param);
+    
+    void Dump(P2pEntitySnapshot &snapshot);
 
     void Lock()
     {

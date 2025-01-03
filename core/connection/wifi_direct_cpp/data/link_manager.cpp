@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "link_manager.h"
 
 #include "conn_log.h"
@@ -317,5 +318,13 @@ void LinkManager::Dump() const
     if (links_.empty()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
     }
+}
+
+void LinkManager::Dump(std::list<std::shared_ptr<LinkSnapshot>> &snapshots)
+{
+    LinkManager::GetInstance().ForEach([&snapshots](const InnerLink &link) {
+        snapshots.push_back(std::make_shared<LinkSnapshot>(link));
+        return true;
+    });
 }
 } // namespace OHOS::SoftBus

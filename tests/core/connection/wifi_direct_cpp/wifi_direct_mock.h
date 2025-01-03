@@ -16,20 +16,20 @@
 #ifndef WIFI_DIRECT_MOCK_H
 #define WIFI_DIRECT_MOCK_H
 
+#include <atomic>
+#include <gmock/gmock.h>
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "lnn_feature_capability.h"
-#include "lnn_p2p_info.h"
-#include "lnn_distributed_net_ledger.h"
-#include "softbus_proxychannel_pipeline.h"
-#include "wifi_direct_types.h"
+#include "data/negotiate_message.h"
+#include "dfx/wifi_direct_hidumper.h"
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
 #include "kits/c/wifi_p2p.h"
-#include <atomic>
-#include <gmock/gmock.h>
-
-#include "data/negotiate_message.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
+#include "lnn_p2p_info.h"
+#include "softbus_proxychannel_pipeline.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectInterface {
@@ -114,6 +114,9 @@ public:
     virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual int32_t GetInterfaceIpString(const std::string &interface, std::string &ip) = 0;
+    virtual void HidumpInit() = 0;
+    using Hidumper = std::function<int()>;
+    virtual void Register(const Hidumper &hidumper) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -202,6 +205,9 @@ public:
     MOCK_METHOD(std::string, ProxyNegotiateChannelGetRemoteDeviceId, (int32_t channelId), (const override));
     MOCK_METHOD(int32_t, LnnGetOsTypeByNetworkId, (const char *networkId, int32_t *osType), (override));
     MOCK_METHOD(int32_t, GetInterfaceIpString, (const std::string &interface, std::string &ip), (override));
+    MOCK_METHOD(void, HidumpInit, (), (override));
+    using Hidumper = std::function<int()>;
+    MOCK_METHOD(void, Register, (const Hidumper &hidumper), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
     static void InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback);

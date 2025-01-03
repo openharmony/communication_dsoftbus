@@ -17,9 +17,11 @@
 #define LINK_MANAGER_H
 
 #include <atomic>
+#include <list>
 #include <map>
 #include <mutex>
 #include <functional>
+#include "dfx/link_snapshot.h"
 #include "inner_link.h"
 #include "wifi_direct_types.h"
 
@@ -58,6 +60,8 @@ public:
     void RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac);
 
     void Dump() const;
+    
+    void Dump(std::list<std::shared_ptr<LinkSnapshot>> &snapshots);
 
 private:
     mutable std::recursive_mutex lock_;

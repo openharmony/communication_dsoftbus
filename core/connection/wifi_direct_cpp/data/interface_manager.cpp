@@ -97,4 +97,12 @@ void InterfaceManager::Init()
     GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
     GetInstance().InitInterface(InterfaceInfo::InterfaceType::HML);
 }
+
+void InterfaceManager::Dump(std::list<std::shared_ptr<InterfaceSnapshot>> &snapshots)
+{
+    std::shared_lock lock(lock_);
+    for (const auto &interface : interfaces_) {
+        snapshots.push_back(std::make_shared<InterfaceSnapshot>(interface));
+    }
+}
 } // namespace OHOS::SoftBus
