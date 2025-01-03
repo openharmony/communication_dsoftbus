@@ -706,6 +706,17 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         ProcessAbnormalUdpChannelState(&info, ret, false);
         goto ERR_EXIT;
     }
+
+    if (info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
+        ret = SendReplyUdpInfo(&info, authHandle, seq);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "send reply udp info failed. ret=%{public}d.", ret);
+            errDesc = (char *)"send reply error";
+            ProcessAbnormalUdpChannelState(&info, ret, false);
+            goto ERR_EXIT;
+        }
+        ReportUdpRequestHandShakeReplyEvent(&info, &extra, EVENT_STAGE_RESULT_OK, SOFTBUS_OK);
+    }
     return;
 ERR_EXIT:
     ReportUdpRequestHandShakeReplyEvent(&info, &extra, EVENT_STAGE_RESULT_FAILED, ret);
