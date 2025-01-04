@@ -21,6 +21,7 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_usb_dispatcher.h"
+#include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -38,6 +39,7 @@ static bool g_isInited = false;
 
 static SoftBusList *g_publishInfoList = NULL;
 static SoftBusList *g_discoveryInfoList = NULL;
+static SoftBusHandler g_discManagerHandler = {};
 
 static DiscoveryFuncInterface *g_discCoapInterface = NULL;
 static DiscoveryFuncInterface *g_discBleInterface = NULL;
@@ -60,6 +62,11 @@ typedef enum {
     SUBSCRIBE_INNER_SERVICE = 3,
     MAX_SERVICE = SUBSCRIBE_INNER_SERVICE,
 } ServiceType;
+
+typedef enum {
+    DISC_MANAGER_USER_SWITCHED,
+    DISC_MANAGER_BUTT,
+} DiscManagerMessage;
 
 typedef union {
     PublishOption publishOption;
@@ -193,6 +200,7 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
     infoNode->statistics.repTimes++;
     infoNode->statistics.devNum++;
 }
+
 static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *infoNode)
 {
     DiscoveryStatistics *statistics = &infoNode->statistics;
@@ -200,6 +208,7 @@ static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *info
     SoftbusRecordBleDiscDetails((char *)packageName, totalTime, statistics->repTimes, statistics->devNum,
                                 statistics->discTimes);
 }
+
 static void BitmapSet(uint32_t *bitMap, uint32_t pos)
 {
     *bitMap |= 1U << pos;
@@ -223,6 +232,19 @@ static void BuildDiscCallEvent(DiscEventExtra *extra, const DiscInfo *info, cons
         extra->callerPkg = packageName;
     }
     extra->interFuncType = type + 1;
+}
+
+static SoftBusMessage *CreateDiscMgrHandlerMsg(int32_t what, uint64_t arg1, uint64_t arg2, void *obj)
+{
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
+    DISC_CHECK_AND_RETURN_RET_LOGE(msg != NULL, NULL, DISC_CONTROL, "disc manager create handler msg failed");
+    msg->what = what;
+    msg->arg1 = arg1;
+    msg->arg2 = arg2;
+    msg->handler = &g_discManagerHandler;
+    msg->FreeMessage = NULL;
+    msg->obj = obj;
+    return msg;
 }
 
 static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
@@ -1235,14 +1257,21 @@ static void RemoveDiscInfoForDiscovery(const char *pkgName)
     RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, pkgName);
 }
 
+static void StopPreviousPubAndDisc(void)
+{
+    RemoveDiscInfoByPackageName(g_publishInfoList, PUBLISH_SERVICE, NULL);
+    RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, NULL);
+}
+
 static void DiscMgrUserSwitchHandler(const LnnEventBasicInfo *info)
 {
     DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is null");
     DISC_CHECK_AND_RETURN_LOGE(info->event == LNN_EVENT_USER_SWITCHED, DISC_CONTROL,
         "invalid event=%{public}d", info->event);
     DISC_LOGI(DISC_CONTROL, "recv userSwitch event, stop previous publish and discovery");
-    RemoveDiscInfoByPackageName(g_publishInfoList, PUBLISH_SERVICE, NULL);
-    RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, NULL);
+    SoftBusMessage *msg = CreateDiscMgrHandlerMsg(DISC_MANAGER_USER_SWITCHED, 0, 0, NULL);
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_CONTROL, "msg is null");
+    g_discManagerHandler.looper->PostMessage(g_discManagerHandler.looper, msg);
 }
 
 void DiscMgrDeathCallback(const char *pkgName)
@@ -1253,6 +1282,29 @@ void DiscMgrDeathCallback(const char *pkgName)
     DISC_LOGD(DISC_CONTROL, "pkg is dead. pkgName=%{public}s", pkgName);
     RemoveDiscInfoForPublish(pkgName);
     RemoveDiscInfoForDiscovery(pkgName);
+}
+
+static void DiscManagerMsgHandler(SoftBusMessage *msg)
+{
+    switch (msg->what) {
+        case DISC_MANAGER_USER_SWITCHED:
+            StopPreviousPubAndDisc();
+            break;
+        default:
+            DISC_LOGE(DISC_CONTROL, "wrong msg what=%{public}d", msg->what);
+            return;
+    }
+}
+
+static int32_t DiscManagerLooperInit(void)
+{
+    g_discManagerHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_discManagerHandler.looper != NULL, SOFTBUS_LOOPER_ERR, DISC_INIT,
+        "get looper failed");
+
+    g_discManagerHandler.name = (char *)"disc_manager_handler";
+    g_discManagerHandler.HandleMessage = DiscManagerMsgHandler;
+    return SOFTBUS_OK;
 }
 
 int32_t DiscMgrEventInit(void)
@@ -1293,6 +1345,11 @@ int32_t DiscMgrInit(void)
         g_publishInfoList = NULL;
         return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
     }
+    if (DiscManagerLooperInit() != SOFTBUS_OK) {
+        DISC_LOGE(DISC_INIT, "init discovery manager looper failed");
+        DiscMgrDeinit();
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
 
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
         ListInit(&g_capabilityList[i]);
@@ -1316,6 +1373,8 @@ void DiscMgrDeinit(void)
     DiscCoapDeinit();
     DiscBleDeinit();
     DiscUsbDispatcherDeinit();
+
+    (void)memset_s(&g_discManagerHandler, sizeof(SoftBusHandler), 0, sizeof(SoftBusHandler));
 
     g_isInited = false;
     DISC_LOGI(DISC_INIT, "disc manager deinit success");
