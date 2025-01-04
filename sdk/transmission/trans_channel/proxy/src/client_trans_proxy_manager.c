@@ -120,6 +120,7 @@ static int32_t ClientTransProxyListInit()
 
 static void ClientTransProxyListDeinit(void)
 {
+    (void)RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, NULL);
     if (g_proxyChannelInfoList != NULL) {
         DestroySoftBusList(g_proxyChannelInfoList);
         g_proxyChannelInfoList = NULL;
