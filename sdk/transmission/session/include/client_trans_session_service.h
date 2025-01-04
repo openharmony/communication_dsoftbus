@@ -27,7 +27,7 @@ int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
 int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr);
 int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType);
-bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName);
+bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName, int32_t length);
 #ifdef __cplusplus
 }
 #endif
