@@ -832,6 +832,11 @@ int32_t LnnInitNetworkManagerDelay(void)
 
 bool LnnIsAutoNetWorkingEnabled(void)
 {
+    int32_t localDevTypeId = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
+        localDevTypeId == TYPE_WATCH_ID) {
+        return false;
+    }
     bool isConfigEnabled = false;
     if (IsActiveOsAccountUnlocked()) {
         g_isUnLock = true;
