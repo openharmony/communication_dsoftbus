@@ -36,7 +36,7 @@ const char *g_sessionName[] = {
     "DBinder*",
     "hiview*",
     "com.ohos.plrdtest.hongyan*",
-    "ObjectstoreDB*",
+    "objectstoreDB*",
 };
 constexpr int32_t SESSION_NAME_NUM = sizeof(g_sessionName) / sizeof(g_sessionName[0]);
 
