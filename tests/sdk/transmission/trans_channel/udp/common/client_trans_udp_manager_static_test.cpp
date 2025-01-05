@@ -453,4 +453,16 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, Te
     ret = TransUdpChannelSetStreamMultiLayer(TEST_CHANNELID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: TransSendLimitChangeDataToCoreTest001
+ * @tc.desc: TransSendLimitChangeDataToCore
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSendLimitChangeDataToCoreTest001, TestSize.Level0)
+{
+    int32_t ret = TransSendLimitChangeDataToCore(TEST_CHANNELID, FILE_PRIORITY_BK, NSTACKX_EOK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 } // namespace OHOS
