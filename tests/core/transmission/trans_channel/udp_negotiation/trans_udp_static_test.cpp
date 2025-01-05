@@ -263,14 +263,16 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest008, TestSize.Level1)
  */
 HWTEST_F(TransUdpStaticTest, TransUdpStaticTest009, TestSize.Level1)
 {
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(appInfo), 0, sizeof(appInfo));
-    appInfo.fastTransDataSize = TEST_SIZE;
-    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_NE(nullptr, appInfo);
+    appInfo->fastTransDataSize = TEST_SIZE;
+
+    UdpChannelInfo *newChannel = static_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
     ASSERT_NE(nullptr, newChannel);
 
-    int32_t ret = CopyAppInfoFastTransData(newChannel, &appInfo);
+    int32_t ret = CopyAppInfoFastTransData(newChannel, appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(appInfo);
     SoftBusFree(newChannel);
     newChannel = nullptr;
 }
