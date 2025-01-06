@@ -472,7 +472,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     selectParam.transType = allocInfo->transType;
     selectParam.qosRequire = allocInfo->qosRequire;
     selectParam.allocedLaneId = allocLaneId;
-    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
         LNN_LOGE(LNN_LANE, "recommendLinkList malloc fail");
         return SOFTBUS_MALLOC_ERR;
