@@ -226,10 +226,8 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
 
 static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOption *clientAddr)
 {
-    if (cfd < 0 || clientAddr == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param, cfd=%{public}d", cfd);
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(cfd >= 0 && clientAddr != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "invalid param, cfd=%{public}d", cfd);
     int32_t ret;
     int32_t channelId = GenerateChannelId(true);
     TransEventExtra extra = {
@@ -246,6 +244,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         extra.errcode = ret;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "channelId is invalid");
+        DelTrigger(module, cfd, RW_TRIGGER);
         TransTdcSocketReleaseFd(module, cfd);
         return ret;
     }
@@ -255,6 +254,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         extra.errcode = ret;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "create srv data buf node failed.");
+        DelTrigger(module, cfd, RW_TRIGGER);
         TransTdcSocketReleaseFd(module, cfd);
         return ret;
     }
@@ -265,6 +265,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
+        DelTrigger(module, cfd, RW_TRIGGER);
         TransTdcSocketReleaseFd(module, cfd);
         return ret;
     }
@@ -275,10 +276,16 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
     return SOFTBUS_OK;
 }
 
-void CloseTcpDirectFd(int32_t fd)
+void CloseTcpDirectFd(ListenerModule module, int32_t fd)
 {
 #ifndef __LITEOS_M__
-    ConnCloseSocket(fd);
+    if (fd < 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid fd.");
+        return;
+    }
+    if (DelTrigger(module, fd, RW_TRIGGER) == SOFTBUS_NOT_FIND) {
+        ConnCloseSocket(fd);
+    }
 #else
     (void)fd;
 #endif
@@ -313,7 +320,8 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         if (conn.serverSide) {
             return;
         }
-        CloseTcpDirectFd(fd);
+        DelTrigger(module, fd, READ_TRIGGER);
+        CloseTcpDirectFd(module, fd);
     }
     TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
@@ -440,7 +448,7 @@ void TransTdcSocketReleaseFd(ListenerModule module, int32_t fd)
         TRANS_LOGI(TRANS_SDK, "fd less than zero");
         return;
     }
-    if (DelTrigger(module, fd, RW_TRIGGER) != SOFTBUS_NOT_FIND) {
+    if (DelTrigger(module, fd, RW_TRIGGER) == SOFTBUS_NOT_FIND) {
         ConnShutdownSocket(fd);
     }
 }
