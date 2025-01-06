@@ -167,7 +167,7 @@ static uint32_t GetLaneDetectIdWithoutLock()
 
 static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *laneInfo, const LaneLinkCb *callback)
 {
-    LaneDetectInfo *infoItem = (LaneDetectInfo *)SoftBusMalloc(sizeof(LaneDetectInfo));
+    LaneDetectInfo *infoItem = (LaneDetectInfo *)SoftBusCalloc(sizeof(LaneDetectInfo));
     if (infoItem == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }

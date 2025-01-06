@@ -2796,7 +2796,7 @@ static int32_t InitWifiDirectInfo(void)
         LNN_LOGE(LNN_INIT, "mutex init fail");
         return SOFTBUS_NO_INIT;
     }
-    g_authSessionServerList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    g_authSessionServerList = (ListNode *)SoftBusCalloc(sizeof(ListNode));
     if (g_authSessionServerList == NULL) {
         LNN_LOGE(LNN_LANE, "g_authSessionServerList calloc fail.");
         (void)SoftBusMutexDestroy(&g_AuthTagLock);
@@ -2829,18 +2829,18 @@ static int32_t LnnP2pInit(void)
         LNN_LOGE(LNN_INIT, "mutex init fail");
         return SOFTBUS_NO_INIT;
     }
-    g_p2pLinkList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    g_p2pLinkList = (ListNode *)SoftBusCalloc(sizeof(ListNode));
     if (g_p2pLinkList == NULL) {
         (void)SoftBusMutexDestroy(&g_p2pLinkMutex);
         return SOFTBUS_MALLOC_ERR;
     }
-    g_p2pLinkedList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    g_p2pLinkedList = (ListNode *)SoftBusCalloc(sizeof(ListNode));
     if (g_p2pLinkedList == NULL) {
         (void)SoftBusMutexDestroy(&g_p2pLinkMutex);
         SoftBusFree(g_p2pLinkList);
         return SOFTBUS_MALLOC_ERR;
     }
-    g_guideInfoList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    g_guideInfoList = (ListNode *)SoftBusCalloc(sizeof(ListNode));
     if (g_guideInfoList == NULL) {
         LNN_LOGE(LNN_LANE, "g_guideInfoList malloc fail.");
         (void)SoftBusMutexDestroy(&g_p2pLinkMutex);
