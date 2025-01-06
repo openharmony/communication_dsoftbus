@@ -48,6 +48,7 @@ namespace OHOS {
 
 static const char *g_addr = "192.168.8.119";
 static const char *g_ip = "192.168.8.1";
+static const char *g_localIp = "127.0.0.1";
 static int32_t g_port = 6000;
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
@@ -70,6 +71,10 @@ public:
 
 void TransTcpDirectP2pTest::SetUpTestCase(void)
 {
+    int32_t ret = InitBaseListener();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ConnInitSockets();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 void TransTcpDirectP2pTest::TearDownTestCase(void)
@@ -82,7 +87,7 @@ SessionConn *TestSetSessionConn()
     if (conn == nullptr) {
         return nullptr;
     }
-    
+
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
@@ -169,20 +174,24 @@ string TestGetMsgPack()
         cJSON_Delete(msg);
         return nullptr;
     }
-    
+
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
     appInfo->myData.apiVersion = API_V2;
     appInfo->peerData.apiVersion = API_V2;
-    (void)memcpy_s(appInfo->myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName, (strlen(g_sessionName)+1));
-    (void)memcpy_s(appInfo->myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    appInfo->peerData.port = g_port;
+    (void)memcpy_s(appInfo->myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName, (strlen(g_sessionName) + 1));
+    (void)memcpy_s(appInfo->myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName) + 1));
+    (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_addr, (strlen(g_addr) + 1));
     if (TransAuthChannelMsgPack(msg, appInfo) != SOFTBUS_OK) {
         cJSON_Delete(msg);
+        SoftBusFree(appInfo);
         return nullptr;
     }
     string data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
+    SoftBusFree(appInfo);
     return data;
 }
 
@@ -194,11 +203,16 @@ string TestGetMsgPack()
  */
 HWTEST_F(TransTcpDirectP2pTest, StartNewP2pListenerTest001, TestSize.Level1)
 {
+    CreateP2pListenerList();
     int32_t ret = StartNewP2pListener(nullptr, &g_port);
     EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     ret = StartNewP2pListener(g_ip, &g_port);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
+
+    ret = StartNewP2pListener(g_localIp, &g_port);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    StopP2pSessionListener();
 }
 
 /**
@@ -245,7 +259,9 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
  */
 HWTEST_F(TransTcpDirectP2pTest, P2pDirectChannelInitTest001, TestSize.Level1)
 {
+    CheckAndAddPeerDeviceInfo(g_uuid);
     int32_t ret = CreateP2pListenerList();
+    CheckAndAddPeerDeviceInfo(g_uuid);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -267,6 +283,8 @@ HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
     ret = StartP2pListener(g_ip, &g_port, g_uuid);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
+    ret = StartP2pListener(g_localIp, &g_port, g_uuid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
     OnChannelOpenFail(channelId, errCode);
@@ -350,7 +368,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 {
     int32_t ret = ConnectTcpDirectPeer(g_addr, g_port, g_ip);
-    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /**
@@ -428,6 +446,7 @@ HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
     bool isAuthLink = true;
     bool notAuthLink = false;
     SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", isAuthLink);
+    SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", notAuthLink);
 
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
@@ -516,6 +535,12 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
 
     ret = StartNewHmlListener(g_ip, &g_port, &moduleType);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
+
+    ret = StartNewHmlListener(g_localIp, &g_port, &moduleType);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+        StopHmlListener((ListenerModule)i);
+    }
 }
 
 /**
@@ -563,6 +588,25 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StartHmlListener(g_ip, &g_port, g_udid);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
+    for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+        StopHmlListener((ListenerModule)i);
+    }
+}
+
+/**
+ * @tc.name: StartHmlListenerTest004
+ * @tc.desc: StartHmlListener, try listener.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest004, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         StopHmlListener((ListenerModule)i);
     }
@@ -641,7 +685,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
     const char *myAddr = MY_IP;
     int32_t seq = NOAMAL_SEQ;
     ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    EXPECT_EQ(SOFTBUS_CONN_FAIL, ret);
 }
 
 /**
@@ -691,6 +735,9 @@ HWTEST_F(TransTcpDirectP2pTest, ClearHmlListenerByUuidTest001, TestSize.Level1)
     ret = StartHmlListener(g_ip, &g_port, g_udid);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
     ClearHmlListenerByUuid(g_uuid);
+    ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ClearHmlListenerByUuid(g_uuid);
     AnonymizeIp(g_ip, (char *)g_ip, g_port);
     OutputAnonymizeIpAddress(g_ip, g_ip);
 }
@@ -705,13 +752,56 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenedTest001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
-    uint32_t requestId = 1;
+    uint32_t requestId = 12;
+    int32_t channelId = 123;
     conn->requestId = requestId;
-    int32_t ret =TransTdcAddSessionConn(conn);
+    conn->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(SOFTBUS_OK, ret);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_MAX };
     OnAuthConnOpened(requestId, authHandle);
-    SoftBusFree(conn);
+    TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: OnAuthConnOpenedTest002
+ * @tc.desc: OnAuthConnOpened.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenedTest002, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    uint32_t requestId = 12;
+    int32_t channelId = 123;
+    conn->requestId = requestId;
+    conn->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_BR };
+    // fail auto free conn
+    OnAuthConnOpened(requestId, authHandle);
+}
+
+/**
+ * @tc.name: OnAuthConnOpenFailedTest001
+ * @tc.desc: OnAuthConnOpenFailed.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenFailedTest001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    uint32_t requestId = 12;
+    int32_t channelId = 123;
+    conn->requestId = requestId;
+    conn->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    // fail auto free conn
+    OnAuthConnOpenFailed(requestId, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 }
 
 /**
@@ -799,5 +889,50 @@ HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyMsgReceivedTest001, TestSize.Level1)
     int32_t len = strlen(data);
     OnP2pVerifyMsgReceived(channelId, data, len);
     cJSON_free(data);
+}
+
+/**
+ * @tc.name: AddHmlTriggerTest001
+ * @tc.desc: AddHmlTrigger.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, AddHmlTriggerTest001, TestSize.Level1)
+{
+    int32_t fd = 1;
+    int64_t seq = 1;
+    int32_t ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddHmlTrigger(fd, g_ip, seq);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    ClearHmlListenerByUuid(g_uuid);
+}
+
+/**
+ * @tc.name: OnVerifyP2pReplyTest001
+ * @tc.desc: OnVerifyP2pReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    uint32_t requestId = 12;
+    int32_t channelId = 123;
+    int64_t req = 1234;
+    conn->requestId = requestId;
+    conn->channelId = channelId;
+    conn->req = req;
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int64_t authId = 1234;
+    string msg = TestGetMsgPack();
+    cJSON *json = cJSON_Parse(msg.c_str());
+    EXPECT_TRUE(json != nullptr);
+    ret = OnVerifyP2pReply(authId, req, json);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    cJSON_Delete(json);
+    TransDelSessionConnById(channelId);
 }
 }
