@@ -664,6 +664,8 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
     
     ret = SetReuseAddr(0, on);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+    ret = close(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -681,6 +683,8 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
     
     ret = SetReusePort(0, on);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+    ret = close(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
