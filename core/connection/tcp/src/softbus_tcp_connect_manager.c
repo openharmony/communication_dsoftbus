@@ -577,24 +577,30 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
         CONN_LOGE(CONN_COMMON, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
+    ListNode waitDelete;
+    ListInit(&waitDelete);
     TcpConnInfoNode *item = NULL;
     TcpConnInfoNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node)
     {
         if (option->socketOption.protocol == item->info.socketInfo.protocol &&
             strcmp(option->socketOption.addr, item->info.socketInfo.addr) == 0) {
-            (void)DelTrigger((ListenerModule)(item->info.socketInfo.moduleId), item->info.socketInfo.fd, RW_TRIGGER);
-            ConnShutdownSocket(item->info.socketInfo.fd);
             ListDelete(&item->node);
+            ListAdd(&waitDelete, &item->node);
             g_tcpConnInfoList->cnt--;
-            g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
-            SoftBusFree(item);
         }
     }
     if (g_tcpConnInfoList->cnt == 0) {
         ListInit(&g_tcpConnInfoList->list);
     }
     SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &waitDelete, TcpConnInfoNode, node) {
+        ListDelete(&item->node);
+        (void)DelTrigger((ListenerModule)(item->info.socketInfo.moduleId), item->info.socketInfo.fd, RW_TRIGGER);
+        ConnShutdownSocket(item->info.socketInfo.fd);
+        g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
+        SoftBusFree(item);
+    }
     return SOFTBUS_OK;
 }
 
