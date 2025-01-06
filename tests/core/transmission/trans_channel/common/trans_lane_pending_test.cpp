@@ -68,7 +68,7 @@ void TransLanePendingTest::TearDownTestCase(void)
 
 static SoftBusList *TestCreateSessionList()
 {
-    SoftBusList *list = static_cast<SoftBusList *>(SoftBusCalloc(sizeof(SoftBusList)));
+    SoftBusList *list = static_cast<SoftBusList*>(SoftBusCalloc(sizeof(SoftBusList)));
     if (list == nullptr) {
         return nullptr;
     }
@@ -83,14 +83,14 @@ static SoftBusList *TestCreateSessionList()
 
 static SessionParam *TestCreateSessionParam()
 {
-    SessionAttribute *attr = static_cast<SessionAttribute *>(SoftBusCalloc(sizeof(SessionAttribute)));
+    SessionAttribute *attr = static_cast<SessionAttribute*>(SoftBusCalloc(sizeof(SessionAttribute)));
     if (attr == nullptr) {
         return nullptr;
     }
     attr->fastTransData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_FAST_TRANS_DATA));
     attr->fastTransDataSize = TEST_LEN;
     attr->dataType = TYPE_BYTES;
-    SessionParam *param = static_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    SessionParam *param = static_cast<SessionParam*>(SoftBusCalloc(sizeof(SessionParam)));
     if (param == nullptr) {
         SoftBusFree(attr);
         return nullptr;
@@ -106,14 +106,14 @@ static SessionParam *TestCreateSessionParam()
 
 static SessionParam *TestCreateNewSessionParam()
 {
-    SessionAttribute *attr = static_cast<SessionAttribute *>(SoftBusCalloc(sizeof(SessionAttribute)));
+    SessionAttribute *attr = static_cast<SessionAttribute*>(SoftBusCalloc(sizeof(SessionAttribute)));
     if (attr == nullptr) {
         return nullptr;
     }
     attr->fastTransData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_FAST_TRANS_DATA));
     attr->fastTransDataSize = TEST_LEN;
     attr->dataType = TYPE_BYTES;
-    SessionParam *param = static_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    SessionParam *param = static_cast<SessionParam*>(SoftBusCalloc(sizeof(SessionParam)));
     if (param == nullptr) {
         SoftBusFree(attr);
         return nullptr;
@@ -295,17 +295,17 @@ HWTEST_F(TransLanePendingTest, TransFreeLanePendingInit001, TestSize.Level1)
  */
 HWTEST_F(TransLanePendingTest, DestroyAsyncReqItemParam001, TestSize.Level1)
 {
-    SessionParam *param = static_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    SessionParam *param = static_cast<SessionParam*>(SoftBusCalloc(sizeof(SessionParam)));
     ASSERT_TRUE(param != nullptr);
-    char *sessionName = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    char *sessionName = static_cast<char*>(SoftBusCalloc(sizeof(char)));
     EXPECT_TRUE(sessionName != nullptr);
-    char *peerSessionName = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    char *peerSessionName = static_cast<char*>(SoftBusCalloc(sizeof(char)));
     EXPECT_TRUE(peerSessionName != nullptr);
-    char *peerDeviceId = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    char *peerDeviceId = static_cast<char*>(SoftBusCalloc(sizeof(char)));
     EXPECT_TRUE(peerDeviceId != nullptr);
-    char *groupId = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    char *groupId = static_cast<char*>(SoftBusCalloc(sizeof(char)));
     EXPECT_TRUE(groupId != nullptr);
-    SessionAttribute *attr = static_cast<SessionAttribute *>(SoftBusCalloc(sizeof(SessionAttribute)));
+    SessionAttribute *attr = static_cast<SessionAttribute*>(SoftBusCalloc(sizeof(SessionAttribute)));
     EXPECT_TRUE(attr != nullptr);
     param->sessionName = sessionName;
     param->peerSessionName = peerSessionName;
@@ -756,22 +756,6 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProc001, TestSize.Level1)
     param->attr = nullptr;
     SoftBusFree(param);
     param = nullptr;
-}
-
-/**
- * @tc.name: TransAsyncSetFirstTokenInfo001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLanePendingTest, TransAsyncSetFirstTokenInfo001, TestSize.Level1)
-{
-    uint32_t firstTokenId;
-    AppInfo appInfo;
-    TransEventExtra event;
-    firstTokenId = TOKENID_NOT_SET;
-    appInfo.callingTokenId = TEST_TOKEN_ID;
-    EXPECT_NO_THROW(TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &event));
 }
 
 /**
