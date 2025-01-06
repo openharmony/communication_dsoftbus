@@ -1172,12 +1172,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     int32_t proxyChannelId = chan->channelId;
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(proxyChannelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     TransCreateConnByConnId(chan->connId, (bool)chan->isServer);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         ReleaseProxyChannelId(proxyChannelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     if (chan->appInfo.appType == APP_TYPE_NORMAL) {
@@ -1186,6 +1188,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
             return;
         } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+            TransProxyDelChanByChanId(proxyChannelId);
             goto EXIT_ERR;
         }
     }
@@ -1195,7 +1198,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
     return;
 EXIT_ERR:
-    ReleaseChannelInfo(chan);
     extra.result = EVENT_STAGE_RESULT_FAILED;
     extra.errcode = ret;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
