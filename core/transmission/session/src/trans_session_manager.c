@@ -104,7 +104,7 @@ bool TransSessionServerIsExist(const char *sessionName)
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     char *tmpSessionName = NULL;
     Anonymize(sessionName, &tmpSessionName);
-    TRANS_LOGW(TRANS_CTRL, "session server is exist. sessionName=%{public}s", AnonymizeWrapper(tmpSessionName));
+    TRANS_LOGE(TRANS_CTRL, "session server not exist, sessionName=%{public}s", AnonymizeWrapper(tmpSessionName));
     AnonymizeFree(tmpSessionName);
     return false;
 }
