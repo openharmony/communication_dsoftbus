@@ -48,6 +48,66 @@ void ClientTransStreamTest::SetUpTestCase(void)
 void ClientTransStreamTest::TearDownTestCase(void)
 {}
 
+static void TestOnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext,
+    const StreamFrameInfo *param)
+{
+    (void)channelId;
+    (void)data;
+    (void)ext;
+    (void)param;
+}
+
+static int32_t TestOnFileGetSessionId(int32_t channelId, int32_t *sessionId)
+{
+    (void)channelId;
+    (void)sessionId;
+    return SOFTBUS_OK;
+}
+
+static int32_t TestOnUdpChannelOpened(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_OK;
+}
+
+static void TestOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
+{
+    (void)channelId;
+    (void)reason;
+}
+
+static void TestOnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
+{
+    (void)channelId;
+    (void)eventId;
+    (void)tvCount;
+    (void)tvList;
+}
+
+static int32_t TestOnIdleTimeoutReset(int32_t sessionId)
+{
+    (void)sessionId;
+    return SOFTBUS_OK;
+}
+
+static int32_t TestOnRawStreamEncryptOptGet(int32_t channelId, bool *isEncrypt)
+{
+    (void)channelId;
+    (void)isEncrypt;
+    return SOFTBUS_OK;
+}
+
+static UdpChannelMgrCb g_testUdpChannelCb = {
+    .OnStreamReceived = TestOnStreamReceived,
+    .OnFileGetSessionId = TestOnFileGetSessionId,
+    .OnMessageReceived = NULL,
+    .OnUdpChannelOpened = TestOnUdpChannelOpened,
+    .OnUdpChannelClosed = TestOnUdpChannelClosed,
+    .OnQosEvent = TestOnQosEvent,
+    .OnIdleTimeoutReset = TestOnIdleTimeoutReset,
+    .OnRawStreamEncryptOptGet = TestOnRawStreamEncryptOptGet,
+};
+
 /**
  * @tc.name: RegisterStreamCb001
  * @tc.desc: RegisterStreamCb error.
@@ -288,8 +348,28 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
     ret = TransSendStream(channelId, nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
+    channelId = -1;
+    ret = TransSetStreamMultiLayer(channelId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
     channelId = TEST_CHANNELID;
     ret = TransSetStreamMultiLayer(channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientTransStreamTest001
+ * @tc.desc: TransCloseStreamChannel error.
+ * @tc.desc: OnRippleStats error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level0)
+{
+    RegisterStreamCb(&g_testUdpChannelCb);
+    OnQosEvent(TEST_CHANNELID, TEST_CHANNELID, TEST_CHANNELID, nullptr);
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UnregisterStreamCb();
 }
 } // OHOS
