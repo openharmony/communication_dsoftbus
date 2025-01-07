@@ -94,7 +94,7 @@ static BindRequestManager *CreateBindRequestManager(
     TRANS_CHECK_AND_RETURN_RET_LOGE(bindRequest != NULL, NULL, TRANS_SVC, "malloc failed");
     bindRequest->bindDeniedFlag = false;
     bindRequest->count = 0;
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
+    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "genarate param failed");
         SoftBusFree(bindRequest);
@@ -162,7 +162,7 @@ int32_t TransAddTimestampToList(
         return SOFTBUS_INVALID_PARAM;
     }
     BindRequestParam bindRequestParam = { {0} };
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
+    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "genarate param failed");
     ret = SoftBusMutexLock(&g_bindRequestList->lock);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed");
@@ -234,7 +234,7 @@ bool GetDeniedFlagByPeer(const char *mySocketName, const char *peerSocketName, c
 
     bool flag = false;
     BindRequestParam bindRequestParam = { {0} };
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
+    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "genarate param failed");
         return flag;
