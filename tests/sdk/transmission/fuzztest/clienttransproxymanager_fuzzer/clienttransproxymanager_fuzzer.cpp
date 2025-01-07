@@ -72,7 +72,7 @@ void ClientTransProxyManagerTest(const uint8_t* data, size_t size)
 
     ClientTransProxyCloseChannel(channelId);
 
-    TransProxyChannelSendBytes(channelId, clientData, len);
+    TransProxyChannelSendBytes(channelId, clientData, len, false);
 
     TransProxyChannelSendMessage(channelId, clientData, len);
 

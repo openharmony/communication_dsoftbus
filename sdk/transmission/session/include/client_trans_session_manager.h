@@ -105,6 +105,8 @@ typedef struct {
     uint32_t actionId;
     int32_t osType;
     CachedQosEvent cachedQosEvent;
+    bool isSupportTlv;
+    bool needAck;
 } SessionInfo;
 
 typedef struct {
@@ -190,6 +192,8 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType);
 
 int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data);
+
+int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck);
 
 int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType, SessionState *sessionState);
 
@@ -310,6 +314,10 @@ int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *maxIdleTime);
 int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime);
 
 void ClientTransOnPrivilegeClose(const char *peerNetworkId);
+
+int32_t TransGetSupportTlvBySocket(int32_t socket, bool *supportTlv, int32_t *optValueSize);
+
+int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck);
 #ifdef __cplusplus
 }
 #endif
