@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_CONNECTID_CALLBACK_MANAGER
-#define LNN_CONNECTID_CALLBACK_MANAGER
+#ifndef LNN_CONNID_CALLBACK_MANAGER
+#define LNN_CONNID_CALLBACK_MANAGER
 
 #include <stdint.h>
 
@@ -53,4 +53,4 @@ int32_t GetConnIdCbInfoByAddr(const ConnectionAddr *addr, ConnIdCbInfo *dupItem)
 }
 #endif
 
-#endif // LNN_CONNECTID_CALLBACK_MANAGER
+#endif // LNN_CONNID_CALLBACK_MANAGER
