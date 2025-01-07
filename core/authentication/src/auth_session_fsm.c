@@ -190,6 +190,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
     }
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_BR:
+        case AUTH_LINK_TYPE_SESSION:
             break;
         case AUTH_LINK_TYPE_WIFI:
             (void)memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, request.connInfo.info.ipInfo.deviceIdHash,
@@ -1081,6 +1082,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION:
             return PostDeviceInfoMessage(authSeq, info);
         default:
             break;

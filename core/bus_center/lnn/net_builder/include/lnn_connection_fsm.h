@@ -79,6 +79,7 @@ typedef struct tagLnnConnectionFsm {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isDead;
     bool isNeedConnect;
+    bool isSession;
     uint16_t id;
 
     LnnConnectionFsmStopCallback stopCallback;

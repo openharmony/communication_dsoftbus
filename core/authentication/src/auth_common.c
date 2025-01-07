@@ -301,6 +301,13 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
                 return true;
             }
             break;
+        case AUTH_LINK_TYPE_SESSION:
+            if (info2->type == AUTH_LINK_TYPE_SESSION &&
+                info1->info.sessionInfo.connId == info2->info.sessionInfo.connId &&
+                strcmp(info1->info.sessionInfo.udid, info2->info.sessionInfo.udid) == 0) {
+                return true;
+            }
+            break;
         default:
             return false;
     }
