@@ -768,7 +768,8 @@ static int32_t TransProxyOpenNewConnChannel(ListenerModule moduleId, const Conne
     return ret;
 }
 
-static void TransReportStartConnectEvent(const AppInfo *appInfo, const ProxyChannelInfo *chan, int32_t channelId)
+static void TransReportStartConnectEvent(const AppInfo *appInfo, const ProxyChannelInfo *chan, int32_t channelId,
+    bool isSuccess)
 {
     TransEventExtra extra = {
         .peerNetworkId = NULL,
@@ -780,17 +781,24 @@ static void TransReportStartConnectEvent(const AppInfo *appInfo, const ProxyChan
         .requestId = chan->reqId,
         .linkType = chan->type
     };
+    extra.result = EVENT_STAGE_RESULT_OK;
+    if (!isSuccess) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+    }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
 }
 
-int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
+static int32_t CheckParamInfo(const AppInfo *appInfo, const ConnectOption *connInfo)
 {
     if (appInfo == NULL || connInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret;
-    ProxyConnInfo conn;
+    return SOFTBUS_OK;
+}
+
+static int32_t GetChanNewId(int32_t *channelId)
+{
     int32_t chanNewId = INVALID_CHANNEL_ID;
     if (*channelId != INVALID_CHANNEL_ID) {
         chanNewId = *channelId;
@@ -799,6 +807,20 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     }
     if (chanNewId <= INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_CTRL, "proxy channelId is invalid");
+        return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+    }
+    return chanNewId;
+}
+
+int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
+{
+    int32_t ret = CheckParamInfo(appInfo, connInfo);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ProxyConnInfo conn;
+    int32_t chanNewId = GetChanNewId(channelId);
+    if (chanNewId <= INVALID_CHANNEL_ID) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -829,9 +851,12 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     if (ret == SOFTBUS_OK) {
         *channelId = chanNewId;
     } else if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED || ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) {
+        TRANS_LOGE(TRANS_CTRL, "Trans proxy dispensing connect failed");
+        TransReportStartConnectEvent(appInfo, chan, chanNewId, false);
         TransProxyDelChanByChanId(chanNewId);
+        return ret;
     }
-    TransReportStartConnectEvent(appInfo, chan, chanNewId);
+    TransReportStartConnectEvent(appInfo, chan, chanNewId, true);
     return ret;
 }
 
