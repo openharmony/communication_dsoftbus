@@ -284,6 +284,15 @@ void AuthCloseConn(AuthHandle authHandle)
     AuthMetaCloseConn(authHandle.authId);
 }
 
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
+{
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
+        return;
+    }
+    RemoveAuthManagerByAuthId(authHandle);
+}
+
 int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
 {
     if (networkId == NULL || callback == NULL) {

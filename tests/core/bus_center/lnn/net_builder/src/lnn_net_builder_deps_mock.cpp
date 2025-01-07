@@ -660,6 +660,26 @@ int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what)
     return GetNetBuilderDepsInterface()->LnnFsmRemoveMessageByType(fsm, what);
 }
 
+int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
+{
+    return GetNetBuilderDepsInterface()->TransAuthGetConnIdByChanId(channelId, connId);
+}
+
+int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len)
+{
+    return GetNetBuilderDepsInterface()->TransAuthGetPeerUdidByChanId(channelId, peerUdid, len);
+}
+
+void LnnNotifyStateForSession(char *udid, int32_t retCode)
+{
+    return GetNetBuilderDepsInterface()->LnnNotifyStateForSession(udid, retCode);
+}
+
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
+{
+    return GetNetBuilderDepsInterface()->AuthRemoveAuthManagerByAuthHandle(authHandle);
+}
+
 void LnnDeinitBusCenterEvent(void)
 {
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
