@@ -204,7 +204,7 @@ int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t ch
     return g_cb->OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, errCode);
 }
 
-static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
+static int32_t NotifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
 {
     return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, MESSAGE_TYPE_NOMAL);
 }
@@ -624,7 +624,7 @@ static void OnDisconnect(int32_t authId)
     }
     TransAuthCloseChannel(authId, dstInfo.appInfo.linkType, dstInfo.isClient);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
-    (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
+    (void)NotifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
 }
 
@@ -1125,7 +1125,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
             DelAuthMetaManagerByConnectionId(channel->authId);
         }
         TransAuthCloseChannel(channel->authId, channel->appInfo.linkType, channel->isClient);
-        NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
+        NotifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_OK;
@@ -1392,4 +1392,61 @@ void TransAsyncAuthChannelTask(int32_t channelId)
     TRANS_LOGI(TRANS_CTRL, "Open channelId=%{public}d not finished, generate new task and waiting", channelId);
     uint32_t delayTime = (curCount <= LOOPER_SEPARATE_CNT) ? FAST_INTERVAL_MILLISECOND : SLOW_INTERVAL_MILLISECOND;
     TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_AUTH, delayTime);
+}
+
+static void TransAuthDestroyChannelList(const ListNode *destroyList)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(
+        (destroyList != NULL && !IsListEmpty(destroyList)), TRANS_CTRL, "destroyList is null");
+
+    AuthChannelInfo *destroyNode = NULL;
+    AuthChannelInfo *nextDestroyNode = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, nextDestroyNode, destroyList, AuthChannelInfo, node) {
+        ListDelete(&(destroyNode->node));
+        TransAuthCloseChannel(destroyNode->authId, destroyNode->appInfo.linkType, destroyNode->isClient);
+        NotifyCloseAuthChannel(destroyNode->appInfo.myData.pkgName,
+            destroyNode->appInfo.myData.pid, destroyNode->appInfo.myData.channelId);
+
+        if (destroyNode->appInfo.fastTransData != NULL) {
+            SoftBusFree((void *)destroyNode->appInfo.fastTransData);
+        }
+        (void)memset_s(destroyNode->appInfo.sessionKey, sizeof(destroyNode->appInfo.sessionKey), 0,
+            sizeof(destroyNode->appInfo.sessionKey));
+        SoftBusFree(destroyNode);
+    }
+    return;
+}
+
+void TransAuthDeathCallback(const char *pkgName, int32_t pid)
+{
+    if (g_authChannelList == NULL || pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d.", AnonymizeWrapper(anonymizePkgName), pid);
+    AnonymizeFree(anonymizePkgName);
+
+    ListNode destroyList;
+    ListInit(&destroyList);
+    AuthChannelInfo *item = NULL;
+    AuthChannelInfo *tmp = NULL;
+
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed.");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, tmp, &g_authChannelList->list, AuthChannelInfo, node) {
+        if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
+            ListDelete(&(item->node));
+            g_authChannelList->cnt--;
+            ListAdd(&destroyList, &(item->node));
+            TRANS_LOGE(TRANS_CTRL, "add to destroyList channelId=%{public}" PRId64, item->appInfo.myData.channelId);
+            continue;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TransAuthDestroyChannelList(&destroyList);
 }

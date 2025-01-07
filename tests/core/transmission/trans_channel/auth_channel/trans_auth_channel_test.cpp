@@ -540,18 +540,18 @@ HWTEST_F(TransAuthChannelTest, NotifyOpenAuthChannelFailedTest001, TestSize.Leve
 }
 
 /**
- * @tc.name: NofifyCloseAuthChannelTest001
+ * @tc.name: NotifyCloseAuthChannelTest001
  * @tc.desc: Transmission auth manager notify close auth channel.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelTest, NofifyCloseAuthChannelTest001, TestSize.Level1)
+HWTEST_F(TransAuthChannelTest, NotifyCloseAuthChannelTest001, TestSize.Level1)
 {
     NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
     EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransAuthInit(callback);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = NofifyCloseAuthChannel(g_pkgName, TRANS_TEST_PID, TRANS_TEST_CHANNEL_ID);
+    ret = NotifyCloseAuthChannel(g_pkgName, TRANS_TEST_PID, TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     TransAuthDeinit();
 }
