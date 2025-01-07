@@ -360,7 +360,6 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
         ListAdd(destroyList, &(destroyNode->node));
         SoftBusFree(sessionNode);
     }
-
 }
 
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
