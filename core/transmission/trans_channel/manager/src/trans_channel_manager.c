@@ -798,6 +798,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
     TransTdcChannelInfoDeathCallback(pkgName, pid);
     TransLaneMgrDeathCallback(pkgName, pid);
     TransUdpDeathCallback(pkgName, pid);
+    TransAuthDeathCallback(pkgName, pid);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,

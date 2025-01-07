@@ -58,6 +58,7 @@ int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t ch
 int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo);
 int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult);
 void TransAsyncAuthChannelTask(int32_t channelId);
+void TransAuthDeathCallback(const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 #if __cplusplus
