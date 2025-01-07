@@ -826,12 +826,12 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
             ret = TransProxyConnExistProc(chan, chanNewId, connInfo);
         }
     }
+    TransReportStartConnectEvent(appInfo, chan, chanNewId);
     if (ret == SOFTBUS_OK) {
         *channelId = chanNewId;
     } else if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED || ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) {
         TransProxyDelChanByChanId(chanNewId);
     }
-    TransReportStartConnectEvent(appInfo, chan, chanNewId);
     return ret;
 }
 
