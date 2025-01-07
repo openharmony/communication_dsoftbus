@@ -243,6 +243,7 @@ The DSoftBus directory structure is as follows:
         void (*OnFile)(int32_t socket, FileEvent *event);
         void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
         void (*OnError)(int32_t socket, int32_t errCode);
+        void (*OnBytesSent)(int32_t socket, uint32_t dataSeq, int32_t errCode);
     } ISocketListener;
 
     typedef enum {
@@ -274,6 +275,8 @@ The DSoftBus directory structure is as follows:
     ```C
     // Send bytes.
     int32_t SendBytes(int32_t socket, const void *data, uint32_t len);
+    // Async Send bytes. dataSeq Indicates the unique seq number of the packet to be send. which cannot be zero.
+    int32_t SendBytesAsync(int32_t socket, uint32_t dataSeq, const void *data, uint32_t len);    
     // Send messages.
     int32_t SendMessage(int32_t socket, const void *data, uint32_t len);
     // Send a stream.

@@ -142,8 +142,10 @@ if (defined(ohos_lite)) {
     sources = [ "proxy/client_trans_proxy_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
-    include_dirs +=
-        [ "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src" ]
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+    ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
     if (is_standard_system) {
@@ -222,6 +224,7 @@ if (defined(ohos_lite)) {
     sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
       "$dsoftbus_root_path/sdk/transmission/ipc/include",
@@ -253,6 +256,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
       "$dsoftbus_root_path/sdk/transmission/ipc/include",

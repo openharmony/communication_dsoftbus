@@ -24,6 +24,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
+#include "softbus_utils.h"
 #include "trans_log.h"
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
@@ -106,6 +107,10 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(json, SESSION_KEY, (char *)encodeSessionKey) ||
         !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig)) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    if (!AddNumberToJsonObject(json, TRANS_CAPABILITY, (int32_t)appInfo->transCapability)) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
@@ -294,6 +299,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectNumber64Item(msg, JSON_KEY_CALLING_TOKEN_ID, (int64_t *)&appInfo->callingTokenId)) {
         appInfo->callingTokenId = TOKENID_NOT_SET;
     }
+    (void)GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&appInfo->transCapability);
     return SOFTBUS_OK;
 }
 
@@ -309,6 +315,8 @@ static int32_t AddItemsToJsonObject(const AppInfo *appInfo, cJSON *json)
         SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add uid");
     TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, PID, appInfo->myData.pid),
         SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add pid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, TRANS_CAPABILITY, appInfo->transCapability),
+        SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add transCapability");
     return SOFTBUS_OK;
 }
 
@@ -402,6 +410,7 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
             return SOFTBUS_PARSE_JSON_ERR;
         }
     }
+    (void)GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&appInfo->transCapability);
     return SOFTBUS_OK;
 }
 

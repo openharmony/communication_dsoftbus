@@ -166,11 +166,16 @@ public:
 
 void ClientTransProxyManagerTest::SetUpTestCase(void)
 {
+    TransClientInit();
     int32_t ret = ClientTransProxyInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SetAccessTokenPermission("dsoftbusTransTest");
 }
-void ClientTransProxyManagerTest::TearDownTestCase(void) {}
+
+void ClientTransProxyManagerTest::TearDownTestCase(void)
+{
+    TransClientDeinit();
+}
 
 /**
  * @tc.name: ClientTransProxyInitTest
@@ -229,6 +234,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     channelInfo.channelId = channelId;
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = true;
+    channelInfo.isSupportTlv = true;
     int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
@@ -261,20 +267,20 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     packetHead.magicNumber = MAGIC_NUMBER;
     packetHead.dataLen = 0;
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
     
     packetHead.dataLen = sizeof(PacketHead) - 1;
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
 
 /**
@@ -301,7 +307,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     sliceHead.sliceNum = SILCE_NUM_COUNT;
     sliceHead.sliceSeq = SLICE_SEQ_BEGIN;
@@ -318,19 +324,19 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = memcpy_s(buf2 + sizeof(SliceHead), dataLen, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf2, dataLen, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     sliceHead.sliceSeq = SLICE_SEQ_MID;
     ret = memcpy_s(buf2, dataLen, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf2, dataLen, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_NO_INVALID, ret);
 
     sliceHead.sliceSeq = SLICE_SEQ_END;
     ret = memcpy_s(buf2, dataLen, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf2, dataLen, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_NO_INVALID, ret);
 
     ClientTransProxyCloseChannel(channelId);
 }
@@ -348,10 +354,11 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
     channelInfo.channelId = channelId;
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = false;
+    channelInfo.isSupportTlv = true;
     int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH);
+    ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH, false);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
     ClientTransProxyCloseChannel(channelId);
 
@@ -359,7 +366,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
     ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH);
+    ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH, false);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
     ClientTransProxyCloseChannel(channelId);
 }
@@ -377,6 +384,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize
     channelInfo.channelId = channelId;
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = false;
+    channelInfo.isSupportTlv = false;
     int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -389,7 +397,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyChannelSendMessage(channelId, TEST_DATA, TEST_DATA_LENGTH);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
     ClientTransProxyCloseChannel(channelId);
 }
 
@@ -406,6 +414,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
     channelInfo.channelId = channelId;
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = false;
+    channelInfo.isSupportTlv = true;
     int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -455,7 +464,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyChannelSendFile(channelId, g_testProxyFileName, nullptr, TEST_FILE_CNT);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     ret = TransProxyChannelSendFile(channelId, g_testProxyFileName, g_proxyFileSet, TEST_FILE_CNT);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -501,7 +510,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyPackAndSendData(channelId,
         static_cast<const void *>(data), len, &info, pktType);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
 
 /**
@@ -555,5 +564,99 @@ HWTEST_F(ClientTransProxyManagerTest, ClientGetActualDataLenTest, TestSize.Level
     head.sliceNum = (g_proxyMaxMessageBufSize / SLICE_LEN) + 2;
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ClientGetActualDataLen(&head, &actualDataLen));
+}
+
+/**
+ * @tc.name: ProxyBuildNeedAckTlvData001
+ * @tc.desc: ProxyBuildNeedAckTlvData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData001, TestSize.Level0)
+{
+    int32_t bufferSize = 0;
+    int32_t ret = ProxyBuildNeedAckTlvData(NULL, true, 1, &bufferSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ProxyBuildTlvDataHead001
+ * @tc.desc: ProxyBuildTlvDataHead
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead001, TestSize.Level0)
+{
+    int32_t bufferSize = 0;
+    DataHead data;
+    int32_t ret = ProxyBuildTlvDataHead(&data, 1, 0, 32, &bufferSize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ClientTransProxyProcSendMsgAck001
+ * @tc.desc: ClientTransProxyProcSendMsgAck
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcSendMsgAck001, TestSize.Level0)
+{
+    const char *data = "test";
+    int32_t ret = ClientTransProxyProcSendMsgAck(1, NULL, PROXY_ACK_SIZE, 1, 1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL);
+
+    ret = ClientTransProxyProcSendMsgAck(1, data, 1, 1, 1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    ret = ClientTransProxyProcSendMsgAck(1, data, PROXY_ACK_SIZE, 1, 1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientTransProxyProcSendMsgAck(1, data, PROXY_ACK_SIZE, 1, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+}
+
+/**
+ * @tc.name: ClientTransProxyBytesNotifySession001
+ * @tc.desc: ClientTransProxyBytesNotifySession
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession001, TestSize.Level0)
+{
+    const char *data = "test";
+    DataHeadTlvPacketHead dataHead;
+    dataHead.dataSeq = 1;
+    dataHead.seq = 1;
+    dataHead.flags = TRANS_SESSION_ACK;
+    int32_t ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, 4);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    dataHead.flags = TRANS_SESSION_BYTES;
+    ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    dataHead.flags = TRANS_SESSION_MESSAGE;
+    ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ClientTransProxyProcData001
+ * @tc.desc: ClientTransProxyProcData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcData001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    DataHeadTlvPacketHead dataHead;
+    dataHead.dataLen = 2;
+    const char *data = "test";
+    int32_t ret = ClientTransProxyProcData(channelId, &dataHead, data);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    dataHead.dataLen = 34;
+    ret = ClientTransProxyProcData(channelId, &dataHead, data);
+    EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
 }
 } // namespace OHOS

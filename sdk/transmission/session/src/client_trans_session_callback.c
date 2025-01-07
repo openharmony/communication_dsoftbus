@@ -59,6 +59,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->isAsync = false;
     session->osType = channel->osType;
     session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
+    session->isSupportTlv = channel->isSupportTlv;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {

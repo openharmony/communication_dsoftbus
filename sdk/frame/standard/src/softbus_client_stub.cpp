@@ -161,17 +161,24 @@ int32_t SoftBusClientStub::SetChannelInfo(
     return TransSetChannelInfo(sessionName, sessionId, channelId, channelType);
 }
 
+static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
+{
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        channel->fd = data.ReadFileDescriptor();
+        channel->myIp = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
 {
     READ_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_IPC_ERR);
-    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        channel->fd = data.ReadFileDescriptor();
-        channel->myIp = (char *)data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(channel->myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
-    }
+    int32_t ret = MessageTcpParcelRead(data, channel);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_IPC_ERR, COMM_SDK, "read tcp ip or fd failed");
     READ_PARCEL_WITH_RET(data, Bool, channel->isServer, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Bool, channel->isEnabled, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_IPC_ERR);
@@ -210,6 +217,7 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
     READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
     return SOFTBUS_OK;
 }
 
