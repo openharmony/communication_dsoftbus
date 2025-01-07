@@ -1230,6 +1230,7 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
 static int32_t LnnConvertSessionAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *authConn)
 {
     if (addr == NULL || authConn == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     authConn->type = AUTH_LINK_TYPE_SESSION;

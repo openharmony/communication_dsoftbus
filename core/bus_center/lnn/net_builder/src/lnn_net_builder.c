@@ -1029,6 +1029,7 @@ int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t
 static bool AuthCapabilityIsSupport(char *peerUdid, AuthCapability capaBit)
 {
     if (peerUdid == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid peerUdid.");
         return false;
     }
     NodeInfo nodeInfo;

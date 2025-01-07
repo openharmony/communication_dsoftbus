@@ -189,6 +189,7 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
 static void NotifyStateForSession(const JoinLnnMsgPara *para)
 {
     if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "JoinLnnMsgPara is null.");
         return;
     }
     ConnIdCbInfo connIdCbInfo;

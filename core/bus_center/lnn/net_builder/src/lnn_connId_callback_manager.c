@@ -38,6 +38,7 @@ static ListNode *g_lnnConnIdCbInfoList;
 static int32_t LnnConnIdCallbackLock(void)
 {
     if (!g_connIdCbInit) {
+        LNN_LOGE(LNN_BUILDER, "connIdCallback not init");
         return SOFTBUS_NO_INIT;
     }
     return SoftBusMutexLock(&g_lnnConnIdCbMutex);
@@ -51,7 +52,7 @@ static void LnnConnIdCallbackUnLock(void)
 static int32_t DupItem(const ConnIdCbInfo *item, ConnIdCbInfo *dupItem)
 {
     if (item == NULL || dupItem == NULL) {
-        LNN_LOGW(LNN_BUILDER, "item or dupItem is null");
+        LNN_LOGE(LNN_BUILDER, "item or dupItem is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(dupItem, sizeof(ConnIdCbInfo), item, sizeof(ConnIdCbInfo)) != EOK) {
@@ -124,7 +125,7 @@ void InvokeCallbackForJoinExt(const char *udid, int32_t result)
 static ConnIdCbErrorType IsRepeatConnIdCallbackInfoItem(uint32_t connId, char *peerUdid)
 {
     if (connId <= 0 || peerUdid == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid connId or peerUdid.");
+        LNN_LOGE(LNN_BUILDER, "invalid connId = %{public}u or peerUdid.", connId);
         return SOFTBUS_INVALID_PARAM;
     }
     ConnIdCbErrorType ret = CONNID_CB_OK;
@@ -165,7 +166,7 @@ int32_t AddConnIdCallbackInfoItem(const ConnectionAddr *sessionAddr, const LnnSe
 {
     if (sessionAddr == NULL || callBack == NULL || callBack->lnnServerJoinExtCallback == NULL ||
         peerUdid == NULL || connId <= 0) {
-        LNN_LOGE(LNN_BUILDER, "invalid param");
+        LNN_LOGE(LNN_BUILDER, "invalid param, connId = %{public}u.", connId);
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnConnIdCallbackLock() != SOFTBUS_OK) {
@@ -175,6 +176,7 @@ int32_t AddConnIdCallbackInfoItem(const ConnectionAddr *sessionAddr, const LnnSe
     ConnIdCbErrorType errorType = IsRepeatConnIdCallbackInfoItem(connId, peerUdid);
     if (errorType == CONNID_CB_CONNID_IS_EXIST) {
         LnnConnIdCallbackUnLock();
+        LNN_LOGE(LNN_BUILDER, "repeat connId, add fail.");
         return SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
     }
 
@@ -252,7 +254,7 @@ int32_t GetConnIdCbInfoByAddr(const ConnectionAddr *addr, ConnIdCbInfo *dupItem)
 int32_t LnnInitConnIdCallbackManager(void)
 {
     if (g_connIdCbInit) {
-        LNN_LOGE(LNN_BUILDER, "callback manager has init");
+        LNN_LOGW(LNN_BUILDER, "callback manager has init.");
         return SOFTBUS_OK;
     }
     SoftBusMutexAttr attr = {
@@ -260,7 +262,7 @@ int32_t LnnInitConnIdCallbackManager(void)
     };
     int32_t ret = SoftBusMutexInit(&g_lnnConnIdCbMutex, &attr);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "g_lnnConnIdCbMutex init fail");
+        LNN_LOGE(LNN_BUILDER, "g_lnnConnIdCbMutex init fail.");
         return ret;
     }
     g_lnnConnIdCbInfoList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
