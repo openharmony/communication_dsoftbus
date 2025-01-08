@@ -57,6 +57,9 @@ static int32_t SoftBusSocketEpollWait(int32_t fd, struct epoll_event *ev, int32_
     int32_t ret = epoll_wait(fd, ev, cnt, timeoutMs);
     if (ret < 0) {
         CONN_LOGE(CONN_COMMON, "epoll wait failed errno=%{public}s, ret=%{public}d", strerror(errno), ret);
+        if (errno == EINTR) {
+            return SOFTBUS_ADAPTER_SOCKET_EINTR;
+        }
         return SOFTBUS_ERRNO(KERNELS_SUB_MODULE_CODE) + abs(errno);
     }
 
