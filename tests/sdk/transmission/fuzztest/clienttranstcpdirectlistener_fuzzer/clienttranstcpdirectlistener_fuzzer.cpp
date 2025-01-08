@@ -84,7 +84,7 @@ namespace OHOS {
             return;
         }
         char tmp = *(reinterpret_cast<const char *>(data));
-        TransTdcSendBytes((int32_t)size, &tmp, (uint32_t)size);
+        TransTdcSendBytes(static_cast<int32_t>(size), &tmp, static_cast<uint32_t>(size), false);
     }
 
     void TransTdcSendMessageTest(const uint8_t* data, size_t size)

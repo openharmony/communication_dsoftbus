@@ -27,6 +27,15 @@
 extern "C" {
 #endif
 
+typedef struct {
+    ListNode node;
+    int32_t socketId;
+    int32_t channelId;
+    int32_t seq;
+    int32_t channelType;
+    uint32_t timeout;
+} DataSeqInfo;
+
 int32_t GenerateSessionId(void);
 
 void DestroySessionId(void);
@@ -100,6 +109,20 @@ int32_t ClientTransCheckCollabRelation(
     const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
 
 void DestroyRelationChecker(void);
+
+int32_t LockClientDataSeqInfoList(void);
+
+void UnlockClientDataSeqInfoList(void);
+
+int32_t TransDataSeqInfoListInit(void);
+
+void TransDataSeqInfoListDeinit(void);
+
+int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType);
+
+int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId);
+
+void TransAsyncSendBytesTimeoutProc(void);
 #ifdef __cplusplus
 }
 #endif

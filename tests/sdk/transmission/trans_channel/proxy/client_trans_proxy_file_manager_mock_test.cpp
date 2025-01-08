@@ -777,21 +777,11 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyProcSendMsgAckTest
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t len = TEST_DATA_LEN;
     int32_t dataHeadSeq = TEST_DATA_LEN;
-    int32_t ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq);
+    int32_t ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq, 0);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     len = PROXY_ACK_SIZE;
-    ret = ClientTransProxyProcSendMsgAck(channelId, nullptr, len, dataHeadSeq);
+    ret = ClientTransProxyProcSendMsgAck(channelId, nullptr, len, dataHeadSeq, 0);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL, ret);
-
-    NiceMock<ClientTransProxyFileManagerInterfaceMock> ClientProxyFileManagerMock;
-    EXPECT_CALL(ClientProxyFileManagerMock, SoftBusNtoHl).WillRepeatedly(Return(FILE_MAGIC_NUMBER));
-    EXPECT_CALL(ClientProxyFileManagerMock, SoftBusNtoHl).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

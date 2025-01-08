@@ -579,13 +579,13 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level0)
     int32_t channelId = 1;
     const char *data = "data";
     uint32_t len = (uint32_t)strlen(data);
-    int32_t ret = TransTdcSendBytes(channelId, nullptr, len);
+    int32_t ret = TransTdcSendBytes(channelId, nullptr, len, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcSendBytes(channelId, data, 0);
+    ret = TransTdcSendBytes(channelId, data, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcSendBytes(channelId, data, len);
+    ret = TransTdcSendBytes(channelId, data, len, false);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
 
     ChannelInfo *channel = TestGetChannelInfo();
@@ -593,7 +593,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level0)
     ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    ret = TransTdcSendBytes(channelId, data, len);
+    ret = TransTdcSendBytes(channelId, data, len, false);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
 
     SoftBusFree(channel);

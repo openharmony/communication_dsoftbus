@@ -719,3 +719,21 @@ int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_
     *offSet += sizeof(*data);
     return SOFTBUS_OK;
 }
+
+void EnableCapabilityBit(uint32_t *value, uint32_t offSet)
+{
+    if (value == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return;
+    }
+    *value |= (1 << offSet);
+}
+
+bool GetCapabilityBit(uint32_t *value, uint32_t offSet)
+{
+    if (value == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return false;
+    }
+    return (bool)((*value >> offSet) & 0x1);
+}

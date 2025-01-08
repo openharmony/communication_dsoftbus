@@ -52,7 +52,7 @@ static int32_t TransGetSocketMaxIdleTime(
     int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
 {
     if (socket < 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid optValueSize, socket=%{public}d", socket);
+        TRANS_LOGE(TRANS_SDK, "invalid socket, socket=%{public}d", socket);
         return SOFTBUS_INVALID_PARAM;
     }
     *optValueSize = sizeof(uint32_t);
@@ -63,7 +63,7 @@ static int32_t TransSetSocketMaxIdleTime(
     int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
 {
     if (socket < 0 || optValueSize < (int32_t)sizeof(uint32_t)) {
-        TRANS_LOGE(TRANS_SDK, "invalid optValueSize, socket=%{public}d, optValueSize=%{public}d", socket, optValueSize);
+        TRANS_LOGE(TRANS_SDK, "invalid param, socket=%{public}d, optValueSize=%{public}d", socket, optValueSize);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -71,10 +71,37 @@ static int32_t TransSetSocketMaxIdleTime(
     return SetMaxIdleTimeBySocket(socket, maxIdleTime);
 }
 
+static int32_t TransGetSupportTlv(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+{
+    if (socket <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid socket, socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return TransGetSupportTlvBySocket(socket, (bool *)optValue, optValueSize);
+}
+
+static int32_t TransSetNeedAck(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
+{
+    if (socket <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid socket, socket=%{public}d, optValueSize=%{public}d", socket, optValueSize);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (optValueSize != sizeof(bool)) {
+        TRANS_LOGE(TRANS_SDK, "optValueSize invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    bool needAck = *(bool *)optValue;
+    return TransSetNeedAckBySocket(socket, needAck);
+}
+
 static SocketOptMap g_socketOptMap[] = {
     { OPT_TYPE_MAX_BUFFER, TransGetSocketMaxBufferLen, NULL },
     { OPT_TYPE_FIRST_PACKAGE, TransGetSocketFirstPackage, NULL },
     { OPT_TYPE_MAX_IDLE_TIMEOUT, TransGetSocketMaxIdleTime, TransSetSocketMaxIdleTime },
+    { OPT_TYPE_SUPPORT_TLV, TransGetSupportTlv, NULL },
+    { OPT_TYPE_NEED_ACK, NULL, TransSetNeedAck },
 };
 
 int32_t GetCommonSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)

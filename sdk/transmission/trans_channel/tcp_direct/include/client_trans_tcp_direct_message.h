@@ -47,13 +47,24 @@ typedef struct {
     uint32_t dataLen;
 } __attribute__((packed)) TcpDataPacketHead;
 
+typedef struct {
+    uint32_t magicNumber;
+    uint8_t tlvCount;
+    int32_t seq;
+    uint32_t dataSeq;
+    uint32_t flags;
+    uint32_t dataLen;
+    bool needAck;
+} __attribute__((packed)) TcpDataTlvPacketHead;
+
 int32_t TransTdcRecvData(int32_t channelId);
 
 int32_t TransDataListInit(void);
 void TransDataListDeinit(void);
 int32_t TransDelDataBufNode(int32_t channelId);
 int32_t TransAddDataBufNode(int32_t channelId, int32_t fd);
-int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len);
+int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len, bool needAck);
+int32_t TransTdcAsyncSendBytes(int32_t channelId, const char *data, uint32_t len, uint32_t dataSeq);
 int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len);
 
 #ifdef __cplusplus

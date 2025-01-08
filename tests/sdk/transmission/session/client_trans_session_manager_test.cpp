@@ -1629,4 +1629,39 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest52, TestSiz
 
     EXPECT_NO_FATAL_FAILURE(DestroyRelationChecker());
 }
+
+/**
+ * @tc.name: TransClientSessionManagerTest53
+ * @tc.desc: DataSeqInfoListAddItem
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest53, TestSize.Level1)
+{
+    TransDataSeqInfoListInit();
+    int32_t channelId = 1;
+    uint32_t dataSeq = 1;
+    int32_t socketId = 1;
+    int32_t ret = DataSeqInfoListAddItem(dataSeq, channelId, socketId, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransDataSeqInfoListDeinit();
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest55
+ * @tc.desc: DeleteDataSeqInfoList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest55, TestSize.Level1)
+{
+    TransDataSeqInfoListInit();
+    int32_t channelId = 1;
+    uint32_t dataSeq = 1;
+    int32_t socketId = 1;
+    DataSeqInfoListAddItem(dataSeq, channelId, socketId, 0);
+    int32_t ret = DeleteDataSeqInfoList(dataSeq, channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransDataSeqInfoListDeinit();
+}
 }

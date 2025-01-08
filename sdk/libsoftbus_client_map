@@ -60,6 +60,7 @@
         "StopPublishLNN";
         "GetPeerSessionName";
         "SendBytes";
+        "SendBytesAsync";
         "RegistFileSchema";
         "UnregistFileSchema";
         "TransRegistFileSchema";
