@@ -29,6 +29,7 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
+#include "trans_log.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
@@ -75,7 +76,10 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
     }
 
     if (!CheckUidAndPid(param->sessionName, callingUid, callingPid)) {
-        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", param->sessionName);
+        char *tmpName = NULL;
+        Anonymize(param->sessionName, &tmpName);
+        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", AnonymizeWrapper(tmpName));
+        AnonymizeFree(tmpName);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
 
