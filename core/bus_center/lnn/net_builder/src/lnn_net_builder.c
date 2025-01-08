@@ -69,6 +69,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "lnn_net_builder_process.h"
 #include "lnn_net_builder_init.h"
+#include "trans_auth_manager.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN      8
 #define JSON_KEY_MASTER_UDID             "MasterUdid"
@@ -965,7 +966,7 @@ void UpdateLocalNetCapability(void)
         oldNetCap, netCapability, brState, isWifiActive);
 }
 
-int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession)
 {
     if (addr == NULL || info == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join with nodeinfo message fail");
@@ -984,6 +985,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
         SoftBusFree(para);
         return SOFTBUS_MEM_ERR;
     }
+    para->isSession = isSession;
     if (PostBuildMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
         SoftBusFree(para->dupInfo);
@@ -1015,6 +1017,85 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
         return SOFTBUS_NETWORK_LOOPER_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len)
+{
+    (void) peerUdid;
+    return SOFTBUS_OK;
+}
+
+
+static bool AuthCapabilityIsSupport(char *peerUdid, AuthCapability capaBit)
+{
+    if (peerUdid == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid peerUdid.");
+        return false;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnRetrieveDeviceInfoByUdid(peerUdid, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "retrieve device info fail, peerUdid:%{public}s", peerUdid);
+        return false;
+    }
+    return IsSupportFeatureByCapaBit(nodeInfo.authCapacity, capaBit);
+}
+
+static int32_t PostJoinLnnExtMsg(ConnectionAddr *addr, int32_t connId)
+{
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, true);
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
+        DelConnIdCallbackInfoItem((uint32_t)connId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    para->isSession = true;
+    if (PostBuildMessageToHandler(MSG_TYPE_JOIN_LNN, para) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post join lnn message fail");
+        DelConnIdCallbackInfoItem((uint32_t)connId);
+        SoftBusFree(para);
+        return SOFTBUS_NETWORK_LOOPER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
+{
+    if (callback == NULL || addr == NULL || addr->type != CONNECTION_ADDR_SESSION) {
+        LNN_LOGE(LNN_BUILDER, "invalid callback");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_netBuilder.isInit == false) {
+        LNN_LOGE(LNN_BUILDER, "no init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t connId = 0;
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    int32_t ret = TransAuthGetConnIdByChanId(addr->info.session.channelId, &connId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get connId fail");
+        return ret;
+    }
+    ret = TransAuthGetPeerUdidByChanId(addr->info.session.channelId, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get peerUdid fail");
+        return ret;
+    }
+    LNN_LOGI(LNN_BUILDER, "addr.type=%{public}d, connId=%{public}d, chanId=%{public}d",
+        addr->type, connId, addr->info.session.channelId);
+    if (!AuthCapabilityIsSupport(peerUdid, BIT_SUPPORT_SESSION_DUP_BLE)) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    ret = AddConnIdCallbackInfoItem(addr, callback, (uint32_t)connId, peerUdid);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_BUILDER, "add connId callback ret = %{public}d.", ret);
+        return (ret == SOFTBUS_ALREADY_EXISTED ? SOFTBUS_OK : ret);
+    }
+
+    return PostJoinLnnExtMsg(addr, connId);
 }
 
 int32_t LnnServerLeave(const char *networkId, const char *pkgName)

@@ -54,6 +54,7 @@ typedef enum {
     AUTH_LINK_TYPE_ENHANCED_P2P,
     AUTH_LINK_TYPE_RAW_ENHANCED_P2P,
     AUTH_LINK_TYPE_NORMALIZED,
+    AUTH_LINK_TYPE_SESSION,
     AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
@@ -89,6 +90,10 @@ typedef struct {
             ListenerModule moduleId; /* for open enhance p2p auth conn */
             char udid[UDID_BUF_LEN];
         } ipInfo;
+        struct {
+            uint32_t connId;
+            char udid[UDID_BUF_LEN];
+        } sessionInfo;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
 } AuthConnInfo;
@@ -209,6 +214,7 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
 uint32_t AuthGetGroupType(const char *udid, const char *uuid);
 bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle);
 
 int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
 void AuthFreeConn(const AuthHandle *authHandle);

@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "auth_interface.h"
+#include "lnn_connId_callback_manager.h"
 #include "lnn_event.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_bus_center.h"
@@ -133,6 +134,7 @@ typedef struct {
 typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isNeedConnect;
+    bool isSession;
     ConnectionAddr addr;
     NodeInfo *dupInfo;
     LnnDfxDeviceInfoReport infoReport;
@@ -204,7 +206,8 @@ void ClearPcRestrictMap(void);
 void DeleteNodeFromPcRestrictMap(const char *udidHash);
 int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
 int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
-int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info);
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession);
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback);
 int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen);
 void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange);
 #ifdef __cplusplus
