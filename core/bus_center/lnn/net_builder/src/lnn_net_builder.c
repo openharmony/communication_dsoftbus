@@ -1019,13 +1019,6 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
     return SOFTBUS_OK;
 }
 
-int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len)
-{
-    (void) peerUdid;
-    return SOFTBUS_OK;
-}
-
-
 static bool AuthCapabilityIsSupport(char *peerUdid, AuthCapability capaBit)
 {
     if (peerUdid == NULL) {
