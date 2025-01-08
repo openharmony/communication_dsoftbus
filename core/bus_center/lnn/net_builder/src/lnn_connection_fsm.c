@@ -26,6 +26,7 @@
 #include "lnn_ble_lpdevice.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_connId_callback_manager.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
@@ -960,6 +961,14 @@ static void DeletePcRestrictNode(int32_t retCode, NodeInfo *nodeInfo)
     }
 }
 
+static void NotifyJoinExtResultProcess(LnnConnectionFsm *connFsm, int32_t retCode)
+{
+    if (!connFsm->isSession) {
+        return;
+    }
+    LnnNotifyStateForSession(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, retCode);
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -981,6 +990,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         connFsm->isDead = true;
         LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
+    NotifyJoinExtResultProcess(connFsm, retCode);
 
     int32_t infoNum = 0;
     int32_t lnnType = 0;
@@ -1217,6 +1227,28 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
     return SOFTBUS_NETWORK_BLE_DIRECT_FAILED;
 }
 
+static int32_t LnnConvertSessionAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *authConn)
+{
+    if (addr == NULL || authConn == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    authConn->type = AUTH_LINK_TYPE_SESSION;
+    ConnIdCbInfo connIdCbInfo;
+    (void)memset_s(&connIdCbInfo, sizeof(ConnIdCbInfo), 0, sizeof(ConnIdCbInfo));
+    int32_t ret = GetConnIdCbInfoByAddr(addr, &connIdCbInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get connIdCbInfo fail.");
+        return ret;
+    }
+    if (strncpy_s(authConn->info.sessionInfo.udid, UDID_BUF_LEN, connIdCbInfo.udid, UDID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "copy udid to authConn fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    authConn->info.sessionInfo.connId = connIdCbInfo.connId;
+    return SOFTBUS_OK;
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -1224,6 +1256,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     if (CheckDeadFlag(connFsm, true)) {
         NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_CONN_FSM_DEAD);
+        NotifyJoinExtResultProcess(connFsm, SOFTBUS_NETWORK_CONN_FSM_DEAD);
         return SOFTBUS_NETWORK_CONN_FSM_DEAD;
     }
     LNN_CHECK_AND_RETURN_RET_LOGW(connInfo->authHandle.authId <= 0, SOFTBUS_OK, LNN_BUILDER,
@@ -1231,7 +1264,16 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     LNN_LOGI(LNN_BUILDER, "begin join request, [id=%{public}u], peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
-    (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
+        rc = LnnConvertSessionAddrToAuthConnInfo(&connInfo->addr, &authConn);
+        if (rc != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "convert session addr to auth conn info fail. [id=%{public}u]", connFsm->id);
+            CompleteJoinLNN(connFsm, NULL, rc);
+            return rc;
+        }
+    } else {
+        (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    }
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     bool dupOk = false;
@@ -1255,7 +1297,6 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
     } else {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
-        rc = SOFTBUS_OK;
     }
     LNN_LOGI(LNN_BUILDER, "verify request. [id=%{public}u], requestId=%{public}u", connFsm->id, connInfo->requestId);
     return rc;
@@ -1322,6 +1363,27 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
     return IsBasicNodeInfoChanged(&oldNodeInfo, newNodeInfo, false);
 }
 
+static int32_t FillBleAddr(ConnectionAddr *addr, const ConnectionAddr *connAddr, NodeInfo *nodeInfo)
+{
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+    addr->type = CONNECTION_ADDR_BLE;
+    if (memcpy_s(addr->info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac,
+        BT_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), hash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udid short hash fail.");
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    if (memcpy_s(addr->info.ble.udidHash, UDID_HASH_LEN, hash, SHORT_UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memcpy udid hash fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability)
 {
     if (nodeInfo == NULL || connAddr == NULL) {
@@ -1342,33 +1404,40 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, Aut
     if (LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
         &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE) &&
         !CheckRemoteBasicInfoChanged(nodeInfo)) {
+        if (authCapability == BIT_SUPPORT_SESSION_DUP_BLE) {
+            LnnNotifyStateForSession(nodeInfo->deviceInfo.deviceUdid, SOFTBUS_OK);
+        }
         LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
         return SOFTBUS_OK;
     }
     ConnectionAddr addr;
-    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    addr.type = CONNECTION_ADDR_BLE;
-    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac, BT_MAC_LEN) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
-        return SOFTBUS_MEM_ERR;
+    int32_t rc = FillBleAddr(&addr, connAddr, nodeInfo);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "fill ble addr fail");
+        return rc;
     }
-    if (SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
-        strlen(nodeInfo->deviceInfo.deviceUdid), hash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "generate udid short hash fail.");
-        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
-    }
-    if (memcpy_s(addr.info.ble.udidHash, UDID_HASH_LEN, hash, SHORT_UDID_HASH_LEN) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "memcpy udid hash fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    int32_t rc = JoinLnnWithNodeInfo(&addr, nodeInfo);
+    bool isSession = (authCapability == BIT_SUPPORT_SESSION_DUP_BLE);
+    rc = JoinLnnWithNodeInfo(&addr, nodeInfo, isSession);
     if (rc == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "join with node info success");
     } else {
         LNN_LOGE(LNN_BUILDER, "join with node info fail");
     }
     return rc;
+}
+
+static void ProcessBleOnlineForSession(LnnConnectionFsm *connFsm)
+{
+    LnnConntionInfo *connInfo = &connFsm->connInfo;
+    int32_t retCode = ProcessBleOnline(connInfo->nodeInfo, &(connInfo->addr),  BIT_SUPPORT_SESSION_DUP_BLE);
+    if (retCode != SOFTBUS_OK) {
+        LnnNotifyStateForSession(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, retCode);
+    }
+    LNN_LOGI(LNN_BUILDER, "session online not need notify.");
+    AuthRemoveAuthManagerByAuthHandle(connInfo->authHandle);
+    LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
+    (void)LnnRequestCleanConnFsm(connFsm->id);
 }
 
 static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
@@ -1391,8 +1460,14 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         LNN_LOGI(LNN_BUILDER,
             "[id=%{public}u] auth passed, authId=%{public}" PRId64, connFsm->id, connInfo->authHandle.authId);
         (void)LnnFillConnInfo(connInfo);
-        if (connInfo->addr.type == CONNECTION_ADDR_BR && connInfo->nodeInfo != NULL) {
-            (void)ProcessBleOnline(connInfo->nodeInfo, &(connInfo->addr), BIT_SUPPORT_BR_DUP_BLE);
+        if (connInfo->nodeInfo != NULL) {
+            if (connInfo->addr.type == CONNECTION_ADDR_BR) {
+                (void)ProcessBleOnline(connInfo->nodeInfo, &(connInfo->addr), BIT_SUPPORT_BR_DUP_BLE);
+            } else if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
+                ProcessBleOnlineForSession(connFsm);
+                SoftBusFree(retCode);
+                return SOFTBUS_OK;
+            }
         }
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);

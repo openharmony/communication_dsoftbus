@@ -912,7 +912,7 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
-    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_SESSION) {
         PostCancelAuthMessage(authSeq, info);
     }
     if (!info->isConnectServer) {

@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_connId_callback_manager.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
@@ -56,6 +57,7 @@ typedef enum {
     NOTIFY_NETWORKID_UPDATE,
     NOTIFY_LOCAL_NETWORKID_UPDATE,
     NOTIFY_DEVICE_TRUSTED_CHANGED,
+    NOTIFY_STATE_SESSION,
 } NotifyType;
 
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
@@ -160,6 +162,16 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
     LNN_LOGD(LNN_EVENT, "offline exceted 5min, process networkId update event");
 }
 
+static void HandleStateSessionMessage(SoftBusMessage *msg)
+{
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid state session message");
+        return;
+    }
+    int32_t retCode = (int32_t)msg->arg1;
+    InvokeCallbackForJoinExt((const char *)msg->obj, retCode);
+}
+
 static void HandleNotifyMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
@@ -185,6 +197,9 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             break;
         case NOTIFY_DEVICE_TRUSTED_CHANGED:
             HandleDeviceTrustedChangedMessage(msg);
+            break;
+        case NOTIFY_STATE_SESSION:
+            HandleStateSessionMessage(msg);
             break;
         default:
             LNN_LOGE(LNN_EVENT, "unknown notify msgType=%{public}d", msg->what);
@@ -334,6 +349,41 @@ static int32_t PostNotifyMessageDelay(int32_t what, uint64_t delayMillis)
     msg->handler = &g_notifyHandler;
     msg->FreeMessage = FreeNotifyMessage;
     return PostMessageToHandlerDelay(msg, delayMillis);
+}
+
+static char *DupUdid(char *udid)
+{
+    if (udid == NULL) {
+        LNN_LOGW(LNN_EVENT, "udid is null");
+        return NULL;
+    }
+    int32_t len = strlen(udid) + 1;
+    char *dupMsg = SoftBusCalloc(len);
+    if (dupMsg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc dupMsg err");
+        return NULL;
+    }
+    if (strcpy_s(dupMsg, len, udid) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy dupMsg fail");
+        SoftBusFree(dupMsg);
+        return NULL;
+    }
+    return dupMsg;
+}
+
+static int32_t PostNotifyMessageWithUdid(int32_t what, char *udid, uint64_t arg1)
+{
+    SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc msg fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = what;
+    msg->arg1 = arg1;
+    msg->obj = DupUdid(udid);
+    msg->handler = &g_notifyHandler;
+    msg->FreeMessage = FreeNotifyMessage;
+    return PostMessageToHandlerDelay(msg, 0);
 }
 
 static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
@@ -504,6 +554,15 @@ void LnnNotifyNodeStatusChanged(NodeStatus *info, NodeStatusType type)
 void LnnNotifyLocalNetworkIdChanged(void)
 {
     (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
+}
+
+void LnnNotifyStateForSession(char *udid, int32_t retCode)
+{
+    if (udid == NULL) {
+        LNN_LOGE(LNN_EVENT, "udid is null");
+        return;
+    }
+    (void)PostNotifyMessageWithUdid(NOTIFY_STATE_SESSION, udid, retCode);
 }
 
 void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)

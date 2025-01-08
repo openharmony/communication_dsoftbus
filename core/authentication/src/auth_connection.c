@@ -98,6 +98,8 @@ const char *GetConnTypeStr(uint64_t connId)
             return "p2p";
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return "enhanced_p2p";
+        case AUTH_LINK_TYPE_SESSION:
+            return "session";
         default:
             break;
     }
@@ -430,20 +432,32 @@ static void OnWiFiDisconnected(int32_t fd)
     RouteClearAuthChannelId(fd);
 }
 
+static bool IsSessionAuth(int32_t module)
+{
+    return (module == MODULE_SESSION_AUTH);
+}
+
 static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
 
-    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module) &&
+        !IsSessionAuth(head->module)) {
         return;
     }
     bool fromServer = false;
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
-        return;
+    if (IsSessionAuth(head->module)) {
+        connInfo.type = AUTH_LINK_TYPE_SESSION;
+        connInfo.info.sessionInfo.connId = fd;
+        AUTH_LOGI(AUTH_CONN, "set connInfo for AUTH_LINK_TYPE_SESSION, fd=%{public}d", fd);
+    } else {
+        if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
+            return;
+        }
     }
     HandleDataReceivedProcess(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
 }
@@ -645,6 +659,13 @@ void AuthConnDeinit(void)
     (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
 }
 
+static void SessionConnectSucc(uint32_t requestId, const AuthConnInfo *connInfo)
+{
+    AUTH_LOGI(AUTH_CONN, "no need connect.");
+    uint64_t connId = GenConnId(connInfo->type, (int32_t)connInfo->info.sessionInfo.connId);
+    NotifyClientConnected(requestId, connId, SOFTBUS_OK, connInfo);
+}
+
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -673,6 +694,9 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
+            break;
+        case AUTH_LINK_TYPE_SESSION:
+            SessionConnectSucc(requestId, connInfo);
             break;
         default:
             ret = SOFTBUS_OK;
@@ -731,6 +755,31 @@ void DisconnectAuthDevice(uint64_t *connId)
     }
 }
 
+static int32_t PostBytesForSession(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+{
+    uint32_t size = GetAuthDataSize(head->len);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    if (buf == NULL) {
+        AUTH_LOGE(AUTH_CONN, "calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    AuthDataHead tmpHead = *head;
+    tmpHead.module = MODULE_SESSION_AUTH;
+    int32_t ret = PackAuthData(&tmpHead, data, buf, size);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "PackAuthData fail");
+        SoftBusFree(buf);
+        return ret;
+    }
+    tmpHead.len = size;
+    ret = SocketPostBytes(fd, &tmpHead, buf);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SocketPostBytes fail");
+    }
+    SoftBusFree(buf);
+    return ret;
+}
+
 int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
@@ -748,6 +797,8 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return PostCommData(GetConnId(connId), toServer, head, data);
+        case AUTH_LINK_TYPE_SESSION:
+            return PostBytesForSession(GetFd(connId), head, data);
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
             break;

@@ -150,6 +150,20 @@ static uint32_t ModuleToDataType(int32_t module)
     return DATA_TYPE_CONNECTION;
 }
 
+static void SessionNotifyDataReceived(ListenerModule module, int32_t fd,
+    uint32_t len, const uint8_t *data)
+{
+    AuthDataHead head = {0};
+    const uint8_t *body = UnpackAuthData(data, len, &head);
+    if (body == NULL) {
+        AUTH_LOGE(AUTH_CONN, "unpack auth data fail.");
+        return;
+    }
+    if (g_callback.onDataReceived != NULL) {
+        g_callback.onDataReceived(module, fd, &head, body);
+    }
+}
+
 static void NotifyDataReceived(ListenerModule module, int32_t fd, const SocketPktHead *pktHead, const uint8_t *data)
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
@@ -158,6 +172,10 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd, const SocketPk
     }
     if (pktHead->module == MODULE_META_AUTH) {
         AuthMetaNotifyDataReceived(fd, pktHead, data);
+        return;
+    }
+    if (pktHead->module == MODULE_SESSION_AUTH) {
+        SessionNotifyDataReceived(module, fd, pktHead->len, data);
         return;
     }
     AuthDataHead head = {

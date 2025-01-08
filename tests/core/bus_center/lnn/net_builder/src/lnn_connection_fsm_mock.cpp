@@ -142,6 +142,16 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
     return GetLnnConnInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);
 }
 
+void LnnNotifyStateForSession(char *udid, int32_t retCode)
+{
+    return GetLnnConnInterface()->LnnNotifyStateForSession(udid, retCode);
+}
+
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
+{
+    return GetLnnConnInterface()->AuthRemoveAuthManagerByAuthHandle(authHandle);
+}
+
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     return GetLnnConnInterface()->LnnConvAddrTypeToDiscType(type);
