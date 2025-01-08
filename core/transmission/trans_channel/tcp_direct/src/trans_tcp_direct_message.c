@@ -35,6 +35,7 @@
 #include "softbus_app_info.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
+#include "softbus_utils.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
@@ -432,6 +433,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         info.isFastData = true;
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
+    info.isSupportTlv = GetCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
@@ -1492,6 +1494,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     if (conn.appInfo.fastTransDataSize > 0 && conn.appInfo.fastTransData != NULL) {
         NotifyFastDataRecv(&conn, channelId);
     }
+    EnableCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
     CloseTcpDirectFd(conn.appInfo.fd);
     if (ret != SOFTBUS_OK) {

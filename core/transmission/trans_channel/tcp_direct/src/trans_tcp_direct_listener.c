@@ -29,6 +29,7 @@
 #include "softbus_error_code.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
+#include "softbus_utils.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
@@ -136,7 +137,7 @@ static int32_t StartVerifySession(SessionConn *conn)
         return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
-
+    EnableCapabilityBit(&conn->appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
     bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);

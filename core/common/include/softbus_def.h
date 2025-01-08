@@ -153,6 +153,7 @@ typedef struct {
     bool isEncrypt;
     bool isUdpFile;
     bool isFastData;
+    bool isSupportTlv;
     int32_t channelId;
     int32_t channelType;
     int32_t businessType;
