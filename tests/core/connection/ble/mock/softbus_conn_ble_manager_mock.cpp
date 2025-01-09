@@ -206,5 +206,10 @@ bool GetJsonObjectNumber16Item(const cJSON *json, const char * const str, uint16
 {
     return GetConnectionBleInterface()->GetJsonObjectNumber16Item(json, str, target);
 }
+
+int32_t BleHiDumperRegister(void)
+{
+    return SOFTBUS_OK;
+}
 }
 } // namespace OHOS

@@ -114,6 +114,7 @@ void ConnBrRemoveConnection(ConnBrConnection *connection);
 ConnBrConnection *ConnBrGetConnectionByAddr(const char *addr, ConnSideType side);
 ConnBrConnection *ConnBrGetConnectionById(uint32_t connectionId);
 void ConnBrReturnConnection(ConnBrConnection **connection);
+int32_t ConnBrDumper(ListNode *connectionSnapshots);
 
 ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback);
 
