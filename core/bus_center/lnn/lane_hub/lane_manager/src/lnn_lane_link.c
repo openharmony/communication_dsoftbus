@@ -1403,13 +1403,9 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
 {
     int32_t ret = SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     int32_t port = 0;
-    if (reqInfo->transType == LANE_T_MSG) {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
-        LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
-    } else {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
-        LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
-    }
+
+    ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
+    LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
