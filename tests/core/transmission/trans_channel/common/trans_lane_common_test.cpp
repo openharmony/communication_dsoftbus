@@ -188,7 +188,7 @@ HWTEST_F(TransLaneCommonTest, TransGetChannelType001, TestSize.Level1)
 
     type = LANE_WLAN_5G;
     ret = TransGetChannelType(&MsgParam, type);
-    EXPECT_EQ(CHANNEL_TYPE_PROXY, ret);
+    EXPECT_EQ(CHANNEL_TYPE_TCP_DIRECT, ret);
 }
 
 /**

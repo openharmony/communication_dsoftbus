@@ -454,23 +454,19 @@ static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char
         TRANS_LOGE(TRANS_SDK, "failed to get supportTlv. channelId=%{public}d", channel->channelId);
         return res;
     }
+    int32_t tmpHeadLen = DC_DATA_HEAD_SIZE;
     if (supportTlv) {
-        ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + lenInfo.tlvHeadLen, 0);
-        if (ret != (ssize_t)outLen + lenInfo.tlvHeadLen) {
-            TRANS_LOGE(TRANS_SDK, "new send bytes failed to send tcp data. channelId=%{public}d, ret=%{public}zd",
-                channel->channelId, ret);
-            SoftBusFree(buf);
-            (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
-            return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
-        }
-    } else {
-        ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
-        if (ret != (ssize_t)outLen + DC_DATA_HEAD_SIZE) {
-            TRANS_LOGE(TRANS_SDK, "failed to send tcp data. ret=%{public}zd", ret);
-            SoftBusFree(buf);
-            (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
-            return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
-        }
+        TRANS_LOGE(TRANS_SDK, "supportTlv is true");
+        tmpHeadLen = lenInfo.tlvHeadLen;
+    }
+    ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + tmpHeadLen, 0);
+    if (ret != (ssize_t)outLen + tmpHeadLen) {
+        TRANS_LOGE(TRANS_SDK, "send bytes failed to send tcp data. channelId=%{public}d, ret=%{public}zd",
+            channel->channelId, ret);
+        SoftBusFree(buf);
+        int32_t socketErr = ConnGetSocketError(channel->detail.fd);
+        (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
+        return socketErr;
     }
     (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
     SoftBusFree(buf);
@@ -1190,7 +1186,7 @@ int32_t TransTdcRecvData(int32_t channelId)
     if (recvLen < 0) {
         SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_SDK, "client recv data failed, channelId=%{public}d, recvLen=%{public}d.", channelId, recvLen);
-        return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
+        return ConnGetSocketError(fd);
     } else if (recvLen == 0) {
         SoftBusFree(recvBuf);
         return SOFTBUS_DATA_NOT_ENOUGH;
