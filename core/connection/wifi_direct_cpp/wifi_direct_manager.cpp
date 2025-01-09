@@ -14,6 +14,7 @@
  */
 
 #include <atomic>
+#include <future>
 #include <list>
 #include <mutex>
 #include <securec.h>
@@ -36,6 +37,8 @@
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::list<WifiDirectStatusListener> g_listeners;
+static std::recursive_mutex g_promiseMaplock;
+static std::map<uint32_t, std::shared_ptr<std::promise<int32_t>>> g_promiseMap;
 static std::recursive_mutex g_listenerModuleIdLock;
 static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
@@ -274,6 +277,72 @@ static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
             }
             return false;
         });
+    return result;
+}
+
+static void OnForceDisconnectSuccess(uint32_t requestId)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect succ, requestId=%{public}u", requestId);
+    g_promiseMap[requestId]->set_value(SOFTBUS_OK);
+}
+
+static void OnForceDisconnectFailure(uint32_t requestId, int32_t reason)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect fail, requestId=%{public}u, reason=%{public}d",
+        requestId, reason);
+    g_promiseMap[requestId]->set_value(reason);
+}
+
+static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkType)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "linktype=%{public}d", wifiDirectLinkType);
+    std::string remoteUuid;
+    auto linkType = LinkTypeConver(wifiDirectLinkType);
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&remoteUuid, linkType] (OHOS::SoftBus::InnerLink &link) {
+        if (link.GetLinkType() == linkType && link.GetState() == OHOS::SoftBus::InnerLink::LinkState::CONNECTED) {
+            remoteUuid = link.GetRemoteDeviceId();
+            CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s, state=CONNECTED",
+                OHOS::SoftBus::WifiDirectAnonymizeDeviceId(link.GetRemoteDeviceId()).c_str());
+            return true;
+        }
+        return false;
+    });
+    /* If the link of the specified vap cannot be found,
+       a success message is returned, indicating that the hot spot can be opened.
+       All other error codes are that the hot spot cannot be opened, and the vap conflict occurs. */
+    CONN_CHECK_AND_RETURN_RET_LOGW(remoteUuid != "", SOFTBUS_OK, CONN_WIFI_DIRECT, "no connected devices");
+
+    struct WifiDirectForceDisconnectInfo info = {
+        .linkType = wifiDirectLinkType,
+        .requestId = GetRequestId(),
+    };
+    auto res = strcpy_s(info.remoteUuid, UUID_BUF_LEN, remoteUuid.c_str());
+    CONN_CHECK_AND_RETURN_RET_LOGW(res == EOK, SOFTBUS_STRCPY_ERR, CONN_WIFI_DIRECT, "copy fail, res=%{public}d", res);
+    auto promise = std::make_shared<std::promise<int32_t>>();
+    {
+        std::lock_guard lock(g_promiseMaplock);
+        g_promiseMap[info.requestId] = promise;
+    }
+    struct WifiDirectDisconnectCallback callback = {
+        .onDisconnectSuccess = OnForceDisconnectSuccess,
+        .onDisconnectFailure = OnForceDisconnectFailure,
+    };
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestid=%{public}d linktype=%{public}d remoteUuid=%{public}s", info.requestId,
+        info.linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info.remoteUuid).c_str());
+    auto ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
+        info, callback);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect scheduler fail, requestid=%{public}d ret=%{public}d",
+            info.requestId, ret);
+        std::lock_guard lock(g_promiseMaplock);
+        g_promiseMap.erase(info.requestId);
+        return ret;
+    }
+    int32_t result = SOFTBUS_OK;
+    result = g_promiseMap[info.requestId]->get_future().get();
+    CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect requestid=%{public}d reason=%{public}d", info.requestId, result);
+    std::lock_guard lock(g_promiseMaplock);
+    g_promiseMap.erase(info.requestId);
     return result;
 }
 
@@ -581,6 +650,7 @@ static struct WifiDirectManager g_manager = {
     .cancelConnectDevice = CancelConnectDevice,
     .disconnectDevice = DisconnectDevice,
     .forceDisconnectDevice = ForceDisconnectDevice,
+    .forceDisconnectDeviceSync = ForceDisconnectDeviceSync,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
     .isNoneLinkByType = IsNoneLinkByType,
