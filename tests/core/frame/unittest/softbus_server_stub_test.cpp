@@ -1753,6 +1753,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
     datas.WriteInt32(pid);
     datas.WriteCString(networkId);
     ret = softBusServer->PrivilegeCloseChannelInner(datas, reply);
-    EXPECT_NE(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 }

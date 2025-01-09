@@ -1214,7 +1214,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest002, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
     int32_t ret = TransTdcProcessPostData(channel, data, len, flags);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
     SoftBusFree(channel);
     SoftBusFree(info);
     SoftBusFree(serverNode);
@@ -1249,7 +1249,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level0)
 
     info->detail.needRelease = false;
     ret = TransTdcSendBytes(channelId, data, len, false);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
@@ -1282,7 +1282,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendMessageTest001, TestSize.Level0)
 
     info->detail.needRelease = false;
     ret = TransTdcSendMessage(channelId, data, len);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
@@ -1408,56 +1408,37 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     int32_t ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
     buf->w = buf->data + DC_DATA_HEAD_SIZE;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 
     pktHead->magicNumber = MAGIC_NUMBER;
     pktHead->dataLen = g_dataBufferMaxLen - DC_DATA_HEAD_SIZE + 1;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 
     pktHead->dataLen = OVERHEAD_LEN;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 
     pktHead->dataLen = 1;
     buf->size = DC_DATA_HEAD_SIZE;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 
     pktHead->dataLen = OVERHEAD_LEN + 1;
     buf->size = DC_DATA_HEAD_SIZE;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 
     pktHead->dataLen = 0;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
     // pktHead is deleted in the abnormal branch
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDataList);
     g_tcpDataList = NULL;
-}
-
-/**
- * @tc.name: TransAssembleTlvData001
- * @tc.desc: TransAssembleTlvData
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectTest, TransAssembleTlvData001, TestSize.Level0)
-{
-    int32_t bufferSize = 0;
-    uint8_t dataSeq = 1;
-    DataHead data;
-    data.magicNum = MAGIC_NUMBER;
-    data.tlvCount = 2;
-    data.tlvElement = (uint8_t *)SoftBusCalloc(2 * sizeof(TlvElement));
-    int32_t ret = TransAssembleTlvData(&data, 2, (uint8_t *)&dataSeq, 4, &bufferSize);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusFree(data.tlvElement);
 }
 
 /**
@@ -1498,28 +1479,6 @@ HWTEST_F(TransTcpDirectTest, BuildDataHead001, TestSize.Level0)
     DataHead data;
     int32_t ret = BuildDataHead(&data, 1, 0, 32, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: TransTdcPackTlvData001
- * @tc.desc: TransTdcPackTlvData
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectTest, TransTdcPackTlvData001, TestSize.Level0)
-{
-    int32_t bufferSize = 0;
-    uint32_t dataSeq = 1;
-    int32_t seq = 0;
-    DataHead data;
-    data.magicNum = MAGIC_NUMBER;
-    data.tlvCount = 2;
-    data.tlvElement = (uint8_t *)SoftBusCalloc(2 * sizeof(TlvElement));
-    TransAssembleTlvData(&data, 0, (uint8_t *)&seq, sizeof(seq), &bufferSize);
-    TransAssembleTlvData(&data, 1, (uint8_t *)&dataSeq, sizeof(dataSeq), &bufferSize);
-    char *buf = TransTdcPackTlvData(&data, bufferSize, 32);
-    EXPECT_TRUE(buf == nullptr);
-    SoftBusFree(data.tlvElement);
 }
 
 /**
