@@ -100,5 +100,10 @@ int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority prior
 {
     return GetConnectionBleInterface()->BleGattcSetPriority(clientId, bdAddr, priority);
 }
+
+int32_t BleHiDumperRegister(void)
+{
+    return SOFTBUS_OK;
+}
 }
 }
