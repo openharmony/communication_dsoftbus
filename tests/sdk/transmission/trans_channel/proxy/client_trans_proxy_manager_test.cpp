@@ -367,7 +367,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH, false);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
     ClientTransProxyCloseChannel(channelId);
 }
 
