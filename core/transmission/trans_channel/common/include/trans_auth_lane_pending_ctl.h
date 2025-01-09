@@ -33,6 +33,7 @@ typedef struct {
         ActionAddr action;
     };
     bool enable160M;
+    bool accountInfo;
 } LinkPara;
 
 typedef struct {
