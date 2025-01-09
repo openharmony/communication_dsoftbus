@@ -1458,7 +1458,7 @@ static void TransProcessAsyncOpenTdcChannelFailed(
     }
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
     TransCleanTdcSource(conn->channelId);
-    CloseTcpDirectFd(conn->appInfo.fd);
+    CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
 }
 
 int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
@@ -1496,7 +1496,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     }
     EnableCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
-    CloseTcpDirectFd(conn.appInfo.fd);
+    CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
     if (ret != SOFTBUS_OK) {
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         goto ERR_EXIT;
@@ -1538,7 +1538,7 @@ void TransAsyncTcpDirectChannelTask(int32_t channelId)
         uint64_t seq = 0;
         ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
         if (ret != SOFTBUS_OK) {
-            CloseTcpDirectFd(connInfo.appInfo.fd);
+            CloseTcpDirectFd(connInfo.listenMod, connInfo.appInfo.fd);
             TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
             return;
         }
@@ -1555,7 +1555,7 @@ void TransAsyncTcpDirectChannelTask(int32_t channelId)
             connInfo.appInfo.sessionKey, sizeof(connInfo.appInfo.sessionKey), 0, sizeof(connInfo.appInfo.sessionKey));
         (void)NotifyChannelClosed(&connInfo.appInfo, channelId);
         TransCleanTdcSource(channelId);
-        CloseTcpDirectFd(connInfo.appInfo.fd);
+        CloseTcpDirectFd(connInfo.listenMod, connInfo.appInfo.fd);
         return;
     }
     TRANS_LOGI(TRANS_CTRL, "Open channelId=%{public}d not finished, generate new task and waiting", channelId);
@@ -1616,7 +1616,7 @@ ERR_EXIT:
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    CloseTcpDirectFd(conn.appInfo.fd);
+    CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
     TransDelSessionConnById(channelId);
     return ret;
 }
