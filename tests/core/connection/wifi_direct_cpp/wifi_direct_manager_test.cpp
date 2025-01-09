@@ -469,4 +469,19 @@ HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest002, TestSize.Level1)
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
+/*
+ * @tc.name: ForceDisconnectDeviceSync001
+ * @tc.desc: check ForceDisconnectDeviceSync001 method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, ForceDisconnectDeviceSync001, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 enter");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    auto result = ForceDisconnectDeviceSync(WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 exit");
+}
+
 } // namespace OHOS::SoftBus

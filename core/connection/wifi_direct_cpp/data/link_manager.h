@@ -48,7 +48,7 @@ public:
     bool ProcessIfPresent(int linkId, const Handler &handler);
     void RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId);
     void RemoveLink(const std::string &remoteMac);
-    void RemoveLinks(InnerLink::LinkType type);
+    void RemoveLinks(InnerLink::LinkType type, bool onlyRemoveConnected = false);
 
     void GetAllLinksBasicInfo(std::vector<InnerLinkBasicInfo> &infos);
 
