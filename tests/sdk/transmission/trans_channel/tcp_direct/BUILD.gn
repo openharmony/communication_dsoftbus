@@ -94,6 +94,7 @@ ohos_unittest("TransSessionTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
       "hilog:libhilog",
     ]
   } else {
@@ -106,7 +107,10 @@ ohos_unittest("TransSessionTest") {
 
 ohos_unittest("TransTcpDirectTest") {
   module_out_path = module_output_path
-  sources = [ "trans_tcp_direct_test.cpp" ]
+  sources = [
+    "trans_tcp_direct_mock.cpp",
+    "trans_tcp_direct_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -137,6 +141,7 @@ ohos_unittest("TransTcpDirectTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
       "hilog:libhilog",
     ]
   } else {
