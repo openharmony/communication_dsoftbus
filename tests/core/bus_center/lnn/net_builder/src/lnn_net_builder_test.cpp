@@ -38,6 +38,7 @@ constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
 constexpr uint8_t MSG[] = "123456BNHFCF";
 constexpr int64_t AUTH_ID = 10;
 constexpr uint32_t REQUEST_ID = 10;
+constexpr uint16_t CHANNEL_ID = 2050;
 
 #define SOFTBUS_SUB_SYSTEM        203
 #define SOFTBUS_AUTH_MODULE       3
@@ -73,6 +74,11 @@ void LNNNetBuilderTest::TearDown()
 {
     LnnDeinitNetBuilder();
     LnnDeinitBusCenterEvent();
+}
+
+static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t returnRet)
+{
+    return;
 }
 
 /*
@@ -281,6 +287,30 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
     ret = LnnServerJoin(&addr, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
+}
+
+/*
+ * @tc.name: LNN_SERVER_JOIN_EXT_TEST_001
+ * @tc.desc: test LnnServerJoinExt
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_EXT_TEST_001, TestSize.Level0)
+{
+    ConnectionAddr addr = { .type = CONNECTION_ADDR_SESSION, .info.session.channelId = CHANNEL_ID };
+    LnnServerJoinExtCallBack cb = {
+        .lnnServerJoinExtCallback = OnLnnServerJoinExtCb
+    };
+    int32_t ret = LnnServerJoinExt(&addr, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnServerJoinExt(&addr, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnServerJoinExt(nullptr, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnServerJoinExt(&addr, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
