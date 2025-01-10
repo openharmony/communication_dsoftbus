@@ -62,6 +62,7 @@ void LnnUnRegistParamMgrByType(LnnHeartbeatType type);
 
 int32_t LnnHbStrategyInit(void);
 void LnnHbStrategyDeinit(void);
+void LnnRemoveV0BroadcastAndCheckDev(void);
 
 #ifdef __cplusplus
 }
