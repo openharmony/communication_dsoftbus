@@ -1216,3 +1216,15 @@ void LnnHbStrategyDeinit(void)
     LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH);
     (void)SoftBusMutexDestroy(&g_hbStrategyMutex);
 }
+
+void LnnRemoveV0BroadcastAndCheckDev(void)
+{
+    if (g_hbFsm == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB strategy is not init");
+        return;
+    }
+    LnnFsmRemoveMessage(&g_hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
+    LnnFsmRemoveMessage(&g_hbFsm->fsm, EVENT_HB_SEND_ONE_END);
+    LnnCheckDevStatusMsgPara checkMsg = { .hbType = HEARTBEAT_TYPE_BLE_V0, .hasNetworkId = false };
+    LnnRemoveCheckDevStatusMsg(g_hbFsm, &checkMsg);
+}
