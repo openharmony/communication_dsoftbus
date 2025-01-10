@@ -289,14 +289,12 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOption001, TestSize.Level1)
  */
 HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnExistProc001, TestSize.Level1)
 {
-    ProxyChannelInfo chan;
     ConnectOption connInfo;
     (void)memset_s(&connInfo, sizeof(ConnectOption), 1, sizeof(ConnectOption));
     int32_t chanNewId = 1;
     bool isServer = false;
     TransCreateConnByConnId(1, isServer);
-    chan.isServer = false;
-    int32_t ret = TransProxyConnExistProc(&chan, chanNewId, &connInfo);
+    int32_t ret = TransProxyConnExistProc(isServer, chanNewId, &connInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED, ret);
 }
 
