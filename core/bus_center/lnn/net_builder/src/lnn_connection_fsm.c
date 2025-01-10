@@ -966,7 +966,9 @@ static void NotifyJoinExtResultProcess(LnnConnectionFsm *connFsm, int32_t retCod
     if (!connFsm->isSession) {
         return;
     }
-    LnnNotifyStateForSession(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, retCode);
+    if (connFsm->connInfo.nodeInfo != NULL) {
+        LnnNotifyStateForSession(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, retCode);
+    }
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
