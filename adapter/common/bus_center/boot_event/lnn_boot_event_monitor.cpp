@@ -52,6 +52,9 @@ static void ProcessBootEvent(void *para)
         LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
         return;
     }
+    if (!LnnIsDefaultOhosAccount()) {
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+    }
     EhLoginEventHandler();
     LnnStartHeartbeat(0);
 }
@@ -59,7 +62,7 @@ static void ProcessBootEvent(void *para)
 static void AccountBootEventCb(const char *key, const char *value, void *context)
 {
     (void)context;
-    LNN_LOGI(LNN_EVENT, "start account boot event");
+    LNN_LOGI(LNN_EVENT, "start account boot event, value=%{public}s", value);
     if (strcmp(key, BOOTEVENT_ACCOUNT_READY) == 0 && strcmp(value, "true") == 0) {
         if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessBootEvent, NULL, 0) != SOFTBUS_OK) {
             LNN_LOGE(LNN_EVENT, "async call boot event fail");
