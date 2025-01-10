@@ -32,10 +32,6 @@ using namespace testing::ext;
 
 class LnnConnIdCbManagerTest : public testing::Test {
 public:
-    LnnConnIdCbManagerTest()
-    {}
-    ~LnnConnIdCbManagerTest()
-    {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -59,12 +55,14 @@ void LnnConnIdCbManagerTest::TearDown()
 
 static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t ret)
 {
+    (void)addr;
     return;
 }
 
 static LnnServerJoinExtCallBack cb = {
     .lnnServerJoinExtCallback = OnLnnServerJoinExtCb
 };
+
 /**
  * @tc.name: LnnConnIdCbManagerTest001
  * @tc.desc: AddConnIdCallbackInfoItem test.
@@ -139,5 +137,4 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest004, TestSize.Level1)
     ret = GetConnIdCbInfoByAddr(&addr, &connIdCbInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-
 } // namespace OHOS
