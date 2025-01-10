@@ -380,7 +380,7 @@ enum IpAddrType LinkInfo::GetIpAddrType()
     return static_cast<enum IpAddrType>(ret);
 }
 
-std::string LinkInfo::ToString(LinkInfo::LinkMode mode)
+std::string LinkInfo::ToString(LinkMode mode)
 {
     switch (mode) {
         case LinkMode::INVALID:
