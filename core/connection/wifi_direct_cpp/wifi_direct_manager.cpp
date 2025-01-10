@@ -26,6 +26,7 @@
 #include "data/link_manager.h"
 #include "dfx/duration_statistic.h"
 #include "dfx/wifi_direct_dfx.h"
+#include "dfx/wifi_direct_hidumper.h"
 #include "entity/entity_factory.h"
 #include "softbus_error_code.h"
 #include "utils/wifi_direct_anonymous.h"
@@ -570,6 +571,7 @@ static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
     OHOS::SoftBus::WifiDirectInitiator::GetInstance().Init();
+    OHOS::SoftBus::WifiDirectHidumper::GetInstance().HidumperInit();
     return SOFTBUS_OK;
 }
 

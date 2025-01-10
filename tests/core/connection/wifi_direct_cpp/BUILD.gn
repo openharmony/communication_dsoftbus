@@ -62,6 +62,7 @@ ohos_unittest("WifiDirectIpManagerTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
@@ -106,6 +107,7 @@ ohos_unittest("WifiDirectRoleOptionTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
@@ -158,6 +160,10 @@ ohos_unittest("WifiDirectManagerCppTest") {
     "$wifi_direct_cpp_path/data/link_manager.cpp",
     "$wifi_direct_cpp_path/data/negotiate_message.cpp",
     "$wifi_direct_cpp_path/dfx/duration_statistic.cpp",
+    "$wifi_direct_cpp_path/dfx/interface_snapshot.cpp",
+    "$wifi_direct_cpp_path/dfx/link_snapshot.cpp",
+    "$wifi_direct_cpp_path/dfx/p2p_entity_snapshot.cpp",
+    "$wifi_direct_cpp_path/dfx/processor_snapshot.cpp",
     "$wifi_direct_cpp_path/dfx/wifi_direct_dfx.cpp",
     "$wifi_direct_cpp_path/dfx/wifi_direct_trace.cpp",
     "$wifi_direct_cpp_path/entity/p2p_available_state.cpp",
@@ -211,6 +217,7 @@ ohos_unittest("WifiDirectManagerCppTest") {
     "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
     "wifi:wifi_sdk",
   ]
 }
