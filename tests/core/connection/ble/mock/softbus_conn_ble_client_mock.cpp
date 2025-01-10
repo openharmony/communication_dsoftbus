@@ -188,5 +188,10 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t len
     return GetConnectionBleClientInterface()->ConnBlePostBytesInner(connectionId,
         data, len, pid, flag, module, seq, postBytesFinishAction);
 }
+
+int32_t BleHiDumperRegister(void)
+{
+    return SOFTBUS_OK;
+}
 }
 }

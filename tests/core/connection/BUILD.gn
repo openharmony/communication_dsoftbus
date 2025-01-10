@@ -24,6 +24,7 @@ group("unittest") {
     deps += [
       "br:BrConnTest",
       "br:BrConnectionTest",
+      "br:BrHidumperTest",
       "br:ConnectionBrTest",
     ]
   }
@@ -32,6 +33,7 @@ group("unittest") {
       "ble:BleClientTest",
       "ble:BleConnectionManagerTest",
       "ble:BleConnectionServiceTest",
+      "ble:BleHidumperTest",
       "ble:BleTransTest",
       "ble:ConnectionBleSwitchTest",
       "ble:ConnectionBleTest",

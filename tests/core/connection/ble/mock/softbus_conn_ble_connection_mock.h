@@ -50,6 +50,7 @@ public:
     virtual int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number) = 0;
     virtual int BleGattcUnRegister(int clientId) = 0;
     virtual int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority) = 0;
+    virtual int32_t BleHiDumperRegister(void) = 0;
 };
 
 class ConnectionBleInterfaceMock : public ConnectionBleInterface {
@@ -69,6 +70,7 @@ public:
     MOCK_METHOD(int, BleGattsAddService, (int, BtUuid, bool, int), (override));
     MOCK_METHOD(int, BleGattcUnRegister, (int), (override));
     MOCK_METHOD(int, BleGattcSetPriority, (int, const BdAddr *, BtGattPriority), (override));
+    MOCK_METHOD(int32_t, BleHiDumperRegister, (), (override));
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_MOCK_H

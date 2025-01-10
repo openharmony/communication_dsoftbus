@@ -169,5 +169,10 @@ int32_t SoftBusThreadCreate(
 {
     return GetConnectionBrInterface()->SoftBusThreadCreate(thread, threadAttr, threadEntry, arg);
 }
+
+int32_t BrHiDumperRegister(void)
+{
+    return SOFTBUS_OK;
+}
 }
 }
