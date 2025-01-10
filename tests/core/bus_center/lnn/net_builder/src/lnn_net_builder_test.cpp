@@ -78,6 +78,7 @@ void LNNNetBuilderTest::TearDown()
 
 static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t returnRet)
 {
+    (void)addr;
     return;
 }
 
@@ -298,9 +299,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_EXT_TEST_001, TestSize.Level0)
 {
     ConnectionAddr addr = { .type = CONNECTION_ADDR_SESSION, .info.session.channelId = CHANNEL_ID };
-    LnnServerJoinExtCallBack cb = {
-        .lnnServerJoinExtCallback = OnLnnServerJoinExtCb
-    };
+    LnnServerJoinExtCallBack cb = { .lnnServerJoinExtCallback = OnLnnServerJoinExtCb };
     int32_t ret = LnnServerJoinExt(&addr, &cb);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     ret = LnnInitNetBuilder();
