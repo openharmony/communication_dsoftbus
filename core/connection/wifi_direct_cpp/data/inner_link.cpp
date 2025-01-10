@@ -439,4 +439,36 @@ void InnerLink::Dump() const
     object["LINKS"] = linkIdArrayObject;
     CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s", object.dump().c_str());
 }
+
+std::string InnerLink::ToString(InnerLink::LinkType type)
+{
+    switch (type) {
+        case LinkType::INVALID_TYPE:
+            return "INVALID_TYPE";
+        case LinkType::P2P:
+            return "P2P";
+        case LinkType::HML:
+            return "HML";
+        default:
+            return "UNKNOWN_TYPE(" + std::to_string(static_cast<int>(type)) + ")";
+    }
+}
+
+std::string InnerLink::ToString(InnerLink::LinkState state)
+{
+    switch (state) {
+        case LinkState::INVALID_STATE:
+            return "INVALID_STATE";
+        case LinkState::DISCONNECTED:
+            return "DISCONNECTED";
+        case LinkState::CONNECTED:
+            return "CONNECTED";
+        case LinkState::CONNECTING:
+            return "CONNECTING";
+        case LinkState::DISCONNECTING:
+            return "DISCONNECTING";
+        default:
+            return "UNKNOWN_STATE(" + std::to_string(static_cast<int>(state)) + ")";
+    }
+}
 } // namespace OHOS::SoftBus

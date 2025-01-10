@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef WIFI_DIRECT_TRACE_H
-#define WIFI_DIRECT_TRACE_H
+#ifndef PROCESSOR_SNAPSHOT_H
+#define PROCESSOR_SNAPSHOT_H
 
+#include <list>
+#include <nlohmann/json.hpp>
 #include <string>
 
-namespace OHOS::SoftBus {
-class WifiDirectTrace {
-public:
-    static void StartTrace(const std::string &requestDeviceId, const std::string &receiverDeviceId);
-    static void StopTrace();
-    static void SetRequestId(uint64_t requestId);
-};
+#include "wifi_direct_snapshot.h"
 
+namespace OHOS::SoftBus {
+class ProcessorSnapshot : public WifiDirectSnapshot {
+public:
+    ProcessorSnapshot(const std::string &remoteDeviceId, const std::string &processorType, const std::string &state);
+    void Marshalling(nlohmann::json &output) override;
+
+private:
+    std::string remoteDeviceId_;
+    std::string type_;
+    std::string state_;
+};
 } // namespace OHOS::SoftBus
-#endif // WIFI_DIRECT_TRACE_H
+#endif

@@ -565,4 +565,21 @@ void P2pEntity::UpdateInterfaceManagerWhenStateChanged(P2pState state)
     });
 }
 
+void P2pEntity::Dump(P2pEntitySnapshot &snapshot)
+{
+    {
+        std::lock_guard lock(operationLock_);
+        snapshot.state_ = state_->GetName();
+        snapshot.frequency_ = currentFrequency_;
+    }
+    std::map<std::string, uint32_t> joinClients;
+    {
+        std::lock_guard lock(joiningClientsLock_);
+        std::string macString;
+        for (const auto &client : joiningClients_) {
+            macString += client.first + " ";
+        }
+        snapshot.joiningClients_ = macString;
+    }
+}
 } // namespace OHOS::SoftBus

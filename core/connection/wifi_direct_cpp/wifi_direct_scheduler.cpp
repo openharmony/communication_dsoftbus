@@ -213,4 +213,14 @@ void WifiDirectScheduler::DumpNegotiateChannel(const WifiDirectNegotiateChannel 
             CONN_LOGW(CONN_WIFI_DIRECT, "not support type=%{public}d", channel.type);
     }
 }
+
+void WifiDirectScheduler::Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots)
+{
+    std::lock_guard executorLock(executorLock_);
+    for (const auto &executor : executors_) {
+        if (executor.second != nullptr) {
+            executor.second->Dump(snapshots);
+        }
+    }
+}
 }

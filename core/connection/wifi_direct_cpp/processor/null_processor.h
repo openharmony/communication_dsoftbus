@@ -32,6 +32,16 @@ public:
     void HandleCommandAfterTerminate(WifiDirectCommand &command) override {};
 
     [[noreturn]] void Run() override;
+    
+    std::string GetProcessorName() const override
+    {
+        return "";
+    };
+    
+    std::string GetState() const override
+    {
+        return "";
+    };
 
 private:
     int32_t reason_ = SOFTBUS_OK;

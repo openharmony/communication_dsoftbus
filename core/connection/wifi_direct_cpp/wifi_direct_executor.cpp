@@ -129,4 +129,12 @@ void WifiDirectExecutor::ProcessUnHandleCommand()
     GetSender().Clear();
 }
 
+void WifiDirectExecutor::Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots)
+{
+    std::lock_guard lock(processorLock_);
+    if (processor_ != nullptr) {
+        snapshots.push_back(std::make_shared<ProcessorSnapshot>(
+            processor_->GetRemoteDeviceId(), processor_->GetProcessorName(), processor_->GetState()));
+    }
+}
 }

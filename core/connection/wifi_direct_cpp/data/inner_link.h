@@ -164,6 +164,9 @@ public:
 
     void Dump() const;
 
+    static std::string ToString(InnerLink::LinkType type);
+    static std::string ToString(InnerLink::LinkState state);
+
 private:
     void AddId(int linkId, uint32_t requestId, int pid);
     std::map<int, std::shared_ptr<LinkIdStruct>> linkIds_;
