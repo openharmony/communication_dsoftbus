@@ -261,6 +261,15 @@ static void SendFailToFlushDevice(SessionConn *conn)
     }
 }
 
+static int32_t GetErrCodeBySocketErr(int32_t fd, int32_t transErrCode)
+{
+    int32_t socketErrCode = ConnGetSocketError(fd);
+    if (socketErrCode == SOFTBUS_OK) {
+        return transErrCode;
+    }
+    return socketErrCode;
+}
+
 int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)
 {
     if (data == NULL || packetHead == NULL || packetHead->dataLen == 0) {
@@ -303,7 +312,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SendFailToFlushDevice(conn);
         SoftBusFree(buffer);
         SoftBusFree(conn);
-        return ConnGetSocketError(fd);
+        return GetErrCodeBySocketErr(fd, SOFTBUS_TCP_SOCKET_ERR);
     }
     SoftBusFree(conn);
     SoftBusFree(buffer);
@@ -553,7 +562,7 @@ static int32_t TransTdcPostFastData(SessionConn *conn)
     if (ret != (ssize_t)outLen) {
         TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%{public}zd", ret);
         SoftBusFree(buf);
-        return ConnGetSocketError(conn->appInfo.fd);
+        return GetErrCodeBySocketErr(conn->appInfo.fd, SOFTBUS_TRANS_SEND_TCP_DATA_FAILED);
     }
     SoftBusFree(buf);
     buf = NULL;
@@ -1321,7 +1330,7 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
         if (recvLen < 0) {
             TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, channelId=%{public}d, retLen=%{public}d, total=%{public}d, "
                 "totalRecv=%{public}d", channelId, recvLen, bufferSize, totalRecvLen);
-            return ConnGetSocketError(fd);
+            return GetErrCodeBySocketErr(fd, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
         } else if (recvLen == 0) {
             TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d, total=%{public}d, "
                 "totalRecv=%{public}d", channelId, bufferSize, totalRecvLen);
