@@ -612,6 +612,7 @@ static int32_t UpdateChannelInfo(int32_t authId, const AuthChannelInfo *info)
         if (item->authId == authId) {
             if (memcpy_s(&(item->appInfo), sizeof(item->appInfo), &(info->appInfo), sizeof(info->appInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+                TRANS_LOGE(TRANS_SVC, "memcpy_s filed");
                 return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -619,6 +620,7 @@ static int32_t UpdateChannelInfo(int32_t authId, const AuthChannelInfo *info)
         }
     }
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "update channelInfo failed, authId=%{public}d", authId);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
@@ -638,26 +640,21 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "unpackReply failed");
         ChannelReplyErrProc(&extra, ret, &info, authId);
         return;
     }
     extra.peerUdid = strlen(info.appInfo.peerUdid) != 0 ? info.appInfo.peerUdid : info.appInfo.peerData.deviceId;
     ret = TransAuthProcessDataConfig(&info.appInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "ProcessDataConfig failed");
         ChannelReplyErrProc(&extra, ret, &info, authId);
         return;
     }
     extra.result = EVENT_STAGE_RESULT_OK;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
-
     if (info.accountInfo) {
-        TRANS_LOGI(
-            TRANS_SVC, "accountInfo=%{public}d, authId=%{public}d, channelId=%{public}" PRId64,
+        TRANS_LOGI(TRANS_SVC, "accountInfo=%{public}d, authId=%{public}d, channelId=%{public}" PRId64,
             info.accountInfo, info.authId, info.appInfo.myData.channelId);
         if (UpdateChannelInfo(authId, &info) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "update channelInfo failed, authId=%{public}d", info.authId);
             return;
         }
         ConnectionAddr connAddr;
@@ -667,13 +664,11 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         LnnServerJoinExtCallBack svrJoinCallBack = {
             .lnnServerJoinExtCallback = LnnSvrJoinCallback,
         };
-        ret = LnnServerJoinExt(&connAddr, &svrJoinCallBack);
-        if (ret == SOFTBUS_OK) {
+        if (LnnServerJoinExt(&connAddr, &svrJoinCallBack) == SOFTBUS_OK) {
             return;
         }
         TRANS_LOGI(TRANS_SVC, "LnnServerJoinExt fail, channelId=%{public}" PRId64, info.appInfo.myData.channelId);
     }
-
     ret = NotifyOpenAuthChannelSuccess(&info.appInfo, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
