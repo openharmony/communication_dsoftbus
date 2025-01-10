@@ -63,6 +63,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
 int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len)
 {
     if (msg == NULL || appInfo == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
