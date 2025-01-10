@@ -48,7 +48,7 @@ typedef struct {
 typedef struct {
     AuthLinkType type;
     bool (*compareConnInfo)(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash);
-} CommpareByType;
+} CompareByType;
 
 static uint64_t g_uniqueId = 0;
 static SoftBusMutex g_authLock;
@@ -322,7 +322,7 @@ static bool CompareSessionConnInfo(const AuthConnInfo *info1, const AuthConnInfo
     return false;
 }
 
-static CommpareByType g_compareByType[] = {
+static CompareByType g_compareByType[] = {
     {AUTH_LINK_TYPE_WIFI,         CompareWifiConnInfo},
     {AUTH_LINK_TYPE_BR,           CompareBrConnInfo},
     {AUTH_LINK_TYPE_BLE,          CompareBleConnInfo},
@@ -335,7 +335,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
-    for (uint32_t i = 0; i < sizeof(g_compareByType) / sizeof(CommpareByType); i++) {
+    for (uint32_t i = 0; i < sizeof(g_compareByType) / sizeof(CompareByType); i++) {
         if (info1->type == g_compareByType[i].type) {
             if (g_compareByType[i].compareConnInfo != NULL) {
                 return g_compareByType[i].compareConnInfo(info1, info2, cmpShortHash);
