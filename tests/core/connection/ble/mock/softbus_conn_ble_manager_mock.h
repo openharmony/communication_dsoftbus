@@ -70,6 +70,7 @@ public:
     virtual int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener) = 0;
     virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const str, int32_t *target) = 0;
     virtual bool GetJsonObjectNumber16Item(const cJSON *json, const char * const str, uint16_t *target) = 0;
+    virtual int32_t BleHiDumperRegister(void) = 0;
 };
 
 class ConnectionBleManagerInterfaceMock : public ConnectionBleManagerInterface {
@@ -120,6 +121,7 @@ public:
         (override));
     MOCK_METHOD(
         bool, GetJsonObjectNumber16Item, (const cJSON *json, const char * const str, uint16_t *target), (override));
+    MOCK_METHOD(int32_t, BleHiDumperRegister, (), (override));
 
     static bool ActionOfGetdelta(const cJSON *json, const char * const str, int32_t *target);
     static bool ActionOfGetPeerRc1(const cJSON *json, const char * const str, int32_t *target);

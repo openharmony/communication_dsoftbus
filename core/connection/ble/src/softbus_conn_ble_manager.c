@@ -27,6 +27,8 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_conn_ble_hidumper.h"
+#include "softbus_conn_ble_snapshot.h"
 #include "softbus_conn_ble_trans.h"
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
@@ -2368,6 +2370,7 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .ConfigPostLimit = ConnBleTransConfigPostLimit,
     };
     CONN_LOGI(CONN_INIT, "conn init ble successfully");
+    CONN_LOGI(CONN_INIT, "ble hidumper init result=%{public}d", BleHiDumperRegister());
     return &bleFuncInterface;
 }
 
@@ -2416,4 +2419,25 @@ static void DelayRegisterLnnOnlineListener(void)
     }
     registered = true;
     CONN_LOGI(CONN_BLE, "delay register lnn online listener successfully");
+}
+
+int32_t ConnBleDumper(ListNode *connectionSnapshots)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(connectionSnapshots != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invalid param");
+
+    int32_t ret = SoftBusMutexLock(&g_bleManager.connections->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_BLE, "lock ble connections failed, error=%{public}d", ret);
+
+    ConnBleConnection *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &g_bleManager.connections->list, ConnBleConnection, node) {
+        ConnBleConnectionSnapshot *snapshot = ConnBleCreateConnectionSnapshot(it);
+        if (snapshot == NULL) {
+            CONN_LOGE(CONN_BLE, "ble hidumper constructor snapshot failed");
+            continue;
+        }
+        ListAdd(connectionSnapshots, &snapshot->node);
+    }
+    SoftBusMutexUnlock(&g_bleManager.connections->lock);
+    return SOFTBUS_OK;
 }

@@ -49,6 +49,7 @@ public:
     virtual int32_t ConnBlePostBytesInner(
     uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq,
     PostBytesFinishAction postBytesFinishAction) = 0;
+    virtual int32_t BleHiDumperRegister(void) = 0;
 };
 
 class ConnectionBleClientInterfaceMock : public ConnectionBleClientInterface {
@@ -73,6 +74,7 @@ public:
     MOCK_METHOD(int32_t, LnnGetLocalNumInfo, (InfoKey, int32_t *));
     MOCK_METHOD(int32_t, ConnBlePostBytesInner, (uint32_t connectionId, uint8_t *data,
         uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, PostBytesFinishAction));
+    MOCK_METHOD(int32_t, BleHiDumperRegister, (), (override));
 
     static uint8_t *ConnGattTransRecvReturnConnModule(
         uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
