@@ -586,6 +586,27 @@ void OnLnnProcessUserChangeMsgDelay(void *para)
     SoftBusFree(para);
 }
 
+static void LnnAsyncSendUserId(void *param)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)param;
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+    if (data->msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        SoftBusFree(data);
+        return;
+    }
+    int32_t ret = LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
+        LnnRequestLeaveSpecific(data->networkId, CONNECTION_ADDR_MAX);
+    }
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
+}
+
 static void DoSendUserId(const char *udid, uint8_t *msg)
 {
     #define USER_CHANGE_DELAY_TIME 5
@@ -602,9 +623,18 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
         return;
     }
 
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    SendSyncInfoParam *data =
+        CreateSyncInfoParam(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create async info fail");
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        return;
+    }
+    ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnAsyncSendUserId, (void *)data);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "sync info msg failed! ret:%{public}d", ret);
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "async userid to peer fail");
         LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
         return;
     }

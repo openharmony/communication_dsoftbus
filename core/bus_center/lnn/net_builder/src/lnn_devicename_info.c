@@ -64,9 +64,16 @@ static int32_t LnnSyncDeviceName(const char *networkId)
         LNN_LOGE(LNN_BUILDER, "get device name fail");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
-    if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)deviceName,
-        strlen(deviceName) + 1, NULL) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "send sync device name fail");
+    SendSyncInfoParam *data = CreateSyncInfoParam(
+        LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)deviceName, strlen(deviceName) + 1, NULL);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create async info fail");
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
+    }
+    if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnSendAsyncInfoMsg, (void *)data) != SOFTBUS_OK) {
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "send async device name fail");
         return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
     }
     return SOFTBUS_OK;
