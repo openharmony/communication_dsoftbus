@@ -2596,11 +2596,56 @@ ohos_unittest("LNNCtrlLaneMockTest") {
   }
 }
 
+ohos_unittest("LNNConnIdCbManagerTest") {
+  module_out_path = module_output_path
+  sources = [ "net_builder/src/lnn_connId_cb_manager_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "unittest/common/",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":LNNBatteryInfoTest",
     ":LNNBtNetworkImplMockTest",
+    ":LNNConnIdCbManagerTest",
     ":LNNConnectionFsmMockTest",
     ":LNNConnectionFsmTest",
     ":LNNCtrlLaneMockTest",

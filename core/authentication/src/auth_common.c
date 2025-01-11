@@ -45,6 +45,11 @@ typedef struct {
     void *param;
 } EventRemoveInfo;
 
+typedef struct {
+    AuthLinkType type;
+    bool (*compareConnInfo)(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash);
+} CompareByType;
+
 static uint64_t g_uniqueId = 0;
 static SoftBusMutex g_authLock;
 static SoftBusHandler g_authHandler = { NULL, NULL, NULL };
@@ -263,54 +268,81 @@ const char *GetAuthSideStr(bool isServer)
     return isServer ? "server" : "client";
 }
 
+static bool CompareBrConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_BR &&
+        StrCmpIgnoreCase(info1->info.brInfo.brMac, info2->info.brInfo.brMac) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareWifiConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_WIFI && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareBleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    bool isLinkble = (info2->type == AUTH_LINK_TYPE_BLE &&
+                        (memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash,
+                        (cmpShortHash ? SHORT_HASH_LEN : UDID_HASH_LEN)) == 0 ||
+                        StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0));
+    return isLinkble;
+}
+
+static bool CompareP2pConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
+        strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareEnhancedP2pConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_ENHANCED_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
+        strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareSessionConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_SESSION &&
+        info1->info.sessionInfo.connId == info2->info.sessionInfo.connId &&
+        strcmp(info1->info.sessionInfo.udid, info2->info.sessionInfo.udid) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static CompareByType g_compareByType[] = {
+    {AUTH_LINK_TYPE_WIFI,         CompareWifiConnInfo},
+    {AUTH_LINK_TYPE_BR,           CompareBrConnInfo},
+    {AUTH_LINK_TYPE_BLE,          CompareBleConnInfo},
+    {AUTH_LINK_TYPE_P2P,          CompareP2pConnInfo},
+    {AUTH_LINK_TYPE_ENHANCED_P2P, CompareEnhancedP2pConnInfo},
+    {AUTH_LINK_TYPE_SESSION,      CompareSessionConnInfo},
+};
+
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
-    bool isLinkble = false;
-    switch (info1->type) {
-        case AUTH_LINK_TYPE_WIFI:
-            if (info2->type == AUTH_LINK_TYPE_WIFI && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
-                return true;
+    for (uint32_t i = 0; i < sizeof(g_compareByType) / sizeof(CompareByType); i++) {
+        if (info1->type == g_compareByType[i].type) {
+            if (g_compareByType[i].compareConnInfo != NULL) {
+                return g_compareByType[i].compareConnInfo(info1, info2, cmpShortHash);
             }
-            break;
-        case AUTH_LINK_TYPE_BR:
-            if (info2->type == AUTH_LINK_TYPE_BR &&
-                StrCmpIgnoreCase(info1->info.brInfo.brMac, info2->info.brInfo.brMac) == 0) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_BLE:
-            isLinkble = (info2->type == AUTH_LINK_TYPE_BLE &&
-                (memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash,
-                (cmpShortHash ? SHORT_HASH_LEN : UDID_HASH_LEN)) == 0 ||
-                StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0));
-            if (isLinkble) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_P2P:
-            if (info2->type == AUTH_LINK_TYPE_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
-                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_ENHANCED_P2P:
-            if (info2->type == AUTH_LINK_TYPE_ENHANCED_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
-                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_SESSION:
-            if (info2->type == AUTH_LINK_TYPE_SESSION &&
-                info1->info.sessionInfo.connId == info2->info.sessionInfo.connId &&
-                strcmp(info1->info.sessionInfo.udid, info2->info.sessionInfo.udid) == 0) {
-                return true;
-            }
-            break;
-        default:
-            return false;
+        }
     }
+    AUTH_LOGE(AUTH_CONN, "link type not support, info1-type: %{public}d", info1->type);
     return false;
 }
 
