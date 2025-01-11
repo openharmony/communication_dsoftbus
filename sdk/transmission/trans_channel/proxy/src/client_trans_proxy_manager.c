@@ -107,7 +107,7 @@ static int32_t ProxyBuildNeedAckTlvData(DataHead *pktHead, bool needAck, uint32_
     return SOFTBUS_OK;
 }
 
-static int32_t ProxyBuildTlvDataHead(DataHead *pktHead, int32_t finalSeq, int flag, uint32_t dataLen,
+static int32_t ProxyBuildTlvDataHead(DataHead *pktHead, int32_t finalSeq, int32_t flag, uint32_t dataLen,
     int32_t *tlvBufferSize)
 {
     if (pktHead == NULL) {
@@ -119,9 +119,8 @@ static int32_t ProxyBuildTlvDataHead(DataHead *pktHead, int32_t finalSeq, int fl
         TRANS_LOGE(TRANS_SDK, "malloc tlvElement failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    pktHead->tlvCount = PROXY_TLV_ELEMENT;
     pktHead->magicNum = SoftBusHtoLl(MAGIC_NUMBER);
-    uint32_t seq = (int32_t)SoftBusHtoLl((uint32_t)finalSeq);
+    uint32_t seq = SoftBusHtoLl((uint32_t)finalSeq);
     uint32_t flags = SoftBusHtoLl((uint32_t)flag);
     uint32_t dataLens = SoftBusHtoLl(dataLen);
     int32_t ret = TransAssembleTlvData(pktHead, TLV_TYPE_INNER_SEQ, (uint8_t *)&seq, sizeof(seq), tlvBufferSize);
@@ -158,8 +157,7 @@ static int32_t TransProxyParseTlv(const char *data, DataHeadTlvPacketHead *head,
         TRANS_LOGE(TRANS_SDK, "memcpy magicNumber failed.");
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(&head->tlvCount, TLVCOUNT_SIZE, data + MAGICNUM_SIZE,
-        TLVCOUNT_SIZE) != EOK) {
+    if (memcpy_s(&head->tlvCount, TLVCOUNT_SIZE, data + MAGICNUM_SIZE, TLVCOUNT_SIZE) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy tlvCount failed.");
         return SOFTBUS_MEM_ERR;
     }
@@ -860,7 +858,7 @@ static int32_t ClientTransProxyNoSubPacketTlvProc(int32_t channelId, const char 
             pktHead.magicNumber, channelId, len);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
-    if (pktHead.dataLen == 0) {
+    if (pktHead.dataLen <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}u, channelId=%{public}d, len=%{public}u",
             pktHead.dataLen, channelId, len);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
@@ -1321,11 +1319,11 @@ static int32_t ClientTransProxyPackTlvBytes(int32_t channelId, ClientProxyDataIn
     if (dataInfo->outData == NULL) {
         TRANS_LOGE(TRANS_SDK, "TransProxyPackTlvData error");
         ReleaseTlvValueBuffer(&pktHead);
-        SoftBusFree(&pktHead.tlvElement);
+        SoftBusFree(pktHead.tlvElement);
         return SOFTBUS_TRANS_PACK_TLV_DATA_FAILED;
     }
     ReleaseTlvValueBuffer(&pktHead);
-    SoftBusFree(&pktHead.tlvElement);
+    SoftBusFree(pktHead.tlvElement);
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
     dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + newDataHeadSize;
 
