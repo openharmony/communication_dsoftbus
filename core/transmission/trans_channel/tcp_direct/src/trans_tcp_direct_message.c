@@ -434,6 +434,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
     info.isSupportTlv = GetCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
