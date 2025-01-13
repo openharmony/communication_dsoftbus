@@ -1144,6 +1144,21 @@ HWTEST_F(TransAuthChannelTest, LnnServerJoinExtCb001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AdaptLnnServerJoinExt001
+ * @tc.desc: Transmission auth manager adapt lnn server joinext with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, AdaptLnnServerJoinExt001, TestSize.Level1)
+{
+    AuthChannelInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnServerJoinExt).WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t ret = AdaptLnnServerJoinExt(TRANS_TEST_CHANNEL_ID);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
  * @tc.name: OnRecvAuthChannelReply001
  * @tc.desc: Transmission auth manager on receive auth channel reply with different parameters.
  * @tc.type: FUNC
