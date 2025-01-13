@@ -622,16 +622,12 @@ static int32_t UpdateChannelInfo(int32_t authId, const AuthChannelInfo *info)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-static int32_t AdaptLnnServerJoinExt(const AuthChannelInfo *info)
+static int32_t AdaptLnnServerJoinExt(int64_t channelId)
 {
-    if (info == NULL) {
-        TRANS_LOGE(TRANS_SVC, "info is null, invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     connAddr.type = CONNECTION_ADDR_SESSION;
-    connAddr.info.session.channelId = info.appInfo.myData.channelId;
+    connAddr.info.session.channelId = channelId;
     LnnServerJoinExtCallBack svrJoinCallBack = {
         .lnnServerJoinExtCallback = LnnSvrJoinCallback,
     };
@@ -667,6 +663,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
     }
     extra.result = EVENT_STAGE_RESULT_OK;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+
     if (info.accountInfo) {
         TRANS_LOGI(TRANS_SVC, "accountInfo=%{public}d, authId=%{public}d, channelId=%{public}" PRId64,
             info.accountInfo, info.authId, info.appInfo.myData.channelId);
@@ -674,12 +671,14 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
             TRANS_LOGE(TRANS_SVC, "update channelInfo failed, authId=%{public}d", info.authId);
             return;
         }
-        ret = AdaptLnnServerJoinExt(&info);
+        int64_t channelId = info.appInfo.myData.channelId;
+        ret = AdaptLnnServerJoinExt(channelId);
         if (ret == SOFTBUS_OK) {
             return;
         }
-        TRANS_LOGI(TRANS_SVC, "adapt LnnServerJoinExt fail, channelId=%{public}" PRId64, info.appInfo.myData.channelId);
+        TRANS_LOGI(TRANS_SVC, "adapt LnnServerJoinExt fail, channelId=%{public}" PRId64, channelId);
     }
+
     ret = NotifyOpenAuthChannelSuccess(&info.appInfo, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
