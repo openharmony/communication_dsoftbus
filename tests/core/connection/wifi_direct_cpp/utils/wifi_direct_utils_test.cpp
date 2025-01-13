@@ -331,15 +331,13 @@ HWTEST_F(WifiDirectUtilsTest, SyncLnnInfoForP2pTest, TestSize.Level1)
     WifiDirectRole role = WIFI_DIRECT_ROLE_AUTO;
     const std::string localMac = "11:22:33:44:55";
     const std::string goMac = "11:22:33:44:66";
-    bool expect = true;
 
     WifiDirectInterfaceMock mock;
 
     EXPECT_CALL(mock, LnnSetLocalNumInfo).WillOnce(Return(-1));
     EXPECT_CALL(mock, LnnSetLocalStrInfo).WillRepeatedly(Return(-1));
     EXPECT_CALL(mock, LnnSyncP2pInfo).WillOnce(Return(SOFTBUS_OK));
-    WifiDirectUtils::SyncLnnInfoForP2p(role, localMac, goMac);
-    EXPECT_EQ(expect, true);
+    EXPECT_NO_FATAL_FAILURE(WifiDirectUtils::SyncLnnInfoForP2p(role, localMac, goMac));
 }
 
 /*
