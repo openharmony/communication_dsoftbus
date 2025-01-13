@@ -14,11 +14,12 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
+
 #include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
+#include "securec.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -456,6 +457,36 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 
     ret = TransLimitChange(channelId, FILE_PRIORITY_TEST);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransSetUdpChannelTosTest
+ * @tc.desc: trans set udp channel tos test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level0)
+{
+    int32_t channelId = TEST_ERR_CHANNELID;
+    int32_t ret = TransSetUdpChannelTos(channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransGetUdpChannelTosTest
+ * @tc.desc: trans get udp channel tos test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest, TestSize.Level0)
+{
+    int32_t channelId = TEST_ERR_CHANNELID;
+    bool isTosSet = false;
+    int32_t ret = TransGetUdpChannelTos(channelId, &isTosSet);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+    EXPECT_FALSE(isTosSet);
+    ret = TransGetUdpChannelTos(TEST_CHANNELID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
