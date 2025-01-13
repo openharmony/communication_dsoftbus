@@ -106,11 +106,6 @@ const char *GetAuthSideStr(bool isServer)
     return GetAuthHichainMockInterface()->GetAuthSideStr(isServer);
 }
 
-cJSON *cJSON_Parse(const char *value)
-{
-    return GetAuthHichainMockInterface()->cJSON_Parse(value);
-}
-
 int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen)
 {
     return GetAuthHichainMockInterface()->AuthFailNotifyProofInfo(errCode, errorReturn, errorReturnLen);
@@ -193,4 +188,4 @@ bool RequireAuthLock(void)
     return GetAuthHichainMockInterface()->RequireAuthLock();
 }
 } // extern "C"
-} // namespace OHOS
+} // namespace OHOS

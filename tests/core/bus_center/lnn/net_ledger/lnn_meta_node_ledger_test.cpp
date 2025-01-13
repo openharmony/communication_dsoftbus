@@ -37,7 +37,7 @@ using namespace testing::ext;
 constexpr char NODE_DEVICE_NAME[] = "node1_test";
 constexpr char NODE_UDID[] = "123456ABCDEF";
 constexpr char META_NODE_ID[] = "235689BNHFCC";
-constexpr uint32_t ADDR_NUM = 6;
+constexpr uint32_t ADDR_NUM = 7;
 constexpr int32_t INFO_NUM = 0;
 constexpr int32_t INVALID_INFO_NUM = -1;
 using namespace testing;
