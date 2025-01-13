@@ -36,6 +36,8 @@ public:
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId) = 0;
+    virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId) = 0;
 };
 class AuthDeviceProfileListenerInterfaceMock : public AuthDeviceProfileListenerInterface {
 public:
@@ -49,6 +51,8 @@ public:
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool (void));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD3(DpHasAccessControlProfile, bool (const char *, bool, int32_t));
+    MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_LANE_H
