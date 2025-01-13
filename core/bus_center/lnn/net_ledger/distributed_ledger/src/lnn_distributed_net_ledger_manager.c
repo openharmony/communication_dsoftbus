@@ -1950,3 +1950,34 @@ EXIT:
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return false;
 }
+
+bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
+{
+    if (udid == NULL || info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, SHORT_UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate udid hex string hash fail");
+        return false;
+    }
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "no this device info, ignore update");
+        return true;
+    }
+    if (memcmp(cacheInfo.cipherInfo.key, info->key, SESSION_KEY_LENGTH) == 0 &&
+        memcmp(cacheInfo.cipherInfo.iv, info->iv, BROADCAST_IV_LEN) == 0) {
+        LNN_LOGI(LNN_LEDGER, "remote link key same, ignore update");
+        return true;
+    }
+    if (memcpy_s(cacheInfo.cipherInfo.key, SESSION_KEY_LENGTH, info->key, SESSION_KEY_LENGTH) != EOK ||
+        memcpy_s(cacheInfo.cipherInfo.iv, BROADCAST_IV_LEN, info->iv, BROADCAST_IV_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy link key failed");
+        return false;
+    }
+    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    return true;
+}

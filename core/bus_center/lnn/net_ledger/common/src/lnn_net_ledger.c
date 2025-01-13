@@ -97,6 +97,50 @@ static bool IsCapacityChange(NodeInfo *info)
     return false;
 }
 
+static bool IsLocalIrkInfoChange(NodeInfo *info)
+{
+    unsigned char localIrk[LFINDER_IRK_LEN] = { 0 };
+    if (LnnGetLocalByteInfo(BYTE_KEY_IRK, localIrk, LFINDER_IRK_LEN) == SOFTBUS_OK) {
+        if (memcmp(info->rpaInfo.peerIrk, localIrk, LFINDER_IRK_LEN) != 0) {
+            LNN_LOGI(LNN_LEDGER, "local irk change");
+            if (memcpy_s(info->rpaInfo.peerIrk, LFINDER_IRK_LEN, localIrk, LFINDER_IRK_LEN) != EOK) {
+                LNN_LOGE(LNN_LEDGER, "memcpy local irk fail");
+                (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+                return true;
+            }
+            (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+            return true;
+        }
+    }
+    LNN_LOGI(LNN_LEDGER, "local irk same");
+    (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+    return false;
+}
+
+static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
+{
+    BroadcastCipherInfo linkKey;
+    (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+    if (LnnGetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, linkKey.key, SESSION_KEY_LENGTH) == SOFTBUS_OK &&
+        LnnGetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, linkKey.iv, BROADCAST_IV_LEN) == SOFTBUS_OK) {
+        if (memcmp(info->cipherInfo.key, linkKey.key, SESSION_KEY_LENGTH) != 0 ||
+            memcmp(info->cipherInfo.iv, linkKey.iv, BROADCAST_IV_LEN) != 0) {
+            LNN_LOGI(LNN_LEDGER, "local link key change");
+            if (memcpy_s(info->cipherInfo.key, SESSION_KEY_LENGTH, linkKey.key, SESSION_KEY_LENGTH) != EOK ||
+                memcpy_s(info->cipherInfo.iv, BROADCAST_IV_LEN, linkKey.iv, BROADCAST_IV_LEN) != EOK) {
+                LNN_LOGE(LNN_LEDGER, "memcpy local link key fail");
+                (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+                return true;
+            }
+            (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+            return true;
+        }
+    }
+    LNN_LOGI(LNN_LEDGER, "local link key same");
+    (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+    return false;
+}
+
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
     if (IsCapacityChange(info)) {
@@ -128,6 +172,12 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     if ((LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) &&
         (level != info->deviceSecurityLevel)) {
         LNN_LOGW(LNN_LEDGER, "deviceSecurityLevel=%{public}d->%{public}d", info->deviceSecurityLevel, level);
+        return true;
+    }
+    if (IsLocalIrkInfoChange(info)) {
+        return true;
+    }
+    if (IsLocalBroadcastLinKeyChange(info)) {
         return true;
     }
     return false;
