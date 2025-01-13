@@ -107,6 +107,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
 
+    GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
     TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
