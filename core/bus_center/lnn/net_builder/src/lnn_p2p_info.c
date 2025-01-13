@@ -21,6 +21,7 @@
 #include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_link_p2p.h"
@@ -363,12 +364,16 @@ int32_t LnnInitP2p(void)
     if (LnnInitPtkSyncListener() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk listener fail");
     }
+    if (LnnInitBroadcastLinkKey() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init broadcast link key fail");
+    }
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 
 void LnnDeinitP2p(void)
 {
     LnnDeinitPtk();
+    LnnDeinitBroadcastLinkKey();
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 
