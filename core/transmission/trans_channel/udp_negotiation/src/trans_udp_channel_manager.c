@@ -16,6 +16,7 @@
 #include "trans_udp_channel_manager.h"
 
 #include "common_list.h"
+#include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -865,4 +866,20 @@ int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     return SOFTBUS_OK;
+}
+
+bool CompareSessionName(const char *dstSessionName, const char *srcSessionName)
+{
+    if (dstSessionName == NULL || srcSessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid sessionName");
+        return false;
+    }
+    regex_t regComp;
+    if (regcomp(&regComp, dstSessionName, REG_EXTENDED | REG_NOSUB) != REG_OK) {
+        TRANS_LOGE(TRANS_CTRL, "regcomp failed.");
+        return false;
+    }
+    bool compare = regexec(&regComp, srcSessionName, 0, NULL, 0) == REG_OK;
+    regfree(&regComp);
+    return compare;
 }
