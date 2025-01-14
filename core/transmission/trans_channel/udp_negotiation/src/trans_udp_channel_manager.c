@@ -274,7 +274,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
     NotifyUdpChannelCloseInList(&udpDeleteChannelList);
 }
 
-int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
+int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isClient)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -293,7 +293,7 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->info.isClient == isClient) {
             if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -376,7 +376,7 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
+int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isClient)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -390,7 +390,7 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->info.isClient == isClient) {
             udpChannelNode->status = status;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
@@ -426,7 +426,7 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
+void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isClient)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -445,7 +445,7 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->info.isClient == isClient) {
             if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
             }
