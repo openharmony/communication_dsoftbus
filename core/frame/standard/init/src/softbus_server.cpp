@@ -341,11 +341,16 @@ void SoftBusServer::OnStop() {}
 
 int32_t SoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
-    sptr<TransSpecObject> result = new(std::nothrow) TransSpecObject();
-    if (result == nullptr) {
-        return SOFTBUS_MEM_ERR;
+    static sptr<TransSpecObject> instance = nullptr;
+    static std::mutex instanceLock;
+    std::lock_guard<std::mutex> autoLock(instanceLock);
+    if (instance == nullptr) {
+        instance = new(std::nothrow) TransSpecObject();
+        if (instance == nullptr) {
+            return SOFTBUS_MEM_ERR;
+        }
     }
-    object = result;
+    object = instance;
     return SOFTBUS_OK;
 }
 
