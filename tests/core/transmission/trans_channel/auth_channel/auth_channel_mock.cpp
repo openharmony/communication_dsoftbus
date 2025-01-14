@@ -58,5 +58,10 @@ int32_t AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName(LnnDeviceNameHand
     g_deviceNameHandler = handler;
     return SOFTBUS_OK;
 }
+
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
+{
+    return GetAuthChannelInterface()->LnnServerJoinExt(addr, callback);
+}
 }
 }
