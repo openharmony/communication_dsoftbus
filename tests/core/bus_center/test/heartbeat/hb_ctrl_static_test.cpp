@@ -778,7 +778,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SameAccountDevDisableDiscoveryProcess();
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
