@@ -89,7 +89,7 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "BROADCAST_FREQ",       HISYSEVENT_INT32,  DiscAssignerBroadcastFreq  },
     { "MIN_INTERVAL",         HISYSEVENT_INT32,  DiscAssignerMinInterval    },
     { "MAX_INTERVAL",         HISYSEVENT_INT32,  DiscAssignerMaxInterval    },
-    { "CURRENT_NUM",          HISYSEVENT_INT32   DiscAssignerCurrentNum     },
+    { "CURRENT_NUM",          HISYSEVENT_INT32,  DiscAssignerCurrentNum     },
     { "SCAN_TYPE",            HISYSEVENT_INT32,  DiscAssignerScanType       },
     { "SCAN_COUNT",           HISYSEVENT_INT32,  DiscAssignerScanCount      },
     { "SCAN_CYCLE",           HISYSEVENT_STRING, DiscAssignerScanCycle      },
