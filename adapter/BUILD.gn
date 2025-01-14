@@ -152,7 +152,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
@@ -223,7 +223,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
