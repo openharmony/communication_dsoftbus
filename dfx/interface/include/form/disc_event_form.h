@@ -129,6 +129,7 @@ typedef struct {
     int32_t broadcastFreq;       // BROADCAST_FREQ
     int32_t minInterval;         // MIN_INTERVAL
     int32_t maxInterval;         // MAX_INTERVAL
+    int32_t currentNum;          // BROADCAST_CURRENT_NUM
     int32_t scanType;            // SCAN_TYPE
     int32_t scanCount;           // SCAN_COUNT
     const char *scanCycle;       // SCAN_CYCLE
