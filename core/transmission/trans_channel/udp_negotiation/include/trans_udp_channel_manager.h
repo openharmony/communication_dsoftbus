@@ -100,6 +100,8 @@ void TransAsyncUdpChannelTask(int32_t channelId);
 int32_t TransSetTos(int32_t channelId, uint8_t tos);
 
 int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
+
+bool CompareSessionName(const char *dstSessionName, const char *srcSessionName);
 #ifdef __cplusplus
 }
 #endif
