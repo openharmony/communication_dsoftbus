@@ -616,6 +616,9 @@ static void HbScreenOnChangeEventHandler(int64_t nowTime)
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_ON");
     g_lastScreenOnTime = nowTime;
     g_isScreenOnOnce = true;
+    if (LnnIsLocalSupportBurstFeature()) {
+        LnnRemoveV0BroadcastAndCheckDev();
+    }
     HbRemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
     HbChangeMediumParamByState(g_hbConditionState.screenState);
     if (g_lastScreenOnTime - g_lastScreenOffTime >= HB_SCREEN_ON_COAP_TIME) {
