@@ -603,11 +603,11 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
 
-    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE) != SOFTBUS_OK) {
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE, true) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status done failed.");
         return;
     }
-    if (TransGetUdpChannelBySeq(seq, &channel) != SOFTBUS_OK) {
+    if (TransGetUdpChannelBySeq(seq, &channel, true) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel by seq failed.");
         return;
     }
@@ -624,7 +624,7 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
         ProcessAbnormalUdpChannelState(&(channel.info), ret, true);
         return;
     }
-    TransUpdateUdpChannelInfo(seq, &(channel.info));
+    TransUpdateUdpChannelInfo(seq, &(channel.info), true);
     ret = ProcessUdpChannelState(&(channel.info), false, &authHandle, seq);
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
     if (ret != SOFTBUS_OK) {
@@ -771,7 +771,7 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, AuthHandle authHand
         return ret;
     }
     cJSON_free(msgStr);
-    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING) != SOFTBUS_OK) {
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING, true) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status neging failed.");
     }
     TransEventExtra extra = {
