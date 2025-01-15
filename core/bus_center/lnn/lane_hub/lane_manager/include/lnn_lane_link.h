@@ -43,6 +43,7 @@ typedef struct {
     //OldInfo
     char peerBleMac[MAX_MAC_LEN];
     bool isSupportIpv6;
+    bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
     int32_t psm;
     LaneTransType transType;
     uint32_t actionAddr;

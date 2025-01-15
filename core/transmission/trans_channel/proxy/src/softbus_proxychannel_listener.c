@@ -373,6 +373,7 @@ static int32_t TransGetConnectOption(const char *sessionName, const char *peerNe
     option.requestInfo.trans.transType = LANE_T_MSG;
     option.requestInfo.trans.expectedBw = 0;
     option.requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    option.requestInfo.trans.isInnerCalled = true;
     if (memcpy_s(option.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy networkId failed.");
