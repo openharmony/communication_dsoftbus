@@ -293,8 +293,6 @@ static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleDat
         TRANS_LOGE(TRANS_SDK, "sync signal bind failed, ret=%{public}d, socket=%{public}d", ret, sessionId);
         return ret;
     }
-
-    (void)SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
     return SOFTBUS_OK;
 }
 
