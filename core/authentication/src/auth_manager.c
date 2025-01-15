@@ -1761,6 +1761,10 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
             continue;
         }
         if (linkList[i] == AUTH_LINK_TYPE_BLE) {
+            if (!IsRemoteDeviceSupportBleGuide(uuid, CATEGORY_UUID)) {
+                AUTH_LOGI(AUTH_CONN, "peer device is not support ble");
+                continue;
+            }
             if (!CheckActiveAuthConnection(connInfo)) {
                 AUTH_LOGI(AUTH_CONN, "auth ble connection not active");
                 continue;
