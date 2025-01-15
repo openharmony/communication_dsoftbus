@@ -419,7 +419,7 @@ int32_t TransOpenNetWorkingChannel(
     if (TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId) != SOFTBUS_OK) {
         ReleaseProxyChannelId(channelId);
         TRANS_LOGE(TRANS_CTRL, "networking get connect option fail");
-        return channelId;
+        return INVALID_CHANNEL_ID;
     }
     return channelId;
 }
