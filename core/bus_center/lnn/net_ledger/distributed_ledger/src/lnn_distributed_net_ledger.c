@@ -1975,3 +1975,33 @@ bool IsAvailableMeta(const char *peerNetWorkId)
     }
     return ((uint32_t)value & (1 << ONLINE_METANODE));
 }
+
+bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type)
+{
+    if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return true;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return true;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        char *anonyUuid = NULL;
+        Anonymize(id, &anonyUuid);
+        LNN_LOGW(LNN_LEDGER, "get info by id=%{public}s, type=%{public}d", AnonymizeWrapper(anonyUuid), type);
+        AnonymizeFree(anonyUuid);
+        return false;
+    }
+    if (!nodeInfo->isSupportSv && !nodeInfo->isBleP2p && nodeInfo->deviceInfo.deviceTypeId == TYPE_TV_ID) {
+        LNN_LOGI(LNN_LEDGER,
+            "peer device unsupport ble guide, isSupportSv=%{public}d, isBleP2p=%{public}d, deviceTypeId=%{public}d",
+            nodeInfo->isSupportSv, nodeInfo->isBleP2p, nodeInfo->deviceInfo.deviceTypeId);
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return false;
+    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return true;
+}

@@ -107,6 +107,8 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid);
 int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey);
 int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv);
 bool IsAvailableMeta(const char *peerNetWorkId);
+bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info);
+bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type);
 #ifdef __cplusplus
 }
 #endif
