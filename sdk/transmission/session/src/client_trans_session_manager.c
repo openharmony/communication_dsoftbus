@@ -2430,8 +2430,8 @@ int32_t ClientWaitSyncBind(int32_t socket)
 
 static void TransWaitForBindReturn(int32_t socket)
 {
-#define RETRY_GET_BIND_RESULT_TIMES 3
-#define RETRY_WAIT_TIME             5000 // 5ms
+#define RETRY_GET_BIND_RESULT_TIMES 10
+#define RETRY_WAIT_TIME             500
 
     SocketLifecycleData lifecycle;
     (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
