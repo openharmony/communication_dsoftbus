@@ -111,8 +111,11 @@ static bool IsLocalIrkInfoChange(NodeInfo *info)
             (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
             return true;
         }
+        LNN_LOGI(LNN_LEDGER, "local irk same");
+        (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+        return false;
     }
-    LNN_LOGI(LNN_LEDGER, "local irk same");
+    LNN_LOGI(LNN_LEDGER, "get local irk fail, ignore");
     (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
     return false;
 }
@@ -135,8 +138,11 @@ static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
             (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
             return true;
         }
+        LNN_LOGI(LNN_LEDGER, "local link key same");
+        (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+        return false;
     }
-    LNN_LOGI(LNN_LEDGER, "local link key same");
+    LNN_LOGI(LNN_LEDGER, "get local link key fail, ignore");
     (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
     return false;
 }
