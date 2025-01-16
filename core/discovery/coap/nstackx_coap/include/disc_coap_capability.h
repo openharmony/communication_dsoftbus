@@ -18,6 +18,7 @@
 
 #include "nstackx.h"
 #include "disc_interface.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
 

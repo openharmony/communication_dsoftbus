@@ -420,7 +420,7 @@ static int32_t SetLocalDeviceInfo(void)
     if (deviceIdStr == NULL) {
         DISC_LOGE(DISC_COAP, "get device id string failed.");
         (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
-        return SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL;
+        return SOFTBUS_ERR;
     }
 
     if (strcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr) != EOK) {

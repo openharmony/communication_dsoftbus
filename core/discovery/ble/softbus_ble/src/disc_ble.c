@@ -1795,15 +1795,6 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
     return &g_discBleDispatcherInterface;
 }
 
-static bool CheckLockInit(SoftBusMutex *lock)
-{
-    if (SoftBusMutexLock(lock) != SOFTBUS_OK) {
-        return false;
-    }
-    SoftBusMutexUnlock(lock);
-    return true;
-}
-
 static void RecvMessageDeinit(void)
 {
     int32_t ret = SoftBusMutexLock(&g_recvMessageInfo.lock);
