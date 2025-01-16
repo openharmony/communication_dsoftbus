@@ -167,7 +167,7 @@ static void NotifyDeviceDisplayNameChange(const char *networkId, const char *udi
     UpdateProfile(&nodeInfo);
 }
 
-static void SetDisplayName(char *displayName, const char *nickName, const NodeInfo *peerNodeInfo,
+static void LnnSetDisplayName(char *displayName, const char *nickName, const NodeInfo *peerNodeInfo,
     const NodeInfo *localNodeInfo, int64_t accountId)
 {
     int32_t ret = EOK;
@@ -228,7 +228,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
     AnonymizeFree(anonyNickName);
     AnonymizeFree(anonyUnifiedName);
     AnonymizeFree(anonyDeviceName);
-    SetDisplayName(displayName, nickName, &peerNodeInfo, localNodeInfo, accountId);
+    LnnSetDisplayName(displayName, nickName, &peerNodeInfo, localNodeInfo, accountId);
     if (strcmp(peerNodeInfo.deviceInfo.deviceName, displayName) == 0 || strlen(displayName) == 0) {
         LNN_LOGI(LNN_BUILDER, "device name not change, ignore this msg");
         return;
