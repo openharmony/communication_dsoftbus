@@ -939,7 +939,8 @@ HWTEST_F(TransUdpNegoTest, ProcessAbnormalUdpChannelState001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
 {
-    bool flag = IsIShareSession(g_sessionName);
+    const char *dstSessionName = "testSessionName";
+    bool flag = CompareSessionName(dstSessionName, g_sessionName);
     EXPECT_EQ(flag, SOFTBUS_OK);
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
