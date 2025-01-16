@@ -18,7 +18,6 @@
 #include <securec.h>
 
 #include "lnn_ohos_account_adapter.h"
-#include "regex.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
@@ -37,26 +36,11 @@ typedef enum {
 
 #define ISHARE_SESSION_NAME "IShare*"
 
-bool IsIShareSession(const char *sessionName)
-{
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid sessionName");
-        return false;
-    }
-    regex_t regComp;
-    if (regcomp(&regComp, ISHARE_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
-        TRANS_LOGE(TRANS_CTRL, "regcomp failed.");
-        return false;
-    }
-    bool compare = regexec(&regComp, sessionName, 0, NULL, 0) == 0;
-    regfree(&regComp);
-    return compare;
-}
-
 static inline CodeType getCodeType(const AppInfo *appInfo)
 {
     return ((appInfo->udpConnType == UDP_CONN_TYPE_P2P) &&
-        IsIShareSession(appInfo->myData.sessionName) && (IsIShareSession(appInfo->peerData.sessionName))) ?
+        CompareSessionName(ISHARE_SESSION_NAME, appInfo->myData.sessionName) &&
+        (CompareSessionName(ISHARE_SESSION_NAME, appInfo->peerData.sessionName))) ?
         CODE_FILE_TRANS_UDP : CODE_EXCHANGE_UDP_INFO;
 }
 
