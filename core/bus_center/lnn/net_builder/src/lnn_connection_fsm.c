@@ -1218,9 +1218,10 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
     LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (ret == SOFTBUS_OK) {
-        if ((dupOk || LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK) &&
+        if ((dupOk ||
+            (LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK)) &&
             AuthRestoreAuthManager(udidHash, authConn, connInfo->requestId, deviceInfo,
-                &authHandle.authId) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK) {
+                &authHandle.authId) == SOFTBUS_OK) {
             FilterRetrieveDeviceInfo(deviceInfo);
             LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authHandle, deviceInfo);
             return SOFTBUS_OK;
