@@ -30,6 +30,7 @@
 
 #define DEVICE_TYPE_SIZE_MAX 3
 #define DUMP_STR_LEN 256
+#define DISC_INFO_LIST_SIZE_MAX 50
 
 static bool g_isInited = false;
 
@@ -647,6 +648,9 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
+        DISC_CHECK_AND_RETURN_RET_LOGE(
+            itemNode->infoNum < DISC_INFO_LIST_SIZE_MAX, SOFTBUS_DISCOVER_MANAGER_ID_MAX_ERR,
+            DISC_CONTROL, "infolist size limit reached, packageName=%{public}s", packageName);
 
         SetDiscItemCallback(itemNode, cb, type);
         exist = true;
