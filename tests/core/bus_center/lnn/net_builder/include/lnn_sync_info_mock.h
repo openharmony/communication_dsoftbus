@@ -31,6 +31,10 @@ public:
     virtual int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler) = 0;
     virtual int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler) = 0;
     virtual int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability) = 0;
+
+    virtual void LnnSendAsyncInfoMsg(void *param) = 0;
+    virtual SendSyncInfoParam *CreateSyncInfoParam(LnnSyncInfoType type, const char *networkId, const uint8_t *msg,
+        uint32_t len, LnnSyncInfoMsgComplete complete) = 0;
 };
 
 class LnnSyncInfoInterfaceMock : public LnnSyncInfoInterface {
@@ -42,6 +46,10 @@ public:
     MOCK_METHOD2(LnnRegSyncInfoHandler, int32_t(LnnSyncInfoType, LnnSyncInfoMsgHandler));
     MOCK_METHOD2(LnnUnregSyncInfoHandler, int32_t(LnnSyncInfoType, LnnSyncInfoMsgHandler));
     MOCK_METHOD2(LnnSendP2pSyncInfoMsg, int32_t(const char *, uint32_t));
+
+    MOCK_METHOD1(LnnSendAsyncInfoMsg, void (void *));
+    MOCK_METHOD5(CreateSyncInfoParam,
+        SendSyncInfoParam *(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
 };
 } // namespace OHOS
 #endif // LNN_SYNC_INFO_MOCK_H
