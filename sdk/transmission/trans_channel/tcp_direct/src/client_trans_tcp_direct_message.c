@@ -151,30 +151,30 @@ static int32_t TransTdcParseTlv(char *data, TcpDataTlvPacketHead *head, uint32_t
     char *temp = data + MAGICNUM_SIZE + TLVCOUNT_SIZE;
     for (int index = 0; index < head->tlvCount; index++) {
         uint8_t *type = (uint8_t *)temp;
-        uint8_t *lenth = (uint8_t *)(temp + sizeof(uint8_t));
+        uint8_t *length = (uint8_t *)(temp + sizeof(uint8_t));
         temp += (TLV_TYPE_AND_LENTH *sizeof(uint8_t));
         switch (*type) {
             case TLV_TYPE_INNER_SEQ:
-                ret = memcpy_s(&head->seq, sizeof(head->seq), temp, *lenth);
+                ret = memcpy_s(&head->seq, sizeof(head->seq), temp, *length);
                 break;
             case TLV_TYPE_DATA_SEQ:
-                ret = memcpy_s(&head->dataSeq, sizeof(head->dataSeq), temp, *lenth);
+                ret = memcpy_s(&head->dataSeq, sizeof(head->dataSeq), temp, *length);
                 break;
             case TLV_TYPE_FLAG:
-                ret = memcpy_s(&head->flags, sizeof(head->flags), temp, *lenth);
+                ret = memcpy_s(&head->flags, sizeof(head->flags), temp, *length);
                 break;
             case TLV_TYPE_NEED_ACK:
-                ret = memcpy_s(&head->needAck, sizeof(head->needAck), temp, *lenth);
+                ret = memcpy_s(&head->needAck, sizeof(head->needAck), temp, *length);
                 break;
             case TLV_TYPE_DATA_LEN:
-                ret = memcpy_s(&head->dataLen, sizeof(head->dataLen), temp, *lenth);
+                ret = memcpy_s(&head->dataLen, sizeof(head->dataLen), temp, *length);
                 break;
             default:
                 TRANS_LOGE(TRANS_SDK, "unknown trans tdc tlv skip, tlvType=%{public}d", *type);
                 break;
         }
-        temp += *lenth;
-        *newDataHeadSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + *lenth);
+        temp += *length;
+        *newDataHeadSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + *length);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_SDK,
             "parse tlv memcpy failed, tlvType=%{public}d, ret%{public}d", *type, ret);
     }
@@ -366,7 +366,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
         int32_t tlvBufferSize = 0;
         int32_t ret = BuildDataHead(&pktHead, finalSeq, flags, dataLen, &tlvBufferSize);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, TRANS_SDK, "build tlv dataHead failed");
-        ret = BuildNeedAckTlvData(&pktHead, needAck, 0, &tlvBufferSize); // sync process dataSeq must is 0.
+        ret = BuildNeedAckTlvData(&pktHead, needAck, 0, &tlvBufferSize); // sync process dataSeq must be zero.
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, TRANS_SDK, "build tlv needack failed");
         char *buf = TransTdcPackTlvData(&pktHead, tlvBufferSize, dataLen);
         if (buf == NULL) {
@@ -751,7 +751,7 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
     ListAdd(&g_tcpDataList->list, &node->node);
     TRANS_LOGI(TRANS_SDK, "add channelId=%{public}d", channelId);
     g_tcpDataList->cnt++;
-    SoftBusMutexUnlock(&g_tcpDataList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
     return SOFTBUS_OK;
 }
 
@@ -777,7 +777,7 @@ int32_t TransDelDataBufNode(int32_t channelId)
             break;
         }
     }
-    SoftBusMutexUnlock(&g_tcpDataList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     return SOFTBUS_OK;
 }
@@ -800,7 +800,7 @@ static int32_t TransDestroyDataBuf(void)
         SoftBusFree(item);
         g_tcpDataList->cnt--;
     }
-    SoftBusMutexUnlock(&g_tcpDataList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     return SOFTBUS_OK;
 }
@@ -880,8 +880,8 @@ static int32_t TransTdcProcessTlvData(TcpDirectChannelInfo channel, TcpDataTlvPa
     }
     ClientDataBuf *node = TransGetDataBufNodeById(channel.channelId);
     if (node == NULL) {
-        TRANS_LOGE(TRANS_SDK, "node is null. channelId=%{public}d ", channel.channelId);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        TRANS_LOGE(TRANS_SDK, "node is null. channelId=%{public}d", channel.channelId);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_TRANS_NODE_NOT_FOUND;
     }
     int32_t dataLen = pktHead->dataLen;
@@ -890,7 +890,7 @@ static int32_t TransTdcProcessTlvData(TcpDirectChannelInfo channel, TcpDataTlvPa
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc fail, channelId=%{public}d, dataLen=%{public}u", channel.channelId, dataLen);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -899,16 +899,16 @@ static int32_t TransTdcProcessTlvData(TcpDirectChannelInfo channel, TcpDataTlvPa
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "decrypt fail, channelId=%{public}d, dataLen=%{public}u", channel.channelId, dataLen);
         SoftBusFree(plain);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = MoveNode(channel.channelId, node, dataLen, pkgHeadSize);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(plain);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return ret;
     }
-    SoftBusMutexUnlock(&g_tcpDataList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
     ret = TransTdcProcessBytesDataByFlag(pktHead, &channel, plain, plainLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data fail, channelId=%{public}d, dataLen=%{public}u",
@@ -932,7 +932,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
     if (node == NULL) {
         TRANS_LOGE(TRANS_SDK, "node is null. channelId=%{public}d ", channelId);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_TRANS_NODE_NOT_FOUND;
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
@@ -942,7 +942,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -952,16 +952,16 @@ static int32_t TransTdcProcessData(int32_t channelId)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "decrypt fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
         SoftBusFree(plain);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = MoveNode(channelId, node, dataLen, DC_DATA_HEAD_SIZE);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(plain);
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return ret;
     }
-    SoftBusMutexUnlock(&g_tcpDataList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
     ret = TransTdcProcessDataByFlag(pktHead->flags, pktHead->seq, &channel, plain, plainLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
@@ -993,62 +993,62 @@ static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
     return SOFTBUS_OK;
 }
 
-static int32_t TransNewTdcProcTlvData(int32_t channelId)
+static int32_t TransTdcProcAllTlvData(int32_t channelId)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_tcpDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is NULL");
     while (1) {
         SoftBusMutexLock(&g_tcpDataList->lock);
         ClientDataBuf *node = TransGetDataBufNodeById(channelId);
         if (node == NULL) {
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             TRANS_LOGE(TRANS_SDK, "can not find data buf node. channelId=%{public}d", channelId);
             return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         uint32_t bufLen = node->w - node->data;
         if (bufLen == 0) {
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_OK;
         }
         TcpDirectChannelInfo channel;
         if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "get channelInfo fail. channelId=%{public}d", channelId);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
         }
         TcpDataTlvPacketHead pktHead;
         uint32_t newPktHeadSize = 0;
         int32_t ret = TransTdcParseTlv(node->data, &pktHead, &newPktHeadSize);
         if (ret != SOFTBUS_OK) {
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return ret;
         }
         TransTcpDataTlvUnpack(&pktHead);
         if (bufLen < newPktHeadSize) {
             TRANS_LOGE(TRANS_SDK,
-                "data bufLen not enough, recv biz data next time. channelId=%{public}d, bufLen=%{public}d ",
+                "data bufLen not enough, recv biz data next time. channelId=%{public}d, bufLen=%{public}u",
                 channelId, bufLen);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
         if (pktHead.magicNumber != MAGIC_NUMBER) {
             TRANS_LOGE(TRANS_SDK, "invalid data packet head. channelId=%{public}d", channelId);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         if ((pktHead.dataLen > g_dataBufferMaxLen - newPktHeadSize) || (pktHead.dataLen <= OVERHEAD_LEN)) {
-            TRANS_LOGE(TRANS_SDK, "illegal dataLen=%{public}d", pktHead.dataLen);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            TRANS_LOGE(TRANS_SDK, "illegal dataLen=%{public}u", pktHead.dataLen);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
         uint32_t pkgLen = pktHead.dataLen + newPktHeadSize;
         if (pkgLen > node->size && pkgLen <= g_dataBufferMaxLen) {
             int32_t res = TransResizeDataBuffer(node, pkgLen);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return res;
         }
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         if (bufLen < pkgLen) {
-            TRANS_LOGE(TRANS_SDK, "data bufLen not enough, recv biz data next time. bufLen=%{public}d ", bufLen);
+            TRANS_LOGE(TRANS_SDK, "data bufLen not enough, recv biz data next time. bufLen=%{public}u", bufLen);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
         ret = TransTdcProcessTlvData(channel, &pktHead, newPktHeadSize);
@@ -1063,45 +1063,45 @@ static int32_t TransTdcProcAllData(int32_t channelId)
         SoftBusMutexLock(&g_tcpDataList->lock);
         ClientDataBuf *node = TransGetDataBufNodeById(channelId);
         if (node == NULL) {
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             TRANS_LOGE(TRANS_SDK, "can not find data buf node. channelId=%{public}d", channelId);
             return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         uint32_t bufLen = node->w - node->data;
         if (bufLen == 0) {
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_OK;
         }
         if (bufLen < DC_DATA_HEAD_SIZE) {
             TRANS_LOGW(TRANS_SDK,
-                " head bufLen not enough, recv biz head next time. channelId=%{public}d, bufLen=%{public}d",
+                "head bufLen not enough, recv biz head next time. channelId=%{public}d, bufLen=%{public}u",
                 channelId, bufLen);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
 
         TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
         UnpackTcpDataPacketHead(pktHead);
         if (pktHead->magicNumber != MAGIC_NUMBER) {
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         if ((pktHead->dataLen > g_dataBufferMaxLen - DC_DATA_HEAD_SIZE) || (pktHead->dataLen <= OVERHEAD_LEN)) {
-            TRANS_LOGE(TRANS_SDK, "illegal dataLen=%{public}d", pktHead->dataLen);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            TRANS_LOGE(TRANS_SDK, "illegal dataLen=%{public}u", pktHead->dataLen);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
         uint32_t pkgLen = pktHead->dataLen + DC_DATA_HEAD_SIZE;
 
         if (pkgLen > node->size && pkgLen <= g_dataBufferMaxLen) {
             int32_t ret = TransResizeDataBuffer(node, pkgLen);
-            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return ret;
         }
-        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
 
         if (bufLen < pkgLen) {
-            TRANS_LOGE(TRANS_SDK, "data bufLen not enough, recv biz data next time. bufLen=%{public}d ", bufLen);
+            TRANS_LOGE(TRANS_SDK, "data bufLen not enough, recv biz data next time. bufLen=%{public}u", bufLen);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
         int32_t ret = TransTdcProcessData(channelId);
@@ -1223,7 +1223,7 @@ int32_t TransTdcRecvData(int32_t channelId)
     ret = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_TCP_DIRECT, &supportTlv, NULL);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "fail to get support tlv");
     if (supportTlv) {
-        return TransNewTdcProcTlvData(channelId);
+        return TransTdcProcAllTlvData(channelId);
     }
     return TransTdcProcAllData(channelId);
 }

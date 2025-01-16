@@ -100,7 +100,7 @@ static SocketOptMap g_socketOptMap[] = {
     { OPT_TYPE_MAX_BUFFER, TransGetSocketMaxBufferLen, NULL },
     { OPT_TYPE_FIRST_PACKAGE, TransGetSocketFirstPackage, NULL },
     { OPT_TYPE_MAX_IDLE_TIMEOUT, TransGetSocketMaxIdleTime, TransSetSocketMaxIdleTime },
-    { OPT_TYPE_SUPPORT_TLV, TransGetSupportTlv, NULL },
+    { OPT_TYPE_SUPPORT_ACK, TransGetSupportTlv, NULL },
     { OPT_TYPE_NEED_ACK, NULL, TransSetNeedAck },
 };
 
