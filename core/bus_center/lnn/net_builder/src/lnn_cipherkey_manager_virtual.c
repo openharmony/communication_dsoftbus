@@ -108,3 +108,25 @@ int32_t LnnSetRemoteBroadcastCipherInfo(const char *value, const char *udid)
     (void)udid;
     return SOFTBUS_OK;
 }
+
+int32_t LnnSyncBroadcastLinkKey(const char *networkId)
+{
+    (void)networkId;
+    return SOFTBUS_OK;
+}
+
+bool IsNeedSyncBroadcastLinkKey(const char *networkId)
+{
+    (void)networkId;
+    return true;
+}
+
+int32_t LnnInitBroadcastLinkKey(void)
+{
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitBroadcastLinkKey(void)
+{
+    return;
+}

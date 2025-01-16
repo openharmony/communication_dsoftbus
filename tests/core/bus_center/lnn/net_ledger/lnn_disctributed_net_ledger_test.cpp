@@ -1041,4 +1041,43 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_UpdateDistributedNodeInfo_Test_001, Test
     ret = LnnUpdateDistributedNodeInfo(&newInfo, devUdid);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: LnnUpdateFileInfo_Test_001
+ * @tc.desc: UpdateFileInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_UpdateFileInfo_Test_001, TestSize.Level1)
+{
+    NodeInfo newInfo;
+    memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo oldInfo;
+    memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = UpdateFileInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    (void)memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "newkey", strlen("newkey"));
+    (void)memcpy_s(oldInfo.cipherInfo.key, SESSION_KEY_LENGTH, "oldkey", strlen("oldkey"));
+    ret = UpdateFileInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    (void)memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey"));
+    (void)memcpy_s(oldInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey"));
+    (void)memcpy_s(newInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "newiv", strlen("newiv"));
+    (void)memcpy_s(oldInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "oldiv", strlen("oldiv"));
+    ret = UpdateFileInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    (void)memcpy_s(newInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "sameiv", strlen("sameiv"));
+    (void)memcpy_s(oldInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "sameiv", strlen("sameiv"));
+    (void)memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "newpeerIrk", strlen("newpeerIrk"));
+    (void)memcpy_s(oldInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "oldIrk", strlen("oldIrk"));
+    ret = UpdateFileInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    (void)memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "sameIrk", strlen("sameIrk"));
+    (void)memcpy_s(oldInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "sameIrk", strlen("sameIrk"));
+    ret = UpdateFileInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
