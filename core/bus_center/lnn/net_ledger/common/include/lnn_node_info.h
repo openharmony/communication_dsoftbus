@@ -190,7 +190,7 @@ typedef struct {
     int64_t networkIdTimestamp;
     uint64_t bleDirectTimestamp;
     ConnectInfo connectInfo;
-    uint8_t relation[CONNECTION_ADDR_MAX];
+    uint8_t relation[CONNECTION_ADDR_MAX]; // NodeInfo Check whether the comparison range is changed.
     bool isAuthExchangeUdid;
     bool isSupportIpv6;
     int32_t bleMacRefreshSwitch;
