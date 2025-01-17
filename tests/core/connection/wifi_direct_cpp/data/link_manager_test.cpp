@@ -191,4 +191,46 @@ HWTEST_F(LinkManagerTest, RefreshRelationShip, TestSize.Level1)
     linkManager.Dump();
     EXPECT_NE(result, false);
 }
+
+/*
+ * @tc.name: RemoveLinks
+ * @tc.desc: test RemoveLinks --true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, RemoveLinks, TestSize.Level1)
+{
+    std::string remoteDeviceId1("0123456789ABCDEF");
+    std::string remoteMac1("11:11:**:**:11:11");
+    std::string remoteDeviceId2("0223456789ABCDEF");
+    std::string remoteMac2("22:22:**:**:22:22");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteDeviceId1,
+        [&remoteMac1](InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac1);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteDeviceId2,
+        [&remoteMac2](InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac2);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+    });
+
+    InnerLink::LinkState innerlinkState;
+    auto result = LinkManager::GetInstance().ProcessIfPresent(remoteMac1,
+        [&innerlinkState] (InnerLink &innerLink) {
+            innerlinkState = innerLink.GetState();
+        });
+    EXPECT_TRUE(result);
+    EXPECT_EQ(innerlinkState, OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML, true);
+    result = LinkManager::GetInstance().ProcessIfPresent(remoteMac1, [] (InnerLink &innerLink) {});
+    EXPECT_FALSE(result);
+    result = LinkManager::GetInstance().ProcessIfPresent(remoteMac2,
+        [&innerlinkState] (InnerLink &innerLink) {
+            innerlinkState = innerLink.GetState();
+        });
+    EXPECT_TRUE(result);
+    EXPECT_EQ(innerlinkState, OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
 } // namespace OHOS::SoftBus
