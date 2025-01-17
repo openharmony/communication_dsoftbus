@@ -37,6 +37,7 @@ if (defined(ohos_lite)) {
       ohos_lite_cflags = [
         "--diag_suppress",
         "Pe186",
+        "-Os",
       ]
     }
   }

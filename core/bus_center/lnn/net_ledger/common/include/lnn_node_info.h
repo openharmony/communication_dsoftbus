@@ -148,8 +148,11 @@ typedef struct {
     char remoteMetaPtk[PTK_DEFAULT_LEN];
     bool isScreenOn;
     bool initPreventFlag;
+    bool isAuthExchangeUdid;
+    bool isSupportIpv6;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     uint8_t staticCapability[STATIC_CAP_LEN];
+    uint8_t relation[CONNECTION_ADDR_MAX];
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
     uint16_t dataChangeFlag;
     uint16_t dataDynamicLevel;
@@ -170,9 +173,13 @@ typedef struct {
     int32_t stateVersion;
     int32_t localStateVersion;
     uint32_t groupType;
+    int32_t bleMacRefreshSwitch;
+    int32_t bleConnCloseDelayTime;
     int32_t staticCapLen;
     int32_t userId;
+    uint32_t stateVersionReason;
     int32_t deviceSecurityLevel;
+    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     uint32_t AuthTypeValue;
     DeviceBasicInfo deviceInfo;
     P2pInfo p2pInfo;
@@ -188,20 +195,13 @@ typedef struct {
     int64_t accountId;
     int64_t authSeq[DISCOVERY_TYPE_COUNT];
     int64_t networkIdTimestamp;
-    uint64_t bleDirectTimestamp;
-    ConnectInfo connectInfo;
-    uint8_t relation[CONNECTION_ADDR_MAX]; // NodeInfo Check whether the comparison range is changed.
-    bool isAuthExchangeUdid;
-    bool isSupportIpv6;
-    int32_t bleMacRefreshSwitch;
-    int32_t bleConnCloseDelayTime;
-    uint32_t stateVersionReason;
-    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     int64_t authSeqNum;
     uint64_t heartbeatTimestamp;
+    uint64_t bleDirectTimestamp;
     uint64_t onlinetTimestamp;
     uint64_t updateTimestamp;
     int64_t lastAuthSeq;
+    ConnectInfo connectInfo;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
