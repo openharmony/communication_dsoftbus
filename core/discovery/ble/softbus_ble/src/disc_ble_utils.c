@@ -393,7 +393,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
     while (curLen < dataLen) {
         uint8_t type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
         uint32_t len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
-        if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN  >= dataLen)) {
+        if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN >= dataLen)) {
             DISC_LOGE(DISC_BLE,
                 "unexperted advData: out of range, "
                 "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",

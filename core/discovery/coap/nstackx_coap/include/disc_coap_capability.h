@@ -18,6 +18,7 @@
 
 #include "nstackx.h"
 #include "disc_interface.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
 
@@ -29,7 +30,7 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
     uint32_t outLen);
 void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet);
 int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb);
+    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock);
 
 #ifdef __cplusplus
 }
