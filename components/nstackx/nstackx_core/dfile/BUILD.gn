@@ -27,6 +27,7 @@ if (defined(ohos_lite)) {
       "-DLWIP_LITEOS_A_COMPAT",
       "-DMBEDTLS_INCLUDED",
       "-DDFILE_ENABLE_HIDUMP",
+      "-Os",
     ]
     cflags_cc = cflags
   }
@@ -38,6 +39,7 @@ if (defined(ohos_lite)) {
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DMBEDTLS_INCLUDED",
       "-DENABLE_USER_LOG",
+      "-Os",
     ]
     cflags_cc = cflags
   }
@@ -148,6 +150,7 @@ if (defined(ohos_lite)) {
       "-DDFILE_ENABLE_HIDUMP",
       "-DENABLE_USER_LOG",
       "-DSSL_AND_CRYPTO_INCLUDED",
+      "-Os",
     ]
     cflags_cc = cflags
     include_dirs = [

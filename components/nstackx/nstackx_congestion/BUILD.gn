@@ -29,6 +29,7 @@ if (defined(ohos_lite)) {
         "-DLWIP_LITEOS_A_COMPAT",
         "-DMBEDTLS_INCLUDED",
         "-DENABLE_USER_LOG",
+        "-Os",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -49,6 +50,7 @@ if (defined(ohos_lite)) {
         "-DNSTACKX_WITH_HMOS_LINUX",
         "-DMBEDTLS_INCLUDED",
         "-DENABLE_USER_LOG",
+        "-Os",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -91,6 +93,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_util/platform/unix",
       "interface",
       "platform/unix",
+      "-Os",
     ]
     sources = [
       "core/nstackx_congestion.c",
