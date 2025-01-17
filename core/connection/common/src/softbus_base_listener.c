@@ -205,7 +205,7 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
     return node;
 }
 
-static int32_t AddFdNode(ListNode *fdList, int32_t fd, int32_t event)
+static int32_t AddFdNode(ListNode *fdList, int32_t fd, uint32_t event)
 {
     struct FdNode *fdNode = (struct FdNode *)SoftBusCalloc(sizeof(struct FdNode));
     CONN_CHECK_AND_RETURN_RET_LOGE(fdNode != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON, "calloc fdNode failed");
@@ -1040,7 +1040,7 @@ static void ProcessFdEvent(SoftbusListenerNode *node, struct FdNode fdEvent,
     struct FdNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, fdNode, struct FdNode, node) {
         if (it->fd == fdEvent.fd) {
-            int32_t triggerSet = fdEvent.triggerSet & it->triggerSet;
+            uint32_t triggerSet = fdEvent.triggerSet & it->triggerSet;
             if ((triggerSet & READ_TRIGGER) != 0) {
                 CONN_LOGD(CONN_COMMON, "trigger IN event, wakeupTrace=%{public}d, "
                     "module=%{public}d, fd=%{public}d, triggerSet=%{public}u",
