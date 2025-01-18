@@ -152,7 +152,7 @@ void TransTdcCloseChannel(int32_t channelId)
         if (item->channelId != channelId) {
             continue;
         }
-        TransTdcReleaseFd(DIRECT_CHANNEL_CLIENT, item->detail.fd);
+        TransTdcReleaseFd(item->detail.fd);
         item->detail.needRelease = true;
         if (item->detail.fdRefCnt <= 0) {
             (void)SoftBusMutexDestroy(&(item->detail.fdLock));
@@ -243,7 +243,7 @@ static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
                 TRANS_LOGI(
                     TRANS_SDK, "Server reject conn, channelId=%{public}d, fd=%{public}d", channelId, item->detail.fd);
             } else {
-                TransTdcReleaseFd(DIRECT_CHANNEL_CLIENT, item->detail.fd);
+                TransTdcReleaseFd(item->detail.fd);
             }
             item->detail.needRelease = true;
             if (item->detail.fdRefCnt <= 0) {
