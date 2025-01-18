@@ -971,7 +971,7 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     return ret;
 }
 
-int32_t DecideRueseLane(const char *networkId, const LaneSelectParam *request,
+int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
     if (networkId == NULL || request == NULL || recommendList == NULL ||

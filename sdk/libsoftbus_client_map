@@ -178,6 +178,7 @@
         "CtrlLNNBleHb";
         "PrivilegeShutdown";
         "RegisterRelationChecker";
+        "SoftbusResolveConflict";
     local:
         *;
 };
