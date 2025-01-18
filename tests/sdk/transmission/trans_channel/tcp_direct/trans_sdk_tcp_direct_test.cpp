@@ -494,10 +494,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerTest0012, TestSize.Level0)
 HWTEST_F(TransSdkTcpDirectTest, TransTdcReleaseFdTest0013, TestSize.Level0)
 {
     int32_t fd = INVALID_VALUE;
-    TransTdcReleaseFd(DIRECT_CHANNEL_CLIENT, fd);
+    TransTdcReleaseFd(fd);
     EXPECT_EQ(fd, INVALID_VALUE);
     fd = g_fd;
-    TransTdcReleaseFd(DIRECT_CHANNEL_CLIENT, fd);
+    TransTdcReleaseFd(fd);
     EXPECT_TRUE(g_fd == fd);
 }
 
