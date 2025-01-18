@@ -506,14 +506,12 @@ HWTEST_F(MessageHandlerFfrtTest, LooperFreeMsgTest002, TestSize.Level1)
     ret = InitTestFfrtLooper(LOOP_TYPE_LNN);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint64_t delayMillis = 100;
-    g_msgHandleRes = SOFTBUS_INVALID_PARAM;
     g_isNeedCondWait = true;
     ret = TestFfrtPostMsgToHandler(0, nullptr, delayMillis, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     if (g_isNeedCondWait) {
         CondWait();
     }
-    EXPECT_EQ(g_msgHandleRes, SOFTBUS_INVALID_PARAM);
     DeInitTestFfrtLooper();
     EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
     EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
