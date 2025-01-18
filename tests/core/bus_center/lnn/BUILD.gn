@@ -2640,6 +2640,80 @@ ohos_unittest("LNNConnIdCbManagerTest") {
   }
 }
 
+ohos_unittest("LNNNetLedgerMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_mock_test.cpp",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "unittest/common/",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/adapter/common/bus_center/include/",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include/",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+  external_deps += [ "huks:libhukssdk" ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -2663,6 +2737,7 @@ group("unittest") {
     ":LNNNetBuilderMockTest",
     ":LNNNetBuilderTest",
     ":LNNNetLedgerCommonTest",
+    ":LNNNetLedgerMockTest",
     ":LNNNetworkInfoTest",
     ":LNNNetworkManagerMockTest",
     ":LNNNodeWeightTest",
@@ -2705,6 +2780,7 @@ group("unittest") {
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/meta_node:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/cipherkey:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/fast_offline:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/fast_online:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/unittest:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/test:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/bus_center:unittest",

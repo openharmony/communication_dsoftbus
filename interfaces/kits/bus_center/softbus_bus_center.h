@@ -934,6 +934,23 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
  * @version 1.0
  */
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+
+/**
+ * @brief Set Local device display name.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param nameData Indicates the pointer to the display name, MUST be cJSON format.
+ * @param len Len Indicates the length of nameData.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if parameters is null or invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 #ifdef __cplusplus
 }
 #endif
