@@ -40,17 +40,28 @@ HWTEST_F(LnnLogTest, LnnLogTest001, TestSize.Level0)
     int32_t index = 0;
     int32_t lnnDomainBase = 0xd005780;
 
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[index], LNN_INIT, lnnDomainBase, "LnnInit");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_HEART_BEAT, ++lnnDomainBase, "LnnHeartBeat");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_LEDGER, ++lnnDomainBase, "LnnLedger");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_BUILDER, ++lnnDomainBase, "LnnBuilder");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_LANE, ++lnnDomainBase, "LnnLane");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_QOS, ++lnnDomainBase, "LnnQos");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_EVENT, ++lnnDomainBase, "LnnEvent");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_STATE, ++lnnDomainBase, "LnnState");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_META_NODE, ++lnnDomainBase, "LnnMetaNode");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_CLOCK, ++lnnDomainBase, "LnnClock");
-    ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_TEST, DOMAIN_ID_TEST, "LnnTest");
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[index], LNN_INIT, lnnDomainBase, "LnnInit"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_HEART_BEAT, ++lnnDomainBase, "LnnHeartBeat"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_LEDGER, ++lnnDomainBase, "LnnLedger"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_BUILDER, ++lnnDomainBase, "LnnBuilder"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_LANE, ++lnnDomainBase, "LnnLane"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_QOS, ++lnnDomainBase, "LnnQos"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_EVENT, ++lnnDomainBase, "LnnEvent"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_STATE, ++lnnDomainBase, "LnnState"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_META_NODE, ++lnnDomainBase, "LnnMetaNode"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_CLOCK, ++lnnDomainBase, "LnnClock"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(LNN_LABELS[++index], LNN_TEST, DOMAIN_ID_TEST, "LnnTest"));
 }
 
 /**
