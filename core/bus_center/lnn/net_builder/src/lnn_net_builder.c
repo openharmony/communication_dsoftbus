@@ -253,6 +253,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     }
     connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
     connFsm->connInfo.infoReport = para->infoReport;
+    connFsm->isSession = para->isSession ? true : connFsm->isSession;
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
         if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN || connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH) {
             char uuid[UUID_BUF_LEN] = {0};
@@ -263,6 +264,9 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
         if ((LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+        }
+        if (para->isSession && para->dupInfo != NULL) {
+            LnnNotifyStateForSession(para->dupInfo->deviceInfo.deviceUdid, SOFTBUS_OK);
         }
     }
     LNN_LOGI(LNN_BUILDER, "addr same to before, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
@@ -278,11 +282,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
     DfxRecordLnnAuthStart(&authConn, para, requestId);
     FreeJoinLnnMsgPara(para);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
-        return SOFTBUS_AUTH_START_VERIFY_FAIL;
-    }
-    return SOFTBUS_OK;
+    return AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false);
 }
 
 bool NeedPendingJoinRequest(void)
