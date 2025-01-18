@@ -1476,9 +1476,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     int32_t ret = GetSessionConnById(channelId, &conn);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
     ret = TransTdcUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -1516,7 +1514,8 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     if (ret != SOFTBUS_OK) {
         goto ERR_EXIT;
     }
-    TransCleanTdcSource(channelId);
+    TransDelSessionConnById(channelId);
+    TransSrvDelDataBufNode(channelId);
     return SOFTBUS_OK;
 ERR_EXIT:
     TransCleanTdcSource(channelId);
