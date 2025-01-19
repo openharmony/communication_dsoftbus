@@ -24,6 +24,7 @@ public:
     TransTcpDirectInterface() {};
     virtual ~TransTcpDirectInterface() {};
     virtual int32_t SoftBusSocketGetError(int32_t socketFd) = 0;
+    virtual int32_t GetErrCodeBySocketErr(int32_t transErrCode) = 0;
 };
 
 class TransTcpDirectInterfaceMock : public TransTcpDirectInterface {
@@ -31,6 +32,7 @@ public:
     TransTcpDirectInterfaceMock();
     ~TransTcpDirectInterfaceMock() override;
     MOCK_METHOD1(SoftBusSocketGetError, int32_t (int32_t socketFd));
+    MOCK_METHOD1(GetErrCodeBySocketErr, int32_t (int32_t transErrCode));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MOCK_H

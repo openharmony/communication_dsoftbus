@@ -427,15 +427,6 @@ static int32_t TransTcpSetTos(TcpDirectChannelInfo *channel, int32_t flags)
     return SOFTBUS_OK;
 }
 
-static int32_t GetErrCodeBySocketErr(int32_t fd, int32_t transErrCode)
-{
-    int32_t socketErrCode = ConnGetSocketError(fd);
-    if (socketErrCode == SOFTBUS_OK) {
-        return transErrCode;
-    }
-    return socketErrCode;
-}
-
 static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char *data, uint32_t len, int32_t flags)
 {
     DataLenInfo lenInfo = { 0 };
@@ -473,9 +464,8 @@ static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char
         TRANS_LOGE(TRANS_SDK, "send bytes failed to send tcp data. channelId=%{public}d, ret=%{public}zd",
             channel->channelId, ret);
         SoftBusFree(buf);
-        int32_t socketErr = GetErrCodeBySocketErr(channel->detail.fd, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
         (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
-        return socketErr;
+        return GetErrCodeBySocketErr(SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     }
     (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
     SoftBusFree(buf);
@@ -1206,8 +1196,10 @@ int32_t TransTdcRecvData(int32_t channelId)
     int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
     if (recvLen < 0) {
         SoftBusFree(recvBuf);
-        TRANS_LOGE(TRANS_SDK, "client recv data failed, channelId=%{public}d, recvLen=%{public}d.", channelId, recvLen);
-        return GetErrCodeBySocketErr(fd, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
+        int32_t socketErrCode = GetErrCodeBySocketErr(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
+        TRANS_LOGE(TRANS_SDK, "client recv data failed, channelId=%{public}d, recvLen=%{public}d, errcode=%{public}d.",
+            channelId, recvLen, socketErrCode);
+        return socketErrCode;
     } else if (recvLen == 0) {
         SoftBusFree(recvBuf);
         return SOFTBUS_DATA_NOT_ENOUGH;

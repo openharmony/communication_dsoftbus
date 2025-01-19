@@ -40,5 +40,9 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
 {
     return GetTransTcpDirectInterface()->SoftBusSocketGetError(socketFd);
 }
+int32_t GetErrCodeBySocketErr(int32_t transErrCode)
+{
+    return GetTransTcpDirectInterface()->GetErrCodeBySocketErr(transErrCode);
+}
 }
 }
