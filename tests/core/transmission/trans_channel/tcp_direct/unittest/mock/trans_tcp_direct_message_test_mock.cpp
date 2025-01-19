@@ -228,9 +228,9 @@ int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channe
 {
     return GetTransTcpDirectMessageInterface()->TransTdcOnChannelClosed(pkgName, pid, channelId);
 }
-int32_t SoftBusSocketGetError(int32_t fd)
+int32_t GetErrCodeBySocketErr(int32_t transErrCode)
 {
-    return GetTransTcpDirectMessageInterface()->SoftBusSocketGetError(fd);
+    return GetTransTcpDirectMessageInterface()->GetErrCodeBySocketErr(transErrCode);
 }
 }
 }
