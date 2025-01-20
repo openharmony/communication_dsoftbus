@@ -31,6 +31,9 @@
 
 namespace OHOS::SoftBus {
 static constexpr const char *WIFI_DIRECT_HIDUMPER_INFO = "WifiDirectHidumper";
+static constexpr int P2P_GROUP_EXIST = 1;
+static constexpr int P2P_GROUP_NOT_EXIST = 0;
+
 void WifiDirectHidumper::HidumperInit()
 {
     if (hiDumper_ == nullptr) {
@@ -53,8 +56,12 @@ void WifiDirectHidumper::HidumperRegister()
 void WifiDirectHidumper::DumpInfoHandler(nlohmann::json &json)
 {
     nlohmann::json currentTime;
-    currentTime["loadTime"] = SoftBusGetSysTimeMs();
+    currentTime["loadTime"] = SoftBusFormatTimestamp(SoftBusGetSysTimeMs());
     json.push_back(currentTime);
+
+    nlohmann::json p2pGroupMsg;
+    p2pGroupMsg["p2pGroupExist"] = JudgeP2pGroup();
+    json.push_back(p2pGroupMsg);
 
     P2pEntitySnapshot p2pEntitySnapshot;
     P2pEntity::GetInstance().Dump(p2pEntitySnapshot);
@@ -77,6 +84,15 @@ void WifiDirectHidumper::DumpInfoHandler(nlohmann::json &json)
     for (const auto &interface : interfaceSnapshots) {
         interface->Marshalling(json);
     }
+}
+
+int WifiDirectHidumper::JudgeP2pGroup()
+{
+    auto groupInfo = std::make_shared<WifiP2pGroupInfo>();
+    auto ret = GetCurrentGroup(groupInfo.get());
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ret);
+    return (groupInfo->frequency != 0) ? P2P_GROUP_EXIST : P2P_GROUP_NOT_EXIST;
 }
 } // namespace OHOS::SoftBus
 
