@@ -36,6 +36,7 @@ public:
     void Register(const HiDumper &hidumper);
     static void HidumperRegister();
     static void DumpInfoHandler(nlohmann::json &json);
+    static int JudgeP2pGroup();
 
 private:
     static inline HiDumper hiDumper_;
