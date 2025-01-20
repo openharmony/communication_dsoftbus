@@ -1189,6 +1189,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
             return;
         } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+            (void)TransProxyAckHandshake(chan->connId, chan, ret);
             TransProxyDelChanByChanId(proxyChannelId);
             goto EXIT_ERR;
         }
