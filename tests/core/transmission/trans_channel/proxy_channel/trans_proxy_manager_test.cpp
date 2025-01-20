@@ -581,6 +581,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyChanProcessByReqIdTest001, TestSize.Le
 {
     int32_t channelId = 25;
     const char *identity = "25";
+    int32_t errCode = SOFTBUS_OK;
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
 
     TransCommInterfaceMock commMock;
@@ -594,7 +595,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyChanProcessByReqIdTest001, TestSize.Le
     EXPECT_CALL(connMock, ConnGetHeadSize)
         .WillRepeatedly(Return(sizeof(ConnPktHead)));
 
-    TransProxyChanProcessByReqId(channelId, channelId);
+    TransProxyChanProcessByReqId(channelId, channelId, errCode);
     usleep(500000);
     ProxyChannelInfo chanInfo;
     int32_t ret = TransProxyGetSendMsgChanInfo(m_testProxyConningChannel, &chanInfo);
