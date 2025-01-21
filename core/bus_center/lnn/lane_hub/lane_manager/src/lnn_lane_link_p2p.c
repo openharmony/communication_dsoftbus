@@ -874,13 +874,13 @@ static void DfxReportWdResult(const P2pLinkReqList *reqInfo, const LaneLinkInfo 
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = reqInfo->laneRequestInfo.laneReqId;
+    extra.laneReqId = (int32_t)reqInfo->laneRequestInfo.laneReqId;
     extra.guideType = (int32_t)guideType;
     if (reqInfo->p2pInfo.reuseOnly) {
         extra.isWifiDirectReuse = true;
     }
     if (linkInfo != NULL) {
-        extra.bandWidth = linkInfo->linkInfo.p2p.bw;
+        extra.bandWidth = (int32_t)linkInfo->linkInfo.p2p.bw;
     }
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
