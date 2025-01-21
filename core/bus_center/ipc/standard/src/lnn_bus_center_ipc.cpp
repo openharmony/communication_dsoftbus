@@ -284,6 +284,7 @@ int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
             g_dataLevelChangeRequestInfo.erase(iter);
             break;
         }
+        ++iter;
     }
     LnnUnregDataLevelChangeCb();
     return SOFTBUS_OK;
