@@ -14,11 +14,12 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
+
 #include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
+#include "securec.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -39,6 +40,7 @@ namespace OHOS {
 #define TEST_STATE 1
 #define TEST_ERR_CODE 1
 #define TEST_CHANNELID 5
+#define TEST_SESSIONID 100
 #define TEST_CHANNELTYPE 2
 #define TEST_REMOTE_TYPE 0
 #define TEST_EVENT_ID 2
@@ -410,7 +412,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = ClientTransUdpMgrInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -423,7 +425,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest001, TestSize.Level0)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     int32_t ret = ClientEmitFileEvent(channelId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -436,7 +438,13 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level0)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t ret = ClientEmitFileEvent(channelId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = TransSetUdpChanelSessionId(TEST_CHANNELID, TEST_SESSIONID);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+
+    ret = TransSetUdpChannelRenameHook(TEST_CHANNELID, nullptr);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -449,13 +457,43 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level0)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     int32_t ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 
     channelId = TEST_CHANNELID;
     ret = TransLimitChange(channelId, FILE_PRIORITY_BE);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 
     ret = TransLimitChange(channelId, FILE_PRIORITY_TEST);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: TransSetUdpChannelTosTest
+ * @tc.desc: trans set udp channel tos test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level0)
+{
+    int32_t channelId = TEST_ERR_CHANNELID;
+    int32_t ret = TransSetUdpChannelTos(channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransGetUdpChannelTosTest
+ * @tc.desc: trans get udp channel tos test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest, TestSize.Level0)
+{
+    int32_t channelId = TEST_ERR_CHANNELID;
+    bool isTosSet = false;
+    int32_t ret = TransGetUdpChannelTos(channelId, &isTosSet);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+    EXPECT_FALSE(isTosSet);
+    ret = TransGetUdpChannelTos(TEST_CHANNELID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

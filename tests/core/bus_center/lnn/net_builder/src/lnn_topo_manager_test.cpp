@@ -43,7 +43,7 @@ constexpr uint8_t NEW_RELATION_2[] = "1";
 constexpr uint8_t MSG[] = "tempMsg";
 constexpr uint32_t MSG_LEN = 7;
 constexpr uint32_t RELATION_LEN = 1;
-constexpr uint32_t INVALID_RELATION_LEN = 6;
+constexpr uint32_t INVALID_RELATION_LEN = 7;
 constexpr char MSG_1[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": \"infoTest\"}";
 constexpr char MSG_2[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": [{\"udid\": \
     \"83b37d243c8aac5a660d0cb231a7dbf9643b330245d560f4193956b0749a8651\", \"peerUdid\": \

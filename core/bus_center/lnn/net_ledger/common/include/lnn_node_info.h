@@ -114,6 +114,7 @@ typedef enum {
     BIT_SUPPORT_BR_DUP_BLE = 3,
     BIT_SUPPORT_ADV_OFFLINE = 4,
     BIT_SUPPORT_ENHANCEDP2P_DUP_BLE = 5,
+    BIT_SUPPORT_SESSION_DUP_BLE = 6,
 } AuthCapability;
 
 typedef struct {

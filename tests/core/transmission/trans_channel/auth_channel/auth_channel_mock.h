@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_net_builder.h"
 
 namespace OHOS {
 class AuthChannelInterface {
@@ -28,6 +29,7 @@ public:
     virtual ~AuthChannelInterface() {};
     virtual int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler) = 0;
     virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
+    virtual int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback) = 0;
 };
 
 class AuthChannelInterfaceMock : public AuthChannelInterface {
@@ -38,6 +40,7 @@ public:
     MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static inline LnnDeviceNameHandler g_deviceNameHandler;
+    MOCK_METHOD2(LnnServerJoinExt, int32_t (ConnectionAddr *, LnnServerJoinExtCallBack *));
 };
 } // namespace OHOS
 #endif // AUTH_CHANNEL_MOCK_H

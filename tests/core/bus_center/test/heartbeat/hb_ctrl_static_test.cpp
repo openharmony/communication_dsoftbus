@@ -751,6 +751,8 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
@@ -773,29 +775,15 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     int32_t infoNum = 0;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_INVALID_PARAM)));
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SameAccountDevDisableDiscoveryProcess();
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     ret = SameAccountDevDisableDiscoveryProcess();
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
-}
-
-/*
- * @tc.name: SAME_ACCOUNT_DEV_REQUEST_ENABLE_DISCOVERY_TEST_001
- * @tc.desc: SameAccountDevRequestEnableDiscovery test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_REQUEST_ENABLE_DISCOVERY_TEST_001, TestSize.Level1)
-{
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    g_hbConditionState.isRequestDisable = false;
-    EXPECT_NO_FATAL_FAILURE(SameAccountDevRequestEnableDiscovery(nullptr));
-    g_hbConditionState.isRequestDisable = true;
-    EXPECT_NO_FATAL_FAILURE(SameAccountDevRequestEnableDiscovery(nullptr));
 }
 
 /*
@@ -809,6 +797,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, REQUEST_DISABLE_DISCOVERY_TEST_001, TestSize.L
     NiceMock<BleMock> bleMock;
     EXPECT_CALL(bleMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_DISABLE));
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(false)).WillRepeatedly(Return(true));

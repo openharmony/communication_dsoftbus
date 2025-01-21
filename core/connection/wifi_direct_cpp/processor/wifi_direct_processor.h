@@ -18,6 +18,7 @@
 #include <string>
 
 #include "conn_log.h"
+#include "dfx/processor_snapshot.h"
 #include "softbus_error_code.h"
 
 #include "command/wifi_direct_command.h"
@@ -52,6 +53,11 @@ public:
         }
         return CanAcceptNegotiateDataAtState(command);
     }
+    
+    std::string GetRemoteDeviceId()
+    {
+        return remoteDeviceId_;
+    }
 
     virtual bool CanAcceptNegotiateDataAtState(WifiDirectCommand &command) = 0;
     virtual void HandleCommandAfterTerminate(WifiDirectCommand &command) = 0;
@@ -60,6 +66,9 @@ public:
         CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
         return SOFTBUS_OK;
     };
+
+    virtual std::string GetProcessorName() const = 0;
+    virtual std::string GetState() const = 0;
 
 protected:
     std::string remoteDeviceId_;

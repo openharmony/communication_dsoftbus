@@ -93,7 +93,7 @@ void TransClientSessionTest::SetUpTestCase(void)
     AuthInit();
     BusCenterServerInit();
     TransServerInit();
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret,  SOFTBUS_OK);
 }

@@ -798,6 +798,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
     TransTdcChannelInfoDeathCallback(pkgName, pid);
     TransLaneMgrDeathCallback(pkgName, pid);
     TransUdpDeathCallback(pkgName, pid);
+    TransAuthDeathCallback(pkgName, pid);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
@@ -826,7 +827,7 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
     if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
         ret = TransGetPidByChanId(channelId, channelType, &curChannelPid);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
             return ret;
         }
     } else {
@@ -834,7 +835,8 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
         ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
         (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d, ret=%{public}d",
+                channelId, ret);
             return ret;
         }
         curChannelPid = appInfo.myData.pid;

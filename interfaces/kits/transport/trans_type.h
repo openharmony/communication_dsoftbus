@@ -263,6 +263,8 @@ typedef enum {
     OPT_TYPE_MAX_BUFFER = OPT_TYPE_BEGIN,  /**< @reserved Maximum cache. */
     OPT_TYPE_FIRST_PACKAGE,                /**< @reserved First packet size. */
     OPT_TYPE_MAX_IDLE_TIMEOUT,             /**< @reserved Maximum idle time. */
+    OPT_TYPE_SUPPORT_TLV,
+    OPT_TYPE_NEED_ACK,
     OPT_TYPE_END,
 } OptType;
 

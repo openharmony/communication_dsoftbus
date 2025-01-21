@@ -280,9 +280,13 @@ static bool GenerateUdidShortHash(const char *udid, char *udidHashBuf, uint32_t 
 
 static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
 {
-    if (!info->isServer && info->connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
-        AUTH_LOGD(AUTH_FSM, "client(enhance p2p), use conninfo udid");
-        return GenerateUdidShortHash(info->connInfo.info.ipInfo.udid, udidBuf, bufLen);
+    if (!info->isServer) {
+        AUTH_LOGI(AUTH_FSM, "client generate udid, connType is %{public}d", info->connInfo.type);
+        if (info->connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+            return GenerateUdidShortHash(info->connInfo.info.ipInfo.udid, udidBuf, bufLen);
+        } else if (info->connInfo.type == AUTH_LINK_TYPE_SESSION) {
+            return GenerateUdidShortHash(info->connInfo.info.sessionInfo.udid, udidBuf, bufLen);
+        }
     }
     if (strlen(info->udid) != 0) {
         AUTH_LOGI(AUTH_FSM, "use info->udid build fastAuthInfo");
@@ -327,6 +331,9 @@ bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLe
                 return GenerateUdidShortHash(info->connInfo.info.ipInfo.udid, udidBuf, bufLen);
             }
             return false;
+        case AUTH_LINK_TYPE_SESSION:
+            AUTH_LOGD(AUTH_FSM, "client(session), use conninfo.sessionInfo udid");
+            return GenerateUdidShortHash(info->connInfo.info.sessionInfo.udid, udidBuf, bufLen);
         default:
             AUTH_LOGE(AUTH_CONN, "unknown connType. type=%{public}d", info->connInfo.type);
     }

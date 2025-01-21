@@ -36,9 +36,45 @@
 #define NETWORK_ID_LEN 7
 #define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
 #define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
+#define SENDBYTES_TIMEOUT_S 20
 
 #define DISTRIBUTED_DATA_SESSION "distributeddata-default"
 static IFeatureAbilityRelationChecker *g_relationChecker = NULL;
+static SoftBusList *g_clientDataSeqInfoList = NULL;
+
+int32_t LockClientDataSeqInfoList()
+{
+    if (g_clientDataSeqInfoList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "g_clientDataSeqInfoList not init");
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NOINIT;
+    }
+    int32_t ret = SoftBusMutexLock(&(g_clientDataSeqInfoList->lock));
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void UnlockClientDataSeqInfoList()
+{
+    (void)SoftBusMutexUnlock(&(g_clientDataSeqInfoList->lock));
+}
+
+int TransDataSeqInfoListInit(void)
+{
+    g_clientDataSeqInfoList = CreateSoftBusList();
+    if (g_clientDataSeqInfoList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "g_clientDataSeqInfoList not init");
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NOINIT;
+    }
+    return SOFTBUS_OK;
+}
+
+void TransDataSeqInfoListDeinit(void)
+{
+    DestroySoftBusList(g_clientDataSeqInfoList);
+    g_clientDataSeqInfoList = NULL;
+}
 
 bool IsValidSessionParam(const SessionParam *param)
 {
@@ -254,7 +290,7 @@ SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
 static int32_t ClientTransGetTdcIp(int32_t channelId, char *myIp, int32_t ipLen)
 {
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "not found Tdc channel by channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
@@ -360,7 +396,6 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
         ListAdd(destroyList, &(destroyNode->node));
         SoftBusFree(sessionNode);
     }
-
 }
 
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
@@ -1001,4 +1036,112 @@ void DestroyRelationChecker(void)
     }
     SoftBusFree(g_relationChecker);
     g_relationChecker= NULL;
+}
+
+int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
+{
+    int32_t ret = LockClientDataSeqInfoList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    DataSeqInfo *exitItem = NULL;
+    LIST_FOR_EACH_ENTRY(exitItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+        if (exitItem->channelId == channelId && exitItem->seq == dataSeq) {
+            TRANS_LOGI(TRANS_SDK, "DataSeqInfo add already exist, channelId=%{public}d", channelId);
+            UnlockClientDataSeqInfoList();
+            return SOFTBUS_OK;
+        }
+    }
+    DataSeqInfo *item = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
+    item->channelId = channelId;
+    item->seq = dataSeq;
+    item->socketId = socketId;
+    item->channelType = channelType;
+    ListInit(&item->node);
+    ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
+    TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}d", channelId, dataSeq);
+    UnlockClientDataSeqInfoList();
+    return SOFTBUS_OK;
+}
+
+int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
+{
+    int32_t ret = LockClientDataSeqInfoList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    DataSeqInfo *item = NULL;
+    DataSeqInfo *itemNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+        if (item->channelId == channelId && item->seq == dataSeq) {
+            ListDelete(&(item->node));
+            SoftBusFree(item);
+            TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}d",
+                channelId, dataSeq);
+            UnlockClientDataSeqInfoList();
+            return SOFTBUS_OK;
+        }
+    }
+    TRANS_LOGE(TRANS_SDK, "dataSeqInfoList not found, channelId=%{public}d, dataSeq=%{public}d", channelId, dataSeq);
+    UnlockClientDataSeqInfoList();
+    return SOFTBUS_TRANS_DATA_SEQ_INFO_NOT_FOUND;
+}
+
+static void TransOnBindSentProc(ListNode *timeoutItemList)
+{
+    if (timeoutItemList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    DataSeqInfo *item = NULL;
+    DataSeqInfo *itemNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, timeoutItemList, DataSeqInfo, node) {
+        SessionListenerAdapter sessionCallback;
+        (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+        bool isServer = false;
+        int32_t ret = ClientGetSessionCallbackAdapterById(item->socketId, &sessionCallback, &isServer);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionId=%{public}d", item->socketId);
+            ListDelete(&(item->node));
+            SoftBusFree(item);
+            continue;
+        }
+        sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_SEND_ACK_TIME_OUT);
+        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socketId=%{public}d, dataSeq=%{public}d",
+            item->socketId, item->seq);
+        ListDelete(&(item->node));
+        SoftBusFree(item);
+    }
+}
+
+void TransAsyncSendBytesTimeoutProc(void)
+{
+    if (LockClientDataSeqInfoList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    ListNode timeoutItemList;
+    ListInit(&timeoutItemList);
+    DataSeqInfo *item = NULL;
+    DataSeqInfo *itemNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+        item->timeout++;
+        if (item->timeout > SENDBYTES_TIMEOUT_S) {
+            DataSeqInfo *timeoutItem = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
+            if (timeoutItem == NULL) {
+                TRANS_LOGE(TRANS_SDK, "timeoutItem calloc fail");
+                continue;
+            }
+            timeoutItem->socketId = item->socketId;
+            timeoutItem->seq = item->seq;
+            ListDelete(&(item->node));
+            ListAdd(&timeoutItemList, &(timeoutItem->node));
+            SoftBusFree(item);
+        }
+    }
+    UnlockClientDataSeqInfoList();
+    (void)TransOnBindSentProc(&timeoutItemList);
 }

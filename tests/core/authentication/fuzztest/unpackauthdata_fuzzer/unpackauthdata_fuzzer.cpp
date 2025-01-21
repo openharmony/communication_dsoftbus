@@ -28,7 +28,7 @@ namespace OHOS {
         }
 
         AuthDataHead head = *const_cast<AuthDataHead *>(reinterpret_cast<const AuthDataHead *>(data));
-        SetAceessTokenPermission("AuthTest");
+        SetAccessTokenPermission("AuthTest");
         UnpackAuthData(data + sizeof(AuthDataHead), size - sizeof(AuthDataHead), &head);
         return true;
     }

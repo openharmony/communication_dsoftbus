@@ -62,25 +62,25 @@ public:
 void LNNLaneLinkTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "LNNLaneLinkTest start";
+    (void)SoftBusMutexInit(&g_lock, nullptr);
+    (void)SoftBusCondInit(&g_cond);
     LnnInitLnnLooper();
 }
 
 void LNNLaneLinkTest::TearDownTestCase()
 {
     LnnDeinitLnnLooper();
+    (void)SoftBusCondDestroy(&g_cond);
+    (void)SoftBusMutexDestroy(&g_lock);
     GTEST_LOG_(INFO) << "LNNLaneLinkTest end";
 }
 
 void LNNLaneLinkTest::SetUp()
 {
-    (void)SoftBusMutexInit(&g_lock, nullptr);
-    (void)SoftBusCondInit(&g_cond);
 }
 
 void LNNLaneLinkTest::TearDown()
 {
-    (void)SoftBusCondDestroy(&g_cond);
-    (void)SoftBusMutexDestroy(&g_lock);
 }
 
 static void CondSignal(void)

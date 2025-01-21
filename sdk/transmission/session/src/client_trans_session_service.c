@@ -879,7 +879,7 @@ int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uin
     return g_SessionOptionArr[option].readFunc(channelId, type, optionValue, valueSize);
 }
 
-bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
+bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName, int32_t length)
 {
     if ((sessionName == NULL) || (newSessionName == NULL)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -897,7 +897,7 @@ bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
         return false;
     }
     size_t len = posId - sessionName;
-    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, len) != EOK) {
+    if (strncpy_s(newSessionName, length, sessionName, len) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy sessionName failed");
         return false;
     }
@@ -927,7 +927,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingFullTokenId failed");
 
     if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
-        if (!RemoveAppIdFromSessionName(sessionName, newSessionName)) {
+        if (!RemoveAppIdFromSessionName(sessionName, newSessionName, SESSION_NAME_SIZE_MAX + 1)) {
             TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }
@@ -1150,6 +1150,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         ret = ClientWaitSyncBind(socket);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, ret, TRANS_SDK, "ClientWaitSyncBind err, ret=%{public}d", ret);
+        (void)SetSessionStateBySessionId(socket, SESSION_STATE_CALLBACK_FINISHED, 0);
     }
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);

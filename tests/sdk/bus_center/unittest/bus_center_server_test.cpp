@@ -37,7 +37,7 @@ public:
 
 void BusCenterServerTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("busCenterTest");
     int32_t ret = BusCenterServerProxyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

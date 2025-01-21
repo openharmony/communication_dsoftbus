@@ -40,6 +40,7 @@
 #define CONVERSION_BASE 1000LL
 #define CAST_SESSION "CastPlusSessionName"
 static void ClientTransSessionTimerProc(void);
+static void ClientTransAsyncSendBytesTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
 static int32_t g_sessionId = 1;
@@ -116,6 +117,11 @@ int TransClientInit(void)
         return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
     }
 
+    if (TransDataSeqInfoListInit() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "DataSeqInfo list not init");
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NOINIT;
+    }
+
     if (TransServerProxyInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init trans ipc proxy failed");
         return SOFTBUS_TRANS_SERVER_INIT_FAILED;
@@ -129,6 +135,12 @@ int TransClientInit(void)
     if (RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, ClientTransSessionTimerProc) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init trans idle timer failed");
         return SOFTBUS_TRANS_SERVER_INIT_FAILED;
+    }
+
+    if (RegisterTimeoutCallback(
+        SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN, ClientTransAsyncSendBytesTimerProc) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "init trans async sendbytes idle timer failed");
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_INIT_FAIL;
     }
 
     ClientTransRegLnnOffline();
@@ -270,6 +282,7 @@ void TransClientDeinit(void)
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
+    (void)RegisterTimeoutCallback(SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN, NULL);
     ClientSessionServer *serverNode = NULL;
     ClientSessionServer *serverNodeNext = NULL;
     ListNode destroyList;
@@ -284,6 +297,7 @@ void TransClientDeinit(void)
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
+    TransDataSeqInfoListDeinit();
     ClientTransChannelDeinit();
     TransServerProxyDeInit();
     (void)RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, NULL);
@@ -446,6 +460,28 @@ static int32_t GetSessionById(int32_t sessionId, ClientSessionServer **server, S
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if (sessionNode->sessionId == sessionId) {
+                *server = serverNode;
+                *session = sessionNode;
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
+static int32_t GetSessionByChannelId(int32_t channelId, int32_t channelType, ClientSessionServer **server,
+    SessionInfo **session)
+{
+    /* need get lock before */
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->channelId == channelId && (int32_t)sessionNode->channelType == channelType) {
                 *server = serverNode;
                 *session = sessionNode;
                 return SOFTBUS_OK;
@@ -842,6 +878,37 @@ int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *busi
     return SOFTBUS_OK;
 }
 
+int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck)
+{
+    if (channelId <= 0 || (supportTlv == NULL && needAck == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionByChannelId(channelId, channelType, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "channel not found. channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    if (supportTlv != NULL) {
+        *supportTlv = sessionNode->isSupportTlv;
+    }
+    if (needAck != NULL) {
+        *needAck = sessionNode->needAck;
+    }
+    UnlockClientSessionServerList();
+    TRANS_LOGD(TRANS_SDK, "get support tlv or needAck success by channelId=%{public}d", channelId);
+    return SOFTBUS_OK;
+}
+
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
 {
     if ((sessionId < 0) || (transInfo->channelId < 0)) {
@@ -1126,6 +1193,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->isEncrypt = channel->isEncrypt;
                 sessionNode->osType = channel->osType;
                 *sessionId = sessionNode->sessionId;
+                sessionNode->isSupportTlv = channel->isSupportTlv;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     ClientSetAuthSessionTimer(serverNode, sessionNode);
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
@@ -1963,6 +2031,11 @@ static void ClientTransSessionTimerProc(void)
     (void)ClientCleanUpWaitTimeoutSocket(waitOutSocket, waitOutNum);
 }
 
+static void ClientTransAsyncSendBytesTimerProc(void)
+{
+    return TransAsyncSendBytesTimeoutProc();
+}
+
 int32_t ClientResetIdleTimeoutById(int32_t sessionId)
 {
     if (sessionId <= 0) {
@@ -2357,8 +2430,8 @@ int32_t ClientWaitSyncBind(int32_t socket)
 
 static void TransWaitForBindReturn(int32_t socket)
 {
-#define RETRY_GET_BIND_RESULT_TIMES 3
-#define RETRY_WAIT_TIME             5000 // 5ms
+#define RETRY_GET_BIND_RESULT_TIMES 10
+#define RETRY_WAIT_TIME             500
 
     SocketLifecycleData lifecycle;
     (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
@@ -2576,7 +2649,7 @@ int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQo
 
 int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *optValue)
 {
-    if (socket < 0 || optValue == NULL) {
+    if (socket <= 0 || optValue == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -2606,7 +2679,7 @@ int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *optValue)
 
 int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
 {
-    if (socket < 0) {
+    if (socket <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -2631,4 +2704,59 @@ int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
     }
     UnlockClientSessionServerList();
     return ret;
+}
+
+int32_t TransGetSupportTlvBySocket(int32_t socket, bool *supportTlv, int32_t *optValueSize)
+{
+    if (socket <= 0 || supportTlv == NULL || optValueSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    *supportTlv = sessionNode->isSupportTlv;
+    *optValueSize = sizeof(bool);
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck)
+{
+    if (socket <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (!sessionNode->isSupportTlv) {
+        TRANS_LOGI(TRANS_SDK, "cannot support set needAck");
+        return SOFTBUS_TRANS_NOT_SUPPORT_ACK;
+    }
+    sessionNode->needAck = needAck;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
 }

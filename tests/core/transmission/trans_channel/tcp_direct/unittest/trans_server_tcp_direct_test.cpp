@@ -584,6 +584,8 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     
     TransTdcTimerProc();
+    NotifyTdcChannelTimeOut(nullptr);
+    NotifyTdcChannelStopProc(nullptr);
     TransTdcStopSessionProc(AUTH);
 
     TransDelSessionConnById(channelId);
@@ -712,5 +714,10 @@ HWTEST_F(TransServerTcpDirectTest, TransGetAuthTypeByNetWorkId001, TestSize.Leve
     std::string networkId = TEST_NETWORK_ID;
     bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
     EXPECT_NE(true, ret);
+
+    SessionConn *node = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
+    EXPECT_NE(nullptr, node);
+    OnSessionOpenFailProc(node, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+    SoftBusFree(node);
 }
 } // namespace OHOS

@@ -218,4 +218,22 @@ HWTEST_F(LinkInfoTest, TestGetSet, TestSize.Level1)
     linkInfo.SetCustomPort(1);
     EXPECT_EQ(linkInfo.GetCustomPort(), 1);
 }
+
+/*
+ * @tc.name: ToString
+ * @tc.desc: test the to string method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkInfoTest, TypeToString, TestSize.Level1)
+{
+    LinkInfo info;
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::INVALID), "INVALID");
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::NONE), "NONE");
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::STA), "STA");
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::AP), "AP");
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::GO), "GO");
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::GC), "GC");
+    EXPECT_EQ(info.ToString(LinkInfo::LinkMode::HML), "HML");
+}
 } // namespace OHOS::SoftBus

@@ -207,6 +207,7 @@ typedef struct {
     bool networkDelegate;
     bool p2pOnly;
     bool isSupportIpv6;
+    bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
     LaneTransType transType;
     ProtocolType acceptableProtocols;
     int32_t pid;

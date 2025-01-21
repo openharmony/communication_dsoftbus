@@ -56,8 +56,11 @@ uint64_t LnnGetFeatureCapabilty(void)
         LNN_LOGE(LNN_LEDGER, "get lnn feature fail, use default value");
         configValue = DEFAUTL_LNN_FEATURE;
     }
-#ifndef DSOFTBUS_FEATURE_CONN_HV2
+#if !defined(DSOFTBUS_FEATURE_CONN_PV2) && !defined(DSOFTBUS_FEATURE_CONN_HV1)
     LnnClearFeatureCapability(&configValue, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
+    LNN_LOGI(LNN_LEDGER, "clear feature TLV configValue=%{public}" PRIu64, configValue);
+#endif
+#ifndef DSOFTBUS_FEATURE_CONN_HV2
     LnnClearFeatureCapability(&configValue, BIT_BLE_TRIGGER_CONNECTION);
     LNN_LOGI(LNN_LEDGER, "clear feature CONN_HV2 configValue=%{public}" PRIu64, configValue);
 #endif

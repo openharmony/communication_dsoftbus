@@ -76,10 +76,10 @@ static BindRequestManager *GetBindRequestManagerByPeer(BindRequestParam *bindReq
 static uint32_t GenerateParam(
     const char *mySocketName, const char *peerSocketName, const char *peerNetworkId, BindRequestParam *bindReqParam)
 {
-    int32_t ret = memcpy_s(bindReqParam->mySocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
+    int32_t ret = memcpy_s(bindReqParam->mySocketName, SESSION_NAME_SIZE_MAX, mySocketName, SESSION_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy mySocketName failed");
 
-    ret = memcpy_s(bindReqParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerNetworkId, SESSION_NAME_SIZE_MAX);
+    ret = memcpy_s(bindReqParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerSocketName failed");
 
     ret = memcpy_s(bindReqParam->peerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
@@ -94,7 +94,7 @@ static BindRequestManager *CreateBindRequestManager(
     TRANS_CHECK_AND_RETURN_RET_LOGE(bindRequest != NULL, NULL, TRANS_SVC, "malloc failed");
     bindRequest->bindDeniedFlag = false;
     bindRequest->count = 0;
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
+    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "genarate param failed");
         SoftBusFree(bindRequest);
@@ -162,7 +162,7 @@ int32_t TransAddTimestampToList(
         return SOFTBUS_INVALID_PARAM;
     }
     BindRequestParam bindRequestParam = { {0} };
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
+    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "genarate param failed");
     ret = SoftBusMutexLock(&g_bindRequestList->lock);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed");
@@ -218,7 +218,7 @@ static void TransDelTimestampFormList(BindRequestParam *bindRequestParam, uint64
                 break;
             }
         }
-        if (bindRequest->count == 0) {
+        if (bindRequest->count == 0 && !bindRequest->bindDeniedFlag) {
             ListDelete(&bindRequest->node);
             SoftBusFree(bindRequest);
         }
@@ -234,7 +234,7 @@ bool GetDeniedFlagByPeer(const char *mySocketName, const char *peerSocketName, c
 
     bool flag = false;
     BindRequestParam bindRequestParam = { {0} };
-    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
+    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "genarate param failed");
         return flag;
@@ -262,6 +262,8 @@ static void TransResetBindDeniedFlag(BindRequestParam *bindRequestParam)
     BindRequestManager *bindRequest = GetBindRequestManagerByPeer(bindRequestParam);
     if (bindRequest != NULL) {
         bindRequest->bindDeniedFlag = false;
+        ListDelete(&bindRequest->node);
+        SoftBusFree(bindRequest);
         TRANS_LOGI(TRANS_SVC, "close bind request protect.");
     }
     (void)SoftBusMutexUnlock(&g_bindRequestList->lock);

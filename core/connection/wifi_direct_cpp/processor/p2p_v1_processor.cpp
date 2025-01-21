@@ -25,6 +25,7 @@
 #include "channel/auth_negotiate_channel.h"
 #include "data/interface_manager.h"
 #include "data/link_manager.h"
+#include "dfx/wifi_direct_dfx.h"
 #include "entity/p2p_entity.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
@@ -35,6 +36,7 @@
 
 namespace OHOS::SoftBus {
 static constexpr int DECIMAL_BASE = 10;
+static constexpr const char *PROCESSOR_NAME = "P2PV1Processor";
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
     {"AvailableState",             &P2pV1Processor::AvailableState           },
     { "WaitingReqResponseState",   &P2pV1Processor::WaitingReqResponseState  },
@@ -2115,4 +2117,13 @@ void P2pV1Processor::Terminate()
     throw ProcessorTerminate();
 }
 
+std::string P2pV1Processor::GetProcessorName() const
+{
+    return PROCESSOR_NAME;
+}
+
+std::string P2pV1Processor::GetState() const
+{
+    return GetStateName(state_);
+}
 } // namespace OHOS::SoftBus

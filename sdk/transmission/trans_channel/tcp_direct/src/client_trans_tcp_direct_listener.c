@@ -68,11 +68,10 @@ static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,
 
 static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t fd)
 {
-    (void)module;
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
-        TransTdcReleaseFd(module, fd);
+    if (TransTdcGetInfoByFd(fd, &channel) != SOFTBUS_OK) {
+        (void)DelTrigger(module, fd, RW_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "can not match fd. release fd=%{public}d", fd);
         return SOFTBUS_MEM_ERR;
     }
@@ -162,15 +161,18 @@ void TransTdcCloseFd(int32_t fd)
     ConnCloseSocket(fd);
 }
 
-void TransTdcReleaseFd(ListenerModule module, int32_t fd)
+void TransTdcReleaseFd(int32_t fd)
 {
     if (fd < 0) {
         TRANS_LOGI(TRANS_SDK, "fd less than zero");
         return;
     }
-    if (DelTrigger(module, fd, RW_TRIGGER) != SOFTBUS_NOT_FIND) {
-        ConnShutdownSocket(fd);
+    (void)DelTrigger(DIRECT_CHANNEL_CLIENT, fd, RW_TRIGGER);
+    if (ConnGetSocketError(fd) == SOFTBUS_CONN_BAD_FD) {
+        TRANS_LOGI(TRANS_SDK, "fd is bad fd=%{public}d", fd);
+        return;
     }
+    ConnShutdownSocket(fd);
 }
 
 int32_t TransTdcStopRead(int32_t fd)

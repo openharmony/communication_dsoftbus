@@ -65,7 +65,6 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request, ListNode *wait
         ListTailInsert(waitNotifyList, &tmpRequest->node);
         ListDelete(&item->node);
         SoftBusFree(item);
-        num++;
     }
     return num;
 }

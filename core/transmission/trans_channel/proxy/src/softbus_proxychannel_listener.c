@@ -107,7 +107,8 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
-
+    info.isSupportTlv = GetCapabilityBit((uint32_t *)&appInfo->transCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
     TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
@@ -372,6 +373,7 @@ static int32_t TransGetConnectOption(const char *sessionName, const char *peerNe
     option.requestInfo.trans.transType = LANE_T_MSG;
     option.requestInfo.trans.expectedBw = 0;
     option.requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    option.requestInfo.trans.isInnerCalled = true;
     if (memcpy_s(option.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy networkId failed.");
@@ -418,7 +420,7 @@ int32_t TransOpenNetWorkingChannel(
     if (TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId) != SOFTBUS_OK) {
         ReleaseProxyChannelId(channelId);
         TRANS_LOGE(TRANS_CTRL, "networking get connect option fail");
-        return channelId;
+        return INVALID_CHANNEL_ID;
     }
     return channelId;
 }

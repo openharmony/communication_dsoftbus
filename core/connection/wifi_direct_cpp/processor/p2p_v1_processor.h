@@ -157,7 +157,9 @@ private:
 
     void StartTimer(int timeoutInMillis);
     void StopTimer();
-
+    
+    std::string GetProcessorName() const override;
+    std::string GetState() const override;
     [[noreturn]] void Terminate();
 
     ProcessorState state_;

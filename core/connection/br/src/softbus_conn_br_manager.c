@@ -25,7 +25,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_conn_ble_manager.h"
+#include "softbus_conn_br_hidumper.h"
 #include "softbus_conn_br_pending_packet.h"
+#include "softbus_conn_br_snapshot.h"
 #include "softbus_conn_br_trans.h"
 #include "softbus_conn_common.h"
 #include "softbus_json_utils.h"
@@ -1863,5 +1865,28 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         .ConfigPostLimit = ConnBrTransConfigPostLimit,
     };
     CONN_LOGI(CONN_INIT, "ok");
+    ret = BrHiDumperRegister();
+    CONN_LOGI(CONN_INIT, "br hidumper init result=%{public}d", ret);
     return &connectFuncInterface;
+}
+
+int32_t ConnBrDumper(ListNode *connectionSnapshots)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(connectionSnapshots != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invalid param");
+
+    int32_t ret = SoftBusMutexLock(&g_brManager.connections->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_BLE, "lock br connections failed, error=%{public}d", ret);
+
+    ConnBrConnection *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &g_brManager.connections->list, ConnBrConnection, node) {
+        ConnBrConnectionSnapshot *snapshot = ConnBrCreateConnectionSnapshot(it);
+        if (snapshot == NULL) {
+            CONN_LOGE(CONN_BLE, "br hidumper construct snapshot failed");
+            continue;
+        }
+        ListAdd(connectionSnapshots, &snapshot->node);
+    }
+    SoftBusMutexUnlock(&g_brManager.connections->lock);
+    return SOFTBUS_OK;
 }

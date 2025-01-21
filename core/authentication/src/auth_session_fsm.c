@@ -28,6 +28,7 @@
 #include "auth_request.h"
 #include "auth_session_json.h"
 #include "auth_session_message.h"
+#include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_distributed_net_ledger.h"
@@ -190,6 +191,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
     }
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_BR:
+        case AUTH_LINK_TYPE_SESSION:
             break;
         case AUTH_LINK_TYPE_WIFI:
             (void)memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, request.connInfo.info.ipInfo.deviceIdHash,
@@ -1081,6 +1083,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION:
             return PostDeviceInfoMessage(authSeq, info);
         default:
             break;
@@ -1718,9 +1721,10 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect)
 {
     if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "get auth lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     AuthFsm *item = NULL;
@@ -1731,6 +1735,14 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
         if (item->isDead) {
             AUTH_LOGE(AUTH_FSM, "auth fsm has dead. authSeq=%{public}" PRId64 "", item->authSeq);
             continue;
+        }
+        if ((GetConnType(item->info.connId) == AUTH_LINK_TYPE_WIFI ||
+            GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P)) {
+            if (isNeedDisconnect) {
+                DisconnectAuthDevice(&item->info.connId);
+            } else {
+                UpdateFd(&item->info.connId, AUTH_INVALID_FD);
+            }
         }
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);
     }

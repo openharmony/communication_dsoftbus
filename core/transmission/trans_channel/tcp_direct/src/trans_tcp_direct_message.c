@@ -35,6 +35,7 @@
 #include "softbus_app_info.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
+#include "softbus_utils.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
@@ -302,7 +303,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SendFailToFlushDevice(conn);
         SoftBusFree(buffer);
         SoftBusFree(conn);
-        return SOFTBUS_TCP_SOCKET_ERR;
+        return GetErrCodeBySocketErr(SOFTBUS_TCP_SOCKET_ERR);
     }
     SoftBusFree(conn);
     SoftBusFree(buffer);
@@ -432,6 +433,8 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         info.isFastData = true;
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
+    info.isSupportTlv = GetCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
@@ -551,7 +554,7 @@ static int32_t TransTdcPostFastData(SessionConn *conn)
     if (ret != (ssize_t)outLen) {
         TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%{public}zd", ret);
         SoftBusFree(buf);
-        return SOFTBUS_TRANS_SEND_TCP_DATA_FAILED;
+        return GetErrCodeBySocketErr(SOFTBUS_TRANS_SEND_TCP_DATA_FAILED);
     }
     SoftBusFree(buf);
     buf = NULL;
@@ -1319,7 +1322,7 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
         if (recvLen < 0) {
             TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, channelId=%{public}d, retLen=%{public}d, total=%{public}d, "
                 "totalRecv=%{public}d", channelId, recvLen, bufferSize, totalRecvLen);
-            return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
+            return GetErrCodeBySocketErr(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
         } else if (recvLen == 0) {
             TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d, total=%{public}d, "
                 "totalRecv=%{public}d", channelId, bufferSize, totalRecvLen);
@@ -1456,7 +1459,7 @@ static void TransProcessAsyncOpenTdcChannelFailed(
     }
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
     TransCleanTdcSource(conn->channelId);
-    CloseTcpDirectFd(conn->appInfo.fd);
+    CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
 }
 
 int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
@@ -1464,9 +1467,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     int32_t ret = GetSessionConnById(channelId, &conn);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
     ret = TransTdcUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -1492,8 +1493,9 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     if (conn.appInfo.fastTransDataSize > 0 && conn.appInfo.fastTransData != NULL) {
         NotifyFastDataRecv(&conn, channelId);
     }
+    EnableCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
-    CloseTcpDirectFd(conn.appInfo.fd);
+    CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
     if (ret != SOFTBUS_OK) {
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         goto ERR_EXIT;
@@ -1503,7 +1505,8 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     if (ret != SOFTBUS_OK) {
         goto ERR_EXIT;
     }
-    TransCleanTdcSource(channelId);
+    TransDelSessionConnById(channelId);
+    TransSrvDelDataBufNode(channelId);
     return SOFTBUS_OK;
 ERR_EXIT:
     TransCleanTdcSource(channelId);
@@ -1535,7 +1538,7 @@ void TransAsyncTcpDirectChannelTask(int32_t channelId)
         uint64_t seq = 0;
         ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
         if (ret != SOFTBUS_OK) {
-            CloseTcpDirectFd(connInfo.appInfo.fd);
+            CloseTcpDirectFd(connInfo.listenMod, connInfo.appInfo.fd);
             TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
             return;
         }
@@ -1552,7 +1555,7 @@ void TransAsyncTcpDirectChannelTask(int32_t channelId)
             connInfo.appInfo.sessionKey, sizeof(connInfo.appInfo.sessionKey), 0, sizeof(connInfo.appInfo.sessionKey));
         (void)NotifyChannelClosed(&connInfo.appInfo, channelId);
         TransCleanTdcSource(channelId);
-        CloseTcpDirectFd(connInfo.appInfo.fd);
+        CloseTcpDirectFd(connInfo.listenMod, connInfo.appInfo.fd);
         return;
     }
     TRANS_LOGI(TRANS_CTRL, "Open channelId=%{public}d not finished, generate new task and waiting", channelId);
@@ -1613,7 +1616,7 @@ ERR_EXIT:
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    CloseTcpDirectFd(conn.appInfo.fd);
+    CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
     TransDelSessionConnById(channelId);
     return ret;
 }

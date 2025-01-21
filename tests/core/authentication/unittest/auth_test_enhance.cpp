@@ -74,7 +74,7 @@ public:
 
 void AuthEnhanceMockTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("AuthEnhanceMockTest");
+    SetAccessTokenPermission("AuthEnhanceMockTest");
     AuthCommonInit();
 }
 

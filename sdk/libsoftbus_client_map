@@ -60,6 +60,7 @@
         "StopPublishLNN";
         "GetPeerSessionName";
         "SendBytes";
+        "SendBytesAsync";
         "RegistFileSchema";
         "UnregistFileSchema";
         "TransRegistFileSchema";
@@ -177,6 +178,7 @@
         "CtrlLNNBleHb";
         "PrivilegeShutdown";
         "RegisterRelationChecker";
+        "SoftBusResolveConflict";
     local:
         *;
 };

@@ -186,6 +186,22 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
     return &g_reAuthVerifyCallback;
 }
 
+static void NotifyStateForSession(const JoinLnnMsgPara *para)
+{
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "JoinLnnMsgPara is null.");
+        return;
+    }
+    ConnIdCbInfo connIdCbInfo;
+    (void)memset_s(&connIdCbInfo, sizeof(ConnIdCbInfo), 0, sizeof(ConnIdCbInfo));
+    int32_t ret = GetConnIdCbInfoByAddr(&para->addr, &connIdCbInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get connIdCbInfo fail.");
+        return ;
+    }
+    LnnNotifyStateForSession(connIdCbInfo.udid, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+}
+
 int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para, bool needReportFailure)
 {
     if (para == NULL) {
@@ -205,10 +221,15 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
         }
         isCreate = true;
     }
+    if (connFsm != NULL && para->isSession) {
+        connFsm->isSession = true;
+    }
+
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "process join lnn request failed");
         if (needReportFailure) {
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+            NotifyStateForSession(para);
         }
         if (connFsm != NULL && isCreate) {
             LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
@@ -592,7 +613,7 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         return;
     }
 
-    if (authHandle.type != AUTH_LINK_TYPE_ENHANCED_P2P) {
+    if (authHandle.type != AUTH_LINK_TYPE_ENHANCED_P2P && authHandle.type != AUTH_LINK_TYPE_SESSION) {
         if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType())) {
             LNN_LOGE(LNN_BUILDER, "convert connInfo to addr fail");
             SoftBusFree(para);
@@ -601,7 +622,7 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
     } else {
         para->addr.type = CONNECTION_ADDR_BR;
         if (strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, info->connectInfo.macAddr) != EOK) {
-            LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
+            LNN_LOGE(LNN_BUILDER, "copy br mac to addr fail");
         }
     }
 
@@ -617,10 +638,8 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         SoftBusFree(para->nodeInfo);
         SoftBusFree(para);
     }
-    if (info != NULL) {
-        LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
-        DfxRecordDeviceInfoExchangeEndTime(info);
-    }
+    LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
+    DfxRecordDeviceInfoExchangeEndTime(info);
 }
 
 static void OnDeviceDisconnect(AuthHandle authHandle)
@@ -800,6 +819,7 @@ int32_t LnnInitNetBuilder(void)
     LnnInitTopoManager();
     UpdateLocalNetCapability();
     InitNodeInfoSync();
+    LnnInitConnIdCallbackManager();
     NetBuilderConfigInit();
     // link finder init fail will not cause softbus init fail
     if (LnnLinkFinderInit() != SOFTBUS_OK) {
@@ -869,10 +889,12 @@ void LnnDeinitNetBuilder(void)
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_NODE_ADDR, OnReceiveNodeAddrChangedMsg);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler);
     UnregAuthVerifyListener();
     LnnDeinitTopoManager();
     DeinitNodeInfoSync();
     LnnDeinitFastOffline();
     LnnDeinitSyncInfoManager();
+    LnnDeinitConnIdCallbackManager();
     LnnGetNetBuilder()->isInit = false;
 }

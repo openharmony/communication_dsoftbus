@@ -193,6 +193,7 @@ uint32_t SoftBusIfNameToIndex(const char *name);
 int32_t SoftBusIndexToIfName(int32_t index, char *ifname, uint32_t nameLen);
 
 int32_t SoftBusSocketGetError(int32_t socketFd);
+int32_t GetErrCodeBySocketErr(int32_t transErrCode);
 
 #ifdef __cplusplus
 #if __cplusplus

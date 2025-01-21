@@ -79,6 +79,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t TransCheckServerAccessControl(uint64_t callingTokenId) = 0;
     virtual int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId) = 0;
+    virtual int32_t GetErrCodeBySocketErr(int32_t transErrCode) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -129,6 +130,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
     MOCK_METHOD1(TransCheckServerAccessControl, int32_t (uint64_t callingTokenId));
     MOCK_METHOD3(TransTdcOnChannelClosed, int32_t (const char *pkgName, int32_t pid, int32_t channelId));
+    MOCK_METHOD1(GetErrCodeBySocketErr, int32_t (int32_t transErrCode));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

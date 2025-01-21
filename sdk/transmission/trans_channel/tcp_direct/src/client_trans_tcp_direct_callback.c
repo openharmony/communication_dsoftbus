@@ -90,8 +90,8 @@ int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType)
 
     TcpDirectChannelInfo info;
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    TcpDirectChannelInfo *res = TransTdcGetInfoById(channelId, &info);
-    if (res == NULL) {
+    ret = TransTdcGetInfoById(channelId, &info);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channelId);
         return SOFTBUS_NOT_FIND;
     }

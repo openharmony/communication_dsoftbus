@@ -42,7 +42,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         GetLocalNodeDeviceInfo(reinterpret_cast<const char *>(tmp), &localNodeinfo);
         free(tmp);
         return true;
