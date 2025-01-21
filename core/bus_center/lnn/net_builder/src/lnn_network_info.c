@@ -149,7 +149,7 @@ static uint32_t ConvertMsgToUserId(int32_t *userId, const uint8_t *msg, uint32_t
         return SOFTBUS_INVALID_PARAM;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *userId = *userId | (*(msg + i) << (BITS * i));
+        *userId = ((uint32_t)*userId) | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -668,7 +668,7 @@ static uint8_t *ConvertUserIdToMsg(int32_t userId)
         return NULL;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *(arr + i) = (userId >> (i * BITS)) & 0xFF;
+        *(arr + i) = ((uint32_t)userId >> (i * BITS)) & 0xFF;
     }
     return arr;
 }
