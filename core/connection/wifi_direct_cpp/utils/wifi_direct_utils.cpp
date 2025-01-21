@@ -27,6 +27,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_defines.h"
 #include "lnn_lane_vap_info.h"
+#include "softbus_adapter_mem.h"
 #include <algorithm>
 #include <arpa/inet.h>
 #include <endian.h>
@@ -614,4 +615,19 @@ int32_t WifiDirectUtils::GetDeviceType()
     return deviceTypeId;
 }
 
+int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
+{
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "nodeInfo malloc err");
+    auto ret = LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get screen status failed");
+        SoftBusFree(nodeInfo);
+        return ret;
+    }
+    int screenStatus = nodeInfo->isScreenOn;
+    CONN_LOGI(CONN_WIFI_DIRECT, "remote screen status %{public}d", screenStatus);
+    SoftBusFree(nodeInfo);
+    return screenStatus;
+}
 } // namespace OHOS::SoftBus
