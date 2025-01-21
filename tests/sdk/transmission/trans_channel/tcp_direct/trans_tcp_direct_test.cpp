@@ -1099,9 +1099,9 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level0)
     int32_t ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    events = SOFTBUS_SOCKET_IN;
+    events = SOFTBUS_SOCKET_EXCEPTION;
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
