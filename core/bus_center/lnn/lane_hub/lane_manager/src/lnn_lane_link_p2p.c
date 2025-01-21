@@ -686,6 +686,8 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         if (item->auth.requestId != authRequestId) {
             continue;
         }
+        item->p2pInfo.p2pRequestId = p2pRequestId;
+        item->auth.authHandle = authHandle;
         if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_P2P_MAC,
             wifiDirectInfo->remoteMac, sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
             LinkUnlock();
@@ -713,8 +715,6 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-        item->p2pInfo.p2pRequestId = p2pRequestId;
-        item->auth.authHandle = authHandle;
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -1789,6 +1789,8 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         if (item->auth.requestId != authRequestId) {
             continue;
         }
+        item->p2pInfo.p2pRequestId = p2pRequestId;
+        item->auth.authHandle = authHandle;
         if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_WIFIDIRECT_ADDR,
             wifiDirectInfo->remoteMac, sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
             LinkUnlock();
@@ -1817,8 +1819,6 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
-        item->p2pInfo.p2pRequestId = p2pRequestId;
-        item->auth.authHandle = authHandle;
         LinkUnlock();
         return SOFTBUS_OK;
     }

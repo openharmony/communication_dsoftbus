@@ -43,8 +43,6 @@ constexpr int32_t REQID = 2;
 constexpr int32_t LANEREQID = 12;
 constexpr int32_t LANEREQID15 = 15;
 constexpr int32_t LANEVALUE = 3;
-constexpr int32_t DB_MAGIC_NUMBER = 0x5A5A5A5A;
-constexpr int32_t MESH_MAGIC_NUMBER = 0xA5A5A5A5;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
