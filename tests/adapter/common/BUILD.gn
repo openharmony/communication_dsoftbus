@@ -63,6 +63,7 @@ ohos_unittest("LnnWifiServiceMonitorTest") {
     external_deps += [
       "ability_base:base",
       "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
       "ipc:ipc_core",
       "wifi:wifi_sdk",
     ]
