@@ -292,11 +292,11 @@ void CloseTcpDirectFd(ListenerModule module, int32_t fd)
 #endif
 }
 
-static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
+static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t channelId, int32_t fd)
 {
     SessionConn conn;
-    int32_t getInfoRet = GetSessionConnById(channelId, &conn);
-    if (ret != SOFTBUS_OK) {
+    int32_t ret = GetSessionConnById(channelId, &conn);
+    if (errCode != SOFTBUS_OK) {
         TransEventExtra extra = {
             .socketName = NULL,
             .peerNetworkId = NULL,
@@ -304,11 +304,11 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
             .callerPkg = NULL,
             .channelId = channelId,
             .socketFd = fd,
-            .errcode = ret,
+            .errcode = errCode,
             .result = EVENT_STAGE_RESULT_FAILED
         };
         
-        if (getInfoRet != SOFTBUS_OK || !conn.serverSide) {
+        if (ret != SOFTBUS_OK || !conn.serverSide) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -316,9 +316,9 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
         TransTdcSocketReleaseFd(module, fd);
-        (void)NotifyChannelOpenFailed(channelId, ret);
+        (void)NotifyChannelOpenFailed(channelId, errCode);
     } else {
-        if (conn.serverSide) {
+        if (ret != SOFTBUS_OK || conn.serverSide) {
             return;
         }
         DelTrigger(module, fd, READ_TRIGGER);
