@@ -112,20 +112,20 @@ ChannelInfo *TestGetRightChannelInfo(void)
  */
 HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level0)
 {
-    AddSocketResource(g_sessionName, nullptr);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, nullptr));
 
     ChannelInfo *errChannel = TestGetErrorChannelInfo();
-    AddSocketResource(NULL, errChannel);
+    EXPECT_NO_THROW(AddSocketResource(NULL, errChannel));
 
-    AddSocketResource(g_sessionName, errChannel);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, errChannel));
     SoftBusFree(errChannel);
 
     ChannelInfo *serverChannel = TestGetServerChannelInfo();
-    AddSocketResource(g_sessionName, serverChannel);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, serverChannel));
     SoftBusFree(serverChannel);
 
     ChannelInfo *rightChannel = TestGetRightChannelInfo();
-    AddSocketResource(g_sessionName, rightChannel);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, rightChannel));
     SoftBusFree(rightChannel);
 }
 
