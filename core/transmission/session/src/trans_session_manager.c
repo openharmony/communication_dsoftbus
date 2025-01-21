@@ -390,7 +390,7 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     }
     int32_t routeType = (int32_t)GET_ROUTE_TYPE(type);
     int32_t connType = (int32_t)GET_CONN_TYPE(type);
-    bool isUserSwitchEvent = (bool)((type >> USER_SWITCH_OFFSET) & 0xff);
+    bool isUserSwitchEvent = (bool)(((uint32_t)(type) >> USER_SWITCH_OFFSET) & 0xff);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     TRANS_LOGI(TRANS_CTRL,
