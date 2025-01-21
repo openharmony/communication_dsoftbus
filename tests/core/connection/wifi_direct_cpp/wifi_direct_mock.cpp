@@ -303,6 +303,11 @@ int32_t GenerateRandomStr(char *str, uint32_t len)
 {
     return SOFTBUS_OK;
 }
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return SOFTBUS_OK;
+}
 }
 
 namespace OHOS::SoftBus {

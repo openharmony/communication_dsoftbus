@@ -108,6 +108,7 @@ MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param arr
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isReuse);
     MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.negotiateTime);
     MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.linkTime);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.remoteScreenStatus);
     EXPECT_EQ(++index, validSize);
     return true;
 }
