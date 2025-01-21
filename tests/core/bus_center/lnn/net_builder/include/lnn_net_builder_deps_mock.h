@@ -193,6 +193,10 @@ public:
     virtual bool IsSupportLpFeature(void);
     virtual bool LnnSubcribeKvStoreService(void);
     virtual void LnnNotifyLocalNetworkIdChanged(void);
+    virtual int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId) = 0;
+    virtual int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len) = 0;
+    virtual void LnnNotifyStateForSession(char *udid, int32_t retCode) = 0;
+    virtual void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle) = 0;
     virtual bool LnnIsDefaultOhosAccount() = 0;
     virtual void DeleteFromProfile(const char *udid) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
@@ -350,6 +354,10 @@ public:
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool(const NodeInfo *));
+    MOCK_METHOD2(TransAuthGetConnIdByChanId, int32_t(int32_t, int32_t *));
+    MOCK_METHOD3(TransAuthGetPeerUdidByChanId, int32_t(int32_t, char *, uint32_t));
+    MOCK_METHOD2(LnnNotifyStateForSession, void(char *, int32_t));
+    MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));

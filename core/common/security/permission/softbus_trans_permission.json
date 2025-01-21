@@ -358,7 +358,7 @@
     "APP_INFO": [
       {
         "TYPE": "native_app",
-        "PKG_NAME": "hmos.carservice.distributedengine",
+        "PKG_NAME": "carservice.distributedengine",
         "ACTIONS": "create,open"
       }
     ]
@@ -393,7 +393,7 @@
     "SEC_LEVEL": "public",
     "APP_INFO": [
       {
-        "PKG_NAME": "hmos.carservice.distributedengine",
+        "PKG_NAME": "carservice.distributedengine",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
@@ -514,6 +514,17 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.distributed_notification",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.wearlink",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.wearlink",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }

@@ -298,41 +298,14 @@ static void RequestDisableDiscovery(int64_t timeout)
     HbConditionChanged(false);
 }
 
-static void SameAccountDevRequestEnableDiscovery(void *para)
-{
-    if (LnnIsDefaultOhosAccount()) {
-        LNN_LOGW(LNN_HEART_BEAT, "can not request enable because default account");
-        return;
-    }
-    RequestEnableDiscovery(para);
-}
-
 static int32_t SameAccountDevDisableDiscoveryProcess(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "enter");
-    int32_t infoNum = 0;
-    NodeBasicInfo *info = NULL;
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
-        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    bool addrType[CONNECTION_ADDR_MAX] = {false};
+    addrType[CONNECTION_ADDR_BLE] = true;
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "leave ble network fail");
     }
-    if (info == NULL || infoNum == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
-        return SOFTBUS_NO_ONLINE_DEVICE;
-    }
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    for (int32_t i = 0; i < infoNum; ++i) {
-        if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
-            continue;
-        }
-        if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BLE)) {
-            LnnSyncBleOfflineMsg();
-            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_BLE);
-        }
-    }
-    SoftBusFree(info);
-    return SOFTBUS_OK;
+    return LnnSyncBleOfflineMsg();
 }
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
@@ -350,7 +323,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             SameAccountDevDisableDiscoveryProcess();
             break;
         case SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY:
-            SameAccountDevRequestEnableDiscovery(NULL);
+            RequestEnableDiscovery(NULL);
             break;
         default:
             LNN_LOGE(LNN_HEART_BEAT, "error strategy, not need to deal. strategy=%{public}d", strategy);
@@ -643,6 +616,9 @@ static void HbScreenOnChangeEventHandler(int64_t nowTime)
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_ON");
     g_lastScreenOnTime = nowTime;
     g_isScreenOnOnce = true;
+    if (LnnIsLocalSupportBurstFeature()) {
+        LnnRemoveV0BroadcastAndCheckDev();
+    }
     HbRemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
     HbChangeMediumParamByState(g_hbConditionState.screenState);
     if (g_lastScreenOnTime - g_lastScreenOffTime >= HB_SCREEN_ON_COAP_TIME) {
@@ -1343,6 +1319,7 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartbeat(void)

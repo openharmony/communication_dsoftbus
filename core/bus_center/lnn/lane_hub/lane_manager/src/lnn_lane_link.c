@@ -1054,7 +1054,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
         item->port = port;
         item->cnt++;
     } else {
-        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusMalloc(sizeof(P2pAddrNode));
+        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusCalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
             SoftBusMutexUnlock(&g_P2pAddrList.lock);
             return;
@@ -1100,7 +1100,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
         item->port = port;
         item->cnt++;
     } else {
-        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusMalloc(sizeof(P2pAddrNode));
+        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusCalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
             SoftBusMutexUnlock(&g_P2pAddrList.lock);
             return;
@@ -1403,7 +1403,8 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
 {
     int32_t ret = SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     int32_t port = 0;
-    if (reqInfo->transType == LANE_T_MSG) {
+
+    if (reqInfo->isInnerCalled) {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
         LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
     } else {

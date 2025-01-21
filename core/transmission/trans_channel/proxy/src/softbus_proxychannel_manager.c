@@ -152,6 +152,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->appInfo.crc = info->appInfo.crc;
             item->appInfo.myData.dataConfig = info->appInfo.myData.dataConfig;
             item->appInfo.peerHandleId = info->appInfo.peerHandleId;
+            item->appInfo.transCapability = info->appInfo.transCapability;
             if (memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                 &(info->appInfo.peerData), sizeof(info->appInfo.peerData)) != EOK ||
                 memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
@@ -1172,12 +1173,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     int32_t proxyChannelId = chan->channelId;
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(proxyChannelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     TransCreateConnByConnId(chan->connId, (bool)chan->isServer);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         ReleaseProxyChannelId(proxyChannelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     if (chan->appInfo.appType == APP_TYPE_NORMAL) {
@@ -1186,6 +1189,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
             return;
         } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+            (void)TransProxyAckHandshake(chan->connId, chan, ret);
+            TransProxyDelChanByChanId(proxyChannelId);
             goto EXIT_ERR;
         }
     }
@@ -1195,7 +1200,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
     return;
 EXIT_ERR:
-    ReleaseChannelInfo(chan);
     extra.result = EVENT_STAGE_RESULT_FAILED;
     extra.errcode = ret;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -1968,6 +1972,7 @@ static void TransProxyManagerDeinitInner(void)
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 
     DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = NULL;
 }
 
 void TransProxyManagerDeinit(void)

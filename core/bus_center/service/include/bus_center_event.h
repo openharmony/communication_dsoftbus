@@ -335,6 +335,8 @@ void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
 
 void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
 
+void LnnNotifyStateForSession(char *udid, int32_t retCode);
+
 void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType);
 
 void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state);

@@ -38,7 +38,7 @@ ohos_fuzztest("BleConnectionFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "bleconnection_fuzzer.cpp" ]
+  sources = [ "softbus_conn_ble_connection_fuzzer.cpp" ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",

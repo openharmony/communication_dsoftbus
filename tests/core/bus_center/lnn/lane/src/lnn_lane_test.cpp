@@ -835,7 +835,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_011, TestSize.Level1)
 
 /*
 * @tc.name: LANE_ALLOC_Test_012
-* @tc.desc: lane alloc for continuous task(local is match)
+* @tc.desc: lane alloc for continuous task(local is watch)
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -853,7 +853,6 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_012, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
-        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_PHONE_ID), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
@@ -875,7 +874,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_012, TestSize.Level1)
 
 /*
 * @tc.name: LANE_ALLOC_Test_013
-* @tc.desc: lane alloc for continuous task(remote is match)
+* @tc.desc: lane alloc for continuous task(remote is watch)
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -905,6 +904,90 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_013, TestSize.Level1)
     allocInfo.qosRequire.continuousTask = true;
     SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForBr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    SetIsNeedCondWait();
+    ret = laneManager->lnnFreeLane(laneReqId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+}
+
+/*
+* @tc.name: LANE_ALLOC_Test_014
+* @tc.desc: lane alloc for MIDDLE_LOW_BW&not continuous task(local is watch)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_014, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    mock.SetDefaultResultForAlloc(15, 15, 0x3F7EA, 0x3F7EA);
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
+        .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
+
+    LaneAllocInfo allocInfo = {};
+    CreateAllocInfoForAllocTest(LANE_T_BYTE, DEFAULT_QOSINFO_MIN_BW + LOW_BW, DEFAULT_QOSINFO_MAX_LATENCY,
+        DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
+    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    SetIsNeedCondWait();
+    ret = laneManager->lnnFreeLane(laneReqId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+}
+
+/*
+* @tc.name: LANE_ALLOC_Test_015
+* @tc.desc: lane alloc for MIDDLE_HIGH_BW&not continuous task(remote is watch)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_015, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    mock.SetDefaultResultForAlloc(15, 15, 0x3F7EA, 0x3F7EA);
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo)
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
+        .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
+
+    LaneAllocInfo allocInfo = {};
+    CreateAllocInfoForAllocTest(LANE_T_BYTE, HIGH_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
+        DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
+    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     SetIsNeedCondWait();

@@ -379,4 +379,26 @@ enum IpAddrType LinkInfo::GetIpAddrType()
     auto ret = Get(LinkInfoKey::IPADDR_TYPE, 0);
     return static_cast<enum IpAddrType>(ret);
 }
+
+std::string LinkInfo::ToString(LinkMode mode)
+{
+    switch (mode) {
+        case LinkMode::INVALID:
+            return "INVALID";
+        case LinkMode::NONE:
+            return "NONE";
+        case LinkMode::STA:
+            return "STA";
+        case LinkMode::AP:
+            return "AP";
+        case LinkMode::GO:
+            return "GO";
+        case LinkMode::GC:
+            return "GC";
+        case LinkMode::HML:
+            return "HML";
+        default:
+            return "UNKNOWN_MODE(" + std::to_string(static_cast<int>(mode)) + ")";
+    }
+}
 }

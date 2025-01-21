@@ -31,7 +31,6 @@ struct FdNode {
     ListNode node;
     int32_t fd;
     uint32_t triggerSet;
-    bool eventProcessed;
 };
 
 typedef int32_t (*GetAllFdEventCallback)(ListNode *list);

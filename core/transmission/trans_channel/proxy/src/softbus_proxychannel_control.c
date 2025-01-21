@@ -27,6 +27,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "trans_log.h"
 #include "trans_event.h"
+#include "softbus_utils.h"
 
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
     uint32_t payLoadLen, int32_t priority)
@@ -121,6 +122,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
             return SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED;
         }
     }
+    EnableCapabilityBit(&info->appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
     TRANS_LOGI(TRANS_CTRL, "handshake myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
@@ -159,6 +161,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
+    EnableCapabilityBit(&chan->appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};

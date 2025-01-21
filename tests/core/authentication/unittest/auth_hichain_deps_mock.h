@@ -52,7 +52,6 @@ public:
     virtual int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len) = 0;
     virtual int32_t AuthSessionHandleAuthFinish(int64_t authSeq) = 0;
     virtual const char *GetAuthSideStr(bool isServer) = 0;
-    virtual cJSON *cJSON_Parse(const char *value) = 0;
     virtual int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis) = 0;
@@ -94,7 +93,6 @@ public:
     MOCK_METHOD3(AuthSessionSaveSessionKey, int32_t (int64_t, const uint8_t *, uint32_t));
     MOCK_METHOD1(AuthSessionHandleAuthFinish, int32_t (int64_t));
     MOCK_METHOD1(GetAuthSideStr, const char *(bool));
-    MOCK_METHOD1(cJSON_Parse, cJSON *(const char *));
     MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t (int32_t, const char *, uint32_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(AuthSessionHandleAuthError, int32_t (int64_t, int32_t));
@@ -114,4 +112,4 @@ public:
     MOCK_METHOD0(RequireAuthLock, bool (void));
 };
 } // namespace OHOS
-#endif // AUTH_COMMON_MOCK_H
+#endif // AUTH_COMMON_MOCK_H

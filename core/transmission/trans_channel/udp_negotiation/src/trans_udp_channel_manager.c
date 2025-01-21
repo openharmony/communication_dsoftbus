@@ -16,6 +16,7 @@
 #include "trans_udp_channel_manager.h"
 
 #include "common_list.h"
+#include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -274,7 +275,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
     NotifyUdpChannelCloseInList(&udpDeleteChannelList);
 }
 
-int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
+int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isClient)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -293,7 +294,7 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->info.isClient == isClient) {
             if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -376,7 +377,7 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
+int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isClient)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -390,7 +391,7 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->info.isClient == isClient) {
             udpChannelNode->status = status;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
@@ -426,7 +427,7 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
+void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isClient)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -445,7 +446,7 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->info.isClient == isClient) {
             if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
             }
@@ -865,4 +866,20 @@ int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     return SOFTBUS_OK;
+}
+
+bool CompareSessionName(const char *dstSessionName, const char *srcSessionName)
+{
+    if (dstSessionName == NULL || srcSessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid sessionName");
+        return false;
+    }
+    regex_t regComp;
+    if (regcomp(&regComp, dstSessionName, REG_EXTENDED | REG_NOSUB) != REG_OK) {
+        TRANS_LOGE(TRANS_CTRL, "regcomp failed.");
+        return false;
+    }
+    bool compare = regexec(&regComp, srcSessionName, 0, NULL, 0) == REG_OK;
+    regfree(&regComp);
+    return compare;
 }

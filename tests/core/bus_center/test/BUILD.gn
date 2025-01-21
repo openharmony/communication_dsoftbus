@@ -630,6 +630,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
   ]
 
   deps = [

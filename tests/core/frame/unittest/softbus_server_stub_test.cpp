@@ -89,7 +89,7 @@ void SoftbusServerStubTest::TearDownTestCase(void)
 
 SessionParam *GenerateSessionParam()
 {
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     EXPECT_NE(nullptr, sessionParam);
     SessionAttribute attr;
@@ -1753,6 +1753,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
     datas.WriteInt32(pid);
     datas.WriteCString(networkId);
     ret = softBusServer->PrivilegeCloseChannelInner(datas, reply);
-    EXPECT_NE(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 }

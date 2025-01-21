@@ -165,4 +165,23 @@ HWTEST_F(InnerLinkTest, SetAndGetGrocery, TestSize.Level1)
     sleep(PROTECT_DURATION_MS / 1000 + 1);
     EXPECT_EQ(info.IsProtected(), false);
 }
+
+/*
+ * @tc.name: ToString
+ * @tc.desc: test the to string method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InnerLinkTest, TypeToString, TestSize.Level1)
+{
+    InnerLink info("");
+    EXPECT_EQ(info.ToString(InnerLink::LinkType::INVALID_TYPE), "INVALID_TYPE");
+    EXPECT_EQ(info.ToString(InnerLink::LinkType::HML), "HML");
+    EXPECT_EQ(info.ToString(InnerLink::LinkType::P2P), "P2P");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::INVALID_STATE), "INVALID_STATE");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::DISCONNECTED), "DISCONNECTED");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::CONNECTED), "CONNECTED");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::CONNECTING), "CONNECTING");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::DISCONNECTING), "DISCONNECTING");
+}
 } // namespace OHOS::SoftBus

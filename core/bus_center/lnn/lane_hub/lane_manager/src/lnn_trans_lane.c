@@ -101,6 +101,7 @@ typedef struct {
     bool isCompleted;
     uint32_t actionAddr;
     bool isSupportIpv6;
+    bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
 } LaneLinkNodeInfo;
 
 typedef struct {
@@ -299,6 +300,7 @@ static int32_t TriggerLink(uint32_t laneReqId, TransOption *request,
     linkNode->triggerLinkTime = SoftBusGetSysTimeMs();
     linkNode->availableLinkTime = DEFAULT_LINK_LATENCY;
     linkNode->isCompleted = false;
+    linkNode->isInnerCalled = request->isInnerCalled;
     InitStatusList(linkNode);
     ListInit(&linkNode->node);
     if (Lock() != SOFTBUS_OK) {
@@ -471,7 +473,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     selectParam.transType = allocInfo->transType;
     selectParam.qosRequire = allocInfo->qosRequire;
     selectParam.allocedLaneId = allocLaneId;
-    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
         LNN_LOGE(LNN_LANE, "recommendLinkList malloc fail");
         return SOFTBUS_MALLOC_ERR;
@@ -1112,6 +1114,7 @@ static int32_t CreateLinkRequestNode(const LaneLinkNodeInfo *nodeInfo, LinkReque
     requestInfo->psm = nodeInfo->psm;
     requestInfo->actionAddr = nodeInfo->actionAddr;
     requestInfo->isSupportIpv6 = nodeInfo->isSupportIpv6;
+    requestInfo->isInnerCalled = nodeInfo->isInnerCalled;
     if (memcpy_s(requestInfo->peerNetworkId, NETWORK_ID_BUF_LEN, nodeInfo->networkId, NETWORK_ID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy networkId fail");
         return SOFTBUS_MEM_ERR;

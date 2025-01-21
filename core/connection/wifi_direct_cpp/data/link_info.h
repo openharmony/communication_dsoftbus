@@ -145,6 +145,8 @@ public:
 
     void SetIpAddrType(enum IpAddrType value);
     enum IpAddrType GetIpAddrType();
+
+    static std::string ToString(LinkMode mode);
 };
 }
 #endif

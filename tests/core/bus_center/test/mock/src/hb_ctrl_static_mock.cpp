@@ -266,5 +266,9 @@ int32_t LnnSyncBleOfflineMsg(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnSyncBleOfflineMsg();
 }
+void LnnRemoveV0BroadcastAndCheckDev(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnRemoveV0BroadcastAndCheckDev();
+}
 }
 } // namespace OHOS

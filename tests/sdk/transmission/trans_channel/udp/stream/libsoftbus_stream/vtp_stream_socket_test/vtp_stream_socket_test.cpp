@@ -1045,6 +1045,8 @@ HWTEST_F(VtpStreamSocketTest, InsertBufferLength001, TestSize.Level1)
 
     length = 0;
     vtpStreamSocket->InsertBufferLength(num, length, reinterpret_cast<uint8_t *>(data.get()));
+
+    vtpStreamSocket->InsertBufferLength(num, length, nullptr);
 }
 
 /**

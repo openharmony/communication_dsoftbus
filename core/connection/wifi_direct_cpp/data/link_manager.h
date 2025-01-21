@@ -17,9 +17,11 @@
 #define LINK_MANAGER_H
 
 #include <atomic>
+#include <list>
 #include <map>
 #include <mutex>
 #include <functional>
+#include "dfx/link_snapshot.h"
 #include "inner_link.h"
 #include "wifi_direct_types.h"
 
@@ -48,7 +50,7 @@ public:
     bool ProcessIfPresent(int linkId, const Handler &handler);
     void RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId);
     void RemoveLink(const std::string &remoteMac);
-    void RemoveLinks(InnerLink::LinkType type);
+    void RemoveLinks(InnerLink::LinkType type, bool onlyRemoveConnected = false);
 
     void GetAllLinksBasicInfo(std::vector<InnerLinkBasicInfo> &infos);
 
@@ -58,6 +60,8 @@ public:
     void RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac);
 
     void Dump() const;
+    
+    void Dump(std::list<std::shared_ptr<LinkSnapshot>> &snapshots);
 
 private:
     mutable std::recursive_mutex lock_;

@@ -39,7 +39,7 @@ namespace OHOS {
             free(tmp);
             return false;
         }
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         DeactiveMetaNode(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp));
         free(tmp);
         return true;

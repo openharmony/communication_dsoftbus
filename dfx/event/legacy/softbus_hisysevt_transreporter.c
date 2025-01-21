@@ -287,8 +287,13 @@ static char *GetApiNameByCode(uint32_t code)
 
 static void AddInfoNodeToList(bool isAppDiff, const char *appName, char *apiName)
 {
+#define MAX_PKG_NAME_CNT 200
     CalledApiInfoStruct *apiInfoNode = NULL;
     if (isAppDiff) {
+        if (g_calledApiInfoList->cnt > MAX_PKG_NAME_CNT) {
+            COMM_LOGE(COMM_EVENT, "the number %{public}u of callers exceeds the limit", g_calledApiInfoList->cnt);
+            return;
+        }
         apiInfoNode = GetNewApiInfo(appName, apiName);
         if (apiInfoNode == NULL) {
             COMM_LOGE(COMM_EVENT, "GetNewApiInfo fail");

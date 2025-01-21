@@ -42,7 +42,7 @@ public:
 
 void BusCenterHeartbeatSdkTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("busCenterTest");
     LnnInitLnnLooper();
     LooperInit();
     LnnInitBusCenterEvent();

@@ -21,12 +21,12 @@ ohos_unittest("ClientTransStatisticsTest") {
   sources = [ "client_trans_statistics_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/src",
-    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/src",
   ]
 
   deps = [

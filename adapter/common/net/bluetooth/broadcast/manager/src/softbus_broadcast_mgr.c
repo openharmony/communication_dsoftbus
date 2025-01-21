@@ -308,7 +308,7 @@ static char *GetSrvType(BaseServiceType srvType)
     return g_srvTypeMap[srvType].service;
 }
 
-static void ReportCurrentBroadcast(void)
+static void ReportCurrentBroadcast(bool result)
 {
     DiscEventExtra extra = { 0 };
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
@@ -318,8 +318,11 @@ static void ReportCurrentBroadcast(void)
             extra.serverType = GetSrvType(g_bcManager[managerId].srvType);
             extra.minInterval = g_bcManager[managerId].minInterval;
             extra.maxInterval = g_bcManager[managerId].maxInterval;
+            if (result) {
+                extra.currentNum = g_bcCurrentNum;
+            }
             DISC_LOGI(DISC_BROADCAST, "startTime=%{public}d, advHandle=%{public}d, serverType=%{public}s, "
-                "minInterval=%{public}d, maxInterval=%{public}d, ", extra.startTime,
+                "minInterval=%{public}d, maxInterval=%{public}d", extra.startTime,
                 extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval);
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
         }
@@ -329,7 +332,7 @@ static void ReportCurrentBroadcast(void)
 static void UpdateBcMaxExtra(void)
 {
     if (g_bcCurrentNum > BC_DFX_REPORT_NUM) {
-        ReportCurrentBroadcast();
+        ReportCurrentBroadcast(true);
     }
  
     if (g_bcCurrentNum < g_bcMaxNum) {
@@ -1597,7 +1600,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     if (ret != SOFTBUS_OK) {
         callback.OnStartBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
         DISC_LOGE(DISC_BROADCAST, "call from adapter failed");
-        ReportCurrentBroadcast();
+        ReportCurrentBroadcast(false);
         ReleaseSoftbusBroadcastData(&softbusBcData);
         return ret;
     }

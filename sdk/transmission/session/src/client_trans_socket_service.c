@@ -107,7 +107,7 @@ int32_t Socket(SocketInfo info)
             TRANS_LOGE(TRANS_SDK, "copy session name failed");
             return SOFTBUS_STRCPY_ERR;
         }
-        if (!RemoveAppIdFromSessionName(info.name, newSessionName)) {
+        if (!RemoveAppIdFromSessionName(info.name, newSessionName, SESSION_NAME_SIZE_MAX + 1)) {
             TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }

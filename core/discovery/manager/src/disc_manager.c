@@ -193,6 +193,7 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
     infoNode->statistics.repTimes++;
     infoNode->statistics.devNum++;
 }
+
 static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *infoNode)
 {
     DiscoveryStatistics *statistics = &infoNode->statistics;
@@ -200,6 +201,7 @@ static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *info
     SoftbusRecordBleDiscDetails((char *)packageName, totalTime, statistics->repTimes, statistics->devNum,
                                 statistics->discTimes);
 }
+
 static void BitmapSet(uint32_t *bitMap, uint32_t pos)
 {
     *bitMap |= 1U << pos;
@@ -1235,16 +1237,6 @@ static void RemoveDiscInfoForDiscovery(const char *pkgName)
     RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, pkgName);
 }
 
-static void DiscMgrUserSwitchHandler(const LnnEventBasicInfo *info)
-{
-    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is null");
-    DISC_CHECK_AND_RETURN_LOGE(info->event == LNN_EVENT_USER_SWITCHED, DISC_CONTROL,
-        "invalid event=%{public}d", info->event);
-    DISC_LOGI(DISC_CONTROL, "recv userSwitch event, stop previous publish and discovery");
-    RemoveDiscInfoByPackageName(g_publishInfoList, PUBLISH_SERVICE, NULL);
-    RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, NULL);
-}
-
 void DiscMgrDeathCallback(const char *pkgName)
 {
     DISC_CHECK_AND_RETURN_LOGE(pkgName != NULL, DISC_CONTROL, "pkgName is null");
@@ -1253,21 +1245,6 @@ void DiscMgrDeathCallback(const char *pkgName)
     DISC_LOGD(DISC_CONTROL, "pkg is dead. pkgName=%{public}s", pkgName);
     RemoveDiscInfoForPublish(pkgName);
     RemoveDiscInfoForDiscovery(pkgName);
-}
-
-int32_t DiscMgrEventInit(void)
-{
-    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, DiscMgrUserSwitchHandler);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT,
-        "register user switch evt handler failed, ret=%{public}d", ret);
-
-    DISC_LOGI(DISC_INIT, "init disc manager event success");
-    return SOFTBUS_OK;
-}
-
-void DiscMgrEventDeinit(void)
-{
-    LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, DiscMgrUserSwitchHandler);
 }
 
 int32_t DiscMgrInit(void)

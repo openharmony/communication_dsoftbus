@@ -912,7 +912,7 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
-    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_SESSION) {
         PostCancelAuthMessage(authSeq, info);
     }
     if (!info->isConnectServer) {
@@ -983,6 +983,29 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     NotifyAuthResult(authHandle, info);
 }
 
+static void UpdateAuthConnIdSyncWithInfo(const AuthConnInfo *connInfo, uint64_t connId, bool isServer)
+{
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "get auth lock fail");
+        return;
+    }
+
+    AuthManager *auth = FindAuthManagerByConnInfo(connInfo, isServer);
+    if (auth == NULL) {
+        PrintAuthConnInfo(connInfo);
+        ReleaseAuthLock();
+        AUTH_LOGE(AUTH_FSM, "auth manager not found, connType=%{public}d, side=%{public}s",
+            connInfo->type, GetAuthSideStr(isServer));
+        return;
+    }
+    if (auth->connId[connInfo->type] == connId &&  GetConnType(connId) == AUTH_LINK_TYPE_WIFI) {
+        AUTH_LOGI(AUTH_FSM,
+            "When conntype is wifi, auth connId sync with connInfo, connId=%{public}" PRIu64, connId);
+        UpdateFd(&auth->connId[connInfo->type], AUTH_INVALID_FD);
+    }
+    ReleaseAuthLock();
+}
+
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "auth session info is null");
@@ -1014,6 +1037,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     }
     ReportAuthRequestFailed(info->requestId, reason);
     if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
+        UpdateAuthConnIdSyncWithInfo(&info->connInfo, info->connId, info->isServer);
         DisconnectAuthDevice((uint64_t *)&info->connId);
     } else if (!info->isConnectServer) {
         /* Bluetooth networking only the client to close the connection. */
@@ -1571,7 +1595,7 @@ static void HandleDisconnectedEvent(const void *para)
         }
     }
     /* Try to terminate authing session. */
-    (void)AuthSessionHandleDeviceDisconnected(connId);
+    (void)AuthSessionHandleDeviceDisconnected(connId, GetFd(dupConnId) != AUTH_INVALID_FD);
 }
 
 static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)

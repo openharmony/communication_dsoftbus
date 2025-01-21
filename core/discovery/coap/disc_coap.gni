@@ -14,6 +14,7 @@
 import("../../../dsoftbus.gni")
 disc_coap_external_deps = []
 disc_coap_inc = [
+  "$dsoftbus_root_path/core/broadcast/common/include",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/core/discovery/coap/interface",
   "$dsoftbus_root_path/core/discovery/coap/common/include",

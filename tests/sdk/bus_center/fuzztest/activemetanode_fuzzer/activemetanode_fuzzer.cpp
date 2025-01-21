@@ -51,7 +51,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         int32_t ret = ActiveMetaNode(reinterpret_cast<const char *>(tmp), &meta, metaNodeId);
         if (ret == SOFTBUS_OK) {
             DeactiveMetaNode(reinterpret_cast<const char *>(tmp), metaNodeId);

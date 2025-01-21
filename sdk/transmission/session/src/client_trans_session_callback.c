@@ -59,6 +59,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->isAsync = false;
     session->osType = channel->osType;
     session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
+    session->isSupportTlv = channel->isSupportTlv;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -292,8 +293,6 @@ static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleDat
         TRANS_LOGE(TRANS_SDK, "sync signal bind failed, ret=%{public}d, socket=%{public}d", ret, sessionId);
         return ret;
     }
-
-    (void)SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
     return SOFTBUS_OK;
 }
 

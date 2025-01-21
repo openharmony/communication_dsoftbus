@@ -64,7 +64,7 @@ void TransUdpNegotiationTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
 }
 
 void TransUdpNegotiationTest::TearDownTestCase(void)

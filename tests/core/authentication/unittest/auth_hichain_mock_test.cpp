@@ -115,13 +115,13 @@ HWTEST_F(AuthHichainMockTest, GET_DEVICE_SIDE_FLAG_TEST_001, TestSize.Level1)
     }
     EXPECT_CALL(hichainMock, AuthFailNotifyProofInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ProcessAuthFailCallBack(nullptr);
-    ProcessAuthFailCallBack(para);
+    EXPECT_NO_FATAL_FAILURE(ProcessAuthFailCallBack(nullptr));
+    EXPECT_NO_FATAL_FAILURE(ProcessAuthFailCallBack(para));
     void *para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ProofInfo)));
     if (para1 == nullptr) {
         return;
     }
-    ProcessAuthFailCallBack(para1);
+    EXPECT_NO_FATAL_FAILURE(ProcessAuthFailCallBack(para1));
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     EXPECT_CALL(hichainMock, GetAuthFsmByAuthSeq).WillOnce(Return(nullptr))
@@ -150,23 +150,6 @@ HWTEST_F(AuthHichainMockTest, GET_DEVICE_SIDE_FLAG_TEST_001, TestSize.Level1)
 HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
-    cJSON *json = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
-    if (json == nullptr) {
-        return;
-    }
-    cJSON *json1 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
-    if (json1 == nullptr) {
-        SoftBusFree(json);
-        return;
-    }
-    cJSON *json2 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
-    if (json2 == nullptr) {
-        SoftBusFree(json);
-        SoftBusFree(json1);
-        return;
-    }
-    EXPECT_CALL(hichainMock, cJSON_Parse).WillOnce(Return(nullptr)).WillOnce(Return(json))
-        .WillOnce(Return(nullptr)).WillOnce(Return(json1)).WillOnce(Return(json2));
     EXPECT_CALL(hichainMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(hichainMock, RequireAuthLock).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, ReleaseAuthLock).WillRepeatedly(Return());
@@ -174,14 +157,13 @@ HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level
     int32_t ret = CheckErrReturnValidity(errorReturn);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     ret = CheckErrReturnValidity(errorReturn);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     int errCode = PC_AUTH_ERRCODE;
-    NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, nullptr);
-    NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn);
-    NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn);
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, nullptr));
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn));
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn));
     errCode = PC_PROOF_NON_CONSISTENT_ERRCODE;
-    EXPECT_CALL(hichainMock, GetAuthFsmByAuthSeq).WillOnce(Return(nullptr));
-    NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn);
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn));
 }
 
 /*
@@ -294,12 +276,12 @@ HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = GetUdidHash(udid, udidHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    DeletePcRestrictNode(nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeletePcRestrictNode(nullptr));
     EXPECT_CALL(hichainMock, GetNodeFromPcRestrictMap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    DeletePcRestrictNode(udid);
+    EXPECT_NO_FATAL_FAILURE(DeletePcRestrictNode(udid));
     EXPECT_CALL(hichainMock, DeleteNodeFromPcRestrictMap).WillRepeatedly(Return());
-    DeletePcRestrictNode(udid);
+    EXPECT_NO_FATAL_FAILURE(DeletePcRestrictNode(udid));
 }
 
 /*
@@ -316,20 +298,19 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
     const char *udid = "udidTest";
     const char *uid = "uidTest";
     const char *groupInfo = "groupInfoTest";
-    OnDeviceBound(udid, nullptr);
-    OnDeviceBound(nullptr, groupInfo);
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(nullptr, groupInfo));
     int32_t ret = HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {
         return;
     }
-    EXPECT_CALL(hichainMock, cJSON_Parse).WillOnce(Return(nullptr)).WillOnce(Return(msg));
-    OnDeviceBound(udid, groupInfo);
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
     EXPECT_CALL(hichainMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, GetJsonObjectNumberItem)
         .WillRepeatedly(DoAll(SetArgPointee<2>(AUTH_IDENTICAL_ACCOUNT_GROUP), Return(true)));
     EXPECT_CALL(hichainMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    OnDeviceBound(udid, groupInfo);
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
 }
 } // namespace OHOS
