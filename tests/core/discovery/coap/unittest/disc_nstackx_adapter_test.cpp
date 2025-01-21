@@ -163,6 +163,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread002, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscNstackxDeinit();
+    LnnDeinitLocalLedger();
 }
 
 /*
@@ -696,11 +697,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     ret = LnnInitLocalLedger();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    LnnDeinitLocalLedger();
 }
 } // namespace OHOS
