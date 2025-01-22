@@ -76,5 +76,15 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 {
     return GetInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+
+bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId)
+{
+    return GetInterface()->DpHasAccessControlProfile(udid, isNeedUserId, localUserId);
+}
+
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+{
+    return GetInterface()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+}
 }
 } // namespace OHOS
