@@ -34,7 +34,7 @@
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
-static const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
+static const char *COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
 static const int32_t WIFI_UID = 1010;
 
 namespace OHOS {
@@ -126,7 +126,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_HOTSPOT_STATE) {
         SetSoftBusWifiHotSpotState(code, &state);
     }
-    if (action == COMMON_EVENT_WIFI_SEMI_STATE) {
+    if (action.compare(COMMON_EVENT_WIFI_SEMI_STATE) == 0) {
         SetSoftBusWifiSemiState(code, &state);
     }
     if (state != SOFTBUS_WIFI_UNKNOWN) {
