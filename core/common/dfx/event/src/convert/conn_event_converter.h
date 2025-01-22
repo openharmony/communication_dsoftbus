@@ -73,8 +73,9 @@ CONN_ASSIGNER(Errcode, IsRenegotiate, isRenegotiate)
 CONN_ASSIGNER(Errcode, IsReuse, isReuse)
 CONN_ASSIGNER(Uint64, NegotiateTime, negotiateTime)
 CONN_ASSIGNER(Uint64, LinkTime, linkTime)
+CONN_ASSIGNER(Errcode, RemoteScreenStatus, remoteScreenStatus)
 
-#define CONN_ASSIGNER_SIZE 39 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 40 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -115,6 +116,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "IS_REUSE",          HISYSEVENT_INT32,  ConnAssignerIsReuse       },
     { "NEGOTIATE_TIME",    HISYSEVENT_UINT64, ConnAssignerNegotiateTime },
     { "LINK_TIME",         HISYSEVENT_UINT64, ConnAssignerLinkTime      },
+    { "REMOTE_SCREEN_STATUS", HISYSEVENT_INT32,  ConnAssignerRemoteScreenStatus},
     // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 

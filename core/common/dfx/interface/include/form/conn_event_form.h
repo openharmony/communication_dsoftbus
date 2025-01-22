@@ -106,6 +106,7 @@ typedef struct {
     int32_t osType;             // OS_TYPE
     const char *localDeviceType;   // LOCAL_DEVICE_TYPE
     const char *remoteDeviceType;  //REMOTE_DEVICE_TYPE
+    int32_t remoteScreenStatus;   // REMOTE_SCREEN_STATUS
 } ConnEventExtra;
 
 typedef enum {
