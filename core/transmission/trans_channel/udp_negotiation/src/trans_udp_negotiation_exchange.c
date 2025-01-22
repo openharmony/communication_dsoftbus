@@ -138,7 +138,9 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
                 appInfo->callingTokenId = TOKENID_NOT_SET;
             }
             (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
-            (void)GetJsonObjectNumberItem(msg, "USER_ID", &appInfo->peerData.userId);
+            if (!GetJsonObjectNumberItem(msg, "USER_ID", &appInfo->peerData.userId)) {
+                appInfo->peerData.userId = INVALID_USER_ID;
+            }
             (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
             (void)GetJsonObjectSignedNumber64Item(msg, "ACCOUNT_ID", &appInfo->peerData.accountId);
             break;

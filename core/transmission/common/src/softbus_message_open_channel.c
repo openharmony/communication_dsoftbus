@@ -28,6 +28,7 @@
 #include "trans_log.h"
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
+#define INVALID_USER_ID (-1)
 
 char *PackError(int32_t errCode, const char *errDesc)
 {
@@ -233,7 +234,9 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
     (void)GetJsonObjectSignedNumber64Item(msg, ACCOUNT_ID, &appInfo->peerData.accountId);
-    (void)GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId);
+    if (!GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId)) {
+        appInfo->peerData.userId = INVALID_USER_ID;
+    }
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
