@@ -29,6 +29,7 @@
 #include "disc_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -51,6 +52,8 @@
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
+static SoftBusMutex g_localDeviceInfoLock = { 0 };
+static SoftBusMutex g_discCoapInnerCbLock = { 0 };
 static int32_t NstackxLocalDevInfoDump(int fd);
 
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
@@ -179,7 +182,8 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             DISC_LOGW(DISC_COAP, "parse discovery device info failed.");
             continue;
         }
-        ret = DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb);
+        ret = DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb,
+            &g_discCoapInnerCbLock);
         if (ret != SOFTBUS_OK) {
             DISC_LOGD(DISC_COAP, "DiscRecv: process device info failed, ret=%{public}d", ret);
         }
@@ -203,12 +207,20 @@ static NSTACKX_Parameter g_nstackxCallBack = {
 
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(discCoapCb != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_discCoapInnerCbLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_COAP, "lock failed");
+    if (g_discCoapInnerCb == NULL) {
+        DISC_LOGE(DISC_COAP, "coap inner callback not init.");
+        (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
+        return SOFTBUS_DISCOVER_COAP_NOT_INIT;
+    }
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
         DISC_LOGE(DISC_COAP, "memcpy_s failed.");
+        (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
         return SOFTBUS_MEM_ERR;
     }
+    (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
     return SOFTBUS_OK;
 }
 
@@ -412,18 +424,31 @@ GET_DEVICE_ID_END:
 
 static int32_t SetLocalDeviceInfo(void)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
-        "disc coap not init");
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_COAP, "lock failed");
+    if (g_localDeviceInfo == NULL) {
+        DISC_LOGE(DISC_COAP, "disc coap not init");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+        return SOFTBUS_DISCOVER_COAP_NOT_INIT;
+    }
     int32_t res = memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
-    DISC_CHECK_AND_RETURN_RET_LOGE(res == EOK, SOFTBUS_MEM_ERR, DISC_COAP, "memset_s local device info failed");
+    if (res != EOK) {
+        DISC_LOGE(DISC_COAP, "memset_s local device info failed");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+        return SOFTBUS_MEM_ERR;
+    }
 
     char *deviceIdStr = GetDeviceId();
-    DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL, DISC_COAP,
-        "get device id string failed.");
+    if (deviceIdStr == NULL) {
+        DISC_LOGE(DISC_COAP, "get device id string failed.");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+        return SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL;
+    }
 
     if (strcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr) != EOK) {
         cJSON_free(deviceIdStr);
         DISC_LOGE(DISC_COAP, "strcpy_s deviceId failed.");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         return SOFTBUS_STRCPY_ERR;
     }
     cJSON_free(deviceIdStr);
@@ -431,6 +456,7 @@ static int32_t SetLocalDeviceInfo(void)
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceType);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local device type failed.");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         return ret;
     }
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
@@ -442,10 +468,12 @@ static int32_t SetLocalDeviceInfo(void)
         LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->localIfInfo[0].networkName,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local device info from lnn failed.");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         return SOFTBUS_DISCOVER_GET_LOCAL_STR_FAILED;
     }
     g_localDeviceInfo->ifNums = 1;
 
+    (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     return SOFTBUS_OK;
 }
 
@@ -455,11 +483,14 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
         "invlaid link status, status=%{public}d.", status);
     
     if (status == LINK_STATUS_DOWN) {
+        DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, DISC_COAP, "lock failed");
         if (strcpy_s(g_localDeviceInfo->localIfInfo[0].networkIpAddr,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr), INVALID_IP_ADDR) != EOK) {
             DISC_LOGE(DISC_COAP, "link status down: strcpy_s networkIpAddr failed.");
+            (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
             return;
         }
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     } else {
         DISC_CHECK_AND_RETURN_LOGE(SetLocalDeviceInfo() == SOFTBUS_OK, DISC_COAP,
             "link status up: set local device info failed");
@@ -470,7 +501,9 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
     DISC_LOGI(DISC_COAP, "register local device info. status=%{public}s, accountInfo=%{public}s",
         status == LINK_STATUS_UP ? "up" : "down", accountId == 0 ? "without" : "with");
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, DISC_COAP, "lock failed");
     ret = NSTACKX_RegisterDeviceAn(g_localDeviceInfo, (uint64_t)accountId);
+    (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device info to dfinder failed");
     DiscCoapUpdateDevName();
 }
@@ -563,32 +596,59 @@ void DiscCoapUpdateAccount(void)
 
 static void DeinitLocalInfo(void)
 {
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, DISC_COAP, "lock failed");
     if (g_localDeviceInfo != NULL) {
         SoftBusFree(g_localDeviceInfo);
         g_localDeviceInfo = NULL;
     }
+    (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
 
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_discCoapInnerCbLock) == SOFTBUS_OK, DISC_COAP, "lock failed");
     if (g_discCoapInnerCb != NULL) {
         SoftBusFree(g_discCoapInnerCb);
         g_discCoapInnerCb = NULL;
     }
+    (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
+
+    (void)SoftBusMutexDestroy(&g_localDeviceInfoLock);
+    (void)SoftBusMutexDestroy(&g_discCoapInnerCbLock);
 }
 
 static int32_t InitLocalInfo(void)
 {
+    if (SoftBusMutexInit(&g_localDeviceInfoLock, NULL) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "g_localDeviceInfoLock init failed");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexInit(&g_discCoapInnerCbLock, NULL) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "g_discCoapInnerCbLock init failed");
+        (void)SoftBusMutexDestroy(&g_localDeviceInfoLock);
+        return SOFTBUS_NO_INIT;
+    }
+
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_COAP, "lock failed");
     if (g_localDeviceInfo == NULL) {
         g_localDeviceInfo = (NSTACKX_LocalDeviceInfo *)SoftBusCalloc(sizeof(NSTACKX_LocalDeviceInfo));
         if (g_localDeviceInfo == NULL) {
-            return SOFTBUS_MEM_ERR;
-        }
-    }
-    if (g_discCoapInnerCb == NULL) {
-        g_discCoapInnerCb = (DiscInnerCallback *)SoftBusCalloc(sizeof(DiscInnerCallback));
-        if (g_discCoapInnerCb == NULL) {
+            (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
             DeinitLocalInfo();
             return SOFTBUS_MEM_ERR;
         }
     }
+    (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_discCoapInnerCbLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_COAP, "lock failed");
+    if (g_discCoapInnerCb == NULL) {
+        g_discCoapInnerCb = (DiscInnerCallback *)SoftBusCalloc(sizeof(DiscInnerCallback));
+        if (g_discCoapInnerCb == NULL) {
+            (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
+            DeinitLocalInfo();
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
     return SOFTBUS_OK;
 }
 
@@ -621,6 +681,8 @@ void DiscNstackxDeinit(void)
 static int32_t NstackxLocalDevInfoDump(int fd)
 {
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = {0};
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_COAP, "lock failed");
     SOFTBUS_DPRINTF(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
     SOFTBUS_DPRINTF(fd, "name                                : %s\n", g_localDeviceInfo->name);
     DataMasking(g_localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN, ID_DELIMITER, deviceId);
@@ -632,6 +694,7 @@ static int32_t NstackxLocalDevInfoDump(int fd)
     SOFTBUS_DPRINTF(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
     SOFTBUS_DPRINTF(fd, "version                             : %s\n", g_localDeviceInfo->version);
     SOFTBUS_DPRINTF(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
+    (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
 
     return SOFTBUS_OK;
 }

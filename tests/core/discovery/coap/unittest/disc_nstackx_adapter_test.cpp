@@ -97,6 +97,25 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: TestDiscCoapAdapterDeInit001
+ * @tc.desc: Test DiscNstackxInit should return SOFTBUS_OK after repeat deinit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterDeInit001, TestSize.Level1)
+{
+    DiscNstackxDeinit();
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    // repeat init
+    ret = DiscNstackxInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscNstackxDeinit();
+}
+
+/*
  * @tc.name: TestDiscCoapAdapterRegCb001
  * @tc.desc: Test DiscCoapRegisterCb should return SOFTBUS_INVALID_PARAM when given invalid DiscInnerCallback
  * @tc.type: FUNC
