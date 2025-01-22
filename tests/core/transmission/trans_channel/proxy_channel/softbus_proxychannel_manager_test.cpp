@@ -637,13 +637,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest001, Te
     int32_t channelId = TEST_NUMBER_25;
     uint32_t connId = TEST_NUMBER_TEN;
     char identity[TEST_ARRRY_SIZE] = {0};
+    int32_t errCode = SOFTBUS_OK;
     int32_t ret = strcpy_s(identity, TEST_CHANNEL_IDENTITY_LEN, TEST_STRING_ELEVEN);
     if (ret != EOK) {
         TRANS_LOGE(TRANS_TEST, "copy failed");
         return;
     }
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
-    TransProxyChanProcessByReqId(TEST_NUMBER_26, connId);
+    TransProxyChanProcessByReqId(TEST_NUMBER_26, connId, errCode);
     usleep(TEST_SLEEP_TIME);
     ProxyChannelInfo chanInfo;
     ret = TransProxyGetSendMsgChanInfo(TEST_NUMBER_25, &chanInfo);
@@ -663,10 +664,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest002, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t channelId = TEST_VALID_CHANNEL_ID;
     uint32_t connId = TEST_VALID_CONN_ID;
+    int32_t errCode = SOFTBUS_OK;
     char identity[TEST_ARRRY_SIZE] = { TEST_ARR_INIT };
     (void)strcpy_s(identity, TEST_CHANNEL_IDENTITY_LEN, TEST_STRING_ELEVEN);
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
-    TransProxyChanProcessByReqId(TEST_VALID_CHANNEL_ID, connId);
+    TransProxyChanProcessByReqId(TEST_VALID_CHANNEL_ID, connId, errCode);
     usleep(TEST_SLEEP_TIME);
     ProxyChannelInfo chanInfo;
     ret = TransProxyGetSendMsgChanInfo(TEST_VALID_CHANNEL_ID, &chanInfo);
