@@ -344,7 +344,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         uint8_t type = (data[curLen] & MOST_SIGNIFICANT_4BIT_MASK) >> BYTE_SHIFT_4BIT;
         uint32_t len = (uint32_t)(data[curLen] & LEAST_SIGNIFICANT_4BIT_MASK);
         DISC_CHECK_AND_RETURN_RET_LOGE(
-            curLen + TL_LEN + len <= dataLen && (len != TLV_VARIABLE_DATA_LEN || curLen + TL_LEN  < dataLen),
+            curLen + TL_LEN + len <= dataLen && (len != TLV_VARIABLE_DATA_LEN || curLen + TL_LEN < dataLen),
             SOFTBUS_BC_MGR_UNEXPECTED_PACKETS, DISC_BLE,
             "unexperted advData: out of range, "
             "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",
