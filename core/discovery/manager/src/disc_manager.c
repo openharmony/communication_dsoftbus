@@ -30,7 +30,7 @@
 
 #define DEVICE_TYPE_SIZE_MAX 3
 #define DUMP_STR_LEN 256
-#define DISC_INFO_LIST_SIZE_MAX 50
+#define DISC_INFO_LIST_SIZE_MAX 1024
 
 static bool g_isInited = false;
 
