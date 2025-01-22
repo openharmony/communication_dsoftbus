@@ -34,6 +34,7 @@ typedef enum {
     EVENT_SCENE_SOCKET_CONNECT = 7,
     EVENT_SCENE_SOCKET_SHUTDOWN = 8,
     EVENT_SCENE_SOCKET_CLOSE = 9,
+    EVENT_SCENE_PASSIVE_CONNECT = 11,
 } ConnEventScene;
 
 typedef enum {
