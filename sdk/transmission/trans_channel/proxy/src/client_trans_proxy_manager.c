@@ -718,6 +718,17 @@ static int32_t ClientTransProxyBytesNotifySession(int32_t channelId, const DataH
         case TRANS_SESSION_BYTES:
             ClientTransProxySendBytesAck(channelId, seq, dataSeq, needAck);
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        case TRANS_SESSION_FILE_FIRST_FRAME:
+        case TRANS_SESSION_FILE_ONGOINE_FRAME:
+        case TRANS_SESSION_FILE_LAST_FRAME:
+        case TRANS_SESSION_FILE_ONLYONE_FRAME:
+        case TRANS_SESSION_FILE_ALLFILE_SENT:
+        case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
+        case TRANS_SESSION_FILE_RESULT_FRAME:
+        case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
+        case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+        case TRANS_SESSION_ASYNC_MESSAGE:
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         default:
             TRANS_LOGE(TRANS_SDK, "invalid flags=%{public}d", flags);
             return SOFTBUS_INVALID_PARAM;
