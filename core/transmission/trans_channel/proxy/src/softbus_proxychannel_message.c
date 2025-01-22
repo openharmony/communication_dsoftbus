@@ -506,7 +506,7 @@ static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
         !AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, info->appInfo.myData.dataConfig)) {
         return false;
     }
-    if (!AddNumberToJsonObject(root, TRANS_CAPABILITY, info->appInfo.transCapability)) {
+    if (!AddNumberToJsonObject(root, TRANS_CAPABILITY, info->appInfo.channelCapability)) {
         return false;
     }
     return true;
@@ -578,7 +578,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, NULL, TRANS_CTRL, "create json object failed.");
     if (!AddStringToJsonObject(root, JSON_KEY_IDENTITY, chan->identity) ||
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
-        !AddNumberToJsonObject(root, TRANS_CAPABILITY, appInfo->transCapability)) {
+        !AddNumberToJsonObject(root, TRANS_CAPABILITY, appInfo->channelCapability)) {
         cJSON_Delete(root);
         return NULL;
     }
@@ -714,7 +714,9 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
                                  sizeof(chanInfo->appInfo.peerData.pkgName))) {
         TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
     }
-    (void)GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&chanInfo->appInfo.transCapability);
+    if (!GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&(chanInfo->appInfo.channelCapability))) {
+        chanInfo->appInfo.channelCapability = 0;
+    }
     cJSON_Delete(root);
     return SOFTBUS_OK;
 }
@@ -858,7 +860,9 @@ static int32_t TransProxyGetJsonObject(cJSON *root, const char *msg, int32_t len
     if (!GetJsonObjectNumberItem(root, API_VERSION, (int32_t *)&(chan->appInfo.myData.apiVersion))) {
         TRANS_LOGD(TRANS_CTRL, "peer apiVersion is null.");
     }
-    (void)GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&chan->appInfo.transCapability);
+    uint32_t remoteCapability = 0;
+    (void)GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&remoteCapability);
+    chan->appInfo.channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     return SOFTBUS_OK;
 }
 

@@ -433,7 +433,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         info.isFastData = true;
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
-    info.isSupportTlv = GetCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    info.isSupportTlv = GetCapabilityBit(&conn.appInfo.channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
@@ -1493,7 +1493,6 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
     if (conn.appInfo.fastTransDataSize > 0 && conn.appInfo.fastTransData != NULL) {
         NotifyFastDataRecv(&conn, channelId);
     }
-    EnableCapabilityBit(&conn.appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
     CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
     if (ret != SOFTBUS_OK) {

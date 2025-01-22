@@ -119,7 +119,7 @@ int TransClientInit(void)
 
     if (TransDataSeqInfoListInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "DataSeqInfo list not init");
-        return SOFTBUS_TRANS_DATA_SEQ_INFO_NOINIT;
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NO_INIT;
     }
 
     if (TransServerProxyInit() != SOFTBUS_OK) {
@@ -880,7 +880,7 @@ int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *busi
 
 int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck)
 {
-    if (channelId <= 0 || (supportTlv == NULL && needAck == NULL)) {
+    if (channelId <= 0 || (supportTlv == NULL && needAck == NULL)) { // supportTlv and needAck is an optional param
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -2754,7 +2754,7 @@ int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck)
 
     if (!sessionNode->isSupportTlv) {
         TRANS_LOGI(TRANS_SDK, "cannot support set needAck");
-        return SOFTBUS_TRANS_NOT_SUPPORT_ACK;
+        return SOFTBUS_TRANS_NOT_SUPPORT_TLV_HEAD;
     }
     sessionNode->needAck = needAck;
     UnlockClientSessionServerList();

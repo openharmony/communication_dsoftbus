@@ -24,6 +24,7 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_message_open_channel.h"
+#include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_session_account_adapter.h"
 #include "trans_udp_channel_manager.h"
@@ -87,6 +88,9 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {
+        appInfo->channelCapability = 0;
     }
     return SOFTBUS_OK;
 }
@@ -154,6 +158,9 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
+    uint32_t remoteCapability = 0;
+    (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
+    appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     return SOFTBUS_OK;
 }
 
@@ -225,6 +232,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddStringToJsonObject(msg, "GROUP_ID", appInfo->groupId);
     (void)AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName);
     (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
+    (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
     return SOFTBUS_OK;
 }
 
@@ -256,7 +264,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", appInfo->businessType);
     (void)AddNumberToJsonObject(msg, "STREAM_TYPE", appInfo->streamType);
     (void)AddNumberToJsonObject(msg, "API_VERSION", (int32_t)appInfo->myData.apiVersion);
-
+    (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
     return SOFTBUS_OK;
 }
 
