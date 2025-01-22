@@ -309,10 +309,10 @@ static void DfxReportSelectLaneResult(uint32_t laneReqId, const LaneAllocInfo *a
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = laneReqId;
-    extra.minBW = allocInfo->qosRequire.minBW;
-    extra.maxLaneLatency = allocInfo->qosRequire.maxLaneLatency;
-    extra.minLaneLatency = allocInfo->qosRequire.minLaneLatency;
+    extra.laneReqId = (int32_t)laneReqId;
+    extra.minBW = (int32_t)allocInfo->qosRequire.minBW;
+    extra.maxLaneLatency = (int32_t)allocInfo->qosRequire.maxLaneLatency;
+    extra.minLaneLatency = (int32_t)allocInfo->qosRequire.minLaneLatency;
     int32_t discoveryType = 0;
     if (LnnGetRemoteNumInfo(allocInfo->networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) == SOFTBUS_OK) {
         extra.onlineType = discoveryType;
