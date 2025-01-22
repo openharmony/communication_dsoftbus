@@ -105,7 +105,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterDeInit001, TestSize.Level1)
 {
     DiscNstackxDeinit();
-    DiscNstackxDeinit();
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
