@@ -23,10 +23,10 @@ using namespace OHOS;
 
 int32_t TransGetForegroundUserId(void)
 {
-    int32_t userId = INVALID_USER_ID;
+    int32_t userId = DEFAULT_USER_ID;
     int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
     if (ret != 0) {
-        userId = INVALID_USER_ID;
+        userId = DEFAULT_USER_ID;
         TRANS_LOGE(TRANS_CTRL, "GetForegroundOsAccountLocalId failed ret=%{public}d.", ret);
     }
     return userId;
