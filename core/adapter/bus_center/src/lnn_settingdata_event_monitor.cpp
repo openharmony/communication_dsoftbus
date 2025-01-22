@@ -138,7 +138,7 @@ static int32_t GetUserDefinedDeviceName(std::shared_ptr<DataShare::DataShareHelp
     }
     std::string accountIdStr = std::to_string(osAccountId);
     std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_SECURE_URI + accountIdStr +
-        "?Proxy=true&key=" +USER_DEFINED_STRING);
+        "?Proxy=true&key=" + USER_DEFINED_STRING);
     LNN_LOGI(LNN_STATE, "get user defined deviceName, accountIdStr=%{public}s", accountIdStr.c_str());
     return GetDeviceNameFromDataShareHelper(dataShareHelper, uri, USER_DEFINED_STRING, deviceName, len);
 }
