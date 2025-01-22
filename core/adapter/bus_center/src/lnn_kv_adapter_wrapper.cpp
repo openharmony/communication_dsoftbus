@@ -36,7 +36,6 @@ namespace {
 constexpr int32_t MIN_DBID_COUNT = 1;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MIN_STRING_LEN = 1;
-const std::string SEPARATOR = "#";
 std::mutex g_kvAdapterWrapperMutex;
 } // namespace
 
