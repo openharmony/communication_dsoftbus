@@ -334,7 +334,7 @@ void TransProxyDelChanByChanId(int32_t chanlId)
     return;
 }
 
-void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
+void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCode)
 {
     ProxyChannelInfo *item = NULL;
     TRANS_CHECK_AND_RETURN_LOGE(
@@ -354,7 +354,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
     }
 
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    if (!isUsing) {
+    if (!isUsing && errCode != SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND) {
         TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
         TransProxyCloseConnChannel(connId, false);
     }
