@@ -35,7 +35,7 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->RegAuthTransListener(module, listener);
 }
 
-WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len)
+WifiErrorCode Hid2dGetChannelListFor5G(int32_t *chanList, int32_t len)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dGetChannelListFor5G(chanList, len);
 }
@@ -58,6 +58,11 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnSetLocalNumInfo(key, info);
+}
+
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalNumU64Info(key, info);
 }
 
 int32_t LnnSyncP2pInfo()
@@ -85,6 +90,12 @@ int32_t LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId, InfoKey key, boo
 {
     auto id = std::string(networkId);
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfoIgnoreOnline(id, key, info);
+}
+
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    auto id = std::string(networkId);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNumU64Info(id, key, info);
 }
 
 int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId)
@@ -179,6 +190,11 @@ int32_t GetInterfaceIpString(const std::string &interface, std::string &ip)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetInterfaceIpString(interface, ip);
 }
 
+int IsWifiActive()
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->IsWifiActive();
+}
+
 WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetLinkedInfo(info);
@@ -189,7 +205,7 @@ WifiErrorCode Hid2dGetRecommendChannel(const RecommendChannelRequest *request, R
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dGetRecommendChannel(request, response);
 }
 
-WifiErrorCode Hid2dGetSelfWifiCfgInfo(SelfCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int *getDatValidLen)
+WifiErrorCode Hid2dGetSelfWifiCfgInfo(SelfCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int32_t *getDatValidLen)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dGetSelfWifiCfgInfo(cfgType, cfgData, getDatValidLen);
 }
@@ -199,7 +215,7 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->SoftBusBase64Decode(dst, dlen, olen, src, slen);
 }
 
-WifiErrorCode Hid2dSetPeerWifiCfgInfo(PeerCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int setDataValidLen)
+WifiErrorCode Hid2dSetPeerWifiCfgInfo(PeerCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int32_t setDataValidLen)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dSetPeerWifiCfgInfo(cfgType,
                                                                                       cfgData, setDataValidLen);
@@ -220,7 +236,7 @@ WifiErrorCode Hid2dConfigIPAddr(const char ifName[IF_NAME_LEN], const IpAddrInfo
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dConfigIPAddr(ifName, ipInfo);
 }
 
-WifiErrorCode Hid2dCreateGroup(const int frequency, FreqType type)
+WifiErrorCode Hid2dCreateGroup(const int32_t frequency, FreqType type)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dCreateGroup(frequency, type);
 }
@@ -269,7 +285,7 @@ int32_t TransProxyPipelineSendMessage(
         channelId, data, dataLen, type);
 }
 
-int Hid2dIsWideBandwidthSupported()
+int32_t Hid2dIsWideBandwidthSupported()
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dIsWideBandwidthSupported();
 }
@@ -300,6 +316,11 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 }
 
 int32_t GenerateRandomStr(char *str, uint32_t len)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
 {
     return SOFTBUS_OK;
 }
@@ -359,7 +380,7 @@ WifiErrorCode WifiDirectInterfaceMock::RegisterP2pStateChangedCallback(const P2p
     return WIFI_SUCCESS;
 }
 
-WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int frequency, FreqType type)
+WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int32_t frequency, FreqType type)
 {
     auto run = []() {
         WifiP2pLinkedInfo info;
@@ -373,7 +394,7 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int freque
     return WIFI_SUCCESS;
 }
 
-WifiErrorCode WifiDirectInterfaceMock::CreateGroupFailureAction(const int frequency, FreqType type)
+WifiErrorCode WifiDirectInterfaceMock::CreateGroupFailureAction(const int32_t frequency, FreqType type)
 {
     auto run = []() {
         WifiP2pLinkedInfo info;
@@ -385,7 +406,7 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupFailureAction(const int freque
     return WIFI_SUCCESS;
 }
 
-WifiErrorCode WifiDirectInterfaceMock::CreateGroupTimeOutAction(const int frequency, FreqType type)
+WifiErrorCode WifiDirectInterfaceMock::CreateGroupTimeOutAction(const int32_t frequency, FreqType type)
 {
     auto run = []() {
         WifiP2pLinkedInfo info;
