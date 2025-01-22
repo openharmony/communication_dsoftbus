@@ -52,8 +52,8 @@
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
-static SoftBusMutex g_localDeviceInfoLock = {0};
-static SoftBusMutex g_discCoapInnerCbLock = {0};
+static SoftBusMutex g_localDeviceInfoLock = { 0 };
+static SoftBusMutex g_discCoapInnerCbLock = { 0 };
 static int32_t NstackxLocalDevInfoDump(int fd);
 
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
