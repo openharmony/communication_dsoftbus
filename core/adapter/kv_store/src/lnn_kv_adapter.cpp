@@ -33,7 +33,7 @@ constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_INIT_RETRY_TIMES = 3;
 constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 100 * 1000; // 100ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
-const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
+const char *DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
 } // namespace
 
 KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId)
