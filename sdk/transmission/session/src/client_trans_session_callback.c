@@ -655,15 +655,6 @@ int32_t ClientTransOnQos(int32_t channelId, int32_t channelType, QoSEvent event,
         TRANS_LOGE(TRANS_SDK, "qos is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    char sessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
-    if (ClientGetSessionNameByChannelId(channelId, channelType, sessionName, SESSION_NAME_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "failed to get sessionName, channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
-    }
-    if (!IsDistributedDataSession(sessionName)) {
-        TRANS_LOGI(TRANS_SDK, "not report qos event on non-distributed data session");
-        return SOFTBUS_OK;
-    }
     int32_t socket = INVALID_SESSION_ID;
     SessionListenerAdapter sessionCallback;
     bool isServer = false;

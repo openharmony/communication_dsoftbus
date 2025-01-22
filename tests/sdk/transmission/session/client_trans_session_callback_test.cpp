@@ -997,7 +997,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestS
     int32_t ret = ClientTransOnQos(channelId, channelType, event, nullptr, count);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientTransOnQos(channelId, channelType, event, &qos, count);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
