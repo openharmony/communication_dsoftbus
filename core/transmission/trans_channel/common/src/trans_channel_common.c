@@ -322,6 +322,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
     appInfo->callingTokenId = TransACLGetCallingTokenID();
     appInfo->isClient = true;
+    appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return SOFTBUS_OK;
 }

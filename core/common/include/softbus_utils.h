@@ -36,6 +36,7 @@ extern "C" {
 #define TIMER_TIMEOUT 1000 // 1s
 #define BT_MAC_NO_COLON_LEN 13
 #define TRANS_CAPABILITY_TLV_OFFSET 0
+#define TRANS_CHANNEL_CAPABILITY 0x01
 
 #define MAC_DELIMITER ':'
 #define IP_DELIMITER '.'

@@ -110,7 +110,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
-    if (!AddNumberToJsonObject(json, TRANS_CAPABILITY, (int32_t)appInfo->transCapability)) {
+    if (!AddNumberToJsonObject(json, TRANS_CAPABILITY, (int32_t)appInfo->channelCapability)) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
@@ -299,7 +299,9 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectNumber64Item(msg, JSON_KEY_CALLING_TOKEN_ID, (int64_t *)&appInfo->callingTokenId)) {
         appInfo->callingTokenId = TOKENID_NOT_SET;
     }
-    (void)GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&appInfo->transCapability);
+    uint32_t remoteCapability = 0;
+    (void)GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&remoteCapability);
+    appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     return SOFTBUS_OK;
 }
 
@@ -315,8 +317,8 @@ static int32_t AddItemsToJsonObject(const AppInfo *appInfo, cJSON *json)
         SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add uid");
     TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, PID, appInfo->myData.pid),
         SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add pid");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, TRANS_CAPABILITY, appInfo->transCapability),
-        SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add transCapability");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, TRANS_CAPABILITY, appInfo->channelCapability),
+        SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add channelCapability");
     return SOFTBUS_OK;
 }
 
@@ -410,7 +412,9 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
             return SOFTBUS_PARSE_JSON_ERR;
         }
     }
-    (void)GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&appInfo->transCapability);
+    if (!GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&(appInfo->channelCapability))) {
+        appInfo->channelCapability = 0;
+    }
     return SOFTBUS_OK;
 }
 

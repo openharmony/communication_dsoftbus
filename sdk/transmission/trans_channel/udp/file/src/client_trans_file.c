@@ -103,8 +103,8 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
     event->statusList.notCompletedList.fileCnt = (uint32_t)notCompletedIndex;
     event->statusList.notStartedList.fileCnt = (uint32_t)notStartedIndex;
     TRANS_LOGI(TRANS_SDK,
-        "status list totalFileNum=%{public}d, completedNum=%{public}d, notCompletedNum=%{public}d, "
-        "notStartedNum=%{public}d",
+        "status list totalFileNum=%{public}d, completedNum=%{public}u, notCompletedNum=%{public}u, "
+        "notStartedNum=%{public}u",
         fileNum, event->statusList.completedList.fileCnt, event->statusList.notCompletedList.fileCnt,
         event->statusList.notStartedList.fileCnt);
 }

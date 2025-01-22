@@ -46,7 +46,7 @@ int32_t LockClientDataSeqInfoList()
 {
     if (g_clientDataSeqInfoList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_clientDataSeqInfoList not init");
-        return SOFTBUS_TRANS_DATA_SEQ_INFO_NOINIT;
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NO_INIT;
     }
     int32_t ret = SoftBusMutexLock(&(g_clientDataSeqInfoList->lock));
     if (ret != SOFTBUS_OK) {
@@ -65,7 +65,7 @@ int TransDataSeqInfoListInit(void)
     g_clientDataSeqInfoList = CreateSoftBusList();
     if (g_clientDataSeqInfoList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_clientDataSeqInfoList not init");
-        return SOFTBUS_TRANS_DATA_SEQ_INFO_NOINIT;
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NO_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -1074,18 +1074,18 @@ int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
         return ret;
     }
     DataSeqInfo *item = NULL;
-    DataSeqInfo *itemNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+    DataSeqInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
         if (item->channelId == channelId && item->seq == dataSeq) {
             ListDelete(&(item->node));
             SoftBusFree(item);
-            TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}d",
+            TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u",
                 channelId, dataSeq);
             UnlockClientDataSeqInfoList();
             return SOFTBUS_OK;
         }
     }
-    TRANS_LOGE(TRANS_SDK, "dataSeqInfoList not found, channelId=%{public}d, dataSeq=%{public}d", channelId, dataSeq);
+    TRANS_LOGD(TRANS_SDK, "dataSeqInfoList not found, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
     UnlockClientDataSeqInfoList();
     return SOFTBUS_TRANS_DATA_SEQ_INFO_NOT_FOUND;
 }
@@ -1097,20 +1097,20 @@ static void TransOnBindSentProc(ListNode *timeoutItemList)
         return;
     }
     DataSeqInfo *item = NULL;
-    DataSeqInfo *itemNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, timeoutItemList, DataSeqInfo, node) {
+    DataSeqInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, timeoutItemList, DataSeqInfo, node) {
         SessionListenerAdapter sessionCallback;
         (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
         bool isServer = false;
         int32_t ret = ClientGetSessionCallbackAdapterById(item->socketId, &sessionCallback, &isServer);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionId=%{public}d", item->socketId);
+            TRANS_LOGE(TRANS_SDK, "get session callback failed, socket=%{public}d", item->socketId);
             ListDelete(&(item->node));
             SoftBusFree(item);
             continue;
         }
-        sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_SEND_ACK_TIME_OUT);
-        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socketId=%{public}d, dataSeq=%{public}d",
+        sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socketId=%{public}d, dataSeq=%{public}u",
             item->socketId, item->seq);
         ListDelete(&(item->node));
         SoftBusFree(item);
@@ -1126,8 +1126,8 @@ void TransAsyncSendBytesTimeoutProc(void)
     ListNode timeoutItemList;
     ListInit(&timeoutItemList);
     DataSeqInfo *item = NULL;
-    DataSeqInfo *itemNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+    DataSeqInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
         item->timeout++;
         if (item->timeout > SENDBYTES_TIMEOUT_S) {
             DataSeqInfo *timeoutItem = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));

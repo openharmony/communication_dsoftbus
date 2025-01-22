@@ -152,7 +152,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->appInfo.crc = info->appInfo.crc;
             item->appInfo.myData.dataConfig = info->appInfo.myData.dataConfig;
             item->appInfo.peerHandleId = info->appInfo.peerHandleId;
-            item->appInfo.transCapability = info->appInfo.transCapability;
+            item->appInfo.channelCapability = info->appInfo.channelCapability;
             if (memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                 &(info->appInfo.peerData), sizeof(info->appInfo.peerData)) != EOK ||
                 memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
