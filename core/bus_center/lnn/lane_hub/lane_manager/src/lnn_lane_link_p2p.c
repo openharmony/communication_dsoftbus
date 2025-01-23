@@ -2397,8 +2397,10 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
         LNN_LOGI(LNN_LANE, "not find lane resource");
         return ret;
     }
-    LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel");
-    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+    enum WifiDirectLinkType linkType = (request->linkType == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
+        WIFI_DIRECT_LINK_TYPE_P2P;
+    LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel, linkType=%{public}d", linkType);
+    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, linkType)) {
         LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " exist but need nego channel", resourceItem.laneId);
         return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
