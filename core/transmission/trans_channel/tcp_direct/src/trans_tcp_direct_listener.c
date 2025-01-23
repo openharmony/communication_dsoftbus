@@ -23,6 +23,7 @@
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "legacy/softbus_adapter_hitrace.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
@@ -88,16 +89,25 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
+static void TransTdcCheckIsApp(AppInfo *appInfo)
+{
+    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+        return;
+    }
+    if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
+        appInfo->myData.accountId = INVALID_ACCOUNT_ID;
+        TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
+    }
+    appInfo->myData.userId = TransGetForegroundUserId();
+}
+
 static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)
 {
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-    if (GetCurrentAccount(&conn->appInfo.myData.accountId) != SOFTBUS_OK) {
-        conn->appInfo.myData.accountId = INVALID_ACCOUNT_ID;
-    }
-    conn->appInfo.myData.userId = TransGetForegroundUserId();
+    TransTdcCheckIsApp(&conn->appInfo);
 
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {

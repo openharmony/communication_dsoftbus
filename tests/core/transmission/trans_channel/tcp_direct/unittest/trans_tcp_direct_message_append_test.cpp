@@ -2225,7 +2225,15 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcFillAppInfoAndNotifyChannel001
     EXPECT_CALL(TcpMessageMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, SetAppInfoById).WillOnce(Return(SOFTBUS_OK));
     ret = TransTdcFillAppInfoAndNotifyChannel(appInfo, channelId, errDesc);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(TcpMessageMock, TransTdcGetUidAndPid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(1));
+    EXPECT_CALL(TcpMessageMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, SetAppInfoById).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, CheckCollabRelation).WillOnce(Return(SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION));
+    ret = TransTdcFillAppInfoAndNotifyChannel(appInfo, channelId, errDesc);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SoftBusFree(appInfo);
     SoftBusFree(errDesc);
 }
