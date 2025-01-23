@@ -186,15 +186,15 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
     return &g_reAuthVerifyCallback;
 }
 
-static void NotifyStateForSession(const JoinLnnMsgPara *para)
+void NotifyStateForSession(const ConnectionAddr *addr)
 {
-    if (para == NULL) {
-        LNN_LOGE(LNN_BUILDER, "JoinLnnMsgPara is null.");
+    if (addr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "addr is null.");
         return;
     }
     ConnIdCbInfo connIdCbInfo;
     (void)memset_s(&connIdCbInfo, sizeof(ConnIdCbInfo), 0, sizeof(ConnIdCbInfo));
-    int32_t ret = GetConnIdCbInfoByAddr(&para->addr, &connIdCbInfo);
+    int32_t ret = GetConnIdCbInfoByAddr(addr, &connIdCbInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get connIdCbInfo fail.");
         return ;
@@ -229,7 +229,7 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
         LNN_LOGE(LNN_BUILDER, "process join lnn request failed");
         if (needReportFailure) {
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
-            NotifyStateForSession(para);
+            NotifyStateForSession(&para->addr);
         }
         if (connFsm != NULL && isCreate) {
             LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
