@@ -232,5 +232,9 @@ int32_t GetErrCodeBySocketErr(int32_t transErrCode)
 {
     return GetTransTcpDirectMessageInterface()->GetErrCodeBySocketErr(transErrCode);
 }
+int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType)
+{
+    return GetTransTcpDirectMessageInterface()->CheckCollabRelation(appInfo, channelId, channelType);
+}
 }
 }
