@@ -35,6 +35,7 @@
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
+#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
@@ -841,6 +842,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
+    bool isIrkChanged = false;
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
     UpdateNewNodeAccountHash(newInfo);
     UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid, newInfo->userId);
@@ -856,6 +858,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NETWORK_MAP_GET_FAILED;
     }
+    if (memcmp(newInfo->rpaInfo.peerIrk, oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN) != 0) {
+        isIrkChanged = true;
+    }
     int32_t ret = UpdateRemoteNodeInfo(oldInfo, newInfo, connectionType, deviceName);
     if (ret != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -864,6 +869,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
+    }
+    if (isIrkChanged) {
+        LnnInsertLinkFinderInfo(oldInfo->networkId);
     }
     CheckUserIdCheckSumChange(oldInfo, newInfo);
     ret = RemoteNodeInfoRetrieve(newInfo, connectionType, deviceName);
