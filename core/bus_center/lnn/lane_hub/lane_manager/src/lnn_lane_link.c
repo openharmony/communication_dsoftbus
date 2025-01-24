@@ -1078,7 +1078,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
         item->port = port;
         item->cnt++;
     } else {
-        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusMalloc(sizeof(P2pAddrNode));
+        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusCalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
             SoftBusMutexUnlock(&g_P2pAddrList.lock);
             return;
@@ -1124,7 +1124,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
         item->port = port;
         item->cnt++;
     } else {
-        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusMalloc(sizeof(P2pAddrNode));
+        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusCalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
             SoftBusMutexUnlock(&g_P2pAddrList.lock);
             return;
