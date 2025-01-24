@@ -67,6 +67,7 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",
     "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
     "$dsoftbus_core_path/bus_center/service/include",
     "$dsoftbus_core_path/discovery/ble/dispatcher/include",
     "$dsoftbus_core_path/discovery/usb/dispatcher/include",

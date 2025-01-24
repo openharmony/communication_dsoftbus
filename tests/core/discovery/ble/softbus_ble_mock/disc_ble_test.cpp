@@ -239,6 +239,10 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
     busMock.SetupSuccessStub();
 
     SubscribeOption option = GetSubscribeOptionForOsd();
+    const char *pkgName = "ohos.distributedhardware.devicemanager";
+    const char *nameData = "{\"raw\": \"My Device\",\"name18\": \"Display Name 18\","
+        "\"name21\": \"Display Name 21\",\"name24\": \"Display Name 24\"}";
+    DiscSetDisplayName(pkgName, nameData, strlen(nameData));
     EXPECT_EQ(g_interface->mediumInterface->StartAdvertise(&option), SOFTBUS_OK);
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
 

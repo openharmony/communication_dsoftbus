@@ -27,8 +27,6 @@ class AuthChannelInterface {
 public:
     AuthChannelInterface() {};
     virtual ~AuthChannelInterface() {};
-    virtual int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler) = 0;
-    virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
     virtual int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback) = 0;
 };
 
@@ -36,10 +34,6 @@ class AuthChannelInterfaceMock : public AuthChannelInterface {
 public:
     AuthChannelInterfaceMock();
     ~AuthChannelInterfaceMock() override;
-    MOCK_METHOD1(LnnInitGetDeviceName, int32_t (LnnDeviceNameHandler));
-    MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
-    static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
-    static inline LnnDeviceNameHandler g_deviceNameHandler;
     MOCK_METHOD2(LnnServerJoinExt, int32_t (ConnectionAddr *, LnnServerJoinExtCallBack *));
 };
 } // namespace OHOS

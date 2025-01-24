@@ -51,10 +51,5 @@ int32_t GetActiveOsAccountIds(void)
 {
     return GetSettingDataEventMonitorDepsInterface()->GetActiveOsAccountIds();
 }
-
-void UpdateDeviceName(void *p)
-{
-    return GetSettingDataEventMonitorDepsInterface()->UpdateDeviceName(p);
-}
 }
 } // namespace OHOS

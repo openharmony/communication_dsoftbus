@@ -579,3 +579,17 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
     }
     return SyncTrustedRelationShipInner(pkgName, msg, msgLen);
 }
+
+int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || nameData == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid SetDisplayName para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SetDisplayNameInner(pkgName, nameData, len);
+}

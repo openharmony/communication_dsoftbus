@@ -42,19 +42,6 @@ static NetBuilderDepsInterface *GetNetBuilderDepsInterface()
     return reinterpret_cast<NetBuilderDepsInterfaceMock *>(g_netBuilderDepsInterface);
 }
 
-int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    if (deviceName == NULL) {
-        LNN_LOGE(LNN_TEST, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
-        LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     if (info == NULL || infoNum == NULL) {
@@ -75,11 +62,6 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicIn
 }
 
 extern "C" {
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    return GetNetBuilderDepsInterface()->LnnGetSettingDeviceName(deviceName, len);
-}
-
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);

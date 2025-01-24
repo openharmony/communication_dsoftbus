@@ -437,6 +437,11 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     return LnnSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return LnnDisSetDisplayName(pkgName, nameData, len);
+}
+
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {
