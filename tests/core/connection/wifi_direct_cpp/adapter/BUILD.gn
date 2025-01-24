@@ -120,7 +120,6 @@ ohos_unittest("P2pAdapterTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
-    "googletest:gmock_main",
     "googletest:gmock_rtti",
     "googletest:gtest_rtti",
     "hilog:libhilog",
