@@ -914,8 +914,6 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
-                RegisterNameMonitor();
-                LnnUpdateDeviceName();
                 LnnUpdateOhosAccount(UPDATE_USER_SWITCH);
                 HbConditionChanged(false);
                 RefreshBleBroadcastByUserSwitched();

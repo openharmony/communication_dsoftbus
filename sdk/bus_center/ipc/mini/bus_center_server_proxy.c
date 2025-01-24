@@ -143,3 +143,11 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     (void)msgLen;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    (void)pkgName;
+    (void)nameData;
+    (void)len;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

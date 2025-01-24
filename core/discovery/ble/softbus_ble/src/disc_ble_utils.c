@@ -104,7 +104,7 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
     DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name size is 0");
 
     char localDevName[DEVICE_NAME_BUF_LEN] = {0};
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, size);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "get local device name failed");
 
     uint32_t truncateLen = 0;

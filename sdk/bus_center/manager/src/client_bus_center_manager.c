@@ -1036,6 +1036,11 @@ int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint3
     return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return ServerIpcSetDisplayName(pkgName, nameData, len);
+}
+
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;

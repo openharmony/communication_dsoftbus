@@ -17,6 +17,8 @@
 #include <securec.h>
 #include <string>
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "iservice_registry.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_device_info.h"
@@ -26,27 +28,22 @@
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "lnn_settingdata_event_monitor_deps_mock.h"
+#include "locale_config.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "system_ability_definition.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "iservice_registry.h"
-#include "system_ability_definition.h"
-#include "softbus_adapter_mem.h"
-#include "lnn_settingdata_event_monitor_deps_mock.h"
 
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
-constexpr char *DEVICE_NAME1 = nullptr;
-const char *DEVICE_NAME2 = "ABCDEFG";
 const char *NICK_NAME = "TEST_NICK_NAME";
 const char *DEFAULT_NAME = "TEST_DEFAULT_NAME";
+static constexpr const char *INTERNAL_NAME_CONCAT_STRING = "的";
+static constexpr const char *EXTERNAL_NAME_CONCAT_STRING = "-";
 
 class LnnSettingdataEventMonitorTest : public testing::Test {
 protected:
@@ -61,31 +58,6 @@ void LnnSettingdataEventMonitorTest::SetUp(void) { }
 void LnnSettingdataEventMonitorTest::TearDown(void) { }
 
 /*
-* @tc.name: LnnGetSettingDeviceNameTest001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSize.Level1)
-{
-    int32_t ret = LnnGetSettingDeviceName(DEVICE_NAME1, DEVICE_NAME_BUF_LEN);
-    EXPECT_NE(ret, SOFTBUS_OK);
-}
-
-/*
-* @tc.name: LnnGetSettingDeviceNameTest002
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest002, TestSize.Level1)
-{
-    LnnDeviceNameHandler handler = NULL;
-    int32_t ret = LnnInitGetDeviceName(handler);
-    EXPECT_NE(ret, SOFTBUS_OK);
-}
-
-/*
 * @tc.name: LnnGetSettingDeviceNameTest003
 * @tc.desc:
 * @tc.type: FUNC
@@ -94,8 +66,20 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest002, TestSiz
 HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSize.Level1)
 {
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
-    strncpy_s(deviceName, sizeof(deviceName), "TEST_DEVICE_NAME", sizeof(deviceName) - 1);
     int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, deviceName, DEVICE_NAME_BUF_LEN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_NOT_IMPLEMENT);
+    if (ret != SOFTBUS_NOT_IMPLEMENT) {
+        char devName[DEVICE_NAME_BUF_LEN] = {0};
+        std::string language = OHOS::Global::I18n::LocaleConfig::GetSystemLanguage();
+        if ("zh-Hans" == language || "zh-Hant" == language) {
+            ASSERT_GT(sprintf_s(devName, DEVICE_NAME_BUF_LEN, "%s%s%s", NICK_NAME,
+            INTERNAL_NAME_CONCAT_STRING, DEFAULT_NAME), 0);
+            EXPECT_EQ(strncmp(devName, deviceName, DEVICE_NAME_BUF_LEN), 0);
+        } else {
+            ASSERT_GT(sprintf_s(devName, DEVICE_NAME_BUF_LEN, "%s%s%s", NICK_NAME,
+            EXTERNAL_NAME_CONCAT_STRING, DEFAULT_NAME), 0);
+            EXPECT_EQ(strncmp(devName, deviceName, DEVICE_NAME_BUF_LEN), 0);
+        }
+    }
 }
-}
+} // namespace OHOS

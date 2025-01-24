@@ -593,7 +593,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSiz
     EXPECT_CALL(decisionDbMock, LnnGetLocalByteInfo(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR));
     int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*

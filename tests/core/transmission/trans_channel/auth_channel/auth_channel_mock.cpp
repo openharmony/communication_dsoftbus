@@ -40,25 +40,6 @@ static AuthChannelInterface *GetAuthChannelInterface()
 }
 
 extern "C" {
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
-{
-    return GetAuthChannelInterface()->LnnInitGetDeviceName(handler);
-}
-
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    return GetAuthChannelInterface()->LnnGetSettingDeviceName(deviceName, len);
-}
-
-int32_t AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler)
-{
-    if (handler == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    g_deviceNameHandler = handler;
-    return SOFTBUS_OK;
-}
-
 int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
 {
     return GetAuthChannelInterface()->LnnServerJoinExt(addr, callback);

@@ -23,8 +23,7 @@
 extern "C" {
 #endif
 
-void UpdateDeviceName(void *p);
-void LnnUpdateDeviceName(void);
+int32_t LnnSetLocalDeviceName(const char *displayName);
 int32_t LnnInitDevicename(void);
 void LnnDeinitDevicename(void);
 

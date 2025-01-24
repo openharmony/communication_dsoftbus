@@ -24,6 +24,11 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return BusCenterMock::GetMock()->LnnGetLocalStrInfo(key, info, len);
 }
 
+int32_t LnnSetLocalDeviceName(const char *displayName)
+{
+    return BusCenterMock::GetMock()->LnnSetLocalDeviceName(displayName);
+}
+
 int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
 {
     return BusCenterMock::GetMock()->LnnConvertDeviceTypeToId(deviceType, typeId);
@@ -112,6 +117,7 @@ bool BusCenterMock::ActionOfLnnIsDefaultOhosAccount()
 void BusCenterMock::SetupSuccessStub()
 {
     EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(BusCenterMock::ActionOfLnnGetLocalStrInfo);
+    EXPECT_CALL(*this, LnnSetLocalDeviceName).WillRepeatedly(testing::Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnConvertDeviceTypeToId).WillRepeatedly(BusCenterMock::ActionOfLnnConvertDeviceTypeToId);
     EXPECT_CALL(*this, LnnGetLocalByteInfo).WillRepeatedly(BusCenterMock::ActionOfLnnGetLocalByteInfo);
     EXPECT_CALL(*this, LnnIsDefaultOhosAccount).WillRepeatedly(BusCenterMock::ActionOfLnnIsDefaultOhosAccount);

@@ -88,6 +88,9 @@ ohos_unittest("LnnKSettingDataEventMonitorTest") {
     "kv_store:distributeddata_inner",
     "samgr:samgr_proxy",
   ]
+  if (support_i18n && qemu_arm_disable) {
+    external_deps += [ "i18n:intl_util" ]
+  }
 }
 
 ohos_unittest("AdapterDsoftbusRsaCryptoTest") {

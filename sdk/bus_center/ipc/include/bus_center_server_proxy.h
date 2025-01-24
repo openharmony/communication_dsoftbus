@@ -52,6 +52,7 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
 int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
 int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

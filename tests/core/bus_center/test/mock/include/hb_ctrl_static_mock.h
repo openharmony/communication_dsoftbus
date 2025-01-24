@@ -84,9 +84,7 @@ public:
     virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len) = 0;
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
-    virtual void LnnUpdateDeviceName(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
-    virtual void RegisterNameMonitor(void) = 0;
     virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
     virtual void LnnRemoveV0BroadcastAndCheckDev(void) = 0;
 };
@@ -138,9 +136,7 @@ public:
     MOCK_METHOD4(
         HbBuildUserIdCheckSum, int32_t(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
-    MOCK_METHOD0(LnnUpdateDeviceName, void(void));
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
-    MOCK_METHOD0(RegisterNameMonitor, void(void));
     MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
     MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void (void));
 };

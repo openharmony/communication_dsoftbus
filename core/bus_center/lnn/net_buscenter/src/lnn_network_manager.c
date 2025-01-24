@@ -368,7 +368,6 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
             if (!g_isDataShareInit) {
                 g_isDataShareInit = true;
                 LnnInitOOBEStateMonitorImpl();
-                LnnInitDeviceNameMonitorImpl();
                 RetryCheckOOBEState(NULL);
             }
             (void)SoftBusMutexUnlock(&g_dataShareMutex);
