@@ -123,7 +123,6 @@ ohos_unittest("P2pEntityTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "googletest:gmock_main",
     "googletest:gmock_rtti",
     "googletest:gtest_rtti",
     "hilog:libhilog",
