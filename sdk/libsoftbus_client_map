@@ -26,6 +26,7 @@
         "SetFileSendListener";
         "ShiftLNNGear";
         "SyncTrustedRelationShip";
+        "SetDisplayName";
         "GetNodeKeyInfo";
         "GetSessionKey";
         "SendFile";

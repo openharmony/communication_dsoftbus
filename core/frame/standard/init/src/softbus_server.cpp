@@ -446,4 +446,9 @@ int32_t SoftBusServer::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, cons
     }
     return TransPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
 }
+
+int32_t SoftBusServer::SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return LnnIpcSetDisplayName(pkgName, nameData, len);
+}
 } // namespace OHOS

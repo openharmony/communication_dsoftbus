@@ -247,19 +247,9 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
     return HeartBeatCtrlStaticInterface()->LnnSetLocalByteInfo(key, info, len);
 }
 
-void LnnUpdateDeviceName(void)
-{
-    return HeartBeatCtrlStaticInterface()->LnnUpdateDeviceName();
-}
-
 int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
 {
     return HeartBeatCtrlStaticInterface()->LnnStartHbByTypeAndStrategyEx(msgPara);
-}
-
-void RegisterNameMonitor(void)
-{
-    return HeartBeatCtrlStaticInterface()->RegisterNameMonitor();
 }
 
 int32_t LnnSyncBleOfflineMsg(void)
