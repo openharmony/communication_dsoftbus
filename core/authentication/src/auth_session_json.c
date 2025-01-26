@@ -2135,6 +2135,7 @@ int32_t UnpackDeviceInfoMessage(
         return SOFTBUS_PARSE_JSON_ERR;
     }
     int32_t ret;
+    int32_t target = 0;
     if (devInfo->linkType == AUTH_LINK_TYPE_WIFI) {
         ret = UnpackWiFi(json, nodeInfo, devInfo->version, isMetaAuth);
     } else if (devInfo->version == SOFTBUS_OLD_V1) {
@@ -2143,6 +2144,10 @@ int32_t UnpackDeviceInfoMessage(
         ret = UnpackBt(json, nodeInfo, devInfo->version, isMetaAuth);
     }
     UnpackWifiDirectInfo(json, nodeInfo, isMetaAuth);
+    nodeInfo->isSupportSv = false;
+    if (JSON_GetInt32FromOject(json, STATE_VERSION, &target)) {
+        nodeInfo->isSupportSv = true;
+    }
     if (UnpackCertificateInfo(json, nodeInfo, info) != SOFTBUS_OK) {
         JSON_Delete(json);
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;

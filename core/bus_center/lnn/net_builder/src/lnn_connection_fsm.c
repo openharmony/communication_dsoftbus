@@ -515,6 +515,9 @@ static void SetLnnConnNodeInfo(
     NodeInfo oldInfo;
     (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnRetrieveDeviceInfoByNetworkId(networkId, &oldInfo);
+    if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
+        connInfo->nodeInfo->isSupportSv = true;
+    }
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {

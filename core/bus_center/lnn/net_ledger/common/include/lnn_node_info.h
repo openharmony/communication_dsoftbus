@@ -151,6 +151,7 @@ typedef struct {
     bool isAuthExchangeUdid;
     bool isSupportIpv6;
     bool isBleP2p; // true: this device support connect p2p via ble connection
+    bool isSupportSv;
     uint8_t staticCapability[STATIC_CAP_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];

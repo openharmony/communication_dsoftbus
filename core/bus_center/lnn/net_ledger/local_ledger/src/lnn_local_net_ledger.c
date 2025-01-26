@@ -2389,6 +2389,7 @@ static void GenerateStateVersion(void)
     }
     randNum = randNum % (MAX_STATE_VERSION + 1);
     g_localNetLedger.localInfo.stateVersion = randNum;
+    g_localNetLedger.localInfo.isSupportSv = true;
     LNN_LOGI(LNN_LEDGER, "init local stateVersion=%{public}d", g_localNetLedger.localInfo.stateVersion);
 }
 
