@@ -33,6 +33,7 @@ typedef enum {
 
 typedef struct {
     bool isMeta;
+    bool isReply;
     uint8_t tos;
     UdpChannelStatus status;
     uint32_t requestId;
@@ -63,17 +64,17 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel);
 int32_t TransDelUdpChannel(int32_t channelId);
 void TransCloseUdpChannelByNetWorkId(const char* netWorkId);
 
-int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel);
+int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isReply);
 int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel);
 int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel);
 
-int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status);
+int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isReply);
 int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type);
 
 int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionName,
     uint16_t pkgNameLen, uint16_t sessionNameLen);
 
-void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo);
+void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isReply);
 
 UdpChannelInfo *TransGetChannelObj(int32_t channelId);
 
@@ -102,6 +103,8 @@ int32_t TransSetTos(int32_t channelId, uint8_t tos);
 int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
 
 bool CompareSessionName(const char *dstSessionName, const char *srcSessionName);
+
+void TransSetUdpChannelMsgType(uint32_t requestId);
 #ifdef __cplusplus
 }
 #endif
