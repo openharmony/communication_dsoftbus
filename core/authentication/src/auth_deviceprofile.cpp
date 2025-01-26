@@ -272,8 +272,8 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
         LNN_LOGI(LNN_STATE, "dp has acl. udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d, "
             "Status=%{public}d", AnonymizeWrapper(anonyUdid), localUserId, peerUserId, aclProfile.GetStatus());
         AnonymizeFree(anonyUdid);
-        if (aclProfile.GetStatus() != (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE) {
-            aclProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
+        if (aclProfile.GetStatus() != (int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE) {
+            aclProfile.SetStatus((int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
             ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
             LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile ret=%{public}d", ret);
         }

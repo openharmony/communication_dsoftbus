@@ -29,8 +29,8 @@
 #include "tokenid_kit.h"
 
 constexpr int32_t JUDG_CNT = 1;
-const std::string SAMGR_PROCESS_NAME = "samgr";
-const std::string DMS_PROCESS_NAME = "distributedsched";
+const char *SAMGR_PROCESS_NAME = "samgr";
+const char *DMS_PROCESS_NAME = "distributedsched";
 static PermissionChangeCb g_permissionChangeCb = nullptr;
 const char *g_sessionName[] = {
     "DBinder*",

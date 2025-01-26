@@ -37,9 +37,9 @@ static LnnDeviceNameHandler g_eventHandler = nullptr;
 
 namespace OHOS {
 namespace BusCenter {
-static const std::string SETTINGS_DATA_BASE_URI =
+static const char *SETTINGS_DATA_BASE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
-static const std::string SETTINGS_DATA_SECURE_URI =
+static const char *SETTINGS_DATA_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
 static constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 static constexpr const char *SETTINGS_DATA_FIELD_KEYWORD = "KEYWORD";
@@ -123,7 +123,8 @@ static int32_t GetDeviceNameFromDataShareHelper(std::shared_ptr<DataShare::DataS
 static int32_t GetDefaultDeviceName(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper,
     char *deviceName, uint32_t len)
 {
-    std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
+    std::shared_ptr<Uri> uri = std::make_shared<Uri>(std::string(SETTINGS_DATA_BASE_URI) +
+        "&key=" + std::string(PREDICATES_STRING));
     LNN_LOGI(LNN_STATE, "get default deviceName");
     return GetDeviceNameFromDataShareHelper(dataShareHelper, uri, PREDICATES_STRING, deviceName, len);
 }
@@ -136,8 +137,8 @@ static int32_t GetUserDefinedDeviceName(std::shared_ptr<DataShare::DataShareHelp
         return SOFTBUS_NO_INIT;
     }
     std::string accountIdStr = std::to_string(osAccountId);
-    std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_SECURE_URI + accountIdStr + "?Proxy=true&key=" +
-        USER_DEFINED_STRING);
+    std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_SECURE_URI + accountIdStr +
+        "?Proxy=true&key=" + USER_DEFINED_STRING);
     LNN_LOGI(LNN_STATE, "get user defined deviceName, accountIdStr=%{public}s", accountIdStr.c_str());
     return GetDeviceNameFromDataShareHelper(dataShareHelper, uri, USER_DEFINED_STRING, deviceName, len);
 }
@@ -149,7 +150,7 @@ static void RegisterNameMonitorHelper(void)
         LNN_LOGE(LNN_STATE, "CreateDataShareHelperInstance fail.");
         return;
     }
-    auto uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
+    auto uri = std::make_shared<Uri>(std::string(SETTINGS_DATA_BASE_URI) + "&key=" + std::string(PREDICATES_STRING));
     sptr<LnnSettingDataEventMonitor> settingDataObserver = std::make_unique<LnnSettingDataEventMonitor>().release();
     dataShareHelper->RegisterObserver(*uri, settingDataObserver);
 

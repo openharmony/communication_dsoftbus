@@ -25,6 +25,14 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     return SOFTBUS_OK;
 }
 
+int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len)
+{
+    (void)userId;
+    (void)id;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t GetCurrentAccount(int64_t *account)
 {
     (void)account;

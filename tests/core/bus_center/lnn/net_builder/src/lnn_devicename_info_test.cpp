@@ -23,6 +23,7 @@
 #include "lnn_service_mock.h"
 #include "lnn_sync_info_mock.h"
 #include "softbus_error_code.h"
+#include "lnn_sync_info_manager.h"
 
 namespace OHOS {
 using namespace testing;
@@ -208,14 +209,19 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_HANDLER_GET_DEVICE_NAME_TEST_001, TestSize.L
 HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
+    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusMalloc(sizeof(SendSyncInfoParam));
+    EXPECT_TRUE(data != NULL);
+    memset_s(data, sizeof(SendSyncInfoParam), 0, sizeof(SendSyncInfoParam));
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr))
         .WillRepeatedly(Return(&nodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillOnce(Return(DEVICE_NAME1))
         .WillRepeatedly(Return(DEVICE_NAME2));
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg)
-        .WillOnce(Return(SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED))
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillOnce(Return(nullptr))
+        .WillRepeatedly(Return(data));
+    NiceMock<LnnServicetInterfaceMock> ServiceMock;
+    EXPECT_CALL(ServiceMock, LnnAsyncCallbackHelper)
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncDeviceName(NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
@@ -225,6 +231,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED);
     ret = LnnSyncDeviceName(NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
 }
 
 /*

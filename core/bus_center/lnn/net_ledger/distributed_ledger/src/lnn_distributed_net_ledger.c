@@ -35,6 +35,7 @@
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
+#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
@@ -732,6 +733,33 @@ static void CheckUserIdCheckSumChange(NodeInfo *oldInfo, const NodeInfo *newInfo
     }
 }
 
+static int32_t UpdateFileInfo(NodeInfo *newInfo, NodeInfo *oldInfo)
+{
+    LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
+    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy ptk failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcmp(newInfo->cipherInfo.key, oldInfo->cipherInfo.key, SESSION_KEY_LENGTH) != 0 ||
+        memcmp(newInfo->cipherInfo.iv, oldInfo->cipherInfo.iv, BROADCAST_IV_LEN) != 0) {
+        LNN_LOGI(LNN_LEDGER, "remote link key change");
+        if (memcpy_s(oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) != EOK ||
+            memcpy_s(oldInfo->cipherInfo.iv, BROADCAST_IV_LEN, newInfo->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "copy link key failed");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    if (memcmp(newInfo->rpaInfo.peerIrk, oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN) != 0) {
+        LNN_LOGI(LNN_LEDGER, "remote irk change");
+        if (memcpy_s(oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, newInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "copy irk failed");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    LNN_LOGI(LNN_LEDGER, "update file info success");
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_t connectionType, char *deviceName)
 {
     if (oldInfo == NULL || newInfo == NULL || deviceName == NULL) {
@@ -757,9 +785,8 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
         LNN_LOGE(LNN_LEDGER, "copy account hash failed");
         return SOFTBUS_MEM_ERR;
     }
-    LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
-    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "copy ptk failed");
+    if (UpdateFileInfo(newInfo, oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update file info failed");
         return SOFTBUS_MEM_ERR;
     }
     oldInfo->accountId = newInfo->accountId;
@@ -815,6 +842,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
+    bool isIrkChanged = false;
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
     UpdateNewNodeAccountHash(newInfo);
     UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid, newInfo->userId);
@@ -830,6 +858,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NETWORK_MAP_GET_FAILED;
     }
+    if (memcmp(newInfo->rpaInfo.peerIrk, oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN) != 0) {
+        isIrkChanged = true;
+    }
     int32_t ret = UpdateRemoteNodeInfo(oldInfo, newInfo, connectionType, deviceName);
     if (ret != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -838,6 +869,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
+    }
+    if (isIrkChanged) {
+        LnnInsertLinkFinderInfo(oldInfo->networkId);
     }
     CheckUserIdCheckSumChange(oldInfo, newInfo);
     ret = RemoteNodeInfoRetrieve(newInfo, connectionType, deviceName);
@@ -1050,17 +1084,17 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         return;
     }
     if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
-        sizeof(info->rpaInfo.peerIrk)) != EOK) {
+            sizeof(info->rpaInfo.peerIrk)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
         return;
     }
-        if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
-        sizeof(info->cipherInfo.key)) != EOK) {
+    if (memcpy_s(deviceInfo->cipherInfo.key, sizeof(deviceInfo->cipherInfo.key), info->cipherInfo.key,
+            sizeof(info->cipherInfo.key)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.key fail");
         return;
     }
     if (memcpy_s(deviceInfo->cipherInfo.iv, sizeof(deviceInfo->cipherInfo.iv), info->cipherInfo.iv,
-        sizeof(info->cipherInfo.iv)) != EOK) {
+            sizeof(info->cipherInfo.iv)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo.iv fail");
         return;
     }
@@ -1120,6 +1154,7 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
         FilterBrInfo(info);
     }
     if (IsDeviceInfoChanged(info)) {
+        LNN_LOGI(LNN_LEDGER, "device info changed");
         if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         }

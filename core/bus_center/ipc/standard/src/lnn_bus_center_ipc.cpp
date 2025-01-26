@@ -284,6 +284,7 @@ int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
             g_dataLevelChangeRequestInfo.erase(iter);
             break;
         }
+        ++iter;
     }
     LnnUnregDataLevelChangeCb();
     return SOFTBUS_OK;
@@ -454,6 +455,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
         info.pid = (*iter)->pid;
         if (strcpy_s(info.pkgName, PKG_NAME_SIZE_MAX, (*iter)->pkgName) != EOK) {
             LNN_LOGE(LNN_EVENT, "strcpy_s fail");
+            ++iter;
             continue;
         }
         ClientOnJoinLNNResult(&info, addr, addrTypeLen, networkId, retCode);

@@ -54,6 +54,9 @@
 #define ID_OFFSET (1)
 #define MAX_ERRDESC_LEN 128
 
+#define ISHARE_SESSION_NAME "IShare*"
+#define CLONE_SESSION_NAME "IShare_*"
+
 static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
 static IServerChannelCallBack *g_channelCb = NULL;
@@ -320,7 +323,7 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
     }
     appInfo->myData.channelId = udpChannelId;
     int32_t ret = LnnGetNetworkIdByUuid(
-        (const char *)appInfo->peerData.deviceId, appInfo->peerNetWorkId, DEVICE_ID_SIZE_MAX);
+        (const char *)appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get network id by uuid failed.");
     }
@@ -603,11 +606,11 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
 
-    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE, true) != SOFTBUS_OK) {
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status done failed.");
         return;
     }
-    if (TransGetUdpChannelBySeq(seq, &channel, true) != SOFTBUS_OK) {
+    if (TransGetUdpChannelBySeq(seq, &channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel by seq failed.");
         return;
     }
@@ -624,7 +627,7 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
         ProcessAbnormalUdpChannelState(&(channel.info), ret, true);
         return;
     }
-    TransUpdateUdpChannelInfo(seq, &(channel.info), true);
+    TransUpdateUdpChannelInfo(seq, &(channel.info));
     ret = ProcessUdpChannelState(&(channel.info), false, &authHandle, seq);
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
     if (ret != SOFTBUS_OK) {
@@ -771,7 +774,7 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, AuthHandle authHand
         return ret;
     }
     cJSON_free(msgStr);
-    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING, true) != SOFTBUS_OK) {
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status neging failed.");
     }
     TransEventExtra extra = {
@@ -952,7 +955,9 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
 
 static bool TransUdpGetAuthType(const char *peerNetWorkId, const char *mySessionName)
 {
-    if (IsIShareSession(mySessionName) && IsAvailableMeta(peerNetWorkId)) {
+    if (!CompareSessionName(CLONE_SESSION_NAME, mySessionName) &&
+        CompareSessionName(ISHARE_SESSION_NAME, mySessionName) &&
+        IsAvailableMeta(peerNetWorkId)) {
         return true;
     }
     return TransGetAuthTypeByNetWorkId(peerNetWorkId);

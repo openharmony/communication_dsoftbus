@@ -768,6 +768,16 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
         TRANS_LOGE(TRANS_FILE, "bussiness type not match");
         return SOFTBUS_NOT_NEED_UPDATE;
     }
+    bool isTosSet = false;
+    ret = TransGetUdpChannelTos(channelId, &isTosSet);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "get tos failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    if (isTosSet) {
+        TRANS_LOGW(TRANS_FILE, "tos has set");
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
     uint8_t dfileTos = tos;
     DFileOpt dfileOpt = {
         .optType = OPT_TYPE_SOCK_PRIO,
@@ -851,6 +861,58 @@ int32_t TransSetUdpChannelRenameHook(int32_t channelId, OnRenameFileCallback onR
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channelId && channelNode->businessType == BUSINESS_TYPE_FILE) {
             channelNode->onRenameFile = onRenameFile;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_SDK, "udp channel not found, channelId=%{public}d.", channelId);
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
+
+int32_t TransSetUdpChannelTos(int32_t channelId)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannel *channelNode = NULL;
+    LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
+        if (channelNode->channelId == channelId) {
+            channelNode->isTosSet = true;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_SDK, "udp channel not found, channelId=%{public}d.", channelId);
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
+
+int32_t TransGetUdpChannelTos(int32_t channelId, bool *isTosSet)
+{
+    if (isTosSet == NULL) {
+        TRANS_LOGE(TRANS_SDK, "isTosSet is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    UdpChannel *channelNode = NULL;
+    LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
+        if (channelNode->channelId == channelId) {
+            *isTosSet = channelNode->isTosSet;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
         }

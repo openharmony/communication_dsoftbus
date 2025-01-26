@@ -686,6 +686,8 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         if (item->auth.requestId != authRequestId) {
             continue;
         }
+        item->p2pInfo.p2pRequestId = p2pRequestId;
+        item->auth.authHandle = authHandle;
         if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_P2P_MAC,
             wifiDirectInfo->remoteMac, sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
             LinkUnlock();
@@ -713,8 +715,6 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-        item->p2pInfo.p2pRequestId = p2pRequestId;
-        item->auth.authHandle = authHandle;
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -874,13 +874,13 @@ static void DfxReportWdResult(const P2pLinkReqList *reqInfo, const LaneLinkInfo 
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = reqInfo->laneRequestInfo.laneReqId;
+    extra.laneReqId = (int32_t)reqInfo->laneRequestInfo.laneReqId;
     extra.guideType = (int32_t)guideType;
     if (reqInfo->p2pInfo.reuseOnly) {
         extra.isWifiDirectReuse = true;
     }
     if (linkInfo != NULL) {
-        extra.bandWidth = linkInfo->linkInfo.p2p.bw;
+        extra.bandWidth = (int32_t)linkInfo->linkInfo.p2p.bw;
     }
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
@@ -1789,6 +1789,8 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         if (item->auth.requestId != authRequestId) {
             continue;
         }
+        item->p2pInfo.p2pRequestId = p2pRequestId;
+        item->auth.authHandle = authHandle;
         if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_WIFIDIRECT_ADDR,
             wifiDirectInfo->remoteMac, sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
             LinkUnlock();
@@ -1817,8 +1819,6 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
-        item->p2pInfo.p2pRequestId = p2pRequestId;
-        item->auth.authHandle = authHandle;
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -2397,8 +2397,10 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
         LNN_LOGI(LNN_LANE, "not find lane resource");
         return ret;
     }
-    LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel");
-    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+    enum WifiDirectLinkType linkType = (request->linkType == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
+        WIFI_DIRECT_LINK_TYPE_P2P;
+    LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel, linkType=%{public}d", linkType);
+    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, linkType)) {
         LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " exist but need nego channel", resourceItem.laneId);
         return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }

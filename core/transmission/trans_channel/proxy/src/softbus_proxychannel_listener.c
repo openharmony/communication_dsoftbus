@@ -107,7 +107,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
-    info.isSupportTlv = GetCapabilityBit((uint32_t *)&appInfo->transCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    info.isSupportTlv = GetCapabilityBit((uint32_t *)&appInfo->channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
     TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%{public}d, ret=%{public}d", channelId, ret);
@@ -420,7 +420,7 @@ int32_t TransOpenNetWorkingChannel(
     if (TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId) != SOFTBUS_OK) {
         ReleaseProxyChannelId(channelId);
         TRANS_LOGE(TRANS_CTRL, "networking get connect option fail");
-        return channelId;
+        return INVALID_CHANNEL_ID;
     }
     return channelId;
 }

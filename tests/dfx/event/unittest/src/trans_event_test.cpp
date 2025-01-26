@@ -142,11 +142,11 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .firstTokenName = "",
         .firstTokenId = 0,
         .firstTokenType = -1,
-        .minBW = 0,
-        .maxLatency = 0,
-        .minLatency = 0,
+        .minBW = -2,
+        .maxLatency = -3,
+        .minLatency = -4,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 6; // result, errcode and firstTokenId is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode and firstTokenId is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

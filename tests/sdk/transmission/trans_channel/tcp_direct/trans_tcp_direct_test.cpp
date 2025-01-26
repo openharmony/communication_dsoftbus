@@ -452,47 +452,47 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001, TestSize.Level0)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_EINTR));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_EINTR));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_EINTR, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_BAD_FD));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_BAD_FD));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_BAD_FD, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_EAGAIN));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_EAGAIN));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_EAGAIN, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_ADDR_ERR));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_ADDR_ERR));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_ADDR_ERR, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_RESOURCE_BUSY));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_RESOURCE_BUSY));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_RESOURCE_BUSY, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_INVALID_VARIABLE));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_INVALID_VARIABLE));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_INVALID_VARIABLE, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_TOO_MUCH_FILE));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_TOO_MUCH_FILE));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_TOO_MUCH_FILE, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_FULL_FD));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_FULL_FD));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_FULL_FD, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NO_SPACE_LEFT));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NO_SPACE_LEFT));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NO_SPACE_LEFT, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_PIPE_INTER));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_PIPE_INTER));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_PIPE_INTER, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NOT_SOCKET));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NOT_SOCKET));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NOT_SOCKET, ret);
     testing::Mock::VerifyAndClearExpectations(&tcpDirectMock);
@@ -523,39 +523,39 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001_1, TestSize.Level0)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_OPTION_UNKNOWN));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_OPTION_UNKNOWN));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_OPTION_UNKNOWN, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_ADDR_IN_USE));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_ADDR_IN_USE));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_ADDR_IN_USE, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_ADDR_NOT_AVAIL));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_ADDR_NOT_AVAIL));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_ADDR_NOT_AVAIL, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NET_DOWN));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NET_DOWN));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NET_DOWN, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_NET_REACH));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_NET_REACH));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_NET_REACH, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NET_RESET));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NET_RESET));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NET_RESET, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_CONN_RESET));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_CONN_RESET));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_CONN_RESET, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NO_BUFS));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NO_BUFS));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NO_BUFS, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_IS_CONN));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_IS_CONN));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_IS_CONN, ret);
     testing::Mock::VerifyAndClearExpectations(&tcpDirectMock);
@@ -586,23 +586,23 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001_2, TestSize.Level0)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NOT_CONN));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NOT_CONN));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NOT_CONN, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_TIME_OUT));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_TIME_OUT));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_TIME_OUT, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_REFUSED));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_REFUSED));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_REFUSED, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_HOST_DOWN));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_HOST_DOWN));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_HOST_DOWN, ret);
 
-    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillOnce(Return(SOFTBUS_CONN_SOCKET_NO_ROUTE_AVALIABLE));
+    EXPECT_CALL(tcpDirectMock, GetErrCodeBySocketErr).WillOnce(Return(SOFTBUS_CONN_SOCKET_NO_ROUTE_AVALIABLE));
     ret = TransTdcRecvData(channelId);
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NO_ROUTE_AVALIABLE, ret);
     testing::Mock::VerifyAndClearExpectations(&tcpDirectMock);
@@ -1099,9 +1099,9 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level0)
     int32_t ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    events = SOFTBUS_SOCKET_IN;
+    events = SOFTBUS_SOCKET_EXCEPTION;
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, g_fd);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;

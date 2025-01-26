@@ -308,7 +308,7 @@ static char *GetSrvType(BaseServiceType srvType)
     return g_srvTypeMap[srvType].service;
 }
 
-static void ReportCurrentBroadcast(bool result)
+static void ReportCurrentBroadcast(bool startBcResult)
 {
     DiscEventExtra extra = { 0 };
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
@@ -318,7 +318,7 @@ static void ReportCurrentBroadcast(bool result)
             extra.serverType = GetSrvType(g_bcManager[managerId].srvType);
             extra.minInterval = g_bcManager[managerId].minInterval;
             extra.maxInterval = g_bcManager[managerId].maxInterval;
-            if (result) {
+            if (startBcResult) {
                 extra.currentNum = g_bcCurrentNum;
             }
             DISC_LOGI(DISC_BROADCAST, "startTime=%{public}d, advHandle=%{public}d, serverType=%{public}s, "

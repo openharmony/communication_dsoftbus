@@ -45,7 +45,6 @@ static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 static bool g_isNeedCondWait = true;
 static bool g_qosEvent[MAX_LANE_REQ_ID_NUM];
-constexpr int32_t DB_MAGIC_NUMBER = 0x5A5A5A5A;
 constexpr int32_t QOS_BW_10K = 10 * 1024;
 
 class LNNTransLaneMockTest : public testing::Test {

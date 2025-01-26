@@ -38,6 +38,7 @@ LnnConnectionFsm *FindConnectionFsmByConnFsmId(uint16_t connFsmId);
 void TryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm);
 void TryNotifyAllTypeOffline(const LnnConnectionFsm *connFsm);
 void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm);
+void NotifyStateForSession(const ConnectionAddr *para);
 
 #ifdef __cplusplus
 }
