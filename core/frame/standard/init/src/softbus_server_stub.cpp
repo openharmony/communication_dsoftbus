@@ -167,6 +167,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
     memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
     memberFuncMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = &SoftBusServerStub::PrivilegeCloseChannelInner;
+    memberFuncMap_[SERVER_SET_DISPLAY_NAME] = &SoftBusServerStub::SetDisplayNameInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -213,6 +214,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_SET_DISPLAY_NAME] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -1686,4 +1688,36 @@ int32_t SoftBusServerStub::PrivilegeCloseChannelInner(MessageParcel &data, Messa
     }
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerStub::SetDisplayNameInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(DM_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_SET_DISPLAY_NAME);
+    const char *nameData = data.ReadCString();
+    if (nameData == nullptr) {
+        COMM_LOGE(COMM_SVC, "read nameData failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    uint32_t len = data.ReadUint32();
+    if (len > MSG_MAX_SIZE || len != strlen(nameData)) {
+        COMM_LOGE(COMM_SVC, "len invalid!, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t retReply = SetDisplayName(pkgName, nameData, len);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 } // namespace OHOS

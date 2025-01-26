@@ -149,6 +149,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
     para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
     EXPECT_TRUE(para1 != nullptr);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isSession = false;
     EXPECT_CALL(serviceMock, LnnNotifyJoinResult).WillRepeatedly(Return());
     bool ret = AuthStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);

@@ -27,12 +27,22 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_json_utils.h"
 #include "legacy/softbus_hisysevt_discreporter.h"
+#include "lnn_devicename_info.h"
 #include "softbus_utils.h"
 
 #define DEVICE_TYPE_SIZE_MAX 3
 #define DUMP_STR_LEN 256
 #define DISC_INFO_LIST_SIZE_MAX 50
+#define DISPLAY_NAME_BUF_LEN 128
+#define DISPLAY_NAME_LEN_24 24
+#define DISPLAY_NAME_LEN_21 21
+#define DISPLAY_NAME_LEN_18 18
+#define JSON_KEY_RAW_NAME        "raw"
+#define JSON_KEY_NAME_LEN_24     "name24"
+#define JSON_KEY_NAME_LEN_21     "name21"
+#define JSON_KEY_NAME_LEN_18     "name18"
 
 static bool g_isInited = false;
 
@@ -46,6 +56,15 @@ static DiscoveryFuncInterface *g_discUsbInterface = NULL;
 static DiscInnerCallback g_discMgrMediumCb;
 
 static ListNode g_capabilityList[CAPABILITY_MAX_BITNUM];
+
+typedef struct {
+    char raw[DISPLAY_NAME_BUF_LEN];
+    char name18[DISPLAY_NAME_LEN_18 + 1];
+    char name21[DISPLAY_NAME_LEN_21 + 1];
+    char name24[DISPLAY_NAME_LEN_24 + 1];
+} DisplayNameList;
+
+static DisplayNameList g_displayName = { 0 };
 
 static const char *g_discModuleMap[] = {
     "MODULE_LNN",
@@ -1296,4 +1315,87 @@ void DiscMgrDeinit(void)
 
     g_isInited = false;
     DISC_LOGI(DISC_INIT, "disc manager deinit success");
+}
+
+int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        (pkgName != NULL && nameData != NULL), SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid param");
+    int ret = SOFTBUS_PARSE_JSON_ERR;
+    if (memset_s(&g_displayName, sizeof(g_displayName), 0, sizeof(g_displayName)) != EOK) {
+        DISC_LOGE(DISC_CONTROL, "DiscSetDisplayName failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    cJSON *json = cJSON_ParseWithLength(nameData, len);
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_CONTROL, "parse cJSON failed");
+
+    if (!GetJsonObjectStringItem(json, JSON_KEY_RAW_NAME, g_displayName.raw, DISPLAY_NAME_BUF_LEN)) {
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem raw name failed. displayName=%{public}s", g_displayName.raw);
+        goto CLEANUP;
+    }
+
+    if (LnnSetLocalDeviceName(g_displayName.raw) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_CONTROL, "LnnSetLocalDeviceName fail");
+        goto CLEANUP;
+    }
+
+    if (!GetJsonObjectStringItem(json, JSON_KEY_NAME_LEN_18, g_displayName.name18, sizeof(g_displayName.name18))) {
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name18 failed. displayName=%{public}s", g_displayName.name18);
+        goto CLEANUP;
+    }
+
+    if (!GetJsonObjectStringItem(json, JSON_KEY_NAME_LEN_21, g_displayName.name21, sizeof(g_displayName.name21))) {
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name21 failed. displayName=%{public}s", g_displayName.name21);
+        goto CLEANUP;
+    }
+
+    if (!GetJsonObjectStringItem(json, JSON_KEY_NAME_LEN_24, g_displayName.name24, sizeof(g_displayName.name24))) {
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name24 failed. displayName=%{public}s", g_displayName.name24);
+        goto CLEANUP;
+    }
+    DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
+    ret = SOFTBUS_OK;
+CLEANUP:
+    cJSON_Delete(json);
+    return ret;
+}
+
+int32_t DiscGetDisplayName(char *displayName, uint32_t length, uint32_t remainLen)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE((displayName != NULL && remainLen > 0 && remainLen <= DISPLAY_NAME_BUF_LEN),
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid param");
+    char *source = NULL;
+    uint32_t len = 0;
+    if (remainLen > strlen(g_displayName.raw)) {
+        source = g_displayName.raw;
+        len = strlen(g_displayName.raw);
+        goto END;
+    }
+    if (remainLen >= DISPLAY_NAME_LEN_24) {
+        source = g_displayName.name24;
+        len = DISPLAY_NAME_LEN_24;
+        goto END;
+    }
+    if (remainLen >= DISPLAY_NAME_LEN_21) {
+        source = g_displayName.name21;
+        len = DISPLAY_NAME_LEN_21;
+        goto END;
+    }
+    if (remainLen >= DISPLAY_NAME_LEN_18) {
+        source = g_displayName.name18;
+        len = DISPLAY_NAME_LEN_18;
+        goto END;
+    } else {
+        source = g_displayName.name18;
+        len = remainLen;
+    }
+
+END:
+    DISC_CHECK_AND_RETURN_RET_LOGW(len < length, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "length too long");
+    if (memcpy_s(displayName, length, source, len) != EOK) {
+        DISC_LOGE(DISC_CONTROL, "memcpy reply fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    displayName[len] = '\0';
+    return SOFTBUS_OK;
 }
