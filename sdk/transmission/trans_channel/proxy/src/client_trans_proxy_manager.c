@@ -1336,7 +1336,7 @@ static int32_t ClientTransProxyPackTlvBytes(int32_t channelId, ClientProxyDataIn
     ReleaseTlvValueBuffer(&pktHead);
     SoftBusFree(pktHead.tlvElement);
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
-    dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + newDataHeadSize;
+    dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + (uint32_t)newDataHeadSize;
 
     uint32_t outLen = 0;
     AesGcmCipherKey cipherKey = { 0 };

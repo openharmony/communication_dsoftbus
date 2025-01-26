@@ -94,7 +94,7 @@ static BindRequestManager *CreateBindRequestManager(
     TRANS_CHECK_AND_RETURN_RET_LOGE(bindRequest != NULL, NULL, TRANS_SVC, "malloc failed");
     bindRequest->bindDeniedFlag = false;
     bindRequest->count = 0;
-    uint32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
+    int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "genarate param failed");
         SoftBusFree(bindRequest);

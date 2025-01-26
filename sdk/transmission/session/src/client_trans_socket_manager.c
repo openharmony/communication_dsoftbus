@@ -1047,7 +1047,7 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
     }
     DataSeqInfo *exitItem = NULL;
     LIST_FOR_EACH_ENTRY(exitItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
-        if (exitItem->channelId == channelId && exitItem->seq == dataSeq) {
+        if (exitItem->channelId == channelId && exitItem->seq == (int32_t)dataSeq) {
             TRANS_LOGI(TRANS_SDK, "DataSeqInfo add already exist, channelId=%{public}d", channelId);
             UnlockClientDataSeqInfoList();
             return SOFTBUS_OK;
@@ -1056,12 +1056,12 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
     DataSeqInfo *item = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
     item->channelId = channelId;
-    item->seq = dataSeq;
+    item->seq = (int32_t)dataSeq;
     item->socketId = socketId;
     item->channelType = channelType;
     ListInit(&item->node);
     ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
-    TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}d", channelId, dataSeq);
+    TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
     UnlockClientDataSeqInfoList();
     return SOFTBUS_OK;
 }
@@ -1076,7 +1076,7 @@ int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
     DataSeqInfo *item = NULL;
     DataSeqInfo *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
-        if (item->channelId == channelId && item->seq == dataSeq) {
+        if (item->channelId == channelId && item->seq == (int32_t)dataSeq) {
             ListDelete(&(item->node));
             SoftBusFree(item);
             TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u",
