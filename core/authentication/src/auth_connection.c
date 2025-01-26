@@ -451,7 +451,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     if (IsSessionAuth(head->module)) {
         connInfo.type = AUTH_LINK_TYPE_SESSION;
-        connInfo.info.sessionInfo.connId = fd;
+        connInfo.info.sessionInfo.connId = (uint32_t)fd;
         AUTH_LOGI(AUTH_CONN, "set connInfo for AUTH_LINK_TYPE_SESSION, fd=%{public}d", fd);
     } else {
         if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
