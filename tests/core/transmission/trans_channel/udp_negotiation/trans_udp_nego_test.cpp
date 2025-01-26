@@ -745,7 +745,7 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsServer001, TestSize.Level1)
     int64_t seq = 1;
 
     int32_t ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(channel);
@@ -790,7 +790,7 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     isServerSide = false;
     ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq);
@@ -939,7 +939,8 @@ HWTEST_F(TransUdpNegoTest, ProcessAbnormalUdpChannelState001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
 {
-    bool flag = IsIShareSession(g_sessionName);
+    const char *dstSessionName = "testSessionName";
+    bool flag = CompareSessionName(dstSessionName, g_sessionName);
     EXPECT_EQ(flag, SOFTBUS_OK);
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);

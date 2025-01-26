@@ -23,6 +23,7 @@
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "legacy/softbus_adapter_hitrace.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
@@ -88,16 +89,25 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
+static void TransTdcCheckIsApp(AppInfo *appInfo)
+{
+    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+        return;
+    }
+    if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
+        appInfo->myData.accountId = INVALID_ACCOUNT_ID;
+        TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
+    }
+    appInfo->myData.userId = TransGetForegroundUserId();
+}
+
 static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)
 {
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-    if (GetCurrentAccount(&conn->appInfo.myData.accountId) != SOFTBUS_OK) {
-        conn->appInfo.myData.accountId = INVALID_ACCOUNT_ID;
-    }
-    conn->appInfo.myData.userId = TransGetForegroundUserId();
+    TransTdcCheckIsApp(&conn->appInfo);
 
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
@@ -137,7 +147,6 @@ static int32_t StartVerifySession(SessionConn *conn)
         return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
-    EnableCapabilityBit(&conn->appInfo.transCapability, TRANS_CAPABILITY_TLV_OFFSET);
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
     bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
@@ -292,11 +301,11 @@ void CloseTcpDirectFd(ListenerModule module, int32_t fd)
 #endif
 }
 
-static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
+static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t channelId, int32_t fd)
 {
     SessionConn conn;
-    int32_t getInfoRet = GetSessionConnById(channelId, &conn);
-    if (ret != SOFTBUS_OK) {
+    int32_t ret = GetSessionConnById(channelId, &conn);
+    if (errCode != SOFTBUS_OK) {
         TransEventExtra extra = {
             .socketName = NULL,
             .peerNetworkId = NULL,
@@ -304,11 +313,11 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
             .callerPkg = NULL,
             .channelId = channelId,
             .socketFd = fd,
-            .errcode = ret,
+            .errcode = errCode,
             .result = EVENT_STAGE_RESULT_FAILED
         };
         
-        if (getInfoRet != SOFTBUS_OK || !conn.serverSide) {
+        if (ret != SOFTBUS_OK || !conn.serverSide) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -316,9 +325,9 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
         TransTdcSocketReleaseFd(module, fd);
-        (void)NotifyChannelOpenFailed(channelId, ret);
+        (void)NotifyChannelOpenFailed(channelId, errCode);
     } else {
-        if (conn.serverSide) {
+        if (ret != SOFTBUS_OK || conn.serverSide) {
             return;
         }
         DelTrigger(module, fd, READ_TRIGGER);

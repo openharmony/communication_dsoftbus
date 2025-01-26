@@ -38,6 +38,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
+#include "lnn_net_builder_init.h"
 #include "lnn_sync_item_info.h"
 #include "softbus_adapter_bt_common.h"
 #include "lnn_feature_capability.h"
@@ -971,7 +972,9 @@ static void NotifyJoinExtResultProcess(LnnConnectionFsm *connFsm, int32_t retCod
     }
     if (connFsm->connInfo.nodeInfo != NULL) {
         LnnNotifyStateForSession(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, retCode);
+        return;
     }
+    NotifyStateForSession(&connFsm->connInfo.addr);
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
@@ -1152,6 +1155,7 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
     } else {
         NotifyJoinResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_NETWORK_LEAVE_OFFLINE);
     }
+    NotifyJoinExtResultProcess(connFsm, SOFTBUS_NETWORK_JOIN_CANCELED);
 }
 
 static void FilterRetrieveDeviceInfo(NodeInfo *info)
@@ -1221,9 +1225,10 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
     LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (ret == SOFTBUS_OK) {
-        if ((dupOk || LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK) &&
+        if ((dupOk ||
+            (LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK)) &&
             AuthRestoreAuthManager(udidHash, authConn, connInfo->requestId, deviceInfo,
-                &authHandle.authId) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK) {
+                &authHandle.authId) == SOFTBUS_OK) {
             FilterRetrieveDeviceInfo(deviceInfo);
             LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authHandle, deviceInfo);
             return SOFTBUS_OK;
@@ -1372,7 +1377,7 @@ static int32_t FillBleAddr(ConnectionAddr *addr, const ConnectionAddr *connAddr,
 {
     uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     addr->type = CONNECTION_ADDR_BLE;
-    if (memcpy_s(addr->info.ble.bleMac, BT_MAC_LEN, connAddr->info.br.brMac,
+    if (memcpy_s(addr->info.ble.bleMac, BT_MAC_LEN, nodeInfo->connectInfo.macAddr,
         BT_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
         return SOFTBUS_MEM_ERR;

@@ -328,10 +328,11 @@ void TransProxyChanProcessByReqIdTest(const uint8_t *data, size_t size)
     DataGenerator::Write(data, size);
     int32_t reqId = 0;
     uint32_t connId = 0;
+    int32_t errCode = SOFTBUS_OK;
     GenerateInt32(reqId);
     GenerateUint32(connId);
 
-    TransProxyChanProcessByReqId(reqId, connId);
+    TransProxyChanProcessByReqId(reqId, connId, errCode);
     DataGenerator::Clear();
 }
 

@@ -322,6 +322,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
     appInfo->callingTokenId = TransACLGetCallingTokenID();
     appInfo->isClient = true;
+    appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return SOFTBUS_OK;
 }
@@ -675,6 +676,14 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
         return SOFTBUS_INVALID_PARAM;
     }
 
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    GetSourceRelation(appInfo, &sourceInfo);
+    if (sourceInfo.userId == INVALID_USER_ID) {
+        TRANS_LOGW(TRANS_CTRL, "userId is invalid.");
+        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
+    }
+
     CollabInfo sinkInfo;
     (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
     int32_t ret = GetSinkRelation(appInfo, &sinkInfo);
@@ -684,13 +693,6 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
     }
     if (!SoftBusCheckIsApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
         TRANS_LOGE(TRANS_CTRL, "check is not app.");
-        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
-    }
-    CollabInfo sourceInfo;
-    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
-    GetSourceRelation(appInfo, &sourceInfo);
-    if (sourceInfo.userId == DEFAULT_USER_ID) {
-        TRANS_LOGE(TRANS_CTRL, "userId is invalid.");
         return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
     }
 

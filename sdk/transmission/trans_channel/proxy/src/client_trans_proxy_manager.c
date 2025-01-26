@@ -85,7 +85,7 @@ typedef struct {
 static int32_t ProxyBuildNeedAckTlvData(DataHead *pktHead, bool needAck, uint32_t dataSeqs, int32_t *tlvBufferSize)
 {
     if (pktHead == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid.");
+        TRANS_LOGE(TRANS_SDK, "param invalid, pktHead is null");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t dataSeq = SoftBusHtoLl(dataSeqs);
@@ -688,7 +688,7 @@ static void ClientTransProxySendBytesAck(int32_t channelId, int32_t seq, uint32_
         if (info.osType == OH_TYPE) {
             tmpSeq = (int32_t)SoftBusHtoLl((uint32_t)seq);
         } else {
-            tmpSeq = (int32_t)SoftBusHtoNl((uint32_t)seq); // convet host order to net order
+            tmpSeq = (int32_t)SoftBusHtoNl((uint32_t)seq);
         }
         if (memcpy_s(ack, PROXY_ACK_SIZE, &tmpSeq, sizeof(int32_t)) != EOK) {
             TRANS_LOGE(TRANS_SDK, "memcpy seq err");
@@ -717,6 +717,17 @@ static int32_t ClientTransProxyBytesNotifySession(int32_t channelId, const DataH
             return ClientTransProxyProcSendMsgAck(channelId, data, len, seq, dataSeq);
         case TRANS_SESSION_BYTES:
             ClientTransProxySendBytesAck(channelId, seq, dataSeq, needAck);
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        case TRANS_SESSION_FILE_FIRST_FRAME:
+        case TRANS_SESSION_FILE_ONGOINE_FRAME:
+        case TRANS_SESSION_FILE_LAST_FRAME:
+        case TRANS_SESSION_FILE_ONLYONE_FRAME:
+        case TRANS_SESSION_FILE_ALLFILE_SENT:
+        case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
+        case TRANS_SESSION_FILE_RESULT_FRAME:
+        case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
+        case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+        case TRANS_SESSION_ASYNC_MESSAGE:
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         default:
             TRANS_LOGE(TRANS_SDK, "invalid flags=%{public}d", flags);
@@ -858,12 +869,12 @@ static int32_t ClientTransProxyNoSubPacketTlvProc(int32_t channelId, const char 
             pktHead.magicNumber, channelId, len);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
-    if (pktHead.dataLen <= 0) {
+    if (pktHead.dataLen == 0) {
         TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}u, channelId=%{public}d, len=%{public}u",
             pktHead.dataLen, channelId, len);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", pktHead.dataLen, len);
+    TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}u, inputLen=%{public}u", pktHead.dataLen, len);
     if (len <= newPktHeadSize || (pktHead.dataLen != (len - newPktHeadSize))) {
         TRANS_LOGE(TRANS_SDK, "dataLen error, channelId=%{public}d, len=%{public}u, dataLen=%{public}u",
             channelId, len, pktHead.dataLen);
@@ -1525,7 +1536,7 @@ int32_t TransProxyAsyncPackAndSendData(
 
     uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
     if (sliceNum > INT32_MAX) {
-        TRANS_LOGE(TRANS_FILE, "Data overflow");
+        TRANS_LOGE(TRANS_FILE, "Data overflow, sliceNum=%{public}u, channelId=%{public}d", sliceNum, channelId);
         return SOFTBUS_INVALID_NUM;
     }
     for (uint32_t i = 0; i < sliceNum; i++) {

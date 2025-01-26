@@ -149,7 +149,7 @@ static uint32_t ConvertMsgToUserId(int32_t *userId, const uint8_t *msg, uint32_t
         return SOFTBUS_INVALID_PARAM;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *userId = *userId | (*(msg + i) << (BITS * i));
+        *userId = ((uint32_t)*userId) | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -566,6 +566,8 @@ int32_t LnnInitNetworkInfo(void)
 
 void LnnDeinitNetworkInfo(void)
 {
+    (void)LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_USERID, OnReceiveUserIdSyncInfoMsg);
 }
@@ -586,6 +588,27 @@ void OnLnnProcessUserChangeMsgDelay(void *para)
     SoftBusFree(para);
 }
 
+static void LnnAsyncSendUserId(void *param)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)param;
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+    if (data->msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        SoftBusFree(data);
+        return;
+    }
+    int32_t ret = LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
+        LnnRequestLeaveSpecific(data->networkId, CONNECTION_ADDR_MAX);
+    }
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
+}
+
 static void DoSendUserId(const char *udid, uint8_t *msg)
 {
     #define USER_CHANGE_DELAY_TIME 5
@@ -602,9 +625,18 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
         return;
     }
 
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    SendSyncInfoParam *data =
+        CreateSyncInfoParam(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create async info fail");
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        return;
+    }
+    ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnAsyncSendUserId, (void *)data);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "sync info msg failed! ret:%{public}d", ret);
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "async userid to peer fail");
         LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
         return;
     }
@@ -636,7 +668,7 @@ static uint8_t *ConvertUserIdToMsg(int32_t userId)
         return NULL;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *(arr + i) = (userId >> (i * BITS)) & 0xFF;
+        *(arr + i) = ((uint32_t)userId >> (i * BITS)) & 0xFF;
     }
     return arr;
 }

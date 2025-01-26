@@ -586,3 +586,12 @@ uint16_t SoftBusBEtoLEs(uint16_t value)
     ShiftByte((uint8_t *)&res, (int8_t)sizeof(res));
     return res;
 }
+
+int32_t GetErrCodeBySocketErr(int32_t transErrCode)
+{
+    int32_t socketErrCode = SockOptErrorToSoftBusError(errno);
+    if (socketErrCode == SOFTBUS_OK) {
+        return transErrCode;
+    }
+    return socketErrCode;
+}

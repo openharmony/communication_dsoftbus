@@ -620,34 +620,81 @@ static bool IsSupportWifiDirect(const char *networkId)
     return true;
 }
 
-static void FilterWifiDirectLink(const char *peerNetWorkId, uint32_t bandWidth,
+static void GenerateLinkList(LaneLinkType *linkListSrc, uint32_t numsSrc,
     LaneLinkType *linkList, uint32_t *linksNum)
 {
-    if (GetBwType(bandWidth) != LOW_BAND_WIDTH) {
-        return;
-    }
-    int32_t osType = 0;
-    if (LnnGetOsTypeByNetworkId(peerNetWorkId, &osType) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote osType fail");
-        return;
-    }
-    if (osType == OH_OS_TYPE || IsSupportWifiDirect(peerNetWorkId)) {
-        LNN_LOGI(LNN_LANE, "valid wifiDirect, no need filter link");
-        return;
-    }
-    LNN_LOGI(LNN_LANE, "low bandWidth and not support wifiDirect, filter wifiDirect link");
-    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
-    uint32_t num = 0;
-    for (uint32_t i = 0; i < *linksNum; i++) {
-        if (linkList[i] != LANE_HML) {
-            tmpList[num++] = linkList[i];
-        }
-    }
     uint32_t size = sizeof(LaneLinkType) * LANE_LINK_TYPE_BUTT;
     (void)memset_s(linkList, size, -1, size);
-    *linksNum = num;
+    *linksNum = numsSrc;
     for (uint32_t i = 0; i < *linksNum; i++) {
-        linkList[i] = tmpList[i];
+        linkList[i] = linkListSrc[i];
+    }
+}
+
+static void FilterLinksWithContinuous(LaneLinkType *linkList, uint32_t *linksNum)
+{
+    uint32_t num = 0;
+    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = { 0 };
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        if (linkList[i] == LANE_P2P || linkList[i] == LANE_HML) {
+            LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
+            continue;
+        }
+        tmpList[num++] = linkList[i];
+    }
+    if (num == *linksNum) {
+        return;
+    }
+    GenerateLinkList(tmpList, num, linkList, linksNum);
+}
+
+static void FilterLinksWithWifiDirect(LaneLinkType *linkList, uint32_t *linksNum)
+{
+    uint32_t num = 0;
+    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = { 0 };
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        if (linkList[i] == LANE_HML) {
+            LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
+            continue;
+        }
+        tmpList[num++] = linkList[i];
+    }
+    if (num == *linksNum) {
+        return;
+    }
+    GenerateLinkList(tmpList, num, linkList, linksNum);
+}
+
+static bool IsRemoteLegacy(const char *networkId)
+{
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(networkId, &osType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote osType fail");
+        return false;
+    }
+    if (osType == OH_OS_TYPE) {
+        return false;
+    }
+    return true;
+}
+
+static void DecideLinksWithLegacy(const char *networkId, const LaneSelectParam *request,
+    LaneLinkType *linkList, uint32_t *linksNum)
+{
+    if (*linksNum <= 0 || *linksNum > LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "link num exceed lisk list");
+        return;
+    }
+    if (!IsRemoteLegacy(networkId)) {
+        LNN_LOGE(LNN_LANE, "valid os, no need filter links");
+        return;
+    }
+    if (GetBwType(request->qosRequire.minBW) == LOW_BAND_WIDTH) {
+        if (request->qosRequire.continuousTask) {
+            FilterLinksWithContinuous(linkList, linksNum);
+        } else if (!IsSupportWifiDirect(networkId)) {
+            FilterLinksWithWifiDirect(linkList, linksNum);
+        }
     }
 }
 
@@ -663,7 +710,6 @@ static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *
         LNN_LOGE(LNN_LANE, "get udid error");
         return;
     }
-    FilterWifiDirectLink(peerNetWorkId, request->qosRequire.minBW, linkList, linksNum);
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK ||
@@ -745,19 +791,6 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
 
 static bool IsSupportP2pReuse(const char *networkId)
 {
-    if (networkId == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return false;
-    }
-    int32_t osType = 0;
-    if (LnnGetOsTypeByNetworkId(networkId, &osType) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote osType fail");
-        return false;
-    }
-    if (osType == OH_OS_TYPE) {
-        LNN_LOGI(LNN_LANE, "valid os type, no need reuse p2p");
-        return false;
-    }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get udid error");
@@ -810,7 +843,7 @@ static void SelectDbLinks(const char *networkId, LaneLinkType *resList, uint32_t
     GetCustomLinkByType(CUSTOM_QOS_DB, optionalLink, &optLinkNum);
     *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (optionalLink[i] == LANE_P2P && !IsSupportP2pReuse(networkId)) {
+        if (optionalLink[i] == LANE_P2P && (!IsRemoteLegacy(networkId) || !IsSupportP2pReuse(networkId))) {
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
@@ -959,6 +992,7 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     DecideOptimalLinks(networkId, request, linkList, &linksNum);
     DecideRetryLinks(networkId, request, linkList, &linksNum);
     DecideLinksWithDevice(networkId, request, linkList, &linksNum);
+    DecideLinksWithLegacy(networkId, request, linkList, &linksNum);
     UpdateHmlPriority(networkId, request, linkList, &linksNum);
     if (request->allocedLaneId != INVALID_LANE_ID) {
         DelHasAllocedLink(request->allocedLaneId, linkList, &linksNum);
@@ -971,7 +1005,7 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     return ret;
 }
 
-int32_t DecideRueseLane(const char *networkId, const LaneSelectParam *request,
+int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
     if (networkId == NULL || request == NULL || recommendList == NULL ||

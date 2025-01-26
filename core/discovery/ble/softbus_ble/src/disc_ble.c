@@ -201,7 +201,7 @@ static DiscBleListener g_bleListener = {
 
 static DiscEventExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
 static DiscEventExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
-static int32_t g_bleOldCap = 0;
+static uint32_t g_bleOldCap = 0;
 
 // g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
@@ -1077,7 +1077,7 @@ static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
 {
     uint32_t tempCap = 0;
     DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
-    uint64_t stamptime = SoftBusGetSysTimeMs();
+    int32_t stamptime = (int32_t)SoftBusGetSysTimeMs();
  
     const uint32_t event[] = {
         adv == CON_ADV_ID ? CAST_EVENT_CON : CAST_EVENT_NON,

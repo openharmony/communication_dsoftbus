@@ -571,17 +571,17 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
     return SOFTBUS_TRANS_NOT_MATCH;
 }
 
-static void TransSetConnStateByReqId(uint32_t requestId, uint32_t connId, uint32_t state)
+static int32_t TransSetConnStateByReqId(uint32_t requestId, uint32_t connId, uint32_t state)
 {
     ProxyConnInfo *getNode = NULL;
 
     if (g_proxyConnectionList == NULL) {
-        return;
+        return SOFTBUS_NO_INIT;
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(getNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
@@ -590,13 +590,14 @@ static void TransSetConnStateByReqId(uint32_t requestId, uint32_t connId, uint32
             getNode->connId = connId;
             getNode->requestId = 0;
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-            return;
+            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     TRANS_LOGE(TRANS_CTRL,
         "can not find proxy conn when set conn state. requestId=%{public}u, connId=%{public}u", requestId, connId);
     (void)ConnDisconnectDevice(connId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
 static void TransOnConnectSucceed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
@@ -613,8 +614,8 @@ static void TransOnConnectSucceed(uint32_t requestId, uint32_t connectionId, con
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     TRANS_LOGI(TRANS_CTRL,
         "Connect Success requestId=%{public}u, connId=%{public}u", requestId, connectionId);
-    TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
-    TransProxyChanProcessByReqId((int32_t)requestId, connectionId);
+    int32_t ret = TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
+    TransProxyChanProcessByReqId((int32_t)requestId, connectionId, ret);
 }
 
 static void TransOnConnectFailed(uint32_t requestId, int32_t reason)

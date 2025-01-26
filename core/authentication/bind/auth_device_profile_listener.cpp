@@ -24,6 +24,7 @@
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_network_info.h"
@@ -78,7 +79,9 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
     }
     if (profile.GetLocalUserId() != GetActiveOsAccountIds()) {
         AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");
-        // delete db
+        if (!DpHasAccessControlProfile(profile.GetDeviceId().c_str(), true, profile.GetLocalUserId())) {
+            LnnDeleteSpecificTrustedDevInfo(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
+        }
         return SOFTBUS_OK;
     }
     NodeInfo nodeInfo;

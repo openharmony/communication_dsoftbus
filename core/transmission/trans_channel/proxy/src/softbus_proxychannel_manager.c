@@ -152,7 +152,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->appInfo.crc = info->appInfo.crc;
             item->appInfo.myData.dataConfig = info->appInfo.myData.dataConfig;
             item->appInfo.peerHandleId = info->appInfo.peerHandleId;
-            item->appInfo.transCapability = info->appInfo.transCapability;
+            item->appInfo.channelCapability = info->appInfo.channelCapability;
             if (memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                 &(info->appInfo.peerData), sizeof(info->appInfo.peerData)) != EOK ||
                 memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
@@ -334,7 +334,7 @@ void TransProxyDelChanByChanId(int32_t chanlId)
     return;
 }
 
-void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
+void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCode)
 {
     ProxyChannelInfo *item = NULL;
     TRANS_CHECK_AND_RETURN_LOGE(
@@ -354,7 +354,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
     }
 
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    if (!isUsing) {
+    if (!isUsing && errCode != SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND) {
         TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
         TransProxyCloseConnChannel(connId, false);
     }
@@ -1189,6 +1189,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
             return;
         } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+            (void)TransProxyAckHandshake(chan->connId, chan, ret);
             TransProxyDelChanByChanId(proxyChannelId);
             goto EXIT_ERR;
         }
