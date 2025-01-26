@@ -606,11 +606,11 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
 
-    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE) != SOFTBUS_OK) {
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE, true) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status done failed.");
         return;
     }
-    if (TransGetUdpChannelBySeq(seq, &channel) != SOFTBUS_OK) {
+    if (TransGetUdpChannelBySeq(seq, &channel, true) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel by seq failed.");
         return;
     }
@@ -627,7 +627,7 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
         ProcessAbnormalUdpChannelState(&(channel.info), ret, true);
         return;
     }
-    TransUpdateUdpChannelInfo(seq, &(channel.info));
+    TransUpdateUdpChannelInfo(seq, &(channel.info), true);
     ret = ProcessUdpChannelState(&(channel.info), false, &authHandle, seq);
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
     if (ret != SOFTBUS_OK) {
@@ -774,7 +774,7 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, AuthHandle authHand
         return ret;
     }
     cJSON_free(msgStr);
-    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING) != SOFTBUS_OK) {
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING, true) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status neging failed.");
     }
     TransEventExtra extra = {
@@ -790,17 +790,21 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, AuthHandle authHand
     return SOFTBUS_OK;
 }
 
+static void ClientFillTransEventExtra(uint32_t requestId, AuthHandle authHandle, TransEventExtra *extra)
+{
+    extra->socketName = NULL;
+    extra->peerNetworkId = NULL;
+    extra->calleePkg = NULL;
+    extra->callerPkg = NULL;
+    extra->requestId = (int32_t)requestId;
+    extra->authId = (int32_t)authHandle.authId;
+    extra->result = EVENT_STAGE_RESULT_OK;
+}
+
 static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
 {
-    TransEventExtra extra = {
-        .socketName = NULL,
-        .peerNetworkId = NULL,
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .requestId = (int32_t)requestId,
-        .authId = (int32_t)authHandle.authId,
-        .result = EVENT_STAGE_RESULT_OK
-    };
+    TransEventExtra extra = {0};
+    ClientFillTransEventExtra(requestId, authHandle, &extra);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     TRANS_LOGI(
         TRANS_CTRL, "reqId=%{public}u, authId=%{public}" PRId64, requestId, authHandle.authId);
@@ -815,6 +819,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
         TRANS_LOGE(TRANS_CTRL, "get channel fail");
         goto EXIT_ERR;
     }
+    TransSetUdpChannelMsgType(requestId);
     extra.channelId = (int32_t)channel->info.myData.channelId;
     ret = StartExchangeUdpInfo(channel, authHandle, channel->seq);
     (void)memset_s(channel->info.sessionKey, sizeof(channel->info.sessionKey), 0,
