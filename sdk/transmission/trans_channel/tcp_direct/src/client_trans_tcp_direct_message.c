@@ -375,7 +375,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
             return NULL;
         }
         ReleaseDataHeadResource(&pktHead);
-        lenInfo->tlvHeadLen = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
+        lenInfo->tlvHeadLen = (uint32_t)(MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize);
         ret = TransTdcEncryptWithSeq(channel->detail.sessionKey, finalSeq, finalData, len, buf + lenInfo->tlvHeadLen,
             &lenInfo->outLen);
         if (ret != SOFTBUS_OK) {
@@ -454,7 +454,7 @@ static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char
         TRANS_LOGE(TRANS_SDK, "failed to get supportTlv. channelId=%{public}d", channel->channelId);
         return res;
     }
-    int32_t tmpHeadLen = DC_DATA_HEAD_SIZE;
+    uint32_t tmpHeadLen = DC_DATA_HEAD_SIZE;
     if (supportTlv) {
         TRANS_LOGI(TRANS_SDK, "supportTlv is true");
         tmpHeadLen = lenInfo.tlvHeadLen;
@@ -524,6 +524,9 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len, boo
 static int32_t TransSetTosSendData(TcpDirectChannelInfo *channel, char *buf, int32_t newPkgHeadSize,
     int32_t flags, uint32_t outLen)
 {
+    if (channel == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = TransTcpSetTos(channel, flags);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "failed to set tos. channelId=%{public}d", channel->channelId);
@@ -832,7 +835,7 @@ static int32_t TransTdcProcessDataByFlag(
 static int32_t TransTdcProcessBytesDataByFlag(
     TcpDataTlvPacketHead *pktHead, TcpDirectChannelInfo *channel, char *plain, uint32_t plainLen)
 {
-    int32_t flag = pktHead->flags;
+    uint32_t flag = pktHead->flags;
     int32_t seqNum = pktHead->seq;
     uint32_t dataSeq = pktHead->dataSeq;
     bool needAck = pktHead->needAck;
@@ -847,7 +850,7 @@ static int32_t TransTdcProcessBytesDataByFlag(
             TransTdcSendAck(channel->channelId, seqNum);
             return ClientTransTdcOnDataReceived(channel->channelId, plain, plainLen, TRANS_SESSION_MESSAGE);
         default:
-            TRANS_LOGE(TRANS_SDK, "unknown flag=%{public}d.", flag);
+            TRANS_LOGE(TRANS_SDK, "unknown flag=%{public}u.", flag);
             return SOFTBUS_INVALID_PARAM;
     }
 }
@@ -874,7 +877,7 @@ static int32_t TransTdcProcessTlvData(TcpDirectChannelInfo channel, TcpDataTlvPa
         (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_TRANS_NODE_NOT_FOUND;
     }
-    int32_t dataLen = pktHead->dataLen;
+    uint32_t dataLen = pktHead->dataLen;
     TRANS_LOGI(TRANS_SDK, "data received, channelId=%{public}d, dataLen=%{public}u, size=%{public}d, seq=%{public}d",
         channel.channelId, dataLen, node->size, pktHead->seq);
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
