@@ -171,9 +171,7 @@ static SoftBusMutex g_rawLinkLock;
 #define INVAILD_AUTH_ID                (-1)
 #define INVALID_P2P_REQUEST_ID         (-1)
 #define LANE_REQ_ID_TYPE_SHIFT         28
-#define SHORT_RANGE_PTK_NOT_MATCH_CODE 4
 #define BLE_TRIGGER_TIMEOUT            5000
-#define SOFTBUS_LNN_PTK_NOT_MATCH  (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + SHORT_RANGE_PTK_NOT_MATCH_CODE)
 #define RAW_LINK_CHECK_DELAY           (200)
 #define RAW_LINK_CHECK_NUM             (10)
 
