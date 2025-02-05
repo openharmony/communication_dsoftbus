@@ -28,15 +28,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-    PARA_ACTION = 1,
-    PARA_BUTT,
-} ParaType;
-
-typedef struct {
-    uint32_t actionId;
-} ActionAddr;
-
 typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     bool isNetWorkingChannel;
