@@ -762,7 +762,7 @@ static int32_t UpdateFileInfo(NodeInfo *newInfo, NodeInfo *oldInfo)
 
 static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_t connectionType, char *deviceName)
 {
-    if (oldInfo == NULL || newInfo == NULL || deviceName == NULL) {
+    if (oldInfo == NULL || newInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -772,8 +772,13 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
-    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
-        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK ||
+    if (deviceName != NULL) {
+        if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+    }
+    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK ||
         strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK ||
         strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK ||
         strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN,
@@ -798,7 +803,7 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
     return SOFTBUS_OK;
 }
 
-static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType, char *deviceName)
+static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType)
 {
     if (newInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
@@ -825,7 +830,7 @@ static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType,
         LNN_LOGE(LNN_LEDGER, "no this device info.");
         return ret;
     }
-    ret = UpdateRemoteNodeInfo(&deviceInfo, newInfo, connectionType, deviceName);
+    ret = UpdateRemoteNodeInfo(&deviceInfo, newInfo, connectionType, NULL);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -874,7 +879,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
         LnnInsertLinkFinderInfo(oldInfo->networkId);
     }
     CheckUserIdCheckSumChange(oldInfo, newInfo);
-    ret = RemoteNodeInfoRetrieve(newInfo, connectionType, deviceName);
+    ret = RemoteNodeInfoRetrieve(newInfo, connectionType);
     return ret;
 }
 
