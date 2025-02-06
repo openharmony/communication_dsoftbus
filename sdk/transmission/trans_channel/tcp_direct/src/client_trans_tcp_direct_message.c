@@ -394,7 +394,11 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     TRANS_CHECK_AND_RETURN_RET_LOGE(buf != NULL, NULL, TRANS_SDK, "TransPackData fail");
     ret = TransTdcEncryptWithSeq(channel->detail.sessionKey, finalSeq, finalData, len, buf + DC_DATA_HEAD_SIZE,
         &lenInfo->outLen);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, TRANS_SDK, "encrypt error");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "encrypt error");
+        SoftBusFree(buf);
+        return NULL;
+    }
     return buf;
 }
 
