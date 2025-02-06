@@ -460,7 +460,7 @@ static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char
         tmpHeadLen = lenInfo.tlvHeadLen;
     }
     ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + tmpHeadLen, 0);
-    if (ret != (ssize_t)outLen + tmpHeadLen) {
+    if (ret != (ssize_t)outLen + (ssize_t)tmpHeadLen) {
         TRANS_LOGE(TRANS_SDK, "send bytes failed to send tcp data. channelId=%{public}d, ret=%{public}zd",
             channel->channelId, ret);
         SoftBusFree(buf);
