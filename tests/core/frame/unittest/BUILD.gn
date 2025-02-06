@@ -65,8 +65,12 @@ ohos_unittest("SoftbusServerStubTest") {
       "googletest:gmock",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
+    if (has_ces_part) {
+      external_deps += [ "common_event_service:cesfwk_innerkits" ]
+    }
   }
   if (dsoftbus_access_token_feature) {
     external_deps += [
@@ -107,6 +111,7 @@ ohos_unittest("SoftbusServerTest") {
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
+      "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
   }
