@@ -740,7 +740,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendAckTest001, TestSize.Level0)
     int32_t seq = 1;
     int32_t channelId = -1;
     int32_t ret = TransTdcSendAck(channelId, seq);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
 }
 
 /**
@@ -1408,33 +1408,33 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     int32_t ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
     buf->w = buf->data + DC_DATA_HEAD_SIZE;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);
 
     pktHead->magicNumber = MAGIC_NUMBER;
     pktHead->dataLen = g_dataBufferMaxLen - DC_DATA_HEAD_SIZE + 1;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
 
     pktHead->dataLen = OVERHEAD_LEN;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
 
     pktHead->dataLen = 1;
     buf->size = DC_DATA_HEAD_SIZE;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
 
     pktHead->dataLen = OVERHEAD_LEN + 1;
     buf->size = DC_DATA_HEAD_SIZE;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     pktHead->dataLen = 0;
     ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
     // pktHead is deleted in the abnormal branch
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDataList);

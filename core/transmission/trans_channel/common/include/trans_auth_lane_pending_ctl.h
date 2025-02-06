@@ -28,30 +28,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-    ParaType type;
-    union {
-        ActionAddr action;
-    };
-    bool enable160M;
-    bool accountInfo;
-} LinkPara;
-
-typedef struct {
     bool bSucc;
     bool isFinished;
+    bool accountInfo;
     char *sessionName;
     int32_t errCode;
     uint32_t laneReqId;
     int32_t channelId;
     ListNode node;
-    LinkPara linkPara;
     LaneConnInfo connInfo;
 } TransAuthWithParaNode;
 
 int32_t TransAuthWithParaReqLanePendingInit(void);
 void TransAuthWithParaReqLanePendingDeinit(void);
 int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessionName,
-    const LinkPara *linkPara, int32_t channelId);
+    bool accountInfo, int32_t channelId);
 int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId);
 int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, const LaneConnInfo *connInfo,
     int32_t errCode);
