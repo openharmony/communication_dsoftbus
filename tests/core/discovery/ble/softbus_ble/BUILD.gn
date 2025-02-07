@@ -110,6 +110,9 @@ ohos_unittest("DiscBleUtilsTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+  if (is_standard_system && has_ces_part) {
+    external_deps += [ "common_event_service:cesfwk_innerkits" ]
+  }
   if (support_i18n && qemu_arm_disable) {
     external_deps += [ "i18n:intl_util" ]
   }

@@ -88,6 +88,9 @@ ohos_unittest("LnnKSettingDataEventMonitorTest") {
     "kv_store:distributeddata_inner",
     "samgr:samgr_proxy",
   ]
+  if (is_standard_system && has_ces_part) {
+    external_deps += [ "common_event_service:cesfwk_innerkits" ]
+  }
   if (support_i18n && qemu_arm_disable) {
     external_deps += [ "i18n:intl_util" ]
   }
