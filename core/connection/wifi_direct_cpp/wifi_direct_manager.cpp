@@ -314,8 +314,8 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
     CONN_CHECK_AND_RETURN_RET_LOGW(remoteUuid != "", SOFTBUS_OK, CONN_WIFI_DIRECT, "no connected devices");
 
     struct WifiDirectForceDisconnectInfo info = {
-        .linkType = wifiDirectLinkType,
         .requestId = GetRequestId(),
+        .linkType = wifiDirectLinkType,
     };
     auto res = strcpy_s(info.remoteUuid, UUID_BUF_LEN, remoteUuid.c_str());
     CONN_CHECK_AND_RETURN_RET_LOGW(res == EOK, SOFTBUS_STRCPY_ERR, CONN_WIFI_DIRECT, "copy fail, res=%{public}d", res);
