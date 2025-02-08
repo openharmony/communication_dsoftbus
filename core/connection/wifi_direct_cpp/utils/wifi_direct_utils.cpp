@@ -149,7 +149,7 @@ int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
     int channelIdLnn = 0;
     ret = LnnGetRecommendChannel(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn fail, ret = %{public}d", ret);
     return channelIdLnn;
 }
 
@@ -593,7 +593,7 @@ static constexpr int DFS_CHANNEL_FIRST = 52;
 static constexpr int DFS_CHANNEL_LAST = 64;
 bool WifiDirectUtils::IsDfsChannel(const int &frequency)
 {
-    int32_t channel = FrequencyToChannel(frequency);
+    int channel = FrequencyToChannel(frequency);
     CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
     if (channel >= DFS_CHANNEL_FIRST && channel <= DFS_CHANNEL_LAST) {
         return true;
@@ -607,13 +607,13 @@ bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDev
     auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
 
     int32_t osType = OH_OS_TYPE;
-    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK || osType == OH_OS_TYPE) {
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
         return false;
     }
 
     LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
-        if (link.GetLinkType() == type && IsDfsChannel(link.GetFrequency())) {
+        if (link.GetLinkType() == type && osType != OH_OS_TYPE && IsDfsChannel(link.GetFrequency())) {
             dfsLinkIsExist = true;
             return true;
         }
