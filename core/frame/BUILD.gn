@@ -305,8 +305,7 @@ if (defined(ohos_lite)) {
       }
       if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
-        external_deps += [
-        ]
+        external_deps += []
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
       if (!defined(global_parts_info) ||
@@ -317,7 +316,7 @@ if (defined(ohos_lite)) {
         cflags += [ "-DENHANCED_FLAG" ]
         external_deps += [
           "device_certificate_manager:device_cert_mgr_sdk",
-          "zlib:libz"
+          "zlib:libz",
         ]
       }
     }
