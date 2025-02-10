@@ -829,21 +829,34 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyDeviceName);
 }
 
+static void UpdateDeviceNameToCache(const NodeInfo *newInfo, NodeInfo *oldInfo)
+{
+    if (strlen(newInfo->deviceInfo.deviceName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s deviceName to cache info fail");
+        }
+    }
+    if (strlen(newInfo->deviceInfo.unifiedName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedName to cache info fail");
+        }
+    }
+    if (strlen(newInfo->deviceInfo.unifiedDefaultName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN,
+            newInfo->deviceInfo.unifiedDefaultName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedDefaultName to cache info fail");
+        }
+    }
+    if (strlen(newInfo->deviceInfo.nickName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s nickName to cache info fail");
+        }
+    }
+}
+
 static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo)
 {
-    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s deviceName to cache info fail");
-    }
-    if (strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedName to cache info fail");
-    }
-    if (strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedDefaultName) !=
-        EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedDefaultName to cache info fail");
-    }
-    if (strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s nickName to cache info fail");
-    }
+    UpdateDeviceNameToCache(newInfo, oldInfo);
     if (strcpy_s(oldInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, newInfo->deviceInfo.deviceUdid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceUdid to cache info fail");
     }
