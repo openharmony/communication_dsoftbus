@@ -316,7 +316,7 @@ if (defined(ohos_lite)) {
         cflags += [ "-DENHANCED_FLAG" ]
         external_deps += [
           "device_certificate_manager:device_cert_mgr_sdk",
-          "zlib:libz",
+          "zlib:libz"
         ]
       }
     }
