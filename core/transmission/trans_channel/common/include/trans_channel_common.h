@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#define DMS_UID 5522
+#define DMS_SESSIONNAME "ohos.distributedschedule.dms.connect"
 
 void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
     TransInfo *transInfo, const LaneConnInfo *connInfo);
@@ -79,6 +82,7 @@ TransDeviceState TransGetDeviceState(const char *networkId);
 
 int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType);
 
+int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

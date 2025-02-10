@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,5 +276,6 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     
-    return clientProxy->OnCheckCollabRelation(sourceInfo, sinkInfo, transInfo->channelId, transInfo->channelType);
+    return clientProxy->OnCheckCollabRelation(
+        sourceInfo, sinkInfo->pid != -1, sinkInfo, transInfo->channelId, transInfo->channelType);
 }
