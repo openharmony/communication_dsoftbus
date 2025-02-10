@@ -838,7 +838,7 @@ static int32_t InitDbList(void)
     return RecoveryTrustedDevInfo();
 }
 
-static int32_t InitTrustedDevInfoTable(void)
+int32_t InitTrustedDevInfoTable(void)
 {
     bool isExist = false;
     int32_t rc = SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED;
@@ -927,4 +927,9 @@ int32_t LnnInitDecisionDbDelay(void)
         return TryRecoveryTrustedDevInfoTable();
     }
     return SOFTBUS_OK;
+}
+
+void LnnRemoveDb(void)
+{
+    SoftBusRemoveFile(DATABASE_NAME);
 }

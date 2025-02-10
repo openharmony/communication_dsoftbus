@@ -29,7 +29,9 @@
 #include "lnn_cipherkey_manager.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_device_info_recovery.h"
+#include "lnn_file_utils.h"
 #include "lnn_log.h"
+#include "lnn_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
@@ -2164,7 +2166,7 @@ static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
     return SOFTBUS_OK;
 }
 
-static int32_t LnnGenBroadcastCipherInfo(void)
+int32_t LnnGenBroadcastCipherInfo(void)
 {
     BroadcastCipherKey broadcastKey;
     int32_t ret = SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED;
@@ -2443,11 +2445,27 @@ int32_t LnnInitLocalLedger(void)
 
 int32_t LnnInitLocalLedgerDelay(void)
 {
+    NodeInfo localNodeInfo;
+    (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    (void)LnnGetLocalDevInfo(&localNodeInfo);
+    if (strcmp(deviceInfo->deviceUdid, localNodeInfo.deviceInfo.deviceUdid) != 0) {
+        LNN_LOGE(LNN_LEDGER, "udid changed, need update device info");
+        for (int32_t i = 0; i < LNN_FILE_ID_MAX; i++) {
+            if (LnnRemoveStorageConfigPath((LnnFileId)i) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "remove storage config path failed");
+                return SOFTBUS_FILE_ERR;
+            }
+        }
+        if (LnnUpdateLocalDeviceInfo() != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update local device info failed");
+            return SOFTBUS_NETWORK_INVALID_DEV_INFO;
+        }
     }
     int32_t ret = LnnInitOhosAccount();
     if (ret != SOFTBUS_OK) {
