@@ -164,8 +164,6 @@ ohos_static_library("softbus_server_static") {
     if (!defined(global_parts_info) ||
         defined(global_parts_info.bundlemanager_bundle_framework)) {
       external_deps += [
-        "bundle_framework:appexecfwk_base",
-        "bundle_framework:appexecfwk_core",
       ]
       cflags = [ "-DSUPPORT_BUNDLENAME" ]
     }
@@ -177,7 +175,6 @@ ohos_static_library("softbus_server_static") {
       cflags += [ "-DENHANCED_FLAG" ]
       external_deps += [
         "device_certificate_manager:device_cert_mgr_sdk",
-        "zlib:libz",
       ]
     }
   }
