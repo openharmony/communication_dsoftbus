@@ -175,6 +175,7 @@ ohos_static_library("softbus_server_static") {
       cflags += [ "-DENHANCED_FLAG" ]
       external_deps += [
         "device_certificate_manager:device_cert_mgr_sdk",
+        "zlib:libz",
       ]
     }
   }
