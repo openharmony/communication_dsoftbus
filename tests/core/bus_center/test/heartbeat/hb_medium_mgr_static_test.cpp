@@ -430,7 +430,7 @@ HWTEST_F(HeartBeatMediumStaticTest, IsNeedConnectOnLineTest_02, TestSize.Level1)
     EXPECT_CALL(hbStategyMock, LnnRetrieveDeviceInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     unsigned char shortUuid[HB_SHORT_UUID_LEN];
-    shortUuid[0] = 11;
+    shortUuid[0] = 0;
     EXPECT_CALL(hbMediumMock, SoftBusGenerateStrHash)
         .WillRepeatedly(DoAll(SetArgPointee<2>(*shortUuid), Return(SOFTBUS_OK)));
     ret = IsNeedConnectOnLine(&device, &hbResp, &connectReason);
