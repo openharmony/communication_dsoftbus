@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -329,13 +329,16 @@ static int32_t TransSendCollabResult(int32_t channelId, int32_t channelType, int
 }
 
 int32_t TransOnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+    const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
     if (sourceInfo == NULL || sinkInfo == NULL) {
         TRANS_LOGE(TRANS_MSG, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t checkResult = ClientTransCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
-    int32_t ret = TransSendCollabResult(channelId, channelType, checkResult);
+    int32_t ret = SOFTBUS_OK;
+    if (isSinkSide) {
+        ret = TransSendCollabResult(channelId, channelType, checkResult);
+    }
     return ret;
 }
