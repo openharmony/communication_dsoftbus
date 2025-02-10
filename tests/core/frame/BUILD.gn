@@ -163,8 +163,7 @@ ohos_static_library("softbus_server_static") {
     }
     if (!defined(global_parts_info) ||
         defined(global_parts_info.bundlemanager_bundle_framework)) {
-      external_deps += [
-      ]
+      external_deps += []
       cflags = [ "-DSUPPORT_BUNDLENAME" ]
     }
     if (!defined(global_parts_info) ||
