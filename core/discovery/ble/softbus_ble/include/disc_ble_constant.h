@@ -27,6 +27,11 @@
 #define SHA_HASH_LEN 32
 
 #define BT_ADDR_LEN 6
+#define BLE_DISCOVERY_TYPE_VAL_MAX_LEN 16
+
+#define BLE_DISCOVERY_TYPE          "discType"
+#define BLE_DISCOVERY_TYPE_HANDLE   "handle"
+#define BLE_REPORT_HANDLE_JSON_LEY  "handleId"
 
 /* TLV constant defination */
 #define TLV_TYPE_END 0x00
