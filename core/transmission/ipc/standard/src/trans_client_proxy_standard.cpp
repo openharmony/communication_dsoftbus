@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -414,8 +414,8 @@ int32_t TransClientProxy::OnClientChannelOnQos(
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+int32_t TransClientProxy::OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide,
+    const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
     if (sourceInfo == nullptr || sinkInfo == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
@@ -432,6 +432,7 @@ int32_t TransClientProxy::OnCheckCollabRelation(
         TRANS_LOGE(TRANS_CTRL, "Write InterfaceToken failed!");
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
+    WRITE_PARCEL_WITH_RET(data, Bool, isSinkSide, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int64, sourceInfo->accountId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Uint64, sourceInfo->tokenId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, sourceInfo->userId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
@@ -442,16 +443,26 @@ int32_t TransClientProxy::OnCheckCollabRelation(
     WRITE_PARCEL_WITH_RET(data, Int32, sinkInfo->userId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, sinkInfo->pid, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, CString, sinkInfo->deviceId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
-    WRITE_PARCEL_WITH_RET(data, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
-    WRITE_PARCEL_WITH_RET(data, Int32, channelType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    if (isSinkSide) {
+        WRITE_PARCEL_WITH_RET(data, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+        WRITE_PARCEL_WITH_RET(data, Int32, channelType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+        MessageParcel reply;
+        MessageOption option(MessageOption::TF_ASYNC);
+        int32_t ret = remote->SendRequest(CLIENT_CHECK_COLLAB_RELATION, data, reply, option);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "Send request failed, ret=%{public}d", ret);
+            return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        }
+        TransCheckChannelOpenToLooperDelay(channelId, channelType, FAST_INTERVAL_MILLISECOND);
+        return ret;
+    }
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     int32_t ret = remote->SendRequest(CLIENT_CHECK_COLLAB_RELATION, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Send request failed, ret=%{public}d", ret);
         return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
     }
-    TransCheckChannelOpenToLooperDelay(channelId, channelType, FAST_INTERVAL_MILLISECOND);
     return ret;
 }
 
