@@ -54,8 +54,7 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
 
     int32_t testData = 0;
     GenerateInt32(testData);
-    AuthLinkType authLinkType = static_cast<AuthLinkType>
-    (testData % AUTH_LINK_TYPE_MAX);
+    AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
     uint64_t authId = 0;
     GenerateUint64(authId);
     AuthHandle authHandle = { .authId = authId, .type = authLinkType};
@@ -136,8 +135,8 @@ bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
     const AuthConnInfo connInfo = *const_cast<AuthConnInfo *>(reinterpret_cast<const AuthConnInfo *>(data));
     uint32_t requestId = GetData<uint32_t>();
     bool isFastAuth = GetData<bool>();
-    AuthVerifyModule authVeriFyModule = static_cast<AuthVerifyModule>
-    (GetData<int>() % (AUTH_MODULE_BUTT - AUTH_MODULE_LNN + 1));
+    AuthVerifyModule authVeriFyModule =
+        static_cast<AuthVerifyModule>(GetData<int>() % (AUTH_MODULE_BUTT - AUTH_MODULE_LNN + 1));
 
     AuthStartVerify(&connInfo, requestId, authVerifyCallback, authVeriFyModule, isFastAuth);
     return true;

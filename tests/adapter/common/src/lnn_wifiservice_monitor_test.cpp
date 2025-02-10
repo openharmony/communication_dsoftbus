@@ -51,7 +51,7 @@ void LnnWifiServiceMonitorTest::SetUp() { }
 void LnnWifiServiceMonitorTest::TearDown() { }
 
 /**
- * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
+ * @tc.name: LNN_WIFISERVICE_MONITOR_SetSoftBusWifiConnState_001
  * @tc.desc: Verify the SetSoftBusWifiConnState function return value equal SOFTBUS_WIFI_UNKNOWN.
  * @tc.type: FUNC
  * @tc.require: 1
@@ -75,7 +75,7 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiConnSt
 }
 
 /**
- * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
+ * @tc.name: LNN_WIFISERVICE_MONITOR_SetSoftBusWifiUseState_001
  * @tc.desc: Verify the SetSoftBusWifiUseState function return value equal SOFTBUS_WIFI_UNKNOWN.
  * @tc.type: FUNC
  * @tc.require: 1
@@ -96,7 +96,7 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiUseSta
 }
 
 /**
- * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
+ * @tc.name: LNN_WIFISERVICE_MONITOR_SetSoftBusWifiHotSpotState_001
  * @tc.desc: Verify the SetSoftBusWifiHotSpotState function return value equal SOFTBUS_WIFI_UNKNOWN.
  * @tc.type: FUNC
  * @tc.require: 1
