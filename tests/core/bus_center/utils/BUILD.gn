@@ -106,7 +106,6 @@ ohos_unittest("BusCenterUtilsTest") {
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "zlib:libz",
   ]
 }
 
