@@ -60,6 +60,7 @@ int32_t LnnInitWifiDirect(void);
 void LnnDeinitWifiDirect(void);
 int32_t LnnInitPtk(void);
 void LnnDeinitPtk(void);
+void LnnClearPtkList(void);
 int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len);
 int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
 int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len);

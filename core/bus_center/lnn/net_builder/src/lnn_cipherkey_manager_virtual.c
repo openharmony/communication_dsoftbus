@@ -73,6 +73,11 @@ bool IsCipherManagerFindKey(const char *udid)
     return false;
 }
 
+int32_t GenerateNewLocalCipherKey(void)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t LnnLoadLocalBroadcastCipherKey(void)
 {
     return SOFTBUS_OK;

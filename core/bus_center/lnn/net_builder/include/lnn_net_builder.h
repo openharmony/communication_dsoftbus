@@ -186,7 +186,7 @@ void RemovePendingRequestByAddrType(const bool *addrType, uint32_t typeLen);
 void UpdateLocalNetCapability(void);
 void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size);
-int32_t ConifgLocalLedger(void);
+int32_t ConfigLocalLedger(void);
 int32_t SyncElectMessage(const char *networkId);
 ConnectionAddrType GetCurrentConnectType(void);
 NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo);
@@ -210,6 +210,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession
 int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback);
 int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen);
 void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange);
+int32_t LnnUpdateLocalUuidAndIrk(void);
 #ifdef __cplusplus
 }
 #endif

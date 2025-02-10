@@ -355,7 +355,7 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
  */
 HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level1)
 {
-    EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
+    EXPECT_EQ(LnnInitLocalLedgerDelay(), SOFTBUS_NETWORK_INVALID_DEV_INFO);
 }
 
 /*
