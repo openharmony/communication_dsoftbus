@@ -342,7 +342,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
             }
         }
     }
-    AUTH_LOGE(AUTH_CONN, "link type not support, info1-type: %{public}d", info1->type);
+    AUTH_LOGE(AUTH_CONN, "link type not support, info1-type: %{public}d.", info1->type);
     return false;
 }
 
