@@ -442,20 +442,13 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     return ret;
 }
 
-static int32_t NotifyChannelBind(int32_t channelId)
+static int32_t NotifyChannelBind(int32_t channelId, SessionConn *conn)
 {
-    SessionConn conn;
-    if (GetSessionConnById(channelId, &conn) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "notify channel bind, get tdcInfo is null channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
-    }
-    (void)memset_s(&conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    int32_t ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    int32_t ret = TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
 
-    ret = TransTdcOnChannelBind(pkgName, conn.appInfo.myData.pid, channelId);
+    ret = TransTdcOnChannelBind(pkgName, conn->appInfo.myData.pid, channelId);
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
@@ -1494,22 +1487,22 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
         NotifyFastDataRecv(&conn, channelId);
     }
     ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
+    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    TransDelSessionConnById(channelId);
     CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
     if (ret != SOFTBUS_OK) {
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-        goto ERR_EXIT;
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
+        TransSrvDelDataBufNode(channelId);
+        return ret;
     }
-    ret = NotifyChannelBind(channelId);
-    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    ret = NotifyChannelBind(channelId, &conn);
     if (ret != SOFTBUS_OK) {
-        goto ERR_EXIT;
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
+        TransSrvDelDataBufNode(channelId);
+        return ret;
     }
-    TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
     return SOFTBUS_OK;
-ERR_EXIT:
-    TransCleanTdcSource(channelId);
-    return ret;
 }
 
 void TransAsyncTcpDirectChannelTask(int32_t channelId)
