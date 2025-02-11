@@ -651,8 +651,8 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_007, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(1 << BIT_WIFI_P2P, 1 << BIT_WIFI_P2P, 1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION,
-        1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION);
+    mock.SetDefaultResultForAlloc(1 << BIT_WIFI_P2P, 1 << BIT_WIFI_P2P, 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY,
+        1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
     EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
@@ -927,9 +927,8 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_014, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(15, 15, 0x3F7EA, 0x3F7EA);
+    mock.SetDefaultResultForAlloc(15, 15, 0x3137A, 0x3FFEA);
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
-        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
@@ -968,13 +967,11 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_015, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(15, 15, 0x3F7EA, 0x3F7EA);
+    mock.SetDefaultResultForAlloc(15, 15, 0x3FFEA, 0x3137A);
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
-        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
-        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
@@ -1124,13 +1121,13 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(63, 63, 8, 8);
+    mock.SetDefaultResultForAlloc(63, 63, 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY,
+        1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(LaneDepsInterfaceMock::ActionOfAddTrigger);
     char buf[] = "lanedetect";
     EXPECT_CALL(mock, ConnSendSocketData).WillRepeatedly(Return(sizeof(buf)));
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
     EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-
     int32_t ret = AddLaneResourceForAllocTest(LANE_HML);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -1141,7 +1138,6 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     wlanInfo.connState = SOFTBUS_API_WIFI_CONNECTED;
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
-
     LaneAllocInfo allocInfo;
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + MID_BW, DEFAULT_QOSINFO_MAX_LATENCY,
@@ -1173,7 +1169,8 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(63, 63, 8, 8);
+    mock.SetDefaultResultForAlloc(63, 63, 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY,
+        1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
     EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     int32_t ret = AddLaneResourceForAllocTest(LANE_WLAN_5G);
@@ -1183,7 +1180,6 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
     wifiMock.SetDefaultResult();
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
-
     LaneAllocInfo allocInfo;
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + LOW_BW, DEFAULT_QOSINFO_MAX_LATENCY,
@@ -1213,7 +1209,8 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(15, 15, 8, 8);
+    mock.SetDefaultResultForAlloc(15, 15, 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY,
+        1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
     EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     int32_t ret = AddLaneResourceForAllocTest(LANE_HML);
@@ -1221,7 +1218,6 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
 
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
-
     LaneAllocInfo allocInfo;
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,

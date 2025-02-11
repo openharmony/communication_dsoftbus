@@ -229,10 +229,10 @@ static int32_t HmlCapCheck(const char *networkId)
         LNN_LOGE(LNN_LANE, "get feature cap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    if (((local & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0) ||
-        ((remote & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0)) {
+    if (((local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) ||
+        ((remote & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0)) {
         LNN_LOGE(LNN_LANE, "hml capa disable, local=%{public}" PRIu64 ", remote=%{public}"  PRIu64, local, remote);
-        return ((local & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0) ?
+        return ((local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) ?
             SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
     }
     return SOFTBUS_OK;
@@ -429,10 +429,8 @@ static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
 
 static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [HIGH_BAND_WIDTH] = {LANE_HML, LANE_P2P, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
-    [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_P2P,
-        LANE_LINK_TYPE_BUTT},
-    [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_HML, LANE_WLAN_2P4G, LANE_P2P,
-        LANE_LINK_TYPE_BUTT},
+    [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_P2P, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_HML, LANE_WLAN_2P4G, LANE_P2P, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_BR, LANE_P2P,
         LANE_COC_DIRECT, LANE_BLE, LANE_LINK_TYPE_BUTT},
 };
@@ -600,11 +598,8 @@ static bool IsExistWatchDevice(const char *networkId)
     return false;
 }
 
-static bool IsSupportWifiDirect(const char *networkId)
+static bool IsSupportWifiDirectEnhance(const char *networkId)
 {
-    if (IsExistWatchDevice(networkId)) {
-        return false;
-    }
     uint64_t localFeature = 0;
     uint64_t remoteFeature = 0;
     bool isFound = GetFeatureCap(networkId, &localFeature, &remoteFeature);
@@ -612,8 +607,8 @@ static bool IsSupportWifiDirect(const char *networkId)
         LNN_LOGE(LNN_LANE, "getFeature fail");
         return false;
     }
-    if (((localFeature & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) ||
-        ((remoteFeature & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
+    if (((localFeature & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) ||
+        ((remoteFeature & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0)) {
         LNN_LOGE(LNN_LANE, "local=%{public}" PRIu64 ", remote=%{public}" PRIu64, localFeature, remoteFeature);
         return false;
     }
@@ -637,23 +632,6 @@ static void FilterLinksWithContinuous(LaneLinkType *linkList, uint32_t *linksNum
     LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = { 0 };
     for (uint32_t i = 0; i < *linksNum; i++) {
         if (linkList[i] == LANE_P2P || linkList[i] == LANE_HML) {
-            LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
-            continue;
-        }
-        tmpList[num++] = linkList[i];
-    }
-    if (num == *linksNum) {
-        return;
-    }
-    GenerateLinkList(tmpList, num, linkList, linksNum);
-}
-
-static void FilterLinksWithWifiDirect(LaneLinkType *linkList, uint32_t *linksNum)
-{
-    uint32_t num = 0;
-    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = { 0 };
-    for (uint32_t i = 0; i < *linksNum; i++) {
-        if (linkList[i] == LANE_HML) {
             LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
             continue;
         }
@@ -692,8 +670,6 @@ static void DecideLinksWithLegacy(const char *networkId, const LaneSelectParam *
     if (GetBwType(request->qosRequire.minBW) == LOW_BAND_WIDTH) {
         if (request->qosRequire.continuousTask) {
             FilterLinksWithContinuous(linkList, linksNum);
-        } else if (!IsSupportWifiDirect(networkId)) {
-            FilterLinksWithWifiDirect(linkList, linksNum);
         }
     }
 }
@@ -772,7 +748,7 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
         LNN_LOGE(LNN_LANE, "linkList size exceed limit, size=%{public}d", listNum);
         return SOFTBUS_INVALID_PARAM;
     }
-    bool isFilterP2p = IsSupportWifiDirect(networkId);
+    bool isFilterP2p = IsSupportWifiDirectEnhance(networkId);
     uint32_t availableLinkNums = 0;
     for (uint32_t i = 0; i < listNum; i++) {
         if (isFilterP2p && linkList[i] == LANE_P2P) {
@@ -961,8 +937,7 @@ static void DecideLinksWithDevice(const char *networkId, const LaneSelectParam *
     LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
     bool needFilter = false;
     for (uint32_t i = 0; i < *linksNum; i++) {
-        if (linkList[i] == LANE_HML ||
-            (request->qosRequire.continuousTask && (linkList[i] == LANE_P2P || linkList[i] == LANE_COC_DIRECT))) {
+        if (request->qosRequire.continuousTask && (linkList[i] == LANE_P2P || linkList[i] == LANE_COC_DIRECT)) {
             needFilter = true;
             LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
             continue;
