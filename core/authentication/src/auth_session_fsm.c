@@ -158,7 +158,7 @@ static AuthFsm *TranslateToAuthFsm(FsmStateMachine *fsm, int32_t msgType, Messag
     }
     /* check para */
     if ((msgType != FSM_MSG_AUTH_TIMEOUT && msgType != FSM_MSG_DEVICE_NOT_TRUSTED &&
-            msgType != FSM_MSG_DEVICE_DISCONNECTED && msgType != FSM_MSG_STOP_AUTH_FSM) && para == NULL) {
+        msgType != FSM_MSG_DEVICE_DISCONNECTED && msgType != FSM_MSG_STOP_AUTH_FSM) && para == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid msgType. msgType=%{public}d", msgType);
         return NULL;
     }
