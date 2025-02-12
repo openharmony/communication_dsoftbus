@@ -457,7 +457,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     errno_t retMem = memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
         &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "copy accountHash failed");
-    device->info->capabilityBitmap[0] = serviceData[POS_CAPABLITY];
+    device->info->capabilityBitmap[0] = serviceData[POS_CAPABILITY];
 
     uint32_t bcTlvLen = reportInfo->packet.bcData.payloadLen - POS_TLV;
 
