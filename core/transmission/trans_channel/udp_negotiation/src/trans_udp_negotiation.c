@@ -55,7 +55,7 @@
 #define MAX_ERRDESC_LEN 128
 
 #define ISHARE_SESSION_NAME "IShare*"
-#define CLONE_SESSION_NAME "IShare_*"
+#define CLONE_SESSION_NAME "IShare_"
 
 static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
