@@ -2276,7 +2276,9 @@ static bool CheckHasBrConnection(const char *networkId)
         connOpt.brOption.brMac[0] == '\0') {
         return false;
     }
-    return CheckActiveConnection(&connOpt, true);
+    bool ret = CheckActiveConnection(&connOpt, true);
+    LNN_LOGI(LNN_LANE, "CheckActiveConnection ret=%{public}d.", ret);
+    return ret;
 }
 
 static bool IsHasAuthConnInfo(const char *networkId)
@@ -2302,8 +2304,12 @@ static bool IsSupportProxyNego(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return ((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
-        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
+    if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0) ||
+        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0)) {
+        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}" PRIu64 ", remote=%{public}" PRIu64, local, remote);
+        return false;
+    }
+    return true;
 }
 
 static int32_t UpdateP2pReuseInfoByReqId(AsyncResultType type, uint32_t requestId)
