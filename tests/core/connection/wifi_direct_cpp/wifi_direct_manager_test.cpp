@@ -317,20 +317,18 @@ HWTEST_F(WifiDirectManagerCppTest, WifiDirectStatusListenerTest, TestSize.Level1
     std::string remoteUuid("0123456789ABCDEF");
     bool isSource = true;
     std::string localIp("170.30.1.1");
-    bool beCalled = false;
     struct WifiDirectSinkLink sinkLink { };
     struct WifiDirectStatusListener listener1 = { 0 };
     g_listeners.push_back(listener1);
-    NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource);
+    EXPECT_NO_FATAL_FAILURE(NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
 
-    NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str());
+    EXPECT_NO_FATAL_FAILURE(NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str()));
 
-    NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC);
+    EXPECT_NO_FATAL_FAILURE(NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC));
 
-    NotifyConnectedForSink(&sinkLink);
+    EXPECT_NO_FATAL_FAILURE(NotifyConnectedForSink(&sinkLink));
 
-    NotifyDisconnectedForSink(&sinkLink);
-    EXPECT_EQ(beCalled, false);
+    EXPECT_NO_FATAL_FAILURE(NotifyDisconnectedForSink(&sinkLink));
 
     struct WifiDirectStatusListener listener2 = {
         .onDeviceOnLine = [](const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource) {},
@@ -341,17 +339,15 @@ HWTEST_F(WifiDirectManagerCppTest, WifiDirectStatusListenerTest, TestSize.Level1
         .onDisconnectedForSink = [](const struct WifiDirectSinkLink *link) {},
     };
     g_listeners.push_back(listener2);
-    beCalled = true;
-    NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource);
+    EXPECT_NO_FATAL_FAILURE(NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
 
-    NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str());
+    EXPECT_NO_FATAL_FAILURE(NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str()));
 
-    NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC);
+    EXPECT_NO_FATAL_FAILURE(NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC));
 
-    NotifyConnectedForSink(&sinkLink);
+    EXPECT_NO_FATAL_FAILURE(NotifyConnectedForSink(&sinkLink));
 
-    NotifyDisconnectedForSink(&sinkLink);
-    EXPECT_EQ(beCalled, true);
+    EXPECT_NO_FATAL_FAILURE(NotifyDisconnectedForSink(&sinkLink));
 }
 
 /*
@@ -398,16 +394,12 @@ HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeededTest, TestSize.Level1
  */
 HWTEST_F(WifiDirectManagerCppTest, NotifyPtkSyncResultTest, TestSize.Level1)
 {
-    bool beCalled = false;
     std::string remoteUuid("0123456789ABCDEF");
     int result = 0;
-    NotifyPtkSyncResult(remoteUuid.c_str(), result);
-    EXPECT_EQ(beCalled, false);
+    EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteUuid.c_str(), result));
 
     g_syncPtkListener = [](const char *remoteDeviceId, int result) {};
-    beCalled = true;
-    NotifyPtkSyncResult(remoteUuid.c_str(), result);
-    EXPECT_EQ(beCalled, true);
+    EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteUuid.c_str(), result));
 }
 
 /*
