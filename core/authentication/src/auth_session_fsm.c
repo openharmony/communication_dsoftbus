@@ -158,8 +158,7 @@ static AuthFsm *TranslateToAuthFsm(FsmStateMachine *fsm, int32_t msgType, Messag
     }
     /* check para */
     if ((msgType != FSM_MSG_AUTH_TIMEOUT && msgType != FSM_MSG_DEVICE_NOT_TRUSTED &&
-            msgType != FSM_MSG_DEVICE_DISCONNECTED && msgType != FSM_MSG_STOP_AUTH_FSM) &&
-        para == NULL) {
+        msgType != FSM_MSG_DEVICE_DISCONNECTED && msgType != FSM_MSG_STOP_AUTH_FSM) && para == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid msgType. msgType=%{public}d", msgType);
         return NULL;
     }
@@ -296,8 +295,7 @@ static AuthFsm *CreateAuthFsm(
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     AUTH_LOGI(AUTH_FSM,
         "create auth fsm. authSeq=%{public}" PRId64 ", name=%{public}s, side=%{public}s, requestId=%{public}u, "
-        "" CONN_INFO,
-        authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
+        "" CONN_INFO, authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
     return authFsm;
 }
 
@@ -586,9 +584,11 @@ static uint32_t AddConcurrentAuthRequest(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "udidHash is null, authSeq=%{public}" PRId64, authFsm->authSeq);
         return num;
     }
-    NormalizeRequest normalizeRequest = { .authSeq = authFsm->authSeq,
+    NormalizeRequest normalizeRequest = {
+        .authSeq = authFsm->authSeq,
         .connInfo = authFsm->info.connInfo,
-        .isConnectServer = authFsm->info.isConnectServer };
+        .isConnectServer = authFsm->info.isConnectServer
+    };
     if (strcpy_s(normalizeRequest.udidHash, sizeof(normalizeRequest.udidHash), authFsm->info.udidHash) != EOK) {
         AUTH_LOGE(AUTH_FSM, "strcpy udid hash fail. authSeq=%{public}" PRId64, authFsm->authSeq);
         return num;
