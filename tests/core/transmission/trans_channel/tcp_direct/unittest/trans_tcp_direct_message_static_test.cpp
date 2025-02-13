@@ -846,11 +846,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConnTest001, TestSize.Le
 {
     SessionConn *chan = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(chan != nullptr);
-    ReleaseSessionConn(chan);
 
     int32_t channelId = TEST_CHANNEL_ID;
-    int32_t ret = NotifyChannelBind(channelId);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    int32_t ret = NotifyChannelBind(channelId, chan);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    ReleaseSessionConn(chan);
 }
 
 /**
