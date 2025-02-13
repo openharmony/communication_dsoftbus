@@ -1776,22 +1776,19 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest002, TestSize.L
 HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelBindTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
-    int32_t ret = NotifyChannelBind(channelId);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
-
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
-    ret = TransTdcAddSessionConn(conn);
+    int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, TransTdcGetPkgName).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = NotifyChannelBind(channelId);
+    ret = NotifyChannelBind(channelId, conn);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(TcpMessageMock, TransTdcGetPkgName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, TransTdcOnChannelBind).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = NotifyChannelBind(channelId);
+    ret = NotifyChannelBind(channelId, conn);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     TransDelSessionConnById(channelId);
