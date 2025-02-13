@@ -45,6 +45,7 @@ if (defined(ohos_lite)) {
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
+  disc_server_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
 } else {
   disc_server_external_deps += [ "c_utils:utils" ]
 
