@@ -36,7 +36,9 @@
 #include "lnn_feature_capability.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
+#include "softbus_socket.h"
 
 #define AUTH_TIMEOUT_MS            (10 * 1000)
 #define TO_AUTH_FSM(ptr)           CONTAINER_OF(ptr, AuthFsm, fsm)
@@ -1560,6 +1562,7 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
     }
+    DeleteWifiConnItemByConnId(GetConnId(authParam->connId));
     authFsm->info.isNeedFastAuth = authParam->isFastAuth;
     (void)UpdateLocalAuthState(authFsm->authSeq, &authFsm->info);
     AuthFsmStateIndex nextState = STATE_SYNC_DEVICE_ID;
@@ -1728,6 +1731,7 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
         return SOFTBUS_LOCK_ERR;
     }
     AuthFsm *item = NULL;
+    bool isDisconnected = false;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
         if (item->info.connId != connId) {
             continue;
@@ -1740,6 +1744,7 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
             GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P)) {
             if (isNeedDisconnect) {
                 DisconnectAuthDevice(&item->info.connId);
+                isDisconnected = true;
             } else {
                 UpdateFd(&item->info.connId, AUTH_INVALID_FD);
             }
@@ -1747,6 +1752,11 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);
     }
     ReleaseAuthLock();
+    if (isNeedDisconnect && !isDisconnected && GetConnType(connId) == AUTH_LINK_TYPE_WIFI &&
+        IsExistWifiConnItemByConnId(GetConnId(connId))) {
+        DeleteWifiConnItemByConnId(GetConnId(connId));
+        DisconnectAuthDevice(&connId);
+    }
     return SOFTBUS_OK;
 }
 
