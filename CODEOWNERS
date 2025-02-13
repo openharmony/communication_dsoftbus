@@ -56,10 +56,10 @@ interfaces/kits/discovery/  fanjingya1@huawei.com
 adapter/common/bus_center/boot_event/      fengyonghui@huawei.com
 adapter/common/bus_center/common_event/    fengyonghui@huawei.com
 adapter/common/bus_center/driver/          fengyonghui@huawei.com
-adapter/common/bus_center/network/         zhangshaojie3@huawei.com fengyonghui@huawei.com
-adapter/common/bus_center/include/         zhangshaojie3@huawei.com fengyonghui@huawei.com
-adapter/common/bus_center/platform/        zhangshaojie3@huawei.com fengyonghui@huawei.com
-adapter/common/bus_center/wlan/            zhangshaojie3@huawei.com fengyonghui@huawei.com
+adapter/common/bus_center/network/         xuhengxiang@huawei.com fengyonghui@huawei.com
+adapter/common/bus_center/include/         xuhengxiang@huawei.com fengyonghui@huawei.com
+adapter/common/bus_center/platform/        xuhengxiang@huawei.com fengyonghui@huawei.com
+adapter/common/bus_center/wlan/            xuhengxiang@huawei.com fengyonghui@huawei.com
 adapter/common/net/hdi/                    fengyonghui@huawei.com
 adapter/common/net/wifi/                   fengyonghui@huawei.com
 core/adapter/authentication/               chenbotong1@huawei.com
@@ -71,47 +71,47 @@ core/authentication/                       chenbotong1@huawei.com
 core/bus_center/extend/                    fengyonghui@huawei.com
 core/bus_center/interface/                 fengyonghui@huawei.com
 core/bus_center/ipc/                       fengyonghui@huawei.com liubao6@huawei.com
-core/bus_center/lnn/decision_center/       zhangshaojie3@huawei.com
+core/bus_center/lnn/decision_center/       xuhengxiang@huawei.com
 core/bus_center/lnn/meta_node/             fengyonghui@huawei.com zhanghaowen12@huawei.com
-core/bus_center/lnn/net_builder/           fengyonghui@huawei.com zhangshaojie3@huawei.com
-core/bus_center/lnn/lane_hub/common/       zhangshaojie3@huawei.com
+core/bus_center/lnn/net_builder/           fengyonghui@huawei.com xuhengxiang@huawei.com
+core/bus_center/lnn/lane_hub/common/       xuhengxiang@huawei.com
 core/bus_center/lnn/lane_hub/heartbeat/    liubao6@huawei.com
-core/bus_center/lnn/lane_hub/lane_manager/ zhangshaojie3@huawei.com xuhengxiang@huawei.com
-core/bus_center/lnn/lane_hub/lane_qos/     zhangshaojie3@huawei.com xuhengxiang@huawei.com
-core/bus_center/lnn/lane_hub/time_sync/    zhangshaojie3@huawei.com
+core/bus_center/lnn/lane_hub/lane_manager/ xuhengxiang@huawei.com
+core/bus_center/lnn/lane_hub/lane_qos/     xuhengxiang@huawei.com
+core/bus_center/lnn/lane_hub/time_sync/    xuhengxiang@huawei.com
 core/bus_center/lnn/net_buscenter/         fengyonghui@huawei.com
 core/bus_center/lnn/net_ledger/            fengyonghui@huawei.com
 core/bus_center/monitor/                   fengyonghui@huawei.com
-core/bus_center/service/                   zhangshaojie3@huawei.com fengyonghui@huawei.com
-core/bus_center/utils/                     zhangshaojie3@huawei.com fengyonghui@huawei.com
+core/bus_center/service/                   xuhengxiang@huawei.com fengyonghui@huawei.com
+core/bus_center/utils/                     xuhengxiang@huawei.com fengyonghui@huawei.com
 sdk/bus_center/                            fengyonghui@huawei.com
 tests/adapter/unittest/                    fengyonghui@huawei.com
 tests/core/adapter/unittest/dsoftbus_rsa_crypto_test.cpp           liubao6@huawei.com
 tests/core/adapter/unittest/lnn_kv_adapter_test.cpp                liubao6@huawei.com
 tests/core/adapter/unittest/lnn_kv_store_launch_listener_test.cpp  liubao6@huawei.com
-tests/core/adapter/unittest/lnn_ohos_account_adapter_test.cpp      zhangshaojie3@huawei.com fengyonghui@huawei.com
-tests/core/adapter/unittest/lnn_ohos_account_test.cpp              zhangshaojie3@huawei.com fengyonghui@huawei.com
+tests/core/adapter/unittest/lnn_ohos_account_adapter_test.cpp      xuhengxiang@huawei.com fengyonghui@huawei.com
+tests/core/adapter/unittest/lnn_ohos_account_test.cpp              xuhengxiang@huawei.com fengyonghui@huawei.com
 tests/core/adapter/unittest/lnn_settingdata_event_monitor_test.cpp fengyonghui@huawei.com
 tests/core/authentication/                        chenbotong1@huawei.com
 tests/core/bus_center/lnn/ipc/                    fengyonghui@huawei.com liubao6@huawei.com
-tests/core/bus_center/lnn/lane/                   zhangshaojie3@huawei.com
-tests/core/bus_center/lnn/lane_link/              zhangshaojie3@huawei.com
-tests/core/bus_center/lnn/lane_link_conflict/     zhangshaojie3@huawei.com
-tests/core/bus_center/lnn/lane_listener/          zhangshaojie3@huawei.com
+tests/core/bus_center/lnn/lane/                   xuhengxiang@huawei.com
+tests/core/bus_center/lnn/lane_link/              xuhengxiang@huawei.com
+tests/core/bus_center/lnn/lane_link_conflict/     xuhengxiang@huawei.com
+tests/core/bus_center/lnn/lane_listener/          xuhengxiang@huawei.com
 tests/core/bus_center/lnn/net_builder/            fengyonghui@huawei.com
 tests/core/bus_center/lnn/net_buscenter/          fengyonghui@huawei.com
 tests/core/bus_center/lnn/net_ledger/             fengyonghui@huawei.com
 tests/core/bus_center/lnn/unittest/               fengyonghui@huawei.com
-tests/core/bus_center/service/unittest/bus_center_decision_center_test.cpp   zhangshaojie3@huawei.com
+tests/core/bus_center/service/unittest/bus_center_decision_center_test.cpp   xuhengxiang@huawei.com
 tests/core/bus_center/service/unittest/bus_center_event_test.cpp             fengyonghui@huawei.com
 tests/core/bus_center/service/unittest/bus_center_manager_test.cpp           fengyonghui@huawei.com
 tests/core/bus_center/test/heartbeat/        liubao6@huawei.com
 tests/core/bus_center/test/ipc/              fengyonghui@huawei.com liubao6@huawei.com
-tests/core/bus_center/test/service/          zhangshaojie3@huawei.com
+tests/core/bus_center/test/service/          xuhengxiang@huawei.com
 tests/core/bus_center/utils/                 fengyonghui@huawei.com
 
 [LnnInterface]
-interfaces/kits/bus_center/     zhangshaojie3@huawei.com
+interfaces/kits/bus_center/     xuhengxiang@huawei.com
 
 [Trans]
 core/adapter/transmission/      jiazhenyu1@huawei.com baiyuxin6@huawei.com
