@@ -20,7 +20,6 @@
 
 #include "anonymizer.h"
 #include "bus_center_decision_center.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_cipherkey_manager.h"
