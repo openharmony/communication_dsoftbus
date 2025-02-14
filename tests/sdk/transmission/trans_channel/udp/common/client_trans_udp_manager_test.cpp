@@ -524,7 +524,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.L
         sendStringData,
         STREAM_DATA_LENGTH,
     };
-    char str[STREAM_DATA_LENGTH] = "oooooooooooodd";
+    char str[STREAM_DATA_LENGTH] = "ooooooood";
     StreamData tmpData2 = {
         str,
         STREAM_DATA_LENGTH,
@@ -580,7 +580,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Lev
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
     ASSERT_NE(newChannel, NULL);
     newChannel->channelId = channelId;
     newChannel->isEnable = true;
@@ -622,7 +622,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level0)
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
     ASSERT_NE(newChannel, NULL);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_BYTE;
@@ -666,7 +666,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level0)
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
     ASSERT_NE(newChannel, NULL);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
@@ -774,7 +774,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSiz
     ASSERT_NE(newChannel, NULL);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
-    ret = TransSetUdpChanelSessionId(channelId, sessionId);
+    ret = TransSetUdpChannelRenameHook(channelId, onRenameFile);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 
     ret = ClientTransAddUdpChannel(newChannel);
@@ -813,7 +813,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level
     ret = ClientTransAddUdpChannel(newChannel);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransSetUdpChannelTos(newChannel);
+    ret = TransSetUdpChannelTos(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransDeleteUdpChannel(channelId);
