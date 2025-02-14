@@ -166,8 +166,23 @@ if (defined(ohos_lite)) {
     sources = [ "udp/common/client_trans_udp_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+    ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
+    if (enhanced) {
+      include_dirs += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface" ]
+      deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
+    } else {
+      include_dirs +=
+          [ "$dsoftbus_root_path/components/nstackx/nstackx_util/interface" ]
+      deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
+    }
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
