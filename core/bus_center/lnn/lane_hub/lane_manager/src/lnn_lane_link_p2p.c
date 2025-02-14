@@ -2473,6 +2473,10 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
             guideList[(*linksNum)++] = LANE_NEW_AUTH_NEGO;
         }
     }
+    if (*linksNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none guide channel can be used.");
+        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
+    }
     return SOFTBUS_OK;
 }
 
@@ -2520,11 +2524,6 @@ static int32_t LnnSelectDirectLink(uint32_t laneReqId, LaneLinkType linkType)
     if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get guide channel info fail.");
         return SOFTBUS_LANE_NOT_FOUND;
-    }
-    if (guideInfo.guideIdx >= guideInfo.guideNum) {
-        LNN_LOGE(LNN_LANE, "all guide channel type have been tried.");
-        DelGuideInfoItem(laneReqId, linkType);
-        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
     WdGuideType guideType = guideInfo.guideList[guideInfo.guideIdx];
     LNN_LOGI(LNN_LANE, "build guide channel, laneReqId=%{public}u, guideType=%{public}d.", laneReqId, guideType);
