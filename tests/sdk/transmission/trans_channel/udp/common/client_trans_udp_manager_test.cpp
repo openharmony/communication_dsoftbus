@@ -24,6 +24,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "trans_udp_channel_manager.h"
+#include "client_trans_udp_manager.c"
 
 using namespace std;
 using namespace testing::ext;
@@ -50,6 +51,7 @@ namespace OHOS {
 #define TEST_FILE_NAME "test.filename.01"
 #define STREAM_DATA_LENGTH 10
 #define TEST_ERR_CHANNELID (-1)
+#define TEST_ERR_SESSIONID (-1)
 #define FILE_PRIORITY_TEST 0x06
 
 class ClientTransUdpManagerTest : public testing::Test {
@@ -495,5 +497,361 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest, TestSize.Level0)
     EXPECT_FALSE(isTosSet);
     ret = TransGetUdpChannelTos(TEST_CHANNELID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransUdpChannelSendStreamTest002
+ * @tc.desc: trans udp channel sendstream test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->isEnable = false;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    StreamFrameInfo tmpf = {};
+    char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
+    StreamData tmpData1 = {
+        sendStringData,
+        STREAM_DATA_LENGTH,
+    };
+    char str[STREAM_DATA_LENGTH] = "oooooooooooodd";
+    StreamData tmpData2 = {
+        str,
+        STREAM_DATA_LENGTH,
+    };
+    ret = TransUdpChannelSendStream(channelId, &tmpData1, &tmpData2, &tmpf);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_DISABLE, ret);
+
+    newChannel->isEnable = true;
+    ret = TransUdpChannelSendStream(channelId, NULL, NULL, &tmpf);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpChannelSendFileTest002
+ * @tc.desc: trans udp channel sendfile test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    const char *sFileList[] = {
+        "/data/big.tar",
+        "/data/richu.jpg",
+        "/data/richu-002.jpg",
+        "/data/richu-003.jpg",
+    };
+    const char *dFileList[] = {
+        "/data/big.tar",
+        "/data/richu.jpg",
+        "/data/richu-002.jpg",
+        "/data/richu-003.jpg",
+    };
+    uint32_t fileCnt = 0;
+
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->isEnable = false;
+    newChannel->dfileId = TEST_ERR_SESSIONID;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_DISABLE, ret);
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->isEnable = true;
+    newChannel->dfileId = TEST_SESSIONID;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransLimitChangeTest002
+ * @tc.desc: trans limit change test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->businessType = BUSINESS_TYPE_FILE;
+    newChannel->info.isServer = true;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_NOT_NEED_UPDATE, ret);
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->businessType = BUSINESS_TYPE_BYTE;
+    newChannel->info.isServer = false;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_NOT_NEED_UPDATE, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransLimitChangeTest003
+ * @tc.desc: trans limit change test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->businessType = BUSINESS_TYPE_FILE;
+    newChannel->info.isServer = false;
+    newChannel->isTosSet = false;
+    newChannel->dfileId = TEST_ERR_SESSIONID;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->businessType = BUSINESS_TYPE_FILE;
+    newChannel->info.isServer = false;
+    newChannel->isTosSet = true;
+    newChannel->dfileId = TEST_ERR_SESSIONID;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_NOT_NEED_UPDATE, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: ClientEmitFileEventTest003
+ * @tc.desc: client emit file event test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->businessType = BUSINESS_TYPE_FILE;
+    newChannel->dfileId = TEST_ERR_SESSIONID;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientEmitFileEvent(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSetUdpChanelSessionIdTest001
+ * @tc.desc: trans set udpchannel sessionid test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t sessionId = TEST_SESSIONID;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+
+    ret = TransSetUdpChanelSessionId(channelId, sessionId);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSetUdpChanelSessionId(channelId, sessionId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+static void OnRenameFileCb(RenameParam *renameParam)
+{
+    return;
+}
+
+/**
+ * @tc.name: TransSetUdpChannelRenameHookTest001
+ * @tc.desc: trans set udpchannel rename hook test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+    OnRenameFileCallback onRenameFile = OnRenameFileCb;
+
+    ret = TransSetUdpChannelRenameHook(channelId, onRenameFile);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+    newChannel->businessType = BUSINESS_TYPE_FILE;
+    ret = TransSetUdpChanelSessionId(channelId, sessionId);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSetUdpChannelRenameHook(channelId, onRenameFile);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSetUdpChannelTosTest001
+ * @tc.desc: trans set udpchannel tos test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+
+    ret = TransSetUdpChannelTos(channelId);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSetUdpChannelTos(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransGetUdpChannelTosTest001
+ * @tc.desc: trans get udpchannel tos test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    bool isTosSet = false;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+
+    ret = TransGetUdpChannelTos(channelId, &isTosSet);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_NE(newChannel, NULL);
+    newChannel->channelId = channelId;
+
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransGetUdpChannelTos(channelId, &isTosSet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
 }
 } // namespace OHOS
