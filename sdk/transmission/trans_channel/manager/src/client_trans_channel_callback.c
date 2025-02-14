@@ -336,9 +336,8 @@ int32_t TransOnCheckCollabRelation(
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t checkResult = ClientTransCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
-    int32_t ret = SOFTBUS_OK;
-    if (isSinkSide) {
-        ret = TransSendCollabResult(channelId, channelType, checkResult);
+    if (!isSinkSide) {
+        return checkResult;
     }
-    return ret;
+    return TransSendCollabResult(channelId, channelType, checkResult);
 }
