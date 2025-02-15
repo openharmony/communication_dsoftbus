@@ -44,6 +44,7 @@
       "dsoftbus_feature_disc_touch",
       "dsoftbus_feature_disc_sle",
       "dsoftbus_feature_disc_usb",
+      "dsoftbus_feature_disc_oop",
       "dsoftbus_feature_conn_tcp_proxy",
       "dsoftbus_feature_conn_tcp_comm",
       "dsoftbus_feature_conn_pv1",
