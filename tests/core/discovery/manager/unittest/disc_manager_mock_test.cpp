@@ -114,6 +114,7 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
     EXPECT_CALL(usbMock, DiscUsbDispatcherInit).WillRepeatedly(Return(nullptr));
 
     EXPECT_NE(DiscMgrInit(), SOFTBUS_OK);
+    DiscMgrDeinit();
     DISC_LOGI(DISC_TEST, "DiscManagerInit001 end ----");
 }
 
