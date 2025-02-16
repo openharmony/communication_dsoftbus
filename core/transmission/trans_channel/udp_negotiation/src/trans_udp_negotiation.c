@@ -336,6 +336,8 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
     if (memcpy_s(&(newChannel->authHandle), sizeof(AuthHandle), authHandle, sizeof(AuthHandle)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s authHandle failed.");
+        ReleaseUdpChannelId(appInfo->myData.channelId);
+        SoftBusFree(newChannel);
         return SOFTBUS_MEM_ERR;
     }
     if (TransAddUdpChannel(newChannel) != SOFTBUS_OK) {

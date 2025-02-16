@@ -991,8 +991,8 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         (void)TransDelTcpChannelInfoByChannelId(channelId);
         TransDelSessionConnById(channelId);
-        ReleaseSessionConn(conn);
     }
+    ReleaseSessionConn(conn);
     return errCode;
 }
 
