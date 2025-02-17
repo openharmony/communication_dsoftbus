@@ -683,7 +683,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData003, TestSize.Leve
 {
     int32_t bufferSize = 0;
     DataHead pktHead;
-    pktHead.tlvElement = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    pktHead.tlvElement = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, &bufferSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -819,7 +819,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     int32_t invalidFlag = 22;
-    flag = (SessionPktType)invalidFlag;
+    flag = reinterpret_cast<SessionPktType>(invalidFlag);
     ret = ClientTransProxyNotifySession(1, flag, 1, data, sizeof(data));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -860,7 +860,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     uint32_t magic = MAGIC_NUMBER;
-    char *magicData = (char *)SoftBusCalloc(20);
+    char *magicData = reinterpret_cast<char *>(SoftBusCalloc(20));
     memcpy_s(magicData, 4, &magic, 4);
     ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, 0);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
