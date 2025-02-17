@@ -513,8 +513,7 @@ int32_t AuthRestoreAuthManager(
         return SOFTBUS_AUTH_MANAGER_RESTORE_FAIL;
     }
     if (SoftBusGenerateStrHash((unsigned char *)nodeInfo->deviceInfo.deviceUdid,
-        strlen(nodeInfo->deviceInfo.deviceUdid),
-        (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
+        strlen(nodeInfo->deviceInfo.deviceUdid), (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "restore manager fail because generate strhash");
         (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
@@ -531,7 +530,7 @@ int32_t AuthRestoreAuthManager(
         return ret;
     }
     ret = hasDeviceKey ? AuthDirectOnlineProcessSessionKey(&info, &keyInfo, authId) :
-                         AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, authId);
+        AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, authId);
     (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     return ret;
 }
