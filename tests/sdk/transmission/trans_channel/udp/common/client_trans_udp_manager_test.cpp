@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,12 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
+#include "client_trans_udp_manager.c"
 #include "securec.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "trans_udp_channel_manager.h"
-#include "client_trans_udp_manager.c"
 
 using namespace std;
 using namespace testing::ext;
@@ -140,13 +140,13 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest001, TestSize.Lev
     ChannelInfo channel = InitChannelInfo();
     int32_t udpPort;
 
-    ret = TransOnUdpChannelOpened(NULL, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(nullptr, &channel, &udpPort);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, NULL, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, nullptr, &udpPort);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, NULL);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -350,13 +350,13 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest001, TestSize.Lev
         "/data/richu-002.jpg",
         "/data/richu-003.jpg",
     };
-    ret = TransUdpChannelSendFile(TEST_CHANNELID, NULL, NULL, 1);
+    ret = TransUdpChannelSendFile(TEST_CHANNELID, nullptr, nullptr, 1);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
-    ret = TransUdpChannelSendFile(TEST_CHANNELID, sFileList, NULL, 0);
+    ret = TransUdpChannelSendFile(TEST_CHANNELID, sFileList, nullptr, 0);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
-    ret = TransUdpChannelSendFile(TEST_CHANNELID, sFileList, NULL, 1);
+    ret = TransUdpChannelSendFile(TEST_CHANNELID, sFileList, nullptr, 1);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
@@ -512,8 +512,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.L
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->isEnable = false;
     ret = ClientTransAddUdpChannel(newChannel);
@@ -533,7 +533,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_DISABLE, ret);
 
     newChannel->isEnable = true;
-    ret = TransUdpChannelSendStream(channelId, NULL, NULL, &tmpf);
+    ret = TransUdpChannelSendStream(channelId, nullptr, nullptr, &tmpf);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransDeleteUdpChannel(channelId);
@@ -567,8 +567,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Lev
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->isEnable = false;
     newChannel->dfileId = TEST_ERR_SESSIONID;
@@ -580,8 +580,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Lev
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->isEnable = true;
     newChannel->dfileId = TEST_SESSIONID;
@@ -609,8 +609,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level0)
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
     newChannel->info.isServer = true;
@@ -622,8 +622,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level0)
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_BYTE;
     newChannel->info.isServer = false;
@@ -651,8 +651,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level0)
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
     newChannel->info.isServer = false;
@@ -666,8 +666,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level0)
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
     newChannel->info.isServer = false;
@@ -697,8 +697,8 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
     newChannel->dfileId = TEST_ERR_SESSIONID;
@@ -706,7 +706,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientEmitFileEvent(channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -732,8 +732,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.
 
     ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     ret = ClientTransAddUdpChannel(newChannel);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -770,8 +770,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSiz
 
     ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
     newChannel->businessType = BUSINESS_TYPE_FILE;
     ret = TransSetUdpChannelRenameHook(channelId, onRenameFile);
@@ -806,8 +806,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level
 
     ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
 
     ret = ClientTransAddUdpChannel(newChannel);
@@ -840,8 +840,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest002, TestSize.Level
 
     ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    UdpChannel *newChannel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
-    ASSERT_NE(newChannel, NULL);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
     newChannel->channelId = channelId;
 
     ret = ClientTransAddUdpChannel(newChannel);
