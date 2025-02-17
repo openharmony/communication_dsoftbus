@@ -60,6 +60,8 @@ static InnerChannelListener g_listener[] = {
 };
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
+static ListNode g_wifiConnList = { &g_wifiConnList, &g_wifiConnList };
+static SoftBusMutex g_wifiConnListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
@@ -228,6 +230,84 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
     return data;
 }
 
+typedef struct {
+    ListNode node;
+    int32_t fd;
+} WifiConnInstance;
+
+static bool RequireWifiConnListLock(void)
+{
+    if (SoftBusMutexLock(&g_wifiConnListLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiConnList lock fail");
+        return false;
+    }
+    return true;
+}
+
+static void ReleaseWifiConnListLock(void)
+{
+    if (SoftBusMutexUnlock(&g_wifiConnListLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiConnList unlock fail");
+    }
+}
+
+static int32_t AddWifiConnItem(int32_t fd)
+{
+    if (!RequireWifiConnListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireWifiConnListLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    WifiConnInstance *connItem = (WifiConnInstance *)SoftBusCalloc(sizeof(WifiConnInstance));
+    if (connItem == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc connItem fail");
+        ReleaseWifiConnListLock();
+        return SOFTBUS_MEM_ERR;
+    }
+    connItem->fd = fd;
+    ListNodeInsert(&g_wifiConnList, &connItem->node);
+    AUTH_LOGI(AUTH_CONN, "add wifi conn item. fd=%{public}d", fd);
+    ReleaseWifiConnListLock();
+    return SOFTBUS_OK;
+}
+
+bool IsExistWifiConnItemByConnId(int32_t fd)
+{
+    if (!RequireWifiConnListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireWifiConnListLock fail");
+        return false;
+    }
+    WifiConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_wifiConnList, WifiConnInstance, node) {
+        if (item->fd != fd) {
+            continue;
+        }
+        ReleaseWifiConnListLock();
+        return true;
+    }
+    AUTH_LOGE(AUTH_CONN, "wifi conn item is not found. fd=%{public}d", fd);
+    ReleaseWifiConnListLock();
+    return false;
+}
+
+void DeleteWifiConnItemByConnId(int32_t fd)
+{
+    if (!RequireWifiConnListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireWifiConnListLock fail");
+        return;
+    }
+    WifiConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_wifiConnList, WifiConnInstance, node) {
+        if (item->fd != fd) {
+            continue;
+        }
+        AUTH_LOGI(AUTH_CONN, "delete wifi conn item. fd=%{public}d", fd);
+        ListDelete(&item->node);
+        SoftBusFree(item);
+        break;
+    }
+    ReleaseWifiConnListLock();
+}
+
 static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
 {
     AUTH_LOGI(AUTH_CONN, "socket client connect succ: fd=%{public}d.", fd);
@@ -238,6 +318,10 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
     }
     if (ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set none block mode fail.");
+        goto FAIL;
+    }
+    if (AddWifiConnItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
         goto FAIL;
     }
     NotifyConnected(module, fd, true);
@@ -320,6 +404,10 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
             return SOFTBUS_AUTH_MANAGER_BUILD_FAIL;
         }
         return SOFTBUS_OK;
+    }
+    if (module == AUTH && AddWifiConnItem(cfd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
+        return SOFTBUS_MEM_ERR;
     }
     NotifyConnected(module, cfd, false);
     return SOFTBUS_OK;
@@ -756,4 +844,20 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
         fd, tcpKeepaliveOption.keepaliveIdle, tcpKeepaliveOption.keepaliveIntvl, tcpKeepaliveOption.keepaliveCount,
         tcpKeepaliveOption.userTimeout);
     return SOFTBUS_OK;
+}
+
+int32_t WifiConnListLockInit(void)
+{
+    if (SoftBusMutexInit(&g_wifiConnListLock, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiConnList mutex init fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void WifiConnListLockDeinit(void)
+{
+    if (SoftBusMutexDestroy(&g_wifiConnListLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiConnList mutex destroy fail");
+    }
 }
