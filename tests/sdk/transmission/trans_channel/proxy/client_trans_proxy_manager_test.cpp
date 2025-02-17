@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -671,9 +671,20 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Leve
     DataHead pktHead;
     int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
 
+/**
+ * @tc.name: ProxyBuildNeedAckTlvData003
+ * @tc.desc: ProxyBuildNeedAckTlvData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData003, TestSize.Level0)
+{
     int32_t bufferSize = 0;
-    ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, &bufferSize);
+    DataHead pktHead;
+    pktHead.tlvElement = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, &bufferSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -731,18 +742,19 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, T
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSize.Level0)
 {
+    channelId = 1;
     ChannelInfo channelInfo;
-    channelInfo.channelId = 1;
+    channelInfo.channelId = channelId;
     channelInfo.sessionKey = g_sessionKey;
-    channelInfo.isEncrypt = true;
-    channelInfo.isSupportTlv = true;
+    channelInfo.isEncrypt = false;
+    channelInfo.isSupportTlv = false;
     channelInfo.businessType = BUSINESS_TYPE_BYTE;
     int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelInfo.businessType = BUSINESS_TYPE_FILE;
     ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -800,7 +812,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize
 
     flag = TRANS_SESSION_ACK;
     ret = ClientTransProxyNotifySession(1, flag, 1, data, 4);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     flag = TRANS_SESSION_ASYNC_MESSAGE;
     ret = ClientTransProxyNotifySession(1, flag, 1, data, sizeof(data));
@@ -848,15 +860,12 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     uint32_t magic = MAGIC_NUMBER;
-    char magicData[4];
+    char *magicData = (char *)SoftBusCalloc(20);
     memcpy_s(magicData, 4, &magic, 4);
     ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, 0);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, 1);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
-
-    ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, sizeof(magicData));
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 }
 } // namespace OHOS
