@@ -36,6 +36,7 @@
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
+#include "lnn_select_rule.h"
 #include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
@@ -1502,6 +1503,27 @@ static bool IsGuideChannelRetryErrcode(int32_t reason)
     return false;
 }
 
+static void HandleNotSupportP2pError(AsyncResultType type, uint32_t p2pRequestId)
+{
+    P2pLinkReqList reqInfo;
+    (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2pLinkReq fail, type=%{public}d, requestId=%{public}u",
+            ASYNC_RESULT_P2P, p2pRequestId);
+        return;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(reqInfo.laneRequestInfo.networkId, STRING_KEY_DEV_UDID,
+        peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return;
+    }
+    if (UpdateP2pAvailability(peerUdid, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "update p2p availability fail");
+        return;
+    }
+}
+
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
@@ -1538,6 +1560,9 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
             NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
         }
         return;
+    }
+    if (reason == SOFTBUS_CONN_P2P_STA_SAME_MAC) {
+        HandleNotSupportP2pError(ASYNC_RESULT_P2P, p2pRequestId);
     }
     NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
 }

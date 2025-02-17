@@ -40,6 +40,7 @@
 
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
+#define WIFI_DIRECT_EXT_CAP_VALID_TIME  10000
 
 #define LOW_BW                  (384 * 1024)
 #define MID_BW                  (30 * 1024 * 1024)
@@ -52,6 +53,119 @@ typedef enum {
     LANE_DATA_STREAM,
     LANE_DATA_BUTT,
 } LaneDataType;
+
+typedef struct {
+    ListNode node;
+    char peerUdid[UDID_BUF_LEN];
+    bool isP2pAvailable;
+    uint64_t effectiveTime;
+} WifiDirectExtCap;
+
+static SoftBusList g_wifiDirectExtCapList;
+
+static int32_t WifiDirectExtCapLock(void)
+{
+    return SoftBusMutexLock(&g_wifiDirectExtCapList.lock);
+}
+
+static void WifiDirectExtCapUnlock(void)
+{
+    (void)SoftBusMutexUnlock(&g_wifiDirectExtCapList.lock);
+}
+
+static WifiDirectExtCap* GetValidWifiDirectExtCap(const char *peerUdid)
+{
+    WifiDirectExtCap *item = NULL;
+    WifiDirectExtCap *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_wifiDirectExtCapList.list, WifiDirectExtCap, node) {
+        if (strcmp(item->peerUdid, peerUdid) == 0) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
+static int32_t CreateNewWifiDirectExtCapInfo(const char *peerUdid, bool isP2pAvailable)
+{
+    WifiDirectExtCap *item = (WifiDirectExtCap *)SoftBusCalloc(sizeof(WifiDirectExtCap));
+    if (item == NULL) {
+        LNN_LOGE(LNN_LANE, "calloc wifiDirectExtCap item fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (strcpy_s(item->peerUdid, sizeof(item->peerUdid), peerUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "copy peerUdid failed");
+        SoftBusFree(item);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    item->isP2pAvailable = isP2pAvailable;
+    item->effectiveTime = SoftBusGetSysTimeMs();
+    if (WifiDirectExtCapLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "wifiDirect extCap lock fail");
+        SoftBusFree(item);
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListAdd(&g_wifiDirectExtCapList.list, &item->node);
+    g_wifiDirectExtCapList.cnt++;
+    WifiDirectExtCapUnlock();
+    char *anonyUdid = NULL;
+    Anonymize(peerUdid, &anonyUdid);
+    LNN_LOGI(LNN_LANE, "create new wifiDirectExtCap info succ, peerUdid=%{public}s, isP2pAvailable=%{public}s",
+        AnonymizeWrapper(anonyUdid), isP2pAvailable ? "true" : "false");
+    AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
+}
+
+int32_t UpdateP2pAvailability(const char *peerUdid, bool isP2pAvailable)
+{
+    if (peerUdid == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (WifiDirectExtCapLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "wifiDirect extCap lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    WifiDirectExtCap *item = GetValidWifiDirectExtCap(peerUdid);
+    if (item != NULL) {
+        item->isP2pAvailable = isP2pAvailable;
+        item->effectiveTime = SoftBusGetSysTimeMs();
+        LNN_LOGE(LNN_LANE, "update exists wifidirect cap ext info succ");
+        WifiDirectExtCapUnlock();
+        return SOFTBUS_OK;
+    }
+    WifiDirectExtCapUnlock();
+    int32_t ret = CreateNewWifiDirectExtCapInfo(peerUdid, isP2pAvailable);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "create wifiDirectExtCap fail, reason=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DelWifiDirectExtCapInfo(const char *peerUdid)
+{
+    if (WifiDirectExtCapLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "wifiDirect extCap lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    WifiDirectExtCap *item = NULL;
+    WifiDirectExtCap *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_wifiDirectExtCapList.list, WifiDirectExtCap, node) {
+        if (strcmp(item->peerUdid, peerUdid) == 0) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            g_wifiDirectExtCapList.cnt--;
+            WifiDirectExtCapUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    WifiDirectExtCapUnlock();
+    char *anonyUdid = NULL;
+    Anonymize(peerUdid, &anonyUdid);
+    LNN_LOGE(LNN_LANE, "not found wifiDirectExtCap info by peerUdid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
+    return SOFTBUS_LANE_NOT_FOUND;
+}
 
 int32_t GetWlanLinkedFrequency(void)
 {
@@ -850,6 +964,67 @@ static void SelectDbLinks(const char *networkId, LaneLinkType *resList, uint32_t
     }
 }
 
+static bool IsValidWifiDirectExtCap(uint64_t effectiveTime)
+{
+    uint64_t currTime = SoftBusGetSysTimeMs();
+    return (currTime > (effectiveTime + WIFI_DIRECT_EXT_CAP_VALID_TIME)) ? false : true;
+}
+
+static bool CheckP2pIsAvailable(const char *peerUdid)
+{
+    if (WifiDirectExtCapLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "wifiDirect extCap lock fail");
+        return true;
+    }
+    WifiDirectExtCap *item = GetValidWifiDirectExtCap(peerUdid);
+    if (item == NULL) {
+        LNN_LOGD(LNN_LANE, "not find p2p availability info, available by default");
+        WifiDirectExtCapUnlock();
+        return true;
+    }
+    uint64_t effectiveTime = item->effectiveTime;
+    bool isP2pAvailable = item->isP2pAvailable;
+    WifiDirectExtCapUnlock();
+    if (!IsValidWifiDirectExtCap(effectiveTime)) {
+        (void)DelWifiDirectExtCapInfo(peerUdid);
+        LNN_LOGD(LNN_LANE, "p2p availability exceed timeliness, available by default");
+        return true;
+    }
+    LNN_LOGI(LNN_LANE, "p2p available is %{public}s", isP2pAvailable ? "true" : "false");
+    return isP2pAvailable ? true : false;
+}
+
+static void AdjustLinkPriorityForRtt(const char *networkId, LanePreferredLinkList *recommendList)
+{
+    if (!IsRemoteLegacy(networkId)) {
+        LNN_LOGD(LNN_LANE, "valid os, no need adjust");
+        return;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return;
+    }
+    if (CheckP2pIsAvailable(peerUdid)) {
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "adjust link priority for rtt");
+    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
+    uint32_t num = 0;
+    for (uint32_t i = 0; i < recommendList->linkTypeNum; i++) {
+        if (recommendList->linkType[i] != LANE_P2P) {
+            tmpList[num++] = recommendList->linkType[i];
+        }
+    }
+    tmpList[num++] = LANE_P2P;
+    uint32_t size = sizeof(LaneLinkType) * LANE_LINK_TYPE_BUTT;
+    (void)memset_s(&recommendList->linkType, size, -1, size);
+    recommendList->linkTypeNum = num;
+    for (uint32_t i = 0; i < recommendList->linkTypeNum; i++) {
+        recommendList->linkType[i] = tmpList[i];
+    }
+}
+
 static void SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
@@ -862,6 +1037,7 @@ static void SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used, reason=%{public}d", ret);
         return;
     }
+    AdjustLinkPriorityForRtt(networkId, &recommendList);
     *resNum = 0;
     for (uint32_t i = 0; i < recommendList.linkTypeNum; i++) {
         resList[(*resNum)++] = recommendList.linkType[i];
@@ -1039,4 +1215,32 @@ int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
         reuseLink, resourceItem.laneId);
     recommendList->linkType[(recommendList->linkTypeNum)++] = reuseLink;
     return SOFTBUS_OK;
+}
+
+int32_t InitLaneSelectRule(void)
+{
+    if (SoftBusMutexInit(&g_wifiDirectExtCapList.lock, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "wifidirect extcap mutex init fail");
+        return SOFTBUS_NO_INIT;
+    }
+    ListInit(&g_wifiDirectExtCapList.list);
+    g_wifiDirectExtCapList.cnt = 0;
+    return SOFTBUS_OK;
+}
+
+void DeinitLaneSelectRule(void)
+{
+    if (WifiDirectExtCapLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "wifiDirect extCap lock fail");
+        return;
+    }
+    WifiDirectExtCap *item = NULL;
+    WifiDirectExtCap *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_wifiDirectExtCapList.list, WifiDirectExtCap, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+        g_wifiDirectExtCapList.cnt--;
+    }
+    WifiDirectExtCapUnlock();
+    (void)SoftBusMutexDestroy(&g_wifiDirectExtCapList.lock);
 }
