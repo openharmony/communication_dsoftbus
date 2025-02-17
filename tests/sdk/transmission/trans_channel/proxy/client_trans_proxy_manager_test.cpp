@@ -819,7 +819,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     int32_t invalidFlag = 22;
-    flag = reinterpret_cast<SessionPktType>(invalidFlag);
+    flag = static_cast<SessionPktType>(invalidFlag);
     ret = ClientTransProxyNotifySession(1, flag, 1, data, sizeof(data));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
