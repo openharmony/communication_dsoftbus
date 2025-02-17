@@ -164,7 +164,8 @@ static void SessionNotifyDataReceived(ListenerModule module, int32_t fd,
     }
 }
 
-static void NotifyDataReceived(ListenerModule module, int32_t fd, const SocketPktHead *pktHead, const uint8_t *data)
+static void NotifyDataReceived(ListenerModule module, int32_t fd,
+    const SocketPktHead *pktHead, const uint8_t *data)
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
         NotifyChannelDataReceived(fd, pktHead, data);
