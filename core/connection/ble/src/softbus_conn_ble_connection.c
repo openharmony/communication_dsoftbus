@@ -917,8 +917,8 @@ void BleOnServerStarted(BleProtocolType protocol, int32_t status)
         "on server start event handle failed, try to lock failed");
     g_serverCoordination.status[protocol] = status;
     g_serverCoordination.actual =
-        ((g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK) && (g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
-                BLE_SERVER_STATE_STARTED : BLE_SERVER_STATE_STOPPED));
+        (g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK && g_serverCoordination.status[BLE_COC] == SOFTBUS_OK) ?
+                BLE_SERVER_STATE_STARTED : BLE_SERVER_STATE_STOPPED;
     if (g_serverCoordination.expect != g_serverCoordination.actual) {
         ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT, 0, 0, NULL,
             RETRY_SERVER_STATE_CONSISTENT_MILLIS);
