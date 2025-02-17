@@ -742,7 +742,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, T
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSize.Level0)
 {
-    channelId = 1;
+    int32_t channelId = 1;
     ChannelInfo channelInfo;
     channelInfo.channelId = channelId;
     channelInfo.sessionKey = g_sessionKey;
