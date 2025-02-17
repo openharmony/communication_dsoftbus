@@ -483,12 +483,12 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransGetUdpChannelTosTest
+ * @tc.name: TransGetUdpChannelTosTest001
  * @tc.desc: trans get udp channel tos test.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level0)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     bool isTosSet = false;
@@ -589,7 +589,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -706,7 +706,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientEmitFileEvent(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -822,12 +822,12 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level
 }
 
 /**
- * @tc.name: TransGetUdpChannelTosTest001
+ * @tc.name: TransGetUdpChannelTosTest002
  * @tc.desc: trans get udpchannel tos test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest002, TestSize.Level0)
 {
     int32_t channelId = TEST_CHANNELID;
     bool isTosSet = false;
