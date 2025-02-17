@@ -34,12 +34,13 @@
 #include "lnn_lane_link_conflict.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
+#include "lnn_lane_reliability.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
-#include "lnn_log.h"
-#include "lnn_trans_lane.h"
-#include "lnn_lane_reliability.h"
 #include "lnn_lane_vap_info.h"
+#include "lnn_log.h"
+#include "lnn_select_rule.h"
+#include "lnn_trans_lane.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -646,6 +647,10 @@ int32_t InitLane(void)
         LNN_LOGE(LNN_LANE, "InitLaneLinkConflict fail");
         return SOFTBUS_NO_INIT;
     }
+    if (InitLaneSelectRule() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "InitLaneSelectRule fail");
+        return SOFTBUS_NO_INIT;
+    }
     int32_t ret = LnnInitVapInfo();
     if (ret != SOFTBUS_OK) {
         /* optional case, ignore result */
@@ -678,6 +683,7 @@ void DeinitLane(void)
     DeinitLaneListener();
     LnnDeinitScore();
     LnnDeinitVapInfo();
+    DeinitLaneSelectRule();
     DeinitLaneLinkConflict();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
