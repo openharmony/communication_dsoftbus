@@ -25,7 +25,7 @@ void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *
     }
  
     DiscEventExtra extra = { 0 };
-    int32_t stamptime = SoftBusGetSysTimeMs();
+    int64_t stamptime = SoftBusGetSysTimeMs();
     for (int32_t i = 0; i < size; i++) {
         extra.capabilityBit = discExtra[i].capabilityBit;
         extra.discType = discExtra[i].discType;
