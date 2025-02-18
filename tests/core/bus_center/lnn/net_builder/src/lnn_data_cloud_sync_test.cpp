@@ -57,8 +57,8 @@ void LNNDataCloudSyncTest::SetUp()
 void LNNDataCloudSyncTest::TearDown() { }
 
 /*
- * @tc.name: LnnLedgerAllDataSyncToDB_Test_001
- * @tc.desc: LnnLedgerAllDataSyncToDB
+ * @tc.name: LnnAsyncCallLedgerAllDataSyncToDB_Test_001
+ * @tc.desc: LnnAsyncCallLedgerAllDataSyncToDB
  * @tc.type: FUNC
  * @tc.require:
  */
