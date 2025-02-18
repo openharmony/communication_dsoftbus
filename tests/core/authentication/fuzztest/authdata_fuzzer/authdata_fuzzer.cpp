@@ -45,7 +45,7 @@ template <class T> T GetData()
     return objetct;
 }
 
-bool AuthDataFuzzTest(const uint8_t* data, size_t size)
+bool AuthDataFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(uint64_t) || size < sizeof(AuthTransData)) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
@@ -57,9 +57,9 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
     AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
     uint64_t authId = 0;
     GenerateUint64(authId);
-    AuthHandle authHandle = { .authId = authId, .type = authLinkType};
+    AuthHandle authHandle = {.authId = authId, .type = authLinkType};
 
-    const AuthTransData *outData = reinterpret_cast<const AuthTransData*>(data);
+    const AuthTransData *outData = reinterpret_cast<const AuthTransData *>(data);
     AuthTransData *dataInfo = (AuthTransData *)SoftBusMalloc(sizeof(AuthTransData));
     if (dataInfo == nullptr) {
         COMM_LOGE(COMM_TEST, "dataInfo is NULL");
@@ -75,7 +75,7 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
+bool AuthCryptFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(uint64_t)) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
@@ -86,10 +86,10 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
     AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
     uint64_t authId = 0;
     GenerateUint64(authId);
-    AuthHandle authHandle = { .authId = authId, .type = authLinkType };
+    AuthHandle authHandle = {.authId = authId, .type = authLinkType};
 
     uint8_t *outData = nullptr;
-    outData =  (uint8_t *)SoftBusCalloc(sizeof(size));
+    outData = (uint8_t *)SoftBusCalloc(sizeof(size));
     if (outData == nullptr) {
         COMM_LOGE(COMM_TEST, "outData is NULL, SoftBusMalloc failed!");
         return false;
@@ -101,14 +101,15 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool AuthFlushDeviceFuzzTest(const uint8_t* data, size_t size)
+bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size > UDID_BUF_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
-    const char *outData = reinterpret_cast<const char*>(data);
-    char *uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
+    const char *outData = reinterpret_cast<const char *>(data);
+    char *uuid = nullptr;
+    uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
     if (uuid == nullptr) {
         COMM_LOGE(COMM_TEST, "uuid is NULL, SoftBusMalloc failed!");
         return false;
@@ -122,7 +123,7 @@ bool AuthFlushDeviceFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
+bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(AuthConnInfo)) {
         COMM_LOGE(COMM_TEST, "data is NULL or size less than authConnInfo");
@@ -142,7 +143,7 @@ bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
+void AuthMetaStartVerifyFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size != sizeof(AuthKeyInfo)) {
         COMM_LOGE(COMM_TEST, "data is NULL or size is invalid");
