@@ -942,8 +942,8 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
             LNN_LOGE(LNN_EVENT, "copy ifName failed with ret=%{public}d", ret);
             return;
         }
+        NotifyEvent((const LnnEventBasicInfo *)&event);
     }
-    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 int32_t LnnInitBusCenterEvent(void)
