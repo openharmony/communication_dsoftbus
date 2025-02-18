@@ -98,7 +98,7 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
 
 static void NotifyIpUpdated(const char *ifName, struct nlmsghdr *nlh)
 {
-    if (ifName == NULL) {
+    if (ifName == NULL || nlh == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return;
     }
@@ -137,7 +137,7 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
 
 static void NotifyLinkUp(const char *ifName, struct nlmsghdr *nlh, struct ifinfomsg *ifinfo)
 {
-    if (ifName == NULL) {
+    if (ifName == NULL || nlh == NULL || ifinfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return;
     }
