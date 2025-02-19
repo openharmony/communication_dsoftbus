@@ -1403,6 +1403,8 @@ static void UpdateDeviceDeviceName(NodeInfo *nodeInfo, NodeInfo *remoteInfo)
         }
         char *anonyOldName = NULL;
         char *anonyNewName = NULL;
+        Anonymize(remoteInfo->deviceInfo.deviceName, &anonyOldName);
+        Anonymize(nodeInfo->deviceInfo.deviceName, &anonyNewName);
         LNN_LOGI(LNN_BUILDER, "update deviceName=%{public}s -> %{public}s", AnonymizeWrapper(anonyOldName),
             AnonymizeWrapper(anonyNewName));
         AnonymizeFree(anonyOldName);
