@@ -1141,7 +1141,8 @@ static bool IsNeedSyncByAuth(const char *networkId)
         LNN_LOGE(LNN_BUILDER, "get feature fail");
         return false;
     }
-    if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0 || (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) {
+    if ((local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0 ||
+        (remote & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) {
         LNN_LOGI(LNN_BUILDER, "not support wifi direct");
         return false;
     }

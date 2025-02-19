@@ -2245,26 +2245,6 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     return SOFTBUS_OK;
 }
 
-static bool IsSupportHmlTwo(uint64_t local, uint64_t remote)
-{
-    if (((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) || ((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
-        LNN_LOGE(LNN_LANE, "hml2.0 capa disable, local=%{public}" PRIu64 ", remote=%{public}" PRIu64, local, remote);
-        return false;
-    }
-    return true;
-}
-
-static bool IsSupportWifiDirect(const char *networkId)
-{
-    uint64_t local = 0;
-    uint64_t remote = 0;
-    if (GetFeatureCap(networkId, &local, &remote) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
-        return false;
-    }
-    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
-}
-
 static bool CheckHasBrConnection(const char *networkId)
 {
     ConnectOption connOpt;
@@ -2454,7 +2434,7 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         guideList[(*linksNum)++] = LANE_ACTION_TRIGGER;
         return SOFTBUS_OK;
     }
-    if (request->linkType == LANE_HML && IsSupportWifiDirect(request->peerNetworkId)) {
+    if (request->linkType == LANE_HML && GetWifiDirectManager()->supportHmlTwo()) {
         if (IsHasAuthConnInfo(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
         }
