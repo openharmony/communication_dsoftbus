@@ -1101,6 +1101,43 @@ static void ProcessEvent(ListNode *fdNode, const WatchThreadState *watchState, i
         ReturnListenerNode(&node);
     }
 }
+static void RemoveBadFd()
+{
+    for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
+        SoftbusListenerNode *node = GetListenerNode(module);
+        if (node == NULL) {
+            continue;
+        }
+        int32_t ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "lock failed, module=%{public}d", module);
+            ReturnListenerNode(&node);
+            continue;
+        }
+        if (node->info.status != LISTENER_RUNNING) {
+            SoftBusMutexUnlock(&node->lock);
+            ReturnListenerNode(&node);
+            continue;
+        }
+        if (node->info.listenFd > 0 && SoftBusSocketGetError(node->info.listenFd) == SOFTBUS_CONN_BAD_FD) {
+            CONN_LOGE(CONN_COMMON, "remove bad listen fd, fd=%{public}d, module=%{public}d",
+                node->info.listenFd, module);
+            node->info.listenFd = -1;
+        }
+        struct FdNode *it = NULL;
+        struct FdNode *next = NULL;
+        LIST_FOR_EACH_ENTRY_SAFE(it, next, &node->info.waitEventFds, struct FdNode, node) {
+            if (SoftBusSocketGetError(it->fd) == SOFTBUS_CONN_BAD_FD) {
+                CONN_LOGE(CONN_COMMON, "remove bad fd, fd=%{public}d, module=%{public}d", it->fd, module);
+                ListDelete(&it->node);
+                SoftBusFree(it);
+            }
+        }
+        SoftBusMutexUnlock(&node->lock);
+        ReturnListenerNode(&node);
+    }
+}
+
 
 static void *WatchTask(void *arg)
 {
@@ -1139,6 +1176,9 @@ static void *WatchTask(void *arg)
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
                 WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
             ReleaseFdNode(&fdEvents);
+            if (nEvents == SOFTBUS_ADAPTER_SOCKET_EBADF) {
+                RemoveBadFd();
+            }
             SoftBusSleepMs(WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
