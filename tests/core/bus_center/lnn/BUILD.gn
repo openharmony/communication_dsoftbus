@@ -2714,6 +2714,22 @@ ohos_unittest("LNNNetLedgerMockTest") {
   external_deps += [ "huks:libhukssdk" ]
 }
 
+ohos_unittest("LNNFeatureCapabilityTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/lnn_feature_capability_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+  if (dsoftbus_feature_deps_device_auth) {
+    external_deps += [ "device_auth:deviceauth_sdk" ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -2728,6 +2744,7 @@ group("unittest") {
     ":LNNDeviceNameInfoTest",
     ":LNNDiscoveryInterfaceTest",
     ":LNNDisctributedLedgerTest",
+    ":LNNFeatureCapabilityTest",
     ":LNNHuksUtilsTest",
     ":LNNIpNetworkImplMockTest",
     ":LNNLaneExtMockTest",
