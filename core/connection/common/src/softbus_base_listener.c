@@ -1101,7 +1101,8 @@ static void ProcessEvent(ListNode *fdNode, const WatchThreadState *watchState, i
         ReturnListenerNode(&node);
     }
 }
-static void RemoveBadFd()
+
+static void RemoveBadFd(void)
 {
     for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
         SoftbusListenerNode *node = GetListenerNode(module);
