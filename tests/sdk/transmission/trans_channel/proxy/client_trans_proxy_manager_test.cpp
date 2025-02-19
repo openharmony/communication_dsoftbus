@@ -686,6 +686,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData003, TestSize.Leve
     pktHead.tlvElement = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, &bufferSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(pktHead.tlvElement);
 }
 
 /**
@@ -867,5 +868,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
 
     ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, 1);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    SoftBusFree(magicData);
 }
 } // namespace OHOS
