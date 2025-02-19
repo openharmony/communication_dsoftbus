@@ -455,6 +455,7 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, tmpItem, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->isServerSide == chan->isServerSide &&
+            item->connInfo.type == chan->connInfo.type &&
             CompareConnectOption(&item->connInfo, &chan->connInfo) == true) {
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_TRANS_NOT_MATCH;
