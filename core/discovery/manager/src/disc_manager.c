@@ -1371,17 +1371,17 @@ int32_t DiscGetDisplayName(char *displayName, uint32_t length, uint32_t remainLe
         len = strlen(g_displayName.raw);
         goto END;
     }
-    if (remainLen >= DISPLAY_NAME_LEN_24) {
+    if (remainLen > DISPLAY_NAME_LEN_24) {
         source = g_displayName.name24;
         len = DISPLAY_NAME_LEN_24;
         goto END;
     }
-    if (remainLen >= DISPLAY_NAME_LEN_21) {
+    if (remainLen > DISPLAY_NAME_LEN_21) {
         source = g_displayName.name21;
         len = DISPLAY_NAME_LEN_21;
         goto END;
     }
-    if (remainLen >= DISPLAY_NAME_LEN_18) {
+    if (remainLen > DISPLAY_NAME_LEN_18) {
         source = g_displayName.name18;
         len = DISPLAY_NAME_LEN_18;
         goto END;
