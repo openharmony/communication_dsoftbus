@@ -205,7 +205,7 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
         DiscEventExtraInit(&extra);
         extra.discMode = infoNode == NULL ? 0 : infoNode->mode;
         extra.discType = additions == NULL ? 0 : additions->medium + 1;
-        extra.costTime = (int32_t)costTime;
+        extra.costTime = costTime;
         extra.result = EVENT_STAGE_RESULT_OK;
         UpdateDiscEventAndReport(&extra, device);
     }
