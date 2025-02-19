@@ -86,14 +86,24 @@ void DelNotTrustDevice(const char *udid)
     LNN_LOGI(LNN_STATE, "not need remove");
 }
 
+static int32_t GetAclLocalUserId(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice)
+{
+    if (trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
+        return trustDevice.GetAccesser().GetAccesserUserId();
+    }
+    return trustDevice.GetAccessee().GetAccesseeUserId();
+}
+
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash)
 {
+    int32_t localUserId = GetActiveOsAccountIds();
     for (const auto &trustDevice : trustDevices) {
         if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
             trustDevice.GetTrustDeviceId().empty() ||
-            trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE) {
+            trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE ||
+            localUserId != GetAclLocalUserId(trustDevice)) {
             continue;
         }
         char *anonyUdid = nullptr;
@@ -184,11 +194,7 @@ bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t loca
             trustDevice.GetTrustDeviceId() != udid) {
             continue;
         }
-        if (isNeedUserId && trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
-            if (trustDevice.GetAccesser().GetAccesserUserId() != localUserId) {
-                continue;
-            }
-        } else if (isNeedUserId && trustDevice.GetAccessee().GetAccesseeUserId() != localUserId) {
+        if (isNeedUserId && GetAclLocalUserId(trustDevice) != localUserId) {
             continue;
         }
 
