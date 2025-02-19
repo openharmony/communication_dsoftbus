@@ -669,6 +669,10 @@ static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
 
 int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid)
 {
+    if (sinkNetworkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, sinkNetworkId is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t dmsPid = 0;
     int32_t ret = SOFTBUS_OK;
     CollabInfo sourceInfo;
