@@ -142,9 +142,9 @@ typedef struct {
     const char *scanCycle;       // SCAN_CYCLE
     int32_t discType;            // DISC_TYPE
     int32_t discMode;            // DISC_MODE
-    int32_t startTime;           // BROADCAST_START_TIME
-    int32_t stopTime;            // BROADCAST_STOP_TIME
-    int32_t costTime;            // COST_TIME
+    int64_t startTime;           // BROADCAST_START_TIME
+    int64_t stopTime;            // BROADCAST_STOP_TIME
+    int64_t costTime;            // COST_TIME
     int32_t successCnt;          // SUCCESS_COUNT
     int32_t failCnt;             // FAIL_COUNT
     const char *localNetworkId;  // LOCAL_NET_ID
