@@ -783,6 +783,26 @@ static int32_t ProcessLeaveByAuthId(const void *para)
     return rc;
 }
 
+static int32_t ProcessSetReSyncDeviceName(const void *para)
+{
+    (void)para;
+    LnnConnectionFsm *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &LnnGetNetBuilder()->fsmList, LnnConnectionFsm, node) {
+        if (!item->isDead && (item->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
+            if (item->connInfo.nodeInfo != NULL) {
+                LNN_LOGI(LNN_BUILDER, "[id=%{public}u] need resync device name, authId: %{public}" PRId64, item->id,
+                    item->connInfo.authHandle.authId);
+                item->connInfo.nodeInfo->isNeedReSyncDeviceName = true;
+            }
+        }
+    }
+    if (para != NULL) {
+        SoftBusFree((void *)para);
+        para = NULL;
+    }
+    return SOFTBUS_OK;
+}
+
 static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_BUILD_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
@@ -799,6 +819,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_BUILD_MAX] = {
     ProcessLeaveByAddrType,
     ProcessLeaveSpecific,
     ProcessLeaveByAuthId,
+    ProcessSetReSyncDeviceName,
 };
 
 void NetBuilderMessageHandler(SoftBusMessage *msg)

@@ -617,6 +617,8 @@ ohos_unittest("LNNSyncInfoItemTest") {
 ohos_unittest("LNNDeviceNameInfoTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/authentication/src/virtual/auth_session_fsm_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c",
     "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "net_builder/src/lnn_devicename_info_test.cpp",
