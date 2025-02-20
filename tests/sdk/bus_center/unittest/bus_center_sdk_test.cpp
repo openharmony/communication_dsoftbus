@@ -14,8 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-
 #include <securec.h>
+
 #include "bus_center_server_proxy.h"
 #include "bus_center_server_proxy_standard.h"
 #include "client_bus_center_manager.h"
@@ -56,17 +56,11 @@ void BusCenterSdkTest::SetUpTestCase()
     SetAccessTokenPermission("busCenterTest");
 }
 
-void BusCenterSdkTest::TearDownTestCase()
-{
-}
+void BusCenterSdkTest::TearDownTestCase() { }
 
-void BusCenterSdkTest::SetUp()
-{
-}
+void BusCenterSdkTest::SetUp() { }
 
-void BusCenterSdkTest::TearDown()
-{
-}
+void BusCenterSdkTest::TearDown() { }
 
 static int32_t GetSubscribeId(void)
 {
@@ -80,8 +74,7 @@ static int32_t GetPublishId(void)
     return g_publishId;
 }
 
-static SubscribeInfo g_sInfo = {
-    .subscribeId = 1,
+static SubscribeInfo g_sInfo = { .subscribeId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
@@ -89,28 +82,23 @@ static SubscribeInfo g_sInfo = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)CAPABILITY_3,
-    .dataLen = strlen(CAPABILITY_3)
-};
+    .dataLen = strlen(CAPABILITY_3) };
 
-static PublishInfo g_pInfo = {
-    .publishId = 1,
+static PublishInfo g_pInfo = { .publishId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)CAPABILITY_4,
-    .dataLen = strlen(CAPABILITY_4)
-};
+    .dataLen = strlen(CAPABILITY_4) };
 
-static PublishInfo g_pInfo1 = {
-    .publishId = 1,
+static PublishInfo g_pInfo1 = { .publishId = 1,
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = nullptr,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 static SubscribeInfo g_sInfo1 = {
     .subscribeId = 1,
@@ -172,14 +160,9 @@ static void TestPublishResult(int32_t publishId, PublishResult reason)
     printf("[client]TestPublishResult:%d\n", reason);
 }
 
-static IRefreshCallback g_refreshCb = {
-    .OnDeviceFound = TestDeviceFound,
-    .OnDiscoverResult = TestDiscoverResult
-};
+static IRefreshCallback g_refreshCb = { .OnDeviceFound = TestDeviceFound, .OnDiscoverResult = TestDiscoverResult };
 
-static IPublishCb g_publishCb = {
-    .OnPublishResult = TestPublishResult
-};
+static IPublishCb g_publishCb = { .OnPublishResult = TestPublishResult };
 
 static void OnDataLevelChanged(const char *networkId, const DataLevel dataLevel)
 {
@@ -187,9 +170,8 @@ static void OnDataLevelChanged(const char *networkId, const DataLevel dataLevel)
     (void)dataLevel;
 }
 
-static IDataLevelCb g_dataLevelCb = {
-    .onDataLevelChanged = OnDataLevelChanged
-};
+static IDataLevelCb g_dataLevelCb = { .onDataLevelChanged = OnDataLevelChanged };
+
 /*
  * @tc.name: BUS_CENTER_SDK_Join_Lnn_Test_001
  * @tc.desc: bus center JoinLNN interface exception test
@@ -325,8 +307,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
     EXPECT_EQ(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info), SOFTBUS_OK);
     EXPECT_EQ(strlen(info.networkId), (NETWORK_ID_BUF_LEN - 1));
     EXPECT_TRUE(info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_1 ||
-        info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_2 ||
-        info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_3);
+        info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_2 || info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_3);
 }
 
 /*
@@ -340,49 +321,49 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
     NodeBasicInfo info;
     NodeBasicInfo *remoteNodeInfo = nullptr;
     int32_t infoNum = 0;
-    char uuid[UUID_BUF_LEN] = {0};
-    char udid[UDID_BUF_LEN] = {0};
-    char brMac[BT_MAC_LEN] = {0};
-    char ipAddr[IP_STR_MAX_LEN] = {0};
-    char deviceName[DEVICE_NAME_BUF_LEN] = {0};
+    char uuid[UUID_BUF_LEN] = { 0 };
+    char udid[UDID_BUF_LEN] = { 0 };
+    char brMac[BT_MAC_LEN] = { 0 };
+    char ipAddr[IP_STR_MAX_LEN] = { 0 };
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
     int32_t netCapacity = 0;
     int32_t netType = 0;
 
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(nullptr, info.networkId, NODE_KEY_UDID,
-        (uint8_t *)udid, UDID_BUF_LEN) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID,
-        (uint8_t *)udid, 0) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID,
-        (uint8_t *)udid, UDID_BUF_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UUID,
-        (uint8_t *)uuid, UUID_BUF_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(
+        GetNodeKeyInfo(nullptr, info.networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(
+        GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID, (uint8_t *)udid, 0) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(
+        GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(
+        GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UUID, (uint8_t *)uuid, UUID_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(strlen(uuid) == (UUID_BUF_LEN - 1));
 
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_BR_MAC,
-        (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS,
-        (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_DEV_NAME,
-        (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_CAPABILITY,
-        (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_TYPE,
-        (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(
+        GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_BR_MAC, (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS, (uint8_t *)ipAddr, IP_STR_MAX_LEN) ==
+        SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_DEV_NAME, (uint8_t *)deviceName,
+                    DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_CAPABILITY, (uint8_t *)&netCapacity,
+                    LNN_COMMON_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_TYPE, (uint8_t *)&netType,
+                    LNN_COMMON_LEN) == SOFTBUS_OK);
 
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
     for (int32_t i = 0; i < infoNum; i++) {
-        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC,
-            (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC, (uint8_t *)brMac,
+                        BT_MAC_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_IP_ADDRESS,
-            (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
+                        (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEV_NAME,
-            (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
+                        (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_CAPABILITY,
-            (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
+                        (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_TYPE,
-            (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
+                        (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
     }
     FreeNodeInfo(remoteNodeInfo);
 }
@@ -404,7 +385,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_002, TestSize.L
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
     for (int32_t i = 0; i < infoNum; i++) {
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEVICE_SCREEN_STATUS,
-            (uint8_t *)&isScreenOn, DATA_DEVICE_SCREEN_STATUS_LEN) == SOFTBUS_OK);
+                        (uint8_t *)&isScreenOn, DATA_DEVICE_SCREEN_STATUS_LEN) == SOFTBUS_OK);
     }
     FreeNodeInfo(remoteNodeInfo);
 }
@@ -496,13 +477,13 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     int32_t tmpId2 = GetPublishId();
     int32_t tmpId3 = GetPublishId();
     NodeBasicInfo info;
-    char localIp[IP_LEN] = {0};
+    char localIp[IP_LEN] = { 0 };
     char loopBackIpAddr[] = "127.0.0.1";
     char invalidIpAddr[] = "0.0.0.0";
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS,
-        (uint8_t *)localIp, IP_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(
+        GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS, (uint8_t *)localIp, IP_LEN) == SOFTBUS_OK);
     if (strcmp(localIp, loopBackIpAddr) != 0 && strcmp(localIp, invalidIpAddr) != 0 && strcmp(localIp, "") != 0) {
         g_pInfo.publishId = tmpId1;
         ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
@@ -580,16 +561,14 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     int32_t tmpId2 = GetSubscribeId();
     int32_t tmpId3 = GetSubscribeId();
     NodeBasicInfo info;
-    char localIp[IP_LEN] = {0};
+    char localIp[IP_LEN] = { 0 };
     char loopBackIpAddr[] = "127.0.0.1";
     char invalidIpAddr[] = "0.0.0.0";
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
-    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS,
-        (uint8_t *)localIp, IP_LEN) == SOFTBUS_OK);
-    if (strcmp(localIp, loopBackIpAddr) != 0 &&
-        strcmp(localIp, invalidIpAddr) != 0 &&
-        strcmp(localIp, "") != 0) {
+    EXPECT_TRUE(
+        GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS, (uint8_t *)localIp, IP_LEN) == SOFTBUS_OK);
+    if (strcmp(localIp, loopBackIpAddr) != 0 && strcmp(localIp, invalidIpAddr) != 0 && strcmp(localIp, "") != 0) {
         g_sInfo.subscribeId = tmpId1;
         ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
         EXPECT_TRUE(ret == SOFTBUS_OK);

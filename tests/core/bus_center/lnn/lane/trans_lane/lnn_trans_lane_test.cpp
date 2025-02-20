@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -686,7 +686,7 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_RAW_LANE_TEST_001, TestSize.Level1)
     allocInfo.type = LANE_TYPE_CTRL;
     ret = transObj->allocRawLane(LANE_REQ_ID_ONE, &allocInfo, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = UpdateReqListLaneId(LANE_REQ_ID_ONE, LANE_REQ_ID_TWO);
+    ret = UpdateReqListLaneId(LANE_ID_BASE, LANE_ID_BASE + 1);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
