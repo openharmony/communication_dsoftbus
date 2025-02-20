@@ -276,10 +276,10 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Lev
     EXPECT_CALL(netLedgerMock, LnnSetDLWifiDirectAddr)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    OnReceiveWifiDirectSyncAddr(
-        LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
-    OnReceiveWifiDirectSyncAddr(
-        LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID,
+        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID,
+        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
 }
 
 /*
