@@ -1091,6 +1091,15 @@ int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callbac
     return PostJoinLnnExtMsg(addr, connId);
 }
 
+int32_t LnnSetReSyncDeviceName(void)
+{
+    if (PostBuildMessageToHandler(MSG_TYPE_RE_SYNC_DEVICE_NAME, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post resync device name message fail");
+        return SOFTBUS_NETWORK_LOOPER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 {
     (void)pkgName;
