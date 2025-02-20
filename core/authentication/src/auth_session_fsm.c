@@ -1111,6 +1111,7 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
     if (LnnGenerateLocalPtk(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate ptk fail");
     }
+    authFsm->info.nodeInfo.isNeedReSyncDeviceName = false;
     if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "auth fsm sync device info fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
@@ -1777,5 +1778,22 @@ void AuthSessionFsmExit(void)
         DestroyAuthFsm(item);
     }
     ListInit(&g_authFsmList);
+    ReleaseAuthLock();
+}
+
+void AuthSessionSetReSyncDeviceName(void)
+{
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "get auth lock fail");
+        return;
+    }
+    AuthFsm *item = NULL;
+    AuthFsm *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authFsmList, AuthFsm, node) {
+        if (item->curState >= STATE_SYNC_DEVICE_INFO) {
+            AUTH_LOGI(AUTH_FSM, "need resync latest device name authSeq=%{public}" PRId64, item->authSeq);
+            item->info.nodeInfo.isNeedReSyncDeviceName = true;
+        }
+    }
     ReleaseAuthLock();
 }

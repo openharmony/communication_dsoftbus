@@ -28,6 +28,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connId_callback_manager.h"
 #include "lnn_decision_db.h"
+#include "lnn_devicename_info.h"
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
@@ -1760,6 +1761,11 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     LnnNotifyOOBEStateChangeEvent(SOFTBUS_FACK_OOBE_END);
     if (CheckDeadFlag(connFsm, true)) {
         return;
+    }
+    if (isNodeInfoValid && connFsm->connInfo.nodeInfo->isNeedReSyncDeviceName) {
+        if (LnnAsyncDeviceNameDelay(connFsm->connInfo.peerNetworkId) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "LnnAsyncDeviceNameDelay fail");
+        }
     }
     CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
 }
