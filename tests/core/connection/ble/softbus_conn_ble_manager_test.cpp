@@ -32,6 +32,7 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "softbus_conn_ble_manager.c"
 
 using namespace testing::ext;
 using namespace testing;
@@ -942,6 +943,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
     ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
     ConnBleRefreshIdleTimeout(connection);
+    EXPECT_CALL(bleMock, ConnGattClientDisconnect).WillOnce(Return(SOFTBUS_OK));
     SoftBusSleepMs(CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS); // sleep 60s to call timout event
 }
 
@@ -994,5 +996,111 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleDisconnectNow001, TestSize.Level1)
     EXPECT_CALL(bleMock, ConnGattClientDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = ConnBleDisconnectNow(&connection, BLE_DISCONNECT_REASON_CONNECT_TIMEOUT);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ConnectStatistics statistics = {
+        .connectTraceId = 1,
+        .startTime = 0,
+        .reuse = true,
+        .reqId = 1,
+    };
+    DfxRecordBleConnectSuccess(0, &connection, &statistics);
+    DfxRecordBleConnectSuccess(0, &connection, NULL);
 }
+
+/*
+ * @tc.name: BleReuseConnection
+ * @tc.desc: Test BleReuseConnection.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, BleReuseConnection, TestSize.Level1)
+{
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ConnBleDevice *device = NULL;
+    const char *addr = "11:22:33:44:55:66";
+    const char *udid = "1111222233334444";
+    ConnBleConnectRequestContext ctx = {
+        .fastestConnectEnable = true,
+        .psm = 0,
+        .protocol = BLE_GATT,
+    };
+    int32_t ret = strcpy_s(ctx.udid, UDID_BUF_LEN, udid);
+    ASSERT_EQ(EOK, ret);
+    ret = strcpy_s(ctx.addr, BT_MAC_LEN, addr);
+    ASSERT_EQ(EOK, ret);
+    ret = NewDevice(&device, &ctx);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ConnBleConnection connection = {
+        .state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO,
+        .side = CONN_SIDE_SERVER,
+        .protocol = BLE_GATT,
+        .featureBitSet = 0,
+        .psm = 0,
+    };
+    ret = strcpy_s(connection.udid, UDID_BUF_LEN, udid);
+    ASSERT_EQ(EOK, ret);
+    ret = SoftBusMutexInit(&connection.lock, NULL);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    bool result = BleReuseConnection(device, &connection);
+    EXPECT_EQ(true, result);
+
+    connection.state = BLE_CONNECTION_STATE_MTU_SETTED;
+    result = BleReuseConnection(device, &connection);
+    EXPECT_EQ(false, result);
+}
+
+/*
+ * @tc.name: BleCheckPreventing
+ * @tc.desc: Test BleCheckPreventing.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
+{
+    BlePrevent *prevent = (BlePrevent *)SoftBusCalloc(sizeof(BlePrevent));
+    ASSERT_NE(NULL, prevent);
+    ListAdd(&g_bleManager.prevents->list, &prevent->node);
+    const char *udid = "1111222233334444";
+    size_t udidLen = strlen(udid);
+    int32_t result = memcpy_s(prevent->udid, UDID_BUF_LEN - 1, udid, udidLen);
+    ASSERT_EQ(EOK, result);
+    bool ret = BleCheckPreventing(udid);
+    EXPECT_EQ(true, ret);
+    ret = BleCheckPreventing(NULL);
+    EXPECT_EQ(false, ret);
+    const char *bleUdid = "1111222233335555";
+    ret = BleCheckPreventing(bleUdid);
+    EXPECT_EQ(false, ret);
+
+    const char *addr = "22:33:44:55:66:00";
+    ConnBleConnection *connection =
+        ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
+    ASSERT_NE(connection, NULL);
+    const char *devId = "1111222233335555";
+    memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, devId, DEVID_BUFF_LEN);
+    
+    ConnBleDevice *device = NULL;
+    ConnBleConnectRequestContext ctx = {
+        .fastestConnectEnable = true,
+        .psm = 0,
+        .protocol = BLE_GATT,
+    };
+    result = strcpy_s(ctx.udid, UDID_BUF_LEN, udid);
+    ASSERT_EQ(EOK, result);
+    result = strcpy_s(ctx.addr, BT_MAC_LEN, addr);
+    ASSERT_EQ(EOK, result);
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(bleMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    
+    result = NewDevice(&device, &ctx);
+    EXPECT_EQ(SOFTBUS_OK, result);
+    AttempReuseConnect(device, BleConnectDeviceDirectly);
+}
+
 } // namespace OHOS
