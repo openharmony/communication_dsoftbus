@@ -33,6 +33,13 @@ extern "C" {
 #define SOFTBUS_SUB_MODEL_ID_LEN (HEXIFY_LEN(1))
 #define SOFTBUS_NEW_MODEL_ID_LEN (HEXIFY_LEN(4))
 
+typedef enum {
+    RANGE_SERVICE_DEFAULT = 0,
+    RANGE_SERVICE_TOUCH,
+    RANGE_SERVICE_VLINK,
+    RANGE_SERVICE_BUTT,
+} SoftBusRangeBusinessType;
+
 typedef struct {
     int8_t power;
     char identity[SOFTBUS_DEV_IDENTITY_LEN];
@@ -40,7 +47,7 @@ typedef struct {
     char subModelId[SOFTBUS_SUB_MODEL_ID_LEN];
     char newModelId[SOFTBUS_NEW_MODEL_ID_LEN];
     int32_t rssi;
-    int32_t serviceType;
+    SoftBusRangeBusinessType serviceType;
 } SoftBusRangeParam;
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);
