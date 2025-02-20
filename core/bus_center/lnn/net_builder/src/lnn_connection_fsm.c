@@ -1394,6 +1394,24 @@ static int32_t FillBleAddr(ConnectionAddr *addr, const ConnectionAddr *connAddr,
     return SOFTBUS_OK;
 }
 
+static void UpdateDeviceDeviceName(NodeInfo *nodeInfo, NodeInfo *remoteInfo)
+{
+    if (strcmp(nodeInfo->deviceInfo.deviceName, remoteInfo->deviceInfo.deviceName) != 0) {
+        if (!LnnSetDLDeviceInfoName(nodeInfo->deviceInfo.deviceUdid, nodeInfo->deviceInfo.deviceName)) {
+            LNN_LOGE(LNN_BUILDER, "set device name to distributedLedger fail");
+            return;
+        }
+        char *anonyOldName = NULL;
+        char *anonyNewName = NULL;
+        Anonymize(remoteInfo->deviceInfo.deviceName, &anonyOldName);
+        Anonymize(nodeInfo->deviceInfo.deviceName, &anonyNewName);
+        LNN_LOGI(LNN_BUILDER, "update deviceName=%{public}s -> %{public}s", AnonymizeWrapper(anonyOldName),
+            AnonymizeWrapper(anonyNewName));
+        AnonymizeFree(anonyOldName);
+        AnonymizeFree(anonyNewName);
+    }
+}
+
 int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability)
 {
     if (nodeInfo == NULL || connAddr == NULL) {
@@ -1417,6 +1435,7 @@ int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, Aut
         if (authCapability == BIT_SUPPORT_SESSION_DUP_BLE) {
             LnnNotifyStateForSession(nodeInfo->deviceInfo.deviceUdid, SOFTBUS_OK);
         }
+        UpdateDeviceDeviceName(nodeInfo, &remoteInfo);
         LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
         return SOFTBUS_OK;
     }
