@@ -86,3 +86,8 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     (void)addrType;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnSetReSyncDeviceName(void)
+{
+    return SOFTBUS_OK;
+}
