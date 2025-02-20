@@ -586,7 +586,7 @@ static int32_t HbTryCloudSync(void)
         LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
-    int32_t ret = LnnLedgerAllDataSyncToDB(&info);
+    int32_t ret = LnnLedgerAllDataSyncToDB(&info, false, NULL);
     if (ret == SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
     } else {

@@ -70,7 +70,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnAsyncCallLedgerAllDataSyncToDB_Test_001, TestS
     info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(info, nullptr);
     info->accountId = 0;
-    ret = LnnLedgerAllDataSyncToDB(info);
+    ret = LnnLedgerAllDataSyncToDB(info, false, NULL);
     if (ret != SOFTBUS_NOT_IMPLEMENT) {
         EXPECT_EQ(ret, SOFTBUS_KV_CLOUD_DISABLED);
     } else {
