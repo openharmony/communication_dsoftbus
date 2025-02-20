@@ -122,9 +122,9 @@ int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
     return HeartBeatCtrlStaticInterface()->LnnGetLocalNodeInfoSafe(info);
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
 {
-    return HeartBeatCtrlStaticInterface()->LnnLedgerAllDataSyncToDB(info);
+    return HeartBeatCtrlStaticInterface()->LnnLedgerAllDataSyncToDB(info, isAckSeq, peerudid);
 }
 
 ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
