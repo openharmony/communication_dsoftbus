@@ -1159,7 +1159,7 @@ static int32_t UpdateUnifiedName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        if (LnnLedgerAllDataSyncToDB(&nodeInfo, false, NULL) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
         }
     }
