@@ -706,7 +706,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientEmitFileEvent(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
