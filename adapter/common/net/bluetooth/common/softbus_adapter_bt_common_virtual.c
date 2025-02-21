@@ -17,9 +17,10 @@
 
 #include "softbus_error_code.h"
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId)
 {
     (void)listener;
+    (void)listenerId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

@@ -239,9 +239,8 @@ int32_t InitBroadcastMgr(void)
     ret = g_interface[g_interfaceId]->Init();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "call from adapter failed");
 
-    ret = SoftBusAddBtStateListener(&g_softbusBcBtStateLister);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret >= 0, ret, DISC_BROADCAST, "add bt state listener failed");
-    g_btStateListenerId = ret;
+    ret = SoftBusAddBtStateListener(&g_softbusBcBtStateLister, &g_btStateListenerId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "add bt state listener failed");
     g_mgrInit = true;
 
     if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,

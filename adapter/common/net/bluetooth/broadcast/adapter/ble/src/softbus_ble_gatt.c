@@ -927,9 +927,8 @@ void SoftbusBleAdapterInit(void)
     if (RegisterBroadcastMediumFunction(BROADCAST_MEDIUM_TYPE_BLE, &interface) != 0) {
         DISC_LOGE(DISC_BLE_ADAPTER, "register gatt interface failed");
     }
-    int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener);
-    DISC_CHECK_AND_RETURN_LOGE(ret >= 0, DISC_BLE_ADAPTER, "add bt state listener failed.");
-    g_adapterBtStateListenerId = ret;
+    int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener, &g_adapterBtStateListenerId);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE_ADAPTER, "add bt state listener failed.");
     for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
         g_advChannel[channelId].advId = -1;
     }
