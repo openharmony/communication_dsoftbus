@@ -293,25 +293,6 @@ void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
     RemoveAuthManagerByAuthId(authHandle);
 }
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
-{
-    if (networkId == NULL || callback == NULL) {
-        AUTH_LOGE(AUTH_CONN, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return AuthAllocLane(networkId, authRequestId, callback);
-}
-
-void AuthFreeConn(const AuthHandle *authHandle)
-{
-    if (authHandle == NULL) {
-        AUTH_LOGE(AUTH_CONN, "param invalid");
-        return;
-    }
-    AuthFreeLane(authHandle);
-    DelAuthReqInfoByAuthHandle(authHandle);
-}
-
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
