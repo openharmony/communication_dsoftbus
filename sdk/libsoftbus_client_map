@@ -178,6 +178,7 @@
         "UnRegisterFileSchema";
         "SoftBusDFileSetSessionOpt";
         "CtrlLNNBleHb";
+        "SoftBusResolveConflict";
     local:
         *;
 };
