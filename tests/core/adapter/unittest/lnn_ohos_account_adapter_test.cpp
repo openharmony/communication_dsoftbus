@@ -23,6 +23,7 @@
 
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account_adapter_mock.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
@@ -55,11 +56,11 @@ void LnnOhosAccountAdapterTest::TearDown(void) { }
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     EXPECT_EQ(GetOsAccountId(nullptr, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(GetOsAccountId(accountInfo, 0, &len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, nullptr), SOFTBUS_INVALID_PARAM);
-    free(accountInfo);
+    SoftBusFree(accountInfo);
 }
 
 /**
@@ -71,11 +72,11 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
 {
     uint32_t len = 0;
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     AccountSA::OhosAccountKitsMock mock;
     EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(false));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len), SOFTBUS_AUTH_INNER_ERR);
-    free(accountInfo);
+    SoftBusFree(accountInfo);
 }
 
 /**
@@ -86,7 +87,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
  */
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
 {
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     uint32_t len = 0;
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { false, oh_acc_info };
@@ -95,7 +96,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
-    free(accountInfo);
+    SoftBusFree(accountInfo);
 }
 
 /**
@@ -106,7 +107,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
  */
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
 {
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     uint32_t len = 0;
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     oh_acc_info.name_ = "";
@@ -117,7 +118,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
 
-    free(accountInfo);
+    SoftBusFree(accountInfo);
 }
 
 /**
