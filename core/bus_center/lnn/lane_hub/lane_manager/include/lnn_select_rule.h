@@ -47,6 +47,7 @@ typedef struct {
     int32_t (*getLinkScore)(const char *networkId, uint32_t expectedBw);
 } LinkAttribute;
 
+int32_t UpdateP2pAvailability(const char *peerUdid, bool isSupportP2p);
 int32_t GetWlanLinkedFrequency(void);
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
 int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
@@ -58,6 +59,8 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
 int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTransType transType);
 int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
+int32_t InitLaneSelectRule(void);
+void DeinitLaneSelectRule(void);
 
 #ifdef __cplusplus
 }

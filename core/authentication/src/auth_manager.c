@@ -1832,9 +1832,12 @@ bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConn
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
     if (GetAuthConnInfoByUuid(uuid, type, &connInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "auth connInfo not found, type=%{public}d.", type);
         return false;
     }
-    return checkConnection ? CheckActiveAuthConnection(&connInfo) : true;
+    bool ret = checkConnection ? CheckActiveAuthConnection(&connInfo) : true;
+    AUTH_LOGI(AUTH_CONN, "AuthDeviceCheckConnInfo ret=%{public}d.", ret);
+    return ret;
 }
 
 int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
@@ -2144,7 +2147,6 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
         AUTH_LOGE(AUTH_INIT, "AuthCommonInit fail");
         return SOFTBUS_AUTH_COMM_INIT_FAIL;
     }
-    InitAuthReqInfo();
 
     AuthConnListener connListener = {
         .onConnectResult = OnConnectResult,
@@ -2174,7 +2176,6 @@ void AuthDeviceDeinit(void)
     ClearAuthRequest();
     AuthConnDeinit();
     AuthSessionFsmExit();
-    DeInitAuthReqInfo();
     AuthCommonDeinit();
     AUTH_LOGI(AUTH_INIT, "auth deinit succ");
 }

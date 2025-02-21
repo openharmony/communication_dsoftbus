@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -761,28 +761,33 @@ static int32_t MessageParcelReadCollabInfo(MessageParcel &data, CollabInfo &info
 }
 
 int32_t SoftBusClientStub::OnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+    const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
     if (sourceInfo == nullptr || sinkInfo == nullptr) {
         COMM_LOGE(COMM_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    return TransOnCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
+    return TransOnCheckCollabRelation(sourceInfo, isSinkSide, sinkInfo, channelId, channelType);
 }
 
 int32_t SoftBusClientStub::OnCheckCollabRelationInner(MessageParcel &data, MessageParcel &reply)
 {
     CollabInfo sourceInfo;
     CollabInfo sinkInfo;
+    bool isSinkSide = false;
+    int32_t channelId = -1;
+    int32_t channelType = -1;
+    READ_PARCEL_WITH_RET(data, Bool, isSinkSide, SOFTBUS_IPC_ERR);
     int32_t ret = MessageParcelReadCollabInfo(data, sourceInfo);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read source info failed");
     ret = MessageParcelReadCollabInfo(data, sinkInfo);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read sink info failed");
-    int32_t channelId;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
-    int32_t channelType;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelType), SOFTBUS_IPC_ERR, COMM_SDK, "read channelType failed");
-    ret = OnCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    if (isSinkSide) {
+        COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(
+            data.ReadInt32(channelType), SOFTBUS_IPC_ERR, COMM_SDK, "read channelType failed");
+    }
+    ret = OnCheckCollabRelation(&sourceInfo, isSinkSide, &sinkInfo, channelId, channelType);
     COMM_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, COMM_SDK, "CheckCollabRelation failed! ret=%{public}d.", ret);
     return SOFTBUS_OK;

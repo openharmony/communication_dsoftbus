@@ -20,7 +20,6 @@
 
 #include "anonymizer.h"
 #include "bus_center_decision_center.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_cipherkey_manager.h"
@@ -943,8 +942,8 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
             LNN_LOGE(LNN_EVENT, "copy ifName failed with ret=%{public}d", ret);
             return;
         }
+        NotifyEvent((const LnnEventBasicInfo *)&event);
     }
-    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 int32_t LnnInitBusCenterEvent(void)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,7 +111,7 @@ static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int 
     TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
-static int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+static int32_t CheckCollabRelation(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo)
 {
     TRANS_LOGI(TRANS_TEST, "call check collab relation func");
     return SOFTBUS_OK;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -342,7 +342,9 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     TRANS_LOGI(TRANS_CTRL, "check Collab relation ipc server push.");
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    bool isSinkSide = (sinkInfo->pid != -1);
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteBool(&io, isSinkSide);
     WriteInt64(&io, sourceInfo->accountId);
     WriteUint64(&io, sourceInfo->tokenId);
     WriteInt32(&io, sourceInfo->userId);
@@ -353,8 +355,10 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     WriteInt32(&io, sinkInfo->userId);
     WriteInt32(&io, sinkInfo->pid);
     WriteString(&io, sinkInfo->deviceId);
-    WriteInt32(&io, transInfo->channelId);
-    WriteInt32(&io, transInfo->channelType);
+    if (isSinkSide) {
+        WriteInt32(&io, transInfo->channelId);
+        WriteInt32(&io, transInfo->channelType);
+    }
     SvcIdentity svc = {0};
     int32_t ret = GetSvcIdentityByPkgName(pkgName, &svc);
     if (ret != SOFTBUS_OK) {
@@ -363,7 +367,7 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     }
     MessageOption option;
     MessageOptionInit(&option);
-    option.flags = TF_OP_ASYNC;
+    option.flags = isSinkSide ? TF_OP_ASYNC : TF_OP_SYNC;
     ret = SendRequest(svc, CLIENT_CHECK_COLLAB_RELATION, &io, NULL, option, NULL);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "SendRequest failed, ret=%{public}d", ret);

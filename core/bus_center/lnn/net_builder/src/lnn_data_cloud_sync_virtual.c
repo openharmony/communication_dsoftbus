@@ -27,9 +27,11 @@ void LnnDeInitCloudSyncModule(void)
     return;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
 {
     (void)info;
+    (void)isAckSeq;
+    (void)peerudid;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

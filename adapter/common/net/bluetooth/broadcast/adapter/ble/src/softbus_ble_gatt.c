@@ -24,7 +24,7 @@
 #include <stdatomic.h>
 #include <string.h>
 
-#define GATT_ADV_MAX_NUM       16
+#define GATT_ADV_MAX_NUM       20
 #define GATT_SCAN_MAX_NUM      2
 #define LP_BT_UUID_BURST       "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
 #define LP_BT_UUID_HEARTBEAT   "43d4a49f-605d-45b5-9302-4ddbbfd538fd"

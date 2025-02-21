@@ -286,7 +286,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
     auth->lastVerifyTime = 1;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
@@ -330,7 +330,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
     auth->hasAuthPassed[AUTH_LINK_TYPE_WIFI] = true;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
@@ -374,7 +374,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
     auth->hasAuthPassed[AUTH_LINK_TYPE_WIFI] = true;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
@@ -416,7 +416,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
     auth->lastVerifyTime = 1;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
@@ -462,7 +462,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
     auth->lastVerifyTime = 1;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
@@ -509,7 +509,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
     auth->lastVerifyTime = 1;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
@@ -552,7 +552,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
     auth->lastVerifyTime = 1;
 
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
+    int32_t ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);

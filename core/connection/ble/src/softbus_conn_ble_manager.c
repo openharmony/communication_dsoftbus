@@ -2073,7 +2073,7 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
 
     size_t addressLen = strlen(address);
     size_t udidLen = strlen(udid);
-    ConnBleReuseConnectionContext ctx = { 0 };
+    ConnBleReuseConnectionContext ctx = { {0} };
     if (memcpy_s(ctx.addr, BT_MAC_LEN - 1, address, addressLen) != EOK ||
         memcpy_s(ctx.udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
         CONN_LOGE(CONN_BLE,

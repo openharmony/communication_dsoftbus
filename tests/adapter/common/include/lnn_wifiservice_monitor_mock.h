@@ -16,10 +16,11 @@
 #ifndef LNN_WIFISERVICE_MONITOR_MOCK_H
 #define LNN_WIFISERVICE_MONITOR_MOCK_H
 
-#include "message_handler.h"
-#include "softbus_wifi_api_adapter.h"
 #include <gmock/gmock.h>
 #include <mutex>
+
+#include "message_handler.h"
+#include "softbus_wifi_api_adapter.h"
 
 typedef void (*LnnAsyncCallbackFunc)(void *para);
 
