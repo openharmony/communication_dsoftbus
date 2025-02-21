@@ -2299,8 +2299,9 @@ static int32_t InitBleManager(const ConnectCallback *callback)
         .OnBtAclStateChanged = NULL,
         .OnBtStateChanged = OnBtStateChanged,
     };
-    int32_t listenerId = SoftBusAddBtStateListener(&btStateListener);
-    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_INVALID_NUM, CONN_INIT,
+    int32_t listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(&btStateListener, &listenerId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_INVALID_NUM, CONN_INIT,
         "int ble manager failed: add bluetooth state change listener failed, invalid listener id=%{public}d",
         listenerId);
     static SoftBusBleConflictListener bleConflictListener = {
