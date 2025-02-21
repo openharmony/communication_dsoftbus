@@ -918,14 +918,11 @@ static int32_t TransTdcProcessTlvData(TcpDirectChannelInfo channel, TcpDataTlvPa
 static int32_t TransTdcProcessData(int32_t channelId)
 {
     TcpDirectChannelInfo channel;
-    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get key fail. channelId=%{public}d ", channelId);
-        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
-    }
-
-    if (SoftBusMutexLock(&g_tcpDataList->lock) != SOFTBUS_OK) {
-        return SOFTBUS_LOCK_ERR;
-    }
+    int32_t ret = TransTdcGetInfoById(channelId, &channel);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, TRANS_SDK,
+        "get key fail. channelId=%{public}d ", channelId);
+    ret = SoftBusMutexLock(&g_tcpDataList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SDK, "lock failed ");
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
     if (node == NULL) {
         TRANS_LOGE(TRANS_SDK, "node is null. channelId=%{public}d ", channelId);
@@ -933,9 +930,11 @@ static int32_t TransTdcProcessData(int32_t channelId)
         return SOFTBUS_TRANS_NODE_NOT_FOUND;
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
+    int32_t seqNum = pktHead->seq;
+    uint32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
-    TRANS_LOGI(TRANS_SDK, "data received, channelId=%{public}d, dataLen=%{public}u, size=%{public}d, seq=%{public}d",
-        channelId, dataLen, node->size, pktHead->seq);
+    TRANS_LOGI(TRANS_SDK, "data received, channelId=%{public}d, len=%{public}u, size=%{public}d, seq=%{public}d"
+        ", flags=%{public}d", channelId, dataLen, node->size, seqNum, flag);
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
@@ -944,7 +943,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     }
 
     uint32_t plainLen;
-    int32_t ret = TransTdcDecrypt(channel.detail.sessionKey, node->data + DC_DATA_HEAD_SIZE, dataLen,
+    ret = TransTdcDecrypt(channel.detail.sessionKey, node->data + DC_DATA_HEAD_SIZE, dataLen,
         plain, &plainLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "decrypt fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
@@ -959,7 +958,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
         return ret;
     }
     (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
-    ret = TransTdcProcessDataByFlag(pktHead->flags, pktHead->seq, &channel, plain, plainLen);
+    ret = TransTdcProcessDataByFlag(flag, seqNum, &channel, plain, plainLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
     }
