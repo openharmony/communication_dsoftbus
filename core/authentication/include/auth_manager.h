@@ -22,7 +22,6 @@
 #include "auth_common.h"
 #include "auth_device.h"
 #include "auth_interface.h"
-#include "auth_lane.h"
 #include "auth_normalize_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
@@ -72,11 +71,6 @@ bool IsNeedAuthLimit(const char *udidHash);
 void ClearAuthLimitMap(void);
 
 void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info);
-int32_t DelAuthReqInfoByAuthHandle(const AuthHandle *authHandle);
-void AuthFreeLane(const AuthHandle *authHandle);
-int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList);
-int32_t GetAuthConn(const char *uuid, LaneLinkType laneType, AuthConnInfo *connInfo);
-int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
 
 /* Note: must call DelAuthManager to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId);

@@ -2147,7 +2147,6 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
         AUTH_LOGE(AUTH_INIT, "AuthCommonInit fail");
         return SOFTBUS_AUTH_COMM_INIT_FAIL;
     }
-    InitAuthReqInfo();
 
     AuthConnListener connListener = {
         .onConnectResult = OnConnectResult,
@@ -2177,7 +2176,6 @@ void AuthDeviceDeinit(void)
     ClearAuthRequest();
     AuthConnDeinit();
     AuthSessionFsmExit();
-    DeInitAuthReqInfo();
     AuthCommonDeinit();
     AUTH_LOGI(AUTH_INIT, "auth deinit succ");
 }
