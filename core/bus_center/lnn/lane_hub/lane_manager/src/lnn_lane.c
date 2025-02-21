@@ -22,7 +22,6 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ctrl_lane.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_event_form.h"
@@ -666,11 +665,6 @@ int32_t InitLane(void)
         LNN_LOGI(LNN_LANE, "transLane get instance succ");
         g_laneObject[LANE_TYPE_TRANS]->init(&g_laneIdListener);
     }
-    g_laneObject[LANE_TYPE_CTRL] = CtrlLaneGetInstance();
-    if (g_laneObject[LANE_TYPE_CTRL] != NULL) {
-        LNN_LOGI(LNN_LANE, "ctrl get instance succ");
-        g_laneObject[LANE_TYPE_CTRL]->init(&g_laneIdListener);
-    }
     ListInit(&g_laneListenerList.list);
     g_laneListenerList.cnt = 0;
     return SOFTBUS_OK;
@@ -687,9 +681,6 @@ void DeinitLane(void)
     DeinitLaneLinkConflict();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
-    }
-    if (g_laneObject[LANE_TYPE_CTRL] != NULL) {
-        g_laneObject[LANE_TYPE_CTRL]->deinit();
     }
     (void)SoftBusMutexDestroy(&g_laneMutex);
 }
