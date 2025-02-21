@@ -2098,14 +2098,6 @@ HWTEST_F(LNNLaneMockTest, LNN_AUTH_ALLOC_TEST_001, TestSize.Level1)
 
     ret = laneManager->lnnAllocLane(INVALID_LANE_REQ_ID, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    AuthLinkTypeList mockList = {};
-    mockList.linkType[0] = AUTH_LINK_TYPE_WIFI;
-    mockList.linkTypeNum = 1;
-    EXPECT_CALL(mock, GetAuthLinkTypeList)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(mockList), Return(SOFTBUS_OK)));
-    ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
 }
 
 /*

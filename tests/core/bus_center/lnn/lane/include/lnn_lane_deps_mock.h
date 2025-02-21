@@ -53,7 +53,7 @@ public:
     LaneDepsInterface() {};
     virtual ~LaneDepsInterface() {};
 
-    virtual int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback) = 0;
+    virtual int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback) = 0;
     virtual int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
@@ -122,7 +122,7 @@ public:
     LaneDepsInterfaceMock();
     ~LaneDepsInterfaceMock() override;
     MOCK_METHOD2(GetAuthLinkTypeList, int32_t (const char*, AuthLinkTypeList *));
-    MOCK_METHOD3(AuthAllocConn, int32_t (const char *networkId, uint32_t authRequestId, AuthConnCallback *callback));
+    MOCK_METHOD3(AuthAllocLane, int32_t (const char *networkId, uint32_t authRequestId, AuthConnCallback *callback));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char*, IdCategory, NodeInfo *));
     MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char*, IdCategory));
