@@ -108,6 +108,10 @@ public:
     static std::string GetRemoteOsVersion(const char *remoteNetworkId);
     static int32_t GetRemoteScreenStatus(const char *remoteNetworkId);
 
+    static bool IsDeviceId(const std::string &remoteId);
+    static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
+    static std::string RemoteMacToDeviceId(const std::string &remoteMac);
+
 private:
     static inline std::mutex serialParallelLock_;
     static inline std::condition_variable serialParallelCv_;
