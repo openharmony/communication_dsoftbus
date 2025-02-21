@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,9 +69,14 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
         return false;
     }
 
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
     #define DBINDER_BUS_NAME_PREFIX "DBinder"
-    // The authorization of dbind is granted through Samgr, and there is no control here
     if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
+        return false;
+    }
+
+    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         return false;
     }
 

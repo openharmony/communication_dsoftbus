@@ -29,7 +29,6 @@
 extern "C" {
 #endif
 
-LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId);
 int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId);
 void NetBuilderMessageHandler(SoftBusMessage *msg);
 LnnConnectionFsm *FindConnectionFsmByAddr(const ConnectionAddr *addr, bool isShort);

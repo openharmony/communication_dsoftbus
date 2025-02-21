@@ -230,6 +230,7 @@ group("unittest") {
     "adapter:unittest",
     "channel:unittest",
     "data:unittest",
+    "dfx:unittest",
     "entity:unittest",
     "processor:unittest",
     "utils:unittest",

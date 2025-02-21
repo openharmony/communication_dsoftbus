@@ -96,5 +96,15 @@ int32_t LnnAsyncCallbackDelayHelper(
 {
     return GetDataCloudSyncInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    return GetDataCloudSyncInterface()->LnnGetLocalNodeInfoSafe(info);
+}
+
+int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid)
+{
+    return GetDataCloudSyncInterface()->LnnPackCloudSyncAckSeq(json, peerudid);
+}
 }
 } // namespace OHOS

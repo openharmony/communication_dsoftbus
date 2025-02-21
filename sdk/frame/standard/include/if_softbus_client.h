@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,8 +84,8 @@ public:
     virtual int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
 
-    virtual int32_t OnCheckCollabRelation(
-        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
+    virtual int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo,
+        int32_t channelId, int32_t channelType);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

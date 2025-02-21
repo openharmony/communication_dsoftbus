@@ -58,7 +58,7 @@ public:
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
-    virtual int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info) = 0;
+    virtual int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
@@ -110,7 +110,7 @@ public:
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
     MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t(const LnnHeartbeatMediumParam *));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *info));
-    MOCK_METHOD1(LnnLedgerAllDataSyncToDB, int32_t(NodeInfo *info));
+    MOCK_METHOD3(LnnLedgerAllDataSyncToDB, int32_t(NodeInfo *info, bool, char *));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType(LnnHeartbeatType type));
     MOCK_METHOD2(LnnStopScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));

@@ -25,7 +25,7 @@
 #include "softbus_broadcast_type.h"
 #include "softbus_error_code.h"
 
-#define GATT_ADV_MAX_NUM  16
+#define GATT_ADV_MAX_NUM  20
 #define GATT_SCAN_MAX_NUM 2
 
 using namespace testing::ext;

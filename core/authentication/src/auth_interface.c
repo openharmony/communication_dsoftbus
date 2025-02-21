@@ -293,25 +293,6 @@ void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
     RemoveAuthManagerByAuthId(authHandle);
 }
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
-{
-    if (networkId == NULL || callback == NULL) {
-        AUTH_LOGE(AUTH_CONN, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return AuthAllocLane(networkId, authRequestId, callback);
-}
-
-void AuthFreeConn(const AuthHandle *authHandle)
-{
-    if (authHandle == NULL) {
-        AUTH_LOGE(AUTH_CONN, "param invalid");
-        return;
-    }
-    AuthFreeLane(authHandle);
-    DelAuthReqInfoByAuthHandle(authHandle);
-}
-
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
@@ -513,8 +494,7 @@ int32_t AuthRestoreAuthManager(
         return SOFTBUS_AUTH_MANAGER_RESTORE_FAIL;
     }
     if (SoftBusGenerateStrHash((unsigned char *)nodeInfo->deviceInfo.deviceUdid,
-        strlen(nodeInfo->deviceInfo.deviceUdid),
-        (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
+        strlen(nodeInfo->deviceInfo.deviceUdid), (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "restore manager fail because generate strhash");
         (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
@@ -531,7 +511,7 @@ int32_t AuthRestoreAuthManager(
         return ret;
     }
     ret = hasDeviceKey ? AuthDirectOnlineProcessSessionKey(&info, &keyInfo, authId) :
-                         AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, authId);
+        AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, authId);
     (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     return ret;
 }

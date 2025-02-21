@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t 
 int32_t TransOnChannelBind(int32_t channelId, int32_t channelType);
 int32_t TransOnChannelOnQos(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
 int32_t TransOnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
+    const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
 
 #ifdef __cplusplus
 }

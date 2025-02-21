@@ -61,7 +61,7 @@ uint64_t LnnGetFeatureCapabilty(void)
     LNN_LOGI(LNN_LEDGER, "clear feature TLV configValue=%{public}" PRIu64, configValue);
 #endif
 #ifndef DSOFTBUS_FEATURE_CONN_HV2
-    LnnClearFeatureCapability(&configValue, BIT_BLE_TRIGGER_CONNECTION);
+    LnnClearFeatureCapability(&configValue, BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
     LNN_LOGI(LNN_LEDGER, "clear feature CONN_HV2 configValue=%{public}" PRIu64, configValue);
 #endif
 #ifndef DSOFTBUS_FEATURE_CONN_COC
