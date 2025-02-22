@@ -14,10 +14,11 @@
  */
 
 #include "lnn_app_bind_interface.h"
-
+#include "softbus_error_code.h"
 #include "device_profile_listener.h"
 
-void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
+int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
 {
     (void)deviceProfilePara;
+    return SOFTBUS_OK;
 }

@@ -16,6 +16,7 @@
 #ifndef LNN_NETWORK_ID_H
 #define LNN_NETWORK_ID_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -23,8 +24,8 @@ extern "C" {
 #endif
 
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate);
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate);
 
 #ifdef __cplusplus
 }

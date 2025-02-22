@@ -2073,7 +2073,7 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
 
     size_t addressLen = strlen(address);
     size_t udidLen = strlen(udid);
-    ConnBleReuseConnectionContext ctx = { 0 };
+    ConnBleReuseConnectionContext ctx = { {0} };
     if (memcpy_s(ctx.addr, BT_MAC_LEN - 1, address, addressLen) != EOK ||
         memcpy_s(ctx.udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
         CONN_LOGE(CONN_BLE,
@@ -2299,8 +2299,9 @@ static int32_t InitBleManager(const ConnectCallback *callback)
         .OnBtAclStateChanged = NULL,
         .OnBtStateChanged = OnBtStateChanged,
     };
-    int32_t listenerId = SoftBusAddBtStateListener(&btStateListener);
-    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_INVALID_NUM, CONN_INIT,
+    int32_t listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(&btStateListener, &listenerId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_INVALID_NUM, CONN_INIT,
         "int ble manager failed: add bluetooth state change listener failed, invalid listener id=%{public}d",
         listenerId);
     static SoftBusBleConflictListener bleConflictListener = {

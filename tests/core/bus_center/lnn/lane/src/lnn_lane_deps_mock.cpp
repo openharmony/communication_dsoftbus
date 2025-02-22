@@ -179,9 +179,9 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
     return GetLaneDepsInterface()->GetAuthLinkTypeList(networkId, linkTypeList);
 }
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
 {
-    return GetLaneDepsInterface()->AuthAllocConn(networkId, authRequestId, callback);
+    return GetLaneDepsInterface()->AuthAllocLane(networkId, authRequestId, callback);
 }
 
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)

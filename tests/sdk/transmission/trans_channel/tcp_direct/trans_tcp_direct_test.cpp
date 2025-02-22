@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1442,6 +1442,19 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TransAssembleTlvData001
+ * @tc.desc: TransAssembleTlvData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransAssembleTlvData001, TestSize.Level0)
+{
+    int32_t bufferSize = 0;
+    int32_t ret = TransAssembleTlvData(NULL, 1, NULL, 1, &bufferSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: TransAssembleTlvData002
  * @tc.desc: TransAssembleTlvData
  * @tc.type: FUNC
@@ -1449,9 +1462,21 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
  */
 HWTEST_F(TransTcpDirectTest, TransAssembleTlvData002, TestSize.Level0)
 {
+    DataHead pktHead;
+    uint8_t *tlvElement = (uint8_t *)SoftBusCalloc(TDC_TLV_ELEMENT * sizeof(TlvElement));
+    pktHead.tlvElement = tlvElement;
+    pktHead.magicNum = SoftBusHtoLl(MAGIC_NUMBER);
     int32_t bufferSize = 0;
-    int32_t ret = TransAssembleTlvData(NULL, 1, NULL, 1, &bufferSize);
+    int32_t ret = TransAssembleTlvData(&pktHead, TLV_TYPE_INNER_SEQ, NULL, 1, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    uint8_t buffer = 0;
+    ret = TransAssembleTlvData(&pktHead, TLV_TYPE_FLAG, &buffer, 1, &bufferSize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransAssembleTlvData(&pktHead, TLV_TYPE_DATA_LEN, &buffer, 1, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(tlvElement);
 }
 
 /**

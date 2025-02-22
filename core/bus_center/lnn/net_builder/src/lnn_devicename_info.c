@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "anonymizer.h"
+#include "auth_session_fsm.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
@@ -28,6 +29,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_info.h"
+#include "lnn_net_builder.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_settingdata_event_monitor.h"
@@ -36,9 +38,13 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_json.h"
 #include "message_handler.h"
+#include "lnn_init_monitor.h"
 
 #define KEY_NICK_NAME "KEY_NICK_NAME"
 #define KEY_ACCOUNT "KEY_ACCOUNT"
+static bool g_deviceNameInit = false;
+
+static const int32_t DELAY_LEN = 1000;
 
 static int32_t LnnSyncDeviceName(const char *networkId)
 {
@@ -65,6 +71,36 @@ static int32_t LnnSyncDeviceName(const char *networkId)
         LNN_LOGE(LNN_BUILDER, "send async device name fail");
         return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnAsyncDeviceNameDelay(const char *networkId)
+{
+    const char *deviceName = NULL;
+    const NodeInfo *info = LnnGetLocalNodeInfo();
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "get local node info fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    deviceName = LnnGetDeviceName(&info->deviceInfo);
+    if (deviceName == NULL) {
+        LNN_LOGE(LNN_BUILDER, "get device name fail");
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    SendSyncInfoParam *data = CreateSyncInfoParam(
+        LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)deviceName, strlen(deviceName) + 1, NULL);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create async info fail");
+        return SOFTBUS_NETWORK_CREATE_SYNC_INFO_PARAM_FAILED;
+    }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnSendAsyncInfoMsg, (void *)data, DELAY_LEN) !=
+        SOFTBUS_OK) {
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "send async device name fail");
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
+    }
+    LNN_LOGI(LNN_BUILDER, "AsyncDeviceNameDelay %{public}d ms later", DELAY_LEN);
     return SOFTBUS_OK;
 }
 
@@ -225,6 +261,14 @@ static void OnReceiveDeviceNickName(LnnSyncInfoType type, const char *networkId,
     NickNameMsgProc(networkId, accountId, nickName);
 }
 
+void LnnInitDeviceNameStatusSet(InitDepsStatus status)
+{
+    if (!g_deviceNameInit) {
+        LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_NAME, status);
+        g_deviceNameInit = true;
+    }
+}
+
 int32_t LnnSetLocalDeviceName(const char *displayName)
 {
     if (displayName == NULL || strnlen(displayName, DEVICE_NAME_BUF_LEN) == 0 ||
@@ -239,14 +283,19 @@ int32_t LnnSetLocalDeviceName(const char *displayName)
     }
     if (strcmp(localDevName, displayName) == 0) {
         LNN_LOGI(LNN_BUILDER, "device name not change, ignore this msg");
+        LnnInitDeviceNameStatusSet(DEPS_STATUS_SUCCESS);
         return SOFTBUS_OK;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, displayName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set local devcice name failed");
         return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
+    LnnInitDeviceNameStatusSet(DEPS_STATUS_SUCCESS);
     LnnNotifyLocalNetworkIdChanged();
     LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_NAME_CHANGED);
+
+    (void)AuthSessionSetReSyncDeviceName();
+    LnnSetReSyncDeviceName();
     int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {

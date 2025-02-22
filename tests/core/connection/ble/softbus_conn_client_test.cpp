@@ -75,8 +75,10 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
+    (void)listener;
+    (void)listenerId;
     return SOFTBUS_OK;
 }
 

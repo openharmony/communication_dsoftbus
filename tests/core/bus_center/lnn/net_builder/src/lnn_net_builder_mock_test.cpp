@@ -112,8 +112,8 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGenLocalNetworkId(_, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, SoftBusGetBtState()).WillRepeatedly(Return(BLE_ENABLE));
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_INVALID_PARAM);
@@ -135,16 +135,16 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGenLocalNetworkId(_, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _))
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _))
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(ConifgLocalLedger() != SOFTBUS_OK);
-    EXPECT_TRUE(ConifgLocalLedger() != SOFTBUS_OK);
-    EXPECT_TRUE(ConifgLocalLedger() == SOFTBUS_OK);
+    EXPECT_TRUE(ConfigLocalLedger() != SOFTBUS_OK);
+    EXPECT_TRUE(ConfigLocalLedger() != SOFTBUS_OK);
+    EXPECT_TRUE(ConfigLocalLedger() == SOFTBUS_OK);
 }
 
 /*
@@ -391,8 +391,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, RegAuthVerifyListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnRegSyncInfoHandler(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGenLocalNetworkId(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnUnregSyncInfoHandler(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -2158,5 +2158,25 @@ HWTEST_F(LNNNetBuilderMockTest, USER_SWITCHED_HANDLER_TEST_001, TestSize.Level1)
     OnDeviceDisconnect(authHandle);
     bool ret = IsSupportMasterNodeElect(SOFTBUS_NEW_V1);
     EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_UUID_AND_IRK_TEST_001
+ * @tc.desc: LnnUpdateLocalUuidAndIrk test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_LOCAL_UUID_AND_IRK_TEST_001, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _, _))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _, _))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(LnnUpdateLocalUuidAndIrk() != SOFTBUS_OK);
+    EXPECT_TRUE(LnnUpdateLocalUuidAndIrk() == SOFTBUS_OK);
 }
 } // namespace OHOS
