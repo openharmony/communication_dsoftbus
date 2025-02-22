@@ -62,6 +62,7 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time);
 int32_t LnnUpdateLocalScreenStatus(bool isScreenOn);
 void LnnUpdateStateVersion(StateVersionChangeReason reason);
 int32_t LnnUpdateLocalDeviceName(const DeviceBasicInfo *info);
+int32_t LnnGenBroadcastCipherInfo(void);
 
 #ifdef __cplusplus
 }

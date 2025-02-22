@@ -77,6 +77,57 @@ ohos_unittest("LNNConnAddrUtilsTest") {
   }
 }
 
+ohos_unittest("LNNFileUtilsTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_decision_db_deps_mock.cpp",
+    "lnn_file_utils_test.cpp",
+  ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "unittest/common/",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
 ohos_unittest("BusCenterUtilsTest") {
   module_out_path = module_output_path
   sources = [
@@ -115,5 +166,6 @@ group("unittest") {
   deps = [
     ":BusCenterUtilsTest",
     ":LNNConnAddrUtilsTest",
+    ":LNNFileUtilsTest",
   ]
 }
