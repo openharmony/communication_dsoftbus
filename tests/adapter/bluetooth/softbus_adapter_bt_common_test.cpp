@@ -116,12 +116,13 @@ HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
 static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int32_t *outlistenerId)
 {
     EXPECT_CALL(mocker, BleStopScan).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
-    auto listenerId = SoftBusAddBtStateListener(GetMockBtStateListener());
+    auto listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(GetMockBtStateListener(), &listenerId);
     if (listenerId < 0) {
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
 
-    int32_t ret = SoftBusBtInit();
+    ret = SoftBusBtInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     if (MockBluetooth::btGapCallback == nullptr) {
@@ -287,13 +288,18 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
 {
-    int32_t ret = SoftBusAddBtStateListener(NULL);
+    auto listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(NULL, &listenerId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SoftBusAddBtStateListener(GetMockBtStateListener(), NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     for (int i = 0; i < STATE_LISTENER_MAX_NUM; ++i) {
-        ret = SoftBusAddBtStateListener(GetMockBtStateListener());
-        EXPECT_TRUE(ret >= 0);
+        ret = SoftBusAddBtStateListener(GetMockBtStateListener(), &listenerId);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
     }
-    ret = SoftBusAddBtStateListener(GetMockBtStateListener());
+    ret = SoftBusAddBtStateListener(GetMockBtStateListener(), &listenerId);
     EXPECT_EQ(ret, SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR);
 }
 

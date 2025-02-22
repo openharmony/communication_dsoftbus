@@ -74,9 +74,9 @@ SppSocketDriver *InitSppSocketDriver()
     return GetConnectionBrInterface()->InitSppSocketDriver();
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return GetConnectionBrInterface()->SoftBusAddBtStateListener(listener);
+    return GetConnectionBrInterface()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
 uint32_t ConnGetHeadSize(void)

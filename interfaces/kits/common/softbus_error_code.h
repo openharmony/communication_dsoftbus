@@ -50,6 +50,12 @@ extern "C" {
 #define SOFTBUS_SUB_ERRNO(module, sub) (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((module) << 16) | ((sub) << 12) | (0x0FFF)))
 #define CHIP_CONFLICT_ERROR_OFFSET 1000
 
+/**
+ * @brief Softbus error code module. Support 32 modules.
+ *
+ * @since 4.1
+ * @version 1.0
+*/
 enum SoftBusSubModule {
     DISC_SUB_MODULE_CODE = 1,
     CONN_SUB_MODULE_CODE = 2,
@@ -68,6 +74,12 @@ enum SoftBusUnderlayError {
     SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + 4,
 };
 
+/**
+ * @brief Discovery error code submodule. Support 16 submodules.
+ *
+ * @since 5.0
+ * @version 1.0
+*/
 enum DisSubModule {
     DISC_SERVICE_SUB_MODULE_CODE = 1,
     DISC_MANAGER_SUB_MODULE_CODE = 2,
