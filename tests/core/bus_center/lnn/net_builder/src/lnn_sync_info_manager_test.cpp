@@ -2232,7 +2232,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
 
 /*
  * @tc.name: IsNeedSyncByAuth_004
- * @tc.desc: (local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0
+ * @tc.desc: (local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0
  * @tc.type: FUNC
  * @tc.require: 1
  */

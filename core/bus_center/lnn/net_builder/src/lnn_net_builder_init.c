@@ -71,12 +71,14 @@
 #include "trans_channel_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_process.h"
+#include "lnn_init_monitor.h"
 
 
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 #define NOT_TRUSTED_DEVICE_MSG_DELAY     5000
-
+#define DELAY_REG_DP_TIME                10000
+#define RETRY_TIMES                      5
 
 void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)
 {
@@ -804,7 +806,7 @@ static int32_t InitSyncInfoReg(void)
     }
     return SOFTBUS_OK;
 }
- 
+
 int32_t LnnInitNetBuilder(void)
 {
     if (LnnGetNetBuilder()->isInit == true) {
@@ -849,7 +851,8 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "regist user switch evt handler fail, rc=%{public}d", rc);
         return rc;
     }
-    if (!LnnSubcribeKvStoreService()) {
+    if (LnnInitModuleNotifyWithRetrySync(INIT_DEPS_KVSTORE, LnnSubcribeKvStoreService, RETRY_TIMES,
+        DELAY_REG_DP_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist kv store service fail!");
     }
     return InitNetBuilderLooper();

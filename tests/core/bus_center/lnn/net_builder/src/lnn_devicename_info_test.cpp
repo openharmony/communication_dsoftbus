@@ -16,14 +16,16 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "auth_session_fsm.h"
 #include "lnn_connection_mock.h"
 #include "lnn_devicename_info.c"
 #include "lnn_devicename_info.h"
+#include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_service_mock.h"
+#include "lnn_sync_info_manager.h"
 #include "lnn_sync_info_mock.h"
 #include "softbus_error_code.h"
-#include "lnn_sync_info_manager.h"
 
 namespace OHOS {
 using namespace testing;

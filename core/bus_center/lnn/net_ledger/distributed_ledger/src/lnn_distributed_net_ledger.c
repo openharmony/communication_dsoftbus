@@ -1655,6 +1655,31 @@ int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, ui
     return SOFTBUS_OK;
 }
 
+static void UpdateDeviceNameToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
+{
+    if (strlen(newInfo->deviceInfo.deviceName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s deviceName to distributed ledger fail");
+        }
+    }
+    if (strlen(newInfo->deviceInfo.unifiedName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedName to distributed ledger fail");
+        }
+    }
+    if (strlen(newInfo->deviceInfo.unifiedDefaultName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN,
+            newInfo->deviceInfo.unifiedDefaultName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedDefaultName to distributed ledger fail");
+        }
+    }
+    if (strlen(newInfo->deviceInfo.nickName) != 0) {
+        if (strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s nickName to distributed ledger fail");
+        }
+    }
+}
+
 static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 {
     if (strcmp(newInfo->networkId, oldInfo->networkId) == 0 || oldInfo->status != STATUS_ONLINE ||
@@ -1662,19 +1687,7 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
         oldInfo->stateVersion = newInfo->stateVersion;
     }
 
-    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s deviceName to distributed ledger fail");
-    }
-    if (strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedName to distributed ledger fail");
-    }
-    if (strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedDefaultName) !=
-        EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedDefaultName to distributed ledger fail");
-    }
-    if (strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s nickName to distributed ledger fail");
-    }
+    UpdateDeviceNameToDLedger(newInfo, oldInfo);
     if (strcpy_s(oldInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, newInfo->deviceInfo.deviceUdid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceUdid to distributed ledger fail");
     }

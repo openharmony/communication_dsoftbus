@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_log.h"
@@ -579,6 +580,17 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         retReply = SOFTBUS_INVALID_PARAM;
         goto EXIT;
     }
+
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+    if (strncmp(param.sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
+        COMM_LOGI(COMM_SVC, "DMS bind request, need check collaboration relationship");
+        if (CheckSourceCollabRelation(param.peerDeviceId, OHOS::IPCSkeleton::GetCallingPid()) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_SVC, "DMS check collaboration relationship failed, reject binding request");
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
+    }
+
     if ((retReply = TransCheckClientAccessControl(param.peerDeviceId)) != SOFTBUS_OK) {
         goto EXIT;
     }

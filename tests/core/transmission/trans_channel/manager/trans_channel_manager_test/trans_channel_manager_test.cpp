@@ -75,6 +75,8 @@ void TransChannelManagerTest::SetUpTestCase(void)
     LooperInit();
     ConnServerInit();
     AuthInit();
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();

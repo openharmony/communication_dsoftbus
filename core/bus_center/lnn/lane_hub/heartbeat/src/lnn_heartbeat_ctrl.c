@@ -56,6 +56,7 @@
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_utils.h"
+#include "lnn_init_monitor.h"
 
 #define HB_LOOPBACK_IP "127.0.0.1"
 #define INVALID_DELAY_TIME (-1)
@@ -121,15 +122,17 @@ bool IsHeartbeatEnable(void)
     bool isNightMode = g_hbConditionState.nightModeState == SOFTBUS_NIGHT_MODE_ON;
     bool isOOBEEnd =
         g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
+    bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
 
     LNN_LOGI(LNN_HEART_BEAT,
         "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
         "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
-        "request=%{public}d",
+        "request=%{public}d, init check=%{public}d",
         isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
-        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable);
+        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc);
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
-        (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd;
+        (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
+        isInitCheckSuc;
 }
 
 SoftBusScreenState GetScreenState(void)
@@ -265,6 +268,12 @@ static uint64_t GetDisEnableBleDiscoveryTime(uint64_t modeDuration)
         timeout = (modeDuration > MAX_DISABLE_BLE_DISCOVERY_TIME) ? MAX_DISABLE_BLE_DISCOVERY_TIME : modeDuration;
     }
     return timeout;
+}
+
+void HbEnableDiscovery(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "Enable ble discovery.");
+    HbConditionChanged(false);
 }
 
 static void RequestEnableDiscovery(void *para)
@@ -586,7 +595,7 @@ static int32_t HbTryCloudSync(void)
         LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
-    int32_t ret = LnnLedgerAllDataSyncToDB(&info);
+    int32_t ret = LnnLedgerAllDataSyncToDB(&info, false, NULL);
     if (ret == SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
     } else {

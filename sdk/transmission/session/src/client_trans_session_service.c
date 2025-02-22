@@ -1210,8 +1210,10 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         TRANS_LOGE(TRANS_SDK, "get socket state failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
         return;
     }
-    if (lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+    if (lifecycle.sessionState == SESSION_STATE_CANCELLING &&
+        lifecycle.bindErrCode == SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
         TRANS_LOGW(TRANS_SDK, "This socket already in cancelling state. socket=%{public}d", socket);
+        return;
     }
     SetSessionStateBySessionId(socket, SESSION_STATE_CANCELLING, cancelReason);
     if (lifecycle.sessionState == SESSION_STATE_INIT) {

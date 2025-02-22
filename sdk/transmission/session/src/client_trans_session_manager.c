@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -283,6 +283,7 @@ void TransClientDeinit(void)
         return;
     }
     (void)RegisterTimeoutCallback(SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN, NULL);
+    (void)RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, NULL);
     ClientSessionServer *serverNode = NULL;
     ClientSessionServer *serverNodeNext = NULL;
     ListNode destroyList;
@@ -300,7 +301,6 @@ void TransClientDeinit(void)
     TransDataSeqInfoListDeinit();
     ClientTransChannelDeinit();
     TransServerProxyDeInit();
-    (void)RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, NULL);
 }
 
 static bool SessionServerIsExist(const char *sessionName)

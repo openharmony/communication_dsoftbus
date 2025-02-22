@@ -24,7 +24,7 @@
 #include <stdatomic.h>
 #include <string.h>
 
-#define GATT_ADV_MAX_NUM       16
+#define GATT_ADV_MAX_NUM       20
 #define GATT_SCAN_MAX_NUM      2
 #define LP_BT_UUID_BURST       "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
 #define LP_BT_UUID_HEARTBEAT   "43d4a49f-605d-45b5-9302-4ddbbfd538fd"
@@ -927,9 +927,8 @@ void SoftbusBleAdapterInit(void)
     if (RegisterBroadcastMediumFunction(BROADCAST_MEDIUM_TYPE_BLE, &interface) != 0) {
         DISC_LOGE(DISC_BLE_ADAPTER, "register gatt interface failed");
     }
-    int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener);
-    DISC_CHECK_AND_RETURN_LOGE(ret >= 0, DISC_BLE_ADAPTER, "add bt state listener failed.");
-    g_adapterBtStateListenerId = ret;
+    int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener, &g_adapterBtStateListenerId);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE_ADAPTER, "add bt state listener failed.");
     for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
         g_advChannel[channelId].advId = -1;
     }

@@ -48,7 +48,7 @@ static uint32_t GetSameRequestNum(char *udidHash)
 static int32_t GetRequestListByUdidHash(char *udidHash, bool isNeedClear, NormalizeRequest **requests, uint32_t *num)
 {
     if (udidHash == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "udidHash is null or len < SHORT_HASH_LEN");
+        AUTH_LOGE(AUTH_HICHAIN, "udidHash is null");
         return SOFTBUS_INVALID_PARAM;
     }
     *num = GetSameRequestNum(udidHash);

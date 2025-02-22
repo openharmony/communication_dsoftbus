@@ -306,14 +306,15 @@ static void DeRegisteCoAPEpollTaskCtx(CoapCtxType *ctx)
 
 static int DeRegisterCoAPEpollTaskCb(CoapCtxType *ctx)
 {
-    if (ctx->socketErrFlag) {
+    if (ctx->socketErrFlag == NSTACKX_TRUE) {
         DFINDER_LOGI(TAG, "error of ctx socket occurred and destroy g_ctx");
         ctx->socketErrFlag = NSTACKX_FALSE;
         NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
         DestroyLocalIface(ctx->iface, NSTACKX_FALSE);
-    } else {
-        DeRegisteCoAPEpollTaskCtx(ctx);
     }
+
+    DFINDER_LOGD(TAG, "Deregistercoap epollTask freeCtxLater %d", ctx->freeCtxLater);
+    DeRegisteCoAPEpollTaskCtx(ctx);
     if (ctx->freeCtxLater == NSTACKX_TRUE) {
         CoapContextRemove(ctx);
         coap_free_context(ctx->ctx);
@@ -467,21 +468,21 @@ void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit)
 {
     DFINDER_LOGD(TAG, "coap server destroy, module deinit: %d", moduleDeinit);
 
+    if (!moduleDeinit) {
+        // release the context after EpollLoop has processed this round of tasks
+        ctx->freeCtxLater = NSTACKX_TRUE;
+        return;
+    }
+
     for (uint32_t i = 0; i < ctx->socketNum && i < MAX_COAP_SOCKET_NUM; ++i) {
         if (ctx->taskList[i].taskfd < 0) {
             continue;
         }
         (void)DeRegisterEpollTask(&ctx->taskList[i]);
     }
-
-    if (moduleDeinit) {
-        CoapContextRemove(ctx);
-        coap_free_context(ctx->ctx);
-        free(ctx);
-    } else {
-        // release the context after EpollLoop has processed this round of tasks
-        ctx->freeCtxLater = NSTACKX_TRUE;
-    }
+    CoapContextRemove(ctx);
+    coap_free_context(ctx->ctx);
+    free(ctx);
 }
 
 CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface)
