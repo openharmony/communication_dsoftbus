@@ -195,8 +195,10 @@ int32_t ClientCheckCollabRelation(IpcIo *data, IpcIo *reply)
     int32_t channelId = -1;
     int32_t channelType = -1;
     if (isSinkSide) {
-        ReadInt32(data, &channelId);
-        ReadInt32(data, &channelType);
+        COMM_CHECK_AND_RETURN_RET_LOGE(
+            ReadInt32(data, &channelId), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read channelId failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(
+            ReadInt32(data, &channelType), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read channelType failed");
     }
     (void)TransOnCheckCollabRelation(&sourceInfo, isSinkSide, &sinkInfo, channelId, channelType);
     return SOFTBUS_OK;

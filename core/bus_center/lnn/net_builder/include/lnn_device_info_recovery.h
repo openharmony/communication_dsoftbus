@@ -95,6 +95,8 @@ extern "C" {
 #define DEVICE_INFO_USERID_CHECKSUM "USERID_CHECKSUM"
 #define IS_SUPPORT_IPV6 "IS_SUPPORT_IPV6"
 #define IS_AUTH_EXCHANGE_UDID "IS_AUTH_EXCHANGE_UDID"
+#define IS_ACK_SEQ "IS_ACK_SEQ"
+#define DEVICE_INFO_PEER_UDID "DEVICE_INFO_PEER_UDID"
 
 int32_t LnnLoadLocalDeviceInfo(void);
 int32_t LnnLoadRemoteDeviceInfo(void);
@@ -116,6 +118,7 @@ int32_t LnnPackCloudSyncDeviceInfo(cJSON *json, const NodeInfo *cloudSyncInfo);
 int32_t LnnUnPackCloudSyncDeviceInfo(cJSON *json, NodeInfo *cloudSyncInfo);
 void LnnUpdateAuthExchangeUdid(void);
 void LnnClearAuthExchangeUdid(const char *networkId);
+int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid);
 #ifdef __cplusplus
 }
 #endif

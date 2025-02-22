@@ -70,7 +70,7 @@ typedef enum {
 
 void LnnInitCloudSyncModule(void);
 void LnnDeInitCloudSyncModule(void);
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info);
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid);
 int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info);
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength);
 int32_t LnnDeleteSyncToDB(void);

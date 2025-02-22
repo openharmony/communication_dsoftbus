@@ -36,6 +36,7 @@
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
+#include "lnn_select_rule.h"
 #include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
@@ -171,9 +172,7 @@ static SoftBusMutex g_rawLinkLock;
 #define INVAILD_AUTH_ID                (-1)
 #define INVALID_P2P_REQUEST_ID         (-1)
 #define LANE_REQ_ID_TYPE_SHIFT         28
-#define SHORT_RANGE_PTK_NOT_MATCH_CODE 4
 #define BLE_TRIGGER_TIMEOUT            5000
-#define SOFTBUS_LNN_PTK_NOT_MATCH  (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + SHORT_RANGE_PTK_NOT_MATCH_CODE)
 #define RAW_LINK_CHECK_DELAY           (200)
 #define RAW_LINK_CHECK_NUM             (10)
 
@@ -1504,6 +1503,27 @@ static bool IsGuideChannelRetryErrcode(int32_t reason)
     return false;
 }
 
+static void HandleNotSupportP2pError(AsyncResultType type, uint32_t p2pRequestId)
+{
+    P2pLinkReqList reqInfo;
+    (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2pLinkReq fail, type=%{public}d, requestId=%{public}u",
+            ASYNC_RESULT_P2P, p2pRequestId);
+        return;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(reqInfo.laneRequestInfo.networkId, STRING_KEY_DEV_UDID,
+        peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return;
+    }
+    if (UpdateP2pAvailability(peerUdid, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "update p2p availability fail");
+        return;
+    }
+}
+
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
@@ -1540,6 +1560,9 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
             NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
         }
         return;
+    }
+    if (reason == SOFTBUS_CONN_P2P_STA_SAME_MAC) {
+        HandleNotSupportP2pError(ASYNC_RESULT_P2P, p2pRequestId);
     }
     NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
 }
@@ -2247,26 +2270,6 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     return SOFTBUS_OK;
 }
 
-static bool IsSupportHmlTwo(uint64_t local, uint64_t remote)
-{
-    if (((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) || ((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
-        LNN_LOGE(LNN_LANE, "hml2.0 capa disable, local=%{public}" PRIu64 ", remote=%{public}" PRIu64, local, remote);
-        return false;
-    }
-    return true;
-}
-
-static bool IsSupportWifiDirect(const char *networkId)
-{
-    uint64_t local = 0;
-    uint64_t remote = 0;
-    if (GetFeatureCap(networkId, &local, &remote) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
-        return false;
-    }
-    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
-}
-
 static bool CheckHasBrConnection(const char *networkId)
 {
     ConnectOption connOpt;
@@ -2276,7 +2279,9 @@ static bool CheckHasBrConnection(const char *networkId)
         connOpt.brOption.brMac[0] == '\0') {
         return false;
     }
-    return CheckActiveConnection(&connOpt, true);
+    bool ret = CheckActiveConnection(&connOpt, true);
+    LNN_LOGI(LNN_LANE, "CheckActiveConnection ret=%{public}d.", ret);
+    return ret;
 }
 
 static bool IsHasAuthConnInfo(const char *networkId)
@@ -2302,8 +2307,12 @@ static bool IsSupportProxyNego(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return ((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
-        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
+    if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0) ||
+        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0)) {
+        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}" PRIu64 ", remote=%{public}" PRIu64, local, remote);
+        return false;
+    }
+    return true;
 }
 
 static int32_t UpdateP2pReuseInfoByReqId(AsyncResultType type, uint32_t requestId)
@@ -2450,7 +2459,7 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         guideList[(*linksNum)++] = LANE_ACTION_TRIGGER;
         return SOFTBUS_OK;
     }
-    if (request->linkType == LANE_HML && IsSupportWifiDirect(request->peerNetworkId)) {
+    if (request->linkType == LANE_HML && GetWifiDirectManager()->supportHmlTwo()) {
         if (IsHasAuthConnInfo(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
         }
@@ -2468,6 +2477,10 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         if ((!BrAuthIsMostPriority(request->peerNetworkId)) && (!CheckHasBrConnection(request->peerNetworkId))) {
             guideList[(*linksNum)++] = LANE_NEW_AUTH_NEGO;
         }
+    }
+    if (*linksNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none guide channel can be used.");
+        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -2516,11 +2529,6 @@ static int32_t LnnSelectDirectLink(uint32_t laneReqId, LaneLinkType linkType)
     if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get guide channel info fail.");
         return SOFTBUS_LANE_NOT_FOUND;
-    }
-    if (guideInfo.guideIdx >= guideInfo.guideNum) {
-        LNN_LOGE(LNN_LANE, "all guide channel type have been tried.");
-        DelGuideInfoItem(laneReqId, linkType);
-        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
     WdGuideType guideType = guideInfo.guideList[guideInfo.guideIdx];
     LNN_LOGI(LNN_LANE, "build guide channel, laneReqId=%{public}u, guideType=%{public}d.", laneReqId, guideType);

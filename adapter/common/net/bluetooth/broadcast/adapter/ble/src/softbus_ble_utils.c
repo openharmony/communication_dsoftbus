@@ -383,7 +383,14 @@ uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, NULL, DISC_BLE_ADAPTER, "data is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(dataLen != NULL, NULL, DISC_BLE_ADAPTER, "data len is null!");
-    uint16_t payloadLen = (data->bcData.payloadLen > BC_DATA_MAX_LEN) ? BC_DATA_MAX_LEN : data->bcData.payloadLen;
+    uint16_t payloadLen = 0;
+    if (data->isSupportFlag) {
+        payloadLen = (data->bcData.payloadLen > BC_DATA_MAX_LEN) ? BC_DATA_MAX_LEN : data->bcData.payloadLen;
+    } else {
+        /* if not support flag, adv data can take more 3bytes, max adv dataLen is 27 */
+        payloadLen = (data->bcData.payloadLen > (BC_DATA_MAX_LEN + BC_FLAG_LEN)) ?
+            BC_DATA_MAX_LEN + BC_FLAG_LEN : data->bcData.payloadLen;
+    }
     uint16_t len = data->isSupportFlag ? payloadLen + BC_HEAD_LEN : payloadLen + BC_HEAD_LEN - BC_FLAG_LEN;
     uint8_t *advData = (uint8_t *)SoftBusCalloc(len);
     if (advData == NULL) {

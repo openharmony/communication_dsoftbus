@@ -17,6 +17,7 @@
 
 #include "auth_channel.h"
 #include "auth_meta_manager.h"
+#include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_connection_addr_utils.h"
@@ -779,6 +780,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    DeleteWifiConnItemByConnId(info->authId);
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList.");
         return SOFTBUS_LOCK_ERR;

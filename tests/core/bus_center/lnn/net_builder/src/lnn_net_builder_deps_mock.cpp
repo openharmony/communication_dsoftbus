@@ -297,14 +297,14 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
     return GetNetBuilderDepsInterface()->ConnDisconnectDeviceAllConn(option);
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len, isUpdate);
 }
 
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len, isUpdate);
 }
 
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
@@ -749,6 +749,11 @@ void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
     return GetNetBuilderDepsInterface()->GetLnnTriggerInfo(triggerInfo);
 }
 
+void LnnGetDataShareInitResult(bool *isDataShareInit)
+{
+    return GetNetBuilderDepsInterface()->LnnGetDataShareInitResult(isDataShareInit);
+}
+
 int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
 {
     return GetNetBuilderDepsInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
@@ -757,11 +762,6 @@ int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum
 void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
     return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
-}
-
-void LnnGetDataShareInitResult(bool *isDataShareInit)
-{
-    return GetNetBuilderDepsInterface()->LnnGetDataShareInitResult(isDataShareInit);
 }
 } // extern "C"
 } // namespace OHOS

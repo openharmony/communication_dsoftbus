@@ -88,7 +88,7 @@ public:
     uint32_t filterSize, uint32_t filterAction) = 0;
     virtual int32_t RegisterBroadcastMediumFunction(
         SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface) = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
 };
 
 class MockBluetooth : public BluetoothInterface {
@@ -163,7 +163,8 @@ public:
     MOCK_METHOD(int32_t, BleGattsSendIndication, (int32_t serverId, GattsSendIndParam *param), (override));
     MOCK_METHOD(int32_t, RegisterBroadcastMediumFunction,
         (SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface), (override));
-    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
+        (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     static MockBluetooth *GetMocker();
 
     static BtGapCallBacks *btGapCallback;

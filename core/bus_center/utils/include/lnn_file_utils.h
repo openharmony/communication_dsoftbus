@@ -37,6 +37,7 @@ typedef enum {
 } LnnFileId;
 
 int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len);
+int32_t LnnRemoveStorageConfigPath(LnnFileId id);
 
 #ifdef __cplusplus
 }

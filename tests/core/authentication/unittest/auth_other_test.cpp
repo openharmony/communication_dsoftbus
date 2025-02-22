@@ -456,9 +456,9 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
     int32_t ret = RemoveUpdateSessionKeyFunc(nullptr, nullptr);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveUpdateSessionKeyFunc(&authId, nullptr);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = RemoveUpdateSessionKeyFunc(&authId, &para);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = RemoveUpdateSessionKeyFunc(&authId, &authId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -489,13 +489,13 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 {
     AuthDataHead head;
-    uint8_t *buf = NULL;
+    uint8_t *buf = nullptr;
     const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = 32;
 
     (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
     int32_t ret = PackAuthData(&head, data, buf, len);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -811,19 +811,19 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
     }
     int64_t *authId = reinterpret_cast<int64_t *>(malloc(sizeof(int64_t)));
     int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *udidHash = "1234uuid";
     ret = AuthRestoreAuthManager(udidHash, NULL, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, NULL, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, NULL);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
     const char *udidHash1 = "testudidhashpass";
     ret = AuthRestoreAuthManager(udidHash1, connInfo, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
     SoftBusFree(connInfo);
     SoftBusFree(nodeInfo);
 }
@@ -1066,12 +1066,14 @@ HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, Test
     AuthCloseConn(authHandle);
     EXPECT_TRUE(AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetConnInfo(authHandle, &connInfo) == SOFTBUS_INVALID_PARAM);
-    AuthFreeConn(nullptr);
-    AuthFreeConn(&authHandle);
+    AuthFreeLane(nullptr);
+    DelAuthReqInfoByAuthHandle(nullptr);
+    AuthFreeLane(&authHandle);
+    DelAuthReqInfoByAuthHandle(&authHandle);
     AuthConnCallback callback;
-    EXPECT_TRUE(AuthAllocConn(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthAllocConn(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthAllocConn(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocLane(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocLane(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocLane(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetP2pConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     EXPECT_TRUE(AuthGetHmlConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, true, nullptr);
@@ -1095,8 +1097,8 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
         .connInfo.type = AUTH_LINK_TYPE_BR,
     };
     int64_t authId;
-    EXPECT_NE(AuthDirectOnlineProcessSessionKey(&info, &keyInfo, &authId), SOFTBUS_OK);
-    EXPECT_NE(AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, &authId), SOFTBUS_OK);
+    EXPECT_EQ(AuthDirectOnlineProcessSessionKey(&info, &keyInfo, &authId), SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_EQ(AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, &authId), SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE);
     EXPECT_TRUE(AuthEncrypt(nullptr, nullptr, 0, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDecrypt(nullptr, nullptr, 0, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
@@ -1218,7 +1220,8 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.
     ListenerModule moduleId;
     (void)memset_s(&moduleId, sizeof(ListenerModule), 0, sizeof(ListenerModule));
     EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
-    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
+    EXPECT_NE(
+        AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId), SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

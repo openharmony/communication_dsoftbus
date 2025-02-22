@@ -111,6 +111,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
       "$wifi_direct_path/utils/wifi_direct_utils.cpp",
       "$wifi_direct_path/wifi_direct_executor.cpp",
+      "$wifi_direct_path/wifi_direct_executor_manager.cpp",
       "$wifi_direct_path/wifi_direct_initiator.cpp",
       "$wifi_direct_path/wifi_direct_ip_manager.cpp",
       "$wifi_direct_path/wifi_direct_manager.cpp",

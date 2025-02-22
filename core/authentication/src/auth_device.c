@@ -494,13 +494,13 @@ void UnregGroupChangeListener(void)
     g_groupChangeListener.onDeviceBound = NULL;
 }
 
-void AuthRegisterToDpDelay(void *para)
+int32_t AuthRegisterToDpDelay(void)
 {
     DeviceProfileChangeListener deviceProfileChangeListener = {
         .onDeviceProfileAdd = OnDeviceBound,
         .onDeviceProfileDeleted = OnDeviceNotTrusted,
     };
-    RegisterToDp(&deviceProfileChangeListener);
+    return RegisterToDp(&deviceProfileChangeListener);
 }
 
 int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info)

@@ -46,7 +46,6 @@ if (dsoftbus_feature_lnn_frame) {
     "$authentication_path/src/auth_device.c",
     "$authentication_path/src/auth_hichain.c",
     "$authentication_path/src/auth_hichain_adapter.c",
-    "$authentication_path/src/auth_lane.c",
     "$authentication_path/src/auth_manager.c",
     "$authentication_path/src/auth_normalize_request.c",
     "$authentication_path/src/auth_request.c",

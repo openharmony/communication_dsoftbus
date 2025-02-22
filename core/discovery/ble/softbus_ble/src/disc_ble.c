@@ -95,6 +95,7 @@ typedef enum {
     TURN_OFF,
     DFX_DELAY_RECORD,
     BR_STATE_CHANGED,
+    HANDLE_REPORT,
 } DiscBleMessage;
 
 typedef enum {
@@ -179,6 +180,13 @@ typedef struct {
     bool ranging;
 } BleOption;
 
+typedef struct {
+    uint8_t filterType;
+    bool isSameAccount;
+    bool isWakeRemote;
+    uint8_t capabilityPos;
+} DiscBleFilterOption;
+
 static ScanSetting g_scanTable[FREQ_BUTT] = {
     {SOFTBUS_BC_SCAN_WINDOW_P2, SOFTBUS_BC_SCAN_INTERVAL_P2},
     {SOFTBUS_BC_SCAN_WINDOW_P10, SOFTBUS_BC_SCAN_INTERVAL_P10},
@@ -202,6 +210,7 @@ static DiscBleListener g_bleListener = {
 static DiscEventExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
 static DiscEventExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
 static uint32_t g_bleOldCap = 0;
+static uint32_t g_handleId = 0;
 
 // g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
@@ -242,7 +251,7 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
 static int32_t BleInfoDump(int fd);
 static int32_t BleAdvertiserDump(int fd);
 static int32_t RecvMessageInfoDump(int fd);
-static void DiscBleSetScanFilter(int32_t listenerId, int32_t type);
+static void DiscBleSetScanFilter(int32_t listenerId);
 static void BleEventExtraInit(void);
 static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap);
 static void CalcCount(int32_t adv, uint32_t capabilityBitmap, bool result);
@@ -302,36 +311,21 @@ static int32_t GetNeedUpdateAdvertiser(int32_t adv)
     }
 }
 
-static void UpdateScannerInfoManager(int32_t type, bool needUpdate)
+static void UpdateScannerInfoManager(bool needUpdateCap)
 {
     DISC_LOGD(DISC_BLE, "enter");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
-    if (type == CON_FILTER_TYPE) {
-        g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap = needUpdate;
-    } else if (type == NON_FILTER_TYPE) {
-        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap = needUpdate;
-        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap = needUpdate;
-    } else if (type == (CON_FILTER_TYPE | NON_FILTER_TYPE)) {
-        g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap = needUpdate;
-        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap = needUpdate;
-        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap = needUpdate;
-    }
+    g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap = needUpdateCap;
+    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap = needUpdateCap;
+    g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap = needUpdateCap;
     SoftBusMutexUnlock(&g_bleInfoLock);
 }
 
-static bool GetNeedUpdateScanner(int32_t type)
+static bool GetNeedUpdateScanner(void)
 {
-    if (type == CON_FILTER_TYPE) {
-        return g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap;
-    } else if (type == NON_FILTER_TYPE) {
-        return g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap ||
-            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap;
-    } else if (type == (CON_FILTER_TYPE | NON_FILTER_TYPE)) {
-        return g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap ||
-            g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap ||
-            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap;
-    }
-    return false;
+    return g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap ||
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap ||
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap;
 }
 
 static void BleAdvEnableCallback(int channel, int status)
@@ -368,24 +362,20 @@ static void BleAdvUpdateCallback(int channel, int status)
     DISC_LOGI(DISC_BLE, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
-static int32_t GetScannerFilterType(void)
+static void GetScannerFilterType(uint8_t *type, uint32_t capBitMapPos)
 {
-    int32_t type = 0;
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
 
-    if (conScanCapBit != 0 && nonScanCapBit != 0) {
-        type = (CON_FILTER_TYPE | NON_FILTER_TYPE);
-    } else if (conScanCapBit != 0 && nonScanCapBit == 0) {
-        type = CON_FILTER_TYPE;
-    } else if (conScanCapBit == 0 && nonScanCapBit != 0) {
-        type = NON_FILTER_TYPE;
+    if (CheckCapBitMapExist(CAPABILITY_NUM, &conScanCapBit, capBitMapPos)) {
+        *type |= CON_FILTER_TYPE;
     }
-    return type;
+    if (CheckCapBitMapExist(CAPABILITY_NUM, &nonScanCapBit, capBitMapPos)) {
+        *type |= NON_FILTER_TYPE;
+    }
 }
 
 static bool CheckScanner(void)
@@ -619,7 +609,7 @@ static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *rep
     if ((reportInfo->packet.bcData.id == SERVICE_UUID) && (advData[POS_BUSINESS] == DISTRIBUTE_BUSINESS)) {
         SignalingMsgPrint("ble adv rcv", advData, reportInfo->packet.bcData.payloadLen, DISC_BLE);
         ProcessDistributePacket(reportInfo);
-        AccumulateBleScanNum((uint32_t)advData[POS_CAPABLITY]);
+        AccumulateBleScanNum((uint32_t)advData[POS_CAPABILITY]);
     } else {
         DISC_LOGI(DISC_BLE, "ignore other business");
     }
@@ -923,8 +913,8 @@ static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastD
     } else {
         DiscBleGetShortUserIdHash(&broadcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     }
-    broadcastData->data.data[POS_CAPABLITY] = info->capabilityBitmap[0] & BYTE_MASK;
-    broadcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
+    broadcastData->data.data[POS_CAPABILITY] = info->capabilityBitmap[0] & BYTE_MASK;
+    broadcastData->data.data[POS_CAPABILITY_EXTENSION] = 0x0;
     broadcastData->dataLen = POS_TLV;
     return SOFTBUS_OK;
 }
@@ -1077,7 +1067,7 @@ static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
 {
     uint32_t tempCap = 0;
     DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
-    int32_t stamptime = (int32_t)SoftBusGetSysTimeMs();
+    int64_t stamptime = SoftBusGetSysTimeMs();
  
     const uint32_t event[] = {
         adv == CON_ADV_ID ? CAST_EVENT_CON : CAST_EVENT_NON,
@@ -1245,17 +1235,13 @@ static void UpdateScannerFilter(bool isStopScan)
 {
     if (isStopScan) {
         int32_t ret = SchedulerStopScan(g_bleListener.scanListenerId);
-        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "StopScanner failed, ret=%{public}d", ret);
     }
-    int32_t type = GetScannerFilterType();
-    DISC_LOGI(DISC_BLE, "Set filter type=%{public}d", type);
-    DiscBleSetScanFilter(g_bleListener.scanListenerId, type);
+    DiscBleSetScanFilter(g_bleListener.scanListenerId);
 }
 
-static void StartScaner(int32_t type)
+static void StartScaner()
 {
-    DISC_CHECK_AND_RETURN_LOGE(type > 0 && type <= (CON_FILTER_TYPE | NON_FILTER_TYPE),
-        DISC_BLE, "start scanner type invaild");
     if (!CheckScanner()) {
         DISC_LOGI(DISC_BLE, "no need to start scanner");
         (void)StopScaner();
@@ -1263,14 +1249,14 @@ static void StartScaner(int32_t type)
     }
 
     if (g_isScanning) {
-        if (GetNeedUpdateScanner(type)) {
+        if (GetNeedUpdateScanner()) {
             UpdateScannerFilter(true);
         } else {
             DISC_LOGI(DISC_BLE, "scanner already start, no need start again");
             return;
         }
     } else {
-        if (GetNeedUpdateScanner(type)) {
+        if (GetNeedUpdateScanner()) {
             UpdateScannerFilter(false);
         } else {
             DISC_LOGI(DISC_BLE, "no need update filter, start scan"); // when bt turn on or off
@@ -1287,7 +1273,7 @@ static void StartScaner(int32_t type)
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
-    UpdateScannerInfoManager(type, true);
+    UpdateScannerInfoManager(false);
     DfxRecordScanEnd(SOFTBUS_OK);
     DISC_LOGD(DISC_BLE, "StartScanner success");
 }
@@ -1529,6 +1515,56 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
     return SOFTBUS_OK;
 }
 
+static void ReportHandle(SoftBusMessage *msg)
+{
+    (void)msg;
+    DeviceInfo device;
+    (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    InnerDeviceInfoAddtions add;
+    add.medium = BLE;
+    device.capabilityBitmapNum = 1;
+    device.capabilityBitmap[0] = 0x01 << CASTPLUS_CAPABILITY_BITMAP; // const is cast+
+
+    int32_t ret = SoftBusMutexLock(&g_bleInfoLock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed.");
+
+    ret = DiscSoftbusBleBuildReportJson(&device, g_handleId);
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "build report json failed");
+        SoftBusMutexUnlock(&g_bleInfoLock);
+        return;
+    }
+    SoftBusMutexUnlock(&g_bleInfoLock);
+    DISC_LOGI(DISC_BLE, "start report found device, handleId=%{public}d", g_handleId);
+    g_discBleInnerCb->OnDeviceFound(&device, &add);
+}
+
+static int32_t SoftbusBleCheckJson(bool isStart, const SubscribeOption *option)
+{
+    cJSON *json = cJSON_ParseWithLength((const char *)option->capabilityData, option->dataLen);
+    DISC_CHECK_AND_RETURN_RET_LOGW(json != NULL, SOFTBUS_DISCOVER_BLE_NEED_TRIGGER,
+        DISC_BLE, "softbus ble parse json failed");
+
+    char discType[BLE_DISCOVERY_TYPE_VAL_MAX_LEN] = { 0 };
+    bool ret = GetJsonObjectStringItem(json, BLE_DISCOVERY_TYPE, discType, BLE_DISCOVERY_TYPE_VAL_MAX_LEN);
+    cJSON_Delete(json);
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret, SOFTBUS_DISCOVER_BLE_NEED_TRIGGER,
+        DISC_BLE, "get discType from json failed");
+    
+    if (strcmp(discType, BLE_DISCOVERY_TYPE_HANDLE) != 0) {
+        DISC_LOGI(DISC_BLE, "invalid type, type=%{public}s", discType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!isStart) {
+        return SOFTBUS_OK;
+    }
+
+    SoftBusMessage *msg = CreateBleHandlerMsg(HANDLE_REPORT, 0, 0, NULL);
+    DISC_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE, "malloc msg failed");
+    g_discBleHandler.looper->PostMessageDelay(g_discBleHandler.looper, msg, 0);
+    return SOFTBUS_OK;
+}
+
 static int32_t BleStartActivePublish(const PublishOption *option)
 {
     DISC_LOGI(DISC_BLE, "start active publish");
@@ -1555,6 +1591,13 @@ static int32_t BleStopPassivePublish(const PublishOption *option)
 
 static int32_t BleStartActiveDiscovery(const SubscribeOption *option)
 {
+    int32_t ret = SoftbusBleCheckJson(true, option);
+    if (ret == SOFTBUS_OK) {
+        DISC_LOGI(DISC_BLE, "disc ble prepare report handle");
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_DISCOVER_BLE_NEED_TRIGGER, ret,
+        DISC_BLE, "SoftbusBleCheckJson failed");
     DISC_LOGI(DISC_BLE, "start active discovery");
     return ProcessBleDiscFunc(true, BLE_SUBSCRIBE, BLE_ACTIVE, START_ACTIVE_DISCOVERY, (void *)option);
 }
@@ -1567,6 +1610,13 @@ static int32_t BleStartPassiveDiscovery(const SubscribeOption *option)
 
 static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 {
+    int32_t ret = SoftbusBleCheckJson(false, option);
+    if (ret == SOFTBUS_OK) {
+        DISC_LOGI(DISC_BLE, "no need trigger stop adv");
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_DISCOVER_BLE_NEED_TRIGGER, ret,
+        DISC_BLE, "SoftbusBleCheckJson failed");
     DISC_LOGI(DISC_BLE, "stop active discovery");
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, (void *)option);
 }
@@ -1694,7 +1744,7 @@ static void StartPassivePublish(SoftBusMessage *msg)
         DISC_LOGI(DISC_BLE, "UpdateAdvertiser NON_ADV_ID=%{public}d", NON_ADV_ID);
         UpdateAdvertiser(NON_ADV_ID);
     }
-    StartScaner(CON_FILTER_TYPE);
+    StartScaner();
     DISC_LOGD(DISC_BLE, "end");
 }
 
@@ -1702,7 +1752,7 @@ static void StartActiveDiscovery(SoftBusMessage *msg)
 {
     DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(CON_ADV_ID) == SOFTBUS_OK) {
-        StartScaner(NON_FILTER_TYPE);
+        StartScaner();
     }
     DISC_LOGD(DISC_BLE, "end");
 }
@@ -1710,7 +1760,7 @@ static void StartActiveDiscovery(SoftBusMessage *msg)
 static void StartPassiveDiscovery(SoftBusMessage *msg)
 {
     DISC_LOGD(DISC_BLE, "enter");
-    StartScaner(NON_FILTER_TYPE);
+    StartScaner();
     DISC_LOGD(DISC_BLE, "end");
 }
 
@@ -1723,7 +1773,7 @@ static void Recovery(SoftBusMessage *msg)
     if (StartAdvertiser(NON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Start NON_ADV_ID failed");
     }
-    StartScaner(CON_FILTER_TYPE | NON_FILTER_TYPE);
+    StartScaner();
     DISC_LOGD(DISC_BLE, "end");
 }
 
@@ -1955,6 +2005,18 @@ static void OnBrStateChanged(SoftBusMessage *msg)
     }
 }
 
+static void DiscBleMsgHandlerExt(SoftBusMessage *msg)
+{
+    switch (msg->what) {
+        case HANDLE_REPORT:
+            ReportHandle(msg);
+            break;
+        default:
+            DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
+            break;
+    }
+}
+
 static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
     switch (msg->what) {
@@ -1968,7 +2030,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
                 UpdateAdvertiser(NON_ADV_ID);
             }
-            StartScaner(CON_FILTER_TYPE);
+            StartScaner();
             break;
         case START_ACTIVE_DISCOVERY:
             StartActiveDiscovery(msg);
@@ -1982,7 +2044,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             } else {
                 StartAdvertiser(CON_ADV_ID);
             }
-            StartScaner(NON_FILTER_TYPE);
+            StartScaner();
             break;
         case REPLY_PASSIVE_NON_BROADCAST:
             StartAdvertiser(NON_ADV_ID);
@@ -2003,7 +2065,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             DfxDelayRecord(msg);
             break;
         default:
-            DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
+            DiscBleMsgHandlerExt(msg);
             break;
     }
 }
@@ -2018,53 +2080,154 @@ static int32_t DiscBleLooperInit(void)
     return SOFTBUS_OK;
 }
 
-static void DiscFreeBleScanFilter(BcScanFilter *filter)
+static void DiscFreeBleScanFilter(BcScanFilter *filter, uint8_t filterSize)
 {
-    if (filter != NULL) {
-        SoftBusFree(filter->serviceData);
-        SoftBusFree(filter->serviceDataMask);
-        SoftBusFree(filter);
-        filter = NULL;
+    if (filter == NULL || filterSize == 0) {
+        return;
+    }
+    for (uint8_t i = 0; i < filterSize; i++) {
+        BcScanFilter *currentFilter = filter + (i * sizeof(BcScanFilter));
+        SoftBusFree(currentFilter->serviceData);
+        SoftBusFree(currentFilter->serviceDataMask);
+        SoftBusFree(currentFilter);
+        currentFilter = NULL;
+    }
+    filter = NULL;
+}
+
+static bool GetScanFilterWakeRemote(uint8_t filterType, uint32_t capBitMapPos)
+{
+    bool isWakeRemote = false;
+    if (filterType == CON_FILTER_TYPE) {
+        uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
+        isWakeRemote = g_bleInfoManager[infoIndex].isWakeRemote[capBitMapPos];
+    } else if (filterType == NON_FILTER_TYPE) {
+        uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
+        isWakeRemote = g_bleInfoManager[infoIndex].isWakeRemote[capBitMapPos];
+    }
+    return isWakeRemote;
+}
+
+static bool GetScanFilterSameAccount(uint8_t filterType, uint32_t capBitMapPos)
+{
+    bool isSameAccount = false;
+    if (filterType == CON_FILTER_TYPE) {
+        uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
+        isSameAccount = g_bleInfoManager[infoIndex].isSameAccount[capBitMapPos];
+    } else if (filterType == NON_FILTER_TYPE) {
+        uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
+        isSameAccount = g_bleInfoManager[infoIndex].isSameAccount[capBitMapPos];
+    }
+    return isSameAccount;
+}
+
+static void BuildScannerFilterOption(DiscBleFilterOption **filterOption, uint8_t *filterSize)
+{
+    uint32_t totalCapBitMap[CAPABILITY_NUM];
+    (void)SoftBusMutexLock(&g_bleInfoLock);
+    totalCapBitMap[0] = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0] |
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
+
+    uint8_t capTypes = 0;
+    uint32_t tempCapBitMap = totalCapBitMap[0];
+    while (tempCapBitMap != 0) {
+        if ((tempCapBitMap & 1) == 1) {
+            capTypes++;
+        }
+        tempCapBitMap >>= 1;
+    }
+    DISC_CHECK_AND_RETURN_LOGE(capTypes > 0, DISC_BLE, "no need to scan");
+
+    *filterOption = (DiscBleFilterOption *)SoftBusCalloc(sizeof(DiscBleFilterOption) * capTypes);
+    DISC_CHECK_AND_RETURN_LOGE(filterOption != NULL, DISC_BLE, "calloc filterOption failed");
+    *filterSize = capTypes;
+    uint8_t filterIndex = 0;
+    for (uint8_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
+        if (g_bleTransCapabilityMap[pos] < 0) {
+            continue;
+        }
+        if (!CheckCapBitMapExist(CAPABILITY_MAX_BITNUM, totalCapBitMap, pos)) {
+            continue;
+        }
+
+        DiscBleFilterOption *capFilterOption = *filterOption + filterIndex++;
+        capFilterOption->capabilityPos = pos;
+        GetScannerFilterType(&capFilterOption->filterType, pos);
+        capFilterOption->isSameAccount = GetScanFilterSameAccount(capFilterOption->filterType, pos);
+        capFilterOption->isWakeRemote = GetScanFilterWakeRemote(capFilterOption->filterType, pos);
     }
 }
 
-static void DiscBleSetScanFilter(int32_t listenerId, int32_t type)
+static void DiscBleFillSingleFilter(BcScanFilter *filter, DiscBleFilterOption *filterOption)
 {
-    DISC_CHECK_AND_RETURN_LOGW(type != 0, DISC_BLE, "not disc capblity, not set filter");
-    BcScanFilter *filter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter));
-    DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE, "malloc filter failed");
+    filter->serviceUuid = SERVICE_UUID;
+    filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
+    filter->serviceData[POS_VERSION] = 0x0;
+    filter->serviceData[POS_BUSINESS] = DISTRIBUTE_BUSINESS;
+    filter->serviceDataMask[POS_VERSION] = 0x0;
+    filter->serviceDataMask[POS_BUSINESS] = BYTE_MASK;
 
-    filter->serviceData = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
-    filter->serviceDataMask = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
-    if (filter->serviceData == NULL || filter->serviceDataMask == NULL) {
-        DISC_LOGE(DISC_BLE, "malloc filter data failed");
-        DiscFreeBleScanFilter(filter);
+    filter->serviceData[POS_BUSINESS_EXTENSION] = (1 << BYTE_SHIFT_4BIT) | BIT_WAKE_UP;
+    filter->serviceDataMask[POS_BUSINESS_EXTENSION] = (1 << BYTE_SHIFT_4BIT);
+    if ((filterOption->filterType & CON_FILTER_TYPE) == 1) {
+        filter->serviceData[POS_BUSINESS_EXTENSION] |= (1 << BYTE_SHIFT_7BIT);
+    }
+    if (filterOption->filterType == CON_FILTER_TYPE || filterOption->filterType == NON_FILTER_TYPE) {
+        filter->serviceDataMask[POS_BUSINESS_EXTENSION] |= (1 << BYTE_SHIFT_7BIT);
+    }
+    if (filterOption->isWakeRemote) {
+        filter->serviceDataMask[POS_BUSINESS_EXTENSION] |= BIT_WAKE_UP;
+    }
+
+    uint8_t *userIdHash = filter->serviceData + POS_USER_ID_HASH;
+    (void)memset_s(userIdHash, SHORT_USER_ID_HASH_LEN, 0x0, SHORT_USER_ID_HASH_LEN);
+    if (!LnnIsDefaultOhosAccount()) {
+        DiscBleGetShortUserIdHash(userIdHash, SHORT_USER_ID_HASH_LEN);
+    }
+    uint8_t *userIdHashMask = filter->serviceDataMask + POS_USER_ID_HASH;
+    (void)memset_s(userIdHashMask, SHORT_USER_ID_HASH_LEN, filterOption->isSameAccount ? BYTE_MASK : 0x0,
+        SHORT_USER_ID_HASH_LEN);
+
+    filter->serviceData[POS_CAPABILITY] = BYTE_MASK;
+    filter->serviceDataMask[POS_CAPABILITY] = 1 << filterOption->capabilityPos;
+    filter->serviceData[POS_CAPABILITY_EXTENSION] = BYTE_MASK;
+    filter->serviceDataMask[POS_CAPABILITY_EXTENSION] = 0x0;
+}
+
+static void DiscBleSetScanFilter(int32_t listenerId)
+{
+    DiscBleFilterOption *filterOption = NULL;
+    uint8_t filterSize = 0;
+    BuildScannerFilterOption(&filterOption, &filterSize);
+    DISC_CHECK_AND_RETURN_LOGE(filterOption != NULL && filterSize > 0, DISC_BLE, "build filterOption failed");
+
+    BcScanFilter *filter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterSize);
+    if (filter == NULL) {
+        DISC_LOGE(DISC_BLE, "calloc filter failed");
+        SoftBusFree(filterOption);
         return;
     }
 
-    filter->serviceUuid = SERVICE_UUID;
-    filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
-    filter->serviceData[POS_VERSION] = BLE_VERSION;
-    filter->serviceData[POS_BUSINESS] = DISTRIBUTE_BUSINESS;
-    filter->serviceDataMask[POS_VERSION] = BYTE_MASK;
-    filter->serviceDataMask[POS_BUSINESS] = BYTE_MASK;
-
-    if (type == CON_FILTER_TYPE) {
-        filter->serviceData[POS_BUSINESS_EXTENSION] = ((1 << BYTE_SHIFT_7BIT) | (1 << BYTE_SHIFT_4BIT));
-        filter->serviceDataMask[POS_BUSINESS_EXTENSION] = ((1 << BYTE_SHIFT_7BIT) | (1 << BYTE_SHIFT_4BIT));
-    }
-    if (type == NON_FILTER_TYPE) {
-        filter->serviceData[POS_BUSINESS_EXTENSION] = (1 << BYTE_SHIFT_4BIT);
-        filter->serviceDataMask[POS_BUSINESS_EXTENSION] = ((1 << BYTE_SHIFT_7BIT) | (1 << BYTE_SHIFT_4BIT));
-    }
-    if (type == (CON_FILTER_TYPE | NON_FILTER_TYPE)) {
-        filter->serviceData[POS_BUSINESS_EXTENSION] = ((1 << BYTE_SHIFT_7BIT) | (1 << BYTE_SHIFT_4BIT));
-        filter->serviceDataMask[POS_BUSINESS_EXTENSION] = (1 << BYTE_SHIFT_4BIT);
+    for (uint8_t i = 0; i < filterSize; i++) {
+        BcScanFilter *currentFilter = filter + i;
+        DiscBleFilterOption *currentOption = filterOption + i;
+        currentFilter->serviceData = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
+        currentFilter->serviceDataMask = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
+        if (currentFilter->serviceData == NULL || currentFilter->serviceDataMask == NULL) {
+            DISC_LOGE(DISC_BLE, "calloc filter data failed");
+            DiscFreeBleScanFilter(filter, filterSize);
+            SoftBusFree(filterOption);
+            return;
+        }
+        DiscBleFillSingleFilter(currentFilter, currentOption);
     }
 
-    if (SchedulerSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
+    SoftBusFree(filterOption);
+    if (SchedulerSetScanFilter(listenerId, filter, filterSize) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "set scan filter failed");
-        DiscFreeBleScanFilter(filter);
+        DiscFreeBleScanFilter(filter, filterSize);
     }
 }
 
@@ -2072,11 +2235,22 @@ static int32_t InitBleListener(void)
 {
     int32_t ret = SchedulerRegisterScanListener(SRV_TYPE_DIS, &g_bleListener.scanListenerId, &g_scanListener);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register scanner listener fail");
-    g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
+    ret = SoftBusAddBtStateListener(&g_stateChangedListener, &g_bleListener.stateListenerId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register broadcast listener fail");
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
         return SOFTBUS_BC_MGR_REG_NO_AVAILABLE_LISN_ID;
     }
     return SOFTBUS_OK;
+}
+
+void DiscSoftbusBleSetHandleId(uint32_t handleId)
+{
+    DISC_LOGI(DISC_INIT, "enter, handle=%{public}d", handleId);
+
+    int32_t ret = SoftBusMutexLock(&g_bleInfoLock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed.");
+    g_handleId = handleId;
+    SoftBusMutexUnlock(&g_bleInfoLock);
 }
 
 DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)

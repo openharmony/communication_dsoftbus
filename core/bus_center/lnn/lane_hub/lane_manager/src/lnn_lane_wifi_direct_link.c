@@ -89,7 +89,8 @@ static bool IsSupportWifiDirectEnhance(const char *networkId)
         LNN_LOGE(LNN_LANE, "get support feature error");
         return false;
     }
-    if (((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) || ((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
+    if (((local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) ||
+        ((remote & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0)) {
         LNN_LOGE(LNN_LANE, "localFeature=%{public}" PRIu64 ", remoteFeature=%{public}" PRIu64, local, remote);
         return false;
     }

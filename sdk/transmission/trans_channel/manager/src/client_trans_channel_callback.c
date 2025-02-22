@@ -63,7 +63,9 @@ static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t chann
         SoftBusFree(buf);
         return ret;
     }
-    return ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    SoftBusFree(buf);
+    return ret;
 }
 
 static int32_t TransSendUdpChannelOpenedDataToCore(
@@ -97,7 +99,9 @@ static int32_t TransSendUdpChannelOpenedDataToCore(
         SoftBusFree(buf);
         return ret;
     }
-    return ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    SoftBusFree(buf);
+    return ret;
 }
 
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -336,9 +340,8 @@ int32_t TransOnCheckCollabRelation(
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t checkResult = ClientTransCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
-    int32_t ret = SOFTBUS_OK;
-    if (isSinkSide) {
-        ret = TransSendCollabResult(channelId, channelType, checkResult);
+    if (!isSinkSide) {
+        return checkResult;
     }
-    return ret;
+    return TransSendCollabResult(channelId, channelType, checkResult);
 }

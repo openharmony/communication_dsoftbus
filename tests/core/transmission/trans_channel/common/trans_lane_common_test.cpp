@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -922,5 +922,17 @@ HWTEST_F(TransLaneCommonTest, TransReportBadKeyEvent001, TestSize.Level1)
     bool ret = IsPeerDeviceLegacyOs(osType);
     EXPECT_EQ(ret, false);
     TransReportBadKeyEvent(errCode, connectionId, seq, len);
+}
+
+/**
+ * @tc.name: CheckSourceCollabRelationTest001
+ * @tc.desc: test CheckSourceCollabRelation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
+{
+    int32_t ret = CheckSourceCollabRelation(nullptr, TEST_PID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

@@ -216,9 +216,6 @@ uint32_t AuthGetGroupType(const char *udid, const char *uuid);
 bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
 void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle);
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
-void AuthFreeConn(const AuthHandle *authHandle);
-
 int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConnInfo *connInfo);
 int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle);
 int32_t AuthInit(void);
