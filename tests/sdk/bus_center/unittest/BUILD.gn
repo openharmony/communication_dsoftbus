@@ -180,6 +180,38 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("BusCenterSdkDdosTest") {
+    module_out_path = module_output_path
+    sources = [ "bus_center_sdk_ddos_test.cpp" ]
+    include_dirs = bus_center_sdk_test_inc
+    include_dirs += [
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "unittest/common/",
+    ]
+    deps = bus_center_sdk_test_deps
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hilog:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+    external_deps += [
+      "c_utils:utils",
+      "googletest:gmock",
+      "ipc:ipc_single",
+    ]
+    if (dsoftbus_access_token_feature) {
+      external_deps += [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
+      ]
+    }
+  }
+
   ohos_unittest("BusCenterHeartbeatSdkTest") {
     module_out_path = module_output_path
     sources = [
@@ -386,6 +418,7 @@ if (defined(ohos_lite)) {
     if (dsoftbus_access_token_feature) {
       deps += [
         ":BusCenterMetaNodeSdkTest",
+        ":BusCenterSdkDdosTest",
         ":BusCenterSdkTest",
         ":BusCenterServerProxyStandardTest",
         ":BusCenterServerProxyTest",

@@ -386,7 +386,12 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
         LNN_LOGE(LNN_EVENT, "copy node info failed");
         return SOFTBUS_MEM_ERR;
     }
-    return SOFTBUS_OK;
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return serverRet;
 }
 
 int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key,
@@ -428,15 +433,16 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
         return SOFTBUS_IPC_ERR;
     }
     void *retBuf = const_cast<void *>(reply.ReadRawData(infoLen));
-    if (retBuf == nullptr) {
-        LNN_LOGE(LNN_EVENT, "read retBuf failed");
-        return SOFTBUS_IPC_ERR;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(retBuf != nullptr, SOFTBUS_IPC_ERR, LNN_EVENT, "read retBuf failed");
+
     if (memcpy_s(buf, len, retBuf, infoLen) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy node key info failed");
         return SOFTBUS_MEM_ERR;
     }
-    return SOFTBUS_OK;
+    int32_t serverRet = 0;
+    LNN_CHECK_AND_RETURN_RET_LOGE(reply.ReadInt32(serverRet), SOFTBUS_IPC_ERR,
+        LNN_EVENT, "read serverRet failed serverRet = %{public}d", serverRet);
+    return serverRet;
 }
 
 int32_t BusCenterServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
@@ -888,7 +894,12 @@ int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, cha
         LNN_LOGE(LNN_EVENT, "copy meta node id failed");
         return SOFTBUS_MEM_ERR;
     }
-    return SOFTBUS_OK;
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return serverRet;
 }
 
 int32_t BusCenterServerProxy::DeactiveMetaNode(const char *metaNodeId)

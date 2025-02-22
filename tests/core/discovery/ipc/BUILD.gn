@@ -23,6 +23,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/ipc/standard/src/lnn_bus_center_ipc.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_ddos.c",
     "disc_client_on_device_found_test.cpp",
   ]
 
@@ -45,6 +46,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -52,7 +54,11 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
   ]
 
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
 
   external_deps = [
     "c_utils:utils",
