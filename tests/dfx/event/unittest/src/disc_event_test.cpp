@@ -40,7 +40,7 @@ HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
         .broadcastType = 0, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3;
+    constexpr int32_t VALID_EXTRA_SIZE = 5;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -141,7 +141,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
         .peerDeviceType = "\0",
         .callerPkg = nullptr,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 4; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -160,7 +160,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
 HWTEST_F(DiscEventTest, DiscEventTest004, TestSize.Level0)
 {
     DiscEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 4; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
