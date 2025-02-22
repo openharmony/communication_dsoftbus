@@ -485,3 +485,30 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     return ret;
 }
 
+int32_t DiscSoftbusBleBuildReportJson(DeviceInfo *device, uint32_t handleId)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && handleId > 0, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "invalid parm");
+
+    cJSON *json = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE,
+        "create json failed");
+    
+    if (!AddNumberToJsonObject(json, BLE_REPORT_HANDLE_JSON_LEY, handleId)) {
+        DISC_LOGE(DISC_BLE, "add handle failed");
+        cJSON_Delete(json);
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    char *custData = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    DISC_CHECK_AND_RETURN_RET_LOGE(custData != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE,
+        "to json str failed");
+    
+    if (strcpy_s(device->custData, DISC_MAX_CUST_DATA_LEN, custData) != EOK) {
+        DISC_LOGE(DISC_BLE, "copy cust data failed");
+        cJSON_free(custData);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    cJSON_free(custData);
+    return SOFTBUS_OK;
+}
