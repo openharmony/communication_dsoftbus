@@ -29,8 +29,10 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_init_monitor.h"
 
 static const std::string DEFAULT_USER_ID = "0";
+static bool g_accountIdInited = false;
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
@@ -92,6 +94,18 @@ int32_t LnnGetOhosAccountInfoByUserId(int32_t userId, uint8_t *accountHash, uint
     return SOFTBUS_OK;
 }
 
+void LnnAccoutIdStatusSet(int64_t accountId)
+{
+    if (!g_accountIdInited) {
+        if (accountId != 0) {
+            LnnInitDeviceInfoStatusSet(LEDGER_INFO_ACCOUNTID, DEPS_STATUS_SUCCESS);
+            g_accountIdInited = true;
+        } else {
+            LnnInitDeviceInfoStatusSet(LEDGER_INFO_ACCOUNTID, DEPS_STATUS_FAILED);
+        }
+    }
+}
+
 int32_t LnnInitOhosAccount(void)
 {
     int64_t accountId = 0;
@@ -107,6 +121,7 @@ int32_t LnnInitOhosAccount(void)
     if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
         (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     }
+    LnnAccoutIdStatusSet(accountId);
     LNN_LOGI(LNN_STATE, "init accountHash. accountHash[0]=%{public}02X, accountHash[1]=%{public}02X",
         accountHash[0], accountHash[1]);
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
@@ -121,6 +136,7 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
         (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     }
+    LnnAccoutIdStatusSet(accountId);
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "OnAccountChanged get local account hash fail");
         return;

@@ -186,7 +186,7 @@ public:
     virtual void LnnDeinitBusCenterEvent(void);
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
-    virtual bool LnnSubcribeKvStoreService(void);
+    virtual int32_t LnnSubcribeKvStoreService(void);
     virtual int32_t LnnPutDBData(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen);
     virtual int32_t LnnCloudSync(int32_t dbId);
 };
@@ -298,7 +298,7 @@ public:
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyDeviceVerified, void(const char *));
     MOCK_METHOD0(LnnInitBusCenterEvent, int32_t());
-    MOCK_METHOD0(LnnSubcribeKvStoreService, bool());
+    MOCK_METHOD0(LnnSubcribeKvStoreService, int32_t());
     MOCK_METHOD0(LnnInitBatteryInfo, int32_t());
     MOCK_METHOD0(LnnDeinitBatteryInfo, void());
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));

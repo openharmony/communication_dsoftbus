@@ -53,7 +53,7 @@ void AuthNotifyDeviceVerifyPassed(AuthHandle authHandle, const NodeInfo *nodeInf
 void AuthNotifyDeviceDisconnect(AuthHandle authHandle);
 void AuthAddNodeToLimitMap(const char *udid, int32_t reason);
 void AuthDeleteLimitMap(const char *udidHash);
-void AuthRegisterToDpDelay(void *para);
+int32_t AuthRegisterToDpDelay(void);
 
 #ifdef __cplusplus
 #if __cplusplus

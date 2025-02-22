@@ -43,12 +43,17 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "lnn_init_monitor.h"
 
+#define RETRY_TIMES                      5
+#define DELAY_REG_DP_TIME                10000
 static bool g_isRestore = false;
+static bool g_isDeviceInfoSet = false;
 
 int32_t LnnInitNetLedger(void)
 {
-    if (LnnInitHuksInterface() != SOFTBUS_OK) {
+    if (LnnInitModuleNotifyWithRetrySync(INIT_DEPS_HUKS, LnnInitHuksInterface, RETRY_TIMES, DELAY_REG_DP_TIME) !=
+        SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init huks interface fail");
         return SOFTBUS_HUKS_INIT_FAILED;
     }
@@ -230,12 +235,34 @@ static void ProcessLocalDeviceInfo(void)
     }
 }
 
+void LnnLedgerInfoStatusSet(void)
+{
+    const NodeInfo *node = LnnGetLocalNodeInfo();
+    if (g_isDeviceInfoSet) {
+        return;
+    }
+
+    InitDepsStatus uuidStat = node->uuid[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_UUID, uuidStat);
+    InitDepsStatus udidStat = node->deviceInfo.deviceUdid[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_UDID, udidStat);
+    InitDepsStatus netStat = node->networkId[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_NETWORKID, netStat);
+
+    if ((netStat == DEPS_STATUS_SUCCESS) && (udidStat == DEPS_STATUS_SUCCESS) && (netStat == DEPS_STATUS_SUCCESS)) {
+        LNN_LOGI(LNN_TEST, "Device info all ready.");
+        g_isDeviceInfoSet = true;
+        LnnInitSetDeviceInfoReady();
+    }
+}
+
 void RestoreLocalDeviceInfo(void)
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
     LnnSetLocalFeature();
     if (g_isRestore) {
         LNN_LOGI(LNN_LEDGER, "aready init");
+        LnnLedgerInfoStatusSet();
         return;
     }
     if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
@@ -249,6 +276,8 @@ void RestoreLocalDeviceInfo(void)
     } else {
         ProcessLocalDeviceInfo();
     }
+    LnnLedgerInfoStatusSet();
+
     AuthLoadDeviceKey();
     LnnLoadPtkInfo();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
