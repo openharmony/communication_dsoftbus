@@ -14,10 +14,15 @@
 import("../../../dsoftbus.gni")
 
 if (dsoftbus_feature_lnn_frame) {
-  bus_center_monitor_src =
-      [ "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c" ]
+  bus_center_monitor_src = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+  ]
 } else {
-  bus_center_monitor_src = [ "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor_virtual.c" ]
+  bus_center_monitor_src = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor_virtual.c",
+  ]
 }
 bus_center_monitor_inc =
     [ "$dsoftbus_root_path/core/bus_center/monitor/include" ]

@@ -38,9 +38,11 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_json.h"
 #include "message_handler.h"
+#include "lnn_init_monitor.h"
 
 #define KEY_NICK_NAME "KEY_NICK_NAME"
 #define KEY_ACCOUNT "KEY_ACCOUNT"
+static bool g_deviceNameInit = false;
 
 static const int32_t DELAY_LEN = 1000;
 
@@ -259,6 +261,14 @@ static void OnReceiveDeviceNickName(LnnSyncInfoType type, const char *networkId,
     NickNameMsgProc(networkId, accountId, nickName);
 }
 
+void LnnInitDeviceNameStatusSet(InitDepsStatus status)
+{
+    if (!g_deviceNameInit) {
+        LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_NAME, status);
+        g_deviceNameInit = true;
+    }
+}
+
 int32_t LnnSetLocalDeviceName(const char *displayName)
 {
     if (displayName == NULL || strnlen(displayName, DEVICE_NAME_BUF_LEN) == 0 ||
@@ -273,12 +283,14 @@ int32_t LnnSetLocalDeviceName(const char *displayName)
     }
     if (strcmp(localDevName, displayName) == 0) {
         LNN_LOGI(LNN_BUILDER, "device name not change, ignore this msg");
+        LnnInitDeviceNameStatusSet(DEPS_STATUS_SUCCESS);
         return SOFTBUS_OK;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, displayName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set local devcice name failed");
         return SOFTBUS_NETWORK_SET_NODE_INFO_ERR;
     }
+    LnnInitDeviceNameStatusSet(DEPS_STATUS_SUCCESS);
     LnnNotifyLocalNetworkIdChanged();
     LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_NAME_CHANGED);
 

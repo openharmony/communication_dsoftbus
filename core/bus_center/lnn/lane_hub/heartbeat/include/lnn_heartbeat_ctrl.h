@@ -26,6 +26,7 @@ extern "C" {
 
 SoftBusScreenState GetScreenState(void);
 void SetScreenState(SoftBusScreenState state);
+void HbEnableDiscovery(void);
 int32_t LnnStartHeartbeatFrameDelay(void);
 int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
