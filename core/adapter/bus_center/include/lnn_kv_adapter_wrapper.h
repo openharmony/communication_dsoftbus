@@ -34,7 +34,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
 int32_t LnnCloudSync(int32_t dbId);
 int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud);
 void LnnClearRedundancyCache(void);
-bool LnnSubcribeKvStoreService(void);
+int32_t LnnSubcribeKvStoreService(void);
 #ifdef __cplusplus
 };
 #endif

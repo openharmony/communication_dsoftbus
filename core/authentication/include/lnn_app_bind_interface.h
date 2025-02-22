@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara);
+int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara);
 
 #ifdef __cplusplus
 }
