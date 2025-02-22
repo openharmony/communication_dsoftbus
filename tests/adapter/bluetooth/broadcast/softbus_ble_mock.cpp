@@ -127,6 +127,24 @@ static int32_t MockSetBroadcastingData(int32_t bcId, const SoftbusBroadcastData 
     return SOFTBUS_OK;
 }
 
+static int32_t MockSetBroadcastingParam(int32_t bcId, const SoftbusBroadcastParam *param)
+{
+    ManagerMock::broadcastCallback->OnSetBroadcastingParamCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    return SOFTBUS_OK;
+}
+
+static int32_t MockEnableBroadcasting(int32_t bcId)
+{
+    ManagerMock::broadcastCallback->OnEnableBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    return SOFTBUS_OK;
+}
+
+static int32_t MockDisableBroadcasting(int32_t bcId)
+{
+    ManagerMock::broadcastCallback->OnDisableBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    return SOFTBUS_OK;
+}
+
 static int32_t MockUpdateBroadcasting(
     int32_t bcId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
 {
@@ -141,6 +159,12 @@ static int32_t MockStartScan(
 }
 
 static int32_t MockStopScan(int32_t scanerId)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t MockSetScanParams(int32_t scannerId, const SoftBusBcScanParams *param,
+    const SoftBusBcScanFilter *scanFilter, int32_t filterSize, SoftbusSetFilterCmd cmdId)
 {
     return SOFTBUS_OK;
 }
@@ -195,9 +219,13 @@ static void ActionOfSoftbusBleAdapterInit()
         .StartBroadcasting = MockStartBroadcasting,
         .StopBroadcasting = MockStopBroadcasting,
         .SetBroadcastingData = MockSetBroadcastingData,
+        .SetBroadcastingParam = MockSetBroadcastingParam,
+        .EnableBroadcasting = MockEnableBroadcasting,
+        .DisableBroadcasting = MockDisableBroadcasting,
         .UpdateBroadcasting = MockUpdateBroadcasting,
         .StartScan = MockStartScan,
         .StopScan = MockStopScan,
+        .SetScanParams = MockSetScanParams,
         .IsLpDeviceAvailable = MockIsLpDeviceAvailable,
         .SetAdvFilterParam = MockSetAdvFilterParam,
         .GetBroadcastHandle = MockGetBroadcastHandle,
