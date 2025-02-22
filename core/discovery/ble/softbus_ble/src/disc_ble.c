@@ -2235,7 +2235,8 @@ static int32_t InitBleListener(void)
 {
     int32_t ret = SchedulerRegisterScanListener(SRV_TYPE_DIS, &g_bleListener.scanListenerId, &g_scanListener);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register scanner listener fail");
-    g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
+    ret = SoftBusAddBtStateListener(&g_stateChangedListener, &g_bleListener.stateListenerId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register broadcast listener fail");
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
         return SOFTBUS_BC_MGR_REG_NO_AVAILABLE_LISN_ID;
     }
