@@ -770,7 +770,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting002, TestSiz
     packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_OK, UpdateBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_BC_MGR_WAIT_COND_FAIL, UpdateBroadcasting(bcId, &bcParam, &packet));
 
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
@@ -865,6 +865,59 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData003, TestSi
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastSetBroadcastingData003 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastSetBroadcastingParam001
+ * @tc.desc: Invalid parameter, set broadcasting param fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingParam001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastSetBroadcastingParam001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t invalidId = -1;
+    BroadcastParam param = {};
+
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetBroadcastingParam(invalidId, nullptr));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, SetBroadcastingParam(invalidId, &param));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, SetBroadcastingParam(BC_NUM_MAX, &param));
+    invalidId = 0;
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, SetBroadcastingParam(invalidId, &param));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastSetBroadcastingParam001 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastSetBroadcastingParam002
+ * @tc.desc: Set broadcasting param without start.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingParam002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastSetBroadcastingParam002 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    BroadcastParam param = {};
+    EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, SetBroadcastingParam(bcId, &param));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastSetBroadcastingParam002 end ----");
 }
 
 /*
@@ -1065,24 +1118,26 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan004, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastStartScan004 begin ----");
     ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftbusBleAdapterInit).WillRepeatedly(ActionOfSoftbusBleAdapterInitNull);
 
-    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, InitBroadcastMgr());
+
     int32_t listenerId = -1;
     uint8_t filterNum = 1;
     BcScanFilter *filter = GetBcScanFilter();
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
-    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
-    EXPECT_EQ(SOFTBUS_OK, StartScan(listenerId, &scanParam));
-    EXPECT_EQ(SOFTBUS_OK, StartScan(listenerId, &scanParam));
-    EXPECT_EQ(SOFTBUS_OK, StopScan(listenerId));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, SetScanFilter(listenerId, filter, filterNum));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StopScan(listenerId));
 
-    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
-    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastStartScan004 end ----");
 }

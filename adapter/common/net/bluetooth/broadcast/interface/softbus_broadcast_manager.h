@@ -41,6 +41,9 @@ typedef struct {
     void (*OnStopBroadcastingCallback)(int32_t bcId, int32_t status);
     void (*OnUpdateBroadcastingCallback)(int32_t bcId, int32_t status);
     void (*OnSetBroadcastingCallback)(int32_t bcId, int32_t status);
+    void (*OnSetBroadcastingParamCallback)(int32_t bcId, int32_t status);
+    void (*OnEnableBroadcastingCallback)(int32_t bcId, int32_t status);
+    void (*OnDisableBroadcastingCallback)(int32_t bcId, int32_t status);
 } BroadcastCallback;
 
 /**
@@ -165,7 +168,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
 int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 
 /**
- * @brief The service set broadcast data. Set broadcast data when broadcast is enabled.
+ * @brief The service set broadcast data. Set broadcast data when broadcast is advertising.
  *
  * @param bcId Indicates the service broadcast ID.
  * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
@@ -178,6 +181,21 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
  */
 
 int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet);
+
+/**
+ * @brief The service set broadcast param. Set broadcast param when broadcast is advertising and disabled.
+ *
+ * @param bcId Indicates the service broadcast ID.
+ * @param param Indicates the pointer to the service parameter information. For details, see {@link BroadcastParam}.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
+ * returns any other value if the unregister fails.
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param);
+
 /**
  * @brief The service stop broadcast
  *
