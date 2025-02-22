@@ -83,3 +83,14 @@ int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
     AnonymizeFree(anonyPath);
     return SOFTBUS_OK;
 }
+
+int32_t LnnRemoveStorageConfigPath(LnnFileId id)
+{
+    char filePath[SOFTBUS_MAX_PATH_LEN] = {0};
+    if (LnnGetFullStoragePath(id, filePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get saved path fail, id=%{public}d", id);
+        return SOFTBUS_FILE_ERR;
+    }
+    SoftBusRemoveFile(filePath);
+    return SOFTBUS_OK;
+}

@@ -106,6 +106,10 @@ int32_t UpdatePtkByAuth(char *networkId, AuthHandle authHandle)
     return SOFTBUS_OK;
 }
 
+void LnnClearPtkList(void)
+{
+}
+
 int32_t LnnInitPtk(void)
 {
     return SOFTBUS_OK;

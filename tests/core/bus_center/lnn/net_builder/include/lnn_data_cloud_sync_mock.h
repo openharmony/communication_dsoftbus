@@ -113,8 +113,8 @@ public:
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
-    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
-    virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
+    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate);
+    virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate);
     virtual int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
     virtual int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
     virtual int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
@@ -242,8 +242,8 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(GetLooper, SoftBusLooper *(int));
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t(const ConnectOption *));
-    MOCK_METHOD2(LnnGenLocalUuid, int32_t(char *, uint32_t));
-    MOCK_METHOD2(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t));
+    MOCK_METHOD3(LnnGenLocalUuid, int32_t(char *, uint32_t, bool));
+    MOCK_METHOD3(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t, bool));
     MOCK_METHOD2(LnnGenLocalNetworkId, int32_t(char *, uint32_t));
     MOCK_METHOD3(LnnSetDLNodeAddr, int32_t(const char *, IdCategory, const char *));
     MOCK_METHOD3(LnnSetDLProxyPort, int32_t(const char *, IdCategory, int32_t));

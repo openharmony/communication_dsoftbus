@@ -32,11 +32,14 @@
 #include "lnn_event_monitor.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
+#include "lnn_file_utils.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_interface.h"
 #include "lnn_meta_node_ledger.h"
+#include "lnn_network_id.h"
+#include "lnn_net_builder.h"
 #include "lnn_p2p_info.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
@@ -261,12 +264,21 @@ void RestoreLocalDeviceInfo(void)
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
     LnnSetLocalFeature();
     if (g_isRestore) {
-        LNN_LOGI(LNN_LEDGER, "aready init");
+        LNN_LOGI(LNN_LEDGER, "already init");
         LnnLedgerInfoStatusSet();
         return;
     }
-    if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LEDGER, "get local device info fail");
+    int32_t ret = LnnLoadLocalDeviceInfo();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "get local device info fail, ret=%{public}d", ret);
+        if (ret == SOFTBUS_HUKS_UPDATE_ERR || ret == SOFTBUS_PARSE_JSON_ERR) {
+            LNN_LOGE(LNN_LEDGER, "replace mainboard, device storage data need update");
+            LnnRemoveStorageConfigPath(LNN_FILE_ID_UUID);
+            LnnRemoveStorageConfigPath(LNN_FILE_ID_IRK_KEY);
+            if (LnnUpdateLocalUuidAndIrk() != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "update local uuid or irk fail");
+            }
+        }
         const NodeInfo *temp = LnnGetLocalNodeInfo();
         if (LnnSaveLocalDeviceInfo(temp) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save local device info fail");
@@ -956,4 +968,51 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
     SoftbusDumpDeviceInfo(fd, nodeInfo);
     SoftbusDumpDeviceAddr(fd, nodeInfo);
     SoftbusDumpDeviceCipher(fd, nodeInfo);
+}
+
+static void LnnClearLocalPtkList(void)
+{
+    LnnClearPtkList();
+}
+
+int32_t LnnUpdateLocalDeviceInfo(void)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+
+    ClearDeviceInfo();
+    AuthClearDeviceKey();
+    LnnClearLocalPtkList();
+
+    int32_t ret = LnnUpdateLocalUuidAndIrk();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update local uuid or irk failed");
+        return ret;
+    }
+    ret = LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local networkId failed");
+        return ret;
+    }
+    ret = LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set local networkId failed");
+        return ret;
+    }
+    ret = GenerateNewLocalCipherKey();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate new local cipher key failed");
+        return ret;
+    }
+    LnnRemoveDb();
+    ret = InitTrustedDevInfoTable();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init trusted device info failed");
+        return ret;
+    }
+    ret = LnnGenBroadcastCipherInfo();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate cipher failed");
+        return ret;
+    }
+    return SOFTBUS_OK;
 }

@@ -836,7 +836,7 @@ int32_t LnnInitNetBuilder(void)
     if (rc != SOFTBUS_OK) {
         return rc;
     }
-    rc = ConifgLocalLedger();
+    rc = ConfigLocalLedger();
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "config local ledger fail, rc=%{public}d", rc);
         return rc;
