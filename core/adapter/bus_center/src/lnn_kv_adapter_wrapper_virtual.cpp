@@ -88,9 +88,9 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
     (void)dbId;
 }
 
-bool LnnSubcribeKvStoreService(void)
+int32_t LnnSubcribeKvStoreService(void)
 {
-    return false;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)

@@ -41,6 +41,8 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "legacy/softbus_hidumper_buscenter.h"
+#include "lnn_init_monitor.h"
+#include "lnn_net_ledger.h"
 
 #define SOFTBUS_VERSION "hm.1.0.0"
 #define VERSION_TYPE_LITE "LITE"
@@ -1264,6 +1266,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
         AnonymizeWrapper(anonyOldNetworkId), AnonymizeWrapper(anonyNetworkId),
         g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
+    LnnLedgerInfoStatusSet();
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyOldNetworkId);
     if (!IsLocalLedgerReady()) {
@@ -1302,7 +1305,9 @@ static int32_t UpdateLocalBleMac(const void *mac)
 
 static int32_t UpdateLocalUuid(const void *id)
 {
-    return ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
+    int32_t ret = ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
+    LnnLedgerInfoStatusSet();
+    return ret;
 }
 
 int32_t UpdateLocalParentId(const char *id)
@@ -1565,6 +1570,7 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
         return ret;
     }
     SoftBusMutexUnlock(&g_localNetLedger.lock);
+    LnnLedgerInfoStatusSet();
     return SOFTBUS_OK;
 }
 
@@ -2137,6 +2143,7 @@ static int32_t LnnFirstGetUdid(void)
         LNN_LOGE(LNN_LEDGER, "COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
+    LnnLedgerInfoStatusSet();
     return SOFTBUS_OK;
 }
 
@@ -2351,6 +2358,7 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "fail:strncpy_s fail");
         return SOFTBUS_STRCPY_ERR;
     }
+
     ret = InitLocalDeviceInfo(&nodeInfo->deviceInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local device info error");
@@ -2366,7 +2374,9 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local deviceSecurityLevel fail, deviceSecurityLevel=%{public}d",
             nodeInfo->deviceSecurityLevel);
+        LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_FAILED);
     }
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_SUCCESS);
     ret = InitConnectInfo(&nodeInfo->connectInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local connect info error");

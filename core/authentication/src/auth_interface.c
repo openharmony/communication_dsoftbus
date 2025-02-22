@@ -35,6 +35,7 @@
 #include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
+#include "lnn_init_monitor.h"
 
 #define SHORT_ACCOUNT_HASH_LEN 2
 
@@ -731,8 +732,11 @@ int32_t AuthInit(void)
     ret = RegHichainSaStatusListener();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
         AUTH_LOGE(AUTH_INIT, "regHichainSaStatusListener failed");
+        LnnInitModuleStatusSet(INIT_DEPS_HICHAIN, DEPS_STATUS_FAILED);
+        LnnInitModuleReturnSet(INIT_DEPS_HICHAIN, ret);
         return SOFTBUS_AUTH_HICHAIN_SA_PROC_ERR;
     }
+    LnnInitModuleStatusSet(INIT_DEPS_HICHAIN, DEPS_STATUS_SUCCESS);
     ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
         AUTH_LOGI(AUTH_INIT, "customized protocol init failed, ret=%{public}d", ret);

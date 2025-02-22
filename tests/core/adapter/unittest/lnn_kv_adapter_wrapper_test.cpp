@@ -203,8 +203,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
  */
 HWTEST_F(KVAdapterWrapperTest, LnnSubcribeKvStoreService001, TestSize.Level1)
 {
-    bool lnnSubcribeKvStoreRet = LnnSubcribeKvStoreService();
-    EXPECT_EQ(lnnSubcribeKvStoreRet, true);
+    int32_t lnnSubcribeKvStoreRet = LnnSubcribeKvStoreService();
+    EXPECT_EQ(lnnSubcribeKvStoreRet, SOFTBUS_OK);
 }
 
 /**

@@ -44,6 +44,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_init_monitor.h"
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
@@ -51,6 +52,7 @@
 #define FLAG_ACTIVE                        0
 #define AUTH_COUNT                         2
 #define DELAY_REG_DP_TIME                  10000
+#define RETRY_TIMES                        5
 #define RECV_DATA_WAIT_TIME                100
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
@@ -2158,8 +2160,8 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
         AuthCommonDeinit();
         return SOFTBUS_AUTH_CONN_INIT_FAIL;
     }
-    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), AuthRegisterToDpDelay, NULL, DELAY_REG_DP_TIME) !=
-        SOFTBUS_OK) {
+    if (LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_DEVICE_PROFILE, AuthRegisterToDpDelay, RETRY_TIMES,
+        DELAY_REG_DP_TIME, true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "delay registertoDp failed");
         return SOFTBUS_AUTH_INIT_FAIL;
     }
