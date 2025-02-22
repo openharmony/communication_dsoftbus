@@ -95,6 +95,7 @@ typedef enum {
     TURN_OFF,
     DFX_DELAY_RECORD,
     BR_STATE_CHANGED,
+    HANDLE_REPORT,
 } DiscBleMessage;
 
 typedef enum {
@@ -209,6 +210,7 @@ static DiscBleListener g_bleListener = {
 static DiscEventExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
 static DiscEventExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
 static uint32_t g_bleOldCap = 0;
+static uint32_t g_handleId = 0;
 
 // g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
@@ -1513,6 +1515,56 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
     return SOFTBUS_OK;
 }
 
+static void ReportHandle(SoftBusMessage *msg)
+{
+    (void)msg;
+    DeviceInfo device;
+    (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    InnerDeviceInfoAddtions add;
+    add.medium = BLE;
+    device.capabilityBitmapNum = 1;
+    device.capabilityBitmap[0] = 0x01 << CASTPLUS_CAPABILITY_BITMAP; // const is cast+
+
+    int32_t ret = SoftBusMutexLock(&g_bleInfoLock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed.");
+
+    ret = DiscSoftbusBleBuildReportJson(&device, g_handleId);
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "build report json failed");
+        SoftBusMutexUnlock(&g_bleInfoLock);
+        return;
+    }
+    SoftBusMutexUnlock(&g_bleInfoLock);
+    DISC_LOGI(DISC_BLE, "start report found device, handleId=%{public}d", g_handleId);
+    g_discBleInnerCb->OnDeviceFound(&device, &add);
+}
+
+static int32_t SoftbusBleCheckJson(bool isStart, const SubscribeOption *option)
+{
+    cJSON *json = cJSON_ParseWithLength((const char *)option->capabilityData, option->dataLen);
+    DISC_CHECK_AND_RETURN_RET_LOGW(json != NULL, SOFTBUS_DISCOVER_BLE_NEED_TRIGGER,
+        DISC_BLE, "softbus ble parse json failed");
+
+    char discType[BLE_DISCOVERY_TYPE_VAL_MAX_LEN] = { 0 };
+    bool ret = GetJsonObjectStringItem(json, BLE_DISCOVERY_TYPE, discType, BLE_DISCOVERY_TYPE_VAL_MAX_LEN);
+    cJSON_Delete(json);
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret, SOFTBUS_DISCOVER_BLE_NEED_TRIGGER,
+        DISC_BLE, "get discType from json failed");
+    
+    if (strcmp(discType, BLE_DISCOVERY_TYPE_HANDLE) != 0) {
+        DISC_LOGI(DISC_BLE, "invalid type, type=%{public}s", discType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!isStart) {
+        return SOFTBUS_OK;
+    }
+
+    SoftBusMessage *msg = CreateBleHandlerMsg(HANDLE_REPORT, 0, 0, NULL);
+    DISC_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE, "malloc msg failed");
+    g_discBleHandler.looper->PostMessageDelay(g_discBleHandler.looper, msg, 0);
+    return SOFTBUS_OK;
+}
+
 static int32_t BleStartActivePublish(const PublishOption *option)
 {
     DISC_LOGI(DISC_BLE, "start active publish");
@@ -1539,6 +1591,13 @@ static int32_t BleStopPassivePublish(const PublishOption *option)
 
 static int32_t BleStartActiveDiscovery(const SubscribeOption *option)
 {
+    int32_t ret = SoftbusBleCheckJson(true, option);
+    if (ret == SOFTBUS_OK) {
+        DISC_LOGI(DISC_BLE, "disc ble prepare report handle");
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_DISCOVER_BLE_NEED_TRIGGER, ret,
+        DISC_BLE, "SoftbusBleCheckJson failed");
     DISC_LOGI(DISC_BLE, "start active discovery");
     return ProcessBleDiscFunc(true, BLE_SUBSCRIBE, BLE_ACTIVE, START_ACTIVE_DISCOVERY, (void *)option);
 }
@@ -1551,6 +1610,13 @@ static int32_t BleStartPassiveDiscovery(const SubscribeOption *option)
 
 static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 {
+    int32_t ret = SoftbusBleCheckJson(false, option);
+    if (ret == SOFTBUS_OK) {
+        DISC_LOGI(DISC_BLE, "no need trigger stop adv");
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_DISCOVER_BLE_NEED_TRIGGER, ret,
+        DISC_BLE, "SoftbusBleCheckJson failed");
     DISC_LOGI(DISC_BLE, "stop active discovery");
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, (void *)option);
 }
@@ -1939,6 +2005,18 @@ static void OnBrStateChanged(SoftBusMessage *msg)
     }
 }
 
+static void DiscBleMsgHandlerExt(SoftBusMessage *msg)
+{
+    switch (msg->what) {
+        case HANDLE_REPORT:
+            ReportHandle(msg);
+            break;
+        default:
+            DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
+            break;
+    }
+}
+
 static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
     switch (msg->what) {
@@ -1987,7 +2065,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             DfxDelayRecord(msg);
             break;
         default:
-            DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
+            DiscBleMsgHandlerExt(msg);
             break;
     }
 }
@@ -2162,6 +2240,16 @@ static int32_t InitBleListener(void)
         return SOFTBUS_BC_MGR_REG_NO_AVAILABLE_LISN_ID;
     }
     return SOFTBUS_OK;
+}
+
+void DiscSoftbusBleSetHandleId(uint32_t handleId)
+{
+    DISC_LOGI(DISC_INIT, "enter, handle=%{public}d", handleId);
+
+    int32_t ret = SoftBusMutexLock(&g_bleInfoLock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed.");
+    g_handleId = handleId;
+    SoftBusMutexUnlock(&g_bleInfoLock);
 }
 
 DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
