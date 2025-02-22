@@ -975,13 +975,14 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
         COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner malloc info type length failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (GetLocalDeviceInfo(clientName, nodeInfo, infoTypeLen) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner get local info failed");
-        SoftBusFree(nodeInfo);
-        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
-    }
+    int32_t retReply = GetLocalDeviceInfo(clientName, nodeInfo, infoTypeLen);
     if (!reply.WriteRawData(nodeInfo, infoTypeLen)) {
         COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner write node info failed!");
+        SoftBusFree(nodeInfo);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner write reply failed!");
         SoftBusFree(nodeInfo);
         return SOFTBUS_IPC_ERR;
     }
@@ -1025,11 +1026,7 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "malloc buffer failed!");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "get key info failed!");
-        SoftBusFree(buf);
-        return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
-    }
+    int32_t ret = GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen);
     if (!reply.WriteInt32(infoLen)) {
         COMM_LOGE(COMM_SVC, "write info length failed!");
         SoftBusFree(buf);
@@ -1037,6 +1034,11 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
     }
     if (!reply.WriteRawData(buf, infoLen)) {
         COMM_LOGE(COMM_SVC, "write key info failed!");
+        SoftBusFree(buf);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
         SoftBusFree(buf);
         return SOFTBUS_IPC_ERR;
     }
@@ -1480,13 +1482,13 @@ int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParce
         return SOFTBUS_IPC_ERR;
     }
     char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (ActiveMetaNode(info, metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR;
-    }
+    int32_t retReply = ActiveMetaNode(info, metaNodeId);
+
     if (!reply.WriteCString(metaNodeId)) {
         COMM_LOGE(COMM_SVC, "ActiveMetaNode write meta node id failed!");
         return SOFTBUS_IPC_ERR;
     }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
