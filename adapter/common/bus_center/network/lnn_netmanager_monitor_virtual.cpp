@@ -20,14 +20,14 @@
 int32_t ConfigNetLinkUp(const char *ifName)
 {
     (void)ifName;
-    return SOFTBUS_OK;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t ConfigLocalIp(const char *ifName, const char *localIp)
 {
     (void)ifName;
     (void)localIp;
-    return SOFTBUS_OK;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destination, const char *gateway)
@@ -36,7 +36,7 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
     (void)ifName;
     (void)destination;
     (void)gateway;
-    return SOFTBUS_OK;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t LnnInitNetManagerMonitorImpl(void)

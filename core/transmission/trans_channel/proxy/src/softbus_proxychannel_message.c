@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,6 +247,10 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
 
 static int32_t TransProxyParseMessageNoDecrypt(ProxyMessage *msg)
 {
+    if (msg->dateLen > (PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN)) {
+        TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
     uint8_t *allocData = (uint8_t *)SoftBusCalloc((uint32_t)msg->dateLen);
     if (allocData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc data fail");
@@ -268,7 +272,8 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
     int32_t ret = TransProxyParseMessageHead(data, len, msg);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
-        if (msg->dateLen <= 0 || (uint32_t)msg->dateLen < sizeof(uint32_t)) {
+        if ((uint32_t)msg->dateLen < (sizeof(uint32_t) + OVERHEAD_LEN) ||
+            (uint32_t)msg->dateLen > (PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN + sizeof(uint32_t))) {
             TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }

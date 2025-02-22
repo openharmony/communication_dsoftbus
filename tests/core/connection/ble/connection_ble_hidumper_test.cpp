@@ -74,11 +74,14 @@ void OnConnectFailed(uint32_t requestId, int32_t reason)
 extern "C" {
 int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
 {
+    (void)listener;
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
+    (void)listener;
+    (void)listenerId;
     return SOFTBUS_OK;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,7 +166,7 @@ typedef struct {
      * @since 2.0
      * @version 2.0
     */
-    int32_t (*CheckCollabRelation)(CollabInfo sourceInfo, CollabInfo sinkInfo);
+    int32_t (*CheckCollabRelation)(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo);
 } IFeatureAbilityRelationChecker;
 
 /**

@@ -203,7 +203,7 @@ static void DelayReportBroadcast(void *para)
             extra.minInterval = g_bcManagerExtra[managerId].minInterval;
             extra.maxInterval = g_bcManagerExtra[managerId].maxInterval;
             extra.bcOverMaxCnt = g_bcOverMaxNum;
-            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}d, advHandle=%{public}d, serverType=%{public}s, "
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}lld, advHandle=%{public}d, serverType=%{public}s, "
                 "minInterval=%{public}d, maxInterval=%{public}d, bcOverMaxCnt=%{public}d", extra.startTime,
                 extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval, extra.bcOverMaxCnt);
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
@@ -239,9 +239,8 @@ int32_t InitBroadcastMgr(void)
     ret = g_interface[g_interfaceId]->Init();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "call from adapter failed");
 
-    ret = SoftBusAddBtStateListener(&g_softbusBcBtStateLister);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret >= 0, ret, DISC_BROADCAST, "add bt state listener failed");
-    g_btStateListenerId = ret;
+    ret = SoftBusAddBtStateListener(&g_softbusBcBtStateLister, &g_btStateListenerId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "add bt state listener failed");
     g_mgrInit = true;
 
     if (BleAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayReportBroadcast, NULL,
@@ -321,7 +320,7 @@ static void ReportCurrentBroadcast(bool startBcResult)
             if (startBcResult) {
                 extra.currentNum = g_bcCurrentNum;
             }
-            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}d, advHandle=%{public}d, serverType=%{public}s, "
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}lld, advHandle=%{public}d, serverType=%{public}s, "
                 "minInterval=%{public}d, maxInterval=%{public}d", extra.startTime,
                 extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval);
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);

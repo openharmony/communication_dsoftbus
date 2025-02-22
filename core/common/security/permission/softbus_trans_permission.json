@@ -51,6 +51,19 @@
     ]
   },
   {
+    "SESSION_NAME": "ohos.dtbcollab.dms.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "SEC_LEVEL":"public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "dms",
+        "TYPE": "normal_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "com.huawei.dmsdp.*",
     "REGEXP": "true",
     "DEVID": "UDID",

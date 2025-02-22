@@ -745,7 +745,9 @@ static int32_t TransSendLimitChangeDataToCore(int32_t channelId, uint8_t tos, in
         SoftBusFree(buf);
         return ret;
     }
-    return ServerIpcProcessInnerEvent(EVENT_TYPE_TRANS_LIMIT_CHANGE, buf, len);
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_TRANS_LIMIT_CHANGE, buf, len);
+    SoftBusFree(buf);
+    return ret;
 }
 
 int32_t TransLimitChange(int32_t channelId, uint8_t tos)

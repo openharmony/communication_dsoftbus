@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -658,5 +658,216 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcData001, TestSize.Leve
     dataHead.dataLen = 34;
     ret = ClientTransProxyProcData(channelId, &dataHead, data);
     EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
+}
+
+/**
+ * @tc.name: ProxyBuildNeedAckTlvData002
+ * @tc.desc: ProxyBuildNeedAckTlvData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Level0)
+{
+    DataHead pktHead;
+    int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ProxyBuildNeedAckTlvData003
+ * @tc.desc: ProxyBuildNeedAckTlvData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData003, TestSize.Level0)
+{
+    int32_t bufferSize = 0;
+    DataHead pktHead;
+    pktHead.tlvElement = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
+    int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, &bufferSize);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(pktHead.tlvElement);
+}
+
+/**
+ * @tc.name: ProxyBuildTlvDataHead002
+ * @tc.desc: ProxyBuildTlvDataHead
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead002, TestSize.Level0)
+{
+    DataHead pktHead;
+    int32_t ret = ProxyBuildTlvDataHead(&pktHead, 1, 0, 32, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: TransProxyParseTlv001
+ * @tc.desc: TransProxyParseTlv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, TransProxyParseTlv001, TestSize.Level0)
+{
+    uint32_t newDataHeadSize = 0;
+    int32_t ret = TransProxyParseTlv(nullptr, nullptr, &newDataHeadSize);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *data = "test";
+    ret = TransProxyParseTlv(data, nullptr, &newDataHeadSize);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    DataHeadTlvPacketHead head;
+    ret = TransProxyParseTlv(data, &head, &newDataHeadSize);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyGetOsTypeByChannelId001
+ * @tc.desc: ClientTransProxyGetOsTypeByChannelId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, TestSize.Level0)
+{
+    int32_t ret = ClientTransProxyGetOsTypeByChannelId(1, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyOnChannelOpened001
+ * @tc.desc: ClientTransProxyOnChannelOpened
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    ChannelInfo channelInfo;
+    channelInfo.channelId = channelId;
+    channelInfo.sessionKey = g_sessionKey;
+    channelInfo.isEncrypt = false;
+    channelInfo.isSupportTlv = false;
+    channelInfo.businessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelInfo.businessType = BUSINESS_TYPE_FILE;
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxySendBytesAck001
+ * @tc.desc: ClientTransProxySendBytesAck
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySendBytesAck001, TestSize.Level0)
+{
+    const char *data = "test";
+    DataHeadTlvPacketHead dataHead;
+    dataHead.dataSeq = 1;
+    dataHead.seq = 1;
+    dataHead.flags = TRANS_SESSION_BYTES;
+    dataHead.needAck = true;
+    int32_t ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, sizeof(data));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyBytesNotifySession002
+ * @tc.desc: ClientTransProxyBytesNotifySession
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession002, TestSize.Level0)
+{
+    const char *data = "test";
+    uint32_t invalidFlag = 22;
+    DataHeadTlvPacketHead dataHead;
+    dataHead.dataSeq = 1;
+    dataHead.seq = 1;
+    dataHead.flags = TRANS_SESSION_ASYNC_MESSAGE;
+    int32_t ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, sizeof(data));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    dataHead.flags = invalidFlag;
+    ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, sizeof(data));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyNotifySession001
+ * @tc.desc: ClientTransProxyNotifySession
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize.Level0)
+{
+    SessionPktType flag = TRANS_SESSION_MESSAGE;
+    const char *data = "test";
+    int32_t ret = ClientTransProxyNotifySession(1, flag, 1, data, sizeof(data));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    flag = TRANS_SESSION_ACK;
+    ret = ClientTransProxyNotifySession(1, flag, 1, data, 4);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+
+    flag = TRANS_SESSION_ASYNC_MESSAGE;
+    ret = ClientTransProxyNotifySession(1, flag, 1, data, sizeof(data));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    int32_t invalidFlag = 22;
+    flag = static_cast<SessionPktType>(invalidFlag);
+    ret = ClientTransProxyNotifySession(1, flag, 1, data, sizeof(data));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyProcessSessionData001
+ * @tc.desc: ClientTransProxyProcessSessionData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcessSessionData001, TestSize.Level0)
+{
+    PacketHead dataHead;
+    dataHead.dataLen = OVERHEAD_LEN;
+    const char *data = "test";
+    int32_t ret = ClientTransProxyProcessSessionData(1, &dataHead, data);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    dataHead.dataLen = TEST_DATA_LENGTH_2;
+    dataHead.seq = 1;
+    ret = ClientTransProxyProcessSessionData(1, &dataHead, data);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyNoSubPacketTlvProc001
+ * @tc.desc: ClientTransProxyNoSubPacketTlvProc
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, TestSize.Level0)
+{
+    int32_t ret = ClientTransProxyNoSubPacketTlvProc(1, nullptr, 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *data = "test";
+    ret = ClientTransProxyNoSubPacketTlvProc(1, data, 1);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+
+    uint32_t magic = MAGIC_NUMBER;
+    char *magicData = reinterpret_cast<char *>(SoftBusCalloc(20));
+    memcpy_s(magicData, 4, &magic, 4);
+    ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, 0);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    ret = ClientTransProxyNoSubPacketTlvProc(1, magicData, 1);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    SoftBusFree(magicData);
 }
 } // namespace OHOS

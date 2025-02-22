@@ -24,7 +24,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
-#define STATE_LISTENER_MAX_NUM 16
+#define STATE_LISTENER_MAX_NUM 20
 #define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {
@@ -197,18 +197,21 @@ static BtGapCallBacks g_softbusGapCb = {
     .pairConfiremedCallback = WrapperPairConfiremedCallback
 };
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId)
 {
-    if (listener == NULL) {
+    if (listener == NULL || listenerId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     for (int index = 0; index < STATE_LISTENER_MAX_NUM; index++) {
         if (!g_stateListener[index].isUsed) {
             g_stateListener[index].isUsed = true;
             g_stateListener[index].listener = (SoftBusBtStateListener *)listener;
-            return index;
+            *listenerId = index;
+            return SOFTBUS_OK;
         }
     }
+    COMM_LOGE(COMM_ADAPTER, "listener num max");
+    *listenerId = -1;
     return SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR;
 }
 

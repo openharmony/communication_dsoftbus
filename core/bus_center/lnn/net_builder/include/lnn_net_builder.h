@@ -55,6 +55,7 @@ typedef enum {
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_LEAVE_SPECIFIC,
     MSG_TYPE_LEAVE_BY_AUTH_ID,
+    MSG_TYPE_RE_SYNC_DEVICE_NAME = 15,
     MSG_TYPE_BUILD_MAX,
 } NetBuilderMessageType;
 
@@ -149,6 +150,7 @@ int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
+int32_t LnnSetReSyncDeviceName(void);
 int32_t LnnNotifyDiscoveryDevice(
     const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);

@@ -204,7 +204,7 @@ int32_t AuthDeviceProfileListener::OnCharacteristicProfileUpdate(
     return SOFTBUS_OK;
 }
 
-static void RegisterToDpHelper(void)
+static int32_t RegisterToDpHelper(void)
 {
     AUTH_LOGD(AUTH_INIT, "RegistertoDpHelper start!");
     uint32_t saId = SOFTBUS_SA_ID;
@@ -216,23 +216,27 @@ static void RegisterToDpHelper(void)
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) AuthDeviceProfileListener;
     if (subscribeDPChangeListener == nullptr) {
         AUTH_LOGE(AUTH_INIT, "new authDeviceProfileListener fail");
-        return;
+        return SOFTBUS_MEM_ERR;
     }
     SubscribeInfo subscribeInfo(saId, subscribeKey, subscribeTypes, subscribeDPChangeListener);
 
     int32_t subscribeRes = DistributedDeviceProfileClient::GetInstance().SubscribeDeviceProfile(subscribeInfo);
-    AUTH_LOGI(AUTH_INIT, "GetCharacteristicProfile subscribeRes=%{public}d", subscribeRes);
+    if (subscribeRes != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        AUTH_LOGE(AUTH_INIT, "GetCharacteristicProfile subscribeRes failed, ret=%{public}d", subscribeRes);
+        return SOFTBUS_AUTH_SUB_DP_FAILED;
+    }
+    return SOFTBUS_OK;
 }
 } // namespace AuthToDeviceProfile
 } // namespace OHOS
 
-void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
+int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
 {
     if (deviceProfilePara == nullptr) {
         AUTH_LOGE(AUTH_INIT, "invalid param!");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_deviceProfileChange = *deviceProfilePara;
-    OHOS::AuthToDeviceProfile::RegisterToDpHelper();
+    return OHOS::AuthToDeviceProfile::RegisterToDpHelper();
 }
 

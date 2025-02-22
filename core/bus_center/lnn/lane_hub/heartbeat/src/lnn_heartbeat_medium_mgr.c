@@ -35,6 +35,7 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_net_ledger_common.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_fsm.h"
@@ -50,6 +51,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
@@ -533,6 +535,29 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
     return SOFTBUS_OK;
 }
 
+static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
+{
+    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, cacheDeviceInfo->accountId) == -1) {
+        LNN_LOGE(LNN_HEART_BEAT, "long to string fail");
+        return true;
+    }
+    char accountHash[SHA_256_HASH_LEN] = { 0 };
+    int32_t ret = SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString),
+        (unsigned char *)accountHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "account hash fail, ret=%{public}d", ret);
+        return true;
+    }
+    bool isChange = memcmp(accountHash, device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
+    if (isChange) {
+        LNN_LOGI(LNN_HEART_BEAT, "accountHash compare. "
+            "accountHash=[%{public}02X, %{public}02X], device->accountHash=[%{public}02X, %{public}02X]",
+            accountHash[0], accountHash[1], device->accountHash[0], device->accountHash[1]);
+    }
+    return isChange;
+}
+
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
@@ -545,7 +570,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         return true;
     }
     if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
-        IsInvalidBrmac(deviceInfo.connectInfo.macAddr)) {
+        IsInvalidBrmac(deviceInfo.connectInfo.macAddr) || IsAccountChange(device, &deviceInfo)) {
         *connectReason = BLE_FIRST_CONNECT;
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because retrieve fail, "
             "stateVersion=%{public}d->%{public}d", deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);

@@ -29,7 +29,7 @@
 
 class BleInterface {
 public:
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual int32_t SoftBusRemoveBtStateListener(int32_t listenerId) = 0;
 
     virtual int32_t InitBroadcastMgr() = 0;
@@ -67,7 +67,8 @@ public:
     BleMock();
     ~BleMock();
 
-    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
+        (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
     MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
     MOCK_METHOD(int32_t, DeInitBroadcastMgr, (), (override));
@@ -97,7 +98,7 @@ public:
     bool GetAsyncAdvertiseResult();
     bool IsScanning();
 
-    static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
+    static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId);
     static int32_t ActionOfRemoveBtStateListener(int32_t listenerId);
     static int32_t ActionOfInitBroadcastMgr();
     static int32_t ActionOfDeInitBroadcastMgr();

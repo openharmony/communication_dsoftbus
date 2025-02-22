@@ -59,8 +59,8 @@ DISC_ASSIGNER(Int32, DiscType, discType)
 DISC_ASSIGNER(Int32, DiscMode, discMode)
 DISC_ASSIGNER(Int32, SuccessCnt, successCnt)
 DISC_ASSIGNER(Int32, FailCnt, failCnt)
-DISC_ASSIGNER(Int32, StartTime, startTime)
-DISC_ASSIGNER(Int32, CostTime, costTime)
+DISC_ASSIGNER(Int64, StartTime, startTime)
+DISC_ASSIGNER(Int64, CostTime, costTime)
 DISC_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
 DISC_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 DISC_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -97,8 +97,8 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "DISC_MODE",            HISYSEVENT_INT32,  DiscAssignerDiscMode       },
     { "SUCCESS_CNT",          HISYSEVENT_INT32,  DiscAssignerSuccessCnt     },
     { "FAIL_CNT",             HISYSEVENT_INT32,  DiscAssignerFailCnt        },
-    { "START_TIME",           HISYSEVENT_INT32,  DiscAssignerStartTime      },
-    { "COST_TIME",            HISYSEVENT_INT32,  DiscAssignerCostTime       },
+    { "START_TIME",           HISYSEVENT_INT64,  DiscAssignerStartTime      },
+    { "COST_TIME",            HISYSEVENT_INT64,  DiscAssignerCostTime       },
     { "LOCAL_NET_ID",         HISYSEVENT_STRING, DiscAssignerLocalNetworkId },
     { "PEER_IP",              HISYSEVENT_STRING, DiscAssignerPeerIp         },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, DiscAssignerPeerBrMac      },

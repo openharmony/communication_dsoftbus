@@ -27,10 +27,10 @@
 #include "lnn_ohos_account.h"
 #include "parameter.h"
 #include "softbus_error_code.h"
+#include "lnn_init_monitor.h"
 
-static void ProcessBootEvent(void *para)
+static int32_t ProcessBootEvent(void)
 {
-    (void)para;
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
     LNN_LOGI(LNN_EVENT, "start process account ready event");
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
@@ -50,13 +50,14 @@ static void ProcessBootEvent(void *para)
     }
     if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
         LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
-        return;
+        return SOFTBUS_EVENT_MONITER_INIT_FAILED;
     }
     if (!LnnIsDefaultOhosAccount()) {
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     }
     EhLoginEventHandler();
     LnnStartHeartbeat(0);
+    return SOFTBUS_OK;
 }
 
 static void AccountBootEventCb(const char *key, const char *value, void *context)
@@ -64,7 +65,7 @@ static void AccountBootEventCb(const char *key, const char *value, void *context
     (void)context;
     LNN_LOGI(LNN_EVENT, "start account boot event, value=%{public}s", value);
     if (strcmp(key, BOOTEVENT_ACCOUNT_READY) == 0 && strcmp(value, "true") == 0) {
-        if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessBootEvent, NULL, 0) != SOFTBUS_OK) {
+        if (LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_PROCESS_BOOT, ProcessBootEvent, 0, 0, true) != SOFTBUS_OK) {
             LNN_LOGE(LNN_EVENT, "async call boot event fail");
         }
     }

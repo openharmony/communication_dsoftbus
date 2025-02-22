@@ -42,7 +42,7 @@ public:
         SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual SppSocketDriver *InitSppSocketDriver() = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json) = 0;
     virtual int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json) = 0;
@@ -73,7 +73,7 @@ public:
     MOCK_METHOD4(SoftBusThreadCreate, int32_t(SoftBusThread *, SoftBusThreadAttr *, void *(void *), void *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD0(InitSppSocketDriver, SppSocketDriver*());
-    MOCK_METHOD1(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *));
+    MOCK_METHOD2(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *, int32_t *));
     MOCK_METHOD0(ConnGetHeadSize, uint32_t());
     MOCK_METHOD2(ConnBrOnAckRequest, int32_t(ConnBrConnection *, const cJSON *));
     MOCK_METHOD2(ConnBrOnAckResponse, int32_t(ConnBrConnection *, const cJSON *));

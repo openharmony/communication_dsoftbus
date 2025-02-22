@@ -125,7 +125,7 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len);
 
 int SoftBusSetBtName(const char *name);
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener);
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId);
 
 int SoftBusRemoveBtStateListener(int listenerId);
 

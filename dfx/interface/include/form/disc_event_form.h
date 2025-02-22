@@ -37,6 +37,7 @@ typedef enum {
     EVENT_SCENE_RESERVED_10 = 10,
     EVENT_SCENE_RESERVED_11 = 11,
     EVENT_SCENE_RESERVED_12 = 12,
+    EVENT_SCENE_RESERVED_OOP = 13,
 } DiscEventScene;
 
 typedef enum {
@@ -47,6 +48,7 @@ typedef enum {
     EVENT_STAGE_VLINK_BLE_INIT = 5,
     EVENT_STAGE_TOUCH_BLE_INIT = 6,
     EVENT_STAGE_USB_INIT = 7,
+    EVENT_STAGE_OOP_BLE_INIT = 8,
 } DiscEventInitStage;
 
 typedef enum {
@@ -70,7 +72,12 @@ typedef enum {
     EVENT_STAGE_TOUCH_DISC = 1,
     EVENT_STAGE_TOUCH_SCAN = 2,
 } DiscEventTouchBleStage;
- 
+
+typedef enum {
+    EVENT_STAGE_OOP_DISC = 1,
+    EVENT_STAGE_OOP_SCAN = 2,
+} DiscEventOopBleStage;
+
 typedef enum {
     EVENT_STAGE_VLINK_SCAN = 1,
 } DiscEventVlinkStage;
@@ -135,9 +142,9 @@ typedef struct {
     const char *scanCycle;       // SCAN_CYCLE
     int32_t discType;            // DISC_TYPE
     int32_t discMode;            // DISC_MODE
-    int32_t startTime;           // BROADCAST_START_TIME
-    int32_t stopTime;            // BROADCAST_STOP_TIME
-    int32_t costTime;            // COST_TIME
+    int64_t startTime;           // BROADCAST_START_TIME
+    int64_t stopTime;            // BROADCAST_STOP_TIME
+    int64_t costTime;            // COST_TIME
     int32_t successCnt;          // SUCCESS_COUNT
     int32_t failCnt;             // FAIL_COUNT
     const char *localNetworkId;  // LOCAL_NET_ID

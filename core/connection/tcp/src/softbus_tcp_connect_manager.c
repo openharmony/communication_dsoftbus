@@ -339,13 +339,13 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
     int32_t ret = ConnGetSocketError(fd);
     if (ret != 0) {
         CONN_LOGW(CONN_COMMON, "connect fail. fd=%{public}d, ret=%{public}d", fd, ret);
+        (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
+        DelTcpConnNode(tcpInfo.connectionId);
+        ConnShutdownSocket(fd);
         tcpInfo.result.OnConnectFailed(tcpInfo.requestId, ret);
         tcpInfo.statistics.reqId = tcpInfo.requestId;
         DfxRecordTcpConnectFail(
             DEFAULT_PID, NULL, &tcpInfo, &tcpInfo.statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
-        (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
-        DelTcpConnNode(tcpInfo.connectionId);
-        ConnShutdownSocket(fd);
         return SOFTBUS_OK;
     }
     CONN_LOGI(CONN_COMMON, "notfiy connect ok. reqId=%{public}d", tcpInfo.requestId);

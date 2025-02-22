@@ -31,6 +31,8 @@ typedef void (*AccountEventHandle)(const char *key, const char *value, void *con
 
 int32_t LnnInitNetlinkMonitorImpl(void);
 
+int32_t LnnInitNetlinkMonitorImplNotify(void);
+
 int32_t LnnInitProductMonitorImpl(void);
 
 int32_t LnnInitLwipMonitorImpl(void);

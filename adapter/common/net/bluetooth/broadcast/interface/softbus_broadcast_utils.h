@@ -33,7 +33,7 @@ extern "C"{
 #define MEDIUM_NUM_MAX         2
 
 // max broadcasting and scan limit
-#define BC_NUM_MAX             16
+#define BC_NUM_MAX             20
 #define SCAN_NUM_MAX           16
 
 #define BC_DATA_MAX_LEN        24

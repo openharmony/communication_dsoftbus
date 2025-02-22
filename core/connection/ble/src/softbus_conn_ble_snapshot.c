@@ -34,7 +34,7 @@ static void FillConnectionsJson(cJSON *root, ListNode *connectionSnapshots)
             CONN_LOGE(CONN_BLE, "ble hidumper create object fail");
             continue;
         }
-        cJSON_AddNumberToObject(json, "currentTime", SoftBusGetSysTimeMs());
+        cJSON_AddStringToObject(json, "currentTime", SoftBusFormatTimestamp(SoftBusGetSysTimeMs()));
         cJSON_AddNumberToObject(json, "connectionId", it->connectionId);
         cJSON_AddNumberToObject(json, "side", it->side);
         cJSON_AddStringToObject(json, "mac", it->addr);

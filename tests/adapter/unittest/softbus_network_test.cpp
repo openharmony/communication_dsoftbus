@@ -119,7 +119,7 @@ HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1
 {
     NiceMock<NetworkInterfaceMock> networkMock;
     ON_CALL(networkMock, LnnAsyncCallbackHelper).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(networkMock, SoftBusAddBtStateListener).WillByDefault(Return(TEST_LISTENER_ID));
+    ON_CALL(networkMock, SoftBusAddBtStateListener).WillByDefault(Return(SOFTBUS_OK));
 
     int32_t listenerId = TEST_LISTENER_ID;
     int32_t state = TEST_STATE1;
@@ -141,7 +141,8 @@ HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1
     LnnOnBtAclStateChanged(listenerId, &addr, aclState, 0);
     int32_t ret = LnnInitBtStateMonitorImpl();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_CALL(networkMock, SoftBusAddBtStateListener).WillRepeatedly(Return(TEST_LISTENER_ID2));
+    EXPECT_CALL(networkMock, SoftBusAddBtStateListener).
+        WillRepeatedly(Return(SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR));
     ret = LnnInitBtStateMonitorImpl();
     EXPECT_TRUE(ret == SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR);
 }

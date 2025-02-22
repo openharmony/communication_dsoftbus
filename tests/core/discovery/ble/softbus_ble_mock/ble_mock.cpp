@@ -27,9 +27,9 @@ using testing::_;
 using testing::NotNull;
 
 /* implement related global function of BLE */
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return BleMock::GetMock()->SoftBusAddBtStateListener(listener);
+    return BleMock::GetMock()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
 int32_t InitBroadcastMgr()
@@ -139,10 +139,11 @@ int32_t BleMock::ActionOfDeInitBroadcastMgr()
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t BleMock::ActionOfAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
     btStateListener = listener;
-    return BT_STATE_LISTENER_ID;
+    *listenerId = BT_STATE_LISTENER_ID;
+    return SOFTBUS_OK;
 }
 
 int32_t BleMock::ActionOfRemoveBtStateListener(int32_t listenerId)
@@ -529,7 +530,8 @@ void BleMock::SetupSuccessStub()
     EXPECT_CALL(*this, DeInitBroadcastMgr).WillRepeatedly(BleMock::ActionOfDeInitBroadcastMgr);
     EXPECT_CALL(*this, SoftBusGetBtState).WillRepeatedly(BleMock::ActionOfGetBtState);
     EXPECT_CALL(*this, SoftBusGetBrState).WillRepeatedly(BleMock::ActionOfGetBrState);
-    EXPECT_CALL(*this, SoftBusAddBtStateListener(NotNull())).WillRepeatedly(BleMock::ActionOfAddBtStateListener);
+    EXPECT_CALL(*this, SoftBusAddBtStateListener(NotNull(), NotNull())).
+        WillRepeatedly(BleMock::ActionOfAddBtStateListener);
     EXPECT_CALL(*this, SoftBusRemoveBtStateListener).WillRepeatedly(BleMock::ActionOfRemoveBtStateListener);
     EXPECT_CALL(*this, StartBroadcasting).WillRepeatedly(BleMock::ActionOfStartBroadcasting);
     EXPECT_CALL(*this, StopBroadcasting).WillRepeatedly(BleMock::ActionOfStopBroadcasting);

@@ -41,6 +41,7 @@
 #include "softbus_socket.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "lnn_init_monitor.h"
 
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \
@@ -98,7 +99,7 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
 
 static void NotifyIpUpdated(const char *ifName, struct nlmsghdr *nlh)
 {
-    if (ifName == NULL) {
+    if (ifName == NULL || nlh == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return;
     }
@@ -137,7 +138,7 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
 
 static void NotifyLinkUp(const char *ifName, struct nlmsghdr *nlh, struct ifinfomsg *ifinfo)
 {
-    if (ifName == NULL) {
+    if (ifName == NULL || nlh == NULL || ifinfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return;
     }
@@ -243,6 +244,18 @@ int32_t LnnInitNetlinkMonitorImpl(void)
         SoftBusSocketClose(sockFd);
         return ret;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitNetlinkMonitorImplNotify(void)
+{
+    int32_t ret = LnnInitNetlinkMonitorImpl();
+    if (ret != SOFTBUS_OK) {
+        LnnInitModuleStatusSet(INIT_DEPS_NETLINK, DEPS_STATUS_FAILED);
+        LnnInitModuleReturnSet(INIT_DEPS_NETLINK, ret);
+        return ret;
+    }
+    LnnInitModuleStatusSet(INIT_DEPS_NETLINK, DEPS_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
