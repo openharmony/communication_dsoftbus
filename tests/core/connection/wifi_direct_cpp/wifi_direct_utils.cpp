@@ -579,6 +579,25 @@ int32_t WifiDirectUtils::GetDeviceType()
     return deviceTypeId;
 }
 
+int32_t WifiDirectUtils::GetLocalConnSubFeature(uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetLocalNumU64Info(NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get connSubFeature failed");
+    feature = connSubFeature;
+    return SOFTBUS_OK;
+}
+
+int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetRemoteNumU64Info(remoteNetworkId.c_str(), NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
+        "remoteNetworkId=%{public}s, get connSubFeature failed", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
+    feature = connSubFeature;
+    return SOFTBUS_OK;
+}
+
 std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
 {
     std::string remoteOsVersion;
@@ -609,5 +628,20 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
     CONN_LOGI(CONN_WIFI_DIRECT, "remote screen status %{public}d", screenStatus);
     SoftBusFree(nodeInfo);
     return screenStatus;
+}
+
+bool WifiDirectUtils::IsDeviceId(const std::string &remoteId)
+{
+    return remoteId.length() == UUID_BUF_LEN - 1;
+}
+
+std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDeviceId)
+{
+    return {};
+}
+
+std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
+{
+    return {};
 }
 } // namespace OHOS::SoftBus
