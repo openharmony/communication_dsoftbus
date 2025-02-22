@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@
 #include "auth_session_key.c"
 #include "auth_session_key.h"
 #include "auth_tcp_connection_mock.h"
-#include "lnn_connection_mock.h"
+#include "auth_common_mock.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_score.h"
@@ -506,7 +506,7 @@ HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
 {
-    LnnConnectInterfaceMock connMock;
+    AuthCommonInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnGetConnectionInfo).WillRepeatedly(Return(true));
     uint64_t connId = 0;
     connId = GetConnType(connId);
@@ -1204,7 +1204,7 @@ HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.Level1)
 {
     AsyncCallDeviceIdReceived(nullptr);
-    LnnConnectInterfaceMock connMock;
+    AuthCommonInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnStopLocalListening).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnStartLocalListening).WillRepeatedly(Return(0));
     AuthStopListeningForWifiDirect(AUTH_LINK_TYPE_P2P, AUTH_ENHANCED_P2P_START);
