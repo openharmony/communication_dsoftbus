@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef LNN_PARAMETER_UTILS_H
-#define LNN_PARAMETER_UTILS_H
+#include "lnn_change_channel.h"
+#include "softbus_error_code.h"
 
-#include <stdbool.h>
-#include "lnn_lane_interface.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool IsCloudSyncEnabled(void);
-bool IsPowerControlEnabled(void);
-int32_t SetWifiConfigRemoteBaseMac(uint8_t *mac, uint8_t *wifiConfig, int32_t *cfgLen);
-int32_t GetWifiConfigBaseMac(char *mac);
-
-#ifdef __cplusplus
+int32_t InitActionStateAdapter(void)
+{
+    return SOFTBUS_OK;
 }
-#endif
-#endif // LNN_PARAMETER_UTILS_H
+
+int32_t LnnSetPreLink(const void *msg)
+{
+    (void)msg;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetPreLinkParam(void *msg, uint32_t *msgLen)
+{
+    (void)msg;
+    (void)msgLen;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

@@ -91,6 +91,8 @@ if (!enhanced || !dsoftbus_feature_lnn_lane_mgr) {
     "$core_lane_hub_path/lane_manager/src/lnn_lane_score_virtual.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_vap_info_virtual.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_power_control_virtual.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_lane_prelink_virtual.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_change_channel_virtual.c",
     "$core_lane_hub_path/lane_manager/src/lnn_parameter_utils_virtual.c",
   ]
 }
