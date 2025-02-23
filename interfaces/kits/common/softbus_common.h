@@ -252,6 +252,7 @@ typedef enum {
     CONNECTION_ADDR_ETH,      /**< Ethernet */
     CONNECTION_ADDR_SESSION,  /**< SESSION */
     CONNECTION_ADDR_USB,      /**< USB */
+    CONNECTION_ADDR_SESSION_WITH_KEY, /**< Session with key */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
@@ -304,6 +305,8 @@ typedef struct {
             int32_t sessionId;  /**< Session Id in int format */
             int32_t channelId;  /**< Channel Id in int format */
             int32_t type;   /**< Session type in int format */
+            int32_t localDeviceKeyId;
+            int32_t remoteDeviceKeyId;
         } session;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];

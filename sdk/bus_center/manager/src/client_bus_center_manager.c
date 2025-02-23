@@ -126,7 +126,7 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0)
             && (addr1->info.ip.port == addr2->info.ip.port);
     }
-    if (addr1->type == CONNECTION_ADDR_SESSION) {
+    if (addr1->type == CONNECTION_ADDR_SESSION || addr1->type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         return ((addr1->info.session.sessionId == addr2->info.session.sessionId) &&
             (addr1->info.session.channelId == addr2->info.session.channelId) &&
             (addr1->info.session.type == addr2->info.session.type));
