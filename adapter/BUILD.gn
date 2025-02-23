@@ -47,6 +47,7 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$softbus_adapter_common/security/access_token/include",
   ]

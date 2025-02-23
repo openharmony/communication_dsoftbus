@@ -44,6 +44,9 @@ typedef struct {
     void (*OnStopBroadcastingCallback)(int32_t advId, int32_t status);
     void (*OnUpdateBroadcastingCallback)(int32_t advId, int32_t status);
     void (*OnSetBroadcastingCallback)(int32_t advId, int32_t status);
+    void (*OnSetBroadcastingParamCallback)(int32_t advId, int32_t status);
+    void (*OnEnableBroadcastingCallback)(int32_t advId, int32_t status);
+    void (*OnDisableBroadcastingCallback)(int32_t advId, int32_t status);
 } SoftbusBroadcastCallback;
 
 /**
@@ -74,8 +77,13 @@ typedef struct {
     int32_t (*RegisterScanListener)(int32_t *scannerId, const SoftbusScanCallback *cb);
     int32_t (*UnRegisterScanListener)(int32_t scannerId);
     int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
+    int32_t (*SetScanParams)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
+        int32_t filterSize, SoftbusSetFilterCmd cmdId);
     int32_t (*StopBroadcasting)(int32_t advId);
     int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *data);
+    int32_t (*SetBroadcastingParam)(int32_t advId, const SoftbusBroadcastParam *param);
+    int32_t (*EnableBroadcasting)(int32_t advId);
+    int32_t (*DisableBroadcasting)(int32_t advId);
     int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
     int32_t (*StartScan)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
         int32_t filterSize);

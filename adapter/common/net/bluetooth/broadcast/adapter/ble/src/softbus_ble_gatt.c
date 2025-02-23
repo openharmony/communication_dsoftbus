@@ -25,13 +25,10 @@
 #include <string.h>
 
 #define GATT_ADV_MAX_NUM       20
-#define GATT_SCAN_MAX_NUM      2
 #define LP_BT_UUID_BURST       "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
 #define LP_BT_UUID_HEARTBEAT   "43d4a49f-605d-45b5-9302-4ddbbfd538fd"
 #define LP_DELIVERY_MODE_REPLY 0xF0
 #define LP_ADV_DURATION_MS     0
-#define SCAN_CHANNEL_0         0
-#define SCAN_CHANNEL_1         1
 
 static atomic_bool g_init = false;
 static atomic_bool g_bcCbReg = false;
@@ -42,6 +39,7 @@ static int32_t g_adapterBtStateListenerId = -1;
 typedef struct {
     bool isUsed;
     bool isAdvertising;
+    bool isDisabled;
     int32_t advId;
     SoftbusBroadcastCallback *advCallback;
 } AdvChannel;
@@ -185,11 +183,80 @@ static void WrapperAdvUpdateDataCb(int advId, int status)
     }
 }
 
+static void WrapperAdvUpdateParamCb(int advId, int status)
+{
+    int32_t ret = BtStatusToSoftBus((BtStatus)status);
+    for (uint32_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
+        if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
+            DISC_LOGW(DISC_BLE_ADAPTER, "lock adv failed, advId=%{public}u, bt-advId=%{public}d", channelId, advId);
+            continue;
+        }
+        AdvChannel *advChannel = &g_advChannel[channelId];
+        if (advChannel->advId != advId || !advChannel->isUsed || advChannel->advCallback == NULL ||
+            advChannel->advCallback->OnSetBroadcastingParamCallback == NULL) {
+            SoftBusMutexUnlock(&g_advLock);
+            continue;
+        }
+        DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback = *(advChannel->advCallback);
+        SoftBusMutexUnlock(&g_advLock);
+        callback.OnSetBroadcastingParamCallback(channelId, ret);
+        break;
+    }
+}
+
+static void WrapperOnAdvEnableExCb(int advId, int status)
+{
+    int32_t ret = BtStatusToSoftBus((BtStatus)status);
+    for (uint32_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
+        if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
+            DISC_LOGW(DISC_BLE_ADAPTER, "lock adv failed, advId=%{public}u, bt-advId=%{public}d", channelId, advId);
+            continue;
+        }
+        AdvChannel *advChannel = &g_advChannel[channelId];
+        if (advChannel->advId != advId || !advChannel->isUsed || advChannel->advCallback == NULL ||
+            advChannel->advCallback->OnEnableBroadcastingCallback == NULL) {
+            SoftBusMutexUnlock(&g_advLock);
+            continue;
+        }
+        DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback = *(advChannel->advCallback);
+        SoftBusMutexUnlock(&g_advLock);
+        callback.OnEnableBroadcastingCallback(channelId, ret);
+        break;
+    }
+}
+
+static void WrapperOnAdvDisableExCb(int advId, int status)
+{
+    int32_t ret = BtStatusToSoftBus((BtStatus)status);
+    for (uint32_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
+        if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
+            DISC_LOGW(DISC_BLE_ADAPTER, "lock adv failed, advId=%{public}u, bt-advId=%{public}d", channelId, advId);
+            continue;
+        }
+        AdvChannel *advChannel = &g_advChannel[channelId];
+        if (advChannel->advId != advId || !advChannel->isUsed || advChannel->advCallback == NULL ||
+            advChannel->advCallback->OnDisableBroadcastingCallback == NULL) {
+            SoftBusMutexUnlock(&g_advLock);
+            continue;
+        }
+        DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback = *(advChannel->advCallback);
+        SoftBusMutexUnlock(&g_advLock);
+        callback.OnDisableBroadcastingCallback(channelId, ret);
+        break;
+    }
+}
+
 static BtGattCallbacks g_softbusGattCb = {
     .advEnableCb = WrapperAdvEnableCb,
     .advDisableCb = WrapperAdvDisableCb,
     .advDataCb = WrapperAdvSetDataCb,
     .advUpdateCb = WrapperAdvUpdateDataCb,
+    .advChangeCb = WrapperAdvUpdateParamCb,
+    .onEnableExCb = WrapperOnAdvEnableExCb,
+    .onDisableExCb = WrapperOnAdvDisableExCb,
 };
 
 static int32_t SoftbusRegisterAdvCb(int32_t *advId, const SoftbusBroadcastCallback *cb)
@@ -218,6 +285,7 @@ static int32_t SoftbusRegisterAdvCb(int32_t *advId, const SoftbusBroadcastCallba
         g_advChannel[channelId].advId = -1;
         g_advChannel[channelId].isUsed = true;
         g_advChannel[channelId].isAdvertising = false;
+        g_advChannel[channelId].isDisabled = false;
         g_advChannel[channelId].advCallback = (SoftbusBroadcastCallback *)cb;
         *advId = channelId;
         DISC_LOGI(DISC_BLE_ADAPTER, "register success, advId=%{public}u", channelId);
@@ -249,6 +317,7 @@ static int32_t SoftbusUnRegisterAdvCb(int32_t advId)
     g_advChannel[advId].advId = -1;
     g_advChannel[advId].isUsed = false;
     g_advChannel[advId].isAdvertising = false;
+    g_advChannel[advId].isDisabled = false;
     g_advChannel[advId].advCallback = NULL;
     SoftBusMutexUnlock(&g_advLock);
     return SOFTBUS_OK;
@@ -346,32 +415,62 @@ static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type,
 
 static void WrapperScanResultCb0(BtScanResultData *data)
 {
-    WrapperScanResultCb(SCAN_CHANNEL_0, data);
+    WrapperScanResultCb(CHANEL_LP, data);
 }
 
 static void WrapperScanResultCb1(BtScanResultData *data)
 {
-    WrapperScanResultCb(SCAN_CHANNEL_1, data);
+    WrapperScanResultCb(CHANEL_STEADY, data);
+}
+
+static void WrapperScanResultCb2(BtScanResultData *data)
+{
+    WrapperScanResultCb(CHANEL_SHARE, data);
+}
+
+static void WrapperScanResultCb3(BtScanResultData *data)
+{
+    WrapperScanResultCb(CHANEL_UNSTEADY, data);
 }
 
 static void WrapperScanStateChangeCb0(int32_t resultCode, bool isStartScan)
 {
-    WrapperScanStateChangeCb(SCAN_CHANNEL_0, resultCode, isStartScan);
+    WrapperScanStateChangeCb(CHANEL_LP, resultCode, isStartScan);
 }
 
 static void WrapperScanStateChangeCb1(int32_t resultCode, bool isStartScan)
 {
-    WrapperScanStateChangeCb(SCAN_CHANNEL_1, resultCode, isStartScan);
+    WrapperScanStateChangeCb(CHANEL_STEADY, resultCode, isStartScan);
+}
+
+static void WrapperScanStateChangeCb2(int32_t resultCode, bool isStartScan)
+{
+    WrapperScanStateChangeCb(CHANEL_SHARE, resultCode, isStartScan);
+}
+
+static void WrapperScanStateChangeCb3(int32_t resultCode, bool isStartScan)
+{
+    WrapperScanStateChangeCb(CHANEL_UNSTEADY, resultCode, isStartScan);
 }
 
 static void WrapperLpDeviceInfoCb0(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
-    WrapperLpDeviceInfoCb(SCAN_CHANNEL_0, uuid, type, data, dataSize);
+    WrapperLpDeviceInfoCb(CHANEL_LP, uuid, type, data, dataSize);
 }
 
 static void WrapperLpDeviceInfoCb1(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
-    WrapperLpDeviceInfoCb(SCAN_CHANNEL_1, uuid, type, data, dataSize);
+    WrapperLpDeviceInfoCb(CHANEL_STEADY, uuid, type, data, dataSize);
+}
+
+static void WrapperLpDeviceInfoCb2(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
+{
+    WrapperLpDeviceInfoCb(CHANEL_SHARE, uuid, type, data, dataSize);
+}
+
+static void WrapperLpDeviceInfoCb3(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
+{
+    WrapperLpDeviceInfoCb(CHANEL_UNSTEADY, uuid, type, data, dataSize);
 }
 
 static BleScanCallbacks g_softbusBleScanCb[GATT_SCAN_MAX_NUM] = {
@@ -384,7 +483,17 @@ static BleScanCallbacks g_softbusBleScanCb[GATT_SCAN_MAX_NUM] = {
         .scanResultCb = WrapperScanResultCb1,
         .scanStateChangeCb = WrapperScanStateChangeCb1,
         .lpDeviceInfoCb = WrapperLpDeviceInfoCb1,
-    }
+    },
+    {
+        .scanResultCb = WrapperScanResultCb2,
+        .scanStateChangeCb = WrapperScanStateChangeCb2,
+        .lpDeviceInfoCb = WrapperLpDeviceInfoCb2,
+    },
+    {
+        .scanResultCb = WrapperScanResultCb3,
+        .scanStateChangeCb = WrapperScanStateChangeCb3,
+        .lpDeviceInfoCb = WrapperLpDeviceInfoCb3,
+    },
 };
 
 static BleScanCallbacks *GetAdapterScanCb(uint8_t channelId)
@@ -608,6 +717,108 @@ static int32_t SoftbusSetAdvData(int32_t advId, const SoftbusBroadcastData *data
     return ret;
 }
 
+static int32_t SoftbusSetAdvParamter(int32_t advId, const SoftbusBroadcastParam *param)
+{
+    if (param == NULL) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "param is null, advId=%{public}d", advId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "lock adv failed, advId=%{public}d", advId);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!CheckAdvChanInUsed(advId)) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not in used, advId=%{public}d", advId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL;
+    }
+    int32_t btAdvId = g_advChannel[advId].advId;
+    if (!g_advChannel[advId].isAdvertising) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not advertising, advId=%{public}d, bt-advId=%{public}d", advId, btAdvId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_ALREADY_TRIGGERED;
+    }
+    if (!g_advChannel[advId].isDisabled) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not disabled, advId=%{public}d, bt-advId=%{public}d", advId, btAdvId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_BC_ADAPTER_DISABLED_FAIL;
+    }
+
+    SoftBusMutexUnlock(&g_advLock);
+    BleAdvParams advParam = {};
+    SoftbusAdvParamToBt(param, &advParam);
+    int32_t ret = BtStatusToSoftBus(BleChangeAdvParams(btAdvId, advParam));
+    DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
+    return ret;
+}
+
+static int32_t SoftbusEnableBroadcasting(int32_t advId)
+{
+    if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "lock adv failed, advId=%{public}d", advId);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!CheckAdvChanInUsed(advId)) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not in used, advId=%{public}d", advId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL;
+    }
+    int32_t btAdvId = g_advChannel[advId].advId;
+    if (!g_advChannel[advId].isAdvertising) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not advertising, advId=%{public}d, bt-advId=%{public}d", advId, btAdvId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_ALREADY_TRIGGERED;
+    }
+    if (!g_advChannel[advId].isDisabled) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "already enabled, advId=%{public}d, bt-advId=%{public}d", advId, btAdvId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_BC_ADAPTER_ENABLED_FAIL;
+    }
+
+    g_advChannel[advId].isDisabled = false;
+    SoftBusMutexUnlock(&g_advLock);
+    int32_t ret = BleEnableAdvEx(btAdvId);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusDisableBroadcasting(int32_t advId)
+{
+    if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "lock adv failed, advId=%{public}d", advId);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!CheckAdvChanInUsed(advId)) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not in used, advId=%{public}d", advId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL;
+    }
+    int32_t btAdvId = g_advChannel[advId].advId;
+    if (!g_advChannel[advId].isAdvertising) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "adv is not advertising, advId=%{public}d, bt-advId=%{public}d", advId, btAdvId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_ALREADY_TRIGGERED;
+    }
+    if (g_advChannel[advId].isDisabled) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "already disabled, advId=%{public}d, bt-advId=%{public}d",
+            advId, btAdvId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_BC_ADAPTER_DISABLED_FAIL;
+    }
+
+    g_advChannel[advId].isDisabled = true;
+    SoftBusMutexUnlock(&g_advLock);
+    int32_t ret = BleDisableAdvEx(btAdvId);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t SoftbusUpdateAdvData(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
 {
     int32_t ret = SoftbusStopAdv(advId);
@@ -631,6 +842,40 @@ static bool CheckScanChannelInUsed(int32_t scannerId)
         return false;
     }
     return true;
+}
+
+static int32_t SoftbusSetScanParams(int32_t scannerId, const SoftBusBcScanParams *param,
+    const SoftBusBcScanFilter *scanFilter, int32_t filterSize, SoftbusSetFilterCmd cmdId)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL && cmdId >= SOFTBUS_SCAN_FILTER_CMD_NONE &&
+        cmdId < SOFTBUS_SCAN_FILTER_CMD_BUTT, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER,
+        "invalid param, scannerId=%{public}d", scannerId);
+    int32_t ret = -1;
+    BleScanConfigs scanConfig = {};
+    scanConfig.scanMode = GetBtScanMode(param->scanInterval, param->scanWindow);
+    scanConfig.phy = (int)param->scanPhy;
+    if (scanFilter != NULL && filterSize > 0) {
+        BleScanNativeFilter *nativeFilter = (BleScanNativeFilter *)SoftBusCalloc(
+            sizeof(BleScanNativeFilter) * filterSize);
+        if (nativeFilter == NULL) {
+            DISC_LOGE(DISC_BLE_ADAPTER, "malloc native filter failed");
+            return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
+        }
+        SoftbusFilterToBt(nativeFilter, scanFilter, filterSize);
+        DISC_LOGI(DISC_BLE_ADAPTER, "change scan params and filter scannerId is %{public}d",
+            scannerId);
+        ret = BleChangeScanParams(g_scanChannel[scannerId].scannerId, &scanConfig, nativeFilter, filterSize, cmdId);
+        FreeBtFilter(nativeFilter, filterSize);
+    } else {
+        DISC_LOGI(DISC_BLE_ADAPTER, "change scan params scannerId is %{public}d", scannerId);
+        ret = BleChangeScanParams(g_scanChannel[scannerId].scannerId, &scanConfig, NULL, 0, cmdId);
+    }
+    if (ret == OHOS_BT_STATUS_SUCCESS) {
+        return SOFTBUS_OK;
+    } else {
+        DISC_LOGE(DISC_BLE_ADAPTER, "BleChangeScanParams result Error, ret=%{public}d", ret);
+        return SOFTBUS_DISCOVER_BLE_SET_SCAN_PARAM_FAIL;
+    }
 }
 
 static int32_t SoftbusStartScan(int32_t scannerId, const SoftBusBcScanParams *param,
@@ -913,7 +1158,11 @@ void SoftbusBleAdapterInit(void)
         .StartBroadcasting = SoftbusStartAdv,
         .StopBroadcasting = SoftbusStopAdv,
         .SetBroadcastingData = SoftbusSetAdvData,
+        .SetBroadcastingParam = SoftbusSetAdvParamter,
+        .EnableBroadcasting = SoftbusEnableBroadcasting,
+        .DisableBroadcasting = SoftbusDisableBroadcasting,
         .UpdateBroadcasting = SoftbusUpdateAdvData,
+        .SetScanParams = SoftbusSetScanParams,
         .StartScan = SoftbusStartScan,
         .StopScan = SoftbusStopScan,
         .IsLpDeviceAvailable = IsLpAvailable,
