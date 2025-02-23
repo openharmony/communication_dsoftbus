@@ -22,9 +22,11 @@
 #include "auth_attest_interface.h"
 #include "auth_connection.h"
 #include "auth_hichain_adapter.h"
+#include "auth_deviceprofile.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
+#include "auth_pre_link.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
@@ -56,8 +58,14 @@
 #define EXCHANGE_ID_TYPE      "exchangeIdType"
 #define DEV_IP_HASH_TAG       "DevIpHash"
 #define AUTH_MODULE           "AuthModule"
+#define DM_DEVICE_KEY_ID      "dmDeviceKeyId"
 #define CMD_TAG_LEN           30
 #define PACKET_SIZE           (64 * 1024)
+
+/* TestAuthInfo */
+#define TEST_AUTH_INFO  "TEST_AUTH_INFO"
+#define TEST_AUTH_LEN   13
+#define TEST_AUTH_STR   "Test_Auth_OK"
 
 /* DeviceInfo-WiFi */
 #define CODE_VERIFY_IP   1
@@ -838,6 +846,47 @@ static void PackUserId(JsonObj *json, int32_t userId)
     }
 }
 
+char *PackAuthTestInfoMessage(const AuthConnInfo *connInfo)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, NULL, AUTH_FSM, "info is NULL");
+    AUTH_LOGI(AUTH_FSM, "connType=%{public}d", connInfo->type);
+    JsonObj *obj = JSON_CreateObject();
+    if (obj == NULL) {
+        return NULL;
+    }
+    char testInfo[] = TEST_AUTH_STR;
+    if (!JSON_AddStringToObject(obj, TEST_AUTH_INFO, testInfo)) {
+        AUTH_LOGE(AUTH_FSM, "add msg body fail");
+        JSON_Delete(obj);
+        return NULL;
+    }
+    char *msg = JSON_PrintUnformatted(obj);
+    JSON_Delete(obj);
+    return msg;
+}
+
+static void PackDeviceKeyId(JsonObj *obj, const AuthSessionInfo *info)
+{
+    int32_t deviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    AuthPreLinkNode node;
+    (void)memset_s(&node, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
+    if (FindAuthPreLinkNodeById(info->requestId, &node) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "find deviceKeyId fail");
+        return;
+    }
+    deviceKeyId = node.remoteDeviceKeyId;
+    if (!JSON_AddInt32ToObject(obj, DM_DEVICE_KEY_ID, deviceKeyId)) {
+        AUTH_LOGE(AUTH_FSM, "add deviceKeyId fail");
+        return;
+    }
+    if (deviceKeyId == AUTH_INVALID_DEVICEKEY_ID || node.keyLen == 0) {
+        AUTH_LOGE(AUTH_FSM, "deviceKeyId invalid");
+        return;
+    }
+    AuthSessionInfo *infoMut = (AuthSessionInfo *)info;
+    infoMut->isSupportDmDeviceKey = true;
+}
+
 char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is NULL");
@@ -869,6 +918,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info)
         JSON_Delete(obj);
         return NULL;
     }
+    PackDeviceKeyId(obj, info);
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     if (nodeInfo == NULL) {
         AUTH_LOGE(AUTH_FSM, "nodeInfo is null!");
@@ -906,6 +956,10 @@ static bool UnpackWifiSinglePassInfo(JsonObj *obj, AuthSessionInfo *info)
     int32_t rc = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&addr);
     if (rc != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "GetPerrName fd=%{public}d, rc=%{public}d", socketFd, rc);
+        return true;
+    }
+    if (addr.sinFamily == SOFTBUS_AF_INET6) {
+        AUTH_LOGI(AUTH_FSM, "ipv6 socket, skip.");
         return true;
     }
     (void)memset_s(&socketAddr, sizeof(socketAddr), 0, sizeof(socketAddr));
@@ -1066,6 +1120,65 @@ static int32_t IsCmdMatchByDeviceId(JsonObj *obj, AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
+int32_t UnpackAuthTestDataJson(const char *msg, uint32_t len)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "msg is NULL");
+    JsonObj *obj = JSON_Parse(msg, len);
+    if (obj == NULL) {
+        AUTH_LOGE(AUTH_FSM, "json parse fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char authTestData[TEST_AUTH_LEN];
+    if (!JSON_GetStringFromOject(obj, TEST_AUTH_INFO, authTestData, UUID_BUF_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "auth test data not found");
+        JSON_Delete(obj);
+        return SOFTBUS_AUTH_UNPACK_DEV_ID_FAIL;
+    }
+    JSON_Delete(obj);
+    if (memcmp(authTestData, TEST_AUTH_STR, TEST_AUTH_LEN) != 0) {
+        return SOFTBUS_AUTH_SESSION_KEY_INVALID;
+    }
+    return SOFTBUS_OK;
+}
+
+static void CheckDeviceKeyValid(JsonObj *obj, AuthSessionInfo *info)
+{
+    int32_t dmDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    if (!JSON_GetInt32FromOject(obj, DM_DEVICE_KEY_ID, &dmDeviceKeyId)) {
+        AUTH_LOGE(AUTH_FSM, "get device key id fail");
+        return;
+    }
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
+        UpdateAuthPreLinkDeviceKeyIdById(info->requestId, false, dmDeviceKeyId);
+    } else if (AddToAuthPreLinkList(info->requestId, GetFd(info->connId), dmDeviceKeyId,
+        AUTH_INVALID_DEVICEKEY_ID, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "add auth pre link node fail");
+        return;
+    }
+    if (dmDeviceKeyId == AUTH_INVALID_DEVICEKEY_ID) {
+        AUTH_LOGE(AUTH_FSM, "device key id invalid");
+        return;
+    }
+    uint8_t deviceKey[SESSION_KEY_LENGTH] = { 0 };
+    uint32_t keyLen = 0;
+    if (GetSessionKeyProfile(dmDeviceKeyId, deviceKey, &keyLen) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth key fail");
+        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        keyLen = 0;
+        return;
+    }
+    if (UpdateAuthPreLinkDeviceKeyById(info->requestId, deviceKey, keyLen) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "update pre Link device key fail");
+        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        keyLen = 0;
+        return;
+    }
+    info->isSupportDmDeviceKey = true;
+    (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    keyLen = 0;
+    DelSessionKeyProfile(dmDeviceKeyId);
+}
+
 int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "msg is NULL");
@@ -1096,6 +1209,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
         OptString(obj, SUPPORT_INFO_COMPRESS, compressParse, PARSE_UNCOMPRESS_STRING_BUFF_LEN, FALSE_STRING_TAG);
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
+    CheckDeviceKeyValid(obj, info);
     OptInt(obj, AUTH_MODULE, (int32_t *)&info->module, AUTH_MODULE_LNN);
     bool isSupportNormalizedKey = false;
     OptBool(obj, IS_NORMALIZED, &isSupportNormalizedKey, false);
@@ -1895,26 +2009,37 @@ static int32_t PackCertificateInfo(JsonObj *json, const AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
         return SOFTBUS_OK;
     }
-
+    AuthGenCertNode *authGenCertNodePtr = NULL;
+    SoftbusCertChain *softbusCertChainPtr = NULL;
     SoftbusCertChain softbusCertChain;
-    (void)memset_s(&softbusCertChain, sizeof(SoftbusCertChain), 0, sizeof(SoftbusCertChain));
-    if (GenerateCertificate(&softbusCertChain, info) != SOFTBUS_OK) {
-        AUTH_LOGW(AUTH_FSM, "GenerateCertificate fail");
-        return SOFTBUS_OK;
+    if (FindAndWaitAuthGenCertParaNodeById(info->requestId, &authGenCertNodePtr) == SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "use parallel gen cert.");
+        softbusCertChainPtr = authGenCertNodePtr->softbusCertChain;
+    } else {
+        (void)memset_s(&softbusCertChain, sizeof(SoftbusCertChain), 0, sizeof(SoftbusCertChain));
+        if (GenerateCertificate(&softbusCertChain, info) != SOFTBUS_OK) {
+            AUTH_LOGW(AUTH_FSM, "GenerateCertificate fail");
+            return SOFTBUS_OK;
+        }
+        softbusCertChainPtr = &softbusCertChain;
     }
-    if (!JSON_AddBytesToObject(json, ATTEST_CERTS, softbusCertChain.cert[ATTEST_CERTS_INDEX].data,
-        softbusCertChain.cert[ATTEST_CERTS_INDEX].size) ||
-        !JSON_AddBytesToObject(json, DEVICE_CERTS, softbusCertChain.cert[DEVICE_CERTS_INDEX].data,
-        softbusCertChain.cert[DEVICE_CERTS_INDEX].size) ||
-        !JSON_AddBytesToObject(json, MANUFACTURE_CERTS, softbusCertChain.cert[MANUFACTURE_CERTS_INDEX].data,
-        softbusCertChain.cert[MANUFACTURE_CERTS_INDEX].size) ||
-        !JSON_AddBytesToObject(json, ROOT_CERTS, softbusCertChain.cert[ROOT_CERTS_INDEX].data,
-        softbusCertChain.cert[ROOT_CERTS_INDEX].size)) {
-        FreeSoftbusChain(&softbusCertChain);
+    if (!JSON_AddBytesToObject(json, ATTEST_CERTS, softbusCertChainPtr->cert[ATTEST_CERTS_INDEX].data,
+        softbusCertChainPtr->cert[ATTEST_CERTS_INDEX].size) ||
+        !JSON_AddBytesToObject(json, DEVICE_CERTS, softbusCertChainPtr->cert[DEVICE_CERTS_INDEX].data,
+        softbusCertChainPtr->cert[DEVICE_CERTS_INDEX].size) ||
+        !JSON_AddBytesToObject(json, MANUFACTURE_CERTS, softbusCertChainPtr->cert[MANUFACTURE_CERTS_INDEX].data,
+        softbusCertChainPtr->cert[MANUFACTURE_CERTS_INDEX].size) ||
+        !JSON_AddBytesToObject(json, ROOT_CERTS, softbusCertChainPtr->cert[ROOT_CERTS_INDEX].data,
+        softbusCertChainPtr->cert[ROOT_CERTS_INDEX].size)) {
+        FreeSoftbusChain(softbusCertChainPtr);
         AUTH_LOGE(AUTH_FSM, "pack certChain fail.");
         return SOFTBUS_AUTH_INNER_ERR;
     }
-    FreeSoftbusChain(&softbusCertChain);
+    if (authGenCertNodePtr != NULL) {
+        DelAuthGenCertParaNodeById(info->requestId);
+    } else {
+        FreeSoftbusChain(softbusCertChainPtr);
+    }
     return SOFTBUS_OK;
 }
 

@@ -491,6 +491,8 @@ ohos_unittest("LNNNetBuilderMockTest") {
 ohos_unittest("LNNConnectionFsmTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
+    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connId_callback_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
@@ -502,6 +504,9 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_manager.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_sync_info_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
@@ -518,6 +523,14 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include/",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_qos/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
   ]
 
   deps = [
@@ -801,6 +814,7 @@ ohos_unittest("LNNSyncInfoManagerTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm_process.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
@@ -929,6 +943,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   ]
 
   deps = [
@@ -1491,13 +1506,22 @@ ohos_unittest("LNNLaneExtMockTest") {
 
   if (enhanced_test) {
     sources += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_prelink.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_score.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/src/channel_rating_v2.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/src/lnn_rating_manager.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/src/wlan_channel_collector.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/src/wlan_channel_sync.c",
     ]
-    include_dirs += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/include" ]
+    include_dirs += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/include",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/include",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/wifi_direct_cpp",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/action/adapter/include",
+      "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+      "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    ]
   } else {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c" ]
   }
@@ -1597,11 +1621,18 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/dfx/interface/include/form",
+    "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/include",
+    "$dsoftbus_root_path/dsoftbus_enhance/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/action/adapter/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "unittest/common/",
   ]
 
   if (enhanced_test) {
     sources += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_prelink.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_score.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/src/channel_rating_v2.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/src/lnn_rating_manager.c",
@@ -1715,6 +1746,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_common.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_wifi_direct.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_prelink_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_select.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
@@ -1802,6 +1834,7 @@ ohos_unittest("LNNLaneLinkExtTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_common.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_wifi_direct.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_prelink_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_select.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
@@ -1925,7 +1958,9 @@ ohos_unittest("LNNLaneHubTest") {
 ohos_unittest("LNNTransLaneMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_change_channel_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_common.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_prelink_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_reliability.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_parameter_utils_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
@@ -2369,6 +2404,7 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_wifi_direct.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_prelink_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_select_rule.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
