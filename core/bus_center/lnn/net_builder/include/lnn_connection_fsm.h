@@ -81,6 +81,8 @@ typedef struct tagLnnConnectionFsm {
     bool isNeedConnect;
     bool isSession;
     uint16_t id;
+    int32_t localDeviceKeyId;
+    int32_t remoteDeviceKeyId;
 
     LnnConnectionFsmStopCallback stopCallback;
     ListNode node;

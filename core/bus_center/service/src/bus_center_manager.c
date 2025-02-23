@@ -1,4 +1,4 @@
-/*
+   /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
+#include "lnn_change_channel.h"
+#include "lnn_lane_prelink.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
@@ -31,6 +33,7 @@
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account_adapter.h"
+#include "auth_pre_link.h"
 #include "legacy/softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -232,6 +235,22 @@ static int32_t BusCenterServerInitSecondStep(void)
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
         return SOFTBUS_NO_INIT;
     }
+    if (InitAuthPreLinkList() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initAuthPreLinkList fail");
+        return SOFTBUS_NO_INIT;
+    }
+    if (InitAuthGenCertParallelList() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initAuthGenCertParallelList fail");
+        return SOFTBUS_NO_INIT;
+    }
+    if (InitActionBleConcurrency() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initActionBleConcurrencyList fail");
+        return SOFTBUS_NO_INIT;
+    }
+    if (InitActionStateAdapter() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initActionStateAdapter fail");
+        return SOFTBUS_NO_INIT;
+    }
     return SOFTBUS_OK;
 }
 
@@ -284,5 +303,7 @@ void BusCenterServerDeinit(void)
     LnnDeinitMetaNode();
     LnnCoapConnectDeinit();
     LnnDeinitLnnLooper();
+    DeinitAuthGenCertParallelList();
+    DeinitAuthPreLinkList();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }
