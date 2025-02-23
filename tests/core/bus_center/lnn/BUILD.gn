@@ -229,6 +229,40 @@ ohos_unittest("NetBuilderTest") {
   ]
 }
 
+ohos_unittest("LNNInitMonitorTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/lnn_init_monitor_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  include_dirs += [
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/src",
+  ]
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+  external_deps += [
+    "huks:libhukssdk",
+    "ipc:ipc_single",
+  ]
+}
+
 ohos_unittest("LNNHuksUtilsTest") {
   module_out_path = module_output_path
   sources = [ "unittest/lnn_huks_test.cpp" ]
@@ -261,12 +295,16 @@ ohos_unittest("LNNHuksUtilsTest") {
 
 ohos_unittest("LedgerLaneHubTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/ledger_lane_hub_test.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "unittest/ledger_lane_hub_test.cpp",
+  ]
   include_dirs = bus_center_unittest_dirs
   deps = bus_center_unittest_deps
 
   include_dirs += [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
   if (is_standard_system) {
@@ -461,6 +499,7 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_sync_info_mock.cpp",
@@ -477,6 +516,7 @@ ohos_unittest("LNNConnectionFsmTest") {
   include_dirs = lnn_mock_test_include_dirs
   include_dirs += [
     "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include/",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
   ]
 
@@ -517,6 +557,7 @@ ohos_unittest("LNNConnectionFsmMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
@@ -528,8 +569,10 @@ ohos_unittest("LNNConnectionFsmMockTest") {
   ]
 
   include_dirs = lnn_mock_test_include_dirs
-  include_dirs +=
-      [ "$dsoftbus_root_path/core/transmission/trans_channel/auth/include" ]
+  include_dirs += [
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+  ]
   deps = lnn_mock_test_deps
 
   if (is_standard_system) {
@@ -586,6 +629,7 @@ ohos_unittest("LNNBatteryInfoTest") {
 ohos_unittest("LNNSyncInfoItemTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "net_builder/src/lnn_net_builder_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_service_mock.cpp",
@@ -763,6 +807,7 @@ ohos_unittest("LNNSyncInfoManagerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
@@ -776,9 +821,10 @@ ohos_unittest("LNNSyncInfoManagerTest") {
 
   include_dirs = lnn_mock_test_include_dirs
   include_dirs += [
-    "$dsoftbus_root_path/core/bus_center/ipc/include",
-    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include/",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
   ]
 
@@ -1078,6 +1124,7 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_node_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_manager.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "net_ledger/lnn_local_ledger_deps_mock.cpp",
     "net_ledger/lnn_local_ledger_test.cpp",
@@ -2122,6 +2169,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_fsm.c",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_strategy.c",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
+      "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
       "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_virtual.c",
       "net_ledger/lnn_decision_db_deps_mock.cpp",
@@ -2655,6 +2703,7 @@ ohos_unittest("LNNConnIdCbManagerTest") {
 ohos_unittest("LNNNetLedgerMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_mock_test.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",

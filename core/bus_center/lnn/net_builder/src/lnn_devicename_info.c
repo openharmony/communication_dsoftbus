@@ -26,6 +26,7 @@
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor_impl.h"
+#include "lnn_init_monitor.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_info.h"
@@ -38,7 +39,6 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_json.h"
 #include "message_handler.h"
-#include "lnn_init_monitor.h"
 
 #define KEY_NICK_NAME "KEY_NICK_NAME"
 #define KEY_ACCOUNT "KEY_ACCOUNT"
