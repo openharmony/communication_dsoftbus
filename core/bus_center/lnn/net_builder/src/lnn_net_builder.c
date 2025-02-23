@@ -1057,7 +1057,8 @@ static int32_t PostJoinLnnExtMsg(ConnectionAddr *addr, int32_t connId)
 
 int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
 {
-    if (callback == NULL || addr == NULL || addr->type != CONNECTION_ADDR_SESSION) {
+    if (callback == NULL || addr == NULL || addr->type != CONNECTION_ADDR_SESSION ||
+        addr->type != CONNECTION_ADDR_SESSION_WITH_KEY) {
         LNN_LOGE(LNN_BUILDER, "invalid callback");
         return SOFTBUS_INVALID_PARAM;
     }

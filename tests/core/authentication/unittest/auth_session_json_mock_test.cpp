@@ -338,6 +338,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
         .WillRepeatedly(Return(&obj));
     EXPECT_CALL(mocker, JSON_Delete).WillRepeatedly(Return());
     EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mocker, FindAuthPreLinkNodeById).WillRepeatedly(Return(SOFTBUS_OK));
     AuthSessionInfo info = {0};
     char *ret = PackDeviceIdJson(&info);
     EXPECT_EQ(ret, nullptr);
