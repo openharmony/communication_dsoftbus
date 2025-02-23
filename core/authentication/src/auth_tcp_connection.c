@@ -146,8 +146,6 @@ static uint32_t ModuleToDataType(int32_t module)
             return DATA_TYPE_DEVICE_INFO;
         case MODULE_AUTH_CANCEL:
             return DATA_TYPE_CANCEL_AUTH;
-        case MODULE_AUTH_TEST:
-            return DATA_TYPE_TEST_AUTH;
         default:
             break;
     }
@@ -517,47 +515,6 @@ static int32_t SocketConnectInner(
 int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *peerIp, int32_t port, bool isBlockMode)
 {
     return SocketConnectInner(localIp, peerIp, port, AUTH_RAW_P2P_CLIENT, isBlockMode);
-}
-
-int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
-{
-    if (fd < 0) {
-        AUTH_LOGE(AUTH_CONN, "ConnOpenClientSocket fail, fd=%{public}d", fd);
-        return SOFTBUS_INVALID_FD;
-    }
-    TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
-    SoftbusBaseListener listener = {
-        .onConnectEvent = OnConnectEvent,
-        .onDataEvent = OnDataEvent,
-    };
-    if (StartBaseClient(AUTH, &listener) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
-    }
-    if (DelTrigger(AUTH_RAW_P2P_CLIENT, fd, RW_TRIGGER) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
-        ConnShutdownSocket(fd);
-        return SOFTBUS_INVALID_FD;
-    }
-    if (AddTrigger(AUTH, fd, triggerMode) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
-        ConnShutdownSocket(fd);
-        return SOFTBUS_INVALID_FD;
-    }
-    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
-        SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(AUTH, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return SOFTBUS_INVALID_FD;
-    }
-    int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
-        AUTH_LOGE(AUTH_CONN, "set option fail.");
-        (void)DelTrigger(AUTH, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return SOFTBUS_INVALID_FD;
-    }
-    return SOFTBUS_OK;
 }
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)

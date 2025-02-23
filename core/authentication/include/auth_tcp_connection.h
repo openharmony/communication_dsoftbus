@@ -48,7 +48,6 @@ void UnsetSocketCallback(void);
 // connect succ, return fd; otherwise, return -1.
 int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *remoteIp, int32_t port, bool isBlockMode);
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode);
-int32_t SocketSetDevice(int32_t fd, bool isBlockMode);
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode);
 
 void SocketDisconnectDevice(ListenerModule module, int32_t fd);

@@ -21,8 +21,6 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
-#include "lnn_connection_fsm_process.c"
-#include "lnn_connection_fsm_process.h"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
 #include "lnn_map.h"

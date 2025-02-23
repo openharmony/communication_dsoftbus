@@ -40,16 +40,3 @@ void DelNotTrustDevice(const char *udid)
 {
     (void)udid;
 }
-
-void DelSessionKeyProfile(int32_t sessionKeyId)
-{
-    (void)sessionKeyId;
-}
-
-bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
-{
-    (void)sessionKeyId;
-    (void)sessionKey;
-    (void)length;
-    return false;
-}

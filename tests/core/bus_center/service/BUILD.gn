@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../core/authentication/authentication.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/bus_center"
@@ -79,7 +78,6 @@ ohos_unittest("BusCenterDecisionTest") {
 ohos_unittest("BusCenterEventTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_change_channel_virtual.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
     "unittest/bus_center_event_deps_mock.cpp",
     "unittest/bus_center_event_test.cpp",
@@ -141,18 +139,10 @@ ohos_unittest("BusCenterEventTest") {
 ohos_unittest("BusCenterManagerTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
     "unittest/bus_center_manager_deps_mock.cpp",
     "unittest/bus_center_manager_test.cpp",
   ]
-
-  if (!enhanced) {
-    sources += [
-      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_change_channel_virtual.c",
-      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_prelink_virtual.c",
-    ]
-  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
@@ -183,10 +173,6 @@ ohos_unittest("BusCenterManagerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   ]
 
   deps = [
