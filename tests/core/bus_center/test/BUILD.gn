@@ -22,6 +22,7 @@ ohos_unittest("HeartBeatMediumTest") {
   sources = [
     "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_ble_heartbeat_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
@@ -30,6 +31,9 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_manager.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_medium_mgr_test.cpp",
@@ -78,6 +82,16 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_qos/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
   ]
 
   deps = [
