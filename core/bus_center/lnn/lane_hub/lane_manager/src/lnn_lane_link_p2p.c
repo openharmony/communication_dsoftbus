@@ -30,6 +30,7 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link_conflict.h"
 #include "lnn_lane_link_wifi_direct.h"
+#include "lnn_lane_prelink.h"
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
@@ -2243,6 +2244,9 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     LNN_CHECK_AND_RETURN_RET_LOGE(errCode == SOFTBUS_OK, errCode, LNN_LANE, "add new connect node failed");
     wifiDirectInfo.pid = request->pid;
     wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
+    if (HaveConcurrencyBleGuideChannel(request->actionAddr)) {
+        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+    }
     wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
     wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;

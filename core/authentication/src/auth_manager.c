@@ -1332,6 +1332,13 @@ static int32_t AuthSetTcpKeepaliveByConnInfo(const AuthConnInfo *connInfo, ModeC
     DelDupAuthManager(auth[1]);
     return ret;
 }
+static void HandleAuthTestInfoData(const AuthDataHead *head, const uint8_t *data)
+{
+    if (AuthSessionProcessAuthTestData(head->seq, data, head->len) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "perform recv auth test data fail. seq=%{public}" PRId64, head->seq);
+        return;
+    }
+}
 
 static void HandleDeviceInfoData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
@@ -1547,6 +1554,9 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_AUTH:
             HandleAuthData(connInfo, head, data);
+            break;
+        case DATA_TYPE_TEST_AUTH:
+            HandleAuthTestInfoData(head, data);
             break;
         case DATA_TYPE_DEVICE_INFO:
             HandleDeviceInfoData(connId, connInfo, fromServer, head, data);
