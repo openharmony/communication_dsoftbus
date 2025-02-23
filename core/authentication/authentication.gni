@@ -54,7 +54,6 @@ if (dsoftbus_feature_lnn_frame) {
     "$authentication_path/src/auth_session_json.c",
     "$authentication_path/src/auth_session_message.c",
     "$authentication_path/src/auth_interface.c",
-    "$authentication_path/src/auth_pre_link.c",
   ]
   if (enhanced) {
     auth_server_src += [

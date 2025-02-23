@@ -187,10 +187,7 @@ if (defined(ohos_lite)) {
       "bus_center_heartbeat_sdk_test.cpp",
     ]
     include_dirs = bus_center_sdk_test_inc
-    include_dirs += [
-      "unittest/common/",
-      "$dsoftbus_root_path/core/authentication/include",
-    ]
+    include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
     deps += [
       "$dsoftbus_root_path/tests/sdk:softbus_client_static",
