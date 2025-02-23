@@ -348,3 +348,36 @@ void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUs
     }
 }
 
+bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "sessionKey is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(length != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "length is null");
+    std::vector<uint8_t> vecSessionKey;
+    int32_t localUserId = GetActiveOsAccountIds();
+    if (localUserId < 0) {
+        LNN_LOGE(LNN_STATE, "GetUserId failed");
+        return false;
+    }
+    int32_t rc = DpClient::GetInstance().GetSessionKey(localUserId, sessionKeyId, vecSessionKey);
+    if (rc != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetSessionKey failed, ret=%{public}d", rc);
+        return false;
+    }
+    std::copy(vecSessionKey.begin(), vecSessionKey.end(), sessionKey);
+    *length = vecSessionKey.size();
+    return true;
+}
+
+void DelSessionKeyProfile(int32_t sessionKeyId)
+{
+    int32_t localUserId = GetActiveOsAccountIds();
+    if (localUserId < 0) {
+        LNN_LOGE(LNN_STATE, "GetUserId failed");
+        return;
+    }
+    int32_t rc = DpClient::GetInstance().DeleteSessionKey(localUserId, sessionKeyId);
+    if (rc != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "DelSessionKey failed, ret=%{public}d", rc);
+    }
+}
+
