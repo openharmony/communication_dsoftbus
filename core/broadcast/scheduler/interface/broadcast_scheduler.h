@@ -132,7 +132,7 @@ int32_t SchedulerStartBroadcast(int32_t bcId, BroadcastContentType contentType, 
 int32_t SchedulerUpdateBroadcast(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 
 /**
- * @brief The service set broadcast data. Set broadcast data when broadcast is enabled.
+ * @brief The service set broadcast data. Set broadcast data when broadcast is advertising.
  *
  * @param bcId Indicates the service broadcast ID.
  * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
@@ -144,6 +144,20 @@ int32_t SchedulerUpdateBroadcast(int32_t bcId, const BroadcastParam *param, cons
  * @version 1.0
  */
 int32_t SchedulerSetBroadcastData(int32_t bcId, const BroadcastPacket *packet);
+
+/**
+ * @brief The service set broadcast param. Set broadcast param when broadcast is advertising and disabled.
+ *
+ * @param bcId Indicates the service broadcast ID.
+ * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
+ * returns any other value for failed.
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t SchedulerSetBroadcastParam(int32_t bcId, const BroadcastParam *param);
 
 /**
  * @brief The service stop broadcast.

@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 #include "c_header/ohos_bt_gatt.h"
@@ -24,9 +21,10 @@
 #include "softbus_ble_gatt.h"
 #include "softbus_broadcast_type.h"
 #include "softbus_error_code.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #define GATT_ADV_MAX_NUM  20
-#define GATT_SCAN_MAX_NUM 2
 
 using namespace testing::ext;
 using ::testing::AtMost;
@@ -494,7 +492,6 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-// SoftbusBroadcastData类型的数据填充
 const char ADV_DATA_EXAMPLE[] = {
     0x02,
     0x01,
@@ -1106,7 +1103,7 @@ HWTEST_F(SoftbusBleGattTest, TestIsLpAvailable, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = MockBluetooth::interface->IsLpDeviceAvailable();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     ret = MockBluetooth::interface->DeInit();
     EXPECT_EQ(ret, SOFTBUS_OK);

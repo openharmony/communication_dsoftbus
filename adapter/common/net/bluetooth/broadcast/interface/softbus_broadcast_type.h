@@ -424,6 +424,7 @@ typedef struct {
     uint8_t *serviceDataMask;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
+    uint8_t filterIndex;
 } BcScanFilter;
 
 /**

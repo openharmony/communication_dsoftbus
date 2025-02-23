@@ -137,6 +137,13 @@ int32_t BleStartScanEx(
     return MockBluetooth::GetMocker()->BleStartScanEx(scannerId, configs, filter, filterSize);
 }
 
+int BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
+    uint32_t filterSize, uint32_t filterAction)
+{
+    return MockBluetooth::GetMocker()->BleChangeScanParams(scannerId, config, filter,
+        filterSize, filterAction);
+}
+
 int32_t BleStopScan(int32_t scannerId)
 {
     return MockBluetooth::GetMocker()->BleStopScan(scannerId);
