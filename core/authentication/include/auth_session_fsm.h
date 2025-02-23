@@ -85,6 +85,7 @@ typedef struct {
     bool isSupportCompress;
     bool isSupportFastAuth;
     bool isNeedFastAuth;
+    bool isSupportDmDeviceKey;
     int64_t oldIndex;
     int32_t idType;
     int32_t userId;
@@ -134,6 +135,7 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len);
+int32_t AuthSessionProcessAuthTestData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect);
 int32_t AuthNotifyRequestVerify(int64_t authSeq);

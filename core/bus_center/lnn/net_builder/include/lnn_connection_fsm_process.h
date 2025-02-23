@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef LNN_PARAMETER_UTILS_H
-#define LNN_PARAMETER_UTILS_H
+#ifndef LNN_CONNECTION_FSM_PROCESS_H
+#define LNN_CONNECTION_FSM_PROCESS_H
 
-#include <stdbool.h>
-#include "lnn_lane_interface.h"
+#include <stdint.h>
+
+#include "lnn_connection_fsm.h"
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
 #endif
+#endif
 
-bool IsCloudSyncEnabled(void);
-bool IsPowerControlEnabled(void);
-int32_t SetWifiConfigRemoteBaseMac(uint8_t *mac, uint8_t *wifiConfig, int32_t *cfgLen);
-int32_t GetWifiConfigBaseMac(char *mac);
+bool CheckInterfaceCommonArgs(const LnnConnectionFsm *connFsm, bool needCheckDead);
+void NotifyJoinResult(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode);
+void FreeUnhandledMessage(int32_t msgType, void *para);
+void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
-#endif
-#endif // LNN_PARAMETER_UTILS_H
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* LNN_CONNECTION_FSM_PROCESS_H */
