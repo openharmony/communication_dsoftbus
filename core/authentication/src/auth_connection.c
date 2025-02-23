@@ -20,7 +20,6 @@
 #include "auth_common.h"
 #include "auth_log.h"
 #include "auth_request.h"
-#include "auth_pre_link.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
@@ -54,8 +53,6 @@ typedef struct {
 
 static ListNode g_connRequestList = { &g_connRequestList, &g_connRequestList };
 static AuthConnListener g_listener = { 0 };
-
-static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient);
 
 void __attribute__((weak)) RouteBuildClientAuthManager(int32_t cfd)
 {
@@ -333,36 +330,20 @@ static void RemoveConnConnectTimeout(uint32_t requestId)
 /* EVENT_CONNECT_CMD */
 static void HandleConnConnectCmd(const void *para)
 {
-    int32_t fd = AUTH_INVALID_FD;
     CHECK_NULL_PTR_RETURN_VOID(para);
     ConnCmdInfo *info = (ConnCmdInfo *)para;
-    bool isFindAuthPreLinkNode = false;
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
         AUTH_LOGE(AUTH_CONN, "invalid connType=%{public}d", info->connInfo.type);
         return;
     }
-    AuthPreLinkNode reuseKeyNode;
-    (void)memset_s(&reuseKeyNode, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
-    if (FindAuthPreLinkNodeById(info->requestId, &reuseKeyNode) == SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_CONN, "find reuse devicekey id");
-        fd = reuseKeyNode.fd;
-        isFindAuthPreLinkNode = true;
-        SocketSetDevice(fd, true);
-    } else {
-        fd = SocketConnectDevice(info->connInfo.info.ipInfo.ip, info->connInfo.info.ipInfo.port, false);
-    }
+    int32_t fd = SocketConnectDevice(info->connInfo.info.ipInfo.ip, info->connInfo.info.ipInfo.port, false);
     if (fd < 0) {
         AUTH_LOGE(AUTH_CONN, "SocketConnectDevice fail");
         RemoveConnConnectTimeout(info->requestId);
         NotifyClientConnected(info->requestId, 0, SOFTBUS_AUTH_CONN_FAIL, NULL);
-        DelAuthPreLinkById(info->requestId);
         return;
     }
     (void)AddConnRequest(&info->connInfo, info->requestId, fd);
-    if (isFindAuthPreLinkNode) {
-        AUTH_LOGI(AUTH_CONN, "reuse socket directly");
-        OnWiFiConnected(AUTH, fd, true);
-    }
 }
 
 /* EVENT_CONNECT_RESULT */
