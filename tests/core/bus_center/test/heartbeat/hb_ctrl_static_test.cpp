@@ -25,6 +25,7 @@
 #include "lnn_heartbeat_ctrl.c"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_init_monitor.c"
 #include "lnn_net_ledger_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -344,6 +345,8 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Lev
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     NiceMock<BleMock> bleMock;
     SetScreenState(SOFTBUS_SCREEN_ON);
+    LnnInitMonitorInitComplete(NULL);
+    LnnInitSetDeviceInfoReady();
     EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(hbStaticMock, AuthHasTrustedRelation).WillRepeatedly(Return(TRUSTED_RELATION_YES));
@@ -369,8 +372,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Lev
     g_hbConditionState.heartbeatEnable = true;
     g_isScreenOnOnce = false;
     HbScreenOnOnceTryCloudSync();
-    ret = IsHeartbeatEnable();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(IsHeartbeatEnable(), true);
     EXPECT_CALL(hbStaticMock, LnnEnableHeartbeatByType).WillOnce(Return(SOFTBUS_LOCK_ERR));
     HbConditionChanged(true);
     EXPECT_CALL(hbStaticMock, LnnEnableHeartbeatByType).WillRepeatedly(Return(SOFTBUS_OK));
