@@ -29,7 +29,6 @@
 #include "auth_meta_manager.h"
 #include "auth_session_json.h"
 #include "auth_session_key.h"
-#include "auth_pre_link.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
@@ -149,7 +148,6 @@ public:
     virtual bool PackCipherKeySyncMsg(void *json) = 0;
     virtual int32_t LnnGetP2pRole(const NodeInfo *info) = 0;
     virtual int32_t LnnGetStaFrequency(const NodeInfo *info) = 0;
-    virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -210,7 +208,6 @@ public:
     MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(GenerateCertificate, int32_t (SoftbusCertChain *, const AuthSessionInfo *));
     MOCK_METHOD1(FreeSoftbusChain, void (SoftbusCertChain *));
-    MOCK_METHOD2(FindAuthPreLinkNodeById, int32_t (uint32_t, AuthPreLinkNode *));
     MOCK_METHOD1(InitSoftbusChain, int32_t (SoftbusCertChain *));
     MOCK_METHOD3(VerifyCertificate, int32_t (SoftbusCertChain *, const NodeInfo *, const AuthSessionInfo *));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));

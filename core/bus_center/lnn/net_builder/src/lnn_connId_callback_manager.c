@@ -239,7 +239,7 @@ int32_t GetConnIdCbInfoByAddr(const ConnectionAddr *addr, ConnIdCbInfo *dupItem)
     int32_t ret = SOFTBUS_NOT_FIND;
     ConnIdCbInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, g_lnnConnIdCbInfoList, ConnIdCbInfo, node) {
-        if (addr->type == CONNECTION_ADDR_SESSION || addr->type != CONNECTION_ADDR_SESSION_WITH_KEY) {
+        if (addr->type == CONNECTION_ADDR_SESSION) {
             if (addr->info.session.channelId == item->sessionAddr.info.session.channelId) {
                 ret = DupItem(item, dupItem);
                 LnnConnIdCallbackUnLock();
