@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef LNN_PARAMETER_UTILS_H
-#define LNN_PARAMETER_UTILS_H
+#ifndef LNN_CHANGE_CHANNEL_H
+#define LNN_CHANGE_CHANNEL_H
 
-#include <stdbool.h>
-#include "lnn_lane_interface.h"
+#include <stdint.h>
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool IsCloudSyncEnabled(void);
-bool IsPowerControlEnabled(void);
-int32_t SetWifiConfigRemoteBaseMac(uint8_t *mac, uint8_t *wifiConfig, int32_t *cfgLen);
-int32_t GetWifiConfigBaseMac(char *mac);
+int32_t InitActionStateAdapter(void);
+int32_t LnnSetPreLink(const void *msg);
+int32_t LnnGetPreLinkParam(void *msg, uint32_t *msgLen);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_PARAMETER_UTILS_H
+
+#endif

@@ -21,6 +21,8 @@
 #include "anonymizer.h"
 #include "lnn_log.h"
 #include "softbus_def.h"
+#include "trans_channel_manager.h"
+#include "auth_tcp_connection.h"
 
 #define LNN_MAX_PRINT_ADDR_LEN 100
 #define SHORT_UDID_HASH_LEN    8
@@ -53,7 +55,7 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0) &&
         (addr1->info.ip.port == addr2->info.ip.port);
     }
-    if (addr1->type == CONNECTION_ADDR_SESSION) {
+    if (addr1->type == CONNECTION_ADDR_SESSION || addr1->type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         return ((addr1->info.session.sessionId == addr2->info.session.sessionId) &&
             (addr1->info.session.channelId == addr2->info.session.channelId) &&
             (addr1->info.session.type == addr2->info.session.type));
@@ -162,7 +164,7 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
         return DISCOVERY_TYPE_BR;
     } else if (type == CONNECTION_ADDR_BLE) {
         return DISCOVERY_TYPE_BLE;
-    } else if (type == CONNECTION_ADDR_SESSION) {
+    } else if (type == CONNECTION_ADDR_SESSION || type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         return DISCOVERY_TYPE_BLE;
     } else {
         return DISCOVERY_TYPE_COUNT;
@@ -182,6 +184,26 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
             break;
     }
     return CONNECTION_ADDR_MAX;
+}
+
+static bool ConvertAddrToAuthConnInfoForSession(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+{
+    int32_t connId = AUTH_INVALID_FD;
+    int32_t rc = SOFTBUS_OK;
+    rc = TransGetConnByChanId(addr->info.session.channelId, addr->info.session.type, &connId);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "TransGetConnByChanId fail");
+        return false;
+    }
+    bool isServer = false;
+    rc = SocketGetConnInfo(connId, connInfo, &isServer);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "SocketGetConnInfo fail");
+        return false;
+    }
+    connInfo->type = AUTH_LINK_TYPE_WIFI;
+    LNN_LOGI(LNN_STATE, "connection_addr_session, deviceIdhash=%{public}s", connInfo->info.ipInfo.deviceIdHash);
+    return true;
 }
 
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
@@ -219,6 +241,9 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
         }
         connInfo->info.ipInfo.port = addr->info.ip.port;
         return true;
+    }
+    if (addr->type == CONNECTION_ADDR_SESSION_WITH_KEY) {
+        return ConvertAddrToAuthConnInfoForSession(addr, connInfo);
     }
     LNN_LOGE(LNN_STATE, "not supported type=%{public}d", addr->type);
     return false;
@@ -293,6 +318,7 @@ bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr)
             }
             break;
         case CONNECTION_ADDR_SESSION:
+        case CONNECTION_ADDR_SESSION_WITH_KEY:
             break;
         default:
             LNN_LOGW(LNN_STATE, "invalid connection addr type");
