@@ -237,8 +237,12 @@ static void ProcessLocalDeviceInfo(void)
 
 void LnnLedgerInfoStatusSet(void)
 {
-    const NodeInfo *node = LnnGetLocalNodeInfo();
     if (g_isDeviceInfoSet) {
+        return;
+    }
+    const NodeInfo *node = LnnGetLocalNodeInfo();
+    if (node == NULL) {
+        LNN_LOGE(LNN_LEDGER, "node is null");
         return;
     }
 
