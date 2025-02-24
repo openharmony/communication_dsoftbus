@@ -103,7 +103,7 @@ typedef enum {
     OSD_EVENT,
     DVKIT_EVENT,
 } EventType;
- 
+
 typedef enum {
     CAST_EVENT_CON,
     CAST_EVENT_NON,
@@ -113,7 +113,7 @@ typedef enum {
     DVKIT_EVENT_NON,
     MAX_DISC_EVENT,
 } DiscBleEventType;
- 
+
 typedef enum {
     SCAN_CAST_EVENT,
     SCAN_DVKIT_EVENT,
@@ -987,7 +987,7 @@ static void BleEventExtraInit(void)
     for (int32_t i = 0; i < MAX_SCAN_EVENT; i++) {
         g_bleScanExtra[i].scanType = BLE + 1;
     }
- 
+
     g_bleDiscExtra[CAST_EVENT_CON].broadcastType = CON_ADV_ID + 1;
     g_bleDiscExtra[CAST_EVENT_CON].capabilityBit = CASTPLUS_CAPABILITY_BITMAP;
     g_bleDiscExtra[CAST_EVENT_NON].broadcastType = NON_ADV_ID + 1;
@@ -1004,7 +1004,7 @@ static void BleEventExtraInit(void)
     g_bleScanExtra[SCAN_DVKIT_EVENT].capabilityBit = DVKIT_CAPABILITY_BITMAP;
     g_bleScanExtra[SCAN_OSD_EVENT].capabilityBit = OSD_CAPABILITY_BITMAP;
 }
- 
+
 static void ClearDiscEventExtra(int32_t index)
 {
     for (int32_t i = 0; i < index; i++) {
@@ -1013,28 +1013,28 @@ static void ClearDiscEventExtra(int32_t index)
         g_bleDiscExtra[i].costTime = 0;
     }
 }
- 
+
 static void ClearScanEventExtra(int32_t index)
 {
     for (int32_t i = 0; i < index; i++) {
         g_bleScanExtra[i].scanCount = 0;
     }
 }
- 
+
 static void DfxDelayRecord(const SoftBusMessage *msg)
 {
     BroadcastDiscEvent(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, g_bleDiscExtra, MAX_DISC_EVENT);
     BroadcastScanEvent(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, g_bleScanExtra, MAX_SCAN_EVENT);
     ClearDiscEventExtra(MAX_DISC_EVENT);
     ClearScanEventExtra(MAX_SCAN_EVENT);
- 
+
     SoftBusMessage *dfxmsg = CreateBleHandlerMsg(DFX_DELAY_RECORD, 0, 0, NULL);
     if (dfxmsg == NULL) {
         DISC_LOGE(DISC_BLE, "create msg fail");
     }
     g_discBleHandler.looper->PostMessageDelay(g_discBleHandler.looper, dfxmsg, DELAY_TIME_DEFAULT);
 }
- 
+
 static void CalcCount(int32_t adv, uint32_t capabilityBitmap, bool result)
 {
     uint32_t tempCap = 0;
@@ -1062,19 +1062,19 @@ static void CalcCount(int32_t adv, uint32_t capabilityBitmap, bool result)
         }
     }
 }
- 
+
 static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
 {
     uint32_t tempCap = 0;
     DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
     int64_t stamptime = SoftBusGetSysTimeMs();
- 
+
     const uint32_t event[] = {
         adv == CON_ADV_ID ? CAST_EVENT_CON : CAST_EVENT_NON,
         adv == CON_ADV_ID ? OSD_EVENT_CON : OSD_EVENT_NON,
         adv == CON_ADV_ID ? DVKIT_EVENT_CON : DVKIT_EVENT_NON
     };
- 
+
     if ((tempCap & (1 << CASTPLUS_CAPABILITY_BITMAP)) && g_bleDiscExtra[event[CAST_EVENT]].isOn == 0) {
         g_bleDiscExtra[event[CAST_EVENT]].startTime = stamptime;
         g_bleDiscExtra[event[CAST_EVENT]].isOn = 1;
@@ -1084,7 +1084,7 @@ static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
         g_bleDiscExtra[event[CAST_EVENT]].costTime +=
             (g_bleDiscExtra[event[CAST_EVENT]].stopTime - g_bleDiscExtra[event[CAST_EVENT]].startTime);
     }
- 
+
     if ((tempCap & (1 << OSD_CAPABILITY_BITMAP)) && g_bleDiscExtra[event[OSD_EVENT]].isOn == 0) {
         g_bleDiscExtra[event[OSD_EVENT]].startTime = stamptime;
         g_bleDiscExtra[event[OSD_EVENT]].isOn = 1;
@@ -1094,7 +1094,7 @@ static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
         g_bleDiscExtra[event[OSD_EVENT]].costTime +=
             (g_bleDiscExtra[event[OSD_EVENT]].stopTime - g_bleDiscExtra[event[OSD_EVENT]].startTime);
     }
- 
+
     if ((tempCap & (1 << DVKIT_CAPABILITY_BITMAP)) && g_bleDiscExtra[event[DVKIT_EVENT]].isOn == 0) {
         g_bleDiscExtra[event[DVKIT_EVENT]].startTime = stamptime;
         g_bleDiscExtra[event[DVKIT_EVENT]].isOn = 1;
@@ -1550,7 +1550,7 @@ static int32_t SoftbusBleCheckJson(bool isStart, const SubscribeOption *option)
     cJSON_Delete(json);
     DISC_CHECK_AND_RETURN_RET_LOGW(ret, SOFTBUS_DISCOVER_BLE_NEED_TRIGGER,
         DISC_BLE, "get discType from json failed");
-    
+
     if (strcmp(discType, BLE_DISCOVERY_TYPE_HANDLE) != 0) {
         DISC_LOGI(DISC_BLE, "invalid type, type=%{public}s", discType);
         return SOFTBUS_INVALID_PARAM;
@@ -1672,7 +1672,6 @@ static DiscoveryFuncInterface g_discBleFuncInterface = {
 static DiscoveryBleDispatcherInterface g_discBleDispatcherInterface = {
     .IsConcern = BleIsConcern,
     .mediumInterface = &g_discBleFuncInterface
-
 };
 
 static int32_t InitAdvertiser(void)
@@ -2008,6 +2007,21 @@ static void OnBrStateChanged(SoftBusMessage *msg)
 static void DiscBleMsgHandlerExt(SoftBusMessage *msg)
 {
     switch (msg->what) {
+        case PROCESS_TIME_OUT:
+            ProcessTimeout(msg);
+            break;
+        case RECOVERY:
+            Recovery(msg);
+            break;
+        case TURN_OFF:
+            BleDiscTurnOff(msg);
+            break;
+        case BR_STATE_CHANGED:
+            OnBrStateChanged(msg);
+            break;
+        case DFX_DELAY_RECORD:
+            DfxDelayRecord(msg);
+            break;
         case HANDLE_REPORT:
             ReportHandle(msg);
             break;
@@ -2048,21 +2062,6 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             break;
         case REPLY_PASSIVE_NON_BROADCAST:
             StartAdvertiser(NON_ADV_ID);
-            break;
-        case PROCESS_TIME_OUT:
-            ProcessTimeout(msg);
-            break;
-        case RECOVERY:
-            Recovery(msg);
-            break;
-        case TURN_OFF:
-            BleDiscTurnOff(msg);
-            break;
-        case BR_STATE_CHANGED:
-            OnBrStateChanged(msg);
-            break;
-        case DFX_DELAY_RECORD:
-            DfxDelayRecord(msg);
             break;
         default:
             DiscBleMsgHandlerExt(msg);
