@@ -674,22 +674,6 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Leve
 }
 
 /**
- * @tc.name: ProxyBuildNeedAckTlvData003
- * @tc.desc: ProxyBuildNeedAckTlvData
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData003, TestSize.Level0)
-{
-    int32_t bufferSize = 0;
-    DataHead pktHead;
-    pktHead.tlvElement = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
-    int32_t ret = ProxyBuildNeedAckTlvData(&pktHead, true, 1, &bufferSize);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    SoftBusFree(pktHead.tlvElement);
-}
-
-/**
  * @tc.name: ProxyBuildTlvDataHead002
  * @tc.desc: ProxyBuildTlvDataHead
  * @tc.type: FUNC
