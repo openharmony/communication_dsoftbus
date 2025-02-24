@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_commonInterface;
+static const int32_t TEST_DATA_LEN = 200;
 AuthCommonInterfaceMock::AuthCommonInterfaceMock()
 {
     g_commonInterface = reinterpret_cast<void *>(this);
@@ -146,5 +147,132 @@ void LnnDeleteLinkFinderInfo(const char *peerUdid)
 {
     return GetCommonInterface()->LnnDeleteLinkFinderInfo(peerUdid);
 }
+
+int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
+{
+    return GetCommonInterface()->ConnGetConnectionInfo(connectionId, info);
+}
+
+int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
+{
+    return GetCommonInterface()->ConnSetConnectCallback(moduleId, callback);
+}
+
+void ConnUnSetConnectCallback(ConnModule moduleId)
+{
+    GetCommonInterface()->ConnUnSetConnectCallback(moduleId);
+}
+
+int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+{
+    return GetCommonInterface()->ConnConnectDevice(option, requestId, result);
+}
+
+int32_t ConnDisconnectDevice(uint32_t connectionId)
+{
+    return GetCommonInterface()->ConnDisconnectDevice(connectionId);
+}
+
+uint32_t ConnGetHeadSize(void)
+{
+    return GetCommonInterface()->ConnGetHeadSize();
+}
+
+int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
+{
+    return GetCommonInterface()->ConnPostBytes(connectionId, data);
+}
+
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
+{
+    return GetCommonInterface()->CheckActiveConnection(option, needOccupy);
+}
+
+int32_t ConnStartLocalListening(const LocalListenerInfo *info)
+{
+    return GetCommonInterface()->ConnStartLocalListening(info);
+}
+
+int32_t ConnStopLocalListening(const LocalListenerInfo *info)
+{
+    return GetCommonInterface()->ConnStopLocalListening(info);
+}
+
+uint32_t ConnGetNewRequestId(ConnModule moduleId)
+{
+    return GetCommonInterface()->ConnGetNewRequestId(moduleId);
+}
+void DiscDeviceInfoChanged(InfoTypeChanged type)
+{
+    return GetCommonInterface()->DiscDeviceInfoChanged(type);
+}
+
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    return GetCommonInterface()->ConnUpdateConnection(connectionId, option);
+}
+}
+
+int32_t AuthCommonInterfaceMock::ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
+{
+    (void)moduleId;
+    if (callback == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_conncallback.OnDataReceived = callback->OnDataReceived;
+    g_conncallback.OnConnected = callback->OnConnected;
+    g_conncallback.OnDisconnected = callback->OnDisconnected;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthCommonInterfaceMock::ActionofOnConnectSuccessed(
+    const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+{
+    (void)option;
+    uint32_t connectionId = 196619;
+    const ConnectionInfo info = {
+        .isAvailable = 1,
+        .isServer = 1,
+        .type = CONNECT_BR,
+        .brInfo.brMac = "11:22:33:44:55:66",
+    };
+    result->OnConnectSuccessed(requestId, connectionId, &info);
+    AUTH_LOGI(AUTH_TEST, "ActionofConnConnectDevice");
+    return SOFTBUS_OK;
+}
+
+int32_t AuthCommonInterfaceMock::AuthCommonInterfaceMock::ActionofOnConnectFailed(
+    const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+{
+    int32_t reason = 0;
+    result->OnConnectFailed(requestId, reason);
+    AUTH_LOGI(AUTH_TEST, "ActionofOnConnectFailed");
+    return SOFTBUS_OK;
+}
+
+int32_t AuthCommonInterfaceMock::ActionofConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
+{
+    (void)connectionId;
+    info->type = CONNECT_BLE;
+    info->isServer = SERVER_SIDE_FLAG;
+    info->isAvailable = 1;
+    strcpy_s(info->brInfo.brMac, sizeof(info->brInfo.brMac), "11:22:33:44:55:66");
+    return SOFTBUS_OK;
+}
+
+void AuthCommonInterfaceMock::ActionofConnUnSetConnectCallback(ConnModule moduleId)
+{
+    (void)moduleId;
+}
+
+int32_t AuthCommonInterfaceMock::ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data)
+{
+    AUTH_LOGI(AUTH_TEST, "ActionOfConnPostBytes");
+    g_encryptData = data->buf;
+    if (strcpy_s(g_encryptData, TEST_DATA_LEN, data->buf) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_TEST, "strcpy failed in conn post bytes");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
 }
 } // namespace OHOS

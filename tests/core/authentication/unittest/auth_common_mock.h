@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,15 +20,22 @@
 #include <mutex>
 
 #include "auth_common.h"
+#include "auth_log.h"
 #include "device_auth.h"
+#include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_interface.h"
 #include "lnn_net_builder.h"
+#include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_node_info.h"
+#include "map"
+#include "securec.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
 
 namespace OHOS {
 class AuthCommonInterface {
@@ -59,6 +66,20 @@ public:
     virtual void DeleteNodeFromPcRestrictMap(const char *udidHash) = 0;
     virtual int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen) = 0;
     virtual void LnnDeleteLinkFinderInfo(const char *peerUdid) = 0;
+    virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
+    virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
+    virtual void ConnUnSetConnectCallback(ConnModule moduleId) = 0;
+    virtual int32_t ConnConnectDevice(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result) = 0;
+    virtual int32_t ConnDisconnectDevice(uint32_t connectionId) = 0;
+    virtual uint32_t ConnGetHeadSize(void) = 0;
+    virtual int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data) = 0;
+    virtual bool CheckActiveConnection(const ConnectOption *option, bool needOccupy) = 0;
+    virtual int32_t ConnStartLocalListening(const LocalListenerInfo *info) = 0;
+    virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
+    virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
+    virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
+    virtual int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -86,6 +107,55 @@ public:
     MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void (const char *));
     MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t (int32_t, const char *, uint32_t));
     MOCK_METHOD1(LnnDeleteLinkFinderInfo, void (const char *));
+    MOCK_METHOD2(ConnGetConnectionInfo, int32_t(uint32_t, ConnectionInfo *));
+    MOCK_METHOD2(ConnSetConnectCallback, int32_t(ConnModule, const ConnectCallback *));
+    MOCK_METHOD1(ConnUnSetConnectCallback, void(ConnModule));
+    MOCK_METHOD3(ConnConnectDevice, int32_t(const ConnectOption *, uint32_t, const ConnectResult *));
+    MOCK_METHOD1(ConnDisconnectDevice, int32_t(uint32_t));
+    MOCK_METHOD0(ConnGetHeadSize, uint32_t(void));
+    MOCK_METHOD2(ConnPostBytes, int32_t(uint32_t, ConnPostData *));
+    MOCK_METHOD2(CheckActiveConnection, bool(const ConnectOption *, bool));
+    MOCK_METHOD1(ConnStartLocalListening, int32_t(const LocalListenerInfo *));
+    MOCK_METHOD1(ConnStopLocalListening, int32_t(const LocalListenerInfo *));
+    MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
+    MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
+    MOCK_METHOD2(ConnUpdateConnection, int32_t(uint32_t, UpdateOption *));
+    static inline char *g_encryptData;
+    static inline ConnectCallback g_conncallback;
+    static inline ConnectResult g_connresultcb;
+    static int32_t ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data);
+    static int32_t ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback);
+    static int32_t ActionofOnConnectSuccessed(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+    static int32_t ActionofOnConnectFailed(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+    static int32_t ActionofConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info);
+    static void ActionofConnUnSetConnectCallback(ConnModule moduleId);
+    static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
+    {
+        (void)requestId;
+        (void)authHandle;
+        (void)info;
+        return;
+    }
+    static void OnVerifyFailed(uint32_t requestId, int32_t reason)
+    {
+        (void)requestId;
+        (void)reason;
+        return;
+    }
+    static void OnConnOpened(uint32_t requestId, AuthHandle authHandle)
+    {
+        (void)requestId;
+        (void)authHandle;
+        return;
+    }
+    static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
+    {
+        (void)requestId;
+        (void)reason;
+        return;
+    }
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H
