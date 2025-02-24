@@ -48,9 +48,9 @@ public:
     template<typename Command>
     void ProcessNegotiateData(const std::string &remoteDeviceId, Command &command)
     {
-        std::lock_guard lock(executorLock_);
         auto aDeviceId = WifiDirectAnonymizeDeviceId(remoteDeviceId);
         CONN_LOGD(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", aDeviceId.c_str());
+        std::lock_guard lock(executorLock_);
         auto executor = executorManager_.Find(remoteDeviceId);
         if (executor != nullptr) {
             if (executor->CanAcceptNegotiateData(command)) {
