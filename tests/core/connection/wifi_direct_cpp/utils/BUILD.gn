@@ -85,6 +85,7 @@ ohos_unittest("WifiDirectUtilsTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_anonymous.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_utils.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_initiator.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_ip_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager.cpp",

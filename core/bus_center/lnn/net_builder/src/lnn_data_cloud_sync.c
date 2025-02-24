@@ -26,6 +26,7 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "lnn_link_finder.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
 #include "lnn_node_info.h"
@@ -930,6 +931,21 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     return SOFTBUS_OK;
 }
 
+static void LnnIsdeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
+{
+    if (strncmp(cacheInfo->deviceInfo.deviceName, oldCacheInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN)!= 0) {
+        NodeInfo info;
+        (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "save local device info fail");
+            return;
+        }
+        if (LnnLedgerAllDataSyncToDB(&info, true, cacheInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "devicename change ack fail");
+        }
+    }
+}
+
 static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
 {
     if (cacheInfo == NULL || oldCacheInfo == NULL) {
@@ -957,6 +973,7 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *ol
         AnonymizeFree(anonyLocalAccountId);
         return ret;
     }
+    LnnIsdeviceNameChangeAck(cacheInfo, oldCacheInfo);
     cacheInfo->localStateVersion = localCacheInfo.stateVersion;
     if (LnnUpdateOldCacheInfo(cacheInfo, oldCacheInfo) != SOFTBUS_OK ||
         LnnSaveRemoteDeviceInfo(oldCacheInfo) != SOFTBUS_OK) {
@@ -1114,7 +1131,7 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param, info is NULL");
@@ -1135,6 +1152,10 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
     }
     int32_t ret = PackBroadcastCipherKeyInner(json, info);
     if (ret != SOFTBUS_OK) {
+        cJSON_Delete(json);
+        return ret;
+    }
+    if (isAckSeq && peerudid != NULL && (ret = LnnPackCloudSyncAckSeq(json, peerudid)) != SOFTBUS_OK) {
         cJSON_Delete(json);
         return ret;
     }
@@ -1164,7 +1185,7 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
 static void ProcessSyncToDB(void *para)
 {
     NodeInfo *info = (NodeInfo *)para;
-    (void)LnnLedgerAllDataSyncToDB(info);
+    (void)LnnLedgerAllDataSyncToDB(info, false, NULL);
     SoftBusFree(info);
 }
 

@@ -694,4 +694,46 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
     SoftBusFree(nodeInfo);
     return screenStatus;
 }
+
+bool WifiDirectUtils::IsDeviceId(const std::string &remoteId)
+{
+    return remoteId.length() == UUID_BUF_LEN - 1;
+}
+
+std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDeviceId)
+{
+    auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
+    char remoteMac[MAC_ADDR_STR_LEN] {};
+    auto ret = LnnGetRemoteStrInfo(remoteNetworkId.c_str(), STRING_KEY_WIFIDIRECT_ADDR, remoteMac, MAC_ADDR_STR_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get wifi direct addr failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+    return remoteMac;
+}
+
+std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
+{
+    int32_t num;
+    NodeBasicInfo *basicInfo{};
+    auto ret = LnnGetAllOnlineNodeInfo(&basicInfo, &num);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get online node info failed");
+
+    for (int32_t i = 0; i < num; i++) {
+        char wifiDirectAddr[MAC_ADDR_STR_LEN] {};
+        ret = LnnGetRemoteStrInfo(basicInfo[i].networkId, STRING_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_ADDR_STR_LEN);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "get wifi direct addr failed, remoteNetworkId=%{public}s",
+                WifiDirectAnonymizeDeviceId(basicInfo[i].networkId).c_str());
+            continue;
+        }
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteNetworkId=%{public}s, wifiDirectAddr=%{public}s",
+            WifiDirectAnonymizeDeviceId(basicInfo[i].networkId).c_str(),
+            WifiDirectAnonymizeMac(wifiDirectAddr).c_str());
+        if (remoteMac == wifiDirectAddr) {
+            SoftBusFree(basicInfo);
+            return NetworkIdToUuid(basicInfo[i].networkId);
+        }
+    }
+    SoftBusFree(basicInfo);
+    return {};
+}
 } // namespace OHOS::SoftBus

@@ -359,6 +359,15 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
         DfxRecordSdkJoinLnnEnd(pkgName, ret);
         return ret;
     }
+    if (target->type == CONNECTION_ADDR_SESSION_WITH_KEY) {
+        ret = ClientGetChannelBySessionId(target->info.session.sessionId, &(target->info.session.channelId),
+            &(target->info.session.type), NULL);
+        if (ret != SOFTBUS_OK) {
+            DfxRecordSdkJoinLnnEnd(pkgName, ret);
+            LNN_LOGE(LNN_STATE, "get channel failed, sessionId=%{public}d", target->info.session.sessionId);
+            return ret;
+        }
+    }
     ret = JoinLNNInner(pkgName, target, cb);
     DfxRecordSdkJoinLnnEnd(pkgName, ret);
     return ret;

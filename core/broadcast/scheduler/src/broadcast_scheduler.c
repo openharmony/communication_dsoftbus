@@ -62,6 +62,11 @@ int32_t SchedulerSetBroadcastData(int32_t bcId, const BroadcastPacket *packet)
     return SetBroadcastingData(bcId, packet);
 }
 
+int32_t SchedulerSetBroadcastParam(int32_t bcId, const BroadcastParam *param)
+{
+    return SetBroadcastingParam(bcId, param);
+}
+
 int32_t SchedulerStopBroadcast(int32_t bcId)
 {
     return StopBroadcasting(bcId);

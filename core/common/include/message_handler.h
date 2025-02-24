@@ -64,7 +64,8 @@ void FreeMessage(SoftBusMessage *msg);
 enum LooperType {
     LOOP_TYPE_DEFAULT = 1,
     LOOP_TYPE_CONN,
-    LOOP_TYPE_LNN
+    LOOP_TYPE_LNN,
+    LOOP_TYPE_DISC
 };
 
 SoftBusLooper *GetLooper(int looper);

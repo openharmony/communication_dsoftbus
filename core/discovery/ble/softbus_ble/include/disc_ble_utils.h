@@ -80,6 +80,7 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);
 
 int32_t AssembleTLV(BroadcastData *broadcastData, unsigned char dataType, const void *data, uint32_t dataLen);
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen);
+int32_t DiscSoftbusBleBuildReportJson(DeviceInfo *device, uint32_t handleId);
 
 #ifdef __cplusplus
 #if __cplusplus

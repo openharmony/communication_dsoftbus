@@ -47,7 +47,7 @@ static ConnBleTransEventListener g_transEventListener = { 0 };
 static SoftBusBtStateListener g_btListener = { 0 };
 static SoftBusBleConflictListener g_conflictListener = { 0 };
 static int32_t g_listenerId = 0;
-static ConnectFuncInterface *g_bleInterface = NULL;
+static ConnectFuncInterface *g_bleInterface = nullptr;
 void OnConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     (void)connectionId;
@@ -91,23 +91,24 @@ void OnConnectFailed(uint32_t requestId, int32_t reason)
 extern "C" {
 int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
 {
-    if (listener == NULL) {
+    if (listener == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     g_transEventListener = *listener;
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    if (listener == NULL) {
+    if (listener == nullptr || listenerId == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     g_btListener = *listener;
     if (g_listenerId > MAX_SIZE) {
         g_listenerId = 0;
     }
-    return g_listenerId++;
+    *listenerId = g_listenerId++;
+    return SOFTBUS_OK;
 }
 
 void SoftbusBleConflictNotifyDateReceive(int32_t underlayerHandle, const uint8_t *data, uint32_t dataLen)
@@ -137,7 +138,7 @@ void LegacyBleReturnConnection(ConnBleConnection **connection)
 
 void SoftbusBleConflictRegisterListener(SoftBusBleConflictListener *listener)
 {
-    if (listener == NULL) {
+    if (listener == nullptr) {
         return;
     }
     g_conflictListener = *listener;
@@ -162,7 +163,7 @@ public:
         EXPECT_CALL(bleMock, ConnGattInitClientModule).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(bleMock, ConnGattInitServerModule).WillRepeatedly(Return(SOFTBUS_OK));
         g_bleInterface = ConnInitBle(&connectCb);
-        ASSERT_NE(g_bleInterface, NULL);
+        ASSERT_NE(g_bleInterface, nullptr);
     }
     void TearDown() override
     {
@@ -203,7 +204,7 @@ HWTEST_F(ConnectionBleManagerTest, TestTransListener001, TestSize.Level1)
     const char *addr = "22:33:44:55:66:77";
     ConnBleConnection *connection =
         ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(connection, NULL);
+    ASSERT_NE(connection, nullptr);
     connection->underlayerHandle = 3;
     int32_t ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
@@ -227,7 +228,7 @@ HWTEST_F(ConnectionBleManagerTest, TestConflictGetConnection001, TestSize.Level1
     g_conflictListener.cancelOccupy(udid);
     ConnBleConnection *connection =
         ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(connection, NULL);
+    ASSERT_NE(connection, nullptr);
     int32_t ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
     ASSERT_EQ(EOK, ret);
 
@@ -270,7 +271,7 @@ HWTEST_F(ConnectionBleManagerTest, TestConflictDisconnect001, TestSize.Level1)
     const char *udid = "1111222233334444";
     ConnBleConnection *connection =
         ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(connection, NULL);
+    ASSERT_NE(connection, nullptr);
     int32_t ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
     ASSERT_EQ(EOK, ret);
 
@@ -300,7 +301,7 @@ HWTEST_F(ConnectionBleManagerTest, TestConflictDisconnect001, TestSize.Level1)
     const char *bleUdid = "1100222233334444";
     ConnBleConnection *bleConnection =
         ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(NULL, bleConnection);
+    ASSERT_NE(nullptr, bleConnection);
     ret = strcpy_s(bleConnection->udid, UDID_BUF_LEN, bleUdid);
     ASSERT_EQ(EOK, ret);
     bleConnection->underlayerHandle = 10;
@@ -357,7 +358,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface001, TestSize.Level1)
 
     ConnBleConnection *connection =
         ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(connection, NULL);
+    ASSERT_NE(connection, nullptr);
     ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
     ASSERT_EQ(EOK, ret);
     connection->underlayerHandle = 2;
@@ -385,7 +386,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface002, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
     ConnBleConnection *connection =
         ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(connection, NULL);
+    ASSERT_NE(connection, nullptr);
     int32_t ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
 
     ASSERT_EQ(EOK, ret);
@@ -409,7 +410,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface002, TestSize.Level1)
 
     ConnBleConnection *serverConnection =
         ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_SERVER, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(serverConnection, NULL);
+    ASSERT_NE(serverConnection, nullptr);
     serverConnection->underlayerHandle = 50;
     ret = ConnBleSaveConnection(serverConnection);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -435,12 +436,12 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface003, TestSize.Level1)
     const char *networkId = "testnetworkid123";
     ConnBleConnection *connection =
         ConnBleCreateConnection(invaildMac, BLE_COC, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    EXPECT_EQ(connection, NULL);
+    EXPECT_EQ(connection, nullptr);
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
     ConnBleConnection *bleConnection =
         ConnBleCreateConnection(bleMac, BLE_COC, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(bleConnection, NULL);
+    ASSERT_NE(bleConnection, nullptr);
     bleConnection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
     bleConnection->featureBitSet = false;
     bleConnection->psm = 10;
@@ -457,7 +458,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface003, TestSize.Level1)
 
     ConnBleConnection *invalidConnection =
         ConnBleCreateConnection(bleMac, BLE_COC, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(invalidConnection, NULL);
+    ASSERT_NE(invalidConnection, nullptr);
     invalidConnection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
     invalidConnection->featureBitSet = true;
     invalidConnection->psm = 10;
@@ -535,7 +536,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface005, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
     ConnBleConnection *bleConnection =
         ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(bleConnection, NULL);
+    ASSERT_NE(bleConnection, nullptr);
 
     ret = memcpy_s(bleConnection->udid, UDID_HASH_LEN, hashStr, UDID_HASH_LEN);
     EXPECT_EQ(ret, EOK);
@@ -578,7 +579,7 @@ HWTEST_F(ConnectionBleManagerTest, NotifyReusedConnected001, TestSize.Level1)
     const char *networkId = "testnetworkid123";
     ConnBleConnection *bleConnection =
         ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
-    ASSERT_NE(bleConnection, NULL);
+    ASSERT_NE(bleConnection, nullptr);
     int32_t ret = memcpy_s(bleConnection->udid, UDID_HASH_LEN, udid, UDID_HASH_LEN);
     EXPECT_EQ(ret, EOK);
 
@@ -732,7 +733,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleUpdateConnectionRc001, TestSize.Level1
     connection.connectionId = 196600;
     connection.side = CONN_SIDE_CLIENT;
     connection.featureBitSet = 0;
-    int32_t ret = SoftBusMutexInit(&connection.lock, NULL);
+    int32_t ret = SoftBusMutexInit(&connection.lock, nullptr);
     ASSERT_EQ(EOK, ret);
 
     connection.underlayerHandle = 10;
@@ -772,7 +773,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleUpdateConnectionRc001, TestSize.Level1
 HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest001, TestSize.Level1)
 {
     ConnBleConnection connection;
-    int32_t ret = SoftBusMutexInit(&connection.lock, NULL);
+    int32_t ret = SoftBusMutexInit(&connection.lock, nullptr);
     ASSERT_EQ(EOK, ret);
     connection.connectionRc = 1;
     connection.state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
@@ -799,7 +800,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest002, TestSize.Level1
 {
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(nullptr, connection);
-    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    int32_t ret = SoftBusMutexInit(&connection->lock, nullptr);
     ASSERT_EQ(EOK, ret);
     const char *bleMac = "11:22:33:44:33:56";
     const char *udid = "1254222233334419";
@@ -845,7 +846,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest003, TestSize.Level1
 {
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(nullptr, connection);
-    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    int32_t ret = SoftBusMutexInit(&connection->lock, nullptr);
     ASSERT_EQ(EOK, ret);
     const char *bleMac = "11:22:33:44:33:56";
     const char *udid = "1254222233334419";
@@ -923,7 +924,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
 {
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(nullptr, connection);
-    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    int32_t ret = SoftBusMutexInit(&connection->lock, nullptr);
     ASSERT_EQ(EOK, ret);
     connection->protocol = BLE_GATT;
     connection->side = CONN_SIDE_SERVER;

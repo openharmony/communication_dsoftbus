@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,7 @@ void SoftbusProxyChannelManagerTest::SetUpTestCase(void)
     callBack.GetPkgNameBySessionName = TestGetPkgNameBySessionName;
     callBack.GetUidAndPidBySessionName = TestGetUidAndPidBySessionName;
     ASSERT_EQ(SOFTBUS_OK, TransProxyManagerInitInner(&callBack));
+    ASSERT_EQ(SOFTBUS_OK, TransChannelResultLoopInit());
 }
 
 void SoftbusProxyChannelManagerTest::TearDownTestCase(void)
@@ -2105,6 +2106,97 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
     ret = TransProxyGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyDelByChannelId(channelId, chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransDealProxyCheckCollabResult001
+ * @tc.desc: TransDealProxyCheckCollabResult Test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, TestSize.Level1)
+{
+    int32_t channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->reqId = TEST_VALID_REQ;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    chan->connId = TEST_VALID_CONN_ID;
+    ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
+    ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+
+    ret = TransProxyDelByChannelId(channelId, chan);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+}
+
+/**
+ * @tc.name: TransDealProxyCheckCollabResult002
+ * @tc.desc: TransDealProxyCheckCollabResult Test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransCheckChannelOpenToLooperDelay(TEST_VALID_CHANNEL_ID, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
+    ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+}
+
+/**
+ * @tc.name: TransProxyPostResetPeerMsgToLoop001
+ * @tc.desc: test TransProxyPostResetPeerMsgToLoop.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop001, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransProxyPostKeepAliveMsgToLoop(chan);
+    TransProxyPostResetPeerMsgToLoop(chan);
+    TransProxyPostOpenFailMsgToLoop(chan, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyPostResetPeerMsgToLoop002
+ * @tc.desc: test TransProxyPostResetPeerMsgToLoop.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransProxyPostResetPeerMsgToLoop(nullptr);
+    TransProxyPostOpenClosedMsgToLoop(chan);
+
+    ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

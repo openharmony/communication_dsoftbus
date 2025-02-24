@@ -40,6 +40,7 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_init_monitor.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","
@@ -355,7 +356,7 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "Data share get invalid param");
         return;
     }
-    
+
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusDataShareState state = (SoftBusDataShareState)event->status;
     switch (state) {
@@ -371,8 +372,11 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
                 RetryCheckOOBEState(NULL);
             }
             (void)SoftBusMutexUnlock(&g_dataShareLock);
+            LnnInitModuleStatusSet(INIT_DEPS_DATA_SHARE, DEPS_STATUS_SUCCESS);
             break;
         default:
+            LnnInitModuleStatusSet(INIT_DEPS_DATA_SHARE, DEPS_STATUS_FAILED);
+            LnnInitModuleReturnSet(INIT_DEPS_DATA_SHARE, SOFTBUS_NETWORK_DATA_SHARE_QUERY_FAILED);
             if (SoftBusMutexLock(&g_dataShareLock) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
                 return;
@@ -831,6 +835,7 @@ int32_t LnnInitNetworkManagerDelay(void)
 bool LnnIsAutoNetWorkingEnabled(void)
 {
     int32_t localDevTypeId = 0;
+    bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_WIFI_NET);
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
         localDevTypeId == TYPE_WATCH_ID) {
         return false;
@@ -846,10 +851,11 @@ bool LnnIsAutoNetWorkingEnabled(void)
     }
     LNN_LOGI(LNN_BUILDER,
         "wifi condition state:config=%{public}d, background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, "
-        "unlock=%{public}d",
-        isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock);
+        "unlock=%{public}d, init check=%{public}d",
+        isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock,
+        isInitCheckSuc);
     return isConfigEnabled && (g_backgroundState == SOFTBUS_USER_FOREGROUND) && !g_isNightMode &&
-        g_isOOBEEnd && g_isUnLock;
+        g_isOOBEEnd && g_isUnLock && isInitCheckSuc;
 }
 
 void LnnDeinitNetworkManager(void)
