@@ -652,7 +652,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return true;
     }
     if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, true) ||
-        IsPotentialTrustedDeviceDp(device->devId)) {
+        IsPotentialTrustedDeviceDp(device->devId, true)) {
         AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }

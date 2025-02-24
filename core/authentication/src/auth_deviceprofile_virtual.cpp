@@ -15,9 +15,10 @@
 
 #include "auth_deviceprofile.h"
 
-bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
+bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint)
 {
     (void)deviceIdHash;
+    (void)isOnlyPointToPoint;
     return true;
 }
 

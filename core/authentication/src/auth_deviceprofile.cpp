@@ -95,12 +95,15 @@ static int32_t GetAclLocalUserId(const OHOS::DistributedDeviceProfile::AccessCon
 }
 
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
-    const char *deviceIdHash, const char *anonyDeviceIdHash)
+    const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
     int32_t localUserId = GetActiveOsAccountIds();
     for (const auto &trustDevice : trustDevices) {
+        if (isOnlyPointToPoint &&
+            trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+            continue;
+        }
         if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
-            trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
             trustDevice.GetTrustDeviceId().empty() ||
             trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE ||
             localUserId != GetAclLocalUserId(trustDevice)) {
@@ -131,7 +134,7 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
     return false;
 }
 
-bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
+bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint)
 {
     if (deviceIdHash == nullptr) {
         LNN_LOGE(LNN_STATE, "deviceIdHash is null");
@@ -155,7 +158,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     char *anonyDeviceIdHash = nullptr;
     Anonymize(deviceIdHash, &anonyDeviceIdHash);
     static uint32_t callCount = 0;
-    if (IsTrustDevice(aclProfiles, deviceIdHash, anonyDeviceIdHash)) {
+    if (IsTrustDevice(aclProfiles, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint)) {
         AnonymizeFree(anonyDeviceIdHash);
         return true;
     }
