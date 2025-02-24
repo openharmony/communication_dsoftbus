@@ -760,7 +760,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySendBytesAck001, TestSize.
     dataHead.seq = 1;
     dataHead.flags = TRANS_SESSION_BYTES;
     dataHead.needAck = true;
-    int32_t ret = ClientTransProxyBytesNotifySession(1, &dataHead, data, sizeof(data));
+    int32_t ret = ClientTransProxyBytesNotifySession(channelId, &dataHead, data, sizeof(data));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
