@@ -92,6 +92,11 @@ int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *devi
     return GetInterface()->AuthFindLatestNormalizeKey(udidHash, deviceKey, clearOldKey);
 }
 
+bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time)
+{
+    return GetInterface()->AuthIsLatestNormalizeKeyInTime(udidHash, time);
+}
+
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey)
 {
     return GetInterface()->AuthFindDeviceKey(udidHash, keyType, deviceKey);
@@ -121,6 +126,11 @@ bool IsPotentialTrustedDevice(TrustedRelationIdType idType,
     const char *deviceId, bool isPrecise, bool isPointToPoint)
 {
     return GetInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise, isPointToPoint);
+}
+
+bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isPointToPoint)
+{
+    return GetInterface()->IsPotentialTrustedDeviceDp(deviceIdHash, isPointToPoint);
 }
 
 int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen,

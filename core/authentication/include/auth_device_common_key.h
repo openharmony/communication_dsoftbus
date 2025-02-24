@@ -49,6 +49,7 @@ void AuthUpdateNormalizeKeyIndex(const char *udidHash, int64_t index, AuthLinkTy
     bool isServer);
 int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey);
 int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey);
+bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time);
 void AuthClearDeviceKey(void);
 
 #ifdef __cplusplus
