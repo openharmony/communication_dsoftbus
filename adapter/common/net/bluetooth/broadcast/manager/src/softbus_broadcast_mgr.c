@@ -307,7 +307,6 @@ int32_t DeInitBroadcastMgr(void)
     }
     g_mgrLockInit = false;
     g_mgrInit = false;
-    SoftbusBleAdapterDeInit();
     int32_t ret;
     if (g_btStateListenerId != -1) {
         ret = SoftBusRemoveBtStateListener(g_btStateListenerId);
@@ -318,6 +317,7 @@ int32_t DeInitBroadcastMgr(void)
     ret = g_interface[g_interfaceId]->DeInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "call from adapter failed");
     g_interface[g_interfaceId] = NULL;
+    SoftbusBleAdapterDeInit();
     return SOFTBUS_OK;
 }
 
