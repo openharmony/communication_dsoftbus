@@ -182,6 +182,7 @@ ohos_unittest("WifiDirectManagerCppTest") {
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_path/wifi_direct_ip_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_role_option.cpp",

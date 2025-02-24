@@ -44,6 +44,11 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t InitTrustedDevInfoTable(void)
+{
+    return SOFTBUS_OK;
+}
+
 bool LnnIsPotentialHomeGroup(const char *udid)
 {
     (void)udid;
@@ -73,4 +78,8 @@ int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
 {
     LNN_LOGI(LNN_INIT, "check generate softbus key by huks not implemented");
     return SOFTBUS_OK;
+}
+
+void LnnRemoveDb(void)
+{
 }

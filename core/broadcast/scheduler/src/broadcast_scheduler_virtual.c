@@ -79,6 +79,13 @@ int32_t SchedulerSetBroadcastData(int32_t bcId, const BroadcastPacket *packet)
     return SOFTBUS_OK;
 }
 
+int32_t SchedulerSetBroadcastParam(int32_t bcId, const BroadcastParam *param)
+{
+    (void)bcId;
+    (void)param;
+    return SOFTBUS_OK;
+}
+
 int32_t SchedulerStopBroadcast(int32_t bcId)
 {
     (void)bcId;

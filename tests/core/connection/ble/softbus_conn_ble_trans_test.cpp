@@ -24,6 +24,7 @@
 #include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_adapter_mem.h"
+#include <arpa/inet.h>
 
 using namespace testing::ext;
 using namespace testing;
@@ -147,7 +148,7 @@ HWTEST_F(ConnectionBleTransTest, TransPackMsg, TestSize.Level1)
     ctx.challengeCode = 0;
     ctx.referenceRequest.referenceNumber = 2;
     ctx.referenceRequest.delta = 1;
-    uint8_t *data = NULL;
+    uint8_t *data = nullptr;
     uint32_t dataLen = 0;
     NiceMock<ConnectionBleTransInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, cJSON_CreateObject).WillOnce(Return(nullptr));
@@ -192,7 +193,7 @@ HWTEST_F(ConnectionBleTransTest, TransPackMsg, TestSize.Level1)
 HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
 {
     uint32_t connectionId = 10;
-    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *data = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     uint32_t dataLen = sizeof(uint8_t);
     int32_t pid = 0;
     int32_t flag = 2;
@@ -201,13 +202,13 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
     int32_t ret = ConnBlePostBytesInner(connectionId, data, 0, pid, flag, module, seq, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    uint8_t *value = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *value = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     ret = ConnBlePostBytesInner(connectionId, value, MAX_DATA_LEN + 1, pid, flag, module, seq, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     NiceMock<ConnectionBleTransInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillOnce(Return(nullptr));
-    uint8_t *value1 = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *value1 = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     ret = ConnBlePostBytesInner(connectionId, value1, dataLen, pid, flag, module, seq, NULL);
     EXPECT_EQ(SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, ret);
 
@@ -216,11 +217,11 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
     connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
     SoftBusMutexInit(&connection->lock, NULL);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillOnce(Return(connection));
-    uint8_t *value2 = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *value2 = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     ret = ConnBlePostBytesInner(connectionId, value2, dataLen, pid, flag, MODULE_AUTH_MSG, seq, NULL);
     EXPECT_EQ(SOFTBUS_CONN_BLE_CONNECTION_NOT_READY_ERR, ret);
 
-    uint8_t *value3 = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *value3 = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     ConnBleConnection *bleConnectionconnection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(nullptr, connection);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillRepeatedly(Return(bleConnectionconnection));
@@ -242,7 +243,7 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTransTest, GattTransRecv001, TestSize.Level1)
 {
-    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *data = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     uint32_t dataLen = sizeof(uint8_t) + sizeof(BleTransHeader);
     ConnBleReadBuffer buffer;
     uint32_t outLen = 0;
@@ -267,48 +268,112 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GattTransRecv002
-* @tc.desc: Test ConnGattTransRecv002.
+* @tc.name: GattTransRecv003
+* @tc.desc: Test ConnGattTransRecv003.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionBleTransTest, GattTransRecv002, TestSize.Level1)
+HWTEST_F(ConnectionBleTransTest, GattTransRecv003, TestSize.Level1)
 {
-    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
-    uint32_t dataLen = sizeof(uint8_t) + sizeof(BleTransHeader);
-    ConnBleReadBuffer buffer;
-    uint32_t outLen = 0;
+    CONN_LOGI(CONN_BLE, "GattTransRecv003, start");
+    uint8_t *data = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     uint32_t connectionId = 1;
-    uint32_t received[3] = {0, 1000, 1};
+    uint32_t outLen = 0;
+    uint32_t dataLen = sizeof(uint8_t) + sizeof(BleTransHeader);
     BleTransHeader tmp;
-    NiceMock<ConnectionBleTransInterfaceMock> bleMock;
-    tmp.seq = 100000;
-    tmp.size = dataLen - sizeof(BleTransHeader) + 1;
+    tmp.seq = ntohl(100000);
+    tmp.size = ntohl(0x01);
+    tmp.offset = 0;
+    tmp.total = ntohl(0x10000);
+
+    data = (uint8_t *)&tmp;
+    ConnBleReadBuffer buffer = { 0 };
+    uint8_t *value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    tmp.total = 0;
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    tmp.total = ntohl(0x10);
+    tmp.offset = tmp.total;
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    tmp.offset = 0;
     tmp.total = tmp.size;
-    tmp.offset = tmp.total - tmp.size + 1;
-    buffer.seq = 100001;
-    buffer.total = tmp.total + 1;
     data = (uint8_t *)&tmp;
-    uint8_t *value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
-    EXPECT_EQ(nullptr, value);
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_NE(nullptr, value);
 
-    tmp.total = tmp.size + 1;
+    tmp.total = ntohl(0x10);
     data = (uint8_t *)&tmp;
-    value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
+    ListInit(&buffer.packets);
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 
-    for (uint32_t i = 0; i < sizeof(received) / sizeof(received[0]); i++) {
-        buffer.received = received[i];
-        value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
-        EXPECT_EQ(nullptr, value);
-    }
+    tmp.total = tmp.size;
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_NE(nullptr, value);
 
-    value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
+    tmp.total = ntohl(0x10);
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
+    CONN_LOGI(CONN_BLE, "GattTransRecv003, end");
 }
 
+/*
+* @tc.name: GattTransRecv004
+* @tc.desc: Test ConnGattTransRecv004.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleTransTest, GattTransRecv004, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "GattTransRecv004, start");
+    uint8_t *data = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
+    uint32_t connectionId = 1;
+    uint32_t outLen = 0;
+    uint32_t dataLen = sizeof(uint8_t) + sizeof(BleTransHeader);
+    BleTransHeader tmp;
+    tmp.seq = ntohl(100000);
+    tmp.size = ntohl(0x01);
+    tmp.offset = ntohl(0x0F);
+    tmp.total = ntohl(0x10);
+
+    data = (uint8_t *)&tmp;
+    ConnBleReadBuffer buffer = { 0 };
+    buffer.seq = ntohl(tmp.seq) + 1;
+    buffer.total = ntohl(tmp.total) + 1;
+    ListInit(&buffer.packets);
+    uint8_t *value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    buffer.seq = ntohl(tmp.seq) + 1;
+    buffer.total = ntohl(tmp.total) + 1;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    buffer.seq = 0;
+    for (uint32_t i = 1; i < ntohl(tmp.total) - 1; i++) {
+        tmp.offset = ntohl(0x0F - i);
+        data = (uint8_t *)&tmp;
+        ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    }
+    tmp.offset = 0;
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_NE(nullptr, value);
+    CONN_LOGI(CONN_BLE, "GattTransRecv004, end");
+}
 /*
 * @tc.name: ConnBleTransConfigPostLimit
 * @tc.desc: Test ConnBleTransConfigPostLimit.

@@ -524,4 +524,26 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_006, TestSize.Level1)
 
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_006, End");
 }
+
+/*
+ * @tc.name: DiscSoftbusBleBuildReportJson001
+ * @tc.desc: Test DiscSoftbusBleBuildReportJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(DiscBleUtilsTest, DiscSoftbusBleBuildReportJson001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, DiscSoftbusBleBuildReportJson001, Start");
+
+    DeviceInfo device = { { 0 } };
+    uint32_t handleId  = 1;
+
+    int32_t ret = DiscSoftbusBleBuildReportJson(nullptr, handleId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = DiscSoftbusBleBuildReportJson(&device, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = DiscSoftbusBleBuildReportJson(&device, handleId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, DiscSoftbusBleBuildReportJson001, End");
+}
 } // namespace OHOS

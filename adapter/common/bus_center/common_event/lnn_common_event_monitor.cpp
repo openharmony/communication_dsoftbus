@@ -35,6 +35,7 @@
 #include "power_mgr_client.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "lnn_init_monitor.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
@@ -137,41 +138,32 @@ bool LnnQueryLocalScreenStatusOnce(bool notify)
     return isScreenOn;
 }
 
-static void LnnSubscribeCommonEvent(void *para)
+int32_t LnnSubscribeCommonEvent(void)
 {
-    (void)para;
-    static int32_t retry = 0;
-    if (retry > RETRY_MAX) {
-        LNN_LOGE(LNN_EVENT, "try subscribe common event max times");
-        return;
-    }
     OHOS::EventFwk::SubscribeEvent *subscriberPtr = new OHOS::EventFwk::SubscribeEvent();
     if (subscriberPtr == nullptr) {
         LNN_LOGE(LNN_EVENT, "SubscribeEvent init fail");
-        return;
+        return SOFTBUS_MEM_ERR;
     }
-    if (subscriberPtr->SubscribeCommonEvent() == SOFTBUS_OK) {
-        LNN_LOGI(LNN_EVENT, "subscribe common event success");
-        LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
-        if (!LnnIsDefaultOhosAccount()) {
-            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
-        }
-    } else {
+    if (subscriberPtr->SubscribeCommonEvent() != SOFTBUS_OK) {
+        delete subscriberPtr;
         LNN_LOGE(LNN_EVENT, "subscribe common event fail");
-        retry++;
-        SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "async call subscribe screen state fail");
-        }
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
-    delete subscriberPtr;
+    LNN_LOGI(LNN_EVENT, "subscribe common event success");
+    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
+    if (!LnnIsDefaultOhosAccount()) {
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+    }
     (void)LnnQueryLocalScreenStatusOnce(true);
+    delete subscriberPtr;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnInitCommonEventMonitorImpl(void)
 {
-    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackHelper(looper, LnnSubscribeCommonEvent, NULL);
+    int32_t ret = LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_SCREEN_STATUS, LnnSubscribeCommonEvent, RETRY_MAX,
+        DELAY_LEN, false);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "LnnAsyncCallbackHelper fail");
     }

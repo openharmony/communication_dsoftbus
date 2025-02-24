@@ -760,7 +760,7 @@ static char *CreateNetworkIdMsgPara(const char *networkId)
     return para;
 }
 
-int32_t ConifgLocalLedger(void)
+int32_t ConfigLocalLedger(void)
 {
     char uuid[UUID_BUF_LEN] = { 0 };
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
@@ -768,13 +768,13 @@ int32_t ConifgLocalLedger(void)
 
     // set local networkId and uuid
     if (LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGenLocalUuid(uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        LnnGenLocalUuid(uuid, UUID_BUF_LEN, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local id fail");
         return SOFTBUS_NOT_FIND;
     }
 
     // irk fail should not cause softbus init fail
-    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local irk fail");
     }
 
@@ -1057,7 +1057,8 @@ static int32_t PostJoinLnnExtMsg(ConnectionAddr *addr, int32_t connId)
 
 int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
 {
-    if (callback == NULL || addr == NULL || addr->type != CONNECTION_ADDR_SESSION) {
+    if (callback == NULL || addr == NULL || addr->type != CONNECTION_ADDR_SESSION ||
+        addr->type != CONNECTION_ADDR_SESSION_WITH_KEY) {
         LNN_LOGE(LNN_BUILDER, "invalid callback");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1697,4 +1698,22 @@ void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool 
     LnnNotifyDeviceTrustedChange(DEVICE_FOREGROUND_USERID_CHANGE, msg, strlen(msg));
     cJSON_free(msg);
     LNN_LOGI(LNN_BUILDER, "notify change to service! isChange:%{public}s", isChange ? "true":"false");
+}
+
+int32_t LnnUpdateLocalUuidAndIrk(void)
+{
+    char uuid[UUID_BUF_LEN] = { 0 };
+    unsigned char irk[LFINDER_IRK_LEN] = { 0 };
+
+    if (LnnGenLocalUuid(uuid, UUID_BUF_LEN, true) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local uuid fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN, true) != SOFTBUS_OK) {
+        LNN_LOGW(LNN_BUILDER, "get local irk fail");
+    }
+    LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
+    LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+    (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+    return SOFTBUS_OK;
 }

@@ -26,7 +26,7 @@
 class BleGattInterface {
 public:
     virtual void SoftbusBleAdapterInit() = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual int32_t SoftBusRemoveBtStateListener(int32_t listenerId) = 0;
 };
 
@@ -38,7 +38,8 @@ public:
     ~ManagerMock();
 
     MOCK_METHOD(void, SoftbusBleAdapterInit, (), (override));
-    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
+        (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
 
     static const SoftbusBroadcastCallback *broadcastCallback;

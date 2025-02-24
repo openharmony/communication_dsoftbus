@@ -1787,8 +1787,9 @@ static int32_t InitBrManager()
         .OnBtAclStateChanged = NULL,
         .OnBtStateChanged = OnBtStateChanged,
     };
-    int32_t listenerId = SoftBusAddBtStateListener(&listener);
-    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
+    int32_t listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(&listener, &listenerId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
         "InitBrManager: add bt state change listener failed, invalid listenerId=%{public}d", listenerId);
     TransitionToState(BR_STATE_AVAILABLE);
     return SOFTBUS_OK;

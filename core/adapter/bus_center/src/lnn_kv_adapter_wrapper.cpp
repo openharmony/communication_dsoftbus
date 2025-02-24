@@ -293,25 +293,25 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
     LNN_LOGI(LNN_LEDGER, "DeRegisterDataChangeListener success");
 }
 
-bool LnnSubcribeKvStoreService(void)
+int32_t LnnSubcribeKvStoreService(void)
 {
     auto abilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (abilityManager == nullptr) {
         LNN_LOGE(LNN_LEDGER, "abilityManager is nullptr");
-        return false;
+        return SOFTBUS_NO_INIT;
     }
     sptr<KvStoreStatusChangeListener> listener = new (std::nothrow) KvStoreStatusChangeListener();
     if (listener == nullptr) {
         LNN_LOGE(LNN_LEDGER, "failed to create listener");
-        return false;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t ret = abilityManager->SubscribeSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, listener);
     if (ret != ERR_OK) {
         LNN_LOGE(LNN_LEDGER, "subscribe system ability failed, ret=%{public}d", ret);
-        return false;
+        return SOFTBUS_KV_SUBSCRIBE_SA_FAILED;
     }
     LNN_LOGI(LNN_LEDGER, "subscribe kv store service success");
-    return true;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)

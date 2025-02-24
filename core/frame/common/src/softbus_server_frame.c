@@ -29,6 +29,7 @@
 #include "softbus_utils.h"
 #include "trans_session_service.h"
 #include "wifi_direct_manager.h"
+#include "lnn_init_monitor.h"
 
 static bool g_isInit = false;
 
@@ -111,7 +112,7 @@ static int32_t InitServicesAndModules(void)
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
-
+    LnnInitMonitorInit();
     if (ServerStubInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "server stub init failed.");
         return;
@@ -136,10 +137,14 @@ void InitSoftBusServer(void)
 
     ret = SoftBusBtInit();
     if (ret != SOFTBUS_OK) {
+        LnnInitModuleReturnSet(INIT_DEPS_BLUETOOTH, ret);
+        LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_FAILED);
         ServerModuleDeinit();
         COMM_LOGE(COMM_SVC, "softbus bt init failed, err = %{public}d", ret);
         return;
     }
+    LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_SUCCESS);
+    LnnModuleInitMonitorCheckStart();
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

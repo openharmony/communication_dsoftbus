@@ -139,3 +139,10 @@ void LnnClearAuthExchangeUdid(const char *networkId)
     (void)networkId;
     return;
 }
+
+int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid)
+{
+    (void)json;
+    (void)peerudid;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

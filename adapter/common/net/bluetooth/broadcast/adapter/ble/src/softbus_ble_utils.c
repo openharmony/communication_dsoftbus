@@ -243,6 +243,7 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
     DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE_ADAPTER, "bc scan filter is null!");
     DISC_CHECK_AND_RETURN_LOGE(filterSize > 0, DISC_BLE_ADAPTER, "filter size is 0 or smaller!");
     while (filterSize-- > 0) {
+        (nativeFilter + filterSize)->filterIndex = (filter + filterSize)->filterIndex;
         (nativeFilter + filterSize)->address = (char *)(filter + filterSize)->address;
         (nativeFilter + filterSize)->deviceName = (char *)(filter + filterSize)->deviceName;
         (nativeFilter + filterSize)->manufactureData = (unsigned char *)(filter + filterSize)->manufactureData;

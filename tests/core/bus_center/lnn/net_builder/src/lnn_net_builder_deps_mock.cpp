@@ -297,14 +297,14 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
     return GetNetBuilderDepsInterface()->ConnDisconnectDeviceAllConn(option);
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len, isUpdate);
 }
 
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len, isUpdate);
 }
 
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)

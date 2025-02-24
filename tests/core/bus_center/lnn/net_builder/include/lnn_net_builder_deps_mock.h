@@ -116,8 +116,8 @@ public:
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
-    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
-    virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
+    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate);
+    virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate);
     virtual int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
     virtual int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
     virtual int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
@@ -190,7 +190,7 @@ public:
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
     virtual bool IsSupportLpFeature(void);
-    virtual bool LnnSubcribeKvStoreService(void);
+    virtual int32_t LnnSubcribeKvStoreService(void);
     virtual void LnnNotifyLocalNetworkIdChanged(void);
     virtual int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId) = 0;
     virtual int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len) = 0;
@@ -263,8 +263,8 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(GetLooper, SoftBusLooper *(int));
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t(const ConnectOption *));
-    MOCK_METHOD2(LnnGenLocalUuid, int32_t(char *, uint32_t));
-    MOCK_METHOD2(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t));
+    MOCK_METHOD3(LnnGenLocalUuid, int32_t(char *, uint32_t, bool));
+    MOCK_METHOD3(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t, bool));
     MOCK_METHOD2(LnnGenLocalNetworkId, int32_t(char *, uint32_t));
     MOCK_METHOD3(LnnSetDLNodeAddr, int32_t(const char *, IdCategory, const char *));
     MOCK_METHOD3(LnnSetDLProxyPort, int32_t(const char *, IdCategory, int32_t));
@@ -319,7 +319,7 @@ public:
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyDeviceVerified, void(const char *));
     MOCK_METHOD0(LnnInitBusCenterEvent, int32_t());
-    MOCK_METHOD0(LnnSubcribeKvStoreService, bool());
+    MOCK_METHOD0(LnnSubcribeKvStoreService, int32_t());
     MOCK_METHOD0(LnnInitBatteryInfo, int32_t());
     MOCK_METHOD0(LnnDeinitBatteryInfo, void());
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));

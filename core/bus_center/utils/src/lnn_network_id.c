@@ -31,7 +31,7 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
-static int32_t GetUuidFromFile(char *id, uint32_t len)
+static int32_t GetUuidFromFile(char *id, uint32_t len, bool isUpdate)
 {
     int32_t rc;
     char uuidFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
@@ -41,7 +41,7 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
         LNN_LOGE(LNN_STATE, "get uuid save path fail");
         return rc;
     }
-    if (SoftBusReadFullFile(uuidFilePath, id, len) != SOFTBUS_OK) {
+    if (isUpdate || SoftBusReadFullFile(uuidFilePath, id, len) != SOFTBUS_OK) {
         rc = GenerateRandomStr(id, len);
         if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate uuid id fail");
@@ -76,7 +76,7 @@ int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate)
 {
     static bool isGenerated = false;
     static char localUuid[UUID_BUF_LEN] = {0};
@@ -86,8 +86,8 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (isGenerated == false) {
-        if (GetUuidFromFile(localUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+    if (isUpdate || isGenerated == false) {
+        if (GetUuidFromFile(localUuid, UUID_BUF_LEN, isUpdate) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "get uuid from file failed");
             return SOFTBUS_NETWORK_GET_UUID_FROM_FILE_FAILED;
         }
@@ -100,7 +100,7 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len)
+static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len, bool isUpdate)
 {
     int32_t rc;
     char irkFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
@@ -110,7 +110,7 @@ static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len)
         LNN_LOGE(LNN_STATE, "get irk save path fail");
         return rc;
     }
-    if (SoftBusReadFullFile(irkFilePath, (char *)irk, len) != SOFTBUS_OK) {
+    if (isUpdate || SoftBusReadFullFile(irkFilePath, (char *)irk, len) != SOFTBUS_OK) {
         rc = SoftBusGenerateRandomArray(irk, len);
         if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate irk id fail");
@@ -125,7 +125,7 @@ static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate)
 {
     static bool isIrkGenerated = false;
     static char locaIrk[LFINDER_IRK_LEN] = {0};
@@ -134,8 +134,8 @@ int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (!isIrkGenerated) {
-        if (GetIrkFromFile((unsigned char *)locaIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+    if (isUpdate || !isIrkGenerated) {
+        if (GetIrkFromFile((unsigned char *)locaIrk, LFINDER_IRK_LEN, isUpdate) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "get irk from file failed");
             return SOFTBUS_GET_IRK_FAIL;
         }
