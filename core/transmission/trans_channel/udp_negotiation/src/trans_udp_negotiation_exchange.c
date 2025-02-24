@@ -168,7 +168,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 
 static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
 {
-    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+    if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
     int64_t accountId = 0;

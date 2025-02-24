@@ -128,7 +128,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
     (void)AddNumber64ToJsonObject(json, JSON_KEY_CALLING_TOKEN_ID, (int64_t)appInfo->callingTokenId);
-    if (SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+    if (SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         (void)AddNumber64ToJsonObject(json, ACCOUNT_ID, appInfo->myData.accountId);
         (void)AddNumberToJsonObject(json, USER_ID, appInfo->myData.userId);
     }

@@ -91,7 +91,7 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
 
 static void TransTdcCheckIsApp(AppInfo *appInfo)
 {
-    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+    if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
     if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
