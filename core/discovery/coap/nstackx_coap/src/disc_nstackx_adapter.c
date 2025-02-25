@@ -47,8 +47,6 @@
 #define DISC_FREQ_COUNT_MASK   0xFFFF
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND           1000
-#define MULTI_BYTE_CHAR_LEN    8
-#define MAX_WIDE_STR_LEN       128
 #define DEFAULT_MAX_DEVICE_NUM 20
 
 #define NSTACKX_LOCAL_DEV_INFO "NstackxLocalDevInfo"
@@ -573,66 +571,6 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device info to dfinder failed");
     DiscCoapUpdateDevName();
-}
-
-static int32_t SetLocale(char **localeBefore)
-{
-    *localeBefore = setlocale(LC_CTYPE, NULL);
-    if (*localeBefore == NULL) {
-        DISC_LOGW(DISC_COAP, "get locale failed");
-    }
-
-    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
-    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_DISCOVER_SET_LOCALE_FAILED;
-}
-
-static void RestoreLocale(const char *localeBefore)
-{
-    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
-        DISC_LOGW(DISC_COAP, "restore locale failed");
-    }
-}
-
-static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
-{
-    size_t multiByteStrLen = strlen(multiByteStr);
-    if (multiByteStrLen == 0) {
-        *truncatedSize = 0;
-        return SOFTBUS_OK;
-    }
-    DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= MAX_WIDE_STR_LEN, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "multi byte str too long: %zu", multiByteStrLen);
-
-    char *localeBefore = NULL;
-    int32_t ret = SetLocale(&localeBefore);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "set locale failed");
-
-    // convert multi byte str to wide str
-    wchar_t wideStr[MAX_WIDE_STR_LEN] = { 0 };
-    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
-    if (numConverted == 0 || numConverted > multiByteStrLen) {
-        DISC_LOGE(DISC_COAP, "mbstowcs failed");
-        RestoreLocale(localeBefore);
-        return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
-    }
-
-    uint32_t truncateTotal = 0;
-    int32_t truncateIndex = (int32_t)numConverted - 1;
-    char multiByteChar[MULTI_BYTE_CHAR_LEN] = { 0 };
-    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
-        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
-        if (truncateCharLen <= 0) {
-            DISC_LOGE(DISC_COAP, "wctomb failed");
-            RestoreLocale(localeBefore);
-            return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
-        }
-        truncateTotal += (uint32_t)truncateCharLen;
-        truncateIndex--;
-    }
-
-    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
-    RestoreLocale(localeBefore);
-    return SOFTBUS_OK;
 }
 
 void DiscCoapUpdateDevName(void)

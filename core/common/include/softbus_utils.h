@@ -109,6 +109,8 @@ int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_
 
 int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data);
 
+int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
+
 void SetSignalingMsgSwitchOn(void);
 void SetSignalingMsgSwitchOff(void);
 bool GetSignalingMsgSwitch(void);
