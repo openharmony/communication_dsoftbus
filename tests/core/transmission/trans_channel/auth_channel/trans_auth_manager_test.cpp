@@ -118,6 +118,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
     ASSERT_EQ(ret,  SOFTBUS_OK);
     ret = TransCloseAuthChannel(TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
+    GetAuthChannelListHead();
     TransAuthDeinit();
 }
 }
