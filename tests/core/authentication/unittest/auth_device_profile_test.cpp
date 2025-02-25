@@ -103,10 +103,10 @@ HWTEST_F(AuthDeviceProfileTest, TRUST_DEVICE_PROFILE_DELETE_TEST_002, TestSize.L
 HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
 {
     const char *deviceIdHash = nullptr;
-    bool ret = IsPotentialTrustedDeviceDp(deviceIdHash);
+    bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_TRUE(!ret);
     deviceIdHash = "dev/ice%Id()Hash()";
-    ret = IsPotentialTrustedDeviceDp(deviceIdHash);
+    ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_TRUE(!ret);
 }
 } // namespace OHOS

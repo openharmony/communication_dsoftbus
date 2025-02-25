@@ -61,6 +61,13 @@ int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *devi
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time)
+{
+    (void)udidHash;
+    (void)time;
+    return true;
+}
+
 void AuthUpdateNormalizeKeyIndex(const char *udidHash, int64_t index, AuthLinkType type, SessionKey *normalizedKey,
     bool isServer)
 {
