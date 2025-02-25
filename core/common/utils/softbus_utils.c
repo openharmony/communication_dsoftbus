@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <locale.h>
 #include "softbus_utils.h"
 
 #include <stdlib.h>
@@ -27,6 +28,8 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
+#define WIDE_CHAR_MAX_LEN 8
+#define WIDE_STR_MAX_LEN 128
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -736,4 +739,71 @@ bool GetCapabilityBit(uint32_t *value, uint32_t offSet)
         return false;
     }
     return (bool)((*value >> offSet) & 0x1);
+}
+
+static int32_t SetLocale(char **localeBefore)
+{
+    *localeBefore = setlocale(LC_CTYPE, NULL);
+    if (*localeBefore == NULL) {
+        COMM_LOGW(COMM_UTILS, "get locale failed");
+    }
+
+    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_DISCOVER_SET_LOCALE_FAILED;
+}
+
+static void RestoreLocale(const char *localeBefore)
+{
+    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
+        COMM_LOGW(COMM_UTILS, "restore locale failed");
+    }
+}
+
+// Calculate the truncated length in wide characters, ensuring that the truncation is performed in wide character
+int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
+{
+    size_t multiByteStrLen = strlen(multiByteStr);
+    if (multiByteStrLen == 0) {
+        *truncatedSize = 0;
+        return SOFTBUS_OK;
+    }
+    if (multiByteStrLen > WIDE_STR_MAX_LEN) {
+        COMM_LOGE(COMM_UTILS, "multi byte str too long: %{public}zu", multiByteStrLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "set locale failed");
+        return ret;
+    }
+
+    // convert multi byte str to wide str
+    wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
+    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
+    if (numConverted == 0 || numConverted > multiByteStrLen) {
+        COMM_LOGE(COMM_UTILS, "mbstowcs failed");
+        RestoreLocale(localeBefore);
+        return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
+    }
+
+    // truncate wide str until <= capacity
+    uint32_t truncateTotal = 0;
+    int32_t truncateIndex = (int32_t)numConverted - 1;
+    char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
+    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
+        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
+        if (truncateCharLen <= 0) {
+            COMM_LOGE(COMM_UTILS, "wctomb failed on w_char. truncateIndex=%{public}d", truncateIndex);
+            RestoreLocale(localeBefore);
+            return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
+        }
+        truncateTotal += (uint32_t)truncateCharLen;
+        truncateIndex--;
+    }
+
+    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
+    RestoreLocale(localeBefore);
+    return SOFTBUS_OK;
 }
