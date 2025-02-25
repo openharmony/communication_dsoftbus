@@ -40,10 +40,6 @@ static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 
 int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
 {
-    if (pkgName == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "pkgName is null");
-        return SOFTBUS_INVALID_PKGNAME;
-    }
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
