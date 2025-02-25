@@ -735,7 +735,7 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
         TRANS_LOGE(TRANS_CTRL, "get sink relation failed.");
         return ret;
     }
-    if (!SoftBusCheckIsApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
+    if (!SoftBusCheckIsCollabApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
         TRANS_LOGE(TRANS_CTRL, "check is not app.");
         return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
     }

@@ -86,7 +86,7 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
 {
     (void)fullTokenId;
     (void)sessionName;
