@@ -405,4 +405,69 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), TRANS_SUB_MODULE_CODE);
 }
+
+/**
+ * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize001
+ * @tc.desc: Test CalculateMbsTruncateSize with null str.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+ HWTEST_F(SoftBusUtilsTest, CalculateMbsTruncateSize001, TestSize.Level1)
+{
+    uint32_t maxCapacity = 15;
+    char multiByteStr[] = "";
+    uint32_t exceptSize = 0;
+    uint32_t truncatedSize = 0;
+
+    for (uint32_t capacity = 0; capacity < maxCapacity; ++capacity) {
+        int32_t ret = CalculateMbsTruncateSize(multiByteStr, capacity, &truncatedSize);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(truncatedSize, exceptSize);
+    }
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize002
+ * @tc.desc: Test CalculateMbsTruncateSize with ascii str.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+ HWTEST_F(SoftBusUtilsTest, CalculateMbsTruncateSize002, TestSize.Level1)
+{
+    uint32_t maxCapacity = 25;
+    char multiByteStr[] = "ABCDEF Ghig 12 Klm";
+    uint32_t exceptSize[] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 18, 18, 18, 18, 18, 18
+    };
+    uint32_t truncatedSize = 0;
+
+    for (uint32_t capacity = 0; capacity < maxCapacity; ++capacity) {
+        int32_t ret = CalculateMbsTruncateSize(multiByteStr, capacity, &truncatedSize);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(truncatedSize, exceptSize[capacity]);
+    }
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize003
+ * @tc.desc: Test CalculateMbsTruncateSize with utf-8 str.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+ HWTEST_F(SoftBusUtilsTest, CalculateMbsTruncateSize003, TestSize.Level1)
+{
+    uint32_t maxCapacity = 40;
+    char multiByteStr[] = "床前明月,光疑是地上霜。";
+    uint32_t exceptSize[] = {
+        0, 0, 0, 3, 3, 3, 6, 6, 6, 9, 9, 9, 12, 13, 13, 13, 16, 16, 16, 19, 19, 19, 22, 22, 22, 25, 25, 25, 28, 28, 28,
+        31, 31, 31, 34, 34, 34, 34, 34, 34
+    };
+    uint32_t truncatedSize = 0;
+
+    for (uint32_t capacity = 0; capacity < maxCapacity; ++capacity) {
+        int32_t ret = CalculateMbsTruncateSize(multiByteStr, capacity, &truncatedSize);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(truncatedSize, exceptSize[capacity]);
+    }
+}
 } // namespace OHOS
