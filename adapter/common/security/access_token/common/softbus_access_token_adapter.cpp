@@ -31,14 +31,8 @@
 constexpr int32_t JUDG_CNT = 1;
 const char *SAMGR_PROCESS_NAME = "samgr";
 const char *DMS_PROCESS_NAME = "distributedsched";
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
 static PermissionChangeCb g_permissionChangeCb = nullptr;
-const char *g_sessionName[] = {
-    "DBinder*",
-    "hiview*",
-    "com.ohos.plrdtest.hongyan*",
-    "objectstoreDB*",
-};
-constexpr int32_t SESSION_NAME_NUM = sizeof(g_sessionName) / sizeof(g_sessionName[0]);
 
 namespace OHOS {
 using namespace Security::AccessToken;
@@ -75,7 +69,6 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
         return false;
     }
 
-    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
     if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         return false;
     }
@@ -255,29 +248,15 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-static bool CheckSessionName(const char *src, const char *dst)
-{
-    regex_t regComp;
-    if (regcomp(&regComp, src, REG_EXTENDED | REG_NOSUB) != REG_OK) {
-        COMM_LOGE(COMM_PERM, "regcomp failed.");
-        return false;
-    }
-    bool compare = regexec(&regComp, dst, 0, nullptr, 0) == REG_OK;
-    regfree(&regComp);
-    return compare;
-}
-
-bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
 {
     if (sessionName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
         return false;
     }
 
-    for (uint32_t i = 0; i < SESSION_NAME_NUM; i++) {
-        if (CheckSessionName(g_sessionName[i], sessionName)) {
-            return false;
-        }
+    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) != 0) {
+        return false;
     }
 
     auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
