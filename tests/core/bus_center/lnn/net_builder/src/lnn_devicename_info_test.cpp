@@ -279,4 +279,39 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_LOCAL_DEVICE_NAME_TEST_001, TestSize.Lev
     ret = LnnSetLocalDeviceName(DEVICE_NAME2);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001
+ * @tc.desc: lnn Async device name test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusMalloc(sizeof(SendSyncInfoParam));
+    EXPECT_TRUE(data != NULL);
+    memset_s(data, sizeof(SendSyncInfoParam), 0, sizeof(SendSyncInfoParam));
+
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr)).WillRepeatedly(Return(&nodeInfo));
+    EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillOnce(Return(DEVICE_NAME1)).WillRepeatedly(Return(DEVICE_NAME2));
+    NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillOnce(Return(nullptr)).WillRepeatedly(Return(data));
+    NiceMock<LnnServicetInterfaceMock> ServiceMock;
+    EXPECT_CALL(ServiceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t ret = LnnAsyncDeviceNameDelay(NETWORKID);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+
+    ret = LnnAsyncDeviceNameDelay(NETWORKID);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
+
+    ret = LnnAsyncDeviceNameDelay(NETWORKID);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_CREATE_SYNC_INFO_PARAM_FAILED);
+
+    ret = LnnAsyncDeviceNameDelay(NETWORKID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusFree(data);
+}
 } // namespace OHOS
