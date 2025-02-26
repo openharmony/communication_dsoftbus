@@ -161,7 +161,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
     ON_CALL(serviceMock, AuthGenRequestId).WillByDefault(Return(1));
     EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
-    ret = LnnSendJoinRequestToConnFsm(connFsm2);
+    ret = LnnSendJoinRequestToConnFsm(connFsm2, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(1000);
 }

@@ -182,7 +182,7 @@ int32_t BusCenterServerProxy::RippleStats(int32_t channelId, int32_t channelType
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     if (pkgName == nullptr || addr == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -208,6 +208,10 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     }
     if (!data.WriteRawData(addr, addrTypeLen)) {
         LNN_LOGE(LNN_EVENT, "write addr failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteBool(isForceJoin)) {
+        LNN_LOGE(LNN_EVENT, "write force join flag failed");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;

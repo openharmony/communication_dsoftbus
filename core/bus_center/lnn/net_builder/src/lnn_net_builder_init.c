@@ -227,7 +227,7 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
         connFsm->isSession = true;
     }
 
-    if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
+    if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "process join lnn request failed");
         if (needReportFailure) {
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);

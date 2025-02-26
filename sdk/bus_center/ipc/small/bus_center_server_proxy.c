@@ -408,7 +408,7 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return g_serverProxy->Invoke(g_serverProxy, SERVER_SET_DATA_LEVEL, &request, NULL, NULL);
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     LNN_LOGD(LNN_EVENT, "join Lnn ipc client push");
     if (addr == NULL || pkgName == NULL) {
@@ -425,6 +425,7 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
     WriteString(&request, pkgName);
     WriteUint32(&request, addrTypeLen);
     WriteBuffer(&request, addr, addrTypeLen);
+    WriteBool(&request, isForceJoin);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_JOIN_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {

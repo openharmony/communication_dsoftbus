@@ -107,7 +107,7 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
     int32_t period = 1;
     TransServerProxy transServerProxy(nullptr);
 
-    int32_t ret = transServerProxy.JoinLNN(g_pkgName, (void *)g_addr, addrTypeLen);
+    int32_t ret = transServerProxy.JoinLNN(g_pkgName, (void *)g_addr, addrTypeLen, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.LeaveLNN(g_pkgName, g_networkId);

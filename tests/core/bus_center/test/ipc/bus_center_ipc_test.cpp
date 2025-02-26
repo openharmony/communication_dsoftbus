@@ -69,13 +69,13 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
     EXPECT_CALL(busCenterIpcMock, LnnServerJoin).WillRepeatedly(Return(SOFTBUS_OK));
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     AddJoinLNNInfo(TEST_PKGNAME, 0, &addr);
-    int32_t ret = LnnIpcServerJoin(nullptr, 0, &addr, TEST_ADDR_TYPE_LEN);
+    int32_t ret = LnnIpcServerJoin(nullptr, 0, &addr, TEST_ADDR_TYPE_LEN, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, nullptr, TEST_ADDR_TYPE_LEN);
+    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, nullptr, TEST_ADDR_TYPE_LEN, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, &addr, sizeof(ConnectionAddr));
+    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, &addr, sizeof(ConnectionAddr), false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, &addr, sizeof(ConnectionAddr));
+    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, &addr, sizeof(ConnectionAddr), false);
     EXPECT_TRUE(ret == SOFTBUS_ALREADY_EXISTED);
 }
 

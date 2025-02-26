@@ -632,7 +632,7 @@ typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
  * @since 1.0
  * @version 1.0
  */
-int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
+int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin);
 
 /**
  * @brief Removes the current device from the LNN.

@@ -76,9 +76,9 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     return GetBusCenterManagerInterface()->ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen, bool isForceJoin)
 {
-    return GetBusCenterManagerInterface()->ServerIpcJoinLNN(pkgName, addr, addrTypeLen);
+    return GetBusCenterManagerInterface()->ServerIpcJoinLNN(pkgName, addr, addrTypeLen, isForceJoin);
 }
 
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
