@@ -309,6 +309,14 @@ int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo 
     return AuthDeviceGetConnInfoByType(uuid, type, connInfo);
 }
 
+int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient)
+{
+    if (isMeta) {
+        return AuthMetaGetConnInfoBySide(uuid, isClient, connInfo);
+    }
+    return AuthDeviceGetPreferConnInfo(uuid, connInfo);
+}
+
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {

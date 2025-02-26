@@ -796,7 +796,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
     }
     ListAdd(&g_authChannelList->list, &info->node);
     TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}" PRId64 ", isClient=%{public}d",
-        info->appInfo.myData.channelId, info->appInfo.isClient);
+        info->appInfo.myData.channelId, info->isClient);
     g_authChannelList->cnt++;
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
@@ -1556,4 +1556,25 @@ void TransAuthDeathCallback(const char *pkgName, int32_t pid)
     }
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     TransAuthDestroyChannelList(&destroyList);
+}
+
+int32_t TransAuthGetRoleByAuthId(int32_t authId, bool *isClient)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_authChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_authChannelList is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        isClient != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
+    int32_t ret = SoftBusMutexLock(&g_authChannelList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    AuthChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (item->authId == authId) {
+            *isClient = item->isClient;
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "Auth channel not find: authId=%{public}d", authId);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }

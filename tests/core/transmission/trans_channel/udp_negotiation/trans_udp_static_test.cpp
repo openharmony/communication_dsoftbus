@@ -196,7 +196,7 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest006, TestSize.Level1)
     uint32_t requestId = TEST_SEQ;
     bool isMeta = true;
     int32_t linkType = LANE_P2P_REUSE;
-    int32_t ret = UdpOpenAuthConn(peerUdid, requestId, isMeta, linkType);
+    int32_t ret = UdpOpenAuthConn(peerUdid, requestId, isMeta, linkType, true);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
