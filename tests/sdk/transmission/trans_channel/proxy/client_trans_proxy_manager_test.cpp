@@ -855,7 +855,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
     uint32_t magic = MAGIC_NUMBER;
     int32_t len = 20;
     char *magicData = reinterpret_cast<char *>(SoftBusCalloc(len));
-    memcpy_s(magicData, MAGICNUM_SIZE, &magic, MAGICNUM_SIZE);
+    ASSERT_TRUE(magicData != nullptr);
+    (void)memcpy_s(magicData, MAGICNUM_SIZE, &magic, MAGICNUM_SIZE);
     ret = ClientTransProxyNoSubPacketTlvProc(channelId, magicData, 0);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
@@ -934,7 +935,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyPackTlvBytes001, TestSize.
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ProxyChannelInfoDetail info;
-    memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
+    (void)memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
     ret = ClientTransProxyPackTlvBytes(channelId, &dataInfo, &info, TEST_SEQ, flag);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
