@@ -278,15 +278,15 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
 {
     ConnectionAddr addr = { .type = CONNECTION_ADDR_WLAN, .info.ip.port = PORT };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
-    int32_t ret = LnnServerJoin(&addr, "pkgName");
+    int32_t ret = LnnServerJoin(&addr, "pkgName", false);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnServerJoin(&addr, "pkgName");
+    ret = LnnServerJoin(&addr, "pkgName", false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnServerJoin(nullptr, "pkgName");
+    ret = LnnServerJoin(nullptr, "pkgName", false);
     EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
-    ret = LnnServerJoin(&addr, nullptr);
+    ret = LnnServerJoin(&addr, nullptr, false);
     EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
 }
 

@@ -144,7 +144,7 @@ public:
     virtual int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnGetLocalWeight(void);
     virtual void AuthMetaReleaseVerify(int64_t authId);
-    virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
+    virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin);
     virtual void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
@@ -273,7 +273,7 @@ public:
     MOCK_METHOD1(LnnSendSyncOfflineFinishToConnFsm, int32_t(LnnConnectionFsm *));
     MOCK_METHOD0(LnnGetLocalWeight, int32_t());
     MOCK_METHOD1(AuthMetaReleaseVerify, void(int64_t));
-    MOCK_METHOD1(LnnSendJoinRequestToConnFsm, int32_t(LnnConnectionFsm *));
+    MOCK_METHOD2(LnnSendJoinRequestToConnFsm, int32_t(LnnConnectionFsm *, bool));
     MOCK_METHOD3(LnnNotifyJoinResult, void(ConnectionAddr *, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyConnectionFsm, void(LnnConnectionFsm *));
     MOCK_METHOD3(LnnCreateConnectionFsm,

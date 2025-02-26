@@ -391,9 +391,9 @@ void AuthMetaReleaseVerify(int64_t authId)
     return GetAuthLaneMockInterface()->AuthMetaReleaseVerify(authId);
 }
 
-int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin)
 {
-    return GetAuthLaneMockInterface()->LnnSendJoinRequestToConnFsm(connFsm);
+    return GetAuthLaneMockInterface()->LnnSendJoinRequestToConnFsm(connFsm, isForceJoin);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

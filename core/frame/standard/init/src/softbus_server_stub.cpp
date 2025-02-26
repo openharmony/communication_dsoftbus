@@ -884,8 +884,12 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
     auto rawData = data.ReadRawData(addrTypeLen);
     COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read addrTypeLen failed.");
     void *addr = const_cast<void *>(rawData);
-
-    int32_t retReply = JoinLNN(clientName, addr, addrTypeLen);
+    bool isForceJoin;
+    if (!data.ReadBool(isForceJoin)) {
+        COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read force join flag failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = JoinLNN(clientName, addr, addrTypeLen, isForceJoin);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner write reply failed!");
         return SOFTBUS_IPC_ERR;

@@ -109,22 +109,22 @@ HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcJoinLNN(_, _, _))
+    EXPECT_CALL(busCentManagerMock, ServerIpcJoinLNN(_, _, _, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NE(JoinLNNInner(nullptr, &target1, cb), SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, cb) == SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_ALREADY_EXISTED);
+    EXPECT_NE(JoinLNNInner(nullptr, &target1, cb, false), SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, cb, false) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr, false) == SOFTBUS_ALREADY_EXISTED);
     target1.type = CONNECTION_ADDR_BLE;
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr, false) == SOFTBUS_OK);
     target1.type = CONNECTION_ADDR_WLAN;
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr, false) == SOFTBUS_OK);
     target1.type = CONNECTION_ADDR_ETH;
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr, false) == SOFTBUS_OK);
     target1.type = CONNECTION_ADDR_SESSION;
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr, false) == SOFTBUS_OK);
     target1.type = CONNECTION_ADDR_MAX;
-    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &target1, nullptr, false) == SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 
@@ -463,10 +463,10 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ONJOIN_RESULT_Test_001, TestSize.Level1)
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnJoinResult(reinterpret_cast<void *>(&addr), NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcJoinLNN(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(JoinLNNInner(nullptr, &addr, OnJoinLNNResultCb) == SOFTBUS_OK);
+    EXPECT_CALL(busCentManagerMock, ServerIpcJoinLNN(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(JoinLNNInner(nullptr, &addr, OnJoinLNNResultCb, false) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnJoinResult(reinterpret_cast<void *>(&addr), NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNNInner(nullptr, &addr, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNNInner(nullptr, &addr, nullptr, false) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnJoinResult(reinterpret_cast<void *>(&addr), NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
     BusCenterClientDeinit();
 }

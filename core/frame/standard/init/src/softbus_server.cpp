@@ -180,10 +180,10 @@ int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const
     return TransSendMsg(channelId, channelType, data, len, msgType);
 }
 
-int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    return LnnIpcServerJoin(pkgName, (int32_t)callingPid, addr, addrTypeLen);
+    return LnnIpcServerJoin(pkgName, (int32_t)callingPid, addr, addrTypeLen, isForceJoin);
 }
 
 int32_t SoftBusServer::LeaveLNN(const char *pkgName, const char *networkId)

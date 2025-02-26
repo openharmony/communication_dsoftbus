@@ -182,9 +182,9 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Join_Lnn_Test_001, TestSize.Level0)
 {
     ConnectionAddr addr;
 
-    EXPECT_TRUE(JoinLNN(nullptr, &addr, OnJoinLNNDone) != SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, nullptr, OnJoinLNNDone) != SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, &addr, nullptr) != SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNN(nullptr, &addr, OnJoinLNNDone, false) != SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, nullptr, OnJoinLNNDone, false) != SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, &addr, nullptr, false) != SOFTBUS_OK);
 }
 
 /*

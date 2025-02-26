@@ -62,7 +62,7 @@ public:
     virtual int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId, int32_t reason) = 0;
     virtual int32_t ClientOnRefreshDeviceFound(
         const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen) = 0;
-    virtual int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName) = 0;
+    virtual int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin) = 0;
 };
 class BusCenterIpcInterfaceMock : public BusCenterIpcInterface {
 public:
@@ -94,7 +94,7 @@ public:
     MOCK_METHOD4(ClientOnPublishLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
     MOCK_METHOD4(ClientOnRefreshLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
     MOCK_METHOD4(ClientOnRefreshDeviceFound, int32_t(const char *, int32_t, const void *, uint32_t));
-    MOCK_METHOD2(LnnServerJoin, int32_t(ConnectionAddr *, const char *));
+    MOCK_METHOD3(LnnServerJoin, int32_t(ConnectionAddr *, const char *, bool));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

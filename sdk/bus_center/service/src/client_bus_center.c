@@ -347,7 +347,7 @@ int32_t SetDataLevel(const DataLevel *dataLevel)
     return SetDataLevelInner(dataLevel);
 }
 
-int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
+int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin)
 {
     if (pkgName == NULL || target == NULL || cb == NULL) {
         DfxRecordSdkJoinLnnEnd(pkgName, SOFTBUS_INVALID_PARAM);
@@ -368,7 +368,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
             return ret;
         }
     }
-    ret = JoinLNNInner(pkgName, target, cb);
+    ret = JoinLNNInner(pkgName, target, cb, isForceJoin);
     DfxRecordSdkJoinLnnEnd(pkgName, ret);
     return ret;
 }

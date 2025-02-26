@@ -757,9 +757,9 @@ void AuthMetaReleaseVerify(int64_t authId)
     return GetLocalLedgerDepsInterface()->AuthMetaReleaseVerify(authId);
 }
 
-int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin)
 {
-    return GetLocalLedgerDepsInterface()->LnnSendJoinRequestToConnFsm(connFsm);
+    return GetLocalLedgerDepsInterface()->LnnSendJoinRequestToConnFsm(connFsm, isForceJoin);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

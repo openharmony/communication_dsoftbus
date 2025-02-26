@@ -716,7 +716,7 @@ int32_t SetDataLevelInner(const DataLevel *dataLevel)
     return ret;
 }
 
-int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
+int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin)
 {
     if (target == NULL) {
         LNN_LOGE(LNN_STATE, "target is null");
@@ -739,7 +739,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
             rc = SOFTBUS_ALREADY_EXISTED;
             break;
         }
-        rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target));
+        rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target), isForceJoin);
         if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "request join lnn failed, ret=%{public}d", rc);
         } else {
