@@ -2271,33 +2271,47 @@ static int32_t UpdateP2pReuseInfoByReqId(AsyncResultType type, uint32_t requestI
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
-static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
+static int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, struct WifiDirectConnectInfo *wifiDirectInfo)
 {
-    struct WifiDirectConnectInfo wifiDirectInfo;
-    (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
-    wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
-    wifiDirectInfo.pid = request->pid;
-    if (request->actionAddr > 0) {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
-        wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
-        wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
+    wifiDirectInfo->requestId = GetWifiDirectManager()->getRequestId();
+    wifiDirectInfo->pid = request->pid;
+    if (request->linkType == LANE_HML) {
+        if (request->actionAddr > 0) {
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
+            wifiDirectInfo->negoChannel.type = NEGO_CHANNEL_ACTION;
+            wifiDirectInfo->negoChannel.handle.actionAddr = request->actionAddr;
+        } else {
+            wifiDirectInfo->connectType = GetWifiDirectManager()->supportHmlTwo() ?
+                WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+        }
     } else {
-        wifiDirectInfo.connectType = GetWifiDirectManager()->supportHmlTwo() ?
-            WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+        wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
     }
-    wifiDirectInfo.reuseOnly = true;
-    if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
+    wifiDirectInfo->reuseOnly = true;
+    if (strcpy_s(wifiDirectInfo->remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "strcpy fail");
         return SOFTBUS_STRCPY_ERR;
     }
     if (LnnGetRemoteStrInfo(request->peerNetworkId, STRING_KEY_WIFIDIRECT_ADDR,
-        wifiDirectInfo.remoteMac, sizeof(wifiDirectInfo.remoteMac)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote mac fail, laneReqId=%{public}u", laneReqId);
+        wifiDirectInfo->remoteMac, sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote mac fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
-    wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
-    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback);
+    wifiDirectInfo->isNetworkDelegate = request->networkDelegate;
+    wifiDirectInfo->ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    return SOFTBUS_OK;
+}
+
+static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
+{
+    struct WifiDirectConnectInfo wifiDirectInfo;
+    (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
+    int32_t ret = GetWifiDirectParamWithReuse(request, &wifiDirectInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get wifidirect reuse param fail, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
+        return ret;
+    }
+    ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add p2plinkinfo fail, laneReqId=%{public}u", laneReqId);
         return ret;
@@ -2340,8 +2354,10 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
         LNN_LOGI(LNN_LANE, "not find lane resource");
         return ret;
     }
-    LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel");
-    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+    enum WifiDirectLinkType linkType = (request->linkType == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
+        WIFI_DIRECT_LINK_TYPE_P2P;
+    LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel, linkType=%{public}d", linkType);
+    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, linkType)) {
         LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " exist but need nego channel", resourceItem.laneId);
         return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
