@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,9 @@ extern "C" {
 #define TIMER_TIMEOUT 1000 // 1s
 #define BT_MAC_NO_COLON_LEN 13
 #define TRANS_CAPABILITY_TLV_OFFSET 0
-#define TRANS_CHANNEL_CAPABILITY 0x01
+#define TRANS_CHANNEL_INNER_ENCRYPT_OFFSET 1
+#define TRANS_CHANNEL_INNER_ENCRYPT (1u << TRANS_CHANNEL_INNER_ENCRYPT_OFFSET) /* bit1 */
+#define TRANS_CHANNEL_CAPABILITY 0x03 /* bit0 & bit1 */
 
 #define MAC_DELIMITER ':'
 #define IP_DELIMITER '.'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -435,7 +435,6 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     }
 
     int32_t ret = TransProxyGetSendMsgChanInfo(channelId, info);
-    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
@@ -455,6 +454,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     }
 
     ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     SoftBusFree(info);
     return ret;
 }

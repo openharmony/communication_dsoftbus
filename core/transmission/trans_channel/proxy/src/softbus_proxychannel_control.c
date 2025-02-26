@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 
 #include "auth_interface.h"
 #include "cJSON.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_proxychannel_manager.h"
@@ -29,29 +31,77 @@
 #include "trans_log.h"
 #include "trans_event.h"
 
-int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
-    uint32_t payLoadLen, int32_t priority)
+static int32_t TransProxyEncryptInnerMessage(const char *sessionKey,
+    const char *inData, uint32_t inDataLen, char *outData, uint32_t outDataLen)
 {
-    if (info == NULL || payLoad == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
+    AesGcmCipherKey cipherKey = { 0 };
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
+        return SOFTBUS_MEM_ERR;
     }
 
-    ProxyDataInfo dataInfo = {0};
-    ProxyMessageHead msgHead = {0};
+    int32_t ret =
+        SoftBusEncryptData(&cipherKey, (unsigned char *)inData, inDataLen, (unsigned char *)outData, &outDataLen);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "SoftBusEncryptData failed, ret=%{public}d", ret);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad, uint32_t payLoadLen, int32_t priority)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL && payLoad != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid.");
+
+    int32_t ret;
+    char *outPayLoad = NULL;
+    bool needFreeOutPayLoad = true;
+    uint32_t outPayLoadLen = payLoadLen + OVERHEAD_LEN;
+    if ((info->appInfo.channelCapability & TRANS_CHANNEL_INNER_ENCRYPT) != 0) {
+        outPayLoad = (char *)SoftBusCalloc(outPayLoadLen);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(outPayLoad != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc failed");
+        ret = TransProxyEncryptInnerMessage(info->appInfo.sessionKey, payLoad, payLoadLen, outPayLoad, outPayLoadLen);
+        if (ret != SOFTBUS_OK && needFreeOutPayLoad) {
+            SoftBusFree(outPayLoad);
+            TRANS_LOGE(TRANS_CTRL, "encrypt msg failed, channelId=%{public}d", info->channelId);
+            return ret;
+        }
+    } else {
+        outPayLoad = (char *)payLoad;
+        outPayLoadLen = payLoadLen;
+        needFreeOutPayLoad = false;
+    }
+
+    ProxyDataInfo dataInfo = { 0 };
+    ProxyMessageHead msgHead = { 0 };
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.cipher = (msgHead.cipher | ENCRYPTED);
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
 
-    dataInfo.inData = (uint8_t *)payLoad;
-    dataInfo.inLen = payLoadLen;
+    dataInfo.inData = (uint8_t *)outPayLoad;
+    dataInfo.inLen = outPayLoadLen;
     if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack msg error");
-        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+        ret = SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+        goto CLEAN_UP;
     }
-    return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
-        priority, info->appInfo.myData.pid);
+    ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, priority, info->appInfo.myData.pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_MSG, "proxy send msg fail, ret=%{public}d", ret);
+        goto CLEAN_UP;
+    }
+
+CLEAN_UP:
+    if (dataInfo.outData != NULL) {
+        SoftBusFree(dataInfo.outData);
+    }
+    if (needFreeOutPayLoad) {
+        SoftBusFree(outPayLoad);
+    }
+    return ret;
 }
 
 static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
