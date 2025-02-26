@@ -99,6 +99,7 @@ typedef enum {
     SRV_TYPE_TOUCH, // The service type is touch discovery.
     SRV_TYPE_OOP, // The service type is oop discovery.
     SRV_TYPE_AUTH_CONN, // The service type is auth connection.
+    SRV_TYPE_OH_APPROACH, // The service type is oh approach discovery.
     SRV_TYPE_BUTT,
 } BaseServiceType;
 
@@ -136,7 +137,8 @@ static const SrvTypeMap g_srvTypeMap[] = {
     {SRV_TYPE_VLINK, (char *)"virtual link"},
     {SRV_TYPE_TOUCH, (char *)"touch"},
     {SRV_TYPE_OOP, (char *)"oop"},
-    {SRV_TYPE_AUTH_CONN, (char *)"authConn"}
+    {SRV_TYPE_AUTH_CONN, (char *)"authConn"},
+    {SRV_TYPE_OH_APPROACH, (char *)"oh_approach"}
 };
 
 /**
