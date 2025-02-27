@@ -182,5 +182,19 @@ bool LnnIsMultiDeviceOnline(void)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnIsMultiDeviceOnline();
 }
+int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->SoftBusMutexLockInner(mutex);
+}
+
+int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnPostTransStateMsgToHbFsm(hbFsm, evtType);
+}
+
+int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnPostUpdateSendInfoMsgToHbFsm(hbFsm, type);
+}
 }
 } // namespace OHOS
