@@ -1035,7 +1035,8 @@ static int32_t GetSrvTypeIndex(BaseServiceType srvType)
     if (srvType == SRV_TYPE_LP_BURST || srvType == SRV_TYPE_LP_HB) {
         return CHANEL_LP;
     } else if (srvType == SRV_TYPE_CONN || srvType == SRV_TYPE_TRANS_MSG || srvType == SRV_TYPE_AUTH_CONN ||
-        srvType == SRV_TYPE_APPROACH || srvType == SRV_TYPE_VLINK || srvType == SRV_TYPE_FAST_OFFLINE) {
+        srvType == SRV_TYPE_APPROACH || srvType == SRV_TYPE_OH_APPROACH || srvType == SRV_TYPE_VLINK ||
+        srvType == SRV_TYPE_FAST_OFFLINE) {
         return CHANEL_STEADY;
     } else if (srvType == SRV_TYPE_SHARE || srvType == SRV_TYPE_TOUCH) {
         return CHANEL_SHARE;

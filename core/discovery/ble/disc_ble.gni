@@ -68,10 +68,15 @@ if (dsoftbus_feature_disc_approach && dsoftbus_feature_inner_disc_ble &&
     dsoftbus_feature_ex_kits) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/approach_ble/approach_ble.gni")
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/oh_approach_ble/oh_approach_ble.gni")
 
   ble_discovery_src += approach_sources
   ble_discovery_inc += approach_include_dirs
   ble_discovery_deps += approach_deps
+  ble_discovery_src += oh_approach_sources
+  ble_discovery_inc += oh_approach_include_dirs
+  ble_discovery_deps += oh_approach_deps
 } else {
   ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c" ]
 }
