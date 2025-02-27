@@ -166,6 +166,7 @@ typedef struct {
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
+    uint32_t staticNetCap;
     uint32_t netCapacity;
     uint32_t authCapacity;
     uint32_t heartbeatCapacity;

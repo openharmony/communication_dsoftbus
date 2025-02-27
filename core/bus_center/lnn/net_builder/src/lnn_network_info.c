@@ -476,6 +476,67 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
+static int32_t GetEnhancedP2PCap(uint32_t *staticNetCap)
+{
+    if (staticNetCap == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getHmlCapabilityCode == NULL) {
+        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+    HmlCapabilityCode code = GetWifiDirectManager()->getHmlCapabilityCode();
+    LNN_LOGE(LNN_BUILDER, "hml capability code=%{public}d.", code);
+    int32_t ret;
+    if (code == CONN_HML_SUPPORT) {
+        ret = LnnSetStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return ret;
+        }
+        return SOFTBUS_OK;
+    }
+    if (code == CONN_HML_CAP_UNKNOWN || code == CONN_HML_NOT_SUPPORT) {
+        ret = LnnClearStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return ret;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
+{
+    LNN_LOGI(LNN_BUILDER, "wifi service on start.");
+    if (info == NULL || info->event != LNN_EVENT_WIFI_SERVICE_START) {
+        LNN_LOGE(LNN_BUILDER, "invalid param.");
+        return;
+    }
+    uint32_t staticNetCap = 0;
+    uint32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    uint32_t oldCap = staticNetCap;
+    ret = GetEnhancedP2PCap(&staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "update enhanced p2p static cap failed, ret=%{public}d.", ret);
+        return;
+    }
+    if (oldCap == staticNetCap) {
+        return;
+    }
+
+    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
+}
+
 static bool IsSupportApCoexist(const char *coexistCap)
 {
     cJSON *coexistObj = cJSON_ParseWithLength(coexistCap, strlen(coexistCap) + 1);
@@ -552,6 +613,11 @@ int32_t LnnInitNetworkInfo(void)
         LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail, ret=%{public}d", ret);
         return ret;
     }
+    ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_SERVICE_START, WifiServiceOnStartHandle);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "register wifi service start fail, ret=%{public}d", ret);
+        return ret;
+    }
     ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -570,6 +636,7 @@ void LnnDeinitNetworkInfo(void)
     (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_USERID, OnReceiveUserIdSyncInfoMsg);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_SERVICE_START, WifiServiceOnStartHandle);
 }
 
 static void LnnProcessUserChangeMsg(LnnSyncInfoType syncType, const char *networkId, const uint8_t *msg, uint32_t len)

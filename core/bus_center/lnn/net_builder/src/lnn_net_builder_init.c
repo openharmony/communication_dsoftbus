@@ -54,6 +54,7 @@
 #include "lnn_oobe_manager.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
+#include "lnn_sa_status_monitor.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
@@ -199,7 +200,7 @@ void NotifyStateForSession(const ConnectionAddr *addr)
     int32_t ret = GetConnIdCbInfoByAddr(addr, &connIdCbInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get connIdCbInfo fail.");
-        return ;
+        return;
     }
     LnnNotifyStateForSession(connIdCbInfo.udid, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
 }
@@ -855,9 +856,9 @@ int32_t LnnInitNetBuilder(void)
         DELAY_REG_DP_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist kv store service fail!");
     }
+    LnnInitSaStatusMonitor();
     return InitNetBuilderLooper();
 }
-
 
 int32_t LnnInitNetBuilderDelay(void)
 {
@@ -898,6 +899,7 @@ void LnnDeinitNetBuilder(void)
     DeinitNodeInfoSync();
     LnnDeinitFastOffline();
     LnnDeinitSyncInfoManager();
+    LnnDeInitSaStatusMonitor();
     LnnDeinitConnIdCallbackManager();
     LnnGetNetBuilder()->isInit = false;
 }

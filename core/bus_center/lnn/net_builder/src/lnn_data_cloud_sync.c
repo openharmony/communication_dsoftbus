@@ -804,8 +804,8 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfo: WIFI_VERSION=%{public}" PRId64 ", BLE_VERSION=%{public}" PRId64
         ", ACCOUNT_ID=%{public}s, TRANSPORT_PROTOCOL=%{public}" PRIu64 ", FEATURE=%{public}" PRIu64
-        ", CONN_SUB_FEATURE=%{public}" PRIu64 ", TIMESTAMP=%{public}" PRIu64 ", "
-        "P2P_MAC_ADDR=%{public}s, PKG_VERSION=%{public}s, DEVICE_NAME=%{public}s, AUTH_CAP=%{public}u, "
+        ", CONN_SUB_FEATURE=%{public}" PRIu64 ", TIMESTAMP=%{public}" PRIu64 ", P2P_MAC_ADDR=%{public}s, "
+        "PKG_VERSION=%{public}s, DEVICE_NAME=%{public}s, STATIC_NET_CAP=%{public}u, AUTH_CAP=%{public}u, "
         "HB_CAP=%{public}u, OS_TYPE=%{public}d, OS_VERSION=%{public}s, BLE_P2P=%{public}d, BT_MAC=%{public}s, "
         "DEVICE_TYPE=%{public}d, SW_VERSION=%{public}s, DEVICE_UDID=%{public}s, DEVICE_UUID=%{public}s, "
         "NETWORK_ID=%{public}s, STATE_VERSION=%{public}d, BROADCAST_CIPHER_KEY=%{public}02x, "
@@ -813,7 +813,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         "DEVICE_VERSION=%{public}s",
         cacheInfo->wifiVersion, cacheInfo->bleVersion, AnonymizeWrapper(anonyAccountId), cacheInfo->supportedProtocols,
         cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, AnonymizeWrapper(anonyP2pMac),
-        cacheInfo->pkgVersion, AnonymizeWrapper(anonyDeviceName), cacheInfo->authCapacity,
+        cacheInfo->pkgVersion, AnonymizeWrapper(anonyDeviceName), cacheInfo->staticNetCap, cacheInfo->authCapacity,
         cacheInfo->heartbeatCapacity, cacheInfo->deviceInfo.osType, cacheInfo->deviceInfo.osVersion,
         cacheInfo->isBleP2p, AnonymizeWrapper(anonyMacAddr), cacheInfo->deviceInfo.deviceTypeId,
         cacheInfo->softBusVersion, AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyUuid),
@@ -886,6 +886,7 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
     oldInfo->localStateVersion = newInfo->localStateVersion;
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
+    oldInfo->staticNetCap = newInfo->staticNetCap;
 }
 
 static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)

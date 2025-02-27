@@ -210,6 +210,8 @@ public:
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
     virtual void LnnGetDataShareInitResult(bool *isDataShareInit) = 0;
+    virtual int32_t LnnInitSaStatusMonitor(void) = 0;
+    virtual void LnnDeInitSaStatusMonitor(void) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -360,6 +362,8 @@ public:
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
     MOCK_METHOD1(LnnGetDataShareInitResult, void(bool *));
+    MOCK_METHOD0(LnnInitSaStatusMonitor, int32_t());
+    MOCK_METHOD0(LnnDeInitSaStatusMonitor, void());
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H
