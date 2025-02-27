@@ -38,7 +38,42 @@ public:
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
+    virtual int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+        const AuthConnCallback *connCallback, AuthVerifyModule module, bool isFastAuth) = 0;
+    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+        int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
+    virtual void AuthMetaReleaseVerify(int64_t authId) = 0;
+    virtual void AuthServerDeathCallback(const char *pkgName, int32_t pid) = 0;
+    virtual int32_t RegGroupChangeListener(const GroupChangeListener *listener) = 0;
+    virtual void UnregGroupChangeListener(void) = 0;
+    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device) = 0;
+    virtual bool IsAuthHasTrustedRelation(void) = 0;
+    virtual bool IsSameAccountDevice(const DeviceInfo *device) = 0;
+    virtual bool AuthHasSameAccountGroup(void) = 0;
+
+    virtual int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port) = 0;
+    virtual void AuthStopListening(AuthLinkType type) = 0;
+    virtual int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port,
+        ListenerModule *moduleId) = 0;
+    virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
+
+    virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
+        bool isMeta) = 0;
+    virtual void AuthCloseConn(AuthHandle authHandle) = 0;
+    virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num) = 0;
+    virtual int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
+        DiscoveryType type) = 0;
+    virtual void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle) = 0;
+    virtual int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index,
+        AuthHandle *authHandle) = 0;
+    virtual int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta) = 0;
+
 };
+
 class AuthInterfaceMock : public AuthInterface {
 public:
     AuthInterfaceMock();
@@ -56,6 +91,35 @@ public:
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t(const AuthConnInfo *, bool, bool));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
+    MOCK_METHOD5(AuthStartConnVerify, int32_t(const AuthConnInfo *, uint32_t, const AuthConnCallback *,
+        AuthVerifyModule, bool));
+    MOCK_METHOD5(AuthMetaStartVerify, int32_t(uint32_t, const AuthKeyInfo *, uint32_t, int32_t
+        const AuthVerifyCallback *));
+    MOCK_METHOD1(AuthMetaReleaseVerify, void(int64_t));
+    MOCK_METHOD2(AuthServerDeathCallback, void(const char *, int32_t));
+    MOCK_METHOD1(RegGroupChangeListener, int32_t(const GroupChangeListener *));
+    MOCK_METHOD0(UnregGroupChangeListener, void());
+    MOCK_METHOD1(AuthIsPotentialTrusted, bool(const DeviceInfo *));
+    MOCK_METHOD0(IsAuthHasTrustedRelation, bool());
+    MOCK_METHOD1(IsSameAccountDevice, bool(const DeviceInfo *));
+    MOCK_METHOD0(AuthHasSameAccountGroup, bool());
+
+    MOCK_METHOD3(AuthStartListening, int32_t(AuthLinkType, const char *, int32_t));
+    MOCK_METHOD1(AuthStopListening, void(AuthLinkType));
+    MOCK_METHOD4(AuthStartListeningForWifiDirect, int32_t(AuthLinkType, const char *, int32_t, ListenerModule *));
+    MOCK_METHOD2(AuthStopListeningForWifiDirect, void(AuthLinkType, ListenerModule));
+
+    MOCK_METHOD4(AuthOpenConn, int32_t(const AuthConnInfo *, uint32_t, const AuthConnCallback *, bool));
+    MOCK_METHOD1(AuthCloseConn, void(AuthHandle));
+    MOCK_METHOD3(AuthGetPreferConnInfo, int32_t(const char *, AuthConnInfo *, bool));
+    MOCK_METHOD4(AuthGetConnInfoByType, int32_t(const char *, AuthLinkType, AuthConnInfo *, bool));
+    MOCK_METHOD3(AuthGetP2pConnInfo, int32_t(const char *, AuthConnInfo *, bool));
+    MOCK_METHOD3(AuthGetHmlConnInfo, int32_t(const char *, AuthConnInfo *, bool));
+    MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t(const char *, int64_t *, uint32_t));
+    MOCK_METHOD4(AuthGetLatestAuthSeqListByType, int32_t(const char *, int64_t *, uint64_t *, DiscoveryType));
+    MOCK_METHOD4(AuthGetLatestIdByUuid, void(const char *, AuthLinkType, bool, AuthHandle *));
+    MOCK_METHOD4(AuthGetAuthHandleByIndex, int32_t(const AuthConnInfo *, bool, int32_t, AuthHandle *));
+    MOCK_METHOD4(AuthGetIdByUuid, int64_t(const char *, bool, bool));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H
