@@ -112,7 +112,7 @@ static int32_t JoinNetwork()
     ConnectionAddr addr = {
         .type = CONNECTION_ADDR_ETH,
     };
-    if (JoinLNN(g_pkgName, &addr, OnJoinLNNDone) != 0) {
+    if (JoinLNN(g_pkgName, &addr, OnJoinLNNDone, false) != 0) {
         TRANS_LOGI(TRANS_TEST, "[test]JoinLNN error!");
         return -1;
     }

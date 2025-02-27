@@ -284,7 +284,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_001, TestSize.Level1)
     uint32_t addrTypeLen = ADDRTYPE_LEN;
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.JoinLNN(pkgName, (void *)addr, addrTypeLen);
+    int32_t ret = servertest.JoinLNN(pkgName, (void *)addr, addrTypeLen, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -300,7 +300,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_002, TestSize.Level1)
     uint32_t addrTypeLen = ADDRTYPE_LEN;
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.JoinLNN(pkgName, nullptr, addrTypeLen);
+    int32_t ret = servertest.JoinLNN(pkgName, nullptr, addrTypeLen, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

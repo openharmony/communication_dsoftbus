@@ -178,7 +178,7 @@ static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *da
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
@@ -195,7 +195,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%{public}s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerJoin(connAddr, pkgName);
+    int32_t ret = LnnServerJoin(connAddr, pkgName, isForceJoin);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinLNNInfo(pkgName, callingPid, connAddr);
     }

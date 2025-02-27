@@ -38,7 +38,7 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
 int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel);
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen);
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin);
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);

@@ -34,10 +34,11 @@ void LnnDeinitNetBuilder(void)
 {
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
 {
     (void)addr;
     (void)pkgName;
+    (void)isForceJoin;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

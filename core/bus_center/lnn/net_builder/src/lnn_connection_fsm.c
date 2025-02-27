@@ -96,6 +96,7 @@ typedef enum {
     FSM_MSG_TYPE_SYNC_OFFLINE_DONE,
     FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT,
     FSM_MSG_TYPE_INITIATE_ONLINE,
+    FSM_MSG_TYPE_FORCE_JOIN_LNN,
 } StateMessageType;
 
 typedef struct {
@@ -1765,6 +1766,23 @@ static void LeaveLNNInOnline(LnnConnectionFsm *connFsm)
     LnnFsmTransactState(&connFsm->fsm, g_states + STATE_LEAVING_INDEX);
 }
 
+static void OnForceJoinLNNInOnline(LnnConnectionFsm *connFsm)
+{
+    AuthConnInfo authConn;
+    LnnConntionInfo *connInfo = &connFsm->connInfo;
+    if (CheckDeadFlag(connFsm, true)) {
+        NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_CONN_FSM_DEAD);
+        return;
+    }
+    connInfo->requestId = AuthGenRequestId();
+    (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetReAuthVerifyCallback(),
+        AUTH_MODULE_LNN, true) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
+        NotifyJoinResult(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
+    }
+}
+
 static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -1779,6 +1797,9 @@ static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
             OnJoinLNNInOnline(connFsm);
+            break;
+        case FSM_MSG_TYPE_FORCE_JOIN_LNN:
+            OnForceJoinLNNInOnline(connFsm);
             break;
         case FSM_MSG_TYPE_LEAVE_LNN:
         case FSM_MSG_TYPE_NOT_TRUSTED:
@@ -2026,7 +2047,7 @@ int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCall
     return LnnFsmDeinit(&connFsm->fsm);
 }
 
-int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
@@ -2037,6 +2058,9 @@ int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
         SoftBusGetBtState() != BLE_ENABLE) {
         LNN_LOGE(LNN_BUILDER, "send join request while bt is turn off");
         return SOFTBUS_NETWORK_BLE_DISABLE;
+    }
+    if (isForceJoin && ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0)) {
+        return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_FORCE_JOIN_LNN, NULL);
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }

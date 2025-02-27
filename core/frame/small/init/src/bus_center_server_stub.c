@@ -69,7 +69,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
+    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen, false);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcServerJoin failed");
         return ret;

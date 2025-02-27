@@ -136,6 +136,7 @@ typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isNeedConnect;
     bool isSession;
+    bool isForceJoin;
     ConnectionAddr addr;
     NodeInfo *dupInfo;
     LnnDfxDeviceInfoReport infoReport;
