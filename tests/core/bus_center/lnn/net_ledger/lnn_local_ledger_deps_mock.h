@@ -232,6 +232,38 @@ public:
     virtual bool LnnSubcribeKvStoreService(void);
     virtual int32_t LnnPutDBData(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen);
     virtual int32_t LnnCloudSync(int32_t dbId);
+
+    virtual int32_t LnnSyncP2pInfo(void);
+    virtual int32_t LnnSyncWifiDirectAddr(void);
+    virtual int32_t LnnInitPtk(void);
+    virtual int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len);
+    virtual int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
+    virtual int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
+    virtual int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len);
+    virtual int32_t LnnSyncPtk(const char *networkId);
+    virtual int32_t UpdateLocalPtkIfValid(char *udid);
+    virtual int32_t LnnSetLocalPtkConn(char *udid);
+    virtual int32_t LnnGenerateLocalPtk(char *udid, char *uuid);
+    virtual int32_t LnnGenerateMetaPtk(uint32_t connId);
+    virtual int32_t LnnGetMetaPtk(uint32_t connId, char *metaPtk, uint32_t len);
+    virtual int32_t LnnDeleteMetaPtk(uint32_t connectionId);
+    virtual int32_t UpdatePtkByAuth(char *networkId, AuthHandle authHandle);
+
+    virtual int32_t SoftBusEnableBt(void) = 0;
+    virtual int32_t SoftBusDisableBt(void) = 0;
+    virtual int32_t SoftBusGetBtName(unsigned char *name, unsigned int *len) = 0;
+    virtual int32_t SoftBusSetBtName(const char *name) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId) = 0;
+    virtual int32_t SoftBusRemoveBtStateListener(int listenerId) = 0;
+    virtual int32_t SoftBusBtInit(void) = 0;
+
+    virtual int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
+        size_t *olen, const unsigned char *src, size_t slen);
+    virtual int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
+        size_t *olen, const unsigned char *src, size_t slen);
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
+    virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len);
+    virtual uint32_t SoftBusCryptoRand(void);
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -407,6 +439,38 @@ public:
     MOCK_METHOD5(LnnPutDBData,
         int32_t(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen));
     MOCK_METHOD1(LnnCloudSync, int32_t(int32_t dbId));
+
+    MOCK_METHOD0(LnnSyncP2pInfo, int32_t());
+    MOCK_METHOD0(LnnSyncWifiDirectAddr, int32_t());
+    MOCK_METHOD0(LnnInitPtk, int32_t());
+    MOCK_METHOD3(LnnGetLocalPtkByUdid, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD3(LnnGetLocalPtkByUuid, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD3(LnnGetLocalDefaultPtkByUuid, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD3(LnnGetRemoteDefaultPtkByUuid, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD1(LnnSyncPtk, int32_t(const char *));
+    MOCK_METHOD1(UpdateLocalPtkIfValid, int32_t(char *));
+    MOCK_METHOD1(LnnSetLocalPtkConn, int32_t(char *));
+    MOCK_METHOD2(LnnGenerateLocalPtk, int32_t(char *, char *));
+    MOCK_METHOD1(LnnGenerateMetaPtk, int32_t(uint32_t));
+    MOCK_METHOD3(LnnGetMetaPtk, int32_t(uint32_t, char *, uint32_t));
+    MOCK_METHOD1(LnnDeleteMetaPtk, int32_t(uint32_t));
+    MOCK_METHOD2(UpdatePtkByAuth, int32_t(char *, AuthHandle));
+
+    MOCK_METHOD0(SoftBusEnableBt, int32_t());
+    MOCK_METHOD0(SoftBusDisableBt, int32_t());
+    MOCK_METHOD2(SoftBusGetBtName, int32_t(unsigned char *, unsigned int *));
+    MOCK_METHOD1(SoftBusSetBtName, int32_t(const char *));
+    MOCK_METHOD2(SoftBusAddBtStateListener, int32_t(const SoftBusBtStateListener *, int *));
+    MOCK_METHOD1(SoftBusRemoveBtStateListener, int32_t(int));
+    MOCK_METHOD0(SoftBusBtInit, int32_t());
+
+    MOCK_METHOD5(SoftBusBase64Encode, int32_t(unsigned char *, size_t,
+        size_t *, const unsigned char *, size_t));
+    MOCK_METHOD5(SoftBusBase64Decode, int32_t(unsigned char *, size_t,
+        size_t *, const unsigned char *, size_t));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t(char *, uint32_t));
+    MOCK_METHOD0(SoftBusCryptoRand, uint32_t());
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
