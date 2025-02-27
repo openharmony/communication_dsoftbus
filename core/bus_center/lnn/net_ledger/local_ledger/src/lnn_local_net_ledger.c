@@ -1897,6 +1897,25 @@ static int32_t L1GetUserId(void *userId, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetStaticNetCap(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint32_t *)buf) = info->staticNetCap;
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateStaticNetCap(const void *capability)
+{
+    if (capability == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.staticNetCap = *(int32_t *)capability;
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -1946,6 +1965,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, -1, L1GetConnSubFeatureCapa, UpdateLocalConnSubFeatureCapability},
     {NUM_KEY_USERID, sizeof(int32_t), L1GetUserId, UpdateLocalUserId},
+    {NUM_KEY_STATIC_NET_CAP, -1, LlGetStaticNetCap, UpdateStaticNetCap},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
@@ -2097,7 +2117,7 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LNN_LOGE(LNN_LEDGER, "key not support or info format error. key=%{public}d", key);
+            LNN_LOGE(LNN_LEDGER, "set fail, key=%{public}d, len=%{public}zu", key, strlen(info));
             SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_INVALID_PARAM;
         }
@@ -2214,57 +2234,57 @@ int32_t LnnGenBroadcastCipherInfo(void)
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int32_t));
 }
 
 int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int64_t));
 }
 
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint64_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint64_t));
 }
 
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int16_t));
 }
 
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint16_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint16_t));
 }
 
 int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint32_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint32_t));
 }
 
 int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
@@ -2426,6 +2446,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     nodeInfo->authCapacity = GetAuthCapacity();
     nodeInfo->feature = LnnGetFeatureCapabilty();
+    nodeInfo->staticNetCap = LnnGetDefaultStaticNetCap();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
         g_localNetLedger.status = LL_INIT_FAIL;

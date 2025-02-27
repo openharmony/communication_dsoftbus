@@ -48,6 +48,7 @@
 #define MAX_NODE_STATE_CB_CNT 10
 #define MAX_LNN_CONNECTION_CNT 30
 #define LNN_SUPPORT_CAPBILITY 62
+#define LNN_STATIC_CAPABILITY 63
 #define LNN_SUPPORT_FEATURE     0x177C2
 #define AUTH_ABILITY_COLLECTION 0
 #define DEFAULT_SUPPORT_AUTHCAPACITY 0xF
@@ -124,6 +125,7 @@ typedef struct {
     uint32_t authCapacity;
     int32_t connBleCloseDelayTime;
     int32_t bleMacAutoRefreshSwitch;
+    uint32_t staticCapability;
 } ConfigItem;
 
 typedef struct {
@@ -156,6 +158,7 @@ ConfigItem g_config = {
     DEFAULT_SUPPORT_AUTHCAPACITY,
     CONN_BLE_CLOSE_DELAY,
     DEFAULT_BLE_MAC_AUTO_REFRESH,
+    LNN_STATIC_CAPABILITY,
 };
 
 typedef struct {
@@ -358,6 +361,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_AUTH_CAPACITY,
         (unsigned char *)&(g_config.authCapacity),
         sizeof(g_config.authCapacity)
+    },
+    {
+        SOFTBUS_INT_STATIC_NET_CAPABILITY,
+        (unsigned char *)&(g_config.staticCapability),
+        sizeof(g_config.staticCapability)
     },
 };
 

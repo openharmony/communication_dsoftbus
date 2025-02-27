@@ -800,6 +800,7 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
         oldInfo->localStateVersion = newInfo->localStateVersion;
         oldInfo->stateVersion = newInfo->stateVersion;
     }
+    oldInfo->staticNetCap = newInfo->staticNetCap;
     return SOFTBUS_OK;
 }
 
@@ -1110,11 +1111,11 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     }
     deviceInfo->netCapacity = info->netCapacity;
     deviceInfo->accountId = info->accountId;
+    deviceInfo->staticNetCap = info->staticNetCap;
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
     }
-    return;
 }
 
 static void BleDirectlyOnlineProc(NodeInfo *info)
@@ -1707,6 +1708,7 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
+    oldInfo->staticNetCap = newInfo->staticNetCap;
 }
 
 static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)

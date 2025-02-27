@@ -58,6 +58,8 @@ typedef enum {
     LNN_EVENT_NODE_NET_TYPE,
     LNN_EVENT_DEVICE_INFO_CHANGED,
     LNN_EVENT_NET_LINK_STATE_CHANGE,
+    /* event from sa monitor */
+    LNN_EVENT_WIFI_SERVICE_START,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -342,6 +344,8 @@ void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType);
 void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state);
 
 void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName);
+
+void LnnNotifyWifiServiceStart(void *para);
 
 #ifdef __cplusplus
 }

@@ -602,5 +602,10 @@ int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
 {
     return GetNetLedgerInterface()->LnnUpdateLocalScreenStatus(isScreenOn);
 }
+
+int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    return GetNetLedgerInterface()->LnnClearStaticNetCap(capability, type);
+}
 }
 } // namespace OHOS
