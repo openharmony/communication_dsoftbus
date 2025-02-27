@@ -31,47 +31,54 @@
 #include "trans_log.h"
 #include "trans_event.h"
 
-static int32_t TransProxyEncryptInnerMessage(const char *sessionKey,
-    const char *inData, uint32_t inDataLen, char *outData, uint32_t outDataLen)
+static int32_t TransProxySendEncryptInnerMessage(ProxyChannelInfo *info,
+    const char *inData, uint32_t inDataLen, ProxyMessageHead *msgHead, ProxyDataInfo *dataInfo)
 {
+    uint32_t outPayLoadLen = inDataLen + OVERHEAD_LEN;
+    char *outPayLoad = (char *)SoftBusCalloc(outPayLoadLen);
+    if (outPayLoad == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc len failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+
     AesGcmCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, info->appInfo.sessionKey, SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
+        SoftBusFree(outPayLoad);
         return SOFTBUS_MEM_ERR;
     }
 
     int32_t ret =
-        SoftBusEncryptData(&cipherKey, (unsigned char *)inData, inDataLen, (unsigned char *)outData, &outDataLen);
+        SoftBusEncryptData(&cipherKey, (unsigned char *)inData, inDataLen, (unsigned char *)outPayLoad, &outPayLoadLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "SoftBusEncryptData failed, ret=%{public}d", ret);
+        SoftBusFree(outPayLoad);
         return SOFTBUS_ENCRYPT_ERR;
     }
-    return SOFTBUS_OK;
+
+    dataInfo->inData = (uint8_t *)outPayLoad;
+    dataInfo->inLen = outPayLoadLen;
+    if (TransProxyPackMessage(msgHead, info->authHandle, dataInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "pack msg error");
+        SoftBusFree(outPayLoad);
+        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+    }
+    ret = TransProxyTransSendMsg(
+        info->connId, dataInfo->outData, dataInfo->outLen, CONN_HIGH, info->appInfo.myData.pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "send encrypt msg failed");
+    }
+    SoftBusFree(outPayLoad);
+    return ret;
 }
 
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad, uint32_t payLoadLen, int32_t priority)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL && payLoad != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid.");
-
-    int32_t ret;
-    char *outPayLoad = NULL;
-    bool needFreeOutPayLoad = true;
-    uint32_t outPayLoadLen = payLoadLen + OVERHEAD_LEN;
-    if ((info->appInfo.channelCapability & TRANS_CHANNEL_INNER_ENCRYPT) != 0) {
-        outPayLoad = (char *)SoftBusCalloc(outPayLoadLen);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(outPayLoad != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc failed");
-        ret = TransProxyEncryptInnerMessage(info->appInfo.sessionKey, payLoad, payLoadLen, outPayLoad, outPayLoadLen);
-        if (ret != SOFTBUS_OK && needFreeOutPayLoad) {
-            SoftBusFree(outPayLoad);
-            TRANS_LOGE(TRANS_CTRL, "encrypt msg failed, channelId=%{public}d", info->channelId);
-            return ret;
-        }
-    } else {
-        outPayLoad = (char *)payLoad;
-        outPayLoadLen = payLoadLen;
-        needFreeOutPayLoad = false;
+    if (info == NULL || payLoad == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
     }
 
     ProxyDataInfo dataInfo = { 0 };
@@ -81,27 +88,23 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad, 
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
 
-    dataInfo.inData = (uint8_t *)outPayLoad;
-    dataInfo.inLen = outPayLoadLen;
-    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "pack msg error");
-        ret = SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
-        goto CLEAN_UP;
+    if ((info->appInfo.channelCapability & TRANS_CHANNEL_INNER_ENCRYPT) != 0) {
+        int32_t ret = TransProxySendEncryptInnerMessage(info, payLoad, payLoadLen, &msgHead, &dataInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "send encrypt msg failed");
+            return ret;
+        }
+    } else {
+        dataInfo.inData = (uint8_t *)payLoad;
+        dataInfo.inLen = payLoadLen;
+        if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "pack msg error");
+            return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+        }
+        return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+            priority, info->appInfo.myData.pid);
     }
-    ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, priority, info->appInfo.myData.pid);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "proxy send msg fail, ret=%{public}d", ret);
-        goto CLEAN_UP;
-    }
-
-CLEAN_UP:
-    if (dataInfo.outData != NULL) {
-        SoftBusFree(dataInfo.outData);
-    }
-    if (needFreeOutPayLoad) {
-        SoftBusFree(outPayLoad);
-    }
-    return ret;
+    return SOFTBUS_OK;
 }
 
 static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
