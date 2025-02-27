@@ -46,11 +46,11 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)callingPid;
     (void)addrTypeLen;
-    return LnnServerJoin((ConnectionAddr *)addr, pkgName);
+    return LnnServerJoin((ConnectionAddr *)addr, pkgName, isForceJoin);
 }
 
 int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)

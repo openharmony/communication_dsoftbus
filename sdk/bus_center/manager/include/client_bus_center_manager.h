@@ -30,7 +30,7 @@ extern "C" {
 int32_t BusCenterClientInit(void);
 void BusCenterClientDeinit(void);
 
-int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
+int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin);
 int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback);
 int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback);

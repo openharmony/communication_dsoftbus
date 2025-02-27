@@ -143,7 +143,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcJoinLNN_TEST_001, TestSize.Level1)
     const char *pkgName = "001";
     void *addr = nullptr;
     uint32_t addrTypeLen = 0;
-    int32_t ret = ServerIpcJoinLNN(pkgName, addr, addrTypeLen);
+    int32_t ret = ServerIpcJoinLNN(pkgName, addr, addrTypeLen, false);
     EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
 }
 

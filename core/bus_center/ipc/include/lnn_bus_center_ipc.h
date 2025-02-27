@@ -28,7 +28,7 @@ extern "C" {
 
 int32_t LnnIpcInit(void);
 void LnnIpcDeinit(void);
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen);
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin);
 int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId);
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);

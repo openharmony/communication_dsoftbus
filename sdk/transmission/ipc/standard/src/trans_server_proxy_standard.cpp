@@ -717,11 +717,12 @@ int32_t TransServerProxy::RemovePermission(const char *sessionName)
     return ret;
 }
 
-int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)pkgName;
     (void)addr;
     (void)addrTypeLen;
+    (void)isForceJoin;
     return SOFTBUS_OK;
 }
 

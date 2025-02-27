@@ -170,13 +170,13 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return ret;
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int32_t ret = g_serverProxy->JoinLNN(pkgName, addr, addrTypeLen);
+    int32_t ret = g_serverProxy->JoinLNN(pkgName, addr, addrTypeLen, isForceJoin);
     return ret;
 }
 

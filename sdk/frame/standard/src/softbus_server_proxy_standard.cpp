@@ -149,11 +149,12 @@ int32_t SoftBusServerProxyFrame::SendMessage(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)pkgName;
     (void)addr;
     (void)addrTypeLen;
+    (void)isForceJoin;
     return SOFTBUS_OK;
 }
 

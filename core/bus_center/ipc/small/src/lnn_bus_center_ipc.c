@@ -200,7 +200,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return ClientOnRefreshDeviceFound(pkgName, 0, &newDevice, sizeof(DeviceInfo));
 }
 
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)callingPid;
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
@@ -229,7 +229,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerJoin(connAddr, pkgName);
+    int32_t ret = LnnServerJoin(connAddr, pkgName, isForceJoin);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinLNNInfo(pkgName, connAddr);
     }

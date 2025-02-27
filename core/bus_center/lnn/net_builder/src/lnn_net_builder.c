@@ -261,7 +261,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
                 uuid, UUID_BUF_LEN);
             (void)AuthFlushDevice(uuid);
         }
-        if ((LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) && needReportFailure) {
+        if ((LnnSendJoinRequestToConnFsm(connFsm, para->isForceJoin) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
         }
@@ -715,7 +715,7 @@ static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
 }
 
 static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    const char *pkgName, bool isNeedConnect)
+    const char *pkgName, bool isNeedConnect, bool isForceJoin)
 {
     JoinLnnMsgPara *para = NULL;
 
@@ -734,6 +734,7 @@ static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const Ln
         return NULL;
     }
     para->isNeedConnect = isNeedConnect;
+    para->isForceJoin = isForceJoin;
     para->addr = *addr;
     para->infoReport = *infoReport;
     return para;
@@ -974,7 +975,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession
     }
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, false);
+    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, false, false);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join with nodeinfo create lnn msg para fail");
         return SOFTBUS_MALLOC_ERR;
@@ -995,7 +996,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession
     return SOFTBUS_OK;
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
 {
     JoinLnnMsgPara *para = NULL;
 
@@ -1006,7 +1007,7 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
     }
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    para = CreateJoinLnnMsgPara(addr, &infoReport, pkgName, true);
+    para = CreateJoinLnnMsgPara(addr, &infoReport, pkgName, true, isForceJoin);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -1039,7 +1040,7 @@ static int32_t PostJoinLnnExtMsg(ConnectionAddr *addr, int32_t connId)
 {
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, true);
+    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, true, false);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
         DelConnIdCallbackInfoItem((uint32_t)connId);
@@ -1142,7 +1143,7 @@ int32_t LnnNotifyDiscoveryDevice(
         LNN_LOGE(LNN_BUILDER, "infoReport is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    para = CreateJoinLnnMsgPara(addr, infoReport, DEFAULT_PKG_NAME, isNeedConnect);
+    para = CreateJoinLnnMsgPara(addr, infoReport, DEFAULT_PKG_NAME, isNeedConnect, false);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc discovery device message fail");
         return SOFTBUS_MALLOC_ERR;
