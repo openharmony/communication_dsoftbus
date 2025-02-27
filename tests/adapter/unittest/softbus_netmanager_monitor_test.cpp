@@ -18,8 +18,11 @@
 
 #include "lnn_event_monitor_impl.h"
 #include "lnn_netmanager_monitor.h"
+#include "lnn_netlink_monitor.c"
 #include "net_conn_client.h"
+#include "network_mock.h"
 #include "refbase.h"
+#include "softbus_adapter_errcode.h"
 #include "softbus_error_code.h"
 
 #define NCM_LINK_NAME           "ncm0"
@@ -89,5 +92,68 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigRouteTest001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = ConfigRoute(id, ifName, destination, gateway);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_CONFIG_NETLINK_ROUTE_FAIL);
+}
+
+/**
+ * @tc.name:LnnNetmanagerMonitorTest_001
+ * @tc.desc: Verify the SetSoftBusWifiConnState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetManagerMonitorImpl_001, TestSize.Level1)
+{
+    NiceMock<NetworkInterfaceMock> NetworkInterfaceMock;
+    EXPECT_CALL(NetworkInterfaceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnInitNetManagerMonitorImpl();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_MONITOR_INIT_FAIL);
+}
+
+/**
+ * @tc.name:LnnNetmanagerMonitorTest_001
+ * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_001, TestSize.Level1)
+{
+    NiceMock<NetworkInterfaceMock> NetworkInterfaceMock;
+    EXPECT_CALL(NetworkInterfaceMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+    int32_t ret = LnnInitNetlinkMonitorImpl();
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/**
+ * @tc.name:LnnInitNetlinkMonitorImpl_002
+ * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value SOFTBUS_NETWORK_CREATE_SOCKET_FAILED.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_002, TestSize.Level1)
+{
+    NiceMock<NetworkInterfaceMock> NetworkInterfaceMock;
+    EXPECT_CALL(NetworkInterfaceMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+	EXPECT_CALL(NetworkInterfaceMock, SoftBusSocketCreate)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_CREATE_SOCKET_FAILED));
+    int32_t ret = LnnInitNetlinkMonitorImpl();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_CREATE_SOCKET_FAILED);
+}
+
+/**
+ * @tc.name:LnnInitNetlinkMonitorImpl_003
+ * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_003, TestSize.Level1)
+{
+    NiceMock<NetworkInterfaceMock> NetworkInterfaceMock;
+    EXPECT_CALL(NetworkInterfaceMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketCreate).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketSetOpt).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketClose).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketBind).WillByDefault(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetworkInterfaceMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+    int32_t ret = LnnInitNetlinkMonitorImpl();
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 } // namespace OHOS
