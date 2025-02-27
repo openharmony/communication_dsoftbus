@@ -102,5 +102,21 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
 {
     return GetNetworkInterface()->LnnNotifyNetlinkStateChangeEvent(state, ifName);
 }
+
+int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis)
+{
+    return GetNetworkInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
+{
+    return GetNetworkInterface()->StartBaseClient(module, listener);
+}
+
+int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    return GetNetworkInterface()->AddTrigger(module, fd, trigger);
+}
 }
 }

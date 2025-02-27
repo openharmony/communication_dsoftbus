@@ -260,6 +260,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/tests/adapter/unittest",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
       "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
+      "$dsoftbus_root_path/core/bus_center/monitor/include",
     ]
     deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
