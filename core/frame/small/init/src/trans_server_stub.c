@@ -374,6 +374,32 @@ int32_t ServerReleaseResources(IpcIo *req, IpcIo *reply)
     return ret;
 }
 
+int32_t ServerProcessInnerEvent(IpcIo *req, IpcIo *reply)
+{
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
+    if (req == NULL || reply == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t eventType = 0;
+    if (!ReadInt32(req, &eventType)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read eventType");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len = 0;
+    if (!ReadUint32(req, &len)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read len");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint8_t* buf = (uint8_t *)ReadRawData(req, len);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read buf");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = TransProcessInnerEvent(eventType, buf, len);
+    return ret;
+}
+
 int32_t ServerPrivilegeCloseChannel(IpcIo *req, IpcIo *reply)
 {
 #define DMS_CALLING_UID 5522

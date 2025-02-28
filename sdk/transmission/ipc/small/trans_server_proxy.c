@@ -461,7 +461,7 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&request, eventType);
-    WriteInt32(&request, len);
+    WriteUint32(&request, len);
     bool value = WriteRawData(&request, buf, len);
     if (!value) {
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
