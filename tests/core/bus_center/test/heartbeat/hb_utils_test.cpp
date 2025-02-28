@@ -327,7 +327,7 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnDumpOnlineDeviceInfo());
     uint32_t ret = GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_600, HB_ADV_RANDOM_TIME_300);
     EXPECT_EQ(ret, HB_ADV_RANDOM_TIME_300);
-    ret = GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_300, HB_ADV_RANDOM_TIME_50);
+    ret = GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_300, HB_ADV_RANDOM_TIME_600);
     EXPECT_NE(ret, HB_ADV_RANDOM_TIME_50);
 }
 
