@@ -159,14 +159,13 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
         return true;
     }
 
-    initVtpCount_++;
     PreSetFillpCoreParams();
-
     int err = static_cast<int>(FtInit());
     if (err != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "failed to init fillp, pkgName=%{public}s, ret=%{public}d", pkgName.c_str(), err);
         return false;
     }
+    initVtpCount_++;
     isDestroyed_ = false;
 #ifdef FILLP_ENHANCED
     if (static_cast<int>(FtSetDfxEventCb(NULL, DstreamHiEventCb)) != 0) {
