@@ -649,6 +649,7 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
     ret = memcpy_s(networkId, NETWORK_ID_BUF_LEN, nodeInfo.networkId, NETWORK_ID_BUF_LEN);
     if (ret != EOK) {
         LNN_LOGI(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
+        SoftBusFree(networkId);
         return;
     }
 
