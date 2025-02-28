@@ -82,9 +82,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1
  */
 HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
-    EXPECT_CALL(ledgerMock, LnnGetNetworkIdByBtMac)
+    EXPECT_CALL(btMock, LnnGetNetworkIdByBtMac)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(btMock, LnnRequestLeaveSpecific)
