@@ -941,11 +941,15 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
     ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
+    const char *udid = "1111222233337777";
+    ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
+    ASSERT_EQ(EOK, ret);
     ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    ConnBleRefreshIdleTimeout(connection);
-    EXPECT_CALL(bleMock, ConnGattClientDisconnect).WillOnce(Return(SOFTBUS_OK));
-    SoftBusSleepMs(CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS); // sleep 60s to call timout event
+    LnnEventBasicInfo info = {
+        .event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
+    };
+    LnnOnlineEventListener(&info);
 }
 
 /*
@@ -1103,5 +1107,4 @@ HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, result);
     AttempReuseConnect(device, BleConnectDeviceDirectly);
 }
-
 } // namespace OHOS
