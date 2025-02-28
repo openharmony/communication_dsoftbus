@@ -24,6 +24,9 @@
 
 #include "assert_helper.h"
 
+// negative numbers to make sure it's illegal
+#define ILLEGAL_OHOS_BT_STATUS (-1)
+
 using namespace testing::ext;
 using ::testing::Return;
 
@@ -181,6 +184,39 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcSearchServices, TestSize.Level3)
     MockBluetooth mocker;
     MockAll(mocker);
     EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_NOT_READY));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_NOMEM));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_BUSY));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_DONE));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_UNSUPPORTED));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_PARM_INVALID));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_UNHANDLED));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_AUTH_FAILURE));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_RMT_DEV_DOWN));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return(SOFTBUS_BT_STATUS_AUTH_REJECTED));
+    EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
+
+    EXPECT_CALL(mocker, BleGattcSearchServices).Times(1).WillOnce(Return((BtStatus)ILLEGAL_OHOS_BT_STATUS));
     EXPECT_EQ(SoftbusGattcSearchServices(1), SOFTBUS_GATTC_INTERFACE_FAILED);
 
     EXPECT_CALL(mocker, BleGattcSearchServices).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
