@@ -18,6 +18,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
+#include "softbus_ddos.h"
 #include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
 #include "softbus_adapter_bt_common.h"
@@ -51,6 +52,7 @@ static void ServerModuleDeinit(void)
     LooperDeinit();
     SoftBusHiDumperDeinit();
     DeinitSoftbusSysEvt();
+    DeinitDdos();
 }
 
 bool GetServerIsInit(void)
@@ -104,7 +106,6 @@ static int32_t InitServicesAndModules(void)
         COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
         return SOFTBUS_DFX_INIT_FAILED;
     }
-
     InstRegister(NULL);
     return SOFTBUS_OK;
 }
@@ -126,6 +127,10 @@ void InitSoftBusServer(void)
     if (LooperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus looper init failed.");
         return;
+    }
+
+    if (InitDdos() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus ddos init failed.");
     }
 
     int32_t ret = InitServicesAndModules();
