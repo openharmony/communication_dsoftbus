@@ -629,7 +629,7 @@ HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        // excute publish before unpublish, to keep g_discoveryInfoList not NULL
+        // excute advertise before stopadvertise, to keep g_discoveryInfoList not NULL
         info.medium = BLE;
         info.subscribeId = SUBSCRIBE_ID1;
         EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_OK);
@@ -813,7 +813,7 @@ HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_EQ(DiscStopDiscovery(packageName_, PUBLISH_ID8), SOFTBUS_OK);
+        EXPECT_EQ(DiscStartDiscovery(packageName_, &info, &serverCallback_), SOFTBUS_OK);
         EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         EXPECT_EQ(DiscStopDiscovery(packageName_, SUBSCRIBE_ID8), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
         EXPECT_EQ(DiscStopDiscovery(packageName_, SUBSCRIBE_ID8), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE);
