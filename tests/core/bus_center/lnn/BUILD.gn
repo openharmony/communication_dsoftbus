@@ -902,7 +902,6 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
     "net_builder/src/lnn_auth_mock.cpp",
-    "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_buscenter/lnn_bt_network_impl_mock.cpp",
     "net_buscenter/lnn_bt_network_impl_test.cpp",
   ]
