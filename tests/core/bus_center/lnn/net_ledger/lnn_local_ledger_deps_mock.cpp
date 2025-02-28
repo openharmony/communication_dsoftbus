@@ -907,5 +907,142 @@ int32_t LnnCloudSync(int32_t dbId)
 {
     return GetLocalLedgerDepsInterface()->LnnCloudSync(dbId);
 }
+
+int32_t LnnSyncP2pInfo(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnSyncP2pInfo();
+}
+
+int32_t LnnSyncWifiDirectAddr(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnSyncWifiDirectAddr();
+}
+
+int32_t LnnInitPtk(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnInitPtk();
+}
+
+int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetLocalPtkByUdid(udid, localPtk, len);
+}
+
+int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetLocalPtkByUuid(uuid, localPtk, len);
+}
+
+int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetLocalDefaultPtkByUuid(uuid, localPtk, len);
+}
+
+int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetRemoteDefaultPtkByUuid(uuid, remotePtk, len);
+}
+
+int32_t LnnSyncPtk(const char *networkId)
+{
+    return GetLocalLedgerDepsInterface()->LnnSyncPtk(networkId);
+}
+
+int32_t UpdateLocalPtkIfValid(char *udid)
+{
+    return GetLocalLedgerDepsInterface()->UpdateLocalPtkIfValid(udid);
+}
+
+int32_t LnnSetLocalPtkConn(char *udid)
+{
+    return GetLocalLedgerDepsInterface()->LnnSetLocalPtkConn(udid);
+}
+
+int32_t LnnGenerateLocalPtk(char *udid, char *uuid)
+{
+    return GetLocalLedgerDepsInterface()->LnnGenerateLocalPtk(udid, uuid);
+}
+
+int32_t LnnGenerateMetaPtk(uint32_t connId)
+{
+    return GetLocalLedgerDepsInterface()->LnnGenerateMetaPtk(connId);
+}
+
+int32_t LnnGetMetaPtk(uint32_t connId, char *metaPtk, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetMetaPtk(connId, metaPtk, len);
+}
+
+int32_t LnnDeleteMetaPtk(uint32_t connectionId)
+{
+    return GetLocalLedgerDepsInterface()->LnnDeleteMetaPtk(connectionId);
+}
+
+int32_t UpdatePtkByAuth(char *networkId, AuthHandle authHandle)
+{
+    return GetLocalLedgerDepsInterface()->UpdatePtkByAuth(networkId, authHandle);
+}
+
+int32_t SoftBusEnableBt(void)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusEnableBt();
+}
+
+int32_t SoftBusDisableBt(void)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusDisableBt();
+}
+
+int32_t SoftBusGetBtName(unsigned char *name, unsigned int *len)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusGetBtName(name, len);
+}
+
+int32_t SoftBusSetBtName(const char *name)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusSetBtName(name);
+}
+
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusAddBtStateListener(listener, listenerId);
+}
+
+int32_t SoftBusRemoveBtStateListener(int listenerId)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusRemoveBtStateListener(listenerId);
+}
+
+int32_t SoftBusBtInit(void)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusBtInit();
+}
+
+int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
+    size_t *olen, const unsigned char *src, size_t slen)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusBase64Encode(dst, dlen, olen, src, slen);
+}
+
+int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
+    size_t *olen, const unsigned char *src, size_t slen)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusBase64Decode(dst, dlen, olen, src, slen);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
+
+int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusGenerateSessionKey(key, len);
+}
+
+uint32_t SoftBusCryptoRand(void)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusCryptoRand();
+}
 } // extern "C"
 } // namespace OHOS
