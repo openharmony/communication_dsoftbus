@@ -31,10 +31,10 @@
 #include "conn_log.h"
 #include "softbus_type_def.h"
 
-#include "adapter_bt_utils.h"
 #define APP_UUID_LEN 2
 #define INVALID_ID   (-1)
 
+static int32_t BleOhosStatusToSoftBus(BtStatus status);
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb);
 static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr);
 static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId);
@@ -48,6 +48,11 @@ typedef struct {
     int32_t clientId;
     ListNode node;
 } BleConnMac;
+
+typedef struct {
+    BtStatus btStatus;
+    SoftBusBtStatus softBusBtStatus;
+} OhosStatusToSoftBus;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
@@ -542,4 +547,32 @@ int32_t InitSoftbusAdapterClient(void)
     g_btGattClientCallbacks.registerNotificationCb = GattcRegisterNotificationCallback;
     g_btGattClientCallbacks.notificationCb = GattcNotificationCallback;
     return SOFTBUS_OK;
+}
+
+OhosStatusToSoftBus g_bleStatus[] = {
+    {OHOS_BT_STATUS_SUCCESS,            SOFTBUS_BT_STATUS_SUCCESS},
+    {OHOS_BT_STATUS_FAIL,               SOFTBUS_BT_STATUS_FAIL},
+    {OHOS_BT_STATUS_NOT_READY,          SOFTBUS_BT_STATUS_NOT_READY},
+    {OHOS_BT_STATUS_NOMEM,              SOFTBUS_BT_STATUS_NOMEM},
+    {OHOS_BT_STATUS_BUSY,               SOFTBUS_BT_STATUS_BUSY},
+    {OHOS_BT_STATUS_DONE,               SOFTBUS_BT_STATUS_DONE},
+    {OHOS_BT_STATUS_UNSUPPORTED,        SOFTBUS_BT_STATUS_UNSUPPORTED},
+    {OHOS_BT_STATUS_PARM_INVALID,       SOFTBUS_BT_STATUS_PARM_INVALID},
+    {OHOS_BT_STATUS_UNHANDLED,          SOFTBUS_BT_STATUS_UNHANDLED},
+    {OHOS_BT_STATUS_AUTH_FAILURE,       SOFTBUS_BT_STATUS_AUTH_FAILURE},
+    {OHOS_BT_STATUS_RMT_DEV_DOWN,       SOFTBUS_BT_STATUS_RMT_DEV_DOWN},
+    {OHOS_BT_STATUS_AUTH_REJECTED,      SOFTBUS_BT_STATUS_AUTH_REJECTED},
+};
+
+static int32_t BleOhosStatusToSoftBus(BtStatus btStatus)
+{
+    int32_t status = OHOS_BT_STATUS_FAIL;
+    const int len = sizeof(g_bleStatus) / sizeof(g_bleStatus[0]);
+    OhosStatusToSoftBus *ptr = g_bleStatus;
+
+    if (btStatus >= len) {
+        return status;
+    }
+
+    return (ptr + btStatus)->softBusBtStatus;
 }
