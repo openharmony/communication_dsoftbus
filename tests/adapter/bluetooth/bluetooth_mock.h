@@ -50,6 +50,7 @@ public:
     virtual int BleGattcRegister(BtUuid appUuid) = 0;
     virtual int BleGattcConnect(int clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect,
         BtTransportType transport) = 0;
+    virtual int BleGattsConnect(int serverId, BdAddr bdaddr) = 0;
     virtual int BleGattcDisconnect(int clientId) = 0;
     virtual int BleGattcSearchServices(int clientId) = 0;
     virtual bool BleGattcGetService(int clientId, BtUuid serviceUuid) = 0;
@@ -103,6 +104,7 @@ public:
         (int clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect,
             BtTransportType transport),
         (override));
+    MOCK_METHOD(int32_t, BleGattsConnect, (int serverId, BdAddr bdAddr), (override));
     MOCK_METHOD(int32_t, BleGattcDisconnect, (int clientId), (override));
     MOCK_METHOD(int32_t, BleGattcSearchServices, (int clientId), (override));
     MOCK_METHOD(bool, BleGattcGetService, (int clientId, BtUuid serviceUuid), (override));
