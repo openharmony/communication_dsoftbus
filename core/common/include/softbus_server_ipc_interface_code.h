@@ -115,6 +115,7 @@ enum SoftBusFuncId {
     CLIENT_ON_CHANNEL_BIND,
     CLIENT_CHANNEL_ON_QOS,
     CLIENT_CHECK_COLLAB_RELATION,
+    SOFTBUS_FUNC_ID_BUIT,
 };
 
 #ifdef __cplusplus

@@ -18,6 +18,7 @@ bus_center_service_sdk_src =
 bus_center_service_sdk_inc = [
   "$dsoftbus_root_path/sdk/bus_center/service/include",
   "$dsoftbus_dfx_path/interface/include",
+  "$dsoftbus_root_path/core/frame/common/include",
 ]
 
 bus_center_manager_sdk_src = []
