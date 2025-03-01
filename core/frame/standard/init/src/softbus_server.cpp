@@ -113,6 +113,8 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
     }
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
     connOpt.type = ConvertConnectType(addrInfo->type);
     switch (connOpt.type) {
         case CONNECT_TCP:
@@ -138,6 +140,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             connOpt.bleOption.protocol = addrInfo->info.ble.protocol;
             connOpt.bleOption.psm = addrInfo->info.ble.psm;
             connOpt.bleOption.fastestConnectEnable = true;
+            param.blePriority = addrInfo->info.ble.priority;
             break;
         case CONNECT_BR:
             if (memcpy_s(connOpt.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
@@ -150,7 +153,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             COMM_LOGE(COMM_SVC, "connect type error");
             return SOFTBUS_TRANS_INVALID_CONNECT_TYPE;
     }
-    return TransOpenAuthChannel(sessionName, &connOpt, "");
+    return TransOpenAuthChannel(sessionName, &connOpt, "", &param);
 }
 
 int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)

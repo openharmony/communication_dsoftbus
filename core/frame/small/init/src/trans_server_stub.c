@@ -266,12 +266,18 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
         WriteInt32(reply, SOFTBUS_NO_INIT);
         return SOFTBUS_NO_INIT;
     }
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    if (addr->type == CONNECTION_ADDR_BLE) {
+        param.blePriority = addr->info.ble.priority;
+    }
+
     ret = CheckOpenSessionPremission(sessionName, sessionName);
     if (ret != SOFTBUS_OK) {
         WriteInt32(reply, ret);
         return ret;
     }
-    ret = TransOpenAuthChannel(sessionName, &connOpt, "");
+    ret = TransOpenAuthChannel(sessionName, &connOpt, "", &param);
     WriteInt32(reply, ret);
     return ret;
 }
