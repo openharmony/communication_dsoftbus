@@ -914,7 +914,7 @@ static int32_t CheckAuthConnStatus(const uint32_t requestId)
     return channel.errCode;
 }
 
-static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta, int32_t linkType)
+static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta, int32_t linkType, bool isClient)
 {
     AuthConnInfo auth;
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -927,6 +927,9 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     if (ret != SOFTBUS_OK && (linkType == LANE_P2P || linkType == LANE_P2P_REUSE)) {
         TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK && isMeta == true) {
+        ret = AuthGetConnInfoBySide(peerUdid, &auth, isMeta, isClient);
     }
     if (ret != SOFTBUS_OK) {
         ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
@@ -1001,7 +1004,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         .peerNetworkId = channel->info.peerNetWorkId
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
-    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, isMeta, channel->info.linkType);
+    int32_t ret = UdpOpenAuthConn(
+        channel->info.peerData.deviceId, requestId, isMeta, channel->info.linkType, channel->info.isClient);
     if (ret != SOFTBUS_OK) {
         extra.errcode = ret;
         extra.result = EVENT_STAGE_RESULT_FAILED;

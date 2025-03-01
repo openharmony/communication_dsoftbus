@@ -65,6 +65,15 @@ int32_t AuthMetaGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthMetaGetConnInfoBySide(const char *uuid, bool isClient, AuthConnInfo *connInfo)
+{
+    (void)uuid;
+    (void)isClient;
+    (void)connInfo;
+    AUTH_LOGI(AUTH_CONN, "auth meta get conninfo by side");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t AuthMetaOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
 {
     (void)info;

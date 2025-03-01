@@ -89,6 +89,7 @@ typedef struct {
             int64_t authId; /* for open p2p auth conn */
             ListenerModule moduleId; /* for open enhance p2p auth conn */
             char udid[UDID_BUF_LEN];
+            int32_t fd;
         } ipInfo;
         struct {
             uint32_t connId;
@@ -190,6 +191,7 @@ int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
 void AuthCloseConn(AuthHandle authHandle);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta);
+int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient);
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);

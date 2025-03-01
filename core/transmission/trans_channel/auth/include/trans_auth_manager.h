@@ -62,6 +62,7 @@ int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t
 int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult);
 void TransAsyncAuthChannelTask(int32_t channelId);
 void TransAuthDeathCallback(const char *pkgName, int32_t pid);
+int32_t TransAuthGetRoleByAuthId(int32_t authId, bool *isClient);
 
 #ifdef __cplusplus
 #if __cplusplus
