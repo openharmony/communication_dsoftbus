@@ -825,7 +825,7 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
     return SOFTBUS_OK;
 }
 
-static bool IsNeedNormalizedProcess(const AuthSessionInfo *info)
+static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
 {
     if (!info->isConnectServer || info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
         return true;
@@ -854,6 +854,8 @@ static bool IsNeedNormalizedProcess(const AuthSessionInfo *info)
     if (AuthIsLatestNormalizeKeyInTime(udidShortHash, NORMALIZEKEY_CHECK_TIME)) {
         return true;
     }
+
+    info->normalizedType = NORMALIZED_KEY_ERROR;
     return false;
 }
 
@@ -865,7 +867,7 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         AUTH_LOGE(AUTH_FSM, "add normalizedType fail");
         return SOFTBUS_AUTH_PACK_NORMALIZED_DATA_FAIL;
     }
-    if (isSupportNormalizedKey && IsNeedNormalizedProcess(info)) {
+    if (isSupportNormalizedKey && IsNeedNormalizedProcess((AuthSessionInfo *)info)) {
         PackNormalizedKey(obj, (AuthSessionInfo *)info);
     }
     if (info->isServer && info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
