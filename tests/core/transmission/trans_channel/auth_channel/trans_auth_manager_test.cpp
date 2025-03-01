@@ -121,4 +121,42 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
     GetAuthChannelListHead();
     TransAuthDeinit();
 }
+
+/**
+ * @tc.name: TransAuthGetRoleByAuthIdTest001
+ * @tc.desc: Transmission auth manager get role by authId with wrong parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest001, TestSize.Level1)
+{
+    int32_t authId = TRANS_TEST_CHANNEL_ID;
+    bool *isClient = nullptr;
+    int32_t ret = TransAuthGetRoleByAuthId(authId, isClient);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ret = TransAuthInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAuthGetRoleByAuthId(authId, isClient);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    TransAuthDeinit();
+}
+
+/**
+ * @tc.name: TransAuthGetRoleByAuthIdTest002
+ * @tc.desc: Transmission auth manager get role by authId with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest002, TestSize.Level1)
+{
+    int32_t authId = TRANS_TEST_CHANNEL_ID;
+    bool isClient = false;
+
+    int32_t ret = TransAuthInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAuthGetRoleByAuthId(authId, &isClient);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    TransAuthDeinit();
+}
 }
