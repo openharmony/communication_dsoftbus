@@ -1203,6 +1203,27 @@ static bool CheckNeedUpdateScan(int32_t listenerId, int32_t *liveListenerId)
     return false;
 }
 
+static int32_t CopyScanFilterServiceInfo(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
+{
+    dstFilter->serviceUuid = srcFilter->serviceUuid;
+    dstFilter->serviceDataLength = srcFilter->serviceDataLength;
+    if (srcFilter->serviceData != NULL && srcFilter->serviceDataLength > 0) {
+        dstFilter->serviceData = (uint8_t *)SoftBusCalloc(dstFilter->serviceDataLength);
+        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->serviceData != NULL &&
+            memcpy_s(dstFilter->serviceData, dstFilter->serviceDataLength,
+            srcFilter->serviceData, srcFilter->serviceDataLength) == EOK,
+            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter serviceData failed");
+    }
+    if (srcFilter->serviceDataMask != NULL && srcFilter->serviceDataLength > 0) {
+        dstFilter->serviceDataMask = (uint8_t *)SoftBusCalloc(dstFilter->serviceDataLength);
+        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->serviceDataMask != NULL &&
+            memcpy_s(dstFilter->serviceDataMask, dstFilter->serviceDataLength,
+            srcFilter->serviceDataMask, srcFilter->serviceDataLength) == EOK,
+            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter serviceDataMask failed");
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
     if (srcFilter->address != NULL) {
@@ -1221,21 +1242,9 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
             SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter deviceName failed");
     }
 
-    dstFilter->serviceUuid = srcFilter->serviceUuid;
-    dstFilter->serviceDataLength = srcFilter->serviceDataLength;
-    if (srcFilter->serviceData != NULL && srcFilter->serviceDataLength > 0) {
-        dstFilter->serviceData = (uint8_t *)SoftBusCalloc(dstFilter->serviceDataLength);
-        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->serviceData != NULL &&
-            memcpy_s(dstFilter->serviceData, dstFilter->serviceDataLength,
-            srcFilter->serviceData, srcFilter->serviceDataLength) == EOK,
-            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter serviceData failed");
-    }
-    if (srcFilter->serviceDataMask != NULL && srcFilter->serviceDataLength > 0) {
-        dstFilter->serviceDataMask = (uint8_t *)SoftBusCalloc(dstFilter->serviceDataLength);
-        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->serviceDataMask != NULL &&
-            memcpy_s(dstFilter->serviceDataMask, dstFilter->serviceDataLength,
-            srcFilter->serviceDataMask, srcFilter->serviceDataLength) == EOK,
-            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter serviceDataMask failed");
+    int ret = CopyScanFilterServiceInfo(srcFilter, dstFilter);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
 
     dstFilter->manufactureId = srcFilter->manufactureId;
