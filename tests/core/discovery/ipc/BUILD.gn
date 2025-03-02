@@ -65,6 +65,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 

@@ -14,7 +14,6 @@
  */
 
 #include "lnn_bus_center_ipc.h"
-
 #include <cstring>
 #include <mutex>
 #include <securec.h>
@@ -22,6 +21,7 @@
 
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
+#include "ipc_skeleton.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
@@ -192,11 +192,15 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
+    int32_t ret = IsOverThreshold(pkgName, SERVER_JOIN_LNN);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     if (IsRepeatJoinLNNRequest(pkgName, callingPid, connAddr)) {
         LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%{public}s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerJoin(connAddr, pkgName, isForceJoin);
+    ret = LnnServerJoin(connAddr, pkgName, isForceJoin);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinLNNInfo(pkgName, callingPid, connAddr);
     }
@@ -231,6 +235,10 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
         LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%{public}d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = IsOverThreshold(pkgName, SERVER_GET_ALL_ONLINE_NODE_INFO);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
     }
     return LnnGetAllOnlineNodeInfo(reinterpret_cast<NodeBasicInfo **>(info), infoNum);
 }
@@ -339,6 +347,10 @@ int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char
 
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_STOP_TIME_SYNC);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
@@ -450,27 +462,50 @@ int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t su
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_ACTIVE_META_NODE);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     return LnnActiveMetaNode(info, metaNodeId);
 }
 
 int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_DEACTIVE_META_NODE);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     return LnnDeactiveMetaNode(metaNodeId);
 }
 
 int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_GET_ALL_META_NODE_INFO);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     return LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
 int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_SHIFT_LNN_GEAR);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_SYNC_TRUSTED_RELATION);
+    if (ret != SOFTBUS_DDOS_DISABLE && ret != SOFTBUS_OK) {
+        return ret;
+    }
     return LnnSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
