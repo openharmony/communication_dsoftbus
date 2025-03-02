@@ -26,13 +26,14 @@
 
 #define TABLE_COLUMNS 3
 #define SAME_USER_SAME_ID_TIMES 100
-#define ALL_USER_SAME_ID_TIMES 500
-#define SAME_USER_ALL_ID_TIMES 800
-#define ALL_USER_ALL_ID_TIMES 1500
+#define USE_SAME_GET_DEVICE_INFO_ID_TIMES 300
+#define ALL_USER_SAME_ID_TIMES 800
+#define SAME_USER_ALL_ID_TIMES 1000
+#define ALL_USER_ALL_ID_TIMES 2000
 #define DDOS_HIDUMP_ENABLE "DdosHiDumperEnable"
 #define DDOS_HIDUMP_DISABLE "DdosHiDumperDisable"
 
-static SoftBusList g_callRecord;
+static SoftBusList* g_callRecord = NULL;
 static bool g_isEnable = true;
 
 static int32_t SetDdosStateEnable(int fd)
@@ -66,10 +67,10 @@ static int32_t DdosHiDumperRegister()
 static int32_t callTable[SOFTBUS_FUNC_ID_BUIT][TABLE_COLUMNS] = {
     [SERVER_JOIN_LNN] =                   {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_LEAVE_LNN] =                  {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
-    [SERVER_GET_ALL_ONLINE_NODE_INFO] =   {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
-    [SERVER_GET_LOCAL_DEVICE_INFO] =      {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
+    [SERVER_GET_ALL_ONLINE_NODE_INFO] =   {USE_SAME_GET_DEVICE_INFO_ID_TIMES, ALL_USER_SAME_ID_TIMES},
+    [SERVER_GET_LOCAL_DEVICE_INFO] =      {USE_SAME_GET_DEVICE_INFO_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_SET_NODE_DATA_CHANGE_FLAG] =  {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
-    [SERVER_GET_NODE_KEY_INFO] =          {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
+    [SERVER_GET_NODE_KEY_INFO] =          {USE_SAME_GET_DEVICE_INFO_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_START_TIME_SYNC] =            {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_STOP_TIME_SYNC] =             {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_PUBLISH_LNN] =                {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
@@ -78,19 +79,19 @@ static int32_t callTable[SOFTBUS_FUNC_ID_BUIT][TABLE_COLUMNS] = {
     [SERVER_STOP_REFRESH_LNN] =           {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_ACTIVE_META_NODE] =           {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_DEACTIVE_META_NODE] =         {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
-    [SERVER_GET_ALL_META_NODE_INFO] =     {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
+    [SERVER_GET_ALL_META_NODE_INFO] =     {USE_SAME_GET_DEVICE_INFO_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_SHIFT_LNN_GEAR] =             {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
     [SERVER_SYNC_TRUSTED_RELATION] =      {SAME_USER_SAME_ID_TIMES, ALL_USER_SAME_ID_TIMES},
 };
 
 static int32_t CallRecordLock(void)
 {
-    return SoftBusMutexLock(&g_callRecord.lock);
+    return SoftBusMutexLock(&g_callRecord->lock);
 }
 
 static void CallRecordUnlock(void)
 {
-    (void)SoftBusMutexUnlock(&g_callRecord.lock);
+    (void)SoftBusMutexUnlock(&g_callRecord->lock);
 }
 
 static CallRecord* CreateAndAddCallRecord(const char* pkgName, int interfaceId)
@@ -107,29 +108,19 @@ static CallRecord* CreateAndAddCallRecord(const char* pkgName, int interfaceId)
     }
     newRecord->interfaceId = interfaceId;
     newRecord->timestamp = time(NULL);
-    if (CallRecordLock() != SOFTBUS_OK) {
-        SoftBusFree(newRecord);
-        LNN_LOGE(LNN_EVENT, "lock fail");
-        return NULL;
-    }
-    ListAdd(&g_callRecord.list, &newRecord->node);
-    g_callRecord.cnt++;
-    CallRecordUnlock();
+    ListAdd(&g_callRecord->list, &newRecord->node);
+    g_callRecord->cnt++;
     return newRecord;
 }
 
 static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interfaceId)
 {
-    if (CallRecordLock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "CallRecord lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
     CallRecord *next = NULL;
     CallRecord *item = NULL;
     int32_t userCount = 1;
     int32_t idCount = 1;
     int32_t recordCount = 1;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord.list, CallRecord, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord->list, CallRecord, node) {
         if (strncmp(item->pkgName, pkgName, PKG_NAME_SIZE_MAX) == 0) {
             userCount++;
         }
@@ -140,10 +131,9 @@ static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interface
             }
         }
     }
-    CallRecordUnlock();
     LNN_LOGE(LNN_EVENT,
         "recordCount=%{public}d, idCount=%{public}d, userCount=%{public}d, totalCount=%{public}d, funcid=%{public}d",
-        recordCount, idCount, userCount, g_callRecord.cnt, interfaceId);
+        recordCount, idCount, userCount, g_callRecord->cnt, interfaceId);
     int column = 0;
     if (recordCount > callTable[interfaceId][column++]) {
         return SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT;
@@ -151,7 +141,7 @@ static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interface
         return SOFTBUS_DDOS_ID_SAME_COUNT_LIMIT;
     } else if (userCount > SAME_USER_ALL_ID_TIMES) {
         return SOFTBUS_DDOS_USER_SAME_ID_COUNT_LIMIT;
-    } else if (g_callRecord.cnt > ALL_USER_ALL_ID_TIMES) {
+    } else if (g_callRecord->cnt > ALL_USER_ALL_ID_TIMES) {
         return SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT;
     } else {
         return SOFTBUS_OK;
@@ -160,21 +150,16 @@ static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interface
 
 static void ClearExpiredRecords(void)
 {
-    if (CallRecordLock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "CallRecord lock fail");
-        return;
-    }
     time_t currentTime = time(NULL);
     CallRecord *next = NULL;
     CallRecord *item = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord.list, CallRecord, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord->list, CallRecord, node) {
         if (currentTime - item->timestamp > TIME_THRESHOLD_SIZE) {
             ListDelete(&item->node);
             SoftBusFree(item);
-            g_callRecord.cnt--;
+            g_callRecord->cnt--;
         }
     }
-    CallRecordUnlock();
 }
 
 static int32_t IsInterfaceFuncIdValid(enum SoftBusFuncId interfaceId)
@@ -195,6 +180,10 @@ int32_t IsOverThreshold(const char* pkgName, enum SoftBusFuncId interfaceId)
         LNN_LOGE(LNN_EVENT, "pkgName or id  is invalid, interfaceId=%{public}d", interfaceId);
         return SOFTBUS_INVALID_PARAM;
     }
+    if (CallRecordLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "CallRecord lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     ClearExpiredRecords();
     int32_t ret = QueryCallRecord(pkgName, interfaceId);
     if (ret != SOFTBUS_OK) {
@@ -203,13 +192,16 @@ int32_t IsOverThreshold(const char* pkgName, enum SoftBusFuncId interfaceId)
         LNN_LOGE(LNN_EVENT, "use over limit ret=%{public}d, pkgName=%{public}s, interfaceId=%{public}d",
             ret, AnonymizeWrapper(tmpName), interfaceId);
         AnonymizeFree(tmpName);
+        CallRecordUnlock();
         return ret;
     }
     CallRecord* record = CreateAndAddCallRecord(pkgName, interfaceId);
     if (record == NULL) {
         LNN_LOGE(LNN_EVENT, "create callrecord failed");
+        CallRecordUnlock();
         return SOFTBUS_INVALID_PARAM;
     }
+    CallRecordUnlock();
     return ret;
 }
 
@@ -223,17 +215,21 @@ static void RegisterClearRecordsTimer(void)
 
 int32_t InitDdos(void)
 {
-    if (SoftBusMutexInit(&g_callRecord.lock, NULL) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "ddos callrecords mutex init fail");
-        return SOFTBUS_NO_INIT;
+    if (g_callRecord != NULL) {
+        return SOFTBUS_OK;
+    }
+    g_callRecord = CreateSoftBusList();
+    if (g_callRecord == NULL) {
+        LNN_LOGE(LNN_EVENT, "create callRecord list fail");
+        return SOFTBUS_CREATE_LIST_ERR;
     }
     int32_t ret = DdosHiDumperRegister();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "register ddos hidumer failed");
         return ret;
     }
-    ListInit(&g_callRecord.list);
     RegisterClearRecordsTimer();
+    g_callRecord->cnt = 0;
     return SOFTBUS_OK;
 }
 
@@ -245,11 +241,11 @@ void DeinitDdos(void)
     }
     CallRecord *next = NULL;
     CallRecord *item = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord.list, CallRecord, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord->list, CallRecord, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
-        g_callRecord.cnt = 0;
     }
     CallRecordUnlock();
-    (void)SoftBusMutexDestroy(&g_callRecord.lock);
+    DestroySoftBusList(g_callRecord);
+    g_callRecord = NULL;
 }

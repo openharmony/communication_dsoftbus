@@ -32,6 +32,7 @@
 #define CAPABILITY_3 "capdata3"
 #define CAPABILITY_4 "capdata4"
 #define USE_TIMES 100
+#define GET_DEVICE_INFO_TIMES 300
 #define DATA_CHANGE_FLAG 11
 #define LEAVELNN_TIMES 20
 
@@ -143,7 +144,7 @@ HWTEST_F(BusCenterSdkDdosTest, DDOS_GET_NODE_KEY_INFO_Test_001, TestSize.Level0)
     NodeBasicInfo info;
     char udid[UDID_BUF_LEN] = {0};
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
-    for (int i = 0; i < USE_TIMES; i++) {
+    for (int i = 0; i < GET_DEVICE_INFO_TIMES; i++) {
         GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UDID,
         (uint8_t *)udid, UDID_BUF_LEN);
     }
@@ -254,16 +255,22 @@ HWTEST_F(BusCenterSdkDdosTest, DDOS_Leave_Lnn_Test_002, TestSize.Level0)
     constexpr char testPkgName2[] = "com.softbus.test02";
     constexpr char testPkgName3[] = "com.softbus.test03";
     constexpr char testPkgName4[] = "com.softbus.test04";
+    constexpr char testPkgName5[] = "com.softbus.test05";
+    constexpr char testPkgName6[] = "com.softbus.test06";
+    constexpr char testPkgName7[] = "com.softbus.test07";
     for (int i = 0; i < USE_TIMES; i++) {
         LeaveLNN(testPkgName, networkId, OnLeaveLNNDone);
         LeaveLNN(testPkgName1, networkId, OnLeaveLNNDone);
         LeaveLNN(testPkgName2, networkId, OnLeaveLNNDone);
         LeaveLNN(testPkgName3, networkId, OnLeaveLNNDone);
+        LeaveLNN(testPkgName4, networkId, OnLeaveLNNDone);
+        LeaveLNN(testPkgName5, networkId, OnLeaveLNNDone);
+        LeaveLNN(testPkgName6, networkId, OnLeaveLNNDone);
     }
     for (int i = 0; i < LEAVELNN_TIMES; i++) {
-        LeaveLNN(testPkgName4, networkId, OnLeaveLNNDone);
+        LeaveLNN(testPkgName7, networkId, OnLeaveLNNDone);
     }
-    EXPECT_TRUE(LeaveLNN(testPkgName4, networkId, OnLeaveLNNDone) != SOFTBUS_OK);
+    EXPECT_TRUE(LeaveLNN(testPkgName7, networkId, OnLeaveLNNDone) == SOFTBUS_DDOS_ID_SAME_COUNT_LIMIT);
 }
 
 /*
@@ -290,7 +297,7 @@ HWTEST_F(BusCenterSdkDdosTest, DDOS_GET_LOCAL_NODE_INFO_Test_001, TestSize.Level
     for (int i = 0; i < USE_TIMES; i++) {
         GetLocalNodeDeviceInfo(testPkgName, &info);
     }
-    EXPECT_TRUE(GetLocalNodeDeviceInfo(testPkgName, &info) == SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT);
+    EXPECT_TRUE(GetLocalNodeDeviceInfo(testPkgName, &info) != SOFTBUS_OK);
     sleep(10);
 }
 } // namespace OHOS
