@@ -413,11 +413,11 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb004, TestSize.Level1)
 
     int32_t scannerld = 0;
     EXPECT_CALL(mocker, BleRegisterScanCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
-    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
-    EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
 
-    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
-    EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
+    for (size_t i = 0; i < GATT_SCAN_MAX_NUM; i++) {
+        ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+        EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
+    }
 
     ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
     EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_REGISTER_FAIL);

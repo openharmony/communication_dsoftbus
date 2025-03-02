@@ -32,6 +32,7 @@ public:
     virtual bool EnableBle() = 0;
     virtual bool DisableBle() = 0;
     virtual bool IsBleEnabled() = 0;
+    virtual bool IsLpDeviceAvailable() = 0;
     virtual bool GetLocalAddr(unsigned char *mac, unsigned int len) = 0;
     virtual bool SetLocalName(unsigned char *localName, unsigned char length) = 0;
     virtual int32_t GapRegisterCallbacks(BtGapCallBacks *func) = 0;
@@ -99,6 +100,7 @@ public:
     MOCK_METHOD(bool, EnableBle, (), (override));
     MOCK_METHOD(bool, DisableBle, (), (override));
     MOCK_METHOD(bool, IsBleEnabled, (), (override));
+    MOCK_METHOD(bool, IsLpDeviceAvailable, (), (override));
     MOCK_METHOD(bool, GetLocalAddr, (unsigned char *mac, unsigned int len), (override));
     MOCK_METHOD(bool, SetLocalName, (unsigned char *localName, unsigned char length), (override));
     MOCK_METHOD(int32_t, GapRegisterCallbacks, (BtGapCallBacks * func), (override));
