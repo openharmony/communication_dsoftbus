@@ -91,6 +91,11 @@ bool IsBleEnabled()
     return MockBluetooth::GetMocker()->IsBleEnabled();
 }
 
+bool IsLpDeviceAvailable()
+{
+    return true;
+}
+
 bool GetLocalAddr(unsigned char *mac, unsigned int len)
 {
     return MockBluetooth::GetMocker()->GetLocalAddr(mac, len);
