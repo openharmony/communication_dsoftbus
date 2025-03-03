@@ -2464,7 +2464,8 @@ int32_t LnnInitLocalLedgerDelay(void)
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     (void)LnnGetLocalDevInfo(&localNodeInfo);
-    if (strcmp(deviceInfo->deviceUdid, localNodeInfo.deviceInfo.deviceUdid) != 0) {
+    if (strcmp(deviceInfo->deviceUdid, localNodeInfo.deviceInfo.deviceUdid) != 0 &&
+        localNodeInfo.deviceInfo.deviceUdid[0] != '\0') {
         LNN_LOGE(LNN_LEDGER, "udid changed, need update device info");
         for (int32_t i = 0; i < LNN_FILE_ID_MAX; i++) {
             if (LnnRemoveStorageConfigPath((LnnFileId)i) != SOFTBUS_OK) {
