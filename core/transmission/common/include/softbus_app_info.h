@@ -17,6 +17,7 @@
 #define SOFTBUS_APP_INFO_H
 
 #include "session.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
 
@@ -109,6 +110,7 @@ typedef struct {
     StreamType streamType;
     UdpConnType udpConnType;
     UdpChannelOptType udpChannelOptType;
+    BlePriority blePriority;
     int fd;
     AppType appType;
     ProtocolType protocol;
