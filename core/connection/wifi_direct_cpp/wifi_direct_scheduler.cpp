@@ -27,10 +27,10 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}d, pid=%{public}d, type=%{public}d, networkId=%{public}s, remoteUuid=%{public}s, "
-        "expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d",
+        "expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d isStrictProtocol=%{public}d",
         info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
         WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str(),
-        info.expectApiRole, info.bandWidth, info.ipAddrType);
+        info.expectApiRole, info.bandWidth, info.ipAddrType, info.isStrictProtocol);
     DumpNegotiateChannel(info.negoChannel);
 
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
