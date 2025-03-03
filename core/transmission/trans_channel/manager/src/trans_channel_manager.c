@@ -565,10 +565,10 @@ EXIT_ERR:
 }
 
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
-    const char *reqId)
+    const char *reqId, const ConnectParam *param)
 {
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
         return channelId;
     }
     char callerPkg[PKG_NAME_SIZE_MAX] = {0};
@@ -587,6 +587,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
             TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo failed");
             goto EXIT_ERR;
         }
+        appInfo->blePriority = param->blePriority;
         appInfo->connectType = connOpt->type;
         if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "strcpy_s reqId failed");
