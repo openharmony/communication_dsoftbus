@@ -521,7 +521,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
     ListInit(&device.requests);
     ListAdd(&device.requests, &request.node);
     NotifyDeviceConnectResult(&device, connection, true, 1);
-    ConnBrRequest *it = NULL;
+    ConnBrRequest *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &device.requests, ConnBrRequest, node) {
         EXPECT_EQ(it->statistics.reuse, true);
     }
@@ -913,7 +913,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
         }" };
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
-    ReceivedControlData(connection, NULL, 0);
+    ReceivedControlData(connection, nullptr, 0);
 
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(false));
     ReceivedControlData(connection, (uint8_t *)data, DATASIZE);
@@ -1284,7 +1284,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager041, TestSize.Level1)
     const char *addr = "11:22:33:44:55:66";
     InitBrManager();
     ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, -1);
-    ASSERT_TRUE(connection != NULL);
+    ASSERT_TRUE(connection != nullptr);
     int32_t ret = ConnBrSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t error = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
@@ -1293,7 +1293,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager041, TestSize.Level1)
 
     BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
     ASSERT_NE(nullptr, callbackStatus);
-    ASSERT_TRUE(callbackStatus != NULL);
+    ASSERT_TRUE(callbackStatus != nullptr);
     ListInit(&callbackStatus->node);
     callbackStatus->status = 0;
     callbackStatus->result = 4;
@@ -1301,7 +1301,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager041, TestSize.Level1)
     isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
     EXPECT_EQ(false, isWait);
 
-    BrUnderlayerStatus *it = NULL;
+    BrUnderlayerStatus *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
         if (it->result == 4) {
             it->result = CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED + 1;

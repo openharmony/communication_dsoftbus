@@ -523,7 +523,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest, TestSize.Level0)
 {
     int32_t channelId = -1;
-    int32_t ret = ClientTransProxyGetLinkTypeByChannelId(channelId, NULL);
+    int32_t ret = ClientTransProxyGetLinkTypeByChannelId(channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     int32_t linkType;
     ret = ClientTransProxyGetLinkTypeByChannelId(channelId, &linkType);
@@ -575,7 +575,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientGetActualDataLenTest, TestSize.Level
 HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData001, TestSize.Level0)
 {
     int32_t bufferSize = 0;
-    int32_t ret = ProxyBuildNeedAckTlvData(NULL, true, 1, &bufferSize);
+    int32_t ret = ProxyBuildNeedAckTlvData(nullptr, true, 1, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -602,7 +602,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead001, TestSize.Level0)
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcSendMsgAck001, TestSize.Level0)
 {
     const char *data = "test";
-    int32_t ret = ClientTransProxyProcSendMsgAck(1, NULL, PROXY_ACK_SIZE, 1, 1);
+    int32_t ret = ClientTransProxyProcSendMsgAck(1, nullptr, PROXY_ACK_SIZE, 1, 1);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL);
 
     ret = ClientTransProxyProcSendMsgAck(1, data, 1, 1, 1);

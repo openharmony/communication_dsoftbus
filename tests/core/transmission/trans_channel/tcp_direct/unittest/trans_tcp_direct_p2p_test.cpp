@@ -165,7 +165,7 @@ IServerChannelCallBack *TestTransServerGetChannelCb(void)
 string TestGetMsgPack()
 {
     cJSON *msg = cJSON_CreateObject();
-    if (msg == NULL) {
+    if (msg == nullptr) {
         cJSON_Delete(msg);
         return nullptr;
     }
@@ -231,7 +231,7 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
     // will free in ClearP2pSessionConn
     ListNode *sessionConnList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
     ASSERT_NE(sessionConnList, nullptr);
-    NotifyP2pSessionConnClear(NULL);
+    NotifyP2pSessionConnClear(nullptr);
     ClearP2pSessionConn();
     ListNode *testsessionConnList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
     ASSERT_NE(testsessionConnList, nullptr);
@@ -621,14 +621,14 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest004, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(appInfo, NULL);
+    EXPECT_NE(appInfo, nullptr);
 
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
+    if (conn == nullptr) {
         SoftBusFree(appInfo);
         appInfo = nullptr;
     }
-    EXPECT_NE(conn, NULL);
+    EXPECT_NE(conn, nullptr);
     ConnectType type = CONNECT_P2P;
 
     int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);

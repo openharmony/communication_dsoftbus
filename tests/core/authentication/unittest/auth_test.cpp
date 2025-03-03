@@ -998,7 +998,7 @@ HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
     AuthTransListener listener = {
         .onDataReceived = AuthOnDataReceived,
         .onDisconnected = AuthOnDisconnected,
-        .onException = NULL,
+        .onException = nullptr,
     };
     int32_t ret;
     ret = RegAuthTransListener(module, nullptr);
@@ -1420,7 +1420,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
     AuthTransCallback callBack = {
         .onDataReceived = AuthOnDataReceivedTest,
         .onDisconnected = AuthOnDisconnectedTest,
-        .onException = NULL,
+        .onException = nullptr,
     };
     ret = AuthDeviceInit(&callBack);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -1954,8 +1954,8 @@ HWTEST_F(AuthTest, SET_SOCKET_CALLBACK_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
-    const AuthDataHead *head = NULL;
-    const uint8_t *data = NULL;
+    const AuthDataHead *head = nullptr;
+    const uint8_t *data = nullptr;
     int32_t ret = SocketPostBytes(fd, head, data);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthDataHead headValue;
@@ -1974,7 +1974,7 @@ HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
-    AuthConnInfo *connInfo = NULL;
+    AuthConnInfo *connInfo = nullptr;
     bool isServer = false;
     int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -2042,7 +2042,7 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     AuthTransListener listener = {
         .onDataReceived = AuthOnDataReceived,
         .onDisconnected = AuthOnDisconnected,
-        .onException = NULL,
+        .onException = nullptr,
     };
     int32_t ret;
     ret = RegAuthTransListener(MODULE_UDP_INFO, &listener);

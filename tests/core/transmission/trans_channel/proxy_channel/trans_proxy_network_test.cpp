@@ -144,14 +144,14 @@ void TransProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
  */
 HWTEST_F(TransProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level1)
 {
-    int32_t ret = NotifyNetworkingChannelOpened(1, NULL, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(1, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
     
-    NotifyNetworkingChannelOpenFailed(1, NULL);
+    NotifyNetworkingChannelOpenFailed(1, nullptr);
     EXPECT_NE(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(1);
     EXPECT_NE(true, TransProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(1, NULL, 0);
+    NotifyNetworkingMsgReceived(1, nullptr, 0);
     EXPECT_NE(true, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
@@ -165,14 +165,14 @@ HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
 {
     TransProxyNetworkTest::TestRegisterNetworkingChannelListener();
 
-    int32_t ret = NotifyNetworkingChannelOpened(1, NULL, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(1, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    NotifyNetworkingChannelOpenFailed(1, NULL);
+    NotifyNetworkingChannelOpenFailed(1, nullptr);
     EXPECT_EQ(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(1);
     EXPECT_EQ(true, TransProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(1, NULL, 0);
+    NotifyNetworkingMsgReceived(1, nullptr, 0);
     EXPECT_EQ(true, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
@@ -188,7 +188,7 @@ HWTEST_F(TransProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, TestS
     AppInfo appInfo;
     unsigned char isServer = '0';
     /* test app info is null */
-    int32_t ret = OnProxyChannelOpened(channelId, NULL, isServer);
+    int32_t ret = OnProxyChannelOpened(channelId, nullptr, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -220,7 +220,7 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize.L
     AppInfo appInfo;
     int32_t errCode = SOFTBUS_MEM_ERR;
     /* test app info is null */
-    int32_t ret = OnProxyChannelOpenFailed(channelId, NULL, errCode);
+    int32_t ret = OnProxyChannelOpenFailed(channelId, nullptr, errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -240,7 +240,7 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Level
     int32_t channelId = -1;
     AppInfo appInfo;
     /* test app info is null */
-    ret = OnProxyChannelClosed(channelId, NULL);
+    ret = OnProxyChannelClosed(channelId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -266,9 +266,9 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.
     uint32_t len = strlen(data) + 1;
 
     /* test invalid param */
-    int32_t ret = OnProxyChannelMsgReceived(channelId, NULL, data, len);
+    int32_t ret = OnProxyChannelMsgReceived(channelId, nullptr, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, NULL, len);
+    ret = OnProxyChannelMsgReceived(channelId, &appInfo, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -299,9 +299,9 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.
 HWTEST_F(TransProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
-    ret = TransOpenNetWorkingChannel(NULL, TEST_VALID_PEER_NETWORKID);
+    ret = TransOpenNetWorkingChannel(nullptr, TEST_VALID_PEER_NETWORKID);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenNetWorkingChannel(TEST_VALID_SESSIONNAME, NULL);
+    ret = TransOpenNetWorkingChannel(TEST_VALID_SESSIONNAME, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 }
 } // namespace OHOS

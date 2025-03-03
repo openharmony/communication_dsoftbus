@@ -62,7 +62,7 @@ void TransBindRequestManagerTest::TearDownTestCase(void)
  */
 HWTEST_F(TransBindRequestManagerTest, TransAddTimestampToList001, TestSize.Level1)
 {
-    uint32_t ret = TransAddTimestampToList(NULL, NULL, NULL, 0);
+    uint32_t ret = TransAddTimestampToList(nullptr, nullptr, nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransAddTimestampToList(g_mySocketName, g_peerSocketName, g_peerNetworkid, SoftBusGetSysTimeMs());
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -76,7 +76,7 @@ HWTEST_F(TransBindRequestManagerTest, TransAddTimestampToList001, TestSize.Level
  */
 HWTEST_F(TransBindRequestManagerTest, GetDeniedFlagByPeer001, TestSize.Level1)
 {
-    bool ret = GetDeniedFlagByPeer(NULL, NULL, NULL);
+    bool ret = GetDeniedFlagByPeer(nullptr, nullptr, nullptr);
     EXPECT_EQ(false, ret);
     ret = GetDeniedFlagByPeer(g_mySocketName, g_peerSocketName, g_peerNetworkid);
     EXPECT_EQ(false, ret);

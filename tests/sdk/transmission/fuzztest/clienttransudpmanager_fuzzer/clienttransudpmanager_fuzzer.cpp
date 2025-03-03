@@ -154,7 +154,7 @@ namespace OHOS {
         int32_t fileCnt = 0;
         GenerateInt32(channelId);
         GenerateInt32(fileCnt);
-        TransUdpChannelSendFile(channelId, sfileList, NULL, fileCnt);
+        TransUdpChannelSendFile(channelId, sfileList, nullptr, fileCnt);
         DataGenerator::Clear();
     }
 

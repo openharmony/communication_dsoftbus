@@ -179,7 +179,7 @@ static int32_t TestOpenSession()
 {
     printf("[test]TestOpenSession enter\r\n");
     g_addr1.type = CONNECTION_ADDR_BLE;
-    int32_t ret = OpenAuthSession(g_sessionName, &g_addr1, 1, NULL);
+    int32_t ret = OpenAuthSession(g_sessionName, &g_addr1, 1, nullptr);
     EXPECT_TRUE(ret >= 0);
     printf("[test]TestOpenSession end\r\n");
     return ret;

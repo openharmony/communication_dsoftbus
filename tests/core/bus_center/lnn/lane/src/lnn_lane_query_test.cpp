@@ -402,7 +402,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_QUERY_LANE_012, TestSize.Level1)
 {
     NiceMock<LaneQueryDepsInterfaceMock> linkQueryMock;
     EXPECT_CALL(linkQueryMock, GetWifiDirectManager)
-        .WillOnce(Return(NULL))
+        .WillOnce(Return(nullptr))
         .WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkQueryMock, SoftBusGetWifiState)
         .WillOnce(Return(SOFTBUS_WIFI_STATE_INACTIVE))
@@ -445,7 +445,7 @@ HWTEST_F(LNNLaneQueryTest, LNN_QUERY_LANE_013, TestSize.Level1)
 {
     NiceMock<LaneQueryDepsInterfaceMock> linkQueryMock;
     EXPECT_CALL(linkQueryMock, GetWifiDirectManager)
-        .WillOnce(Return(NULL))
+        .WillOnce(Return(nullptr))
         .WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkQueryMock, SoftBusGetWifiState)
         .WillOnce(Return(SOFTBUS_WIFI_STATE_INACTIVE))

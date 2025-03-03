@@ -110,7 +110,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
     uint16_t typeId = 0;
     int32_t ret = memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
     EXPECT_TRUE(ret == EOK);
-    EXPECT_TRUE(LnnGetDeviceName(nullptr) == NULL);
+    EXPECT_TRUE(LnnGetDeviceName(nullptr) == nullptr);
     LnnGetDeviceName(&info);
     EXPECT_TRUE(LnnSetDeviceName(nullptr, NODE_DEVICE_NAME) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDeviceName(&info, nullptr) == SOFTBUS_INVALID_PARAM);

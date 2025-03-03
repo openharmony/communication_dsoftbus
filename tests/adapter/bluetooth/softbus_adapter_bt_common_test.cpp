@@ -87,7 +87,7 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtState, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
 {
-    EXPECT_EQ(SoftBusGetBtMacAddr(NULL), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SoftBusGetBtMacAddr(nullptr), SOFTBUS_INVALID_PARAM);
     MockBluetooth mocker;
     SoftBusBtAddr mac = { 0 };
     EXPECT_CALL(mocker, GetLocalAddr(mac.addr, BT_ADDR_LEN)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
@@ -289,10 +289,10 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
 HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
 {
     auto listenerId = -1;
-    int32_t ret = SoftBusAddBtStateListener(NULL, &listenerId);
+    int32_t ret = SoftBusAddBtStateListener(nullptr, &listenerId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = SoftBusAddBtStateListener(GetMockBtStateListener(), NULL);
+    ret = SoftBusAddBtStateListener(GetMockBtStateListener(), nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     for (int i = 0; i < STATE_LISTENER_MAX_NUM; ++i) {

@@ -100,7 +100,7 @@ static int32_t TestOnRawStreamEncryptOptGet(int32_t channelId, bool *isEncrypt)
 static UdpChannelMgrCb g_testUdpChannelCb = {
     .OnStreamReceived = TestOnStreamReceived,
     .OnFileGetSessionId = TestOnFileGetSessionId,
-    .OnMessageReceived = NULL,
+    .OnMessageReceived = nullptr,
     .OnUdpChannelOpened = TestOnUdpChannelOpened,
     .OnUdpChannelClosed = TestOnUdpChannelClosed,
     .OnQosEvent = TestOnQosEvent,
@@ -118,7 +118,7 @@ static UdpChannelMgrCb g_testUdpChannelCb = {
  */
 HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
 {
-    RegisterStreamCb(NULL);
+    RegisterStreamCb(nullptr);
     UnregisterStreamCb();
     int32_t channelId = 12;
     int32_t status = 2;
@@ -155,9 +155,9 @@ HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
     status = STREAM_OPENED;
     SetStreamChannelStatus(channelId, status);
 
-    OnStreamReceived(channelId, NULL, NULL, NULL);
+    OnStreamReceived(channelId, nullptr, nullptr, nullptr);
     UnregisterStreamCb();
-    OnStreamReceived(channelId, NULL, NULL, NULL);
+    OnStreamReceived(channelId, nullptr, nullptr, nullptr);
     if (streamCb != nullptr) {
         SoftBusFree(streamCb);
     }
@@ -286,13 +286,13 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
     ASSERT_TRUE(channel != nullptr);
 
     int32_t streamPort = 2;
-    ret = TransOnstreamChannelOpened(NULL, &streamPort);
+    ret = TransOnstreamChannelOpened(nullptr, &streamPort);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransOnstreamChannelOpened(channel, NULL);
+    ret = TransOnstreamChannelOpened(channel, nullptr);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransOnstreamChannelOpened(NULL, NULL);
+    ret = TransOnstreamChannelOpened(nullptr, nullptr);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 

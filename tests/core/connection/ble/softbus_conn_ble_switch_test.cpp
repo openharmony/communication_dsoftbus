@@ -134,7 +134,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
@@ -227,7 +227,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
@@ -333,7 +333,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
@@ -392,7 +392,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
 
     if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
@@ -492,7 +492,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
@@ -601,7 +601,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;

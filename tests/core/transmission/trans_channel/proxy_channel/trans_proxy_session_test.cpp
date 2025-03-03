@@ -135,7 +135,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
 
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chan);
+    ASSERT_TRUE(chan != nullptr);
     chan->authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
@@ -162,7 +162,7 @@ HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest001, TestSize.Level
     int32_t ret = SOFTBUS_MEM_ERR;
 
     for (uint32_t flags = TRANS_SESSION_BYTES; flags <= TRANS_SESSION_FILE_ACK_RESPONSE_SENT; ++flags) {
-        ret = TransProxyPostSessionData(channelId, NULL, 0, (SessionPktType)flags);
+        ret = TransProxyPostSessionData(channelId, nullptr, 0, (SessionPktType)flags);
         EXPECT_NE(SOFTBUS_OK, ret);
     }
 
@@ -253,7 +253,7 @@ HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest001, TestSize.Level1
     char buf[TEST_BUFFER_SIZE] = {0};
     TestSliceHead head;
     uint32_t len = TEST_DEFAULT_DATA_LEN;
-    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, NULL, len);
+    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -478,7 +478,7 @@ HWTEST_F(TransProxySessionTest, TransOnAuthMsgReceivedTest001, TestSize.Level1)
     int32_t pid = 0;
     int32_t channelId = -1;
     const char * data = "test data";
-    int32_t ret = TransOnAuthMsgReceived(pkgName, pid, channelId, NULL, 0);
+    int32_t ret = TransOnAuthMsgReceived(pkgName, pid, channelId, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint32_t len = TEST_INVALID_DATA_LEN;

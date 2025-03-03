@@ -302,7 +302,7 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     int32_t infoNum = 8;
     NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo) * infoNum);
-    ASSERT_TRUE(nodeBasicInfo != NULL);
+    ASSERT_TRUE(nodeBasicInfo != nullptr);
     (void)memset_s(nodeBasicInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
         DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
@@ -356,7 +356,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnIsSupportBurstFeatureTest_01, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     char networkId[] = "networkId";
-    bool ret = LnnIsSupportBurstFeature(NULL);
+    bool ret = LnnIsSupportBurstFeature(nullptr);
     EXPECT_FALSE(ret);
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
@@ -470,7 +470,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnHasActiveConnectionTest_02, TestSize.Level1)
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteStrInfo(_, Eq(STRING_KEY_DEV_UDID), _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(heartbeatUtilsMock, GetWifiDirectManager).WillRepeatedly(Return(NULL));
+    EXPECT_CALL(heartbeatUtilsMock, GetWifiDirectManager).WillRepeatedly(Return(nullptr));
     bool ret = LnnHasActiveConnection(networkId, CONNECTION_ADDR_BLE);
     EXPECT_FALSE(ret);
     EXPECT_CALL(distributeLedgerMock, ConvertBtMacToBinary)

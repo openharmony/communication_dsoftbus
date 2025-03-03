@@ -57,7 +57,7 @@ static char g_ip[] = "127.0.0.1";
 static VtpStreamOpenParam g_param = {
     g_pkgName,
     g_ip,
-    NULL,
+    nullptr,
     -1,
     RAW_STREAM,
     (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc",
