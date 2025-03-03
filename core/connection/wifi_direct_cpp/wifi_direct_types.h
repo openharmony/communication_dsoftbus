@@ -172,6 +172,7 @@ struct WifiDirectConnectInfo {
     uint32_t requestId;
     int32_t pid;
     enum WifiDirectConnectType connectType;
+    bool isStrictProtocol; // for HMLv1 | P2Pv2
     struct WifiDirectNegotiateChannel negoChannel;
     bool reuseOnly;
     uint32_t expectApiRole;
