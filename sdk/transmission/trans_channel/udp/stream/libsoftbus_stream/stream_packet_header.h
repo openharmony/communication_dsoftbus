@@ -24,9 +24,10 @@
 #include <utility>
 #include <vector>
 
+#include "i_stream.h"
 #include "securec.h"
 #include "stream_common.h"
-#include "i_stream.h"
+#include "trans_log.h"
 
 using ::std::chrono::duration_cast;
 using ::std::chrono::milliseconds;
@@ -141,7 +142,8 @@ public:
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length == 0 || sizeof(uint16_t) * extFiledNum + tl.length > size) {
+            if (tl.length == 0 ||
+                sizeof(uint16_t) * extFiledNum + AlignTo4Bytes(tl.length) + sizeof(checkSum_) > size) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
@@ -149,9 +151,12 @@ public:
             if (ret == 0) {
                 extLen_ = static_cast<ssize_t>(tl.length);
             }
+            checkSum_ = ntohl(*reinterpret_cast<uint32_t *>((reinterpret_cast<char *>(tmp) + AlignTo4Bytes(extLen_))));
+            if (checkSum_ > sizeof(uint16_t) * extFiledNum + AlignTo4Bytes(tl.length)) {
+                TRANS_LOGE(TRANS_STREAM, "checkSum=%{public}u, length=%{public}u", checkSum_, tl.length);
+                checkSum_ = 0;
+            }
         }
-
-        checkSum_ = ntohl(*reinterpret_cast<uint32_t *>((reinterpret_cast<char *>(tmp) + AlignTo4Bytes(extLen_))));
     }
 
     uint16_t GetTlvNums() const
