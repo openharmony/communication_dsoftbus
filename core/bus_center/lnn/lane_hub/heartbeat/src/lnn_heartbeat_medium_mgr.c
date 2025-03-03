@@ -505,11 +505,10 @@ static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t
 
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
-    if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because resp data");
-        return true;
-    }
-    int32_t ret, stateVersion;
+    LNN_CHECK_AND_RETURN_RET_LOGE((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
+        true, LNN_HEART_BEAT,  "ble don't support ble direct online");
+    int32_t ret;
+    int32_t stateVersion;
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (!IsLocalSupportBleDirectOnline()) {
@@ -1133,7 +1132,8 @@ void LnnDumpHbMgrRecvList(void)
 void LnnDumpHbOnlineNodeList(void)
 {
 #define HB_DUMP_ONLINE_NODE_MAX_NUM 5
-    int32_t i, infoNum;
+    int32_t i;
+    int32_t infoNum;
     uint64_t oldTimeStamp;
     NodeBasicInfo *info = NULL;
 
