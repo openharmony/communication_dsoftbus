@@ -712,7 +712,7 @@ static bool IsExistWatchDevice(const char *networkId)
     return false;
 }
 
-static bool IsSupportWifiDirectEnhance(const char *networkId)
+bool IsSupportWifiDirectEnhance(const char *networkId)
 {
     uint64_t localFeature = 0;
     uint64_t remoteFeature = 0;
