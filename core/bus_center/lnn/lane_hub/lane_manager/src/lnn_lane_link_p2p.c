@@ -621,6 +621,11 @@ static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *r
     return SOFTBUS_OK;
 }
 
+bool CheckStrictProtocol(const char *networkId, LaneLinkType linkType)
+{
+    return (linkType == LANE_P2P && IsSupportWifiDirectEnhance(networkId));
+}
+
 static int32_t GetP2pLinkReqParamByChannelRequetId(
     int32_t channelRequestId, int32_t channelId, uint32_t p2pRequestId, struct WifiDirectConnectInfo *wifiDirectInfo)
 {
@@ -662,6 +667,8 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
+        wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(item->laneRequestInfo.networkId,
+            item->laneRequestInfo.linkType);
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
         LinkUnlock();
@@ -715,6 +722,8 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
+        wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(item->laneRequestInfo.networkId,
+            item->laneRequestInfo.linkType);
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -1843,6 +1852,8 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+        wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(item->laneRequestInfo.networkId,
+            item->laneRequestInfo.linkType);
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -2208,6 +2219,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
         return SOFTBUS_STRCPY_ERR;
     }
     wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
+    wifiDirectInfo.isStrictProtocol = CheckStrictProtocol(request->peerNetworkId, request->linkType);
 
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
@@ -2257,6 +2269,7 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
         return SOFTBUS_STRCPY_ERR;
     }
     wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
+    wifiDirectInfo.isStrictProtocol = CheckStrictProtocol(request->peerNetworkId, request->linkType);
 
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
@@ -2369,6 +2382,7 @@ static int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, struct Wi
     }
     wifiDirectInfo->isNetworkDelegate = request->networkDelegate;
     wifiDirectInfo->ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(request->peerNetworkId, request->linkType);
     return SOFTBUS_OK;
 }
 
@@ -2732,6 +2746,8 @@ static int32_t GenerateWifiDirectInfo(const P2pLinkReqList *reqInfo, struct Wifi
         LNN_LOGE(LNN_LANE, "strcpy remote networkId fail");
         return SOFTBUS_STRCPY_ERR;
     }
+    info->isStrictProtocol = CheckStrictProtocol(reqInfo->laneRequestInfo.networkId,
+        reqInfo->laneRequestInfo.linkType);
     WdGuideInfo guideInfo;
     (void)memset_s(&guideInfo, sizeof(WdGuideInfo), -1, sizeof(WdGuideInfo));
     if (GetGuideInfo(reqInfo->laneRequestInfo.laneReqId, reqInfo->laneRequestInfo.linkType,
