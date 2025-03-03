@@ -1009,7 +1009,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleDisconnectNow001, TestSize.Level1)
         .reqId = 1,
     };
     DfxRecordBleConnectSuccess(0, &connection, &statistics);
-    DfxRecordBleConnectSuccess(0, &connection, NULL);
+    DfxRecordBleConnectSuccess(0, &connection, nullptr);
 }
 
 /*
@@ -1024,7 +1024,7 @@ HWTEST_F(ConnectionBleManagerTest, BleReuseConnection, TestSize.Level1)
 {
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ConnBleDevice *device = NULL;
+    ConnBleDevice *device = nullptr;
     const char *addr = "11:22:33:44:55:66";
     const char *udid = "1111222233334444";
     ConnBleConnectRequestContext ctx = {
@@ -1047,7 +1047,7 @@ HWTEST_F(ConnectionBleManagerTest, BleReuseConnection, TestSize.Level1)
     };
     ret = strcpy_s(connection.udid, UDID_BUF_LEN, udid);
     ASSERT_EQ(EOK, ret);
-    ret = SoftBusMutexInit(&connection.lock, NULL);
+    ret = SoftBusMutexInit(&connection.lock, nullptr);
     ASSERT_EQ(SOFTBUS_OK, ret);
     bool result = BleReuseConnection(device, &connection);
     EXPECT_EQ(true, result);
@@ -1068,7 +1068,7 @@ HWTEST_F(ConnectionBleManagerTest, BleReuseConnection, TestSize.Level1)
 HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
 {
     BlePrevent *prevent = (BlePrevent *)SoftBusCalloc(sizeof(BlePrevent));
-    ASSERT_NE(NULL, prevent);
+    ASSERT_NE(nullptr, prevent);
     ListAdd(&g_bleManager.prevents->list, &prevent->node);
     const char *udid = "1111222233334444";
     size_t udidLen = strlen(udid);
@@ -1076,7 +1076,7 @@ HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
     ASSERT_EQ(EOK, result);
     bool ret = BleCheckPreventing(udid);
     EXPECT_EQ(true, ret);
-    ret = BleCheckPreventing(NULL);
+    ret = BleCheckPreventing(nullptr);
     EXPECT_EQ(false, ret);
     const char *bleUdid = "1111222233335555";
     ret = BleCheckPreventing(bleUdid);
@@ -1085,11 +1085,11 @@ HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
     const char *addr = "22:33:44:55:66:00";
     ConnBleConnection *connection =
         ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(connection, NULL);
+    ASSERT_NE(connection, nullptr);
     const char *devId = "1111222233335555";
     memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, devId, DEVID_BUFF_LEN);
     
-    ConnBleDevice *device = NULL;
+    ConnBleDevice *device = nullptr;
     ConnBleConnectRequestContext ctx = {
         .fastestConnectEnable = true,
         .psm = 0,

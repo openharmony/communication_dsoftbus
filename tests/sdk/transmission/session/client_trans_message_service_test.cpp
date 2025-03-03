@@ -151,15 +151,15 @@ static void TestGenerateCommParam(SessionParam *sessionParam)
 static SessionInfo *TestGenerateSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
-    if (session == NULL) {
-        return NULL;
+    if (session == nullptr) {
+        return nullptr;
     }
 
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, param->groupId) != EOK) {
         SoftBusFree(session);
-        return NULL;
+        return nullptr;
     }
 
     session->sessionId = TRANS_TEST_SESSION_ID;
@@ -181,7 +181,7 @@ static int32_t AddSessionServerAndSession(
     const char *sessionName, int32_t channelType, int32_t businessType, bool isServer, SessionEnableStatus enableStatus)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    if (sessionParam == NULL) {
+    if (sessionParam == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -193,7 +193,7 @@ static int32_t AddSessionServerAndSession(
     }
 
     SessionInfo *session = TestGenerateSession(sessionParam);
-    if (session == NULL) {
+    if (session == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
 

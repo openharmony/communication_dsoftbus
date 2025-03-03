@@ -75,10 +75,10 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
     char netmask[] = "abcdefd";
     char ip[32] = "0";
     int32_t len = 10;
-    int32_t ret = GetNetworkIpByIfName(NULL, ip, netmask, len);
+    int32_t ret = GetNetworkIpByIfName(nullptr, ip, netmask, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetNetworkIpByIfName(ifName, NULL, netmask, len);
+    ret = GetNetworkIpByIfName(ifName, nullptr, netmask, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -93,7 +93,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
     const char *ifName = "abcdefgh";
     char ip[32] = "0";
     int32_t len = 10;
-    int32_t ret = GetNetworkIpByIfName(ifName, ip, NULL, len);
+    int32_t ret = GetNetworkIpByIfName(ifName, ip, nullptr, len);
     EXPECT_EQ(SOFTBUS_NETWORK_IOCTL_FAIL, ret);
 }
 
@@ -215,7 +215,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(MAX_MALLOC_SIZE + 1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -227,7 +227,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(-1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -291,7 +291,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(-1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -303,7 +303,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(MAX_MALLOC_SIZE + 1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 } // namespace OHOS

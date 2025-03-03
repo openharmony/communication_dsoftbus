@@ -278,7 +278,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleRspData, TestSize.Level3)
     uint16_t dataLen = 0;
 
     uint8_t *data = AssembleRspData(&rspData, &dataLen);
-    EXPECT_NE(data, NULL);
+    EXPECT_NE(data, nullptr);
     uint16_t expectedDataLen = rspData.payloadLen + RSP_HEAD_LEN;
     EXPECT_EQ(dataLen, expectedDataLen);
     SoftBusFree(data);

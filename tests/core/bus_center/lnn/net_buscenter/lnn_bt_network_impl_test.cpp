@@ -76,7 +76,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_002
- * @tc.desc: relationNum is NULL return SOFTBUS_INVALID_PARAM
+ * @tc.desc: relationNum is nullptr return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  */

@@ -184,11 +184,11 @@ HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest005, TestSize.Level0)
 {
     TransAlarmExtra extra = {
-        .conflictName = NULL,
-        .conflictedName = NULL,
-        .occupyedName = NULL,
-        .permissionName = NULL,
-        .sessionName = NULL,
+        .conflictName = nullptr,
+        .conflictedName = nullptr,
+        .occupyedName = nullptr,
+        .permissionName = nullptr,
+        .sessionName = nullptr,
         .result = 1,
         .errcode = 2233,
         .minBw = 32,
@@ -345,14 +345,14 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest008, TestSize.Level0)
 {
     TransAuditExtra extra = {
-        .localIp = NULL,
-        .localPort = NULL,
-        .localDevId = NULL,
-        .localSessName = NULL,
-        .peerIp = NULL,
-        .peerPort = NULL,
-        .peerDevId = NULL,
-        .peerSessName = NULL,
+        .localIp = nullptr,
+        .localPort = nullptr,
+        .localDevId = nullptr,
+        .localSessName = nullptr,
+        .peerIp = nullptr,
+        .peerPort = nullptr,
+        .peerDevId = nullptr,
+        .peerSessName = nullptr,
         .hostPkg = "a.b.c.transSudit",
         .result = 2,
         .errcode = 9527,

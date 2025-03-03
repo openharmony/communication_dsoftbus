@@ -57,7 +57,7 @@ HWTEST_F(TransSdkCommStreamTest, SendCommStreamTest001, TestSize.Level0)
     int32_t ret = SendStream(-1, &streamData, &extData, &frameInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendStream(sessionId, NULL, &extData, &frameInfo);
+    ret = SendStream(sessionId, nullptr, &extData, &frameInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

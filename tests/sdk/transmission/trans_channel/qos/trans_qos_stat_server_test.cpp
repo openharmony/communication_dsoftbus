@@ -104,7 +104,7 @@ static ISessionListener g_noQosCb = {
     .OnStreamReceived = OnStreamReceived,
     .OnBytesReceived = OnBytesReceived,
     .OnMessageReceived = OnMessageReceived,
-    .OnQosEvent = NULL,
+    .OnQosEvent = nullptr,
 };
 
 /**

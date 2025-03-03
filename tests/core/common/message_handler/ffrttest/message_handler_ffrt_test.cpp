@@ -154,7 +154,7 @@ static void FfrtMsgHandler(SoftBusMessage *msg)
 
 static int32_t TestFfrtRemoveMsgInfo(const SoftBusMessage *msg, void *data)
 {
-    if (msg == NULL || msg->obj == NULL || data == NULL) {
+    if (msg == nullptr || msg->obj == nullptr || data == nullptr) {
         GTEST_LOG_(ERROR) << "invalid param";
         return SOFTBUS_INVALID_PARAM;
     }

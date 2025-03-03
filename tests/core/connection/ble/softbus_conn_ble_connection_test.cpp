@@ -184,7 +184,7 @@ HWTEST_F(ConnectionBleTest, QueueTest001, TestSize.Level1)
     ret = ConnBleInitSendQueue();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ConnBleEnqueueNonBlock(NULL);
+    ret = ConnBleEnqueueNonBlock(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     queueNode.flag = CONN_HIGH;
@@ -229,7 +229,7 @@ HWTEST_F(ConnectionBleTest, QueueTest002, TestSize.Level1)
     ret = ConnBleDequeueBlock(&msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ConnBleDequeueBlock(NULL);
+    ret = ConnBleDequeueBlock(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ConnBleDeinitSendQueue();

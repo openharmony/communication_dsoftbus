@@ -2048,7 +2048,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest002, TestSize.Le
     EXPECT_CALL(TcpMessageMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, AuthGetServerSide).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, PackRequest).WillOnce(Return(NULL));
+    EXPECT_CALL(TcpMessageMock, PackRequest).WillOnce(Return(nullptr));
     int32_t ret = StartVerifySession(conn);
     EXPECT_EQ(SOFTBUS_TRANS_PACK_REQUEST_FAILED, ret);
     ReleaseSessionConn(conn);

@@ -147,14 +147,14 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level
     SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
     char sessionName[TEST_NUMBER_256] = {0};
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
-    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, NULL, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    NotifyNetworkingChannelOpenFailed(sessionName, 1, NULL);
+    NotifyNetworkingChannelOpenFailed(sessionName, 1, nullptr);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(sessionName, 1, NULL, 0);
+    NotifyNetworkingMsgReceived(sessionName, 1, nullptr, 0);
     EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
@@ -170,14 +170,14 @@ HWTEST_F(SoftbusProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
     SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
 
-    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, NULL, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    NotifyNetworkingChannelOpenFailed(sessionName, 1, NULL);
+    NotifyNetworkingChannelOpenFailed(sessionName, 1, nullptr);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(sessionName, 1, NULL, 0);
+    NotifyNetworkingMsgReceived(sessionName, 1, nullptr, 0);
     EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
@@ -193,7 +193,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, Tes
     AppInfo appInfo;
     unsigned char isServer = '0';
     /* test app info is null */
-    int32_t ret = OnProxyChannelOpened(channelId, NULL, isServer);
+    int32_t ret = OnProxyChannelOpened(channelId, nullptr, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -223,7 +223,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize
     AppInfo appInfo;
     int32_t errCode = SOFTBUS_INVALID_PARAM;
     /* test app info is null */
-    int32_t ret = OnProxyChannelOpenFailed(channelId, NULL, errCode);
+    int32_t ret = OnProxyChannelOpenFailed(channelId, nullptr, errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -243,7 +243,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Lev
     int32_t channelId = -1;
     AppInfo appInfo;
     /* test app info is null */
-    ret = OnProxyChannelClosed(channelId, NULL);
+    ret = OnProxyChannelClosed(channelId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -269,9 +269,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSiz
     uint32_t len = strlen(data) + 1;
 
     /* test invalid param */
-    int32_t ret = OnProxyChannelMsgReceived(channelId, NULL, data, len);
+    int32_t ret = OnProxyChannelMsgReceived(channelId, nullptr, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, NULL, len);
+    ret = OnProxyChannelMsgReceived(channelId, &appInfo, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -308,9 +308,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Le
     char sessionName[TEST_NUMBER_256] = {0};
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
     int32_t ret = SOFTBUS_OK;
-    ret = TransOpenNetWorkingChannel(sessionName, NULL, &preferred);
+    ret = TransOpenNetWorkingChannel(sessionName, nullptr, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenNetWorkingChannel(sessionName, NULL, &preferred);
+    ret = TransOpenNetWorkingChannel(sessionName, nullptr, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 }
 } // namespace OHOS

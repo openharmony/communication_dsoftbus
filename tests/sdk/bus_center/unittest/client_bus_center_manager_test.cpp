@@ -732,7 +732,7 @@ HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnLocalNetworkIdChanged(nullptr), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;
@@ -762,7 +762,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, Tes
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnNodeDeviceTrustedChange(nullptr, 0, nullptr, 0), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;
@@ -790,7 +790,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, T
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnHichainProofException(nullptr, nullptr, 0, 0, 0), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;
@@ -818,7 +818,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, Test
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnTimeSyncResult(nullptr, 0), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;

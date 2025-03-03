@@ -35,7 +35,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-static ConnectFuncInterface *g_bleInterface = NULL;
+static ConnectFuncInterface *g_bleInterface = nullptr;
 #define SLEEP_TIME_MS 1000
 
 void OnConnected(uint32_t connectionId, const ConnectionInfo *info)
@@ -153,11 +153,11 @@ HWTEST_F(SoftbusConnBleHiDumperTest, BleHiDumperTest, TestSize.Level1)
 
     ConnBleConnection *connection1 =
         ConnBleCreateConnection(addr1, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(connection1, NULL);
+    ASSERT_NE(connection1, nullptr);
 
     ConnBleConnection *connection2 =
         ConnBleCreateConnection(addr2, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
-    ASSERT_NE(connection2, NULL);
+    ASSERT_NE(connection2, nullptr);
 
     auto ret = ConnBleSaveConnection(connection1);
     ASSERT_EQ(SOFTBUS_OK, ret);

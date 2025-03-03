@@ -183,13 +183,13 @@ int32_t TestCreateSessionServer(void)
 
 int32_t TestOpenAuthSession(const ConnectionAddr *addrInfo, bool two)
 {
-    g_sessionId = OpenAuthSession(g_testSessionName, addrInfo, 1, NULL);
+    g_sessionId = OpenAuthSession(g_testSessionName, addrInfo, 1, nullptr);
     if (g_sessionId < 0) {
         printf("OpenAuthSession ret[%d]", g_sessionId);
         return SOFTBUS_INVALID_SESSION_ID;
     }
     if (two) {
-        g_sessionIdTwo = OpenAuthSession(g_testSessionName, addrInfo, 1, NULL);
+        g_sessionIdTwo = OpenAuthSession(g_testSessionName, addrInfo, 1, nullptr);
         if (g_sessionIdTwo < 0) {
             printf("OpenAuthSession ret[%d]", g_sessionIdTwo);
             return SOFTBUS_INVALID_SESSION_ID;

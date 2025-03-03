@@ -64,12 +64,12 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackErrorTest001, TestSize.Level1)
 {
     int32_t code = CODE;
     int32_t errCode = ERRCODE;
-    char *ret = VerifyP2pPackError(code, errCode, NULL);
-    EXPECT_EQ(NULL, ret);
+    char *ret = VerifyP2pPackError(code, errCode, nullptr);
+    EXPECT_EQ(nullptr, ret);
     
     const char *errDesc = "P2p Pack Err Test";
     ret = VerifyP2pPackError(code, errCode, errDesc);
-    EXPECT_NE(NULL, ret);
+    EXPECT_NE(nullptr, ret);
 }
 
 /**
@@ -82,17 +82,17 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackTest001, TestSize.Level1)
 {
     int32_t myPort = MY_PORT;
     const char *peerIp = PEER_IP;
-    char *ret = VerifyP2pPack(NULL, myPort, peerIp);
-    EXPECT_EQ(NULL, ret);
+    char *ret = VerifyP2pPack(nullptr, myPort, peerIp);
+    EXPECT_EQ(nullptr, ret);
 
     const char *myIp = MY_IP;
     myPort = ERR_PORT;
     ret = VerifyP2pPack(myIp, myPort, peerIp);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 
     myPort = MY_PORT;
     ret = VerifyP2pPack(myIp, myPort, peerIp);
-    EXPECT_NE(NULL, ret);
+    EXPECT_NE(nullptr, ret);
 }
 
 /**

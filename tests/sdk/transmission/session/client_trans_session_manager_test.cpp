@@ -120,7 +120,7 @@ static int32_t CheckCollabRelation(const CollabInfo *sourceInfo, const CollabInf
 static SessionInfo *GenerateSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo*)SoftBusMalloc(sizeof(SessionInfo));
-    EXPECT_TRUE(session != NULL);
+    EXPECT_TRUE(session != nullptr);
     memset_s(session, sizeof(SessionInfo), 0, sizeof(SessionInfo));
 
     int32_t ret = strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName);
@@ -180,10 +180,10 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest01, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    ret = ClientAddSession(NULL, &sessionId, &isEnabled);
+    ret = ClientAddSession(nullptr, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
@@ -202,7 +202,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest01, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest02, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
@@ -226,7 +226,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest02, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest03, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
@@ -273,7 +273,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest05, TestSiz
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
@@ -329,7 +329,7 @@ HWTEST_F(TransClientSessionManagerTest, GetMaxIdleTimeBySocket01, TestSize.Level
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
@@ -361,7 +361,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientAddSessionOutOfMaxTest01, Tes
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     GenerateCommParam(sessionParam);
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret,  SOFTBUS_OK);
@@ -393,7 +393,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest07, TestSiz
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
@@ -423,7 +423,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest08, TestSiz
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     char deviceId[] = {"ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF"};
@@ -444,7 +444,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest09, TestSiz
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
@@ -458,7 +458,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest09, TestSiz
         .dataType = TYPE_FILE,
     };
     SessionParam *newSessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(newSessionParam != NULL);
+    EXPECT_TRUE(newSessionParam != nullptr);
     memset_s(newSessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     newSessionParam->attr = &sessionAttr;
     newSessionParam->groupId = groupId;
@@ -493,7 +493,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest10, TestSiz
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
@@ -543,7 +543,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest12, TestSiz
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
@@ -589,7 +589,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest13, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest14, TestSize.Level1)
 {
     TransInfo *transInfo = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
+    EXPECT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     transInfo->channelId = TRANS_TEST_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_UDP;
@@ -611,14 +611,14 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest14, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest15, TestSize.Level1)
 {
     TransInfo *transInfo = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
+    EXPECT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     transInfo->channelId = TRANS_TEST_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_UDP;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
@@ -666,7 +666,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest17, TestSiz
     ret = GetEncryptByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &data);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
@@ -699,7 +699,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest18, TestSiz
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
@@ -723,7 +723,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest18, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest19, TestSize.Level1)
 {
     ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
-    EXPECT_TRUE(channel != NULL);
+    EXPECT_TRUE(channel != nullptr);
     memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
@@ -731,7 +731,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest19, TestSiz
     ret = ClientEnableSessionByChannelId(channel, &sessionId);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     channel->channelId = 0;
@@ -768,7 +768,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest20, TestSiz
     int32_t ret = ClientGetSessionCallbackById(TRANS_TEST_SESSION_ID, &sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
@@ -834,7 +834,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest22, TestSiz
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
@@ -873,9 +873,9 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest23, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGrantPermission(TRANS_TEST_UID, TRANS_TEST_INVALID_PID, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGrantPermission(TRANS_TEST_UID, TRANS_TEST_PID, NULL);
+    ret = ClientGrantPermission(TRANS_TEST_UID, TRANS_TEST_PID, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientRemovePermission(NULL);
+    ret = ClientRemovePermission(nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 }
 
@@ -897,7 +897,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest24, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
@@ -930,7 +930,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest25, TestSiz
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
 
-    ret = ReCreateSessionServerToServer(NULL);
+    ret = ReCreateSessionServerToServer(nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
     ListNode sessionServerList;
@@ -941,8 +941,8 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest25, TestSiz
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
 
-    SessionServerInfo *infoNode = NULL;
-    SessionServerInfo *infoNodeNext = NULL;
+    SessionServerInfo *infoNode = nullptr;
+    SessionServerInfo *infoNodeNext = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -960,7 +960,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest26, TestSiz
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
@@ -987,15 +987,15 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest27, TestSiz
     ListNode sessionServerList;
     ListInit(&sessionServerList);
     ClientCleanAllSessionWhenServerDeath(&sessionServerList);
-    SessionServerInfo *infoNode = NULL;
-    SessionServerInfo *infoNodeNext = NULL;
+    SessionServerInfo *infoNode = nullptr;
+    SessionServerInfo *infoNodeNext = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
     }
 
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
@@ -1005,8 +1005,8 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest27, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_OK);
 
     ClientCleanAllSessionWhenServerDeath(&sessionServerList);
-    infoNode = NULL;
-    infoNodeNext = NULL;
+    infoNode = nullptr;
+    infoNodeNext = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -1042,11 +1042,11 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestroyTest01, TestSiz
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     session->channelId = TRANS_TEST_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_UDP;
     session->routeType = WIFI_STA;
@@ -1054,7 +1054,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestroyTest01, TestSiz
     ASSERT_EQ(ret, SOFTBUS_OK);
     sessionParam->peerDeviceId = g_networkId;
     SessionInfo *newSession = GenerateSession(sessionParam);
-    ASSERT_TRUE(newSession != NULL);
+    ASSERT_TRUE(newSession != nullptr);
     newSession->channelId = TRANS_TEST_CHANNEL_ID + 1;
     newSession->channelType = CHANNEL_TYPE_UDP;
     newSession->routeType = WIFI_P2P;
@@ -1088,11 +1088,11 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionIsAsyncTest01, TestSiz
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     session->sessionId = 1;
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -1125,11 +1125,11 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     session->channelId = TRANS_TEST_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_PROXY;
     session->routeType = WIFI_STA;
@@ -1140,7 +1140,7 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
     ASSERT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t ChannelType = CHANNEL_TYPE_BUTT;
-    ClientGetChannelBySessionId(1, &channelId, &ChannelType, NULL);
+    ClientGetChannelBySessionId(1, &channelId, &ChannelType, nullptr);
     ASSERT_EQ(channelId, 11);
     ASSERT_EQ(ChannelType, CHANNEL_TYPE_TCP_DIRECT);
     char sessionName[SESSION_NAME_SIZE_MAX];
@@ -1171,7 +1171,7 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest29, TestSize.Level1)
 {
     TransClientDeinit();
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, NULL, g_sessionName, &g_sessionlistener);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, nullptr, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1195,7 +1195,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest29, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest30, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    int32_t ret = ClientAddAuthSession(NULL, &sessionId);
+    int32_t ret = ClientAddAuthSession(nullptr, &sessionId);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientAddAuthSession(g_sessionName, &sessionId);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1210,11 +1210,11 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest30, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest31, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     SessionInfo *session = GenerateSession(sessionParam);
-    int32_t ret = ClientAddNewSession(g_sessionName, NULL);
+    int32_t ret = ClientAddNewSession(g_sessionName, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1232,7 +1232,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest32, TestSiz
     int32_t data = 0;
     int32_t ret = ClientGetSessionIntegerDataById(TRANS_TEST_INVALID_SESSION_ID, &data, KEY_PEER_PID);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetSessionIntegerDataById(TRANS_TEST_SESSION_ID, NULL, KEY_PEER_PID);
+    ret = ClientGetSessionIntegerDataById(TRANS_TEST_SESSION_ID, nullptr, KEY_PEER_PID);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionIntegerDataById(TRANS_TEST_SESSION_ID, &data, KEY_PEER_PID);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1247,7 +1247,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest32, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest33, TestSize.Level1)
 {
     TransInfo *transInfo = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
+    EXPECT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     transInfo->channelId = TRANS_TEST_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_UDP;
@@ -1288,7 +1288,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest35, TestSiz
     int32_t data = 0;
     int32_t ret = GetEncryptByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &data);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = GetEncryptByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, NULL);
+    ret = GetEncryptByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = GetEncryptByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &data);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1306,7 +1306,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest36, TestSiz
     bool isClosing = false;
     int32_t ret = ClientGetSessionIdByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, NULL, isClosing);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, nullptr, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1324,12 +1324,12 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest36, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest37, TestSize.Level1)
 {
     ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
-    EXPECT_TRUE(channel != NULL);
+    EXPECT_TRUE(channel != nullptr);
     memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     int32_t sessionId = 0;
-    int32_t ret = ClientEnableSessionByChannelId(NULL, &sessionId);
+    int32_t ret = ClientEnableSessionByChannelId(nullptr, &sessionId);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientEnableSessionByChannelId(channel, NULL);
+    ret = ClientEnableSessionByChannelId(channel, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientEnableSessionByChannelId(channel, &sessionId);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1347,7 +1347,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest38, TestSiz
     ISessionListener sessionlistener = {0};
     int32_t ret = ClientGetSessionCallbackById(TRANS_TEST_INVALID_SESSION_ID, &sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetSessionCallbackById(TRANS_TEST_SESSION_ID, NULL);
+    ret = ClientGetSessionCallbackById(TRANS_TEST_SESSION_ID, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionCallbackById(TRANS_TEST_SESSION_ID, &sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1362,9 +1362,9 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest38, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest39, TestSize.Level1)
 {
     ISessionListener sessionlistener = {0};
-    int32_t ret = ClientGetSessionCallbackByName(NULL, &sessionlistener);
+    int32_t ret = ClientGetSessionCallbackByName(nullptr, &sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetSessionCallbackByName(g_sessionName, NULL);
+    ret = ClientGetSessionCallbackByName(g_sessionName, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionCallbackByName(g_sessionName, &sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1395,11 +1395,11 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest41, TestSiz
     int32_t crc = 0;
     int32_t ret = ClientGetFileConfigInfoById(TRANS_TEST_INVALID_SESSION_ID, &fileEncrypt, &algorithm, &crc);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, NULL, &algorithm, &crc);
+    ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, nullptr, &algorithm, &crc);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, NULL, &crc);
+    ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, nullptr, &crc);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, &algorithm, NULL);
+    ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, &algorithm, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, &algorithm, &crc);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
@@ -1419,12 +1419,12 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest42, TestSiz
     ListInit(&sessionServerList);
     int32_t ret = ReCreateSessionServerToServer(&sessionServerList);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ClientTransOnLinkDown(NULL, ROUTE_TYPE_ALL);
+    ClientTransOnLinkDown(nullptr, ROUTE_TYPE_ALL);
     ClientTransOnLinkDown(g_networkId, ROUTE_TYPE_ALL);
 
     ClientCleanAllSessionWhenServerDeath(&sessionServerList);
-    SessionServerInfo *infoNode = NULL;
-    SessionServerInfo *infoNodeNext = NULL;
+    SessionServerInfo *infoNode = nullptr;
+    SessionServerInfo *infoNodeNext = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -1488,7 +1488,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest45, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientTransSetChannelInfo(g_sessionName, 1, 1, CHANNEL_TYPE_AUTH);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
-    ret = ClientTransSetChannelInfo(NULL, 1, 1, 1);
+    ret = ClientTransSetChannelInfo(nullptr, 1, 1, 1);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     bool isAsync = false;
     ret = ClientGetSessionIsAsyncBySessionId(1, &isAsync);
@@ -1549,7 +1549,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest48, TestSiz
     EXPECT_EQ(maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
 
     ret = GetQosValue(
-        NULL, 0, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+        nullptr, 0, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
 }
@@ -1564,7 +1564,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest49, TestSiz
 {
     int32_t maxWaitTimeout = 0;
     int32_t ret = GetQosValue(
-        NULL, 1, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+        nullptr, 1, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
