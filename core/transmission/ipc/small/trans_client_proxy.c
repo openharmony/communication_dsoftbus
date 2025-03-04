@@ -41,24 +41,6 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
     return SOFTBUS_OK;
 }
 
-static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
-{
-    IpcIo reply;
-    uintptr_t ptr = 0;
-    MessageOption option;
-    MessageOptionInit(&option);
-    int32_t ans = SendRequest(*svc, CLIENT_ON_CHANNEL_OPENED, io, &reply, option, &ptr);
-    if (ans != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened SendRequest failed");
-        FreeBuffer((void *)ptr);
-        return ans;
-    }
-    int32_t udpPort;
-    ReadInt32(&reply, &udpPort);
-    FreeBuffer((void *)ptr);
-    return udpPort;
-}
-
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
@@ -91,9 +73,6 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
         WriteString(&io, channel->myIp);
         WriteInt32(&io, channel->streamType);
         WriteBool(&io, channel->isUdpFile);
-        if (channel->isServer) {
-            return OnUdpChannelOpenedAsServer(&svc, &io);
-        }
         WriteInt32(&io, channel->peerPort);
         WriteString(&io, channel->peerIp);
     }
