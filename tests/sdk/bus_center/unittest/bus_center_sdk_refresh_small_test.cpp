@@ -76,7 +76,7 @@ static SubscribeInfo g_sInfo3 = { .subscribeId = GetSubscribeId(),
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "hicall",
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 static void OnDiscoverResult(int32_t refreshId, RefreshResult Reason)
 {
@@ -118,13 +118,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(TEST_PKG_NAME, NULL, &g_refreshCb1);
+    ret = RefreshLNN(TEST_PKG_NAME, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, NULL);
+    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
@@ -142,7 +142,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -173,13 +173,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(TEST_PKG_NAME, NULL, &g_refreshCb1);
+    ret = RefreshLNN(TEST_PKG_NAME, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, NULL);
+    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
@@ -197,7 +197,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -228,13 +228,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, NULL, &g_refreshCb1);
+    ret = RefreshLNN(PKG_NAME1, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, &testInfo, NULL);
+    ret = RefreshLNN(PKG_NAME1, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
@@ -252,7 +252,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -283,13 +283,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, NULL, &g_refreshCb1);
+    ret = RefreshLNN(PKG_NAME1, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, &testInfo, NULL);
+    ret = RefreshLNN(PKG_NAME1, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
@@ -307,7 +307,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -338,13 +338,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, NULL, &g_refreshCb1);
+    ret = RefreshLNN(PKG_NAME1, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, &testInfo, NULL);
+    ret = RefreshLNN(PKG_NAME1, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(AUTO + 3);
@@ -362,7 +362,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -393,13 +393,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, NULL, &g_refreshCb1);
+    ret = RefreshLNN(PKG_NAME1, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, &testInfo, NULL);
+    ret = RefreshLNN(PKG_NAME1, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(AUTO + 3);
@@ -417,7 +417,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -448,13 +448,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, NULL, &g_refreshCb1);
+    ret = RefreshLNN(PKG_NAME1, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, &testInfo, NULL);
+    ret = RefreshLNN(PKG_NAME1, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(BLE + 2);
@@ -472,7 +472,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -503,13 +503,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, NULL, &g_refreshCb1);
+    ret = RefreshLNN(PKG_NAME1, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(PKG_NAME1, &testInfo, NULL);
+    ret = RefreshLNN(PKG_NAME1, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(BLE + 2);
@@ -527,7 +527,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
@@ -552,7 +552,7 @@ HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest001, TestSize.Level1)
     g_sInfo2.subscribeId = tmpId;
 
     RefreshLNN(TEST_PKG_NAME, &g_sInfo2, &g_refreshCb1);
-    ret = StopRefreshLNN(NULL, tmpId);
+    ret = StopRefreshLNN(nullptr, tmpId);
     EXPECT_TRUE(ret != 0);
     ret = StopRefreshLNN(ERRO_PKG_NAME, tmpId);
     EXPECT_TRUE(ret != 0);
@@ -573,7 +573,7 @@ HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest002, TestSize.Level1)
     g_sInfo2.subscribeId = tmpId;
 
     RefreshLNN(PKG_NAME1, &g_sInfo2, &g_refreshCb1);
-    ret = StopRefreshLNN(NULL, tmpId);
+    ret = StopRefreshLNN(nullptr, tmpId);
     EXPECT_TRUE(ret != 0);
     ret = StopRefreshLNN(ERRO_PKG_NAME, tmpId);
     EXPECT_TRUE(ret != 0);
@@ -594,7 +594,7 @@ HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest003, TestSize.Level1)
     g_sInfo2.subscribeId = tmpId;
 
     RefreshLNN(PKG_NAME1, &g_sInfo2, &g_refreshCb1);
-    ret = StopRefreshLNN(NULL, tmpId);
+    ret = StopRefreshLNN(nullptr, tmpId);
     EXPECT_TRUE(ret != 0);
     ret = StopRefreshLNN(ERRO_PKG_NAME, tmpId);
     EXPECT_TRUE(ret != 0);

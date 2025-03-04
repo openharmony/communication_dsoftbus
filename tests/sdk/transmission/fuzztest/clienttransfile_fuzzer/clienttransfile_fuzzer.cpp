@@ -115,7 +115,7 @@ namespace OHOS {
         DataGenerator::Write(data, size);
         int32_t len = 0;
         GenerateInt32(len);
-        StartNStackXDFileServer(nullptr, data, DEFAULT_KEY_LENGTH, NULL, &len);
+        StartNStackXDFileServer(nullptr, data, DEFAULT_KEY_LENGTH, nullptr, &len);
         DataGenerator::Clear();
     }
 

@@ -125,7 +125,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusMalloc(sizeof(SendSyncInfoParam));
-    EXPECT_TRUE(data != NULL);
+    EXPECT_TRUE(data != nullptr);
     memset_s(data, sizeof(SendSyncInfoParam), 0, sizeof(SendSyncInfoParam));
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr))
@@ -290,7 +290,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.L
 {
     NodeInfo nodeInfo;
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusMalloc(sizeof(SendSyncInfoParam));
-    EXPECT_TRUE(data != NULL);
+    EXPECT_TRUE(data != nullptr);
     memset_s(data, sizeof(SendSyncInfoParam), 0, sizeof(SendSyncInfoParam));
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;

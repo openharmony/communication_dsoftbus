@@ -372,7 +372,7 @@ HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_002, TestSize.Level1)
 
 /*
 * @tc.name: LnnConnectP2p_001
-* @tc.desc: test LnnConnectP2p, request == NULL && callback == NULL
+* @tc.desc: test LnnConnectP2p, request == nullptr && callback == nullptr
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -1917,7 +1917,7 @@ HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_TEST_001, TestSize.Level1)
     memset_s(&macInfo, sizeof(LnnMacInfo), 0, sizeof(LnnMacInfo));
     int32_t ret = GetMacInfoByLaneId(laneId, &macInfo);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = GetMacInfoByLaneId(USEABLE_LANE_ID, NULL);
+    ret = GetMacInfoByLaneId(USEABLE_LANE_ID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1940,7 +1940,7 @@ HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002, TestSize.Level1
     };
     EXPECT_EQ(strcpy_s(resource.link.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, USEABLE_IP), EOK);
     memset_s(&macInfo, sizeof(LnnMacInfo), 0, sizeof(LnnMacInfo));
-    EXPECT_CALL(laneMock, GetWifiDirectManager).WillOnce(Return(NULL)).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(laneMock, GetWifiDirectManager).WillOnce(Return(nullptr)).WillRepeatedly(Return(&manager));
     EXPECT_CALL(laneDepMock, FindLaneResourceByLaneId).WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(resource), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneDepMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));

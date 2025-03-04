@@ -584,7 +584,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_001, TestSize.Level0)
 HWTEST_F(Sqlite3UtilsTest, Insert_Record_Test_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
-    uint8_t *g_record = NULL;
+    uint8_t *g_record = nullptr;
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     int32_t testid = InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record);
@@ -644,7 +644,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_Record_Key_001, TestSize.Level0)
 {
     DbContext *ctx = nullptr;
     char *record = (char *)SoftBusCalloc(0 * UDID_BUF_LEN);
-    uint8_t *g_record = NULL;
+    uint8_t *g_record = nullptr;
 
     EXPECT_EQ(RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, g_record), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);

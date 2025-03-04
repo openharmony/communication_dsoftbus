@@ -31,8 +31,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-ConnectFuncInterface *connectFuncInterface = NULL;
-ConnectFuncInterface *g_connectFuncInterface = NULL;
+ConnectFuncInterface *connectFuncInterface = nullptr;
+ConnectFuncInterface *g_connectFuncInterface = nullptr;
 
 void Init(const struct tagSppSocketDriver *sppDriver)
 {

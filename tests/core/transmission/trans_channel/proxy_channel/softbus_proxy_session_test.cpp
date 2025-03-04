@@ -118,7 +118,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
 {
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chan);
+    ASSERT_TRUE(chan != nullptr);
     chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
@@ -144,7 +144,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest001, TestSize.Lev
     int32_t ret = SOFTBUS_INVALID_PARAM;
 
     for (uint32_t flags = TRANS_SESSION_BYTES; flags <= TRANS_SESSION_FILE_ACK_RESPONSE_SENT; ++flags) {
-        ret = TransProxyPostSessionData(channelId, NULL, 0, (SessionPktType)flags);
+        ret = TransProxyPostSessionData(channelId, nullptr, 0, (SessionPktType)flags);
         EXPECT_NE(SOFTBUS_OK, ret);
     }
 
@@ -234,7 +234,7 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest001, TestSize.Leve
     char buf[TEST_BUFFER_SIZE] = {0};
     TestSliceHead head;
     uint32_t len = TEST_DEFAULT_DATA_LEN;
-    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, NULL, len);
+    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
     EXPECT_EQ(SOFTBUS_OK, ret);

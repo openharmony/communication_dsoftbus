@@ -643,12 +643,12 @@ HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 {
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         return;
     }
 
     NodeInfo *info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         JSON_Delete(obj);
         return;
     }
@@ -702,7 +702,7 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     AuthSessionInfo *info = (AuthSessionInfo *)SoftBusCalloc(sizeof(AuthSessionInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->requestId = 1;

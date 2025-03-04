@@ -255,7 +255,7 @@ void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
 
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
-    if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
+    if (event == LNN_EVENT_TYPE_MAX || handler == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     g_lnnEventHandlers.emplace(event, handler);

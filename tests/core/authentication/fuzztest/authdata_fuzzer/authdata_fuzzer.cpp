@@ -62,7 +62,7 @@ bool AuthDataFuzzTest(const uint8_t *data, size_t size)
     const AuthTransData *outData = reinterpret_cast<const AuthTransData *>(data);
     AuthTransData *dataInfo = (AuthTransData *)SoftBusMalloc(sizeof(AuthTransData));
     if (dataInfo == nullptr) {
-        COMM_LOGE(COMM_TEST, "dataInfo is NULL");
+        COMM_LOGE(COMM_TEST, "dataInfo is nullptr");
         return false;
     }
     if (memcpy_s(dataInfo, sizeof(AuthTransData), outData, sizeof(AuthTransData)) != EOK) {
@@ -91,7 +91,7 @@ bool AuthCryptFuzzTest(const uint8_t *data, size_t size)
     uint8_t *outData = nullptr;
     outData = (uint8_t *)SoftBusCalloc(sizeof(size));
     if (outData == nullptr) {
-        COMM_LOGE(COMM_TEST, "outData is NULL, SoftBusMalloc failed!");
+        COMM_LOGE(COMM_TEST, "outData is nullptr, SoftBusMalloc failed!");
         return false;
     }
     uint32_t outLen = size;
@@ -111,7 +111,7 @@ bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
     char *uuid = nullptr;
     uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
     if (uuid == nullptr) {
-        COMM_LOGE(COMM_TEST, "uuid is NULL, SoftBusMalloc failed!");
+        COMM_LOGE(COMM_TEST, "uuid is nullptr, SoftBusMalloc failed!");
         return false;
     }
     if (memcpy_s(uuid, UDID_BUF_LEN, outData, size) != EOK) {
@@ -126,7 +126,7 @@ bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
 bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(AuthConnInfo)) {
-        COMM_LOGE(COMM_TEST, "data is NULL or size less than authConnInfo");
+        COMM_LOGE(COMM_TEST, "data is nullptr or size less than authConnInfo");
         return false;
     }
     g_baseFuzzData = data;
@@ -146,7 +146,7 @@ bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
 void AuthMetaStartVerifyFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size != sizeof(AuthKeyInfo)) {
-        COMM_LOGE(COMM_TEST, "data is NULL or size is invalid");
+        COMM_LOGE(COMM_TEST, "data is nullptr or size is invalid");
         return;
     }
     uint32_t connectionId = 0;

@@ -41,7 +41,7 @@ static DecisionDbDepsInterfaceMock *GetDecisionDbDepsInterface()
 int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(
     SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
 {
-    if (callback != NULL) {
+    if (callback != nullptr) {
         callback(para);
         return SOFTBUS_OK;
     }

@@ -670,8 +670,8 @@ namespace OHOS {
     {
         int64_t authSeq = 0;
         GenerateInt64(authSeq);
-        AuthHandle *authHandle1 = NULL;
-        AuthHandle *authHandle2 = NULL;
+        AuthHandle *authHandle1 = nullptr;
+        AuthHandle *authHandle2 = nullptr;
         int32_t num = 0;
         AuthSessionInfo info = {0};
         info.connInfo.type = AUTH_LINK_TYPE_WIFI;

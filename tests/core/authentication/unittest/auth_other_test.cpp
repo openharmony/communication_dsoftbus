@@ -544,7 +544,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
     moduleId = MODULE_CONNECTION;
     int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1KB, testData, strlen(testData));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    OnCommDataReceived(connectionId, moduleId, seq, NULL, len);
+    OnCommDataReceived(connectionId, moduleId, seq, nullptr, len);
     OnCommDataReceived(connectionId, moduleId, seq, data, len);
 
     free(data);
@@ -560,14 +560,14 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
 {
     const char *sessionKeyStr = "www.test.com";
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    if (connInfo == NULL) {
+    if (connInfo == nullptr) {
         return;
     }
     (void)memset_s(connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo->type = AUTH_LINK_TYPE_BLE;
 
     AuthDataHead *head = (AuthDataHead *)SoftBusCalloc(sizeof(AuthDataHead));
-    if (head == NULL) {
+    if (head == nullptr) {
         return;
     }
     (void)memset_s(head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
@@ -615,14 +615,14 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     AuthSessionInfo *info = (AuthSessionInfo *)SoftBusCalloc(sizeof(AuthSessionInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->requestId = 1;
     info->isServer = false;
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     SessionKey *sessionKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
-    if (sessionKey == NULL) {
+    if (sessionKey == nullptr) {
         return;
     }
     sessionKey->len = 0;
@@ -650,10 +650,10 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
     AuthHandle authHandle = { .authId = 111, .type = AUTH_LINK_TYPE_WIFI };
     AuthDeviceCloseConn(authHandle);
     AuthTransData *dataInfo = (AuthTransData *)SoftBusCalloc(sizeof(AuthTransData));
-    if (dataInfo == NULL) {
+    if (dataInfo == nullptr) {
         return;
     }
-    int32_t ret = AuthDevicePostTransData(authHandle, NULL);
+    int32_t ret = AuthDevicePostTransData(authHandle, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     dataInfo->module = 1;
     dataInfo->seq = 2;
@@ -672,13 +672,13 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Level1)
 {
     const char *uuid = "";
-    int32_t ret = AuthDeviceGetPreferConnInfo(uuid, NULL);
+    int32_t ret = AuthDeviceGetPreferConnInfo(uuid, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    if (connInfo == NULL) {
+    if (connInfo == nullptr) {
         return;
     }
-    ret = AuthDeviceGetPreferConnInfo(NULL, connInfo);
+    ret = AuthDeviceGetPreferConnInfo(nullptr, connInfo);
     connInfo->type = AUTH_LINK_TYPE_BLE;
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(connInfo);
@@ -743,7 +743,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     authFsm->info = authSessionInfo;
     authFsm->authSeq = 512;
     const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
-    if (data == NULL) {
+    if (data == nullptr) {
         SoftBusFree(authFsm);
         return;
     }
@@ -785,7 +785,7 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
     uint64_t connId = 111;
     bool isServer = true;
     AuthFsm *ret = GetAuthFsmByConnId(connId, isServer, false);
-    EXPECT_TRUE(ret == NULL);
+    EXPECT_TRUE(ret == nullptr);
     int32_t ret1 = AuthSessionHandleDeviceDisconnected(connId, true);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
 }
@@ -799,25 +799,25 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
 {
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    if (connInfo == NULL) {
+    if (connInfo == nullptr) {
         return;
     }
     connInfo->type = AUTH_LINK_TYPE_BLE;
     uint32_t requestId = 1;
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
-    if (nodeInfo == NULL) {
+    if (nodeInfo == nullptr) {
         SoftBusFree(connInfo);
         return;
     }
     int64_t *authId = reinterpret_cast<int64_t *>(malloc(sizeof(int64_t)));
-    int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
+    int32_t ret = AuthRestoreAuthManager(nullptr, connInfo, requestId, nodeInfo, authId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *udidHash = "1234uuid";
-    ret = AuthRestoreAuthManager(udidHash, NULL, requestId, nodeInfo, authId);
+    ret = AuthRestoreAuthManager(udidHash, nullptr, requestId, nodeInfo, authId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, NULL, authId);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nullptr, authId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, NULL);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
     EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
@@ -853,7 +853,7 @@ HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
 {
-    int64_t ret = GetLatestIdByConnInfo(NULL);
+    int64_t ret = GetLatestIdByConnInfo(nullptr);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
@@ -903,13 +903,13 @@ HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
 {
     int64_t seqList = 1024;
     uint32_t num = 1;
-    int32_t ret = AuthGetLatestAuthSeqList(NULL, &seqList, num);
+    int32_t ret = AuthGetLatestAuthSeqList(nullptr, &seqList, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *udid = "";
     ret = AuthGetLatestAuthSeqList(udid, &seqList, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *udid1 = "11";
-    ret = AuthGetLatestAuthSeqList(udid1, NULL, num);
+    ret = AuthGetLatestAuthSeqList(udid1, nullptr, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetLatestAuthSeqList(udid1, &seqList, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -939,32 +939,32 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
     FsmStateMachine *fsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(fsm != nullptr);
     int32_t msgType = 1;
-    bool ret = SyncDevInfoStateProcess(fsm, msgType, NULL);
+    bool ret = SyncDevInfoStateProcess(fsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
     SoftBusFree(fsm);
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
     testFsm->flag = 1;
 
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_AUTH_TIMEOUT;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     msgType = FSM_MSG_RECV_DEVICE_INFO;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_RECV_CLOSE_ACK;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_RECV_AUTH_DATA;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_AUTH_FINISH;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
     SoftBusFree(testFsm);
 }
