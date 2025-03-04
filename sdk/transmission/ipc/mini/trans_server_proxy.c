@@ -57,7 +57,13 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     if (!LnnConvertAddrToOption(addrInfo, &connOpt)) {
         return SOFTBUS_MEM_ERR;
     }
-    return TransOpenAuthChannel(sessionName, &connOpt, "");
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    if (addrInfo->type == CONNECTION_ADDR_BLE) {
+        param.blePriority = addrInfo->info.ble.priority;
+    }
+
+    return TransOpenAuthChannel(sessionName, &connOpt, "", &param);
 }
 
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)

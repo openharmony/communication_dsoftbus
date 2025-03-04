@@ -1635,6 +1635,37 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     return SOFTBUS_OK;
 }
 
+static void TransProxyUpdateBlePriority(int32_t channelId, uint32_t connId, BlePriority priority)
+{
+    if (priority <= BLE_PRIORITY_DEFAULT || priority >= BLE_PRIORITY_MAX) {
+        TRANS_LOGD(TRANS_CTRL, "not need updated ble priority");
+        return;
+    }
+    ConnectBlePriority blePriority = CONN_BLE_PRIORITY_BALANCED;
+    switch (priority) {
+        case BLE_PRIORITY_BALANCED:
+            blePriority = CONN_BLE_PRIORITY_BALANCED;
+            break;
+        case BLE_PRIORITY_HIGH:
+            blePriority = CONN_BLE_PRIORITY_HIGH;
+            break;
+        case BLE_PRIORITY_LOW_POWER:
+            blePriority = CONN_BLE_PRIORITY_LOW_POWER;
+            break;
+        default:
+            return;
+    }
+    UpdateOption option = {
+        .type = CONNECT_BLE,
+        .bleOption = {
+            .priority = blePriority,
+        }
+    };
+    int32_t ret = ConnUpdateConnection(connId, &option);
+    TRANS_LOGI(TRANS_CTRL, "update ble priority. channelId=%{public}d, connId=%{public}u, "
+        "blePriority=%{public}d, ret=%{public}d", channelId, connId, priority, ret);
+}
+
 void TransProxyOpenProxyChannelSuccess(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "send handshake msg. channelId=%{public}d", channelId);
@@ -1645,6 +1676,9 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId)
         SoftBusFree(channelInfo);
         TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", channelId);
         return;
+    }
+    if (channelInfo->type == CONNECT_BLE) {
+        TransProxyUpdateBlePriority(channelId, channelInfo->connId, channelInfo->appInfo.blePriority);
     }
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
@@ -1706,7 +1740,10 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
-
+    if (info->type == CONNECT_BLE && info->appInfo.blePriority > BLE_PRIORITY_BALANCED &&
+        info->appInfo.blePriority < BLE_PRIORITY_MAX) {
+        TransProxyUpdateBlePriority(channelId, info->connId, BLE_PRIORITY_BALANCED);
+    }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     TransProxyCloseProxyOtherRes(channelId, info);
     return SOFTBUS_OK;

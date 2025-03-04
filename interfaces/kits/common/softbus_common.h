@@ -268,6 +268,18 @@ typedef enum  {
 } BleProtocolType;
 
 /**
+ * @brief Enumerates {@link BlePriority} types of ble priority
+ *
+ */
+typedef enum  {
+    BLE_PRIORITY_DEFAULT = 0,
+    BLE_PRIORITY_BALANCED,
+    BLE_PRIORITY_HIGH,
+    BLE_PRIORITY_LOW_POWER,
+    BLE_PRIORITY_MAX
+} BlePriority;
+
+/**
  * @brief Defines the address of a device that is added to a LNN.
  * For details, see {@link ConnectionAddr}.
  *
@@ -289,6 +301,7 @@ typedef struct {
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
             uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
             uint32_t psm;
+            BlePriority priority;
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {

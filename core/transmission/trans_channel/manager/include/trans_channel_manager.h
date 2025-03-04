@@ -32,6 +32,10 @@ extern "C" {
 #define FAST_INTERVAL_MILLISECOND 100
 #define SLOW_INTERVAL_MILLISECOND 500
 
+typedef struct {
+    BlePriority blePriority;
+} ConnectParam;
+
 int32_t GenerateChannelId(bool isTdcChannel);
 
 int32_t TransChannelInit(void);
@@ -40,7 +44,8 @@ void TransChannelDeinit(void);
 
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo);
 
-int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt, const char *reqId);
+int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt, const char *reqId,
+    const ConnectParam *param);
 
 int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data);
 

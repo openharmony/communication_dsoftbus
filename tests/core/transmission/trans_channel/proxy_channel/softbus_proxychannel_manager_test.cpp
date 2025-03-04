@@ -1076,6 +1076,52 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest00
 }
 
 /**@
+ * @tc.name: TransProxyOpenProxyChannelSuccessTest002
+ * @tc.desc: test trans proxy process
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chan);
+    chan->reqId = TEST_VALID_REQ;
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->type = CONNECT_BLE;
+    chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    chan->connId = TEST_VALID_CONN_ID;
+    chan->appInfo.blePriority = BLE_PRIORITY_DEFAULT;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransProxyOpenProxyChannelSuccess(TEST_VALID_CHANNEL_ID);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
+}
+
+/**@
+ * @tc.name: TransProxyOpenProxyChannelSuccessTest003
+ * @tc.desc: test trans proxy process
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest003, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chan);
+    chan->reqId = TEST_VALID_REQ;
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->type = CONNECT_BLE;
+    chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    chan->connId = TEST_VALID_CONN_ID;
+    chan->appInfo.blePriority = BLE_PRIORITY_BALANCED;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransProxyOpenProxyChannelSuccess(TEST_VALID_CHANNEL_ID);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
+}
+
+/**@
  * @tc.name: TransProxyTimerItemProcTest001
  * @tc.desc: test trans proxy timer item proc
  * @tc.type: FUNC
