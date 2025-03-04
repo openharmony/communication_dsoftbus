@@ -45,7 +45,6 @@ executable("dstream_adaptor_client_test") {
   include_dirs = [
     "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/core/authentication/interface,
   ]
   cflags = [
     "-Wall",
