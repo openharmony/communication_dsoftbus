@@ -14,7 +14,7 @@
  */
 #include <iostream>
 #include <gtest/gtest.h>
-#include "softbus_aes_encrypt.h"
+#include "auth_interface.h"
 #include "session.h"
 #include "softbus_error_code.h"
 #include "stream_adaptor.h"
