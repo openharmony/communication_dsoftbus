@@ -180,11 +180,13 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     ASSERT_TRUE(connOpt != nullptr);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
-    int32_t ret = TransOpenAuthChannel(nullptr, nullptr, nullptr);
+    int32_t ret = TransOpenAuthChannel(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(sessionName, nullptr, nullptr);
+    ret = TransOpenAuthChannel(sessionName, nullptr, nullptr, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(nullptr, connOpt, nullptr);
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    ret = TransOpenAuthChannel(nullptr, connOpt, nullptr, &param);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     SoftBusFree(connOpt);
 }
