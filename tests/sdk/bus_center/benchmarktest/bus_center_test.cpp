@@ -41,9 +41,9 @@ void AddPermission()
             .dcapsNum = 0,
             .permsNum = 2,
             .aclsNum = 0,
-            .dcaps = NULL,
+            .dcaps = nullptr,
             .perms = perms,
-            .acls = NULL,
+            .acls = nullptr,
             .processName = "com.softbus.test",
             .aplStr = "normal",
         };

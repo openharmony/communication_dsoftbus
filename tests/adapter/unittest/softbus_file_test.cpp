@@ -49,13 +49,13 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
     int32_t fd = 0;
     uint32_t value = 0;
     int32_t ret;
-    ret = SoftBusOpenFile(NULL, SOFTBUS_O_RDONLY);
+    ret = SoftBusOpenFile(nullptr, SOFTBUS_O_RDONLY);
     EXPECT_EQ(SOFTBUS_INVALID_FD, ret);
     ret = SoftBusOpenFile("/data", SOFTBUS_O_RDONLY);
     EXPECT_NE(SOFTBUS_INVALID_FD, ret);
     fd = SoftBusOpenFile("/dev/urandom", SOFTBUS_O_RDONLY);
     EXPECT_NE(SOFTBUS_INVALID_FD, fd);
-    ret = SoftBusReadFile(fd, NULL, sizeof(uint32_t));
+    ret = SoftBusReadFile(fd, nullptr, sizeof(uint32_t));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusReadFile(fd, &value, sizeof(uint32_t));
     EXPECT_NE(SOFTBUS_ERR, ret);
@@ -73,7 +73,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Leve
 {
     int32_t fd = 0;
     int32_t ret =
-        SoftBusOpenFileWithPerms(NULL, SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
+        SoftBusOpenFileWithPerms(nullptr, SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     EXPECT_EQ(SOFTBUS_INVALID_FD, ret);
     fd = SoftBusOpenFileWithPerms(
         "/dev/urandom", SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
@@ -96,11 +96,11 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
     int64_t ret;
     fd = SoftBusOpenFile("/dev/urandom", SOFTBUS_O_RDONLY);
     EXPECT_NE(SOFTBUS_INVALID_FD, fd);
-    ret = SoftBusPreadFile(fd, NULL, readBytes, offset);
+    ret = SoftBusPreadFile(fd, nullptr, readBytes, offset);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = SoftBusPreadFile(fd, &value, readBytes, offset);
     EXPECT_NE(SOFTBUS_ERR, ret);
-    ret = SoftBusPwriteFile(fd, NULL, readBytes, offset);
+    ret = SoftBusPwriteFile(fd, nullptr, readBytes, offset);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     SoftBusCloseFile(fd);
 }
@@ -113,7 +113,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
  */
 HWTEST_F(AdaptorDsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
 {
-    int32_t ret = SoftBusMakeDir(NULL, DEFAULT_NEW_PATH_AUTHORITY);
+    int32_t ret = SoftBusMakeDir(nullptr, DEFAULT_NEW_PATH_AUTHORITY);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
@@ -126,7 +126,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
 HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
 {
     uint64_t fileSize = 0;
-    int32_t ret = SoftBusGetFileSize(NULL, &fileSize);
+    int32_t ret = SoftBusGetFileSize(nullptr, &fileSize);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = SoftBusGetFileSize("/data", &fileSize);
     EXPECT_EQ(SOFTBUS_OK, ret);

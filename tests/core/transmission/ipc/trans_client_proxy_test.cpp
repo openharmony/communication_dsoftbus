@@ -191,7 +191,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
         .msgUuid = nullptr,
         .msgUdid = nullptr
     };
-    ret = ClientIpcOnChannelLinkDown(&data, networkId, NULL, TEST_REMOTE_TYPE);
+    ret = ClientIpcOnChannelLinkDown(&data, networkId, nullptr, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -208,7 +208,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
         .msgUuid = nullptr,
         .msgUdid = nullptr
     };
-    ret = ClientIpcOnChannelLinkDown(&msg, networkId, NULL, TEST_REMOTE_TYPE);
+    ret = ClientIpcOnChannelLinkDown(&msg, networkId, nullptr, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

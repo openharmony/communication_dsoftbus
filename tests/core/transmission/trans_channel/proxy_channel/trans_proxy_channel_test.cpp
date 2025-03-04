@@ -118,15 +118,15 @@ void TestAddTestProxyChannel(int32_t authId = AUTH_INVALID_ID)
     callBack.OnChannelOpened = TestOnChannelOpened;
     callBack.OnChannelClosed = TestOnChannelClosed;
     callBack.OnChannelOpenFailed = TestOnChannelOpenFailed;
-    callBack.OnDataReceived = NULL;
+    callBack.OnDataReceived = nullptr;
     callBack.OnQosEvent = TestOnQosEvent;
-    callBack.GetPkgNameBySessionName = NULL;
+    callBack.GetPkgNameBySessionName = nullptr;
     callBack.GetUidAndPidBySessionName = TestGetUidAndPidBySessionName;
     TransProxyManagerInitInner(&callBack);
 
     m_testProxyChannelId = 1;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (chan == NULL) {
+    if (chan == nullptr) {
         TRANS_LOGE(TRANS_TEST, "test proxy calloc channel fail");
         return;
     }
@@ -164,7 +164,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
@@ -186,7 +186,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
@@ -200,7 +200,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
-    int32_t ret = TransProxyHandshake(NULL);
+    int32_t ret = TransProxyHandshake(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ProxyChannelInfo info;
@@ -238,7 +238,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    int32_t ret = TransProxyAckHandshake(0, NULL, SOFTBUS_NO_INIT);
+    int32_t ret = TransProxyAckHandshake(0, nullptr, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_NO_INIT);
@@ -273,7 +273,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    TransProxyKeepalive(connId, NULL);
+    TransProxyKeepalive(connId, nullptr);
     TransProxyKeepalive(connId, &info);
     info.appInfo.appType = APP_TYPE_NORMAL;
     TransProxyKeepalive(connId, &info);
@@ -322,7 +322,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    int32_t ret = TransProxyAckKeepalive(NULL);
+    int32_t ret = TransProxyAckKeepalive(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckKeepalive(&info);
@@ -412,7 +412,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
 HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->appInfo.appType = APP_TYPE_AUTH;
@@ -423,7 +423,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
-    int32_t ret = TransProxyAddChanItem(NULL);
+    int32_t ret = TransProxyAddChanItem(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransProxyAddChanItem(info);
@@ -498,7 +498,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
 HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->appInfo.appType = APP_TYPE_AUTH;
@@ -548,7 +548,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyTimerProcTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Level1)
 {
-    TransProxyDestroyChannelList(NULL);
+    TransProxyDestroyChannelList(nullptr);
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -572,7 +572,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransProxyDeathCallback(NULL, pid);
+    TransProxyDeathCallback(nullptr, pid);
     TransProxyDeathCallback(pkgName, pid);
 
     TransProxyManagerDeinitInner();

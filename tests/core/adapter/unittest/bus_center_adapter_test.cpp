@@ -76,19 +76,19 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, TestSize.Level0)
 HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, TestSize.Level0)
 {
     int32_t len = 10;
-    int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, NULL, len);
+    int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, NULL, len);
+    ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, NULL, len);
+    ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetCommonDevInfo(COMM_DEVICE_KEY_BT_MAC, NULL, len);
+    ret = GetCommonDevInfo(COMM_DEVICE_KEY_BT_MAC, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetCommonDevInfo(COMM_DEVICE_KEY_BUTT, NULL, len);
+    ret = GetCommonDevInfo(COMM_DEVICE_KEY_BUTT, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

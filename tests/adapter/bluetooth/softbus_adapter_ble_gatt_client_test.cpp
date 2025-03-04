@@ -268,10 +268,10 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegisterNotification, TestSize.Le
         .uuid = (char *)charaNetUuidExample,
     };
     EXPECT_CALL(mocker, BleGattcRegisterNotification).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    EXPECT_EQ(SoftbusGattcRegisterNotification(1, &serverUuid, &netUuid, NULL), SOFTBUS_GATTC_INTERFACE_FAILED);
+    EXPECT_EQ(SoftbusGattcRegisterNotification(1, &serverUuid, &netUuid, nullptr), SOFTBUS_GATTC_INTERFACE_FAILED);
 
     EXPECT_CALL(mocker, BleGattcRegisterNotification).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
-    EXPECT_EQ(SoftbusGattcRegisterNotification(1, &serverUuid, &netUuid, NULL), SOFTBUS_OK);
+    EXPECT_EQ(SoftbusGattcRegisterNotification(1, &serverUuid, &netUuid, nullptr), SOFTBUS_OK);
 }
 
 /**
@@ -376,7 +376,7 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
         .uuidLen = strlen(charaNetUuidExample),
         .uuid = (char *)charaNetUuidExample,
     };
-    ASSERT_EQ(SoftbusGattcRegisterNotification(clientId, &serverUuid, &netUuid, NULL), SOFTBUS_OK);
+    ASSERT_EQ(SoftbusGattcRegisterNotification(clientId, &serverUuid, &netUuid, nullptr), SOFTBUS_OK);
     gattClientCallback->registerNotificationCb(clientId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(registNotificationCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS));
 
@@ -385,7 +385,7 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
         .uuidLen = strlen(charaConnUuidExample),
         .uuid = (char *)charaConnUuidExample,
     };
-    ASSERT_EQ(SoftbusGattcRegisterNotification(clientId, &serverUuid, &connUuid, NULL), SOFTBUS_OK);
+    ASSERT_EQ(SoftbusGattcRegisterNotification(clientId, &serverUuid, &connUuid, nullptr), SOFTBUS_OK);
     gattClientCallback->registerNotificationCb(clientId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(registNotificationCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS));
 

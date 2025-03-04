@@ -64,7 +64,7 @@ int32_t TransCloseNetWorkingChannel(int32_t channelId)
 
 int32_t LnnTransInterfaceMock::ActionOfTransRegister(const INetworkingListener *listener)
 {
-    if (listener == NULL) {
+    if (listener == nullptr) {
         LNN_LOGE(LNN_TEST, "listener is invalid para");
         return SOFTBUS_INVALID_PARAM;
     }

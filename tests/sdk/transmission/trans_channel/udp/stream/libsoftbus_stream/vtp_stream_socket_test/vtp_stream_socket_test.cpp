@@ -237,14 +237,14 @@ HWTEST_F(VtpStreamSocketTest, GetOption001, TestSize.Level1)
     vtpStreamSocket->optFuncMap_.clear();
     *value = vtpStreamSocket->GetOption(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     Communication::SoftBus::VtpStreamSocket::OptionFunc fun = {
     };
     type = 2;
     vtpStreamSocket->optFuncMap_.insert(std::pair<int, Communication::SoftBus::VtpStreamSocket::OptionFunc>(type, fun));
     *value = vtpStreamSocket->GetOption(type);
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     if (value != nullptr) {
         SoftBusFree(value);
@@ -315,7 +315,7 @@ HWTEST_F(VtpStreamSocketTest, GetOption002, TestSize.Level1)
 
     *value = vtpStreamSocket->GetOption(type);
     int32_t ret = value->GetIntValue();
-    if (value != NULL) {
+    if (value != nullptr) {
         ret = true;
     }
     EXPECT_EQ(1, ret);
@@ -358,11 +358,11 @@ HWTEST_F(VtpStreamSocketTest, GetIpType001, TestSize.Level1)
     ASSERT_TRUE(value != nullptr);
     int32_t type = IP_TYPE + 2;
     *value = vtpStreamSocket->GetIpType(type);
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     type = IP_TYPE;
     *value = vtpStreamSocket->GetIpType(type);
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     if (value != nullptr) {
         SoftBusFree(value);
@@ -414,11 +414,11 @@ HWTEST_F(VtpStreamSocketTest, IsServer001, TestSize.Level1)
 
     int32_t type = IS_SERVER + 2;
     *value = vtpStreamSocket->IsServer(type);
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     type = IS_SERVER;
     *value = vtpStreamSocket->IsServer(type);
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     if (value != nullptr) {
         SoftBusFree(value);
@@ -593,7 +593,7 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
 
     vtpStreamSocket->FillpAppStatistics();
 
-    if (info != NULL) {
+    if (info != nullptr) {
         SoftBusFree(info);
     }
 }
@@ -846,7 +846,7 @@ HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
     int32_t type = STREAM_TYPE_INT + 1;
     *value = vtpStreamSocket->GetStreamType(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     bool ret = vtpStreamSocket->SetStreamType(type, *value);
     EXPECT_TRUE(!ret);
@@ -854,7 +854,7 @@ HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
     type = STREAM_TYPE_INT;
     *value = vtpStreamSocket->GetStreamType(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     ret = vtpStreamSocket->SetStreamType(type, *value);
     EXPECT_TRUE(ret);
@@ -862,27 +862,27 @@ HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
     type = LOCAL_IP;
     *value = vtpStreamSocket->GetIp(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     type = LOCAL_IP + 1;
     *value = vtpStreamSocket->GetIp(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     type = LOCAL_PORT;
     *value = vtpStreamSocket->GetPort(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     type = LOCAL_PORT + 1;
     *value = vtpStreamSocket->GetPort(type);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     int32_t fd = 2;
     *value = vtpStreamSocket->GetNonBlockMode(fd);
     value->GetIntValue();
-    EXPECT_TRUE(value != NULL);
+    EXPECT_TRUE(value != nullptr);
 
     if (value != nullptr) {
         SoftBusFree(value);

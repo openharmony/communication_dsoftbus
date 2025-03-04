@@ -130,13 +130,13 @@ static ISessionListener g_sessionlistener = {
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level0)
 {
     int32_t ret;
-    ret = CreateSessionServer(NULL, g_sessionName, &g_sessionlistener);
+    ret = CreateSessionServer(nullptr, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = CreateSessionServer(g_pkgName, NULL, &g_sessionlistener);
+    ret = CreateSessionServer(g_pkgName, nullptr, &g_sessionlistener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = CreateSessionServer(g_pkgName, g_sessionName, NULL);
+    ret = CreateSessionServer(g_pkgName, g_sessionName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
@@ -234,10 +234,10 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest001, TestSize.Level0)
 {
     int32_t ret;
-    ret = RemoveSessionServer(NULL, g_sessionName);
+    ret = RemoveSessionServer(nullptr, g_sessionName);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = RemoveSessionServer(g_pkgName, NULL);
+    ret = RemoveSessionServer(g_pkgName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -271,19 +271,19 @@ HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level0)
     int32_t ret;
     g_sessionAttr.dataType = TYPE_BYTES;
 
-    ret = OpenSession(NULL, g_sessionName, g_networkid, g_groupId, &g_sessionAttr);
+    ret = OpenSession(nullptr, g_sessionName, g_networkid, g_groupId, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, NULL, g_networkid, g_groupId, &g_sessionAttr);
+    ret = OpenSession(g_sessionName, nullptr, g_networkid, g_groupId, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, g_sessionName, NULL, g_groupId, &g_sessionAttr);
+    ret = OpenSession(g_sessionName, g_sessionName, nullptr, g_groupId, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, NULL, &g_sessionAttr);
+    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, nullptr, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupId, NULL);
+    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupId, nullptr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
     g_sessionAttr.dataType = TYPE_BUTT;
@@ -309,7 +309,7 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level0)
     ret = SendBytes(-1, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendBytes(sessionId, NULL, len);
+    ret = SendBytes(sessionId, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendBytes(sessionId, data, 0);
@@ -338,7 +338,7 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     ret = SendMessage(-1, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendMessage(sessionId, NULL, len);
+    ret = SendMessage(sessionId, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendMessage(sessionId, data, 0);
@@ -363,7 +363,7 @@ HWTEST_F(TransTcpDirectTest, TransClientGetTdcDataBufByChannelTest001, TestSize.
     int32_t fd = TEST_FD;
     size_t len = BUF_LEN;
 
-    ret = TransClientGetTdcDataBufByChannel(channelId, NULL, NULL);
+    ret = TransClientGetTdcDataBufByChannel(channelId, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
@@ -401,7 +401,7 @@ HWTEST_F(TransTcpDirectTest, TransClientUpdateTdcDataBufWInfoTest001, TestSize.L
     const char *recvBuf = RECV_BUF;
     int32_t recvLen = MAX_LEN;
 
-    ret = TransClientUpdateTdcDataBufWInfo(channelId, NULL, recvLen);
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, nullptr, recvLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
@@ -632,7 +632,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcPackDataTest001, TestSize.Level0)
     const char *data = "data";
     uint32_t len = BUF_LEN;
     int32_t flags = FLAG_ACK;
-    char *ret = TransTdcPackData(channel, data, len, flags, NULL);
+    char *ret = TransTdcPackData(channel, data, len, flags, nullptr);
     EXPECT_TRUE(ret == nullptr);
     SoftBusFree(channel);
 }
@@ -965,7 +965,7 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest001, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, TransGetNewTcpChannelTest001, TestSize.Level0)
 {
     int32_t channelId = 1;
-    TcpDirectChannelInfo *info = TransGetNewTcpChannel(NULL);
+    TcpDirectChannelInfo *info = TransGetNewTcpChannel(nullptr);
     ASSERT_EQ(info, nullptr);
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channelInfo != nullptr);
@@ -1104,7 +1104,7 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
     // info is deleted in the abnormal branch
     DestroySoftBusList(g_tcpDirectChannelInfoList);
-    g_tcpDirectChannelInfoList = NULL;
+    g_tcpDirectChannelInfoList = nullptr;
 }
 
 /**
@@ -1171,7 +1171,7 @@ HWTEST_F(TransTcpDirectTest, CheckCollaborationSessionNameTest001, TestSize.Leve
     const char *testSessionName = "ohos.collaborationcenter";
     bool ret = CheckCollaborationSessionName(testSessionName);
     EXPECT_EQ(ret, true);
-    const char *testSessionName1 = "NULL";
+    const char *testSessionName1 = "nullptr";
     ret = CheckCollaborationSessionName(testSessionName1);
     EXPECT_EQ(ret, false);
 }
@@ -1219,7 +1219,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest002, TestSize.Level0)
     SoftBusFree(info);
     SoftBusFree(serverNode);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
-    g_tcpDirectChannelInfoList = NULL;
+    g_tcpDirectChannelInfoList = nullptr;
 }
 
 /**
@@ -1252,7 +1252,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
-    g_tcpDirectChannelInfoList = NULL;
+    g_tcpDirectChannelInfoList = nullptr;
 }
 
 /**
@@ -1285,7 +1285,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendMessageTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
-    g_tcpDirectChannelInfoList = NULL;
+    g_tcpDirectChannelInfoList = nullptr;
 }
 
 /**
@@ -1344,8 +1344,8 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level0)
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     DestroySoftBusList(g_tcpDataList);
-    g_tcpDirectChannelInfoList = NULL;
-    g_tcpDataList = NULL;
+    g_tcpDirectChannelInfoList = nullptr;
+    g_tcpDataList = nullptr;
 }
 
 /**
@@ -1380,7 +1380,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
 
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDataList);
-    g_tcpDataList = NULL;
+    g_tcpDataList = nullptr;
 }
 
 /**
@@ -1438,7 +1438,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
     // pktHead is deleted in the abnormal branch
     SoftBusFree(buf);
     DestroySoftBusList(g_tcpDataList);
-    g_tcpDataList = NULL;
+    g_tcpDataList = nullptr;
 }
 
 /**
@@ -1450,7 +1450,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, TransAssembleTlvData001, TestSize.Level0)
 {
     int32_t bufferSize = 0;
-    int32_t ret = TransAssembleTlvData(NULL, 1, NULL, 1, &bufferSize);
+    int32_t ret = TransAssembleTlvData(nullptr, 1, nullptr, 1, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -1467,14 +1467,14 @@ HWTEST_F(TransTcpDirectTest, TransAssembleTlvData002, TestSize.Level0)
     pktHead.tlvElement = tlvElement;
     pktHead.magicNum = SoftBusHtoLl(MAGIC_NUMBER);
     int32_t bufferSize = 0;
-    int32_t ret = TransAssembleTlvData(&pktHead, TLV_TYPE_INNER_SEQ, NULL, 1, &bufferSize);
+    int32_t ret = TransAssembleTlvData(&pktHead, TLV_TYPE_INNER_SEQ, nullptr, 1, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint8_t buffer = 0;
     ret = TransAssembleTlvData(&pktHead, TLV_TYPE_FLAG, &buffer, 1, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransAssembleTlvData(&pktHead, TLV_TYPE_DATA_LEN, &buffer, 1, NULL);
+    ret = TransAssembleTlvData(&pktHead, TLV_TYPE_DATA_LEN, &buffer, 1, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(tlvElement);
 }
@@ -1488,7 +1488,7 @@ HWTEST_F(TransTcpDirectTest, TransAssembleTlvData002, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, BuildNeedAckTlvData001, TestSize.Level0)
 {
     int32_t bufferSize = 0;
-    int32_t ret = BuildNeedAckTlvData(NULL, true, 1, &bufferSize);
+    int32_t ret = BuildNeedAckTlvData(nullptr, true, 1, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -1514,7 +1514,7 @@ HWTEST_F(TransTcpDirectTest, BuildDataHead001, TestSize.Level0)
  */
 HWTEST_F(TransTcpDirectTest, TransTdcNeedSendAck001, TestSize.Level0)
 {
-    int32_t ret = TransTdcNeedSendAck(NULL, 1, 0, false);
+    int32_t ret = TransTdcNeedSendAck(nullptr, 1, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }

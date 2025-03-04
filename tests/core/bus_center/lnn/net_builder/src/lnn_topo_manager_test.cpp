@@ -236,8 +236,8 @@ HWTEST_F(LNNTopoManagerTest, CREATE_TOPO_ITEM_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNTopoManagerTest, PACK_COMMON_TOPO_MSG_TEST_001, TestSize.Level1)
 {
-    cJSON *json = NULL;
-    cJSON *info = NULL;
+    cJSON *json = nullptr;
+    cJSON *info = nullptr;
     unsigned char *randStr1 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR1));
     unsigned char *randStr2 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR2));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
