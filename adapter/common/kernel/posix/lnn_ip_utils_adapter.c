@@ -82,3 +82,34 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     close(fd);
     return SOFTBUS_OK;
 }
+
+bool GetLinkUpStateByIfName(const char *ifName)
+{
+    if (ifName == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "ifName or ip buffer is NULL!");
+        return false;
+    }
+    int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        COMM_LOGE(COMM_ADAPTER, "open socket failed");
+        return false;
+    }
+    struct ifreq ifr;
+    if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), ifName, strlen(ifName)) != EOK) {
+        COMM_LOGE(COMM_ADAPTER, "copy netIfName fail. netIfName=%{public}s", ifName);
+        close(fd);
+        return false;
+    }
+    if (ioctl(fd, SIOCGIFFLAGS, (char *)&ifr) < 0) {
+        COMM_LOGE(COMM_ADAPTER, "open socket failed");
+        close(fd);
+        return false;
+    }
+    if (!((uint16_t)ifr.ifr_flags & IFF_UP)) {
+        COMM_LOGE(COMM_ADAPTER, "ifname flag is not up");
+        close(fd);
+        return false;
+    }
+    close(fd);
+    return true;
+}
