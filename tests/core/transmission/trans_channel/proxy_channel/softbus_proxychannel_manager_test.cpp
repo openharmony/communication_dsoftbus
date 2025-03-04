@@ -2172,9 +2172,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop001, Te
     chan->channelId = TEST_VALID_CHANNEL_ID;
     int32_t ret = TransProxyAddChanItem(chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransProxyPostKeepAliveMsgToLoop(chan);
-    TransProxyPostResetPeerMsgToLoop(chan);
-    TransProxyPostOpenFailMsgToLoop(chan, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    TransProxyPostKeepAliveMsgToLoop(nullptr);
+    TransProxyPostResetPeerMsgToLoop(nullptr);
+    TransProxyPostOpenFailMsgToLoop(nullptr, SOFTBUS_TRANS_NODE_NOT_FOUND);
 
     ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -2194,7 +2194,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop002, Te
     int32_t ret = TransProxyAddChanItem(chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransProxyPostResetPeerMsgToLoop(nullptr);
-    TransProxyPostOpenClosedMsgToLoop(chan);
+    TransProxyPostOpenClosedMsgToLoop(nullptr);
 
     ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);

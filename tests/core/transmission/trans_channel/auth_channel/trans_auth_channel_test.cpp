@@ -1647,7 +1647,6 @@ HWTEST_F(TransAuthChannelTest, TransAsyncAuthChannelTaskTest001, TestSize.Level1
     info->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
     TransAsyncAuthChannelTask(info->appInfo.myData.channelId);
 
-    DelAuthChannelInfoByChanId(info->appInfo.myData.channelId);
     TransSessionMgrDeinit();
     TransAuthDeinit();
 }
