@@ -16,9 +16,15 @@
 #ifndef CLIENT_TRANS_UDP_STREAM_ADAPTOR_H_
 #define CLIENT_TRANS_UDP_STREAM_ADAPTOR_H_
 
+#include <atomic>
+#include <sys/types.h>
+#include <utility>
+
 #include "client_trans_udp_stream_interface.h"
 #include "i_stream_manager.h"
 #include "securec.h"
+#include "softbus_adapter_crypto.h"
+#include "stream_common.h"
 
 namespace OHOS {
 class StreamAdaptor : public std::enable_shared_from_this<StreamAdaptor> {
