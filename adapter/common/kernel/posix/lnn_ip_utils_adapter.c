@@ -86,7 +86,7 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 bool GetLinkUpStateByIfName(const char *ifName)
 {
     if (ifName == NULL) {
-        COMM_LOGE(COMM_ADAPTER, "ifName or ip buffer is NULL!");
+        COMM_LOGE(COMM_ADAPTER, "ifName buffer is NULL!");
         return false;
     }
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
