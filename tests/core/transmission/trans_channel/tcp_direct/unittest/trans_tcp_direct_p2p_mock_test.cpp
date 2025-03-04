@@ -697,8 +697,8 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthChannelCloseTest001, TestSize.Level1)
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, NotifyChannelOpenFailed).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     OnAuthChannelClose(authHandle);
-    OnAuthChannelClose(authHandle);
-    TransDelSessionConnById(conn->channelId);
+    AuthHandle authHandleTest = { .authId = TEST_AUTHID, .type = AUTH_LINK_TYPE_WIFI };
+    OnAuthChannelClose(authHandleTest);
 }
 
 /**
