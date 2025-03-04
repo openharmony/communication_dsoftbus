@@ -16,13 +16,9 @@
 #ifndef IDB_MANAGER_H
 #define IDB_MANAGER_H
 
-#include <memory>
-
 #include "i_stream.h"
 #include "i_stream_msg_manager.h"
-#include "session.h"
 #include "softbus_trans_def.h"
-#include "stream_common.h"
 
 namespace Communication {
 namespace SoftBus {

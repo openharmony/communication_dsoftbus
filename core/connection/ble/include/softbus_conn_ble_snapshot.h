@@ -16,11 +16,7 @@
 #ifndef SOFTBUS_CONN_BLE_SNAPSHOT_H
 #define SOFTBUS_CONN_BLE_SNAPSHOT_H
 
-#include <stdint.h>
-
-#include "softbus_common.h"
 #include "softbus_conn_ble_connection.h"
-#include "softbus_conn_manager.h"
 
 #ifdef __cplusplus
 extern "C" {

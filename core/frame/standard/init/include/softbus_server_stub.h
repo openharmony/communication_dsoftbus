@@ -18,7 +18,6 @@
 
 #include <map>
 #include "if_softbus_server.h"
-#include "iremote_object.h"
 #include "iremote_stub.h"
 #include "bus_center_manager.h"
 

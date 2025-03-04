@@ -16,7 +16,6 @@
 #ifndef OHOS_LNN_META_NODE_INTERFACE_H
 #define OHOS_LNN_META_NODE_INTERFACE_H
 
-#include <stdint.h>
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus

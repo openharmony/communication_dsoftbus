@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_SESSION_H
 #define SOFTBUS_PROXYCHANNEL_SESSION_H
 
-#include "stdint.h"
-#include "softbus_def.h"
 #include "softbus_trans_def.h"
 #include "softbus_proxychannel_message.h"
 

@@ -16,9 +16,6 @@
 #ifndef AUTH_LANE_H
 #define AUTH_LANE_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "auth_interface.h"
 #include "lnn_lane_interface.h"
 

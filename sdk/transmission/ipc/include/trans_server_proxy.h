@@ -16,7 +16,6 @@
 #ifndef TRANS_SERVER_PROXY_H
 #define TRANS_SERVER_PROXY_H
 
-#include "stdint.h"
 #include "softbus_common.h"
 #include "softbus_trans_def.h"
 

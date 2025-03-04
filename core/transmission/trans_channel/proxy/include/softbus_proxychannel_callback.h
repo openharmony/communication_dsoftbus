@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_CALLBACK_H
 #define SOFTBUS_PROXYCHANNEL_CALLBACK_H
 
-#include <stdint.h>
-
 #include "trans_channel_callback.h"
 #include "softbus_def.h"
 

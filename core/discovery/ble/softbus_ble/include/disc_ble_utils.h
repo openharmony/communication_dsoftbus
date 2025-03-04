@@ -16,9 +16,6 @@
 #ifndef DISC_BLE_UTILS_H
 #define DISC_BLE_UTILS_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "softbus_common.h"
 #include "broadcast_protocol_constant.h"
 

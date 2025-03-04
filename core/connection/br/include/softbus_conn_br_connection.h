@@ -16,11 +16,8 @@
 #ifndef CONN_BR_CONNECTION_H
 #define CONN_BR_CONNECTION_H
 
-#include <stdint.h>
-
 #include "message_handler.h"
 #include "softbus_conn_interface.h"
-#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "wrapper_br_interface.h"
 

@@ -17,7 +17,6 @@
 #define NSTACKX_FILE_MANAGER_CLIENT_H
 
 #include "nstackx_file_manager.h"
-#include "nstackx_list.h"
 
 #ifdef __cplusplus
 extern "C" {

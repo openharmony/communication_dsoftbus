@@ -16,11 +16,7 @@
 #ifndef CLIENT_TRANS_UDP_MANAGER_H
 #define CLIENT_TRANS_UDP_MANAGER_H
 
-#include <stdint.h>
-
 #include "client_trans_session_callback.h"
-#include "session.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

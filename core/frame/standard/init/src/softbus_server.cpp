@@ -21,7 +21,6 @@
 #include "securec.h"
 #include "string_ex.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_disc_server.h"
 #include "legacy/softbus_hidumper_interface.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"

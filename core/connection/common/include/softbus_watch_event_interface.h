@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_WATCH_EVENT_INTERFACE_H
 #define SOFTBUS_WATCH_EVENT_INTERFACE_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_socket.h"
 

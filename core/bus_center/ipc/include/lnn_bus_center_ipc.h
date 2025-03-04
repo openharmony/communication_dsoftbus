@@ -16,9 +16,6 @@
 #ifndef LNN_BUS_CENTER_IPC_H
 #define LNN_BUS_CENTER_IPC_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "data_level.h"
 #include "softbus_bus_center.h"
 

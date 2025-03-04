@@ -17,7 +17,6 @@
 #define SOFTBUS_FEATURE_CONFIG_H
 
 #include <securec.h>
-#include <stdint.h>
 
 #include "softbus_config_type.h"
 

@@ -17,7 +17,6 @@
 #define DISC_MANAGER_INTERFACE_H
 
 #include "softbus_common.h"
-#include "stdint.h"
 
 #ifdef __cplusplus
 #if __cplusplus

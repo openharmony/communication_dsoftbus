@@ -15,7 +15,6 @@
 #include "disconnect_command.h"
 #include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
-#include "conn_log.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
 

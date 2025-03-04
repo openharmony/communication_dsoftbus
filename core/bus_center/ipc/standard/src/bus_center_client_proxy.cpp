@@ -18,10 +18,6 @@
 #include "bus_center_client_proxy_standard.h"
 #include "lnn_log.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_bus_center.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_permission.h"
 
 using namespace OHOS;
 

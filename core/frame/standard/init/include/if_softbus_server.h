@@ -17,11 +17,8 @@
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
 #include "data_level.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
 #include "softbus_trans_def.h"
 
 namespace OHOS {

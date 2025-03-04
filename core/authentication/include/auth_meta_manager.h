@@ -16,10 +16,7 @@
 #ifndef AUTH_META_MANAGER_H
 #define AUTH_META_MANAGER_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "auth_common.h"
-#include "auth_interface.h"
 
 #ifdef __cplusplus
 #if __cplusplus

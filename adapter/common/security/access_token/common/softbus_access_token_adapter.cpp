@@ -16,12 +16,9 @@
 #include "softbus_access_token_adapter.h"
 
 #include <securec.h>
-#include <string>
 
 #include "accesstoken_kit.h"
 #include "comm_log.h"
-#include "native_token_info.h"
-#include "perm_state_change_callback_customize.h"
 #include "privacy_kit.h"
 #include "regex.h"
 #include "softbus_error_code.h"

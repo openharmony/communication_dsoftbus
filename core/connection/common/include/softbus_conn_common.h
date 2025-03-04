@@ -16,11 +16,8 @@
 #ifndef SOFTBUS_CONN_COMMON_H
 #define SOFTBUS_CONN_COMMON_H
 
-#include <stdint.h>
-
 #include "common_list.h"
 #include "message_handler.h"
-#include "softbus_error_code.h"
 #include "softbus_queue.h"
 #include "softbus_adapter_thread.h"
 

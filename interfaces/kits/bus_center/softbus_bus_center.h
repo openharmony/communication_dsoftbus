@@ -45,9 +45,6 @@
 #ifndef SOFTBUS_BUS_CENTER_H
 #define SOFTBUS_BUS_CENTER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "softbus_common.h"
 
 #ifdef __cplusplus

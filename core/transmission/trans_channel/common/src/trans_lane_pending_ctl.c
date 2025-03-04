@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -634,7 +634,6 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
-    appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);

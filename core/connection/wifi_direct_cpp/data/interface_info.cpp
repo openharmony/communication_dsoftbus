@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <any>
-#include <string>
 #include "conn_log.h"
 #include "interface_info.h"
 #include "protocol/wifi_direct_protocol.h"

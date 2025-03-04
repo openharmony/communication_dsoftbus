@@ -16,9 +16,6 @@
 #ifndef LNN_HEARTBEAT_UTILS_H
 #define LNN_HEARTBEAT_UTILS_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "data_level_inner.h"
 #include "softbus_common.h"
 

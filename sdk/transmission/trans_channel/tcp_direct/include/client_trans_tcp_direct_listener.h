@@ -16,7 +16,6 @@
 #ifndef CLIENT_TRANS_TCP_DIRECT_LISTENER_H
 #define CLIENT_TRANS_TCP_DIRECT_LISTENER_H
 
-#include <stdint.h>
 #include "softbus_conn_interface.h"
 
 #ifdef __cplusplus

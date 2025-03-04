@@ -17,7 +17,6 @@
 #define FILLP_TIMEING_WHEEL_H
 
 #include "hlist.h"
-#include "opt.h"
 
 #ifdef __cplusplus
 extern "C" {

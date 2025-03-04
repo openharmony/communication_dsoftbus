@@ -16,10 +16,7 @@
 #ifndef SOFTBUS_TCP_DIRECT_CALLBACK_H
 #define SOFTBUS_TCP_DIRECT_CALLBACK_H
 
-#include <stdint.h>
-
 #include "client_trans_session_callback.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus

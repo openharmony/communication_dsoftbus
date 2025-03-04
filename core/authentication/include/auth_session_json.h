@@ -16,14 +16,7 @@
 #ifndef AUTH_SESSION_JSON_H
 #define AUTH_SESSION_JSON_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "auth_interface.h"
-#include "auth_session_fsm.h"
 #include "auth_session_message.h"
-#include "lnn_node_info.h"
-#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus

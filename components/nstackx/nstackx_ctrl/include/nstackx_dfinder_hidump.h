@@ -15,8 +15,6 @@
 
 #ifndef NSTACKX_DFINDER_HIDUMP_H
 #define NSTACKX_DFINDER_HIDUMP_H
-#include "sys_common_header.h"
-#include "nstackx.h"
 #include "nstackx_device.h"
 
 #ifdef __cplusplus

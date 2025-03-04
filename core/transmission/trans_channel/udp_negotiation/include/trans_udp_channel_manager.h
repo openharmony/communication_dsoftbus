@@ -16,7 +16,6 @@
 #ifndef TRANS_UDP_CHANNEL_MANAGER_H
 #define TRANS_UDP_CHANNEL_MANAGER_H
 
-#include <stdint.h>
 #include "softbus_app_info.h"
 #include "softbus_common.h"
 

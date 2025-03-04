@@ -16,7 +16,6 @@
 #ifndef LNN_LANE_INTERFACE_H
 #define LNN_LANE_INTERFACE_H
 
-#include <stdint.h>
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"

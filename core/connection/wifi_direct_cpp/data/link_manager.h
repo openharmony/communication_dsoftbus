@@ -16,14 +16,8 @@
 #ifndef LINK_MANAGER_H
 #define LINK_MANAGER_H
 
-#include <atomic>
 #include <list>
-#include <map>
-#include <mutex>
-#include <functional>
 #include "dfx/link_snapshot.h"
-#include "inner_link.h"
-#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 class LinkManager {

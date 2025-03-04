@@ -15,7 +15,6 @@
 
 #include "comm_log.h"
 #include "if_softbus_client.h"
-#include "softbus_error_code.h"
 
 namespace OHOS {
 int32_t ISoftBusClient::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)

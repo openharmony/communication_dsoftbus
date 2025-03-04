@@ -18,7 +18,6 @@
 
 #include <map>
 #include "if_softbus_client.h"
-#include "iremote_object.h"
 #include "iremote_stub.h"
 
 namespace OHOS {

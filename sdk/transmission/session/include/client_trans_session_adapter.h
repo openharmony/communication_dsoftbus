@@ -16,8 +16,6 @@
 #ifndef CLIENT_TRANS_SESSION_ADAPTER_H
 #define CLIENT_TRANS_SESSION_ADAPTER_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "socket.h"
 
 #ifdef __cplusplus

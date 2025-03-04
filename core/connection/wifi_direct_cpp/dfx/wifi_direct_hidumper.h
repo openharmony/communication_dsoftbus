@@ -16,11 +16,7 @@
 #ifndef WIFI_DIRECT_HIDUMP_H
 #define WIFI_DIRECT_HIDUMP_H
 
-#include <functional>
-#include <list>
-#include <memory>
 #include <nlohmann/json.hpp>
-#include <string>
 
 namespace OHOS::SoftBus {
 class WifiDirectHidumper {

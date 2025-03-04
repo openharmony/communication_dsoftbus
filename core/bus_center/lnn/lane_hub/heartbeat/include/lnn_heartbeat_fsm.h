@@ -16,7 +16,6 @@
 #ifndef LNN_HEARTBEAT_FSM_H
 #define LNN_HEARTBEAT_FSM_H
 
-#include "common_list.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_state_machine.h"
 

@@ -611,30 +611,6 @@ int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCapability)
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        channelCapability != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "channelCapability is null");
-    ProxyChannelInfo *item = NULL;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
-    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->channelId == channelId) {
-            if (item->status == PROXY_CHANNEL_STATUS_COMPLETED) {
-                item->timeout = 0;
-            }
-            *channelCapability = item->appInfo.channelCapability;
-            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    TRANS_LOGE(TRANS_CTRL, "not found ChannelCapability by channelId=%{public}d", channelId);
-    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-}
-
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(

@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_QUEUE_H
 #define SOFTBUS_QUEUE_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "securec.h"
 
 #include "softbus_adapter_cpu.h"

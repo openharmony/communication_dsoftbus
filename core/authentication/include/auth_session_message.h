@@ -16,12 +16,7 @@
 #ifndef AUTH_MESSAGE_H
 #define AUTH_MESSAGE_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_manager.h"
-#include "auth_session_fsm.h"
-#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus

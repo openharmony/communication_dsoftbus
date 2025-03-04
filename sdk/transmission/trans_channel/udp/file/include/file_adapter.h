@@ -16,9 +16,6 @@
 #ifndef NSTACKX_DFILE_ADAPTER_H
 #define NSTACKX_DFILE_ADAPTER_H
 
-#include <stdint.h>
-#include "session.h"
-
 #include "nstackx_dfile.h"
 
 #ifdef __cplusplus

@@ -16,7 +16,6 @@
 #ifndef LNN_LANE_POWER_CONTROL_H
 #define LNN_LANE_POWER_CONTROL_H
 
-#include <stdint.h>
 #include "lnn_lane_interface.h"
 
 #ifdef __cplusplus

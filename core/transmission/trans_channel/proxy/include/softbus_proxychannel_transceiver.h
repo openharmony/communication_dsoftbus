@@ -16,9 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_TRANSCEIVER_H
 #define SOFTBUS_PROXYCHANNEL_TRANSCEIVER_H
 
-#include "common_list.h"
-#include "softbus_app_info.h"
-#include "softbus_conn_interface.h"
 #include "softbus_proxychannel_message.h"
 
 #ifdef __cplusplus
