@@ -22,12 +22,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
-#include "lnn_net_builder.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_common.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
 

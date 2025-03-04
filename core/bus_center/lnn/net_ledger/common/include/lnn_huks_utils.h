@@ -18,9 +18,6 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
-#include "hks_type.h"
-
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {

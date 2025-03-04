@@ -16,7 +16,6 @@
 #ifndef SYS_EPOLL_H
 #define SYS_EPOLL_H
 
-#include "nstackx_common_header.h"
 #include "sys_util.h"
 
 typedef int32_t EpollDesc;

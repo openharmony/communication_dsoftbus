@@ -17,8 +17,6 @@
 
 #include "adapter/p2p_adapter.h"
 #include "conn_log.h"
-#include "data/interface_info.h"
-#include "link_info.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 

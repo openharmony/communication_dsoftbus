@@ -16,11 +16,7 @@
 #ifndef LNN_P2P_INFO_H
 #define LNN_P2P_INFO_H
 
-#include <stdint.h>
-
-#include "common_list.h"
 #include "lnn_node_info.h"
-#include "softbus_common.h"
 #include "softbus_json_utils.h"
 
 #ifdef __cplusplus

@@ -16,10 +16,7 @@
 #ifndef SOFTBUS_CONN_BLE_CLIENT_H
 #define SOFTBUS_CONN_BLE_CLIENT_H
 
-#include "message_handler.h"
 #include "softbus_conn_ble_connection.h"
-#include "softbus_conn_interface.h"
-#include "softbus_error_code.h"
 
 /* In the fastest connection mode, the underlying connection timeout and notifications is set to 3500 milliseconds */
 #define BLE_FAST_CONNECT_TIMEOUT 3500

@@ -16,7 +16,6 @@
 #ifndef FILLP_DFX_H
 #define FILLP_DFX_H
 
-#include "fillptypes.h"
 #include "sockets.h"
 
 #ifdef __cplusplus

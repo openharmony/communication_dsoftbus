@@ -14,13 +14,10 @@
  */
 #include "simple_processor_selector.h"
 
-#include <memory>
-
 #include "processor/p2p_v1_processor.h"
 #include "processor/null_processor.h"
 #include "conn_log.h"
 #include "data/link_manager.h"
-#include "data/inner_link.h"
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {

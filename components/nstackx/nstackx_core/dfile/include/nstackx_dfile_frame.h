@@ -16,9 +16,6 @@
 #ifndef NSTACKX_DFILE_FRAME_H
 #define NSTACKX_DFILE_FRAME_H
 
-#include <stdint.h>
-#include <time.h>
-#include "nstackx_list.h"
 #include "nstackx_file_list.h"
 #include "nstackx_congestion.h"
 

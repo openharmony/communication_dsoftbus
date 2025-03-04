@@ -15,10 +15,7 @@
 
 #include "raw_stream_data.h"
 
-#include <utility>
-
 #include "securec.h"
-#include "stream_common.h"
 #include "trans_log.h"
 
 namespace Communication {

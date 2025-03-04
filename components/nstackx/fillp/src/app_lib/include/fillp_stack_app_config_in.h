@@ -16,11 +16,9 @@
 #ifndef FILLP_STACK_APP_CONFIG_IN_H
 #define FILLP_STACK_APP_CONFIG_IN_H
 
-#include "utils.h"
 #include "spunge.h"
 #include "socket_common.h"
 #include "res.h"
-#include "spunge_stack.h"
 #include "spunge_message.h"
 
 #ifdef __cplusplus

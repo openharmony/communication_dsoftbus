@@ -16,8 +16,6 @@
 #ifndef LNN_TOPO_MANAGER_H
 #define LNN_TOPO_MANAGER_H
 
-#include <stdint.h>
-
 #include "softbus_common.h"
 
 #ifdef __cplusplus

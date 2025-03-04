@@ -15,8 +15,6 @@
 
 #ifndef SOFTBUS_PROXYCHANNEL_MESSAGE_H
 #define SOFTBUS_PROXYCHANNEL_MESSAGE_H
-#include "stdint.h"
-#include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 

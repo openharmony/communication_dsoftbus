@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 #include "wifi_direct_scheduler.h"
-#include <thread>
-#include "softbus_error_code.h"
-#include "conn_log.h"
-#include "command/connect_command.h"
 #include "command/command_factory.h"
-#include "command/disconnect_command.h"
 #include "command/negotiate_command.h"
 
 namespace OHOS::SoftBus {

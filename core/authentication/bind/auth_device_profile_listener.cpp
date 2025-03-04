@@ -20,8 +20,6 @@
 #include "anonymizer.h"
 #include "auth_deviceprofile.h"
 #include "auth_log.h"
-#include "bus_center_manager.h"
-#include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_decision_db.h"

@@ -16,14 +16,6 @@
 #ifndef FILLP_H
 #define FILLP_H
 
-#include "fillpinc.h"
-#include "fillp_os.h"
-#include "hlist.h"
-#include "lf_ring.h"
-#include "queue.h"
-#include "log.h"
-#include "opt.h"
-#include "skiplist.h"
 #include "fillp_pcb.h"
 #include "fillp_cookie.h"
 

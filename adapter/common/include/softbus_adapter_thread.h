@@ -16,9 +16,6 @@
 #ifndef SOFTBUS_ADAPTER_THREAD_H
 #define SOFTBUS_ADAPTER_THREAD_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "comm_log.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"

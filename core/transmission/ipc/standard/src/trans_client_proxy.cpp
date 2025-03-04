@@ -15,13 +15,8 @@
 
 #include "trans_client_proxy.h"
 
-#include <unistd.h>
-
 #include "softbus_access_token_adapter.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_trans_def.h"
 #include "trans_client_proxy_standard.h"
 #include "trans_log.h"
 

@@ -17,10 +17,7 @@
 #define CLIENT_TRANS_SESSION_OPERATE_H
 
 #include "inner_socket.h"
-#include "session.h"
-#include "softbus_def.h"
-#include "softbus_trans_def.h"
-#include "client_trans_session_adapter.h"
+
 #include "client_trans_session_manager.h"
 
 #ifdef __cplusplus

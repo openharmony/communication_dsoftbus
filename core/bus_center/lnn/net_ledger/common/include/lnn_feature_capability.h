@@ -16,7 +16,6 @@
 #ifndef LNN_FEATURE_CAPABILITY_H
 #define LNN_FEATURE_CAPABILITY_H
 
-#include <stdint.h>
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus

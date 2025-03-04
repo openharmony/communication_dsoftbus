@@ -16,11 +16,6 @@
 #ifndef TRANS_AUTH_LANE_PENDING_CTL_H
 #define TRANS_AUTH_LANE_PENDING_CTL_H
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
-#include "lnn_lane_interface.h"
 #include "trans_lane_pending_ctl.h"
 
 #ifdef __cplusplus

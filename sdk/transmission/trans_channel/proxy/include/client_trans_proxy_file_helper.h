@@ -16,10 +16,7 @@
 #ifndef CLIENT_TRANS_PROXY_FILE_HELPER_H
 #define CLIENT_TRANS_PROXY_FILE_HELPER_H
 
-#include <stdint.h>
-
 #include "client_trans_file_listener.h"
-#include "client_trans_proxy_file_common.h"
 #include "client_trans_proxy_file_manager.h"
 
 #ifdef __cplusplus

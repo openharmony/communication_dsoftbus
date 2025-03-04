@@ -16,13 +16,9 @@
 #ifndef LNN_NODE_INFO_H
 #define LNN_NODE_INFO_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "lnn_connect_info.h"
 #include "lnn_device_info.h"
 #include "lnn_net_capability.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

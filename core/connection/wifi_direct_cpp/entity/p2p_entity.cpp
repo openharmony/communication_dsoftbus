@@ -14,17 +14,8 @@
  */
 #include "p2p_entity.h"
 
-#include <algorithm>
-#include <future>
-
-#include "conn_log.h"
-#include "softbus_error_code.h"
-
 #include "data/interface_manager.h"
 #include "data/link_manager.h"
-#include "p2p_available_state.h"
-#include "p2p_broadcast_receiver.h"
-#include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_scheduler_factory.h"
 
 namespace OHOS::SoftBus {

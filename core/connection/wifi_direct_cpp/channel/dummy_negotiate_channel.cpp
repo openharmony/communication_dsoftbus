@@ -14,7 +14,6 @@
  */
 #include "dummy_negotiate_channel.h"
 #include "conn_log.h"
-#include "softbus_error_code.h"
 
 namespace OHOS::SoftBus {
 DummyNegotiateChannel::~DummyNegotiateChannel() { }

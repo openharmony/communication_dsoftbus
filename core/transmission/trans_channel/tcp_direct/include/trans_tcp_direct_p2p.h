@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_TCP_DIRECT_P2P_H
 #define SOFTBUS_TCP_DIRECT_P2P_H
 
-#include <stdint.h>
-
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "lnn_app_bind_interface.h"
 #include "softbus_error_code.h"
 #include "device_profile_listener.h"
 

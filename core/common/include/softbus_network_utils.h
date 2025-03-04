@@ -15,8 +15,6 @@
 #ifndef SOFTBUS_NETWORK_UTILS_H
 #define SOFTBUS_NETWORK_UTILS_H
 
-#include <stdint.h>
-
 #include "stdbool.h"
 
 #ifdef __cplusplus

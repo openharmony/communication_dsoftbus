@@ -16,11 +16,6 @@
 #ifndef LNN_LOCAL_NET_LEDGER_H
 #define LNN_LOCAL_NET_LEDGER_H
 
-#include <pthread.h>
-#include <stdint.h>
-
-#include "bus_center_info_key.h"
-#include "lnn_device_info.h"
 #include "lnn_node_info.h"
 
 #ifdef __cplusplus

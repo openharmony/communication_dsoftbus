@@ -15,10 +15,6 @@
 
 #ifndef FILLP_LF_RING_H
 #define FILLP_LF_RING_H
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
 #include "utils.h"
 
 #ifdef __cplusplus

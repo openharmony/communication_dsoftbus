@@ -16,9 +16,7 @@
 #ifndef SOFTBUS_CONN_BLE_SERVER_H
 #define SOFTBUS_CONN_BLE_SERVER_H
 
-#include "message_handler.h"
 #include "softbus_conn_ble_connection.h"
-#include "softbus_error_code.h"
 
 #ifdef __cplusplus
 extern "C" {

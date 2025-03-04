@@ -16,13 +16,7 @@
 #ifndef SOFTBUS_CONN_BLE_MANAGER_H
 #define SOFTBUS_CONN_BLE_MANAGER_H
 
-#include <semaphore.h>
-
-#include "common_list.h"
 #include "softbus_conn_ble_connection.h"
-#include "softbus_conn_interface.h"
-#include "softbus_conn_manager.h"
-#include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_connreporter.h"
 
 #ifdef __cplusplus

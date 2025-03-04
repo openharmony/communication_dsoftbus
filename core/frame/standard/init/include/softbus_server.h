@@ -17,7 +17,6 @@
 #define SOFTBUS_SERVER_H_
 
 #include "softbus_server_stub.h"
-#include "softbus_common.h"
 #include "system_ability.h"
 
 namespace OHOS {

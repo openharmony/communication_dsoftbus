@@ -15,7 +15,6 @@
 #ifndef SOFTBUS_SESSION_LISTENER
 #define SOFTBUS_SESSION_LISTENER
 
-#include "auth_interface.h"
 #include "softbus_base_listener.h"
 
 #ifdef __cplusplus

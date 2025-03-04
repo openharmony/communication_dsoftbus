@@ -18,9 +18,6 @@
 #define INTERFACES_INNERKITS_FRAME_SERVER_PROXY_STANDARD_H_
 
 #include "if_softbus_server.h"
-#include <mutex>
-
-#include "softbus_common.h"
 
 namespace OHOS {
 class SoftBusServerProxyFrame : public IRemoteProxy<ISoftBusServer> {

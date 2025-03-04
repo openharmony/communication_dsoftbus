@@ -15,31 +15,17 @@
 
 #include "auth_deviceprofile.h"
 
-#include <cstring>
-#include <set>
-#include <mutex>
-#include <string>
-#include <vector>
-
 #include <securec.h>
 
-#include "access_control_profile.h"
 #include "anonymizer.h"
-#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "distributed_device_profile_client.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account.h"
 #include "ohos_account_kits.h"
-#include "os_account_manager.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_common.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "trust_device_profile.h"
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static std::set<std::string> g_notTrustedDevices;

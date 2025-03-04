@@ -16,8 +16,6 @@
 #ifndef LNN_ASYNC_CALLBACK_UTILS_H
 #define LNN_ASYNC_CALLBACK_UTILS_H
 
-#include <stdint.h>
-
 #include "message_handler.h"
 
 #ifdef __cplusplus

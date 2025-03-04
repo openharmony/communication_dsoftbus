@@ -16,10 +16,6 @@
 #ifndef RAW_STREAM_DATA_H
 #define RAW_STREAM_DATA_H
 
-#include <cstdint>
-#include <memory>
-#include <sys/types.h>
-
 #include "i_stream.h"
 
 namespace Communication {

@@ -16,10 +16,7 @@
 #ifndef SOFTBUS_DIRECT_CHANNEL_INTERFACE_H
 #define SOFTBUS_DIRECT_CHANNEL_INTERFACE_H
 
-#include <stdbool.h>
-
 #include "softbus_app_info.h"
-#include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
 

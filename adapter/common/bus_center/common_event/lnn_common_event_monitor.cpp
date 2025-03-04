@@ -15,25 +15,12 @@
 
 #include "lnn_event_monitor_impl.h"
 
-#include <securec.h>
-#include <string>
-
-#include "auth_interface.h"
-#include "bus_center_event.h"
-#include "common_event_data.h"
 #include "common_event_manager.h"
-#include "common_event_subscriber.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
-#include "lnn_heartbeat_strategy.h"
-#include "lnn_ohos_account_adapter.h"
-#include "want.h"
-#include "want_params.h"
-
 #include "power_mgr_client.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "lnn_init_monitor.h"
 

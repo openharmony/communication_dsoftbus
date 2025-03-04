@@ -17,7 +17,6 @@
 #define LNN_COMMON_UTILS_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

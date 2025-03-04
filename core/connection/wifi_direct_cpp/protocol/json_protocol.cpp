@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include "json_protocol.h"
 #include "nlohmann/json.hpp"
 #include "conn_log.h"
