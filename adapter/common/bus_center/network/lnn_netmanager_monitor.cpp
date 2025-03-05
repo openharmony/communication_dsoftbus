@@ -226,7 +226,7 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
 
 static int32_t LnnRegisterNetManager(void)
 {
-    static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> netlinkCallback =
+    OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> netlinkCallback =
         new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
     if (netlinkCallback == nullptr) {
         LNN_LOGE(LNN_INIT, "new NetInterfaceStateMonitor failed");
