@@ -583,6 +583,7 @@ int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     uint8_t *cipher = (uint8_t *)SoftBusCalloc(inData->size);
     if (cipher == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc encrypt data fail");
+        HksAbort(&handleEncrypt, g_encryptParamSet);
         return SOFTBUS_MALLOC_ERR;
     }
     struct HksBlob cipherText = {inData->size, cipher};
@@ -591,6 +592,7 @@ int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
         LNN_LOGE(LNN_LEDGER, "huks encrypt data update and finish fail");
         (void)memset_s(cipher, inData->size, 0x0, inData->size);
         SoftBusFree(cipher);
+        HksAbort(&handleEncrypt, g_encryptParamSet);
         return ret;
     }
     outData->size = cipherText.size;
@@ -622,6 +624,7 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     uint8_t *plain = (uint8_t *)SoftBusCalloc(inData->size);
     if (plain == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc encrypt data fail");
+        HksAbort(&handleDecrypt, g_decryptParamSet);
         return SOFTBUS_MALLOC_ERR;
     }
     struct HksBlob plainText = {inData->size, plain};
@@ -630,6 +633,7 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
         LNN_LOGE(LNN_LEDGER, "huks decrypt data update and finish fail");
         (void)memset_s(plain, inData->size, 0x0, inData->size);
         SoftBusFree(plain);
+        HksAbort(&handleDecrypt, g_decryptParamSet);
         return ret;
     }
     outData->size = plainText.size;
@@ -661,6 +665,7 @@ int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
     uint8_t *cipher = (uint8_t *)SoftBusCalloc(inData->size);
     if (cipher == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc encrypt data fail");
+        HksAbort(&handleEncrypt, g_ceEncryptParamSet);
         return SOFTBUS_MALLOC_ERR;
     }
     struct HksBlob cipherText = {inData->size, cipher};
@@ -669,6 +674,7 @@ int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
         LNN_LOGE(LNN_LEDGER, "huks encrypt data update and finish fail");
         (void)memset_s(cipher, inData->size, 0x0, inData->size);
         SoftBusFree(cipher);
+        HksAbort(&handleEncrypt, g_ceEncryptParamSet);
         return ret;
     }
     outData->size = cipherText.size;
@@ -700,6 +706,7 @@ int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
     uint8_t *plain = (uint8_t *)SoftBusCalloc(inData->size);
     if (plain == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc encrypt data fail");
+        HksAbort(&handleDecrypt, g_ceDecryptParamSet);
         return SOFTBUS_MALLOC_ERR;
     }
     struct HksBlob plainText = {inData->size, plain};
@@ -708,6 +715,7 @@ int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
         LNN_LOGE(LNN_LEDGER, "huks decrypt data update and finish fail");
         (void)memset_s(plain, inData->size, 0x0, inData->size);
         SoftBusFree(plain);
+        HksAbort(&handleDecrypt, g_ceDecryptParamSet);
         return ret;
     }
     outData->size = plainText.size;
