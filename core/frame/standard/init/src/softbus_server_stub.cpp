@@ -586,7 +586,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         COMM_LOGI(COMM_SVC, "DMS bind request, need check collaboration relationship");
         if (CheckSourceCollabRelation(param.peerDeviceId, OHOS::IPCSkeleton::GetCallingPid()) != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "DMS check collaboration relationship failed, reject binding request");
-            retReply = SOFTBUS_PERMISSION_DENIED;
+            retReply = SOFTBUS_TRANS_CHECK_RELATION_FAIL;
             goto EXIT;
         }
     }
