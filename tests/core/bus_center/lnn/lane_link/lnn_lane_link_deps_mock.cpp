@@ -179,5 +179,20 @@ int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
 {
     return GetLaneLinkDepsInterface()->CheckLinkConflictByReleaseLink(releaseLink);
 }
+
+int32_t LnnGetLinkLedgerInfo(const char *udid, LinkLedgerInfo *info)
+{
+    return GetLaneLinkDepsInterface()->LnnGetLinkLedgerInfo(udid, info);
+}
+
+int32_t LnnAddLinkLedgerInfo(const char *udid, const LinkLedgerInfo *info)
+{
+    return GetLaneLinkDepsInterface()->LnnAddLinkLedgerInfo(udid, info);
+}
+
+void LnnDeleteLinkLedgerInfo(const char *udid)
+{
+    GetLaneLinkDepsInterface()->LnnDeleteLinkLedgerInfo(udid);
+}
 }
 } // namespace OHOS

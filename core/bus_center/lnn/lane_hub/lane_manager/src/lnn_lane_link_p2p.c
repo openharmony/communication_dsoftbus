@@ -26,9 +26,11 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_communication_capability.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link_conflict.h"
+#include "lnn_lane_link_ledger.h"
 #include "lnn_lane_link_wifi_direct.h"
 #include "lnn_lane_prelink.h"
 #include "lnn_lane_reliability.h"
@@ -1318,6 +1320,8 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
     LNN_LOGI(LNN_LANE,
         "wifidirect conn succ, requestId=%{public}u, linkType=%{public}d, linkId=%{public}d, isReuse=%{public}d",
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
+    SetRemoteDynamicNetCap(linkInfo.peerUdid, BIT_WIFI_P2P);
+    LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
     if (linkInfo.type == LANE_HML_RAW && link->isReuse) {
         ret = NotifyRawLinkSucc(p2pRequestId, link, &linkInfo);
         if (ret != SOFTBUS_OK && ret != SOFTBUS_MALLOC_ERR) {

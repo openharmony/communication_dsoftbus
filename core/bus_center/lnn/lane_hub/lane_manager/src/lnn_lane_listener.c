@@ -20,7 +20,9 @@
 #include "anonymizer.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_common.h"
+#include "lnn_lane_communication_capability.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_link_ledger.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "lnn_parameter_utils.h"
@@ -519,6 +521,8 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
         LNN_LOGE(LNN_STATE, "generate link info fail");
         return;
     }
+    SetRemoteDynamicNetCap(laneLinkInfo.peerUdid, BIT_WIFI_P2P);
+    LnnDeleteLinkLedgerInfo(laneLinkInfo.peerUdid);
     char localUdid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get local udid fail");

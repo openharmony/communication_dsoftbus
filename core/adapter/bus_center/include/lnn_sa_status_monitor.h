@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LANE_COMMUNICATION_CAPABILITY_H
-#define LNN_LANE_COMMUNICATION_CAPABILITY_H
+#ifndef LNN_SA_STATUS_MONITOR_H
+#define LNN_SA_STATUS_MONITOR_H
 
-#include "lnn_lane_interface.h"
-#include "softbus_bus_center.h"
-#include "softbus_common.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-    int32_t (*getStaticCommCapa)(const char *networkId);
-    int32_t (*getDynamicCommCapa)(const char *networkId);
-} LaneCommCapa;
-
-LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType);
-void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex);
+void LnnInitSaStatusMonitor(void);
+void LnnDeInitSaStatusMonitor(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_LANE_COMMUNICATION_CAPABILITY_H
+
+#endif // LNN_SA_STATUS_MONITOR_H

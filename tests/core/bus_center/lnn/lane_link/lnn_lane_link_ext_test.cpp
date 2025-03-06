@@ -19,11 +19,13 @@
 #include <thread>
 
 #include "lnn_feature_capability.h"
+#include "lnn_lane_net_capability_mock.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link_deps_mock.h"
 #include "lnn_lane_link_p2p.h"
+#include "lnn_lane_listener.h"
 #include "lnn_select_rule.h"
 
 namespace OHOS {
@@ -252,6 +254,8 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_001, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> laneMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
@@ -294,6 +298,8 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_002, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> laneMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
@@ -338,6 +344,8 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_003, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> laneMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
@@ -381,6 +389,8 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_DISCONN_TEST_001, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> laneMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
