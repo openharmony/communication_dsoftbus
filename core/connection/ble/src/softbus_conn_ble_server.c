@@ -827,6 +827,7 @@ static void BleServiceDeleteCallback(int32_t status, int32_t srvcHandle)
 static void BleServiceDeleteMsgHandler(const CommonStatusMsgContext *ctx)
 {
     int32_t rc = SOFTBUS_OK;
+    bool isNotifyServerClosed = true;
     do {
         if (ctx->status != SOFTBUS_OK) {
             rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_FAIL;
@@ -840,6 +841,7 @@ static void BleServiceDeleteMsgHandler(const CommonStatusMsgContext *ctx)
             break;
         }
         if (g_serverState.serviceHandle != ctx->srvcHandle) {
+            isNotifyServerClosed = false;
             (void)SoftBusMutexUnlock(&g_serverState.lock);
             rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
             CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", rc);
@@ -863,7 +865,10 @@ static void BleServiceDeleteMsgHandler(const CommonStatusMsgContext *ctx)
         ResetServerState();
     }
     ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_STOP_SERVER_TIMEOUT, 0, 0, NULL);
-    g_serverEventListener.onServerClosed(BLE_GATT, SOFTBUS_OK);
+    // Non-active service delete, delete callback needs to reports close
+    if (isNotifyServerClosed) {
+        g_serverEventListener.onServerClosed(BLE_GATT, rc);
+    }
 }
 
 static void BleServerWaitStopServerTimeoutHandler(void)
