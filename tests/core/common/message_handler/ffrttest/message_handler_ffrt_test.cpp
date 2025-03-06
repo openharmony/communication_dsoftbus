@@ -242,9 +242,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateDestroyTest001, TestSize.Level1)
     if (g_isNeedCondWait) {
         CondWait();
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
     DestroyLooper(looper);
 }
 
@@ -264,9 +262,7 @@ HWTEST_F(MessageHandlerFfrtTest, LnnPostFfrtMsgTest001, TestSize.Level1)
     if (g_isNeedCondWait) {
         CondWait();
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
@@ -284,9 +280,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TestFfrtPostMsgToHandler(0, nullptr, 0, TestFfrtFreeMessage);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
     DestroyLooper(looper);
     SoftBusLooper *looperExt = GetLooper(LOOP_TYPE_DEFAULT);
     EXPECT_EQ(looperExt, nullptr);
@@ -310,9 +304,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest003, TestSize.Level1)
         ret = TestFfrtPostMsgToHandler(0, nullptr, delayMillis, TestFfrtFreeMessage);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
     DestroyLooper(looper);
     SoftBusLooper *looperExt = GetLooper(LOOP_TYPE_DEFAULT);
     EXPECT_EQ(looperExt, nullptr);
@@ -340,9 +332,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest004, TestSize.Level1)
             TestFfrtRemoveMsg(msgType);
         }
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
     DestroyLooper(looper);
     SoftBusLooper *looperExt = GetLooper(LOOP_TYPE_DEFAULT);
     EXPECT_EQ(looperExt, nullptr);
@@ -372,9 +362,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest005, TestSize.Level1)
     if (g_isNeedCondWait) {
         CondWait();
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
@@ -407,9 +395,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperRemoveMsgTest001, TestSize.Level1)
     ret = TestFfrtPostMsgToHandler(0, info1, 0, TestFfrtFreeMessage);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TestFfrtRemoveMsgCustom(param1, param2);
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
@@ -438,9 +424,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperRemoveMsgTest002, TestSize.Level1)
     if (g_isNeedCondWait) {
         CondWait();
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
@@ -462,9 +446,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperRemoveMsgTest003, TestSize.Level1)
     ret = TestFfrtPostMsgToHandler(msgType, info, delayMillis, TestFfrtFreeMessage);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TestFfrtRemoveMsg(msgType);
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
@@ -488,9 +470,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperFreeMsgTest001, TestSize.Level1)
     if (g_isNeedCondWait) {
         CondWait();
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
@@ -512,9 +492,7 @@ HWTEST_F(MessageHandlerFfrtTest, LooperFreeMsgTest002, TestSize.Level1)
     if (g_isNeedCondWait) {
         CondWait();
     }
-    DeInitTestFfrtLooper();
-    EXPECT_EQ(g_testFfrtLoopHandler.HandleMessage, nullptr);
-    EXPECT_EQ(g_testFfrtLoopHandler.looper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 
 /**
