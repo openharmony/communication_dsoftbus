@@ -59,6 +59,7 @@ int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, char *uuid);
 int32_t UpdateAuthPreLinkDeviceKeyById(uint32_t requestId, uint8_t *deviceKey, uint32_t keyLen);
 int32_t UpdateAuthPreLinkDeviceKeyIdById(uint32_t requestId, bool isRemote, int32_t deviceKeyId);
 void DelAuthPreLinkById(uint32_t requestId);
+void DelAuthPreLinkByUuid(char *uuid);
 void DeinitAuthPreLinkList(void);
 
 int32_t InitAuthGenCertParallelList(void);

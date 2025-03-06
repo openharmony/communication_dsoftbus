@@ -1472,7 +1472,9 @@ static void NotifyMigrateDegrade(const char *udid)
 static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type, int32_t authId)
 {
     if ((LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) ||
-        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BLE)) {
+        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BLE) ||
+        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_SESSION_KEY) &&
+        LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_SESSION_KEY)) {
         if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] == authId) {
             info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
         }
