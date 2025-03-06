@@ -1180,6 +1180,10 @@ static int32_t LnnConvertSessionAddrToAuthConnInfo(const ConnectionAddr *addr, A
 
 static int32_t GetDeviceKeyForSessionKey(LnnConntionInfo *connInfo)
 {
+    if (connInfo == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t connId;
     int32_t rc;
     if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
@@ -1194,13 +1198,16 @@ static int32_t GetDeviceKeyForSessionKey(LnnConntionInfo *connInfo)
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
     }
-    rc = GetSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId, deviceKey, &keyLen);
-    if (rc != SOFTBUS_OK) {
+    if (!GetSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId, deviceKey, &keyLen)) {
         LNN_LOGE(LNN_STATE, "get auth key fail");
         keyLen = 0;
         (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     }
-    UpdateAuthPreLinkDeviceKeyById(connInfo->requestId, deviceKey, keyLen);
+    if (UpdateAuthPreLinkDeviceKeyById(connInfo->requestId, deviceKey, keyLen) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "update pre link device key fail");
+        keyLen = 0;
+        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    }
     (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     keyLen = 0;
     DelSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId);
@@ -1476,6 +1483,8 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
             if (connInfo->addr.type == CONNECTION_ADDR_BR) {
                 (void)ProcessBleOnline(connInfo->nodeInfo, &(connInfo->addr), BIT_SUPPORT_BR_DUP_BLE);
             } else if (FindAuthPreLinkNodeByUuid(connInfo->nodeInfo->uuid, &tmpNode) == SOFTBUS_OK) {
+                DelAuthPreLinkByUuid(connInfo->nodeInfo->uuid);
+                LNN_LOGI(LNN_BUILDER, "delete auth pre link node by uuid");
                 ProcessBleOnlineForAuthPreLink(connFsm);
             } else if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
                 ProcessBleOnlineForSession(connFsm);
