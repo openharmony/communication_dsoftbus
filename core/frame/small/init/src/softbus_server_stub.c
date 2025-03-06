@@ -82,7 +82,7 @@ static TaskConfig GetTaskConfig(Service *service)
 
 static void ComponentDeathCallback(const char *pkgName, int32_t pid)
 {
-    DiscServerDeathCallback(pkgName);
+    DiscServerDeathCallback(pkgName, pid);
     TransServerDeathCallback(pkgName, pid);
     BusCenterServerDeathCallback(pkgName);
 }

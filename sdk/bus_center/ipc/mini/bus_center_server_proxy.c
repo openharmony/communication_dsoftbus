@@ -94,12 +94,12 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 
 int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    return LnnIpcPublishLNN(pkgName, info);
+    return LnnIpcPublishLNN(pkgName, 0, info);
 }
 
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
-    return LnnIpcStopPublishLNN(pkgName, publishId);
+    return LnnIpcStopPublishLNN(pkgName, 0, publishId);
 }
 
 int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)

@@ -24,7 +24,7 @@ extern "C" {
 
 int32_t DiscServerInit(void);
 void DiscServerDeinit(void);
-void DiscServerDeathCallback(const char *pkgName);
+void DiscServerDeathCallback(const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 }
