@@ -58,11 +58,17 @@ struct DataLevelChangeReqInfo {
     int32_t pid;
 };
 
+struct BleRangeReqInfo {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
+};
+
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
 static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
+static std::vector<BleRangeReqInfo *> g_bleRangeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);
@@ -75,6 +81,12 @@ static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *da
 
 static IDataLevelChangeCallback g_dataLevelChangeCb = {
     .onDataLevelChanged = OnDataLevelChanged,
+};
+
+static void OnBleRangeDone(const BleRangeInnerInfo *info);
+
+static IBleRangeInnerCallback g_bleRangeCb = {
+    .onRangeDone = OnBleRangeDone,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -177,6 +189,18 @@ static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *da
         (void)ClientOnDataLevelChanged(dbPkgName, iter->pid, networkId, dataLevelInfo);
     }
     return SOFTBUS_OK;
+}
+
+static void OnBleRangeDone(const BleRangeInnerInfo *info)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    const char *msdpPkgName = "ohos.msdp.spatialawareness";
+    for (const auto &iter : g_bleRangeRequestInfo) {
+        if (strcmp(msdpPkgName, iter->pkgName) != 0) {
+            continue;
+        }
+        (void)ClientOnBleRange(msdpPkgName, iter->pid, info);
+    }
 }
 
 int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin)
@@ -301,7 +325,7 @@ int32_t LnnIpcRegDataLevelChangeCb(const char *pkgName, int32_t callingPid)
 
 int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
 {
-    // unregister data level chagne callback to heartbeta
+    // unregister data level chagne callback to heartbeat
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<DataLevelChangeReqInfo *>::iterator iter;
     for (iter = g_dataLevelChangeRequestInfo.begin(); iter != g_dataLevelChangeRequestInfo.end();) {
@@ -498,6 +522,46 @@ int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char
         LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
     }
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
+int32_t LnnIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    return LnnTriggerHbForMeasureDistance(pkgName, callerId, mode);
+}
+
+int32_t LnnIpcRegBleRangeCb(const char *pkgName, int32_t callingPid)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    BleRangeReqInfo *info = new (std::nothrow) BleRangeReqInfo();
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SVC, "new object is nullptr");
+        return SOFTBUS_NETWORK_REG_CB_FAILED;
+    }
+    if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+        delete info;
+        return SOFTBUS_STRCPY_ERR;
+    }
+    info->pid = callingPid;
+    g_bleRangeRequestInfo.push_back(info);
+    LnnRegBleRangeCb(&g_bleRangeCb);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcUnregBleRangeCb(const char *pkgName, int32_t callingPid)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<BleRangeReqInfo *>::iterator iter;
+    for (iter = g_bleRangeRequestInfo.begin(); iter != g_bleRangeRequestInfo.end();) {
+        if (strcmp(pkgName, (*iter)->pkgName) == 0 && callingPid == (*iter)->pid) {
+            delete *iter;
+            g_bleRangeRequestInfo.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+    LnnUnregBleRangeCb();
+    return SOFTBUS_OK;
 }
 
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)

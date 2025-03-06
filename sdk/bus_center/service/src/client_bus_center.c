@@ -18,9 +18,10 @@
 #include <securec.h>
 #include <string.h>
 
+#include "ble_range.h"
 #include "client_bus_center_manager.h"
-#include "data_level.h"
 #include "client_trans_session_manager.h"
+#include "data_level.h"
 #include "lnn_event.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
@@ -32,6 +33,7 @@
 
 static const char *g_dbPkgName = "distributeddata-default";
 #define DM_PKG_NAME "ohos.distributedhardware.devicemanager"
+static const char *g_msdpPkgName = "ohos.msdp.spatialawareness";
 
 static int32_t CommonInit(const char *pkgName)
 {
@@ -348,6 +350,38 @@ int32_t SetDataLevel(const DataLevel *dataLevel)
     return SetDataLevelInner(dataLevel);
 }
 
+int32_t RegBleRangeCb(const char *pkgName, IBleRangeCb *callback)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    if (pkgName == NULL || callback == NULL || callback->onBleRangeInfoReceived == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName or callback is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_msdpPkgName, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "CommonInit failed");
+        return ret;
+    }
+    return RegBleRangeCbInner(pkgName, callback);
+}
+
+int32_t UnregBleRangeCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_msdpPkgName, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return UnregBleRangeCbInner(pkgName);
+}
+
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin)
 {
     if (pkgName == NULL || target == NULL || cb == NULL) {
@@ -580,6 +614,24 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
         return SOFTBUS_INVALID_PARAM;
     }
     return ShiftLNNGearInner(pkgName, callerId, targetNetworkId, mode);
+}
+
+int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    if (pkgName == NULL || callerId == NULL || mode == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid range para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
+    if (len == 0 || len >= CALLER_ID_MAX_LEN) {
+        LNN_LOGE(LNN_STATE, "invalid range callerId len=%{public}zu", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return TriggerHbForMeasureDistanceInner(pkgName, callerId, mode);
 }
 
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)

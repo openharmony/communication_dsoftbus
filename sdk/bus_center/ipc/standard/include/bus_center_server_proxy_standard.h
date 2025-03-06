@@ -65,6 +65,9 @@ public:
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) override;
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
+    int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode) override;
+    int32_t RegBleRangeCb(const char *pkgName) override;
+    int32_t UnregBleRangeCb(const char *pkgName) override;
     int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
     int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;

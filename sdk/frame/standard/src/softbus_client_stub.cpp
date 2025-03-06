@@ -59,6 +59,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissonChangeInner;
     memberFuncMap_[CLIENT_SET_CHANNEL_INFO] = &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
+    memberFuncMap_[CLIENT_ON_BLE_RANGE_DONE] = &SoftBusClientStub::OnBleRangeDoneInner;
     memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] = &SoftBusClientStub::OnClientTransLimitChangeInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
     memberFuncMap_[CLIENT_CHANNEL_ON_QOS] = &SoftBusClientStub::OnChannelOnQosInner;
@@ -718,10 +719,21 @@ int32_t SoftBusClientStub::OnDataLevelChangedInner(MessageParcel &data, MessageP
 
     DataLevelInfo *info = (DataLevelInfo *)data.ReadRawData(sizeof(DataLevelInfo));
     if (info == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnDataLevelChangedInner read data level chagne info failed");
+        COMM_LOGE(COMM_SDK, "OnDataLevelChangedInner read data level change info failed");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
     OnDataLevelChanged(networkId, info);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnBleRangeDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    BleRangeInnerInfo *info = (BleRangeInnerInfo *)data.ReadRawData(sizeof(BleRangeInnerInfo));
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SDK, "read ble range info failed");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    OnBleRangeDone(info);
     return SOFTBUS_OK;
 }
 
@@ -865,6 +877,11 @@ void SoftBusClientStub::OnRefreshDeviceFound(const void *device, uint32_t device
 void SoftBusClientStub::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
 {
     LnnOnDataLevelChanged(networkId, dataLevelInfo);
+}
+
+void SoftBusClientStub::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    LnnOnBleRangeDone(rangeInfo);
 }
 
 int32_t SoftBusClientStub::OnClientChannelOnQos(

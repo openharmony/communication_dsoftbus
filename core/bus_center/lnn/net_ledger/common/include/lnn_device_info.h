@@ -39,6 +39,8 @@ extern "C" {
 #define TYPE_2IN1_ID 0xA2F
 
 typedef struct {
+    uint16_t deviceTypeId;
+    int32_t osType;
     char deviceName[DEVICE_NAME_BUF_LEN];
     char unifiedName[DEVICE_NAME_BUF_LEN];
     char nickName[DEVICE_NAME_BUF_LEN];
@@ -46,8 +48,8 @@ typedef struct {
     char deviceUdid[UDID_BUF_LEN];
     char osVersion[OS_VERSION_BUF_LEN];
     char deviceVersion[DEVICE_VERSION_SIZE_MAX];
-    uint16_t deviceTypeId;
-    int32_t osType;
+    char productId[PRODUCT_ID_SIZE_MAX];
+    char modelName[MODEL_NAME_SIZE_MAX];
 } DeviceBasicInfo;
 
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name);

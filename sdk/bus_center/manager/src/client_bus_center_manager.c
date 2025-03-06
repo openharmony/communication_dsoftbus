@@ -72,6 +72,7 @@ typedef struct {
     IPublishCb publishCb;
     IRefreshCallback refreshCb;
     IDataLevelCb dataLevelCb;
+    IBleRangeCb bleRangeCb;
     bool isInit;
     SoftBusMutex lock;
 } BusCenterClient;
@@ -95,6 +96,7 @@ static BusCenterClient g_busCenterClient = {
     .refreshCb.OnDiscoverResult = NULL,
     .dataLevelCb.onDataLevelChanged = NULL,
     .isInit = false,
+    .bleRangeCb.onBleRangeInfoReceived = NULL,
 };
 
 static bool IsUdidHashEmpty(const ConnectionAddr *addr)
@@ -593,6 +595,7 @@ void BusCenterClientDeinit(void)
         LNN_LOGE(LNN_INIT, "unlock in deinit");
     }
     g_busCenterClient.dataLevelCb.onDataLevelChanged = NULL;
+    g_busCenterClient.bleRangeCb.onBleRangeInfoReceived = NULL;
     SoftBusMutexDestroy(&g_busCenterClient.lock);
     BusCenterServerProxyDeInit();
 }
@@ -712,6 +715,28 @@ int32_t SetDataLevelInner(const DataLevel *dataLevel)
     int32_t ret = ServerIpcSetDataLevel(dataLevel);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server SetDataLevel failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t RegBleRangeCbInner(const char *pkgName, IBleRangeCb *callback)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    g_busCenterClient.bleRangeCb = *callback;
+    int32_t ret = ServerIpcRegBleRangeCb(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server RegBleRangeCbInner failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t UnregBleRangeCbInner(const char *pkgName)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    g_busCenterClient.bleRangeCb.onBleRangeInfoReceived = NULL;
+    int32_t ret = ServerIpcUnregBleRangeCb(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server UnregBleRangeCbInner failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -1029,6 +1054,11 @@ int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_
 int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
+int32_t TriggerHbForMeasureDistanceInner(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    return ServerIpcTriggerHbForMeasureDistance(pkgName, callerId, mode);
 }
 
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen)
@@ -1415,6 +1445,29 @@ void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevel
         .switchLength = dataLevelInfo->switchLength
     };
     g_busCenterClient.dataLevelCb.onDataLevelChanged(networkId, dataLevel);
+}
+
+void LnnOnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    if (g_busCenterClient.bleRangeCb.onBleRangeInfoReceived == NULL) {
+        LNN_LOGW(LNN_STATE, "ble range callback is null");
+        return;
+    }
+    BleRangeInfo info = { .range = rangeInfo->range,
+        .subRange = rangeInfo->subRange,
+        .distance = rangeInfo->distance,
+        .confidence = rangeInfo->confidence };
+    if (strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, rangeInfo->networkId) != EOK) {
+        LNN_LOGW(LNN_STATE, "copy networkId fail");
+        return;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(info.networkId, &anonyNetworkId);
+    LNN_LOGD(LNN_STATE,
+        "range=%{public}d, subrange=%{public}d, distance=%{public}f, confidence=%{public}lf, networkId=%{public}s",
+        info.range, info.subRange, info.distance, info.confidence, AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    g_busCenterClient.bleRangeCb.onBleRangeInfoReceived(&info);
 }
 
 int32_t DiscRecoveryPublish()
