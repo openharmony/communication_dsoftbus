@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <thread>
 
+#include "lnn_lane_net_capability_mock.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_interface.h"
@@ -628,6 +629,8 @@ HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(nodeInfo), Return(SOFTBUS_OK)));
     LaneListenerDepsInterfaceMock listenerMock;
     EXPECT_CALL(listenerMock, DetectDisableWifiDirectApply).WillRepeatedly(Return());
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     WifiDirectSinkLink link = {
         .linkType = WIFI_DIRECT_LINK_TYPE_HML,
         .bandWidth = BAND_WIDTH_20M,

@@ -31,6 +31,7 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_conflict.h"
+#include "lnn_lane_link_ledger.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_reliability.h"
@@ -474,7 +475,7 @@ static LnnLaneManager g_LaneManager = {
     .unRegisterLaneListener = UnRegisterLaneListener,
 };
 
-LnnLaneManager* GetLaneManager(void)
+LnnLaneManager *GetLaneManager(void)
 {
     return &g_LaneManager;
 }
@@ -655,6 +656,11 @@ int32_t InitLane(void)
         /* optional case, ignore result */
         LNN_LOGW(LNN_LANE, "init vap info err, ret=%{public}d", ret);
     }
+    ret = InitLinkLedger();
+    if (ret != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "init link build info ledger err, ret=%{public}d", ret);
+    }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_NO_INIT;
     }
@@ -679,6 +685,7 @@ void DeinitLane(void)
     LnnDeinitVapInfo();
     DeinitLaneSelectRule();
     DeinitLaneLinkConflict();
+    DeinitLinkLedger();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
     }

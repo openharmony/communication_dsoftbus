@@ -16,9 +16,9 @@
 #ifndef LNN_SELECT_RULE_H
 #define LNN_SELECT_RULE_H
 
-#include "softbus_common.h"
-#include "lnn_lane_select.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_select.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ typedef enum {
 
 typedef struct {
     bool available;
-    int32_t (*linkCapCheck)(const char *networkId);
+    int32_t (*linkFeatureCheck)(const char *networkId);
     int32_t (*getLinkScore)(const char *networkId, uint32_t expectedBw);
 } LinkAttribute;
 

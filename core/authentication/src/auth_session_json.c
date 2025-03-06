@@ -97,6 +97,7 @@
 #define VERSION_TYPE                "VERSION_TYPE"
 #define BT_MAC                      "BT_MAC"
 #define BLE_MAC                     "BLE_MAC"
+#define STATIC_NET_CAP              "STATIC_NET_CAP"
 #define CONN_CAP                    "CONN_CAP"
 #define AUTH_CAP                    "AUTH_CAP"
 #define HB_CAP                      "HB_CAP"
@@ -172,6 +173,7 @@
 #define PARSE_UNCOMPRESS_STRING_BUFF_LEN 6 // "true" or "false"
 #define TRUE_STRING_TAG                  "true"
 #define FALSE_STRING_TAG                 "false"
+#define DEFAULT_STATIC_NET_CAP           0x3F
 
 /* fast_auth */
 #define ACCOUNT_HASH      "accountHash"
@@ -1540,6 +1542,7 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
 static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
 {
     bool isFalse = (!JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
+        !JSON_AddInt32ToObject(json, STATIC_NET_CAP, info->staticNetCap) ||
         !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
         !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
         !JSON_AddInt32ToObject(json, HB_CAP, info->heartbeatCapacity) ||
@@ -1690,19 +1693,24 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
     (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
 }
 
-static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
+static void ParseDeviceName(const JsonObj *json, NodeInfo *info)
 {
-    (void)JSON_GetStringFromOject(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
-    OptString(json, PKG_VERSION, info->pkgVersion, VERSION_MAX_LEN, "");
     OptString(json, UNIFIED_DEVICE_NAME, info->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, "");
     OptString(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, "");
     OptString(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, "");
+    (void)JSON_GetStringFromOject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
+}
+
+static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
+{
+    ParseDeviceName(json, info);
+    (void)JSON_GetStringFromOject(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
+    OptString(json, PKG_VERSION, info->pkgVersion, VERSION_MAX_LEN, "");
     OptInt64(json, WIFI_VERSION, &info->wifiVersion, 0);
     OptInt64(json, BLE_VERSION, &info->bleVersion, 0);
     OptString(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN, "");
     OptString(json, BLE_MAC, info->connectInfo.bleMacAddr, MAC_LEN, "");
     char deviceType[DEVICE_TYPE_BUF_LEN] = { 0 };
-    (void)JSON_GetStringFromOject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
     if (JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
         (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
     }
@@ -1712,6 +1720,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     }
     (void)JSON_GetStringFromOject(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
     (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
+    OptInt(json, STATIC_NET_CAP, (int32_t *)&info->staticNetCap, DEFAULT_STATIC_NET_CAP);
     (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
     (void)JSON_GetInt32FromOject(json, HB_CAP, (int32_t *)&info->heartbeatCapacity);

@@ -286,7 +286,7 @@ typedef struct {
     int32_t (*unRegisterLaneListener)(LaneType type);
 } LnnLaneManager;
 
-LnnLaneManager* GetLaneManager(void);
+LnnLaneManager *GetLaneManager(void);
 
 int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
 uint32_t ApplyLaneReqId(LaneType type);

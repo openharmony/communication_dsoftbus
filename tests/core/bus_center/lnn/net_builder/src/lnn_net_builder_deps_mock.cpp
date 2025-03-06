@@ -763,5 +763,16 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
 {
     return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
 }
+
+int32_t LnnInitSaStatusMonitor()
+{
+    return GetNetBuilderDepsInterface()->LnnInitSaStatusMonitor();
+}
+
+void LnnDeInitSaStatusMonitor()
+{
+    GetNetBuilderDepsInterface()->LnnDeInitSaStatusMonitor();
+}
+
 } // extern "C"
 } // namespace OHOS

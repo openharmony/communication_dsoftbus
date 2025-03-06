@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <thread>
 
+#include "lnn_lane_net_capability_mock.h"
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_link_deps_mock.h"
 #include "lnn_lane_link_p2p.h"
@@ -291,6 +292,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_001, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -341,6 +344,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_002, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -389,6 +394,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_003, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -440,6 +447,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_004, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -493,6 +502,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_005, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -546,6 +557,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_006, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -600,6 +613,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_007, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -648,6 +663,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_008, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -702,6 +719,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_009, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
@@ -751,6 +770,8 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, RecycleP2pLinkedReq_001, TestSize.Level1)
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
