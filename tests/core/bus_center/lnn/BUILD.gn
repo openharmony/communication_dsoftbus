@@ -2007,6 +2007,7 @@ ohos_unittest("LNNLaneHubTest") {
 
   include_dirs = [
     "lane/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",

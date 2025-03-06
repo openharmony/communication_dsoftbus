@@ -164,6 +164,11 @@ void ISoftBusClient::OnDataLevelChanged(const char *networkId, const DataLevelIn
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }
 
+void ISoftBusClient::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+}
+
 int32_t ISoftBusClient::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");

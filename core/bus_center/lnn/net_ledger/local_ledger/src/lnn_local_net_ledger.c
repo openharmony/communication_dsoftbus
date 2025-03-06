@@ -990,6 +990,12 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     if (GetCommonDeviceVersion(info->deviceVersion, DEVICE_VERSION_SIZE_MAX) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get device version failed");
     }
+    if (GetCommonDeviceProductId(info->productId, PRODUCT_ID_SIZE_MAX) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device productId failed");
+    }
+    if (GetCommonDeviceModelName(info->modelName, MODEL_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device modelName failed");
+    }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedName fail");
     }

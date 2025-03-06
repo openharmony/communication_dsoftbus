@@ -105,6 +105,8 @@
 #define MASTER_UDID                 "MASTER_UDID"
 #define MASTER_WEIGHT               "MASTER_WEIGHT"
 #define BLE_P2P                     "BLE_P2P"
+#define PRODUCT_ID                  "PRODUCT_ID"
+#define MODEL_NAME                  "MODEL_NAME"
 #define STA_FREQUENCY               "STA_FREQUENCY"
 #define P2P_MAC_ADDR                "P2P_MAC_ADDR"
 #define P2P_ROLE                    "P2P_ROLE"
@@ -215,7 +217,7 @@ static void OptString(
         AUTH_LOGI(AUTH_FSM, "set default fail");
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
+    AUTH_LOGI(AUTH_FSM, "key parse fail, use default. key=%{public}s", key);
 }
 
 static void OptInt(const JsonObj *json, const char * const key, int *target, int defaultValue)
@@ -223,7 +225,7 @@ static void OptInt(const JsonObj *json, const char * const key, int *target, int
     if (JSON_GetInt32FromOject(json, key, target)) {
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
+    AUTH_LOGI(AUTH_FSM, "key parse fail, use default. key=%{public}s", key);
     *target = defaultValue;
 }
 
@@ -232,7 +234,7 @@ static void OptInt64(const JsonObj *json, const char * const key, int64_t *targe
     if (JSON_GetInt64FromOject(json, key, target)) {
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
+    AUTH_LOGI(AUTH_FSM, "key parse fail, use default. key=%{public}s", key);
     *target = defaultValue;
 }
 
@@ -241,7 +243,7 @@ static void OptBool(const JsonObj *json, const char * const key, bool *target, b
     if (JSON_GetBoolFromOject(json, key, target)) {
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
+    AUTH_LOGI(AUTH_FSM, "key parse fail, use default. key=%{public}s", key);
     *target = defaultValue;
 }
 
@@ -1302,7 +1304,9 @@ static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMet
     (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
     if (!JSON_AddStringToObject(json, NETWORK_ID, info->networkId) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
-        !JSON_AddStringToObject(json, DEVICE_UDID, LnnGetDeviceUdid(info))) {
+        !JSON_AddStringToObject(json, DEVICE_UDID, LnnGetDeviceUdid(info)) ||
+        !JSON_AddStringToObject(json, PRODUCT_ID, info->deviceInfo.productId) ||
+        !JSON_AddStringToObject(json, MODEL_NAME, info->deviceInfo.modelName)) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
@@ -1706,42 +1710,21 @@ static void ParseDeviceName(const JsonObj *json, NodeInfo *info)
     (void)JSON_GetStringFromOject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
 }
 
-static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
+static void ParseCommonJsonOptInfo(const JsonObj *json, NodeInfo *info)
 {
-    ParseDeviceName(json, info);
-    (void)JSON_GetStringFromOject(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
+    OptInt(json, STATIC_NET_CAP, (int32_t *)&info->staticNetCap, DEFAULT_STATIC_NET_CAP);
     OptString(json, PKG_VERSION, info->pkgVersion, VERSION_MAX_LEN, "");
     OptInt64(json, WIFI_VERSION, &info->wifiVersion, 0);
     OptInt64(json, BLE_VERSION, &info->bleVersion, 0);
     OptString(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN, "");
     OptString(json, BLE_MAC, info->connectInfo.bleMacAddr, MAC_LEN, "");
-    char deviceType[DEVICE_TYPE_BUF_LEN] = { 0 };
-    if (JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
-        (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
-    }
-    (void)JSON_GetStringFromOject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN);
-    if (isMetaAuth) {
-        (void)JSON_GetStringFromOject(json, DEVICE_UUID, info->uuid, UDID_BUF_LEN);
-    }
-    (void)JSON_GetStringFromOject(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
-    (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
-    OptInt(json, STATIC_NET_CAP, (int32_t *)&info->staticNetCap, DEFAULT_STATIC_NET_CAP);
-    (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
-    (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
-    (void)JSON_GetInt32FromOject(json, HB_CAP, (int32_t *)&info->heartbeatCapacity);
-    info->isBleP2p = false;
-    (void)JSON_GetBoolFromOject(json, BLE_P2P, &info->isBleP2p);
-    (void)JSON_GetInt16FromOject(json, DATA_CHANGE_FLAG, (int16_t *)&info->dataChangeFlag);
-    (void)JSON_GetBoolFromOject(json, IS_CHARGING, &info->batteryInfo.isCharging);
-    (void)JSON_GetInt32FromOject(json, REMAIN_POWER, &info->batteryInfo.batteryLevel);
-    (void)JSON_GetBoolFromOject(json, IS_SUPPORT_IPV6, &info->isSupportIpv6);
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
     OptInt(json, OS_TYPE, &info->deviceInfo.osType, -1);
     if ((info->deviceInfo.osType == -1) && info->authCapacity != 0) {
         info->deviceInfo.osType = OH_OS_TYPE;
-        AUTH_LOGD(AUTH_FSM, "info->deviceInfo.osType: %{public}d", info->deviceInfo.osType);
+        AUTH_LOGD(AUTH_FSM, "info->deviceInfo.osType=%{public}d", info->deviceInfo.osType);
     }
     OptString(json, OS_VERSION, info->deviceInfo.osVersion, OS_VERSION_BUF_LEN, "");
     OptString(json, DEVICE_VERSION, info->deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, "");
@@ -1755,6 +1738,34 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
     OptInt64(json, CONN_SUB_FEATURE, (int64_t *)&info->connSubFeature, 0);
     OptInt(json, STATE_VERSION_CHANGE_REASON, (int32_t *)&info->stateVersionReason, 0);
+}
+
+static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
+{
+    ParseDeviceName(json, info);
+    (void)JSON_GetStringFromOject(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
+    char deviceType[DEVICE_TYPE_BUF_LEN] = { 0 };
+    if (JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
+        (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
+    }
+    (void)JSON_GetStringFromOject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN);
+    (void)JSON_GetStringFromOject(json, PRODUCT_ID, info->deviceInfo.productId, PRODUCT_ID_SIZE_MAX);
+    (void)JSON_GetStringFromOject(json, MODEL_NAME, info->deviceInfo.modelName, MODEL_NAME_SIZE_MAX);
+    if (isMetaAuth) {
+        (void)JSON_GetStringFromOject(json, DEVICE_UUID, info->uuid, UDID_BUF_LEN);
+    }
+    (void)JSON_GetStringFromOject(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
+    (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
+    (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
+    (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
+    (void)JSON_GetInt32FromOject(json, HB_CAP, (int32_t *)&info->heartbeatCapacity);
+    info->isBleP2p = false;
+    (void)JSON_GetBoolFromOject(json, BLE_P2P, &info->isBleP2p);
+    (void)JSON_GetInt16FromOject(json, DATA_CHANGE_FLAG, (int16_t *)&info->dataChangeFlag);
+    (void)JSON_GetBoolFromOject(json, IS_CHARGING, &info->batteryInfo.isCharging);
+    (void)JSON_GetInt32FromOject(json, REMAIN_POWER, &info->batteryInfo.batteryLevel);
+    (void)JSON_GetBoolFromOject(json, IS_SUPPORT_IPV6, &info->isSupportIpv6);
+    ParseCommonJsonOptInfo(json, info);
 }
 
 static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
@@ -2024,8 +2035,10 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
         !JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN) ||
         !JSON_GetStringFromOject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN) ||
         !JSON_GetStringFromOject(json, UUID, info->uuid, UUID_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, BR_MAC_ADDR, info->connectInfo.macAddr, MAC_LEN)) {
-        AUTH_LOGE(AUTH_FSM, "prase devinfo fail, invalid msg");
+        !JSON_GetStringFromOject(json, BR_MAC_ADDR, info->connectInfo.macAddr, MAC_LEN) ||
+        !JSON_GetStringFromOject(json, PRODUCT_ID, info->deviceInfo.productId, PRODUCT_ID_SIZE_MAX) ||
+        !JSON_GetStringFromOject(json, MODEL_NAME, info->deviceInfo.modelName, MODEL_NAME_SIZE_MAX)) {
+        AUTH_LOGE(AUTH_FSM, "parse devinfo fail, invalid msg");
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
     (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));

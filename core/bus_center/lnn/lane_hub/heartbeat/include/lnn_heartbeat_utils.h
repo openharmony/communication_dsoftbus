@@ -156,6 +156,10 @@ typedef struct {
     int32_t (*onDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
 } IDataLevelChangeCallback;
 
+typedef struct {
+    void (*onRangeDone)(const BleRangeInnerInfo *info);
+} IBleRangeInnerCallback;
+
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);
 

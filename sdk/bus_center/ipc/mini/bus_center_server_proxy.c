@@ -72,6 +72,26 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    (void)pkgName;
+    (void)callerId;
+    (void)mode;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen, isForceJoin);
