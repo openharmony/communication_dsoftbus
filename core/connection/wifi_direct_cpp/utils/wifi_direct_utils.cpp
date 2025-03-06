@@ -726,7 +726,7 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
             CONN_LOGE(CONN_WIFI_DIRECT, "get wifi direct addr failed, remoteNetworkId=%{public}s, ret=%{public}d",
                 WifiDirectAnonymizeDeviceId(basicInfo[i].networkId).c_str(), ret);
             continue;
-        }  
+        }
         if (remoteMac == wifiDirectAddr) {
             SoftBusFree(basicInfo);
             return NetworkIdToUuid(basicInfo[i].networkId);
