@@ -98,7 +98,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
     DiscManagerInterfaceMock discMock;
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
-    int32_t ret = LnnPublishService(pkgName, &info, isInnerRequest);
+    int32_t ret = LnnPublishService(pkgName, &info, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
 }
 
@@ -118,17 +118,17 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level
 
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
-    ret = LnnPublishService(pkgName, &info, isInnerRequest);
+    ret = LnnPublishService(pkgName, &info, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnPublishService(pkgName, &info, isInnerRequest);
+    ret = LnnPublishService(pkgName, &info, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_NOT_INIT));
-    ret = LnnPublishService(pkgName, &info, isInnerRequest);
+    ret = LnnPublishService(pkgName, &info, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_NOT_INIT);
     EXPECT_CALL(discMock, DiscStartScan).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnPublishService(pkgName, &info, isInnerRequest);
+    ret = LnnPublishService(pkgName, &info, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -147,17 +147,17 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
     int32_t ret = 0;
 
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
+    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
+    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
+    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
+    ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -180,22 +180,22 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Lev
     };
     (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL));
-    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
+    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL);
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
+    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE));
-    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
+    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL));
-    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
+    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL);
     EXPECT_CALL(discMock, DiscSetDiscoverCallback).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest);
+    ret = LnnStartDiscDevice(pkgName, &info, &cb, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -214,17 +214,17 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
     int32_t ret = 0;
 
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
+    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
+    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
+    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
+    ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

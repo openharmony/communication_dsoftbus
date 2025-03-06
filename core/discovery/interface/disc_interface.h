@@ -79,8 +79,9 @@ void DiscMgrDeinit(void);
  * @brief Found management module information destroy callback function.
  * Destroy the configuration related to the discovery release and clear it.
  * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] pid Indicates pid of the invoking process.
  */
-void DiscMgrDeathCallback(const char *pkgName);
+void DiscMgrDeathCallback(const char *pkgName, int32_t pid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -133,7 +134,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> if InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> if the passive publish is successful.
  */
-int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info);
+int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info, int32_t callingPid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -147,7 +148,7 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> if InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> if the stop publish is successful.
  */
-int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
+int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId, int32_t callingPid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -166,7 +167,7 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> Active discover successfully.
  */
-int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info);
+int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info, int32_t callingPid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -198,7 +199,7 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> Stop discover successfully.
  */
-int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId);
+int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId, int32_t callingPid);
 
 /**
  * @brief Modify the connection state.

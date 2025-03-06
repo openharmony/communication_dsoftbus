@@ -16,6 +16,7 @@
 #include "lnn_coap_discovery_impl.h"
 
 #include <securec.h>
+#include <unistd.h>
 
 #include "anonymizer.h"
 #include "auth_interface.h"
@@ -134,18 +135,21 @@ int32_t LnnStartCoapPublish(void)
         .dataLen = strlen(LNN_DISC_CAPABILITY),
     };
     LNN_LOGD(LNN_BUILDER, "lnn start coap publish");
-    return LnnPublishService(NULL, &publishInfo, true);
+    int32_t pid = getpid();
+    return LnnPublishService(NULL, &publishInfo, true, pid);
 }
 
 int32_t LnnStopCoapPublish(void)
 {
     LNN_LOGD(LNN_BUILDER, "lnn stop coap publish");
-    return LnnUnPublishService(NULL, LNN_PUBLISH_ID, true);
+    int32_t pid = getpid();
+    return LnnUnPublishService(NULL, LNN_PUBLISH_ID, true, pid);
 }
 
 int32_t LnnStopCoapDiscovery(void)
 {
-    return LnnStopDiscDevice(NULL, LNN_SUBSCRIBE_ID, true);
+    int32_t pid = getpid();
+    return LnnStopDiscDevice(NULL, LNN_SUBSCRIBE_ID, true, pid);
 }
 
 int32_t LnnStartCoapDiscovery(void)
@@ -165,7 +169,8 @@ int32_t LnnStartCoapDiscovery(void)
         .innerCb = g_discCb,
     };
     LnnDestroyCoapConnectList();
-    return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true);
+    int32_t pid = getpid();
+    return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true, pid);
 }
 
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
