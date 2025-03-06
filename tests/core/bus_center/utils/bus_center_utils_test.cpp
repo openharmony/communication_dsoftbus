@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -311,28 +311,27 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_SET_TEST_001, TestSize.Level1)
     Map *cMap = (Map *)SoftBusCalloc(sizeof(Map));
     ASSERT_NE(cMap, nullptr);
     cMap->nodes = (MapNode **)SoftBusCalloc(sizeof(MapNode *));
-    if (cMap->nodes == nullptr) {
-        SoftBusFree(cMap);
+    if (cMap->nodes != nullptr) {
+        cMap->bucketSize = 0;
+        cMap->nodeSize = 1;
+        const char *key = "123412341234abcdef";
+        NodeInfo nodeInfo;
+        (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        uint32_t valueSize = HDF_MAP_VALUE_MAX_SIZE + 1;
+        int32_t ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
+        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+        valueSize = HDF_MAP_VALUE_MAX_SIZE;
+        ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
+        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+        cMap->bucketSize = 1;
+        ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+
+        EXPECT_EQ(LnnMapErase(cMap, key), SOFTBUS_OK);
+        EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
     }
-    cMap->bucketSize = 0;
-    cMap->nodeSize = 1;
-    const char *key = "123412341234abcdef";
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    uint32_t valueSize = HDF_MAP_VALUE_MAX_SIZE + 1;
-    int32_t ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    valueSize = HDF_MAP_VALUE_MAX_SIZE;
-    ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    cMap->bucketSize = 1;
-    ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    EXPECT_EQ(LnnMapErase(cMap, key), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
     SoftBusFree(cMap);
 }
 
