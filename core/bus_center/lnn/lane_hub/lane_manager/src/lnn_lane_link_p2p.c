@@ -72,6 +72,7 @@ typedef struct {
     uint32_t bandWidth;
     uint64_t triggerLinkTime;
     uint64_t availableLinkTime;
+    int32_t reconnectTimes;
 } P2pRequestInfo;
 
 typedef struct {
@@ -176,6 +177,7 @@ static SoftBusMutex g_rawLinkLock;
 #define BLE_TRIGGER_TIMEOUT            5000
 #define RAW_LINK_CHECK_DELAY           (200)
 #define RAW_LINK_CHECK_NUM             (10)
+#define WIFIDIRECT_RECONNECT_TIMES     (1)
 
 #define DFX_RECORD_LNN_LANE_SELECT_END(lnnLaneId, lnnConnReqId)                    \
     do {                                                                           \
@@ -621,7 +623,7 @@ static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *r
     return SOFTBUS_OK;
 }
 
-bool CheckStrictProtocol(const char *networkId, LaneLinkType linkType)
+static bool CheckStrictProtocol(const char *networkId, LaneLinkType linkType)
 {
     return (linkType == LANE_P2P && IsSupportWifiDirectEnhance(networkId));
 }
@@ -1534,6 +1536,30 @@ static void HandleNotSupportP2pError(AsyncResultType type, uint32_t p2pRequestId
     }
 }
 
+static bool IsStartWifiDirectReconnect(uint32_t p2pRequestId, int32_t reason)
+{
+    if (reason != SOFTBUS_CONN_RETRYABLE_FAIL_WITH_CURRENT_GUIDE) {
+        return false;
+    }
+    P2pLinkReqList reqInfo;
+    (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2pLinkReq fail, type=%{public}d, requestId=%{public}u",
+            ASYNC_RESULT_P2P, p2pRequestId);
+        return false;
+    }
+    if (reqInfo.p2pInfo.reconnectTimes >= WIFIDIRECT_RECONNECT_TIMES) {
+        LNN_LOGE(LNN_LANE, "reconnect device times exceed limit, requestId=%{public}u", p2pRequestId);
+        return false;
+    }
+    LNN_LOGI(LNN_LANE, "start reconnect device with current guide, p2pRequestId=%{public}u", p2pRequestId);
+    if (WifiDirectReconnectDevice(p2pRequestId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "reconnect device fail, p2pRequestId=%{public}u", p2pRequestId);
+        return false;
+    }
+    return true;
+}
+
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
@@ -1573,6 +1599,9 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
     }
     if (reason == SOFTBUS_CONN_P2P_STA_SAME_MAC) {
         HandleNotSupportP2pError(ASYNC_RESULT_P2P, p2pRequestId);
+    }
+    if (IsStartWifiDirectReconnect(p2pRequestId, reason)) {
+        return;
     }
     NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
 }
@@ -1669,6 +1698,7 @@ static int32_t AddP2pLinkReqItem(AsyncResultType type, uint32_t requestId, uint3
     item->p2pInfo.reuseOnly = false;
     item->laneRequestInfo.isSupportIpv6 = request->isSupportIpv6 ? IPV6 : IPV4;
     item->p2pInfo.actionAddr = request->actionAddr;
+    item->p2pInfo.reconnectTimes = 0;
     if (LinkLock() != 0) {
         SoftBusFree(item);
         LNN_LOGE(LNN_LANE, "lock fail, add conn request fail");
@@ -2684,6 +2714,26 @@ void RecycleP2pLinkedReqByLinkType(const char *peerNetworkId, LaneLinkType linkT
     LinkUnlock();
 }
 
+static int32_t UpdateP2pLinkReconnTimesByReqId(AsyncResultType type, uint32_t requestId)
+{
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    P2pLinkReqList *item = NULL;
+    P2pLinkReqList *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkList, P2pLinkReqList, node) {
+        if (type == ASYNC_RESULT_P2P && item->p2pInfo.p2pRequestId == requestId) {
+            item->p2pInfo.reconnectTimes++;
+            LinkUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LinkUnlock();
+    LNN_LOGE(LNN_LANE, "p2pLinkReq item not found, type=%{public}d, requestId=%{public}u.", type, requestId);
+    return SOFTBUS_LANE_NOT_FOUND;
+}
+
 static int32_t GenerateWifiDirectNegoChannel(WdGuideType guideType, const P2pLinkReqList *reqInfo,
     struct WifiDirectConnectInfo *info)
 {
@@ -2782,6 +2832,11 @@ int32_t WifiDirectReconnectDevice(uint32_t p2pRequestId)
             ASYNC_RESULT_P2P, p2pRequestId);
         return ret;
     }
+    ret = UpdateP2pLinkReconnTimesByReqId(ASYNC_RESULT_P2P, p2pRequestId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "update reconnect times fail, requestId=%{public}u, ret=%{public}d", p2pRequestId, ret);
+        return ret;
+    }
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     ret = GenerateWifiDirectInfo(&reqInfo, &wifiDirectInfo);
@@ -2793,7 +2848,7 @@ int32_t WifiDirectReconnectDevice(uint32_t p2pRequestId)
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
-    LNN_LOGI(LNN_LANE, "wifidirect reconnectDevice. p2pRequest=%{public}u, connectType=%{public}d",
+    LNN_LOGI(LNN_LANE, "wifidirect reconnectDevice. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
     if (ret != SOFTBUS_OK) {
