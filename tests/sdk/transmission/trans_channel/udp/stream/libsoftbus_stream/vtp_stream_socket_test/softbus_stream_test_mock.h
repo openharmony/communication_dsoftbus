@@ -35,6 +35,11 @@ public:
     virtual FILLP_INT32 FtConfigGet(IN FILLP_UINT32 name, IO void *value, IN FILLP_CONST void *param) = 0;
     virtual FILLP_INT32 FtConfigSet(IN FILLP_UINT32 name, IN FILLP_CONST void *value, IN FILLP_CONST void *param) = 0;
     virtual FILLP_INT FtSend(FILLP_INT fd, FILLP_CONST void *data, size_t size, FILLP_INT flag) = 0;
+    virtual FILLP_INT FtFillpStatsGet(IN FILLP_INT fd, OUT struct FillpStatisticsPcb *outStats) = 0;
+    virtual FILLP_INT FtConnect(FILLP_INT fd, FILLP_CONST FILLP_SOCKADDR *name, socklen_t nameLen) = 0;
+    virtual FILLP_INT FtEpollCreate(void) = 0;
+    virtual FILLP_INT FtSendFrame(FILLP_INT fd, FILLP_CONST void *data, size_t size, FILLP_INT flag,
+        FILLP_CONST struct FrameInfo *frame) = 0;
 };
 
 class SoftBusStreamTestInterfaceMock : public SoftBusStreamTestInterface {
@@ -49,6 +54,11 @@ public:
     MOCK_METHOD3(FtConfigSet, FILLP_INT32 (IN FILLP_UINT32 name, IN FILLP_CONST void *value,
         IN FILLP_CONST void *param));
     MOCK_METHOD4(FtSend, FILLP_INT (FILLP_INT fd, FILLP_CONST void *data, size_t size, FILLP_INT flag));
+    MOCK_METHOD2(FtFillpStatsGet, FILLP_INT (IN FILLP_INT fd, OUT struct FillpStatisticsPcb *outStats));
+    MOCK_METHOD3(FtConnect, FILLP_INT (FILLP_INT fd, FILLP_CONST FILLP_SOCKADDR *name, socklen_t nameLen));
+    MOCK_METHOD0(FtEpollCreate, FILLP_INT (void));
+    MOCK_METHOD5(FtSendFrame, FILLP_INT (FILLP_INT fd, FILLP_CONST void *data, size_t size,
+        FILLP_INT flag, FILLP_CONST struct FrameInfo *frame));
 };
 } // namespace OHOS
 #endif // SOFTBUS_STREAM_TEST_MOCK_H
