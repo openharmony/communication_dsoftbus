@@ -1455,7 +1455,7 @@ static void ProcessBleOnlineForAuthPreLink(LnnConnectionFsm *connFsm)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "start ble online");
-    ProcessBleOnline(connFsm->connInfo.nodeInfo, &connAddr, BIT_SUPPORT_BR_DUP_BLE);
+    ProcessBleOnline(connFsm->connInfo.nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
 }
 
 static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
