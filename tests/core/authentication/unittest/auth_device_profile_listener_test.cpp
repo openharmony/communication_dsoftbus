@@ -287,7 +287,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, Tes
     int32_t ret = listener->OnTrustDeviceProfileActive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillOnce(Return(true));
-    EXPECT_CALL(mocker, IsHeartbeatEnable).WillOnce(Return(false));
+    EXPECT_CALL(mocker, IsHeartbeatEnable).WillOnce(Return(true));
     EXPECT_CALL(mocker, LnnStartHbByTypeAndStrategy).WillOnce(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
     ret = listener->OnTrustDeviceProfileActive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
