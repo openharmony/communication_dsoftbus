@@ -946,7 +946,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     } else if (ret != SOFTBUS_OK) {
         SocketServerStateUpdate(newSessionName);
         TRANS_LOGE(TRANS_SDK, "createSocketServer failed, ret=%{public}d", ret);
-        (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, newSessionName);
+        (void)TryDeleteEmptySessionServer(pkgName, newSessionName);
         return ret;
     }
     TRANS_LOGD(TRANS_SDK, "ok");
