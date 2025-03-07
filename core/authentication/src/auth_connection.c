@@ -521,7 +521,8 @@ static void OnWiFiDisconnected(int32_t fd)
             .fd = fd,
             .ret = SOFTBUS_AUTH_CONN_FAIL,
         };
-        (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleTcpSessionConnConnectResult, &info, sizeof(AuthConnectResult), 0);
+        (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleTcpSessionConnConnectResult, &info,
+            sizeof(AuthConnectResult), 0);
         RouteClearAuthChannelId(fd);
         return;
     }

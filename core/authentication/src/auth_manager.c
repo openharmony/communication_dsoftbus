@@ -2237,7 +2237,6 @@ void DelAuthManagerByConnectionId(uint32_t connectionId)
 {
     uint64_t connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, connectionId);
     uint32_t num = 0;
-    uint64_t dupConnId = connId;
     int64_t authIds[2]; /* 2: client and server may use same connection. */
     authIds[num++] = GetAuthIdByConnId(connId, false);
     authIds[num++] = GetAuthIdByConnId(connId, true);
