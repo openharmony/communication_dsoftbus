@@ -437,7 +437,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
-static int32_t RetryRegTrustDataChangeListener()
+static int32_t RetryRegTrustDataChangeListener(void)
 {
     TrustDataChangeListener trustListener = {
         .onGroupCreated = OnGroupCreated,
@@ -673,6 +673,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
     bool judgeTimeOut = false;
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             authHandle.authId = GetLatestIdByConnInfo(info);
             if (authHandle.authId == AUTH_INVALID_ID) {
                 return SOFTBUS_AUTH_NOT_FOUND;
@@ -719,6 +720,7 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             /* Do nothing. */
             break;
         case AUTH_LINK_TYPE_BR:

@@ -825,7 +825,8 @@ static void ReportAuthRequestPassed(uint32_t requestId, AuthHandle authHandle, c
         if (CheckAuthConnCallback(&request.connCb)) {
             AuthNotifyDeviceVerifyPassed(authHandle, nodeInfo);
             if (request.connInfo.type == AUTH_LINK_TYPE_WIFI || request.connInfo.type == AUTH_LINK_TYPE_P2P ||
-                request.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+                request.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P ||
+                request.connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
                 PerformAuthConnCallback(request.requestId, SOFTBUS_OK, authHandle.authId);
                 DelAuthRequest(request.requestId);
                 continue;
@@ -914,7 +915,8 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
-    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_SESSION) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_SESSION &&
+        info->connInfo.type != AUTH_LINK_TYPE_SESSION_KEY) {
         PostCancelAuthMessage(authSeq, info);
     }
     if (!info->isConnectServer) {
@@ -1213,7 +1215,7 @@ static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, con
             return;
         }
         extra.peerUdidHash = udidHash;
-    } else if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
+    } else if (connInfo->type == AUTH_LINK_TYPE_WIFI || connInfo->type == AUTH_LINK_TYPE_SESSION_KEY) {
         ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
                                       connInfo->info.ipInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
         if (ret != SOFTBUS_OK) {
@@ -1423,7 +1425,8 @@ static void HandleConnectionData(
         PrintAuthConnInfo(connInfo);
         AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
         ReleaseAuthLock();
-        if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI) {
+        if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI ||
+            connInfo->type == AUTH_LINK_TYPE_SESSION_KEY) {
             return;
         }
         (void)PostDecryptFailAuthData(connId, fromServer, head, data);
@@ -1516,7 +1519,7 @@ static void HandleCancelAuthData(
 
 static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, bool *fromServer)
 {
-    if (connInfo->type != AUTH_LINK_TYPE_WIFI) {
+    if (connInfo->type != AUTH_LINK_TYPE_WIFI && connInfo->type != AUTH_LINK_TYPE_SESSION_KEY) {
         return;
     }
     uint32_t num = 0;
@@ -1535,6 +1538,29 @@ static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, boo
     }
 }
 
+static void OnDataReceivedCheckType(uint64_t *connId, const AuthConnInfo *connInfo)
+{
+    if (connId == NULL || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return;
+    }
+    if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
+        SoftBusSockAddrIn addr = { 0 };
+        int32_t socketFd = GetFd(*connId);
+        int32_t rc = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&addr);
+        if (rc == SOFTBUS_OK) {
+            if (addr.sinFamily == SOFTBUS_AF_INET6) {
+                AUTH_LOGI(AUTH_FSM, "ipv6 socket");
+                AuthConnInfo *connInfoTmp = (AuthConnInfo *)connInfo;
+                connInfoTmp->type = AUTH_LINK_TYPE_SESSION_KEY;
+                *connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, socketFd);
+            }
+        } else {
+            AUTH_LOGI(AUTH_CONN, "GetPerrName fd=%{public}d, rc=%{public}d", socketFd, rc);
+        }
+    }
+}
+
 static void OnDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1544,6 +1570,7 @@ static void OnDataReceived(
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)head->seq);
     CorrectFromServer(connId, connInfo, &fromServer);
+    OnDataReceivedCheckType(&connId, connInfo);
     AUTH_LOGI(AUTH_CONN,
         "auth recv data. type=0x%{public}x, module=%{public}d, seq=%{public}" PRId64 ", "
         "flag=%{public}d, len=%{public}u, " CONN_INFO ", fromServer=%{public}s",
@@ -1579,6 +1606,18 @@ static void OnDataReceived(
     SoftbusHitraceStop();
 }
 
+bool IsHaveAuthIdByConnId(uint64_t connId)
+{
+    int64_t authIds[2];
+    uint32_t num = 0;
+    authIds[num++] = GetAuthIdByConnId(connId, false);
+    authIds[num++] = GetAuthIdByConnId(connId, true);
+    if (authIds[0] != AUTH_INVALID_ID || authIds[1] != AUTH_INVALID_ID) {
+        return true;
+    }
+    return false;
+}
+
 static void HandleDisconnectedEvent(const void *para)
 {
     AUTH_CHECK_AND_RETURN_LOGE(para != NULL, AUTH_FSM, "para is null");
@@ -1597,7 +1636,7 @@ static void HandleDisconnectedEvent(const void *para)
             g_transCallback.onDisconnected(authHandle);
         }
         if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P ||
-            GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P) {
+            GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P || GetConnType(connId) == AUTH_LINK_TYPE_SESSION_KEY) {
             AuthNotifyDeviceDisconnect(authHandle);
             DisconnectAuthDevice(&dupConnId);
             AuthManager inAuth = {0};
@@ -1766,7 +1805,8 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE };
+    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
+        AUTH_LINK_TYPE_SESSION_KEY };
     uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
     for (uint32_t i = 0; i < linkTypeNum; i++) {
         if (GetAuthConnInfoByUuid(uuid, linkList[i], connInfo) != SOFTBUS_OK) {
@@ -1901,7 +1941,8 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t nu
     bool notFound = true;
     AuthManager *authClient = NULL;
     AuthManager *authServer = NULL;
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_BR };
+    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_BR,
+        AUTH_LINK_TYPE_SESSION_KEY };
     for (size_t i = 0; i < sizeof(linkList) / sizeof(AuthLinkType); i++) {
         authClient = FindAuthManagerByUdid(udid, linkList[i], false);
         authServer = FindAuthManagerByUdid(udid, linkList[i], true);
@@ -2190,4 +2231,25 @@ void AuthDeviceDeinit(void)
     AuthSessionFsmExit();
     AuthCommonDeinit();
     AUTH_LOGI(AUTH_INIT, "auth deinit succ");
+}
+
+void DelAuthManagerByConnectionId(uint32_t connectionId)
+{
+    uint64_t connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, connectionId);
+    uint32_t num = 0;
+    int64_t authIds[2]; /* 2: client and server may use same connection. */
+    authIds[num++] = GetAuthIdByConnId(connId, false);
+    authIds[num++] = GetAuthIdByConnId(connId, true);
+    for (uint32_t i = 0; i < num; i++) {
+        if (authIds[i] == AUTH_INVALID_ID) {
+            continue;
+        }
+        AuthHandle authHandle = { .authId = authIds[i], .type = GetConnType(connId) };
+        if (GetConnType(connId) == AUTH_LINK_TYPE_SESSION_KEY) {
+            AuthNotifyDeviceDisconnect(authHandle);
+            RemoveAuthManagerByAuthId(authHandle);
+        }
+    }
+    /* Try to terminate authing session. */
+    (void)AuthSessionHandleDeviceDisconnected(connId, false);
 }
