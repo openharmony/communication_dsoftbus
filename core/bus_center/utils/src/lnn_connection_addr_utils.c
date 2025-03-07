@@ -164,8 +164,10 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
         return DISCOVERY_TYPE_BR;
     } else if (type == CONNECTION_ADDR_BLE) {
         return DISCOVERY_TYPE_BLE;
-    } else if (type == CONNECTION_ADDR_SESSION || type == CONNECTION_ADDR_SESSION_WITH_KEY) {
+    } else if (type == CONNECTION_ADDR_SESSION) {
         return DISCOVERY_TYPE_BLE;
+    } else if (type == CONNECTION_ADDR_SESSION_WITH_KEY) {
+        return DISCOVERY_TYPE_SESSION_KEY;
     } else {
         return DISCOVERY_TYPE_COUNT;
     }
@@ -180,6 +182,8 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
             return CONNECTION_ADDR_BLE;
         case DISCOVERY_TYPE_BR:
             return CONNECTION_ADDR_BR;
+        case DISCOVERY_TYPE_SESSION_KEY:
+            return CONNECTION_ADDR_SESSION_WITH_KEY;
         default:
             break;
     }
@@ -201,7 +205,7 @@ static bool ConvertAddrToAuthConnInfoForSession(const ConnectionAddr *addr, Auth
         LNN_LOGE(LNN_STATE, "SocketGetConnInfo fail");
         return false;
     }
-    connInfo->type = AUTH_LINK_TYPE_WIFI;
+    connInfo->type = AUTH_LINK_TYPE_SESSION_KEY;
     LNN_LOGI(LNN_STATE, "connection_addr_session, deviceIdhash=%{public}s", connInfo->info.ipInfo.deviceIdHash);
     return true;
 }
@@ -276,6 +280,15 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
     }
     if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
         addr->type = hintType;
+        if (strcpy_s(addr->info.ip.ip, IP_LEN, connInfo->info.ipInfo.ip) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy ip to addr fail");
+            return false;
+        }
+        addr->info.ip.port = (uint16_t)connInfo->info.ipInfo.port;
+        return true;
+    }
+    if (connInfo->type == AUTH_LINK_TYPE_SESSION_KEY) {
+        addr->type = CONNECTION_ADDR_SESSION_WITH_KEY;
         if (strcpy_s(addr->info.ip.ip, IP_LEN, connInfo->info.ipInfo.ip) != EOK) {
             LNN_LOGE(LNN_STATE, "copy ip to addr fail");
             return false;

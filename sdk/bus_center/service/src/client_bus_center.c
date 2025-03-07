@@ -31,6 +31,7 @@
 #include "softbus_utils.h"
 
 static const char *g_dbPkgName = "distributeddata-default";
+#define DM_PKG_NAME "ohos.distributedhardware.devicemanager"
 
 static int32_t CommonInit(const char *pkgName)
 {
@@ -366,6 +367,12 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb,
             DfxRecordSdkJoinLnnEnd(pkgName, ret);
             LNN_LOGE(LNN_STATE, "get channel failed, sessionId=%{public}d", target->info.session.sessionId);
             return ret;
+        }
+        if (strcmp(pkgName, DM_PKG_NAME) == 0) {
+            ret = ClientCancelAuthSessionTimer(target->info.session.sessionId);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_STATE, "fail : cancel timer error, sessionId=%{public}d", target->info.session.sessionId);
+            }
         }
     }
     ret = JoinLNNInner(pkgName, target, cb, isForceJoin);

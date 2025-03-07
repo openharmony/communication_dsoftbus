@@ -237,19 +237,15 @@ static int32_t BusCenterServerInitSecondStep(void)
     }
     if (InitAuthPreLinkList() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initAuthPreLinkList fail");
-        return SOFTBUS_NO_INIT;
     }
     if (InitAuthGenCertParallelList() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initAuthGenCertParallelList fail");
-        return SOFTBUS_NO_INIT;
     }
     if (InitActionBleConcurrency() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initActionBleConcurrencyList fail");
-        return SOFTBUS_NO_INIT;
     }
     if (InitActionStateAdapter() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initActionStateAdapter fail");
-        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }

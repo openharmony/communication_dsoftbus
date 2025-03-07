@@ -180,6 +180,9 @@
         "PrivilegeShutdown";
         "RegisterRelationChecker";
         "SoftBusResolveConflict";
+        "SetPreLinkParam";
+        "GetPreLinkParam";
+        "RegPreLinkParamListener";
     local:
         *;
 };

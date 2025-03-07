@@ -376,6 +376,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             ret = LnnGetRemoteNodeInfoByKey(connInfo->info.ipInfo.ip, &info);
             if (ret != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by ip failed, ret=%{public}d", ret);

@@ -703,8 +703,7 @@ void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return;
     }
-    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS &&
-        strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) != 0) {
+    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS && !IsRawAuthSession(serverNode->sessionName)) {
         return;
     }
 
@@ -739,7 +738,7 @@ static bool CleanUpTimeoutAuthSession(int32_t sessionId)
         return false;
     }
 
-    if (strcmp(sessionName, ISHARE_AUTH_SESSION) != 0) {
+    if (!IsRawAuthSession(sessionName)) {
         return false;
     }
 

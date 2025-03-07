@@ -107,7 +107,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
         channelId, channelType, sessionId, isClosing);
 }
 
-int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key)
+int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, TransSessionKey key)
 {
     return GetClientTransProxyFileManagerInterface()->ClientGetSessionDataById(sessionId, data, len, key);
 }
