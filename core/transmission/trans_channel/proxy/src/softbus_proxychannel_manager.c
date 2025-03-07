@@ -1184,8 +1184,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     TRANS_CHECK_AND_RETURN_LOGW(!(chan == NULL), TRANS_CTRL, "proxy handshake calloc failed.");
     int32_t ret = TransProxyFillChannelInfo(msg, chan);
-    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED) &&
-        (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
+    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED ||
+         ret == SOFTBUS_PERMISSION_SERVER_DENIED) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = { 0 };
