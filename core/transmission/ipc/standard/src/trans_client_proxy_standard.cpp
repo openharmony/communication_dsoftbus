@@ -561,4 +561,9 @@ void TransClientProxy::OnDataLevelChanged(const char *networkId, const DataLevel
     (void)networkId;
     (void)dataLevelInfo;
 }
+
+void TransClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    (void)rangeInfo;
+}
 } // namespace OHOS

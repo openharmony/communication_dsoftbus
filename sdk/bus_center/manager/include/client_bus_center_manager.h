@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ble_range.h"
 #include "data_level.h"
 #include "data_level_inner.h"
 #include "softbus_bus_center.h"
@@ -43,6 +44,8 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback);
 int32_t UnregDataLevelChangeCbInner(const char *pkgName);
 int32_t SetDataLevelInner(const DataLevel *dataLevel);
 void RestartRegDataLevelChange(void);
+int32_t RegBleRangeCbInner(const char *pkgName, IBleRangeCb *callback);
+int32_t UnregBleRangeCbInner(const char *pkgName);
 
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);
@@ -56,6 +59,7 @@ int32_t DeactiveMetaNodeInner(const char *pkgName, const char *metaNodeId);
 int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
+int32_t TriggerHbForMeasureDistanceInner(const char *pkgName, const char *callerId, const HbMode *mode);
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen);
 int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len);
 
@@ -73,6 +77,7 @@ void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
+void LnnOnBleRangeDone(const BleRangeInnerInfo *rangeInfo);
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);

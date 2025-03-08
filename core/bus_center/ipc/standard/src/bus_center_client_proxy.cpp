@@ -244,3 +244,19 @@ int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *n
     clientProxy->OnDataLevelChanged(networkId, dataLevelInfo);
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnBleRange(const char *pkgName, int32_t pid, const BleRangeInnerInfo *rangeInfo)
+{
+    if (pkgName == nullptr || rangeInfo == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+    }
+    clientProxy->OnBleRangeDone(rangeInfo);
+    return SOFTBUS_OK;
+}

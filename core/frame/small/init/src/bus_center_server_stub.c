@@ -703,3 +703,24 @@ ERR_RETURN:
     WriteInt32(reply, SOFTBUS_INVALID_PARAM);
     return SOFTBUS_IPC_ERR;
 }
+
+int32_t ServerTriggerHbForMeasureDistance(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerRegBleRangeCb(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerUnregBleRangeCb(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

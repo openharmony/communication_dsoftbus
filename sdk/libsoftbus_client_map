@@ -25,6 +25,9 @@
         "DisableSessionListener";
         "SetFileSendListener";
         "ShiftLNNGear";
+        "TriggerHbForMeasureDistance";
+        "RegBleRangeCb";
+        "UnregBleRangeCb";
         "SyncTrustedRelationShip";
         "SetDisplayName";
         "GetNodeKeyInfo";

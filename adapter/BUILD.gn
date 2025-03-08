@@ -314,9 +314,13 @@ if (defined(ohos_lite)) {
                                    "$ble_enhanced_impl",
                                  ],
                                  "value")
-    if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
+    if (enhanced_range && defined(global_parts_info.msdp_algorithm) &&
+        defined(global_parts_info.msdp_range_measure)) {
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-      external_deps += [ "algorithm:msdp_ble_range" ]
+      external_deps += [
+        "algorithm:msdp_ble_range",
+        "spatial_awareness:msdp_range_measure",
+      ]
     } else {
       sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
     }
