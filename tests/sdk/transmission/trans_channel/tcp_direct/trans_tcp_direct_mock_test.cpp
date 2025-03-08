@@ -31,6 +31,7 @@
 #define PKG_HEAD_SIZE 32
 #define TRANS_TEST_FD 1000
 #define TRANS_TEST_CHANNEL_ID 1
+#define TEST_DATA_LEN 100
 
 static int32_t g_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -175,7 +176,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcParseTlv001, TestSize.Level0)
     data.dataLen = DATA_SIZE;
     PackTcpDataPacketHead(&data);
     uint32_t bufferSize = 0;
-    int32_t ret = TransTdcParseTlv(nullptr, nullptr, &bufferSize);
+    int32_t ret = TransTdcParseTlv(TEST_DATA_LEN, nullptr, nullptr, &bufferSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
