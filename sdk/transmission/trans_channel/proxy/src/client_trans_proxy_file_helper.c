@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ int32_t UnpackFileTransResultFrame(
         TRANS_LOGE(TRANS_FILE, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (data == NULL || len < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET) {
+    if (data == NULL || len < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET + sizeof(int32_t)) {
         TRANS_LOGE(TRANS_FILE, "recv ack fail. responseLen=%{public}u", len);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
