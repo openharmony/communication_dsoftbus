@@ -64,6 +64,5 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl001, TestSize.Le
 {
     int32_t ret = TransCheckServerAccessControl(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
 }
 } // namespace OHOS
