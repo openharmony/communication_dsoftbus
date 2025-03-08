@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -338,7 +338,7 @@ static int32_t UnpackFileTransStartInfo(
             fileNameData = fileFrame->fileData + FRAME_DATA_SEQ_OFFSET;
         }
     }
-    if (fileNameLen > MAX_FILE_PATH_NAME_LEN) {
+    if (fileNameLen >= MAX_FILE_PATH_NAME_LEN) {
         TRANS_LOGE(TRANS_FILE, "start info fail fileNameLen=%{public}" PRIu64, fileNameLen);
         return SOFTBUS_INVALID_PARAM;
     }
