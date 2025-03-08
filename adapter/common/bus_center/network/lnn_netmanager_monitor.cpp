@@ -243,7 +243,6 @@ static int32_t LnnRegisterNetManager(void)
     if (ret != NETMANAGER_OK) {
         SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
         LNN_LOGE(LNN_INIT, "register netmanager callback failed with ret=%{public}d", ret);
-        delete (netlinkCallback);
         return SOFTBUS_NETWORK_REGISTER_SERVICE_FAILED;
     }
     LNN_LOGI(LNN_INIT, "LnnRegisterNetManager succ");
@@ -265,7 +264,6 @@ int32_t LnnInitNetManagerMonitorImpl(void)
 void LnnDeinitNetManagerMonitorImpl(void)
 {
     if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
-        delete (OHOS::BusCenter::g_netlinkCallback);
         OHOS::BusCenter::g_netlinkCallback = nullptr;
     }
     (void)SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
