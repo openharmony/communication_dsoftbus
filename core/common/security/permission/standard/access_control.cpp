@@ -27,18 +27,25 @@
 #include "distributed_device_profile_enums.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "lnn_ohos_account_adapter.h"
+#include "os_account_manager.h"
 #include "permission_entry.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_proxychannel_callback.h"
 #include "system_ability_definition.h"
+#include "trans_session_account_adapter.h"
+#include "trans_session_manager.h"
 
 #ifdef SUPPORT_ABILITY_RUNTIME
 #include "app_mgr_interface.h"
 #include "app_mgr_proxy.h"
 #endif
 
+const std::string DMS_SESSIONNAME = "ohos.distributedschedule.dms.connect";
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
     using namespace OHOS;
@@ -70,10 +77,55 @@ static int32_t TransCheckAccessControl(uint64_t callingTokenId, const char *devi
     return SOFTBUS_OK;
 }
 
+static int32_t TransCheckSourceAccessControl(uint64_t myTokenId, const char *myDeviceId,
+    int32_t myUserId, const char *peerDeviceId)
+{
+    char *tmpMyDeviceId = nullptr;
+    char *tmpPeerDeviceId = nullptr;
+    Anonymize(myDeviceId, &tmpMyDeviceId);
+    Anonymize(peerDeviceId, &tmpPeerDeviceId);
+    COMM_LOGI(COMM_PERM, "accesserDeviceId: %{public}s, accesserTokenId: %{public}" PRIu64 ",\
+        accesserUserId: %{public}d, accesseeDeviceId: %{public}s",
+        tmpMyDeviceId, myTokenId, myUserId, tmpPeerDeviceId);
+    AnonymizeFree(tmpMyDeviceId);
+    AnonymizeFree(tmpPeerDeviceId);
+
+    std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
+    std::vector<AccessControlProfile> profile;
+    std::map<std::string, std::string> parms;
+    parms.insert({{"accesserDeviceId", myDeviceId}, {"accesserTokenId", std::to_string(myTokenId)},
+        {"accesserUserId", std::to_string(myUserId)}, {"accesseeDeviceId", peerDeviceId}});
+    int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
+    COMM_LOGI(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
+    if (profile.empty()) {
+        COMM_LOGE(COMM_PERM, "check acl failed:tokenId=%{public}" PRIu64, myTokenId);
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    }
+    for (auto &item : profile) {
+        COMM_LOGI(COMM_PERM, "BindLevel=%{public}d, BindType=%{public}d", item.GetBindLevel(), item.GetBindType());
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransCheckSinkAccessControl(const std::map<std::string, std::string> parms)
+{
+    std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
+    std::vector<AccessControlProfile> profile;
+    int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
+    if (profile.empty()) {
+        COMM_LOGE(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    }
+    for (auto &item : profile) {
+        COMM_LOGI(COMM_PERM, "BindLevel=%{public}d, BindType=%{public}d", item.GetBindLevel(), item.GetBindType());
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransCheckClientAccessControl(const char *peerNetworkId)
 {
     if (peerNetworkId == nullptr) {
-        COMM_LOGE(COMM_PERM, "peerDeviceId is null");
+        COMM_LOGE(COMM_PERM, "peerNetworkId is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -88,8 +140,29 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         return SOFTBUS_OK;
     }
 
-    char deviceId[UDID_BUF_LEN] = {0};
-    int32_t ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    int32_t appUserId = -1;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, appUserId);
+    bool isForegroundUser = false;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
+    if (ret != ERR_OK) {
+        COMM_LOGE(COMM_PERM, "app userId %{public}d is not Foreground, ret:%{public}d", appUserId, ret);
+        return ret;
+    }
+    if (!isForegroundUser) {
+        COMM_LOGE(COMM_PERM, "app userId is not Foreground");
+        return SOFTBUS_TRANS_BACKGROUND_USER_DENIED;
+    }
+
+    char myDeviceId[UDID_BUF_LEN] = {0};
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, myDeviceId, sizeof(myDeviceId));
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}" PRIu64 ", ret=%{public}d",
+            callingTokenId, ret);
+        return ret;
+    }
+    char peerDeviceId[UDID_BUF_LEN] = {0};
+    ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerDeviceId, sizeof(peerDeviceId));
     if (ret != SOFTBUS_OK) {
         char *tmpPeerNetworkId = nullptr;
         Anonymize(peerNetworkId, &tmpPeerNetworkId);
@@ -99,7 +172,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         AnonymizeFree(tmpPeerNetworkId);
         return ret;
     }
-    return TransCheckAccessControl(callingTokenId, deviceId);
+    return TransCheckSourceAccessControl(callingTokenId, myDeviceId, appUserId, peerDeviceId);
 }
 
 int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName)
@@ -126,26 +199,114 @@ int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionNa
     return SOFTBUS_OK;
 }
 
-int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
+int32_t CheckSinkAccessControl(const AppInfo *appInfo, uint64_t myTokenId, int32_t appUserId, const char *myDeviceId)
 {
+    char peerNetWorkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, peerNetWorkId, sizeof(peerNetWorkId));
+    if (ret != SOFTBUS_OK) {
+        char *tmpPeerUUId = nullptr;
+        Anonymize(appInfo->peerData.deviceId, &tmpPeerUUId);
+        COMM_LOGE(COMM_PERM, "get peerNetWorkId failed, uuid=%{public}s ret=%{public}d", tmpPeerUUId, ret);
+        AnonymizeFree(tmpPeerUUId);
+        return ret;
+    }
+    char peerDeviceId[UDID_BUF_LEN] = {0};
+    ret = LnnGetRemoteStrInfo(peerNetWorkId, STRING_KEY_DEV_UDID, peerDeviceId, sizeof(peerDeviceId));
+    if (ret != SOFTBUS_OK) {
+        char *tmpPeerNetworkId = nullptr;
+        Anonymize(appInfo->peerNetWorkId, &tmpPeerNetworkId);
+        COMM_LOGE(COMM_PERM, "get remote udid failed, tokenId=%{public}" PRIu64 ", networkId=%{public}s,\
+            ret=%{public}d",appInfo->callingTokenId, AnonymizeWrapper(tmpPeerNetworkId), ret);
+        AnonymizeFree(tmpPeerNetworkId);
+        return ret;
+    }
+
+    if (appInfo->peerData.userId == INVALID_USER_ID) {
+        return TransCheckAccessControl(appInfo->callingTokenId, myDeviceId);
+    } else {
+        char *tmpMyDeviceId = nullptr;
+        char *tmpPeerDeviceId = nullptr;
+        Anonymize(myDeviceId, &tmpMyDeviceId);
+        Anonymize(peerDeviceId, &tmpPeerDeviceId);
+        COMM_LOGI(COMM_PERM, "accesserDeviceId: %{public}s, accesserTokenId: %{public}" PRIu64 ",\
+            accesserUserId: %{public}d, accesseeDeviceId: %{public}s, accesseeTokenId: %{public}" PRIu64 ",\
+            accesseeUserId: %{public}d",tmpMyDeviceId, myTokenId, appUserId, tmpPeerDeviceId,
+            appInfo->callingTokenId, appInfo->peerData.userId);
+        AnonymizeFree(tmpMyDeviceId);
+        AnonymizeFree(tmpPeerDeviceId);
+
+        std::map<std::string, std::string> parms;
+        parms.insert({{"accesserDeviceId", myDeviceId}, {"accesserTokenId", std::to_string(myTokenId)},
+            {"accesserUserId", std::to_string(appUserId)}, {"accesseeDeviceId", peerDeviceId},
+            {"accesseeTokenId", std::to_string(appInfo->callingTokenId)},
+            {"accesseeUserId", std::to_string(appInfo->peerData.userId)}});
+        return TransCheckSinkAccessControl(parms);
+    }
+}
+
+int32_t TranCheckSinkAccessControl(const AppInfo *appInfo, uint64_t myTokenId)
+{
+    int32_t uid = -1;
+    int32_t pid = -1;
+    int32_t ret = TransProxyGetUidAndPidBySessionName(appInfo->myData.sessionName, &uid, &pid);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "get uid fail, uid=%{public}d pid=%{public}d ret=%{public}d", uid, pid, ret);
+        return ret;
+    }
+    int32_t appUserId = -1;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, appUserId);
+    bool isForegroundUser = false;
+    ret = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
+    if (ret != ERR_OK) {
+        COMM_LOGE(COMM_PERM, "app userId %{public}d is not foreground, ret:%{public}d", appUserId, ret);
+        return ret;
+    }
+    if (!isForegroundUser) {
+        COMM_LOGE(COMM_PERM, "app userId %{public}d is not foreground", appUserId);
+        return SOFTBUS_TRANS_BACKGROUND_USER_DENIED;
+    }
+    char myDeviceId[UDID_BUF_LEN] = {0};
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, myDeviceId, sizeof(myDeviceId));
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "get deviceId failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return CheckSinkAccessControl(appInfo, myTokenId, appUserId, myDeviceId);
+}
+
+int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
+{
+    if (appInfo == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint64_t callingTokenId = appInfo->callingTokenId;
     if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
-
-    int32_t accessTokenType = SoftBusGetAccessTokenType(callingTokenId);
-    if (accessTokenType != ACCESS_TOKEN_TYPE_HAP) {
-        COMM_LOGI(COMM_PERM, "accessTokenType=%{public}d, not hap, no verification required", accessTokenType);
+    if (appInfo->peerData.sessionName == DMS_SESSIONNAME || appInfo->myData.sessionName == DMS_SESSIONNAME) {
         return SOFTBUS_OK;
     }
-
-    char deviceId[UDID_BUF_LEN] = {0};
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
+    uint64_t myTokenId = -1;
+    int32_t ret = TransGetTokenIdBySessionName(appInfo->myData.sessionName, &myTokenId);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "get local udid failed, tokenId=%{public}" PRIu64 ", ret=%{public}d",
-            callingTokenId, ret);
+        char *tmpSessionName = nullptr;
+        Anonymize(appInfo->myData.sessionName, &tmpSessionName);
+        COMM_LOGE(COMM_PERM, "get local tokenId failed, sessionName=%{public}s, ret=%{public}d", tmpSessionName, ret);
+        AnonymizeFree(tmpSessionName);
         return ret;
     }
-    return TransCheckAccessControl(callingTokenId, deviceId);
+    int32_t peerTokenType = SoftBusGetAccessTokenType(callingTokenId);
+    int32_t myTokenType = SoftBusGetAccessTokenType(myTokenId);
+    if (peerTokenType != myTokenType) {
+        COMM_LOGE(COMM_PERM, "peerTokenType=%{public}d, myTokenType=%{public}d, not support",
+            peerTokenType, myTokenType);
+        return SOFTBUS_TRANS_CROSS_LAYER_DENIED;
+    }
+    if (peerTokenType != ACCESS_TOKEN_TYPE_HAP) {
+        COMM_LOGE(COMM_PERM, "peerTokenType=%{public}d, not hap, no verification required", peerTokenType);
+        return SOFTBUS_OK;
+    }
+    return TranCheckSinkAccessControl(appInfo, myTokenId);
 }
 
 uint64_t TransACLGetFirstTokenID(void)

@@ -26,8 +26,6 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-const int32_t HAP_TOKENID = 123456;
-const int32_t NATIVE_TOKENID = 134341184;
 class SoftbusPermissionACLTest : public testing::Test {
 public:
     SoftbusPermissionACLTest() { }
@@ -64,13 +62,8 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl001, TestSize.Le
  */
 HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl001, TestSize.Level0)
 {
-    int32_t ret = TransCheckServerAccessControl(TOKENID_NOT_SET);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t ret = TransCheckServerAccessControl(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransCheckServerAccessControl(NATIVE_TOKENID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransCheckServerAccessControl(HAP_TOKENID);
-    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
