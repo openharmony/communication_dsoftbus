@@ -697,15 +697,15 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead002, TestSize.Level0)
 HWTEST_F(ClientTransProxyManagerTest, TransProxyParseTlv001, TestSize.Level0)
 {
     uint32_t newDataHeadSize = 0;
-    int32_t ret = TransProxyParseTlv(nullptr, nullptr, &newDataHeadSize);
+    int32_t ret = TransProxyParseTlv(TEST_DATA_LENGTH, nullptr, nullptr, &newDataHeadSize);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     const char *data = "test";
-    ret = TransProxyParseTlv(data, nullptr, &newDataHeadSize);
+    ret = TransProxyParseTlv(TEST_DATA_LENGTH, data, nullptr, &newDataHeadSize);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     DataHeadTlvPacketHead head;
-    ret = TransProxyParseTlv(data, &head, &newDataHeadSize);
+    ret = TransProxyParseTlv(TEST_DATA_LENGTH_2, data, &head, &newDataHeadSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -858,7 +858,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
     ASSERT_TRUE(magicData != nullptr);
     (void)memcpy_s(magicData, MAGICNUM_SIZE, &magic, MAGICNUM_SIZE);
     ret = ClientTransProxyNoSubPacketTlvProc(channelId, magicData, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
 
     ret = ClientTransProxyNoSubPacketTlvProc(channelId, magicData, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
