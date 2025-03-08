@@ -89,6 +89,7 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
+    int32_t duration;
     uint64_t checkDelay;
     char callerId[PKG_NAME_SIZE_MAX];
 } LnnProcessSendOnceMsgPara;

@@ -1698,6 +1698,12 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
         EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceVersion to distributed ledger fail");
     }
+    if (strcpy_s(oldInfo->deviceInfo.productId, PRODUCT_ID_SIZE_MAX, newInfo->deviceInfo.productId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s productId to distributed ledger fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.modelName, MODEL_NAME_SIZE_MAX, newInfo->deviceInfo.modelName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s modelName to distributed ledger fail");
+    }
     oldInfo->deviceInfo.deviceTypeId = newInfo->deviceInfo.deviceTypeId;
     oldInfo->isBleP2p = newInfo->isBleP2p;
     oldInfo->supportedProtocols = newInfo->supportedProtocols;

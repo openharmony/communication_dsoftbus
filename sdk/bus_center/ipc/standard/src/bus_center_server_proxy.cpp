@@ -77,7 +77,7 @@ int32_t BusCenterServerProxyInit(void)
         LNN_LOGE(LNN_EVENT, "Create bus center server proxy failed");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int ret = g_serverProxy->BusCenterServerProxyStandardInit();
+    int32_t ret = g_serverProxy->BusCenterServerProxyStandardInit();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "Create bus center server proxy standard failed");
         return SOFTBUS_SERVER_NOT_INIT;
@@ -120,7 +120,8 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
     return ret;
 }
 
-int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
+int32_t ServerIpcGetNodeKeyInfo(
+    const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len)
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
@@ -146,7 +147,7 @@ int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName)
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int ret = g_serverProxy->RegDataLevelChangeCb(pkgName);
+    int32_t ret = g_serverProxy->RegDataLevelChangeCb(pkgName);
     return ret;
 }
 
@@ -156,7 +157,7 @@ int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName)
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int ret = g_serverProxy->UnregDataLevelChangeCb(pkgName);
+    int32_t ret = g_serverProxy->UnregDataLevelChangeCb(pkgName);
     return ret;
 }
 
@@ -166,7 +167,27 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int ret = g_serverProxy->SetDataLevel(dataLevel);
+    int32_t ret = g_serverProxy->SetDataLevel(dataLevel);
+    return ret;
+}
+
+int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int32_t ret = g_serverProxy->RegBleRangeCb(pkgName);
+    return ret;
+}
+
+int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int32_t ret = g_serverProxy->UnregBleRangeCb(pkgName);
     return ret;
 }
 
@@ -206,7 +227,7 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int ret = g_serverProxy->StopTimeSync(pkgName, targetNetworkId);
+    int32_t ret = g_serverProxy->StopTimeSync(pkgName, targetNetworkId);
     return ret;
 }
 
@@ -259,7 +280,7 @@ int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *i
     }
     int32_t ret = g_serverProxy->ActiveMetaNode(info, metaNodeId);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "ActiveMetaNode failed");
+        LNN_LOGE(LNN_EVENT, "active failed");
     }
     return ret;
 }
@@ -273,7 +294,7 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
     }
     int32_t ret = g_serverProxy->DeactiveMetaNode(metaNodeId);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "DeactiveMetaNode failed");
+        LNN_LOGE(LNN_EVENT, "deactive failed");
     }
     return ret;
 }
@@ -287,7 +308,7 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
     }
     int32_t ret = g_serverProxy->GetAllMetaNodeInfo(infos, infoNum);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "GetAllMetaNodeInfo failed");
+        LNN_LOGE(LNN_EVENT, "get info failed");
     }
     return ret;
 }
@@ -301,7 +322,20 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
     }
     int32_t ret = g_serverProxy->ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "ShiftLNNGear failed");
+        LNN_LOGE(LNN_EVENT, "shift failed");
+    }
+    return ret;
+}
+
+int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int32_t ret = g_serverProxy->TriggerHbForMeasureDistance(pkgName, callerId, mode);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "trigger failed");
     }
     return ret;
 }
@@ -314,7 +348,7 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     }
     int32_t ret = g_serverProxy->SyncTrustedRelationShip(pkgName, msg, msgLen);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "SyncTrustedRelationShip failed");
+        LNN_LOGE(LNN_EVENT, "sync failed");
     }
     return ret;
 }
@@ -331,7 +365,7 @@ int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint3
     }
     int32_t ret = g_serverProxy->SetDisplayName(pkgName, nameData, len);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "SetDisplayName failed");
+        LNN_LOGE(LNN_EVENT, "set failed");
     }
     return ret;
 }

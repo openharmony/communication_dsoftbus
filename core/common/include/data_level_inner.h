@@ -15,19 +15,29 @@
 #ifndef DATA_LEVEL_INNER_H
 #define DATA_LEVEL_INNER_H
 
-#include  <stdint.h>
+#include <stdint.h>
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
+
 typedef struct {
     uint16_t dynamicLevel;
     uint16_t staticLevel;
     uint32_t switchLevel;
     uint16_t switchLength;
 } DataLevelInfo;
+
+typedef struct {
+    int32_t range;                      /**< The range between two devices */
+    int32_t subRange;                   /**< The subRange between two devices */
+    float distance;                     /**< The distance between two devices */
+    double confidence;                  /**< The confidence of range result */
+    char networkId[NETWORK_ID_BUF_LEN]; /**< The network id value */
+} BleRangeInnerInfo;
 
 #ifdef __cplusplus
 #if __cplusplus

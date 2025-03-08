@@ -63,6 +63,8 @@ public:
         uint32_t qosCount) override;
     int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) override;
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
+    int32_t RegBleRangeCb(const char *pkgName) override;
+    int32_t UnregBleRangeCb(const char *pkgName) override;
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };
