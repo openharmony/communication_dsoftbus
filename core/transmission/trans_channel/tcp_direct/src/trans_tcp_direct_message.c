@@ -956,7 +956,7 @@ static int32_t HandleDataBusReply(
         extra->result = EVENT_STAGE_RESULT_OK;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
     }
-
+    SetByteChannelTos(&conn->appInfo);
     if (conn->appInfo.routeType == WIFI_P2P) {
         if (LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId,
             conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK) {
