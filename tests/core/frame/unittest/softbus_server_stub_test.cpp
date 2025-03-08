@@ -987,7 +987,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
 
     datas.WriteCString(test);
     ret = softBusServer->RegDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -1009,7 +1009,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
 
     datas.WriteCString(test);
     ret = softBusServer->UnregDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -1754,5 +1754,84 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
     datas.WriteCString(networkId);
     ret = softBusServer->PrivilegeCloseChannelInner(datas, reply);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest046
+ * @tc.desc: Verify the RegBleRangeCbInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest046, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    char test1[10] = "test";
+    char test2[30] = "ohos.msdp.spatialawareness";
+    MessageParcel datas;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->RegBleRangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test1);
+    ret = softBusServer->RegBleRangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    datas.WriteCString(test2);
+    ret = softBusServer->RegBleRangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest047
+ * @tc.desc: Verify the UnregBleRangeCbInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest047, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    char test1[10] = "test";
+    char test2[30] = "ohos.msdp.spatialawareness";
+    MessageParcel datas;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->UnregBleRangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test1);
+    ret = softBusServer->UnregBleRangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    datas.WriteCString(test2);
+    ret = softBusServer->UnregBleRangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest048
+ * @tc.desc: Verify the TriggerHbForMeasureDistanceInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    char test[10] = "test";
+    HbMode mode;
+    MessageParcel datas;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->TriggerHbForMeasureDistanceInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    datas.WriteRawData(&mode, sizeof(mode));
+    ret = softBusServer->TriggerHbForMeasureDistanceInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }
