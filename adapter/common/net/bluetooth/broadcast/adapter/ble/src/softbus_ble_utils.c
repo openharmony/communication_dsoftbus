@@ -502,7 +502,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             }
             SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
             data->payloadLen = len - ID_LEN - 1;
-            DISC_CHECK_AND_RETURN_RET_LOGE(data->payloadLen >= 0 && index + ID_LEN + 1 < advLen,
+            DISC_CHECK_AND_RETURN_RET_LOGE(data->payloadLen >= 0 && index + ID_LEN < advLen,
                 SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse payload failed");
             isRsp = !isRsp;
             data->type = BtAdvTypeToSoftbus(type);
@@ -515,6 +515,8 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
             DISC_CHECK_AND_RETURN_RET_LOGE(data->payload != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE_ADAPTER,
                 "malloc payload failed");
+            DISC_CHECK_AND_RETURN_RET_LOGE(index + ID_LEN + 1 < advLen, SOFTBUS_BC_ADAPTER_PARSE_FAIL,
+                DISC_BLE_ADAPTER, "advLen is invalid");
             (void)memcpy_s(data->payload, data->payloadLen, &advData[index + ID_LEN + 1], data->payloadLen);
         }
         index += len;
