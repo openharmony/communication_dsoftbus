@@ -25,9 +25,7 @@
 #include "comm_log.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 
@@ -35,9 +33,7 @@ int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid);
 int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 #endif /* SOFTBUS_OS_ACCOUNT_ADAPTER_H */

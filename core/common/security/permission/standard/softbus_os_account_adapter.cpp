@@ -18,9 +18,9 @@ using namespace OHOS;
 
 int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid)
 {
-    int32_t res = -1;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, res);
-    return res;
+    int32_t appUserId = -1;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, appUserId);
+    return appUserId;
 }
 
 int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser)

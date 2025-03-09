@@ -18,9 +18,7 @@
 #include "softbus_app_info.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 // if the upstream module does not set the first caller tokenID, the value is 0
@@ -42,9 +40,7 @@ uint64_t TransACLGetCallingTokenID(void);
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 #endif /* ACCESS_CONTROL_H */
