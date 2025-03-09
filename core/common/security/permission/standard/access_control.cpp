@@ -142,9 +142,9 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     }
 
     pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    int32_t appUserId = GetOsAccountLocalIdFromUid_Adapter(callingUid);
+    int32_t appUserId = GetOsAccountLocalIdFromUidAdapter(callingUid);
     bool isForegroundUser = false;
-    int32_t ret = IsOsAccountForeground_Adapter(appUserId, isForegroundUser);
+    int32_t ret = IsOsAccountForegroundAdapter(appUserId, isForegroundUser);
     if (ret != ERR_OK) {
         COMM_LOGE(COMM_PERM, "app userId %{public}d is not Foreground, ret:%{public}d", appUserId, ret);
         return ret;
@@ -253,9 +253,9 @@ int32_t TranCheckSinkAccessControl(const AppInfo *appInfo, uint64_t myTokenId)
         COMM_LOGE(COMM_PERM, "get uid fail, uid=%{public}d pid=%{public}d ret=%{public}d", uid, pid, ret);
         return ret;
     }
-    int32_t appUserId = GetOsAccountLocalIdFromUid_Adapter(uid);
+    int32_t appUserId = GetOsAccountLocalIdFromUidAdapter(uid);
     bool isForegroundUser = false;
-    ret = IsOsAccountForeground_Adapter(appUserId, isForegroundUser);
+    ret = IsOsAccountForegroundAdapter(appUserId, isForegroundUser);
     if (ret != ERR_OK) {
         COMM_LOGE(COMM_PERM, "app userId %{public}d is not foreground, ret:%{public}d", appUserId, ret);
         return ret;

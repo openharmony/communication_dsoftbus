@@ -40,8 +40,8 @@ public:
 
 class OsAccountManagerMock : public OsAccountManager {
 public:
-    OsAccountManagerMock() = default;
-    ~OsAccountManagerMock() = default;
+    OsAccountManagerMock();
+    ~OsAccountManagerMock() override;
     MOCK_METHOD1(QueryActiveOsAccountIds, OHOS::ErrCode(std::vector<int32_t> &ids));
     MOCK_METHOD2(IsOsAccountVerified, OHOS::ErrCode(const int32_t id, bool &isVerified));
 };
@@ -57,25 +57,24 @@ public:
     virtual int32_t SoftBusGetAccessTokenType(uint64_t tokenId) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId) = 0;
-    virtual int32_t GetOsAccountLocalIdFromUid_Adapter(const int32_t uid);
+    virtual int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid);
     virtual int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid);
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len);
-    virtual int32_t IsOsAccountForeground_Adapter(const int32_t appUserId, bool &isForegroundUser);
+    virtual int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser);
 };
 class SoftbusPermissionACLInterfaceMock : public SoftbusPermissionACLInterface {
 public:
     SoftbusPermissionACLInterfaceMock();
-    virtual ~SoftbusPermissionACLInterfaceMock() override;
+    ~SoftbusPermissionACLInterfaceMock() override;
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey key, char *info, uint32_t len));
     MOCK_METHOD0(TransGetForegroundUserId, int32_t());
     MOCK_METHOD1(SoftBusGetAccessTokenType, int32_t(uint64_t tokenId));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t(const char *networkId, InfoKey key, char *info, uint32_t len));
     MOCK_METHOD2(TransGetTokenIdBySessionName, int32_t(const char *sessionName, uint64_t *tokenId));
-    MOCK_METHOD1(GetOsAccountLocalIdFromUid_Adapter, int32_t(const int32_t uid));
+    MOCK_METHOD1(GetOsAccountLocalIdFromUidAdapter, int32_t(const int32_t uid));
     MOCK_METHOD3(TransProxyGetUidAndPidBySessionName, int32_t(const char *sessionName, int32_t *uid, int32_t *pid));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t(const char *uuid, char *buf, uint32_t len));
-    MOCK_METHOD2(IsOsAccountForeground_Adapter, int32_t(const int32_t appUserId, bool &isForegroundUser));
-
+    MOCK_METHOD2(IsOsAccountForegroundAdapter, int32_t(const int32_t appUserId, bool &isForegroundUser));
 
     static SoftbusPermissionACLInterfaceMock *GetMock()
     {
@@ -97,7 +96,7 @@ public:
 class IPCSkeletonMock : public IPCSkeleton {
 public:
     IPCSkeletonMock();
-    virtual ~IPCSkeletonMock() override;
+    ~IPCSkeletonMock() override;
     MOCK_METHOD0(GetCallingUid, pid_t());
     MOCK_METHOD0(GetFirstFullTokenID, uint64_t());
     MOCK_METHOD0(GetCallingFullTokenID, uint64_t());
@@ -110,12 +109,13 @@ public:
 private:
     static inline std::atomic<IPCSkeletonMock *> mock = nullptr;
 };
-}// namespace OHOS
+} // namespace OHOS
 
 namespace OHOS::DistributedDeviceProfile {
 class DistributedDeviceProfileClient {
 public:
-    static DistributedDeviceProfileClient& GetInstance() {
+    static DistributedDeviceProfileClient& GetInstance()
+    {
         static DistributedDeviceProfileClient instance;
         return instance;
     }
@@ -128,10 +128,10 @@ public:
 
 class MockDistributedDeviceProfileClient : public DistributedDeviceProfileClient {
 public:
-    MOCK_METHOD2(GetAccessControlProfile, 
+    MOCK_METHOD2(GetAccessControlProfile,
         int32_t(std::map<std::string, std::string> parms, std::vector<AccessControlProfile>& profile));
 };
     
-}// namespace OHOS::DistributedDeviceProfile
+} // namespace OHOS::DistributedDeviceProfile
 
 #endif

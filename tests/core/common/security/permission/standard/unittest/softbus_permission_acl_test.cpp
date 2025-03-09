@@ -37,7 +37,7 @@ const int32_t NATIVE_TOKENID = 134341184;
 const pid_t NATIVE_PID = 123456;
 const int32_t NATIVE_USERID = 123456;
 const int32_t ERR_NOT_OK = 1;
-const char appPkgName[] = "ohos.distributedschedule.dms.connect";
+const char APP_PKG_NAME[] = "ohos.distributedschedule.dms.connect";
 constexpr char NETWORK_ID[] = "testnetworkid123";
 class SoftbusPermissionACLTest : public testing::Test {
 public:
@@ -89,7 +89,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl003, TestSize.Le
 {
     IPCSkeletonMock mockIpc;
     EXPECT_CALL(mockIpc, GetCallingFullTokenID)
-        .WillRepeatedly(Return(HAP_TOKENID)); 
+        .WillRepeatedly(Return(HAP_TOKENID));
     
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
@@ -140,7 +140,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl005, TestSize.Le
     EXPECT_CALL(mockIpc, GetCallingFullTokenID)
         .WillRepeatedly(Return(HAP_TOKENID));
     EXPECT_CALL(mockIpc, GetCallingUid)
-        .WillRepeatedly(Return(NATIVE_PID)); 
+        .WillRepeatedly(Return(NATIVE_PID));
 
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
@@ -203,9 +203,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl007, TestSize.Le
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillRepeatedly(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
         .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));
     EXPECT_CALL(mockSPACL, LnnGetLocalStrInfo)
@@ -235,9 +235,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl008, TestSize.Le
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillRepeatedly(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
         .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));
     EXPECT_CALL(mockSPACL, LnnGetLocalStrInfo)
@@ -285,7 +285,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl003, TestSize.Le
 {
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.sessionName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName));
+    memcpy_s(info.myData.sessionName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME));
 
     int32_t ret = TransCheckServerAccessControl(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -301,7 +301,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl004, TestSize.Le
 {
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.peerData.sessionName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName));
+    memcpy_s(info.peerData.sessionName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME));
 
     int32_t ret = TransCheckServerAccessControl(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -317,7 +317,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl005, TestSize.Le
 {
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
         .WillRepeatedly(Return(SOFTBUS_ERR));
@@ -336,7 +336,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl006, TestSize.Le
 {
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -358,7 +358,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl007, TestSize.Le
 {
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -380,7 +380,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl008, TestSize.Le
 {
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME-1));
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -406,7 +406,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl009, TestSize.Le
     bool expectedOutput = true;
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME-1));
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -416,9 +416,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl009, TestSize.Le
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
     .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_NOT_OK)));;
 
@@ -437,7 +437,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl010, TestSize.Le
     bool expectedOutput = false;
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -447,9 +447,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl010, TestSize.Le
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
     .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));;
 
@@ -468,7 +468,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl011, TestSize.Le
     bool expectedOutput = true;
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -478,9 +478,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl011, TestSize.Le
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
     .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));
     EXPECT_CALL(mockSPACL, LnnGetLocalStrInfo)
@@ -501,7 +501,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl012, TestSize.Le
     bool expectedOutput = true;
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -511,9 +511,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl012, TestSize.Le
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
     .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));
     EXPECT_CALL(mockSPACL, LnnGetLocalStrInfo)
@@ -536,7 +536,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl013, TestSize.Le
     bool expectedOutput = true;
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -546,9 +546,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl013, TestSize.Le
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
     .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));
     EXPECT_CALL(mockSPACL, LnnGetLocalStrInfo)
@@ -573,7 +573,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl014, TestSize.Le
     bool expectedOutput = true;
     AppInfo info;
     info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, appPkgName, strlen(appPkgName-1));
+    memcpy_s(info.myData.pkgName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME)-1);
     info.peerData.userId = NATIVE_USERID;
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, TransGetTokenIdBySessionName)
@@ -583,9 +583,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl014, TestSize.Le
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUid_Adapter)
+    EXPECT_CALL(mockSPACL, GetOsAccountLocalIdFromUidAdapter)
     .WillRepeatedly(Return(NATIVE_USERID));
-    EXPECT_CALL(mockSPACL, IsOsAccountForeground_Adapter)
+    EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
             Return(ERR_OK)));
     EXPECT_CALL(mockSPACL, LnnGetLocalStrInfo)

@@ -24,7 +24,6 @@ namespace OHOS::AccountSA {
 
     OHOS::ErrCode OsAccountManager::IsOsAccountVerified(const int32_t id, bool &isVerified)
     {
-        
         return ERR_OK;
     }
 }
@@ -103,7 +102,7 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
     return SoftbusPermissionACLInterfaceMock::GetMock()->TransGetTokenIdBySessionName(sessionName, tokenId);
 }
 
-int32_t GetOsAccountLocalIdFromUid_Adapter(const int32_t uid)
+int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid)
 {
     return SoftbusPermissionACLInterfaceMock::GetMock()->GetOsAccountLocalIdFromUid_Adapter(uid);
 }
@@ -118,7 +117,7 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
     return SoftbusPermissionACLInterfaceMock::GetMock()->LnnGetNetworkIdByUuid(uuid, buf, len);
 }
 
-int32_t IsOsAccountForeground_Adapter(const int32_t appUserId, bool &isForegroundUser)
+int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser)
 {
     return SoftbusPermissionACLInterfaceMock::GetMock()->IsOsAccountForeground_Adapter(appUserId, isForegroundUser);
 }
@@ -129,10 +128,11 @@ namespace OHOS::DistributedDeviceProfile {
 int32_t DistributedDeviceProfileClient::GetAccessControlProfile(std::map<std::string, std::string> parms,
     std::vector<AccessControlProfile>& profile)
 {
+    int32_t times = 3;
     if (profile.empty()) {
         int32_t bindLevelTest = 1;
         int32_t bindTypeTest = 4;
-        for (int i = 0; i < 3; ++i){
+        for (int i = 0; i < times; ++i) {
             AccessControlProfile item;
             item.SetBindLevel(bindLevelTest++);
             item.SetBindType(bindTypeTest++);
