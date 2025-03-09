@@ -168,7 +168,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl006, TestSize.Le
     EXPECT_CALL(mockIpc, GetCallingFullTokenID)
         .WillRepeatedly(Return(HAP_TOKENID));
     EXPECT_CALL(mockIpc, GetCallingUid)
-        .WillRepeatedly(Return(NATIVE_PID)); 
+        .WillRepeatedly(Return(NATIVE_PID));
 
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)

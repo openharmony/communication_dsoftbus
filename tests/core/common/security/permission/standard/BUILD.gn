@@ -92,7 +92,6 @@ ohos_unittest("SoftbusPermissionACLTest") {
   } else {
     external_deps = [
       "c_utils:utils",
-      "googletest:gmock_main",
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
