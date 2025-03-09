@@ -104,7 +104,7 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
 
 int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid)
 {
-    return SoftbusPermissionACLInterfaceMock::GetMock()->GetOsAccountLocalIdFromUid_Adapter(uid);
+    return SoftbusPermissionACLInterfaceMock::GetMock()->GetOsAccountLocalIdFromUidAdapter(uid);
 }
 
 int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
@@ -119,7 +119,7 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 
 int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser)
 {
-    return SoftbusPermissionACLInterfaceMock::GetMock()->IsOsAccountForeground_Adapter(appUserId, isForegroundUser);
+    return SoftbusPermissionACLInterfaceMock::GetMock()->IsOsAccountForegroundAdapter(appUserId, isForegroundUser);
 }
 }
 } // namespace OHOS
