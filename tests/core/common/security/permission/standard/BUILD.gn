@@ -40,11 +40,13 @@ ohos_unittest("SoftbusPermissionTest") {
 
 ohos_unittest("SoftbusPermissionACLTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/softbus_permission_acl_test.cpp" ]
+  sources = [
+    "unittest/softbus_permission_acl_mock.cpp",
+    "unittest/softbus_permission_acl_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
@@ -53,8 +55,9 @@ ohos_unittest("SoftbusPermissionACLTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
@@ -67,6 +70,7 @@ ohos_unittest("SoftbusPermissionACLTest") {
     external_deps = [
       "access_token:libaccesstoken_sdk",
       "access_token:libtoken_setproc",
+      "googletest:gmock_main",
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_single",
@@ -88,6 +92,7 @@ ohos_unittest("SoftbusPermissionACLTest") {
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock_main",
       "googletest:gtest_main",
       "hilog:libhilog",
     ]

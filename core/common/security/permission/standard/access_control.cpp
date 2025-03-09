@@ -35,6 +35,7 @@
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_os_account_adapter.h"
 #include "softbus_proxychannel_callback.h"
 #include "system_ability_definition.h"
 #include "trans_session_account_adapter.h"
@@ -141,10 +142,9 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     }
 
     pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    int32_t appUserId = -1;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, appUserId);
+    int32_t appUserId = GetOsAccountLocalIdFromUid_Adapter(callingUid);
     bool isForegroundUser = false;
-    int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
+    int32_t ret = IsOsAccountForeground_Adapter(appUserId, isForegroundUser);
     if (ret != ERR_OK) {
         COMM_LOGE(COMM_PERM, "app userId %{public}d is not Foreground, ret:%{public}d", appUserId, ret);
         return ret;
@@ -253,10 +253,9 @@ int32_t TranCheckSinkAccessControl(const AppInfo *appInfo, uint64_t myTokenId)
         COMM_LOGE(COMM_PERM, "get uid fail, uid=%{public}d pid=%{public}d ret=%{public}d", uid, pid, ret);
         return ret;
     }
-    int32_t appUserId = -1;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, appUserId);
+    int32_t appUserId = GetOsAccountLocalIdFromUid_Adapter(uid);
     bool isForegroundUser = false;
-    ret = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
+    ret = IsOsAccountForeground_Adapter(appUserId, isForegroundUser);
     if (ret != ERR_OK) {
         COMM_LOGE(COMM_PERM, "app userId %{public}d is not foreground, ret:%{public}d", appUserId, ret);
         return ret;
