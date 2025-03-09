@@ -855,7 +855,7 @@ static void ReportTransEventExtra(
 static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
 {
     if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
+        TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
         ret = (char *)"Server check acl failed";
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
@@ -900,10 +900,6 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
-    errCode = CheckServerPermission(appInfo, ret);
-    if (errCode != SOFTBUS_OK) {
-        goto ERR_EXIT;
-    }
 
     if (TransTdcGetUidAndPid(appInfo->myData.sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
@@ -917,7 +913,10 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
         ret = (char *)"Get Uuid By ChanId failed";
         goto ERR_EXIT;
     }
-
+    errCode = CheckServerPermission(appInfo, ret);
+    if (errCode != SOFTBUS_OK) {
+        goto ERR_EXIT;
+    }
     errCode = TransTdcFillDataConfig(appInfo);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fill data config failed.");
