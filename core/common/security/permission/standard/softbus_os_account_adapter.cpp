@@ -25,7 +25,6 @@ int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid)
 
 int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser)
 {
-    int32_t res = SOFTBUS_OK;
-    res = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
+    int32_t res = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
     return res;
 }

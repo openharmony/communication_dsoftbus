@@ -112,7 +112,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl004, TestSize.Le
     EXPECT_CALL(mockIpc, GetCallingFullTokenID)
         .WillRepeatedly(Return(HAP_TOKENID));
     EXPECT_CALL(mockIpc, GetCallingUid)
-        .WillRepeatedly(Return(NATIVE_PID)); 
+        .WillRepeatedly(Return(NATIVE_PID));
 
     SoftbusPermissionACLInterfaceMock mockSPACL;
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
@@ -451,7 +451,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl010, TestSize.Le
     .WillRepeatedly(Return(NATIVE_USERID));
     EXPECT_CALL(mockSPACL, IsOsAccountForegroundAdapter)
         .WillOnce(DoAll(SetArgReferee<1>(expectedOutput),
-            Return(ERR_OK)));;
+            Return(ERR_OK)));
 
     int32_t ret = TransCheckServerAccessControl(&info);
     EXPECT_EQ(SOFTBUS_TRANS_BACKGROUND_USER_DENIED, ret);
