@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_MOCK_ADAPTER_H
-#define SOFTBUS_MOCK_ADAPTER_H
+#ifndef SOFTBUS_OS_ACCOUNT_ADAPTER_H
+#define SOFTBUS_OS_ACCOUNT_ADAPTER_H
 
 #include <map>
 #include <string>
