@@ -15,6 +15,7 @@
 
 #ifndef ACCESS_CONTROL_H
 #define ACCESS_CONTROL_H
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,7 +36,7 @@ enum FirstTokenType {
 
 int32_t TransCheckClientAccessControl(const char *peerNetworkId);
 int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName);
-int32_t TransCheckServerAccessControl(uint64_t callingTokenId);
+int32_t TransCheckServerAccessControl(const AppInfo *appInfo);
 uint64_t TransACLGetFirstTokenID(void);
 uint64_t TransACLGetCallingTokenID(void);
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType);
