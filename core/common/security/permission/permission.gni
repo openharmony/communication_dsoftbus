@@ -59,8 +59,10 @@ if (defined(ohos_lite)) {
       "device_info_manager:distributed_device_profile_common",
       "device_info_manager:distributed_device_profile_sdk",
     ]
-    softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/access_control.cpp" ]
-    softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/softbus_os_account_adapter.cpp" ]
+    softbus_permission_src += [ 
+      "$dsoftbus_core_path/common/security/permission/standard/access_control.cpp",
+      "$dsoftbus_core_path/common/security/permission/standard/softbus_os_account_adapter.cpp",
+    ]
   } else {
     softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.c" ]
   }

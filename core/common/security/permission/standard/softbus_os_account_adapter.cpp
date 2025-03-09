@@ -16,14 +16,14 @@
 #include "softbus_os_account_adapter.h"
 using namespace OHOS;
 
-int32_t GetOsAccountLocalIdFromUid_Adapter(const int32_t uid)
+int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid)
 {
     int32_t res = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, res);
     return res;
 }
 
-int32_t IsOsAccountForeground_Adapter(const int32_t appUserId, bool &isForegroundUser)
+int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser)
 {
     int32_t res = SOFTBUS_OK;
     res = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);

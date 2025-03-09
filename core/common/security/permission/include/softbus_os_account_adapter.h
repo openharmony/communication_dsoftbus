@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-int32_t GetOsAccountLocalIdFromUid_Adapter(const int32_t uid);
-int32_t IsOsAccountForeground_Adapter(const int32_t appUserId, bool &isForegroundUser);
+int32_t GetOsAccountLocalIdFromUidAdapter(const int32_t uid);
+int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser);
 
 #ifdef __cplusplus
 #if __cplusplus
