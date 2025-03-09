@@ -541,6 +541,51 @@ HWTEST_F(BusCenterServerProxyStandardTest, SetDataLevel_TEST_001, TestSize.Level
 }
 
 /*
+ * @tc.name: RegBleRangeCb_TEST_001
+ * @tc.desc: RegBleRangeCb return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, RegBleRangeCb_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = nullptr;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.RegBleRangeCb(pkgName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UnregBleRangeCb_TEST_001
+ * @tc.desc: UnregBleRangeCb return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, UnregBleRangeCb_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = nullptr;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.UnregBleRangeCb(pkgName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TriggerHbForMeasureDistance_TEST_001
+ * @tc.desc: TriggerHbForMeasureDistance return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, TriggerHbForMeasureDistance_TEST_001, TestSize.Level1)
+{
+    const HbMode *mode = nullptr;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.TriggerHbForMeasureDistance(nullptr, nullptr, mode);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: StartTimeSync_TEST_001
  * @tc.desc: StartTimeSync return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC

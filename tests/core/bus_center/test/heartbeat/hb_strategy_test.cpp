@@ -598,6 +598,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_PROCESSCHECK_DEVSTATUSMSG_TEST_01, TestSize.
     obj.strategyType = STRATEGY_HB_SEND_SINGLE;
     obj.hbType = HEARTBEAT_TYPE_BLE_V0;
     obj.isDirectBoardcast = true;
+    obj.duration = HB_SEND_DIRECT_LEN_ONCE;
     EXPECT_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = ProcessCheckDevStatusMsg(&hbFsm, &obj, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

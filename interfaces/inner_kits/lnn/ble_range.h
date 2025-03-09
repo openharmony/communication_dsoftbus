@@ -59,7 +59,7 @@ typedef struct {
      * @since 1.0
      * @version 1.0
      */
-    void (*onBleRangeInfoReceived)(BleRangeInfo *info);
+    void (*onBleRangeInfoReceived)(const BleRangeInfo *info);
 } IBleRangeCb;
 
 /**

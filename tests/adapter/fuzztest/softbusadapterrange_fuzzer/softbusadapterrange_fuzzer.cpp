@@ -34,9 +34,11 @@ static void SoftBusAdapterRangeFuzzTest(const uint8_t* data, size_t size)
     rangeParam.subModelId[SOFTBUS_SUB_MODEL_ID_LEN - 1] = '\0';
     rangeParam.newModelId[SOFTBUS_NEW_MODEL_ID_LEN - 1] = '\0';
     rangeParam.identity[SOFTBUS_DEV_IDENTITY_LEN - 1] = '\0';
+    rangeParam.modelName[SOFTBUS_MODEL_NAME_LEN - 1] = '\0';
 
     int32_t range = 0;
     SoftBusBleRange(&rangeParam, &range);
+    SoftBusBleRangeAsync(&rangeParam);
 
     int8_t power = 0;
     SoftBusGetBlePower(&power);
