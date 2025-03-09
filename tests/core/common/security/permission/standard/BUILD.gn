@@ -47,6 +47,7 @@ ohos_unittest("SoftbusPermissionACLTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
@@ -55,9 +56,8 @@ ohos_unittest("SoftbusPermissionACLTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
   ]
 
   deps = [
