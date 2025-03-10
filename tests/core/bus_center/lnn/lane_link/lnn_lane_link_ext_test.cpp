@@ -39,6 +39,10 @@ constexpr int32_t ASYNCFAIL = 2;
 constexpr int32_t ASYNCSUCC = 3;
 constexpr uint64_t DEFAULT_LINK_LATENCY = 30000;
 constexpr int32_t SOFTBUS_LNN_PTK_NOT_MATCH  = (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + 4);
+constexpr int32_t LANE_CAP_VALUE = 63;
+constexpr uint32_t LANE_LINK_TYPE_NUM = 5;
+constexpr int32_t DEFAULT_CAP_VALUE = 65535;
+constexpr int32_t CAP_VALUE = 49151;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
@@ -413,5 +417,120 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_DISCONN_TEST_001, TestSize.Level1)
     CondWait();
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
+}
+
+/*
+* @tc.name: SELECT_EXPECT_LANES_BY_QOS_TEST_001
+* @tc.desc: test SelectExpectLanesByQos parameter reuseBestEffort is true
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, SELECT_EXPECT_LANES_BY_QOS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LanePreferredLinkList recommendList = {};
+    LaneSelectParam request = {};
+    request.qosRequire.reuseBestEffort = true;
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: SELECT_AUTH_LANE_TEST_001
+* @tc.desc: SelectAuthLane test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, SELECT_AUTH_LANE_TEST_001, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList = {};
+    LanePreferredLinkList request = {};
+    request.linkTypeNum = 1;
+    request.linkType[0] = LANE_BR;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(LANE_CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(LANE_CAP_VALUE), Return(SOFTBUS_OK)));
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, GetLinkCapaByLinkType).WillRepeatedly(LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType);
+
+    int32_t ret = SelectAuthLane(NODE_NETWORK_ID, &request, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SELECT_LANE_TEST_001
+* @tc.desc: SelectLane test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, SELECT_LANE_TEST_001, TestSize.Level1)
+{
+    LanePreferredLinkList linkList = {};
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam = {};
+    selectParam.transType = LANE_T_FILE;
+    selectParam.expectedBw = 0;
+    selectParam.list.linkTypeNum = LANE_LINK_TYPE_NUM;
+    selectParam.list.linkType[0] = LANE_HML;
+    selectParam.list.linkType[1] = LANE_P2P_REUSE;
+    selectParam.list.linkType[2] = LANE_BLE_DIRECT;
+    selectParam.list.linkType[3] = LANE_COC;
+    selectParam.list.linkType[4] = LANE_COC_DIRECT;
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(DEFAULT_CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(DEFAULT_CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(DEFAULT_CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(DEFAULT_CAP_VALUE), Return(SOFTBUS_OK)));
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, GetLinkCapaByLinkType).WillRepeatedly(LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType);
+
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(listNum, LANE_LINK_TYPE_NUM);
+}
+
+/*
+* @tc.name: SELECT_LANE_TEST_002
+* @tc.desc: SelectLane test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, SELECT_LANE_TEST_002, TestSize.Level1)
+{
+    LanePreferredLinkList linkList = {};
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam = {};
+    selectParam.transType = LANE_T_BYTE;
+    selectParam.expectedBw = 0;
+    selectParam.list.linkTypeNum = 1;
+    selectParam.list.linkType[0] = LANE_P2P;
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(CAP_VALUE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(CAP_VALUE), Return(SOFTBUS_OK)));
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, GetLinkCapaByLinkType).WillRepeatedly(LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType);
+
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
 }
 } // namespace OHOS
