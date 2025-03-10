@@ -61,6 +61,7 @@ constexpr uint32_t LOCAL_NUM = 8192;
 constexpr uint32_t ROM_NUM = 8;
 constexpr uint32_t ROM_NUM2 = 2;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
+constexpr uint32_t WIFI_DIRECT_EXT_CAP_VALID_TIME = 10000;
 
 static NodeInfo g_NodeInfo = {
     .p2pInfo.p2pRole = 1,
@@ -2072,5 +2073,111 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_LANE_UPDATE_P2P_AVAILABILITY_001
+* @tc.desc: test updateP2pAvailability for create new node
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_UPDATE_P2P_AVAILABILITY_001, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UpdateP2pAvailability(nullptr, false));
+    EXPECT_EQ(SOFTBUS_OK, UpdateP2pAvailability(PEER_UDID, false));
+}
+
+/*
+* @tc.name: LNN_LANE_UPDATE_P2P_AVAILABILITY_002
+* @tc.desc: test updateP2pAvailability for update exists node
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_UPDATE_P2P_AVAILABILITY_002, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UpdateP2pAvailability(nullptr, false));
+    EXPECT_EQ(SOFTBUS_OK, UpdateP2pAvailability(PEER_UDID, false));
+    EXPECT_EQ(SOFTBUS_OK, UpdateP2pAvailability(PEER_UDID, false));
+}
+
+/*
+* @tc.name: LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001
+* @tc.desc: test adjustLinkPriorityForRtt with wifidirect ext cap
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    laneMock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(laneMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(laneMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(HO_OS_TYPE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillRepeatedly(
+        DoAll(SetArrayArgument<LANE_MOCK_PARAM3>(PEER_UDID, PEER_UDID + UDID_BUF_LEN), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetLocalNumU32Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(127), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetRemoteNumU32Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM3>(127), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetLocalNumU64Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(0), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetRemoteNumU64Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+
+    EXPECT_EQ(SOFTBUS_OK, UpdateP2pAvailability(PEER_UDID, false));
+    LanePreferredLinkList linkList = {};
+    LaneSelectParam selectParam = {
+        .transType = LANE_T_FILE,
+        .qosRequire.minBW = HIGH_BW,
+        .qosRequire.rttLevel = LANE_RTT_LEVEL_LOW,
+    };
+    EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
+    EXPECT_EQ(LANE_P2P, linkList.linkType[linkList.linkTypeNum - 1]);
+    GTEST_LOG_(INFO) << "wait wifidirect ext cap exceed timeliness with 10s";
+    std::this_thread::sleep_for(std::chrono::milliseconds(WIFI_DIRECT_EXT_CAP_VALID_TIME));
+    EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
+    EXPECT_EQ(LANE_P2P, linkList.linkType[0]);
+}
+
+/*
+* @tc.name: LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002
+* @tc.desc: test adjustLinkPriorityForRtt with other conditions
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    laneMock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(laneMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(laneMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(OH_OS_TYPE), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(HO_OS_TYPE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(
+        DoAll(SetArrayArgument<LANE_MOCK_PARAM3>(PEER_UDID, PEER_UDID + UDID_BUF_LEN), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetLocalNumU32Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(127), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetRemoteNumU32Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM3>(127), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetLocalNumU64Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(0), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, LnnGetRemoteNumU64Info).WillRepeatedly(
+        DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+
+    EXPECT_EQ(SOFTBUS_OK, UpdateP2pAvailability(PEER_UDID, false));
+    LanePreferredLinkList linkList = {};
+    LaneSelectParam selectParam = {
+        .transType = LANE_T_FILE,
+        .qosRequire.minBW = HIGH_BW,
+        .qosRequire.rttLevel = LANE_RTT_LEVEL_LOW,
+    };
+    EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
+    EXPECT_EQ(LANE_P2P, linkList.linkType[0]);
+    EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
+    EXPECT_EQ(LANE_P2P, linkList.linkType[0]);
 }
 } // namespace OHOS
