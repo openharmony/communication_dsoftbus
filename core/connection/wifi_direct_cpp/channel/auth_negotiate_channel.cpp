@@ -200,6 +200,11 @@ static bool CheckSameAccount(const NegotiateMessage &msg)
         case NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP:
         case NegotiateMessageType::CMD_CONN_V2_REQ_3:
         case NegotiateMessageType::CMD_CONN_V2_RESP_3:
+        case NegotiateMessageType::CMD_RENEGOTIATE_REQ:
+        case NegotiateMessageType::CMD_RENEGOTIATE_RESP:
+        case NegotiateMessageType::CMD_TRIGGER_REQ:
+        case NegotiateMessageType::CMD_TRIGGER_RESP:
+        case NegotiateMessageType::CMD_ERROR_NOTIFICATION:
             ret = msg.GetExtraData().empty() || msg.GetExtraData().front();
             break;
         default:
