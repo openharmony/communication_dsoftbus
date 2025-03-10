@@ -50,13 +50,13 @@ static LnnNetLedgerInterface *GetNetLedgerInterface()
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -70,7 +70,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(
     const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
-    if (srcId == NULL || dstIdBuf == NULL) {
+    if (srcId == nullptr || dstIdBuf == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -84,7 +84,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(
     const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
-    if (srcId == NULL || dstIdBuf == NULL) {
+    if (srcId == nullptr || dstIdBuf == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -97,13 +97,13 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -116,13 +116,13 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInf
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = LNN_MOCK_ONLINE_NODE_CNT;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -162,7 +162,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1(
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -175,7 +175,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1(InfoKey key, char *info, uint32_t len)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -207,7 +207,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(
     const char *uuid, AuthLinkType type, AuthHandle *authHandle)
 {
     (void)uuid;
-    if (authHandle == NULL) {
+    if (authHandle == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -601,6 +601,11 @@ bool LnnSetDLDeviceNickName(const char *networkId, const char *name)
 int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
 {
     return GetNetLedgerInterface()->LnnUpdateLocalScreenStatus(isScreenOn);
+}
+
+int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    return GetNetLedgerInterface()->LnnClearStaticNetCap(capability, type);
 }
 }
 } // namespace OHOS

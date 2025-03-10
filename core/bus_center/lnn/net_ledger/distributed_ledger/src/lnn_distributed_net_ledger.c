@@ -800,6 +800,7 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
         oldInfo->localStateVersion = newInfo->localStateVersion;
         oldInfo->stateVersion = newInfo->stateVersion;
     }
+    oldInfo->staticNetCap = newInfo->staticNetCap;
     return SOFTBUS_OK;
 }
 
@@ -1110,11 +1111,11 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     }
     deviceInfo->netCapacity = info->netCapacity;
     deviceInfo->accountId = info->accountId;
+    deviceInfo->staticNetCap = info->staticNetCap;
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
     }
-    return;
 }
 
 static void BleDirectlyOnlineProc(NodeInfo *info)
@@ -1471,7 +1472,9 @@ static void NotifyMigrateDegrade(const char *udid)
 static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type, int32_t authId)
 {
     if ((LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) ||
-        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BLE)) {
+        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BLE) ||
+        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_SESSION_KEY) &&
+        LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_SESSION_KEY)) {
         if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] == authId) {
             info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
         }
@@ -1695,6 +1698,12 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
         EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceVersion to distributed ledger fail");
     }
+    if (strcpy_s(oldInfo->deviceInfo.productId, PRODUCT_ID_SIZE_MAX, newInfo->deviceInfo.productId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s productId to distributed ledger fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.modelName, MODEL_NAME_SIZE_MAX, newInfo->deviceInfo.modelName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s modelName to distributed ledger fail");
+    }
     oldInfo->deviceInfo.deviceTypeId = newInfo->deviceInfo.deviceTypeId;
     oldInfo->isBleP2p = newInfo->isBleP2p;
     oldInfo->supportedProtocols = newInfo->supportedProtocols;
@@ -1707,6 +1716,7 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
+    oldInfo->staticNetCap = newInfo->staticNetCap;
 }
 
 static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)

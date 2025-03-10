@@ -81,8 +81,8 @@ static void ClearNetBuilderFsmList()
     if (netBuilder == nullptr) {
         return;
     }
-    LnnConnectionFsm *item = NULL;
-    LnnConnectionFsm *next = NULL;
+    LnnConnectionFsm *item = nullptr;
+    LnnConnectionFsm *next = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
         ListDelete(&item->node);
         --netBuilder->connCount;
@@ -660,7 +660,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_001, TestSize.Le
 {
     DeviceVerifyPassMsgPara *msgPara =
         reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = NULL;
+    msgPara->nodeInfo = nullptr;
     void *para = reinterpret_cast<void *>(msgPara);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -677,7 +677,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_001, TestSize.Le
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_001, TestSize.Level1)
 {
     VerifyResultMsgPara *msgPara1 = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara1->nodeInfo = NULL;
+    msgPara1->nodeInfo = nullptr;
     void *para1 = reinterpret_cast<void *>(msgPara1);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1431,7 +1431,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(false));
     para->isNeedConnect = false;
-    para->dupInfo = NULL;
+    para->dupInfo = nullptr;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(nullptr, true, false) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
@@ -1465,7 +1465,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_002, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(false));
     para->isNeedConnect = true;
-    para->dupInfo = NULL;
+    para->dupInfo = nullptr;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_OK);
 
@@ -1497,7 +1497,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_003, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(true));
     para->isNeedConnect = true;
-    para->dupInfo = NULL;
+    para->dupInfo = nullptr;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_OK);
 
@@ -1529,7 +1529,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_004, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(true));
     para->isNeedConnect = true;
-    para->dupInfo = NULL;
+    para->dupInfo = nullptr;
     (void)strcpy_s(para->pkgName, PKG_NAME_SIZE_MAX, "pkgName");
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_OK);
 
@@ -1934,7 +1934,7 @@ HWTEST_F(LNNNetBuilderMockTest, DELETE_PC_NODE_INFO_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, false);
     EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
-    EXPECT_CALL(NetBuilderMock, LnnGetLocalNodeInfo).WillOnce(Return(NULL));
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr));
     ret = DeletePcNodeInfo(peerUdid);
     EXPECT_EQ(ret, false);
     NodeInfo localNodeInfo = {

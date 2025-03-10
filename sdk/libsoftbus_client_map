@@ -25,6 +25,9 @@
         "DisableSessionListener";
         "SetFileSendListener";
         "ShiftLNNGear";
+        "TriggerHbForMeasureDistance";
+        "RegBleRangeCb";
+        "UnregBleRangeCb";
         "SyncTrustedRelationShip";
         "SetDisplayName";
         "GetNodeKeyInfo";
@@ -180,6 +183,9 @@
         "PrivilegeShutdown";
         "RegisterRelationChecker";
         "SoftBusResolveConflict";
+        "SetPreLinkParam";
+        "GetPreLinkParam";
+        "RegPreLinkParamListener";
     local:
         *;
 };

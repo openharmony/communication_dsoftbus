@@ -285,6 +285,14 @@ static bool CompareWifiConnInfo(const AuthConnInfo *info1, const AuthConnInfo *i
     return false;
 }
 
+static bool CompareSessionKeyConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_SESSION_KEY && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
 static bool CompareBleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
     bool isLinkble = (info2->type == AUTH_LINK_TYPE_BLE &&
@@ -329,6 +337,7 @@ static CompareByType g_compareByType[] = {
     {AUTH_LINK_TYPE_P2P,          CompareP2pConnInfo},
     {AUTH_LINK_TYPE_ENHANCED_P2P, CompareEnhancedP2pConnInfo},
     {AUTH_LINK_TYPE_SESSION,      CompareSessionConnInfo},
+    {AUTH_LINK_TYPE_SESSION_KEY,  CompareSessionKeyConnInfo},
 };
 
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
@@ -470,6 +479,8 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
             return DISCOVERY_TYPE_BR;
         case AUTH_LINK_TYPE_P2P:
             return DISCOVERY_TYPE_P2P;
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return DISCOVERY_TYPE_SESSION_KEY;
         default:
             break;
     }
@@ -488,6 +499,8 @@ AuthLinkType ConvertToAuthLinkType(DiscoveryType type)
             return AUTH_LINK_TYPE_BR;
         case DISCOVERY_TYPE_P2P:
             return AUTH_LINK_TYPE_P2P;
+        case DISCOVERY_TYPE_SESSION_KEY:
+            return AUTH_LINK_TYPE_SESSION_KEY;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected discType=%{public}d", type);
             break;

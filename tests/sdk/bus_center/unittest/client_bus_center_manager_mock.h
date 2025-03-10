@@ -54,6 +54,9 @@ public:
     virtual int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel);
     virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex);
     virtual int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex);
+    virtual int32_t ServerIpcRegBleRangeCb(const char *pkgName);
+    virtual int32_t ServerIpcUnregBleRangeCb(const char *pkgName);
+    virtual int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
 public:
@@ -78,6 +81,9 @@ public:
     MOCK_METHOD1(ServerIpcRegDataLevelChangeCb, int32_t (const char *));
     MOCK_METHOD1(ServerIpcUnregDataLevelChangeCb, int32_t (const char *));
     MOCK_METHOD1(ServerIpcSetDataLevel, int32_t (const DataLevel *));
+    MOCK_METHOD1(ServerIpcRegBleRangeCb, int32_t (const char *));
+    MOCK_METHOD1(ServerIpcUnregBleRangeCb, int32_t (const char *));
+    MOCK_METHOD3(ServerIpcTriggerHbForMeasureDistance, int32_t (const char *, const char *, const HbMode *));
     MOCK_METHOD1(SoftBusMutexLockInner, int32_t (SoftBusMutex *));
     MOCK_METHOD1(SoftBusMutexUnlockInner, int32_t (SoftBusMutex *));
 };

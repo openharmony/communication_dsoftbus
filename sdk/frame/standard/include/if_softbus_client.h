@@ -74,6 +74,8 @@ public:
 
     virtual void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 
+    virtual void OnBleRangeDone(const BleRangeInnerInfo *rangeInfo);
+
     virtual int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos);
 
     virtual int32_t OnChannelBind(int32_t channelId, int32_t channelType);

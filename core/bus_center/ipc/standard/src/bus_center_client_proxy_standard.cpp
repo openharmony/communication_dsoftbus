@@ -637,4 +637,29 @@ void BusCenterClientProxy::OnDataLevelChanged(const char *networkId, const DataL
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
+
+void BusCenterClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!data.WriteRawData(rangeInfo, sizeof(BleRangeInnerInfo))) {
+        LNN_LOGE(LNN_EVENT, "write ble range info failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int ret = remote->SendRequest(CLIENT_ON_BLE_RANGE_DONE, data, reply, option);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
 } // namespace OHOS

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -87,34 +87,32 @@ ohos_unittest("BusCenterEventTest") {
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
-    "$dsoftbus_root_path/adapter/common/bus_center/include",
-    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/service/unittest",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/ipc/include/",
-    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include/",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/adapter/common/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include/",
     "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface/",
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include/",
   ]
 
   deps = [
@@ -130,17 +128,12 @@ ohos_unittest("BusCenterEventTest") {
   ]
 
   if (is_standard_system) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/core/bus_center/ipc/standard/include" ]
     bus_center_event_test_external_deps += [
       "bounds_checking_function:libsec_shared",
-      "device_auth:deviceauth_sdk",
       "googletest:gmock_main",
       "googletest:gtest_main",
       "huks:libhukssdk",
     ]
-  } else {
-    include_dirs += [ "$dsoftbus_root_path/core/bus_center/ipc/small/include" ]
   }
   external_deps = bus_center_event_test_external_deps
 }
@@ -178,6 +171,7 @@ ohos_unittest("BusCenterManagerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",

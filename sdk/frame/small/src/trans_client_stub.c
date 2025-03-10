@@ -56,11 +56,6 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
         channel.myIp = (char *)ReadString(data, &size);
         ReadInt32(data, &(channel.streamType));
         ReadBool(data, &(channel.isUdpFile));
-        if (channel.isServer) {
-            int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
-            WriteInt32(reply, udpPort);
-            return udpPort;
-        }
         ReadInt32(data, &(channel.peerPort));
         channel.peerIp = (char *)ReadString(data, &size);
     }

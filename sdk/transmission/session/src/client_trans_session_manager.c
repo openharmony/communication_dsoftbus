@@ -47,6 +47,12 @@ static int32_t g_sessionId = 1;
 static int32_t g_closingIdNum = 0;
 static SoftBusList *g_clientSessionServerList = NULL;
 
+const char *g_rawAuthSession[] = {
+    "IShareAuthSession",
+    "ohos.distributedhardware.devicemanager.resident",
+};
+#define ACTION_AUTH_SESSION_NUM (sizeof(g_rawAuthSession) / sizeof(g_rawAuthSession[0]))
+
 static int32_t LockClientSessionServerList()
 {
     if (g_clientSessionServerList == NULL) {
@@ -679,7 +685,7 @@ int32_t ClientDeleteSession(int32_t sessionId)
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
-int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key)
+int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, TransSessionKey key)
 {
     if ((sessionId < 0) || (data == NULL) || (len == 0)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -725,7 +731,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key)
+int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, TransSessionKey key)
 {
     if ((sessionId < 0) || (data == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -1150,9 +1156,9 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
 // Only need to operate on the action guidance ishare auth channel
 static void ClientSetAuthSessionTimer(const ClientSessionServer *serverNode, SessionInfo *sessionNode)
 {
-    if (strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) == 0 && sessionNode->channelType == CHANNEL_TYPE_AUTH &&
+    if (IsRawAuthSession(serverNode->sessionName) == true && sessionNode->channelType == CHANNEL_TYPE_AUTH &&
         sessionNode->actionId != 0) {
-        sessionNode->lifecycle.maxWaitTime = ISHARE_AUTH_SESSION_MAX_IDLE_TIME;
+        sessionNode->lifecycle.maxWaitTime = RAW_AUTH_SESSION_IDLE_TIME;
         sessionNode->lifecycle.waitTime = 0;
         TRANS_LOGI(TRANS_SDK, "set auth sessionId=%{public}d waitTime success.", sessionNode->sessionId);
     }
@@ -2523,7 +2529,7 @@ int32_t ClientCancelAuthSessionTimer(int32_t sessionId)
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (IsListEmpty(&serverNode->sessionList) || strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) != 0) {
+        if (IsListEmpty(&serverNode->sessionList) || !IsRawAuthSession(serverNode->sessionName)) {
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
@@ -2759,4 +2765,19 @@ int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck)
     sessionNode->needAck = needAck;
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
+}
+
+bool IsRawAuthSession(const char *sessionName)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL, false, TRANS_CTRL, "invalid param.");
+    for (uint32_t i = 0; i < ACTION_AUTH_SESSION_NUM; i++) {
+        if (strcmp(sessionName, g_rawAuthSession[i]) == 0) {
+            return true;
+        }
+    }
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return false;
 }

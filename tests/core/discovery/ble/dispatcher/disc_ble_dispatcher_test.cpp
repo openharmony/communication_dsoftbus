@@ -260,7 +260,7 @@ static SubscribeOption g_sOption0 = { .freq = 1,
 static PublishOption g_pOption1 = {
     .freq = 1,
     .capabilityBitmap = {1},
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = true
 };
@@ -269,13 +269,13 @@ static SubscribeOption g_sOption1 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capabilityBitmap = { 1 },
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 
 static PublishOption g_pOption2 = {
     .freq = 1,
     .capabilityBitmap = {2},
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = true
 };
@@ -284,13 +284,13 @@ static SubscribeOption g_sOption2 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capabilityBitmap = { 2 },
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 
 static PublishOption g_pOption3 = {
     .freq = 1,
     .capabilityBitmap = {3},
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = true
 };
@@ -299,7 +299,7 @@ static SubscribeOption g_sOption3 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capabilityBitmap = { 3 },
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 
 class DiscBleDispatcherTest : public testing::Test {

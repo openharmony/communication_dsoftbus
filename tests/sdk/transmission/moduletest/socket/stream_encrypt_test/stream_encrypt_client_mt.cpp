@@ -113,7 +113,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest001, TestSize.Level1)
         .name = (char *)TEST_SESSION_NAME,
         .pkgName = (char *)PKG_NAME,
         .peerName = (char *)TEST_SESSION_NAME_SRV,
-        .peerNetworkId = NULL,
+        .peerNetworkId = nullptr,
         .dataType = DATA_TYPE_RAW_STREAM,
     };
     info.peerNetworkId = WaitOnLineAndGetNetWorkId();

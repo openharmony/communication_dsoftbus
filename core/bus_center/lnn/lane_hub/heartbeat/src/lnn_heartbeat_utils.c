@@ -492,6 +492,17 @@ static int32_t LnnDumpPrintNetType(const char *networkId)
     return SOFTBUS_OK;
 }
 
+static int32_t LnnDumpPrintStaticNetCap(const char *networkId)
+{
+    uint32_t staticNetCap = 0;
+    if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_STATIC_NET_CAP, &staticNetCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get static netCap failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "StaticNetCap=%{public}u", staticNetCap);
+    return SOFTBUS_OK;
+}
+
 static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
@@ -528,6 +539,10 @@ static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
     }
     if (LnnDumpPrintNetType(nodeInfo->networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintNetType failed");
+        return;
+    }
+    if (LnnDumpPrintStaticNetCap(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintStaticNetCap failed");
         return;
     }
 }

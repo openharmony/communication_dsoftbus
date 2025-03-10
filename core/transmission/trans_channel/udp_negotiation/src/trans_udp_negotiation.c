@@ -536,7 +536,7 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "unpack request udp info failed.");
 
     if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
+        TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {

@@ -55,7 +55,7 @@ HWTEST_F(SoftbusPermissionTest, IsValidPkgNameTest001, TestSize.Level0)
 {
     int32_t ret;
 
-    ret = IsValidPkgName(0, NULL);
+    ret = IsValidPkgName(0, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = IsValidPkgName(0, g_pkgName);
@@ -129,7 +129,7 @@ HWTEST_F(SoftbusPermissionTest, GrantTransPermissionTest001, TestSize.Level0)
 {
     int32_t ret;
     InitDynamicPermission();
-    ret = GrantTransPermission(0, 0, NULL);
+    ret = GrantTransPermission(0, 0, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

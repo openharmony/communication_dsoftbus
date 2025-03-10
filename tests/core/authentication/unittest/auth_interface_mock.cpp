@@ -38,7 +38,7 @@ static AuthOtherInterfaceMock *GetAuthOtherInterfaceMock()
 int32_t AuthOtherInterfaceMock::ActionOfLnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
 {
     (void)key;
-    if (info == NULL) {
+    if (info == nullptr) {
         GTEST_LOG_(ERROR) << "invalid param";
         return SOFTBUS_INVALID_PARAM;
     }
@@ -51,7 +51,7 @@ int32_t AuthOtherInterfaceMock::ActionOfLnnGetRemoteNodeInfoById(const char *id,
 {
     (void)id;
     (void)type;
-    if (info == NULL) {
+    if (info == nullptr) {
         GTEST_LOG_(ERROR) << "invalid param";
         return SOFTBUS_INVALID_PARAM;
     }

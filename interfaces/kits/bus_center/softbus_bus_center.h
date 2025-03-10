@@ -183,6 +183,7 @@ typedef enum {
     NODE_KEY_P2P_IP_ADDRESS,         /**< P2P IP address in string format */
     NODE_KEY_DEVICE_SECURITY_LEVEL,  /**< device security level in number format */
     NODE_KEY_DEVICE_SCREEN_STATUS,   /**< device screen status in bool format */
+    NODE_KEY_STATIC_NETWORK_CAP,     /**< Static Network capability in number format */
 } NodeDeviceInfoKey;
 
 /**
@@ -201,6 +202,22 @@ typedef enum {
     BIT_ETH,        /**< Support ETH */
     BIT_COUNT,      /**< Invalid type */
 } NetCapability;
+
+/**
+ * @brief Enumerates supported static capabilities.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    STATIC_CAP_BIT_BLE = 0,         /**< Support BLE */
+    STATIC_CAP_BIT_BR,              /**< Support BR */
+    STATIC_CAP_BIT_WIFI,            /**< Support WIFI */
+    STATIC_CAP_BIT_P2P,             /**< Support WIFI P2P */
+    STATIC_CAP_BIT_ENHANCED_P2P,    /**< Support WIFI ENHANCED P2P */
+    STATIC_CAP_BIT_ETH,             /**< Support ETH */
+    STATIC_CAP_BIT_COUNT,           /**< Invalid type */
+} StaticNetCapability;
 
 /**
  * @brief Enumerates network types for an online device.

@@ -228,7 +228,7 @@ static void GetWiFiLocalInfo(void)
 
 /*
  * @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
- * @tc.desc: SoftbusDumpPrintNetCapacity test
+ * @tc.desc: SoftbusDumpPrintDynamicNetCap test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,14 +239,14 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.L
 
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE5_NETWORK_ID, strlen(NODE5_NETWORK_ID));
-    EXPECT_NE(SoftbusDumpPrintNetCapacity(fd, &nodeInfo), SOFTBUS_OK);
+    EXPECT_NE(SoftbusDumpPrintDynamicNetCap(fd, &nodeInfo), SOFTBUS_OK);
 
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(true);
 
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID));
-    EXPECT_EQ(SoftbusDumpPrintNetCapacity(fd, &nodeInfo), SOFTBUS_OK);
+    EXPECT_EQ(SoftbusDumpPrintDynamicNetCap(fd, &nodeInfo), SOFTBUS_OK);
 }
 
 /*

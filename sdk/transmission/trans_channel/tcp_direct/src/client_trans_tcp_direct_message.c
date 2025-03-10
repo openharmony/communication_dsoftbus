@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -445,6 +445,7 @@ static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char
     int32_t res = TransTcpSetTos(channel, flags);
     if (res != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "failed to set tos. channelId=%{public}d", channel->channelId);
+        SoftBusFree(buf);
         return res;
     }
     if (SoftBusMutexLock(&(channel->detail.fdLock)) != SOFTBUS_OK) {
@@ -456,6 +457,8 @@ static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char
     res = GetSupportTlvAndNeedAckById(channel->channelId, channel->detail.channelType, &supportTlv, NULL);
     if (res != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "failed to get supportTlv. channelId=%{public}d", channel->channelId);
+        SoftBusFree(buf);
+        (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
         return res;
     }
     uint32_t tmpHeadLen = DC_DATA_HEAD_SIZE;

@@ -44,13 +44,13 @@ static NetBuilderDepsInterface *GetNetBuilderDepsInterface()
 
 int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -763,5 +763,16 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
 {
     return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
 }
+
+int32_t LnnInitSaStatusMonitor()
+{
+    return GetNetBuilderDepsInterface()->LnnInitSaStatusMonitor();
+}
+
+void LnnDeInitSaStatusMonitor()
+{
+    GetNetBuilderDepsInterface()->LnnDeInitSaStatusMonitor();
+}
+
 } // extern "C"
 } // namespace OHOS

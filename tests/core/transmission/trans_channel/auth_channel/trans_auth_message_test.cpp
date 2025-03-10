@@ -60,30 +60,30 @@ void TransAuthMessageTest::TearDownTestCase(void)
 HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != NULL);
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
 
-    int32_t ret = TransAuthChannelMsgPack(NULL, appInfo);
+    int32_t ret = TransAuthChannelMsgPack(nullptr, appInfo);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
-    ret = TransAuthChannelMsgPack(msg, NULL);
+    ret = TransAuthChannelMsgPack(msg, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
-    ret = TransAuthChannelMsgUnpack(NULL, appInfo, 0);
+    ret = TransAuthChannelMsgUnpack(nullptr, appInfo, 0);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
-    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, NULL, 0);
+    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, nullptr, 0);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
     ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, 0);
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
 
     char cJsonStr[ERR_MSG_MAX_LEN] = {0};
-    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, NULL, cJsonStr, ERR_MSG_MAX_LEN);
+    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, nullptr, cJsonStr, ERR_MSG_MAX_LEN);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
-    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, g_errMsg, NULL, ERR_MSG_MAX_LEN);
+    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, g_errMsg, nullptr, ERR_MSG_MAX_LEN);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 
     cJSON_Delete(msg);
@@ -99,7 +99,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
 HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != NULL);
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
 
@@ -162,7 +162,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest002, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != NULL);
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
 

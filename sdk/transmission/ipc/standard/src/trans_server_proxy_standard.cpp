@@ -784,6 +784,18 @@ int32_t TransServerProxy::SetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_OK;
 }
 
+int32_t TransServerProxy::RegBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::UnregBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
 int32_t TransServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {

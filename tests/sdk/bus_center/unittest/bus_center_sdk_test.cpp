@@ -35,6 +35,7 @@ using namespace testing::ext;
 
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
 constexpr char TEST_PKG_NAME_1[] = "com.softbus.test1";
+constexpr char TEST_MSDP_NAME[] = "ohos.msdp.spatialawareness";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_1 = 0;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_2 = 14;
@@ -170,7 +171,14 @@ static void OnDataLevelChanged(const char *networkId, const DataLevel dataLevel)
     (void)dataLevel;
 }
 
+static void OnBleRangeDone(const BleRangeInfo *info)
+{
+    (void)info;
+}
+
 static IDataLevelCb g_dataLevelCb = { .onDataLevelChanged = OnDataLevelChanged };
+static IBleRangeCb g_bleRangeCb = { .onBleRangeInfoReceived = OnBleRangeDone };
+static IBleRangeCb g_bleRangeCb1 = { .onBleRangeInfoReceived = nullptr };
 
 /*
  * @tc.name: BUS_CENTER_SDK_Join_Lnn_Test_001
@@ -654,5 +662,31 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PARAM_CHECK_Test001, TestSize.Level1)
     EXPECT_EQ(SyncTrustedRelationShip(nullptr, msg, strlen(msg)), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SyncTrustedRelationShip(TEST_PKG_NAME, nullptr, strlen(msg)), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SyncTrustedRelationShip(TEST_PKG_NAME, msg, strlen(msg)), SOFTBUS_IPC_ERR);
+}
+
+/*
+ * @tc.name: BUS_CENTER_SDK_TRIGGER_RANGE_Test001
+ * @tc.desc: test sdk parm check
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1)
+{
+    EXPECT_EQ(RegBleRangeCb(nullptr, &g_bleRangeCb), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RegBleRangeCb(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RegBleRangeCb(nullptr, &g_bleRangeCb1), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RegBleRangeCb(TEST_PKG_NAME, &g_bleRangeCb), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RegBleRangeCb(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_OK);
+    EXPECT_EQ(UnregBleRangeCb(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UnregBleRangeCb(TEST_PKG_NAME), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UnregBleRangeCb(TEST_MSDP_NAME), SOFTBUS_OK);
+
+    const char *callerId = "123";
+    HbMode mode = { .connFlag = true, .duration = 5, .replyFlag = false };
+    EXPECT_EQ(TriggerHbForMeasureDistance(nullptr, nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(TriggerHbForMeasureDistance(TEST_PKG_NAME, nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(TriggerHbForMeasureDistance(TEST_PKG_NAME, callerId, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(TriggerHbForMeasureDistance(nullptr, callerId, &mode), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(TriggerHbForMeasureDistance(TEST_PKG_NAME, callerId, &mode), SOFTBUS_OK);
 }
 } // namespace OHOS

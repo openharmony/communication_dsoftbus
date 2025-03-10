@@ -59,7 +59,7 @@ static char g_ip[] = "127.0.0.1";
 static VtpStreamOpenParam g_serverParam1 = {
     g_pkgName,
     g_ip,
-    NULL,
+    nullptr,
     -1,
     RAW_STREAM,
     (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc",
@@ -233,21 +233,21 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
     const StreamFrameInfo frameInfo = {};
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = INVALID;
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = COMMON_VIDEO_STREAM;
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 }
@@ -274,7 +274,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level
 
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData1, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData1, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 

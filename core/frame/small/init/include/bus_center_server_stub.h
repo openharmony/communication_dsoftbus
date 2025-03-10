@@ -46,6 +46,9 @@ int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply);
 int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply);
 int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply);
+int32_t ServerTriggerHbForMeasureDistance(IpcIo *req, IpcIo *reply);
+int32_t ServerRegBleRangeCb(IpcIo *req, IpcIo *reply);
+int32_t ServerUnregBleRangeCb(IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

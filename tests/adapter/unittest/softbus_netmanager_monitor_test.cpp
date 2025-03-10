@@ -53,7 +53,7 @@ void AdapterNetManagerMonitorTest::TearDown() { }
  */
 HWTEST_F(AdapterNetManagerMonitorTest, ConfigNetLinkUpTest001, TestSize.Level1)
 {
-    int32_t ret = ConfigNetLinkUp(NULL);
+    int32_t ret = ConfigNetLinkUp(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     char ifName[] = NCM_LINK_NAME;
     ret = ConfigNetLinkUp(ifName);
@@ -69,7 +69,7 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigNetLinkUpTest001, TestSize.Level1)
 HWTEST_F(AdapterNetManagerMonitorTest, ConfigLocalIpTest001, TestSize.Level1)
 {
     char ifName[] = NCM_LINK_NAME;
-    int32_t ret = ConfigLocalIp(ifName, NULL);
+    int32_t ret = ConfigLocalIp(ifName, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     char ip[] = LOCAL_IP_LINK;
     ret = ConfigLocalIp(ifName, ip);
@@ -88,7 +88,7 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigRouteTest001, TestSize.Level1)
     char ifName[] = NCM_LINK_NAME;
     char destination[] = DEFAULT_GATEWAY_POSTFIX;
     char gateway[] = "";
-    int32_t ret = ConfigRoute(id, ifName, destination, NULL);
+    int32_t ret = ConfigRoute(id, ifName, destination, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = ConfigRoute(id, ifName, destination, gateway);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_CONFIG_NETLINK_ROUTE_FAIL);
