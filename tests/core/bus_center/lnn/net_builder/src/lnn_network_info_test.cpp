@@ -45,6 +45,8 @@ constexpr uint32_t TYPE_16 = 16;
 constexpr uint32_t TYPE_63 = 63;
 constexpr uint32_t TYPE_128 = 128;
 constexpr uint32_t DISCOVERY_TYPE = 13111;
+constexpr uint8_t USER_ID_MSG[] = "100";
+constexpr uint32_t LEN = 10;
 
 class LNNNetworkInfoTest : public testing::Test {
 public:
@@ -258,7 +260,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1
     EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo);
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR))
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNumInfo)
+        .WillOnce(Return(SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     WifiStateProcess(TYPE_63, true);
     WifiStateProcess(TYPE_63, false);
@@ -364,5 +367,203 @@ HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_001, TestSize.Level1)
     EXPECT_EQ(IsSupportApCoexist(coexistCap3), false);
     const char *coexistCap4 = COEXISTCAP4;
     EXPECT_EQ(IsSupportApCoexist(coexistCap4), false);
+}
+
+/*
+ * @tc.name: CONVERT_MSG_TO_USER_ID_TEST_001
+ * @tc.desc: test ConvertMsgToUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USER_ID_TEST_001, TestSize.Level1)
+{
+    uint32_t len = BITLEN - 1;
+    EXPECT_EQ(ConvertMsgToUserId(nullptr, nullptr, len), SOFTBUS_INVALID_PARAM);
+    int32_t userId = 0;
+    EXPECT_EQ(ConvertMsgToUserId(&userId, nullptr, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ConvertMsgToUserId(&userId, USER_ID_MSG, len), SOFTBUS_INVALID_PARAM);
+    len = BITLEN;
+    EXPECT_EQ(ConvertMsgToUserId(&userId, USER_ID_MSG, len), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_RECEIVE_USER_ID_SYNCINFO_MSG_TEST_001
+ * @tc.desc: test OnReceiveUserIdSyncInfoMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, ON_RECEIVE_USER_ID_SYNCINFO_MSG_TEST_001, TestSize.Level1)
+{
+    LnnSyncInfoType type = LNN_INFO_TYPE_PTK;
+    uint32_t len = BITLEN;
+    const char *networkId = NETWORKID;
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, networkId, USER_ID_MSG, len));
+    type = LNN_INFO_TYPE_USERID;
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, nullptr, USER_ID_MSG, len));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, networkId, nullptr, len));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, networkId, USER_ID_MSG, 0));
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
+    EXPECT_CALL(netBuilderMock, LnnSetDLConnUserId)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, networkId, USER_ID_MSG, len));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, networkId, USER_ID_MSG, len));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveUserIdSyncInfoMsg(type, networkId, USER_ID_MSG, len));
+}
+
+/*
+ * @tc.name: ON_LNN_PROCESS_USER_CHANGE_MSG_DELAY_TEST_001
+ * @tc.desc: test OnLnnProcessUserChangeMsgDelay
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, ON_LNN_PROCESS_USER_CHANGE_MSG_DELAY_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnLnnProcessUserChangeMsgDelay(nullptr));
+    void *para = static_cast<void *>(SoftBusCalloc(sizeof(SendSyncInfoParam)));
+    if (para == nullptr) {
+        return;
+    }
+    NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnLnnProcessUserChangeMsgDelay(para));
+}
+
+/*
+ * @tc.name: LNN_ASYNC_SEND_USER_ID_TEST_001
+ * @tc.desc: test LnnAsyncSendUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, LNN_ASYNC_SEND_USER_ID_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(LnnAsyncSendUserId(nullptr));
+    SendSyncInfoParam *data = reinterpret_cast<SendSyncInfoParam *>(SoftBusCalloc(sizeof(SendSyncInfoParam)));
+    if (data == nullptr) {
+        return;
+    }
+    data->msg = nullptr;
+    void *param = reinterpret_cast<void *>(data);
+    EXPECT_NO_FATAL_FAILURE(LnnAsyncSendUserId(param));
+    SendSyncInfoParam *data1 = reinterpret_cast<SendSyncInfoParam *>(SoftBusCalloc(sizeof(SendSyncInfoParam)));
+    if (data1 == nullptr) {
+        return;
+    }
+    data1->len = LEN;
+    data1->msg = reinterpret_cast<uint8_t *>(SoftBusCalloc(data1->len));
+    if (data1->msg == nullptr) {
+        SoftBusFree(data1);
+        return;
+    }
+    NiceMock<LnnSyncInfoInterfaceMock> syncInfoMock;
+    EXPECT_CALL(syncInfoMock, LnnSendSyncInfoMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_OK));
+    void *param1 = reinterpret_cast<void *>(data1);
+    EXPECT_NO_FATAL_FAILURE(LnnAsyncSendUserId(param1));
+}
+
+/*
+ * @tc.name: DO_SEND_USER_ID_TEST_001
+ * @tc.desc: test DoSendUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, DO_SEND_USER_ID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(EOK, strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORKID));
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
+    NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
+        .WillOnce(Return(true))
+        .WillRepeatedly(Return(false));
+    const char *udid = "udidTest";
+    EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
+    EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
+    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusMalloc(sizeof(SendSyncInfoParam));
+    if (data == nullptr) {
+        return;
+    }
+    NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillOnce(Return(nullptr))
+        .WillRepeatedly(Return(data));
+    EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
+}
+
+/*
+ * @tc.name: CONVERT_USER_ID_TO_MSG_TEST_001
+ * @tc.desc: test ConvertUserIdToMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, CONVERT_USER_ID_TO_MSG_TEST_001, TestSize.Level1)
+{
+    EXPECT_NE(ConvertUserIdToMsg(100), nullptr);
+}
+
+/*
+ * @tc.name: NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_001
+ * @tc.desc: test NotifyRemoteDevOffLineByUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NodeInfo info = { .userId = 101 };
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(NotifyRemoteDevOffLineByUserId(DP_INACTIVE_DEFAULT_USERID, nullptr));
+    EXPECT_NO_FATAL_FAILURE(NotifyRemoteDevOffLineByUserId(100, nullptr));
+}
+
+/*
+ * @tc.name: NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_002
+ * @tc.desc: test NotifyRemoteDevOffLineByUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NodeInfo info = { .userId = 0 };
+    EXPECT_EQ(EOK, strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORKID));
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(NotifyRemoteDevOffLineByUserId(0, nullptr));
+}
+
+/*
+ * @tc.name: NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_003
+ * @tc.desc: test NotifyRemoteDevOffLineByUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_003, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NodeInfo info = { .userId = 100 };
+    EXPECT_EQ(EOK, strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORKID));
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(NotifyRemoteDevOffLineByUserId(100, nullptr));
 }
 } // namespace OHOS
