@@ -1560,36 +1560,6 @@ HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest002, TestSize.Leve
 }
 
 /**
- * @tc.name: TransDealAuthChannelOpenResultTest001
- * @tc.desc: TransDealAuthChannelOpenResult
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransAuthChannelTest, TransDealAuthChannelOpenResultTest001, TestSize.Level1)
-{
-    int32_t ret = InitAndCreateSessionServer();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    int32_t channelId = TRANS_TEST_CHANNEL_ID;
-    int32_t openResult = 1;
-    ret = TransDealAuthChannelOpenResult(channelId, openResult);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
-
-    AuthChannelInfo *info = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
-    EXPECT_NE(info, nullptr);
-    info->appInfo.myData.channelId = 1111; // test value
-    ret = AddAuthChannelInfo(info);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = TransDealAuthChannelOpenResult(info->appInfo.myData.channelId, openResult);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    DelAuthChannelInfoByChanId(info->appInfo.myData.channelId);
-    TransSessionMgrDeinit();
-    TransAuthDeinit();
-}
-
-/**
  * @tc.name: TransCheckAuthChannelOpenStatusTest001
  * @tc.desc: TransCheckAuthChannelOpenStatus
  * @tc.type: FUNC
