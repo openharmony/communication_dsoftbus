@@ -16,6 +16,7 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
+#include "ble_range.h"
 #include "data_level.h"
 #include "iremote_proxy.h"
 #include "softbus_bus_center.h"
@@ -66,6 +67,9 @@ public:
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
+    virtual int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
+    virtual int32_t RegBleRangeCb(const char *pkgName) = 0;
+    virtual int32_t UnregBleRangeCb(const char *pkgName) = 0;
     virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);

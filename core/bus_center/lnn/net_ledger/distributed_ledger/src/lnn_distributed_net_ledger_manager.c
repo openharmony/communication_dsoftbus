@@ -778,6 +778,18 @@ static int32_t DlGetNodeP2pIp(const char *networkId, bool checkOnline, void *buf
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetStaticNetCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    if (len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((uint32_t *)buf) = info->staticNetCap;
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -812,6 +824,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_STATIC_CAP_LEN, DlGetStaticCapLen},
     {NUM_KEY_DEVICE_SECURITY_LEVEL, DlGetDeviceSecurityLevel},
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, DlGetConnSubFeatureCap},
+    {NUM_KEY_STATIC_NET_CAP, DlGetStaticNetCap},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BOOL_KEY_SCREEN_STATUS, DlGetNodeScreenOnFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},

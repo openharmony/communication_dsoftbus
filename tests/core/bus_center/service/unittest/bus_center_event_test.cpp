@@ -101,7 +101,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest001, TestSize.Level1)
     bool isOnline = false;
     NodeBasicInfo *info = nullptr;
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
     EXPECT_CALL(BusCenterEventMock, SetDefaultQdisc()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterEventMock, LnnGetAllOnlineNodeNum(_)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
@@ -133,7 +133,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest002, TestSize.Level1)
     NodeBasicInfo *info = nullptr;
     NodeBasicInfoType type = TYPE_DEVICE_NAME;
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     LnnNotifyBasicInfoChanged(info, type);
     NodeBasicInfo info2 = {
         .networkId = "testNetworkId",
@@ -160,9 +160,9 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest003, TestSize.Level1)
 {
     const char *networkId = nullptr;
     int32_t retCode = SOFTBUS_INVALID_PARAM;
-    ConnectionAddr *addr = NULL;
+    ConnectionAddr *addr = nullptr;
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
 
     LnnNotifyJoinResult(addr, networkId, retCode);
     LnnNotifyLeaveResult(networkId, retCode);
@@ -208,7 +208,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest004, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest006, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     SoftBusScreenState mockState = (SoftBusScreenState)(SOFTBUS_SCREEN_UNKNOWN + 1);
 
     LnnNotifyScreenStateChangeEvent(mockState);
@@ -248,7 +248,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest008, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest009, TestSize.Level1)
 {
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     SoftBusAccountState mockState = (SoftBusAccountState)(SOFTBUS_ACCOUNT_UNKNOWN + 1);
 
     LnnNotifyAccountStateChangeEvent(mockState);
@@ -268,7 +268,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest009, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest010, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     SoftBusUserSwitchState mockState = (SoftBusUserSwitchState)(SOFTBUS_USER_SWITCH_UNKNOWN + 1);
 
     LnnNotifyUserSwitchEvent(mockState);
@@ -308,7 +308,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest012, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest014, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     SoftBusOOBEState mockState = (SoftBusOOBEState)(SOFTBUS_OOBE_UNKNOWN + 1);
 
     LnnNotifyOOBEStateChangeEvent(mockState);
@@ -330,7 +330,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest015, TestSize.Level1)
     const char *btMac = nullptr;
     const char *btMacTest = "testBtMac";
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     SoftBusBtAclState state = SOFTBUS_BR_ACL_CONNECTED;
 
     LnnNotifyBtAclStateChangeEvent(btMac, state);
@@ -355,7 +355,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest016, TestSize.Level1)
     const char *ifName = nullptr;
 
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     LnnNotifyAddressChangedEvent(ifName);
     LnnNotifyAddressChangedEvent(ifNameTest);
     int32_t ret = LnnInitBusCenterEvent();
@@ -376,7 +376,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest017, TestSize.Level1)
     bool isLocal = false;
     const char *addrTest = "testAddr";
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
 
     LnnNotifyNodeAddressChanged(addr, networkId, isLocal);
     LnnNotifyNodeAddressChanged(addrTest, networkId, isLocal);
@@ -415,7 +415,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest019, TestSize.Level1)
 {
     const ConnectionAddr *addr = nullptr;
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     NodeBasicInfo info = {
         .networkId = "testNetworkId",
         .deviceName = "testDeviceName",
@@ -444,7 +444,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest019, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest020, TestSize.Level1)
 {
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     SoftBusLpEventType type = (SoftBusLpEventType)(SOFTBUS_LP_EVENT_UNKNOWN + 1);
     LnnNotifyLpReportEvent(type);
     type = SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY;
@@ -463,7 +463,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest020, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest021, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     const char *networkId = nullptr;
     const char *networkIdTest = "testNetworkId";
     LnnNotifyNetworkIdChangeEvent(networkId);
@@ -482,7 +482,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest021, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest022, TestSize.Level1)
 {
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     int32_t ret = LnnInitBusCenterEvent();
     LnnDeinitBusCenterEvent();
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -497,7 +497,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest022, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest023, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
 
     int32_t ret = LnnRegisterEventHandler(event, handler);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -517,7 +517,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest023, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest024, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
 
     int32_t ret = LnnRegisterEventHandler(event, handler);
     LnnUnregisterEventHandler(event, handler);
@@ -534,7 +534,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
 {
     SoftBusWifiState *mockState = nullptr;
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     LnnNotifyWlanStateChangeEvent(nullptr);
     mockState = (SoftBusWifiState *)SoftBusCalloc(sizeof(SoftBusWifiState));
     ASSERT_TRUE(mockState != nullptr);
@@ -554,7 +554,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     SoftBusBtState *mockState = (SoftBusBtState *)SoftBusCalloc(sizeof(SoftBusWifiState));
     ASSERT_TRUE(mockState != nullptr);
     *mockState = (SoftBusBtState)(SOFTBUS_BT_UNKNOWN + 1);
@@ -573,7 +573,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
 {
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     SoftBusNightModeState *mockState = (SoftBusNightModeState *)SoftBusCalloc(sizeof(SoftBusNightModeState));
     ASSERT_TRUE(mockState != nullptr);
     *mockState = (SoftBusNightModeState)(SOFTBUS_NIGHT_MODE_UNKNOWN + 1);
@@ -592,7 +592,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest011, TestSize.Level1)
 {
     LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = NULL;
+    LnnEventHandler handler = nullptr;
     SoftBusDifferentAccountState *mockState  =
         (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
     ASSERT_TRUE(mockState != nullptr);

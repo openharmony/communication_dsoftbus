@@ -19,6 +19,7 @@
 namespace OHOS::SoftBus {
 std::shared_ptr<WifiDirectExecutor> WifiDirectExecutorManager::Find(const std::string &remoteId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(!remoteId.empty(), nullptr, CONN_WIFI_DIRECT, "remote id is empty");
     for (const auto &node : executors_) {
         if (remoteId == node.remoteDeviceId_ || remoteId == node.remoteMac_) {
             CONN_LOGI(CONN_WIFI_DIRECT, "find remoteId=%{public}s, remoteDeviceId=%{public}s, remoteMac=%{public}s",
@@ -33,6 +34,7 @@ std::shared_ptr<WifiDirectExecutor> WifiDirectExecutorManager::Find(const std::s
 
 void WifiDirectExecutorManager::Insert(const std::string &remoteId, const std::shared_ptr<WifiDirectExecutor> &executor)
 {
+    CONN_CHECK_AND_RETURN_LOGE(!remoteId.empty(), CONN_WIFI_DIRECT, "remote id is empty");
     std::string remoteDeviceId;
     std::string remoteMac;
     if (WifiDirectUtils::IsDeviceId(remoteId)) {
@@ -50,12 +52,14 @@ void WifiDirectExecutorManager::Insert(const std::string &remoteId, const std::s
 
 void WifiDirectExecutorManager::Erase(const std::string &remoteId)
 {
+    CONN_CHECK_AND_RETURN_LOGE(!remoteId.empty(), CONN_WIFI_DIRECT, "remote id is empty");
     for (auto it = executors_.begin(); it != executors_.end();) {
         if (remoteId == it->remoteDeviceId_ || remoteId == it->remoteMac_) {
             CONN_LOGI(CONN_WIFI_DIRECT, "erase remoteId=%{public}s, remoteDeviceId=%{public}s, remoteMac=%{public}s",
                 GetDumpString(remoteId).c_str(), WifiDirectAnonymizeDeviceId(it->remoteDeviceId_).c_str(),
                 WifiDirectAnonymizeMac(it->remoteMac_).c_str());
             it = executors_.erase(it);
+            break;
         } else {
             it++;
         }

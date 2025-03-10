@@ -303,6 +303,23 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t SoftBusServer::TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    return LnnIpcTriggerHbForMeasureDistance(pkgName, callerId, mode);
+}
+
+int32_t SoftBusServer::RegBleRangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcRegBleRangeCb(pkgName, callingPid);
+}
+
+int32_t SoftBusServer::UnregBleRangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcUnregBleRangeCb(pkgName, callingPid);
+}
+
 int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     return LnnIpcSyncTrustedRelationShip(pkgName, msg, msgLen);

@@ -946,6 +946,14 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
     }
 }
 
+void LnnNotifyWifiServiceStart(void *para)
+{
+    (void)para;
+    LNN_LOGI(LNN_EVENT, "notify wifi service start");
+    LnnDeviceInfoChangeEvent event = {.basic.event = LNN_EVENT_WIFI_SERVICE_START};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;

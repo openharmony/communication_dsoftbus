@@ -689,7 +689,6 @@ int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid)
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
         sourceInfo.accountId = INVALID_ACCOUNT_ID;
-        return ret;
     }
     ret = TransGetCallingFullTokenId(&sourceInfo.tokenId);
     if (ret != SOFTBUS_OK) {

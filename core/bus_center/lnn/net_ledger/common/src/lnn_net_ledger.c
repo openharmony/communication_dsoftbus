@@ -91,14 +91,21 @@ static bool IsCapacityChange(NodeInfo *info)
     uint32_t authCapacity = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
+            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}u->%{public}u", info->authCapacity, authCapacity);
             return true;
         }
     }
     uint32_t heartbeatCapacity = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_HB_CAP, &heartbeatCapacity) == SOFTBUS_OK) {
         if (heartbeatCapacity != info->heartbeatCapacity) {
-            LNN_LOGW(LNN_LEDGER, "hbCapacity=%{public}d->%{public}d", info->heartbeatCapacity, heartbeatCapacity);
+            LNN_LOGW(LNN_LEDGER, "hbCapacity=%{public}u->%{public}u", info->heartbeatCapacity, heartbeatCapacity);
+            return true;
+        }
+    }
+    uint32_t staticNetCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap) == SOFTBUS_OK) {
+        if (staticNetCap != info->staticNetCap) {
+            LNN_LOGW(LNN_LEDGER, "staticNetCap=%{public}u->%{public}u", info->staticNetCap, staticNetCap);
             return true;
         }
     }
@@ -376,6 +383,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         case NODE_KEY_DEVICE_SCREEN_STATUS:
             return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool *)info, NODE_SCREEN_STATUS_LEN);
+        case NODE_KEY_STATIC_NETWORK_CAP:
+            return LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, (uint32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -415,6 +424,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         case NODE_KEY_DEVICE_SCREEN_STATUS:
             return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
+        case NODE_KEY_STATIC_NETWORK_CAP:
+            return LnnGetRemoteNumU32Info(networkId, NUM_KEY_STATIC_NET_CAP, (uint32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -709,7 +720,7 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintDynamicNetCap(int fd, NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "Invalid parameter");
@@ -773,6 +784,23 @@ static int32_t SoftbusDumpPrintScreenStatus(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_NOT_FIND;
     }
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "isScreenOn", isScreenOn ? "on" : "off");
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusDumpPrintStaticNetCap(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_STATIC_NETWORK_CAP;
+    uint32_t staticNetCap = 0;
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&staticNetCap, sizeof(staticNetCap)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo staticNetCap failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    SOFTBUS_DPRINTF(fd, "  %-15s->%u\n", "StaticNetCap", staticNetCap);
     return SOFTBUS_OK;
 }
 
@@ -908,8 +936,8 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     if (SoftbusDumpPrintUuid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUuid failed");
     }
-    if (SoftbusDumpPrintNetCapacity(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetCapacity failed");
+    if (SoftbusDumpPrintDynamicNetCap(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintDynamicNetCap failed");
     }
     if (SoftbusDumpPrintNetType(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetType failed");
@@ -919,6 +947,9 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintScreenStatus(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintScreenStatus failed");
+    }
+    if (SoftbusDumpPrintStaticNetCap(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintStaticNetCap failed");
     }
 }
 

@@ -298,7 +298,7 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
 
     struct HksBlob decryptData = { 0 };
     decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
-    if (decryptData.data == NULL) {
+    if (decryptData.data == nullptr) {
         SoftBusFree(encryptData.data);
         return;
     }

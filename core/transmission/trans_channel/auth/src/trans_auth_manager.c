@@ -16,6 +16,7 @@
 #include "trans_auth_manager.h"
 
 #include "auth_channel.h"
+#include "auth_manager.h"
 #include "auth_meta_manager.h"
 #include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
@@ -49,6 +50,7 @@
 #define AUTH_GROUP_ID "auth group id"
 #define AUTH_SESSION_KEY "auth session key"
 #define ISHARE_AUTH_SESSION "IShareAuthSession"
+#define DM_PKG_NAME "ohos.distributedhardware.devicemanager.resident"
 
 const char *g_serviceForAction[] = {
     "IShareAuthSession",
@@ -1230,6 +1232,9 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         // If it is an ishare session, clean up the auth manager
         if (strcmp(channel->appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
             DelAuthMetaManagerByConnectionId(channel->authId);
+        }
+        if (strcmp(channel->appInfo.myData.sessionName, DM_PKG_NAME) == 0) {
+            DelAuthManagerByConnectionId(channel->authId);
         }
         TransAuthCloseChannel(channel->authId, channel->appInfo.linkType, channel->isClient);
         NotifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);

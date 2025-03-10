@@ -62,7 +62,7 @@ static void *ThreadSelfTest(void *arg)
 static void *ThreadWaitTest(void *arg)
 {
     printf("----------%s--------\n", __FUNCTION__);
-    int32_t ret = SoftBusCondWait(&g_cond, &g_mutex, NULL);
+    int32_t ret = SoftBusCondWait(&g_cond, &g_mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusSleepMs(DELAY_TIME);
     return nullptr;
@@ -762,7 +762,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadGetSelfTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
 
-    int32_t ret = SoftBusThreadCreate(&thread, NULL, ThreadSelfTest, nullptr);
+    int32_t ret = SoftBusThreadCreate(&thread, nullptr, ThreadSelfTest, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(thread != 0);
 }
@@ -1040,7 +1040,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
 {
-    int32_t ret = SoftBusMutexInit(&g_mutex, NULL);
+    int32_t ret = SoftBusMutexInit(&g_mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftBusCondInit(&g_cond);

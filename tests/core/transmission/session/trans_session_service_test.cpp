@@ -79,9 +79,9 @@ void TransSessionServiceTest::TearDownTestCase(void)
  */
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest01, TestSize.Level1)
 {
-    int32_t ret = TransCreateSessionServer(NULL, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
+    int32_t ret = TransCreateSessionServer(nullptr, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransCreateSessionServer(g_pkgName, NULL, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
+    ret = TransCreateSessionServer(g_pkgName, nullptr, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 }
 
@@ -94,7 +94,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest01, TestSize.Level1)
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
 {
     SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
-    EXPECT_TRUE(sessionServer != NULL);
+    EXPECT_TRUE(sessionServer != nullptr);
     memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
     int32_t ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
     EXPECT_EQ(ret, EOK);
@@ -116,9 +116,9 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
  */
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest03, TestSize.Level1)
 {
-    int32_t ret = TransRemoveSessionServer(NULL, g_sessionName);
+    int32_t ret = TransRemoveSessionServer(nullptr, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransRemoveSessionServer(g_pkgName, NULL);
+    ret = TransRemoveSessionServer(g_pkgName, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransRemoveSessionServer(g_pkgName, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
@@ -135,7 +135,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest04, TestSize.Level1)
     SessionParam sessionPara;
     memset_s(&sessionPara, sizeof(SessionParam), 0, sizeof(SessionParam));
     TransInfo *transInfo = (TransInfo*)SoftBusCalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
+    EXPECT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     int32_t ret = TransOpenSession(&sessionPara, transInfo);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
@@ -167,7 +167,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest04, TestSize.Level1)
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
 {
     SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
-    EXPECT_TRUE(sessionServer != NULL);
+    EXPECT_TRUE(sessionServer != nullptr);
     memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
     int32_t ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
     EXPECT_EQ(ret, EOK);
@@ -175,7 +175,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
     ret = TransSessionServerAddItem(sessionServer);
     TransInfo *transInfo = (TransInfo*)SoftBusCalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
+    EXPECT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     SessionParam sessionPara;
     memset_s(&sessionPara, sizeof(SessionParam), 0, sizeof(SessionParam));

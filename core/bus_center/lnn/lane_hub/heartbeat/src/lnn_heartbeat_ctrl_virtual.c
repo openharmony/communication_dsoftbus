@@ -99,6 +99,14 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    (void)pkgName;
+    (void)callerId;
+    (void)mode;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnTriggerDataLevelHeartbeat(void)
 {
     return SOFTBUS_OK;

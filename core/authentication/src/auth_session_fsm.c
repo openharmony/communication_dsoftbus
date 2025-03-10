@@ -202,6 +202,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
         case AUTH_LINK_TYPE_SESSION:
             break;
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             (void)memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, request.connInfo.info.ipInfo.deviceIdHash,
                 UDID_HASH_LEN);
             break;
@@ -367,6 +368,7 @@ static SoftBusLinkType ConvertAuthLinkTypeToHisysEvtLinkType(AuthLinkType type)
 {
     switch (type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             return SOFTBUS_HISYSEVT_LINK_TYPE_WLAN;
         case AUTH_LINK_TYPE_BR:
             return SOFTBUS_HISYSEVT_LINK_TYPE_BR;
@@ -788,7 +790,7 @@ static int32_t ReuseDeviceKey(AuthFsm *authFsm)
         return ret;
     }
     (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    return AuthSessionHandleAuthFinish(authFsm->authSeq);
+    return SOFTBUS_OK;
 }
 
 static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
@@ -818,6 +820,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             Anonymize(info->connInfo.info.ipInfo.ip, &anonyIp);
             if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, AnonymizeWrapper(anonyIp)) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "IP COPY ERROR");
@@ -1112,7 +1115,7 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 static int32_t TrySendAuthTestInfo(int64_t authSeq, const AuthSessionInfo *info)
 {
     switch (info->connInfo.type) {
-        case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             if (!info->isServer) {
                 return PostAuthTestInfoMessage(authSeq, info);
             }
@@ -1125,6 +1128,10 @@ static int32_t TrySendAuthTestInfo(int64_t authSeq, const AuthSessionInfo *info)
 
 static int32_t SoftbusCertChainParallel(const AuthSessionInfo *info)
 {
+    if (info == NULL || !IsSupportUDIDAbatement() || !info->isNeedPackCert) {
+        AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
+        return SOFTBUS_OK;
+    }
     SoftbusCertChain *softbusCertChain = (SoftbusCertChain *)SoftBusCalloc(sizeof(SoftbusCertChain));
     if (softbusCertChain == NULL) {
         AUTH_LOGI(AUTH_FSM, "malloc gencert parallel node failed. skip");
@@ -1150,6 +1157,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
 {
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             /* WIFI: client firstly send device info, server just reponse it. */
             if (!info->isServer) {
                 return PostDeviceInfoMessage(authSeq, info);
@@ -1508,7 +1516,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
     if (IsAuthPreLinkNodeExist(info->requestId)) {
         UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
     }
-    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
+    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {
             ClientTryCompleteAuthSession(authFsm, info);
@@ -2000,6 +2008,7 @@ static void HandleMsgRecvAuthTestData(AuthFsm *authFsm, const MessagePara *para)
         }
     } while (false);
     if (ret != SOFTBUS_OK) {
+        RemoveAuthSessionKeyByIndex(authFsm->authSeq, authFsm->authSeq, authFsm->info.connInfo.type);
         if (!info->isServer) {
             ret = ProcessClientAuthState(authFsm);
             if (ret != SOFTBUS_OK) {
@@ -2023,6 +2032,7 @@ static void HandleMsgRecvAuthTestData(AuthFsm *authFsm, const MessagePara *para)
     }
     LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO);
     authFsm->curState = STATE_SYNC_DEVICE_INFO;
+    AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
 
 static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)

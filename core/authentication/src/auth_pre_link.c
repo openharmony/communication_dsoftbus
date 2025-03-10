@@ -153,8 +153,8 @@ int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isParallelGen, bool is
             if (isParallelGen) {
                 atomic_store_explicit(&item->isParallelGen, 1, memory_order_release);
             } else {
-                atomic_store_explicit(&item->isParallelGen, 0, memory_order_release);
                 item->softbusCertChain = softbusCertChain;
+                atomic_store_explicit(&item->isParallelGen, 0, memory_order_release);
             }
             AuthGenCertParallelUnLock();
             return SOFTBUS_OK;
@@ -180,6 +180,12 @@ int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **
     if (totalSleepMs >= AUTH_GEN_CERT_PARA_EXPIRE_TIME || (*genCertParaNode)->isValid == false) {
         DelAuthGenCertParaNodeById(requestId);
         *genCertParaNode = NULL;
+        return SOFTBUS_AUTH_TIMEOUT;
+    }
+    if (*genCertParaNode == NULL) {
+        return SOFTBUS_AUTH_TIMEOUT;
+    }
+    if ((*genCertParaNode)->softbusCertChain == NULL) {
         return SOFTBUS_AUTH_TIMEOUT;
     }
     return SOFTBUS_OK;
@@ -443,6 +449,27 @@ void DelAuthPreLinkById(uint32_t requestId)
     AuthPreLinkNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (item->requestId == requestId) {
+            ListDelete(&item->node);
+            g_authPreLinkList.cnt--;
+            SoftBusFree(item);
+            AuthPreLinkUnlock();
+            return;
+        }
+    }
+    AuthPreLinkUnlock();
+}
+
+void DelAuthPreLinkByUuid(char *uuid)
+{
+    AUTH_CHECK_AND_RETURN_LOGE(uuid != NULL, AUTH_CONN, "uuid is NULL");
+    if (AuthPreLinkLock() != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "auth pre link lock fail");
+        return;
+    }
+    AuthPreLinkNode *item = NULL;
+    AuthPreLinkNode *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
+        if (memcmp(item->uuid, uuid, UUID_BUF_LEN) == 0) {
             ListDelete(&item->node);
             g_authPreLinkList.cnt--;
             SoftBusFree(item);

@@ -75,6 +75,7 @@ typedef enum {
     DISCOVERY_TYPE_BR,
     DISCOVERY_TYPE_P2P,
     DISCOVERY_TYPE_LSA,
+    DISCOVERY_TYPE_SESSION_KEY,
     DISCOVERY_TYPE_COUNT,
 } DiscoveryType;
 
@@ -162,6 +163,7 @@ typedef struct {
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
+    uint32_t staticNetCap;
     uint32_t netCapacity;
     uint32_t authCapacity;
     uint32_t heartbeatCapacity;

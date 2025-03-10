@@ -71,6 +71,9 @@ private:
     int32_t DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply);
+    int32_t TriggerHbForMeasureDistanceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegBleRangeCbInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregBleRangeCbInner(MessageParcel &data, MessageParcel &reply);
     int32_t SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply);

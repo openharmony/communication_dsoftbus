@@ -26,8 +26,7 @@ extern "C" {
 
 #define IS_SERVER 0
 #define IS_CLIENT 1
-#define ISHARE_AUTH_SESSION "IShareAuthSession"
-#define ISHARE_AUTH_SESSION_MAX_IDLE_TIME 5000 // 5s
+#define RAW_AUTH_SESSION_IDLE_TIME 5000 // 5s
 
 typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
@@ -135,7 +134,7 @@ typedef enum {
     KEY_PEER_UID,
     KEY_PKG_NAME,
     KEY_ACTION_ID,
-} SessionKey;
+} TransSessionKey;
 
 typedef struct {
     ListNode node;
@@ -178,9 +177,9 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName);
 
 int32_t ClientDeleteSession(int32_t sessionId);
 
-int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key);
+int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, TransSessionKey key);
 
-int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key);
+int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, TransSessionKey key);
 
 int32_t ClientGetChannelBySessionId(
     int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus);
@@ -316,6 +315,8 @@ void ClientTransOnPrivilegeClose(const char *peerNetworkId);
 int32_t TransGetSupportTlvBySocket(int32_t socket, bool *supportTlv, int32_t *optValueSize);
 
 int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck);
+
+bool IsRawAuthSession(const char *sessionName);
 #ifdef __cplusplus
 }
 #endif

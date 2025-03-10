@@ -59,7 +59,7 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_001, TestSize.
     EXPECT_NE(ret, SOFTBUS_OK);
 
     LnnPhysicalSubnet subnet = {
-        .protocol = NULL,
+        .protocol = nullptr,
         .status = LNN_SUBNET_RUNNING,
     };
     ret = LnnRegistPhysicalSubnet(&subnet);
@@ -132,11 +132,11 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_VISIT_PHYSICAL_SUBNET, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     visitCb = CHOICE_FINISH_VISITING;
-    bool visit = LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback, NULL);
+    bool visit = LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback, nullptr);
     EXPECT_FALSE(visit);
 
     visitCb = CHOICE_VISIT_NEXT;
-    visit = LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback, NULL);
+    visit = LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback, nullptr);
     EXPECT_TRUE(visit);
 
     ret = LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_IP);

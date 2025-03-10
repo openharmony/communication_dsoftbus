@@ -101,6 +101,8 @@ int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo);
 void RemoveNotPassedAuthManagerByUdid(const char *udid);
 AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, bool *isNewCreated,
     int64_t lastAuthSeq);
+bool IsHaveAuthIdByConnId(uint64_t connId);
+void DelAuthManagerByConnectionId(uint32_t connectionId);
 
 #ifdef __cplusplus
 #if __cplusplus

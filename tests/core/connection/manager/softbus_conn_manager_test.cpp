@@ -326,7 +326,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger004, TestSize.Level1)
     if (g_connId) {
         data.buf = (char*)calloc(1, CONN_HEAD_SIZE + 20);
         (void)strcpy_s(data.buf + CONN_HEAD_SIZE, strlen(str), str);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
         data.pid = 0;

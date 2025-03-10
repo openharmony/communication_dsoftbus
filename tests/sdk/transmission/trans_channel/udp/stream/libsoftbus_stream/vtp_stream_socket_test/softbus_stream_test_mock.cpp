@@ -60,5 +60,26 @@ FILLP_INT FtSend(FILLP_INT fd, FILLP_CONST void *data, size_t size, FILLP_INT fl
 {
     return GetSoftBusStreamTestInterface()->FtSend(fd, data, size, flag);
 }
+
+FILLP_INT FtFillpStatsGet(IN FILLP_INT fd, OUT struct FillpStatisticsPcb *outStats)
+{
+    return GetSoftBusStreamTestInterface()->FtFillpStatsGet(fd, outStats);
+}
+
+FILLP_INT FtConnect(FILLP_INT fd, FILLP_CONST FILLP_SOCKADDR *name, socklen_t nameLen)
+{
+    return GetSoftBusStreamTestInterface()->FtConnect(fd, name, nameLen);
+}
+
+FILLP_INT FtEpollCreate(void)
+{
+    return GetSoftBusStreamTestInterface()->FtEpollCreate();
+}
+
+FILLP_INT FtSendFrame(FILLP_INT fd, FILLP_CONST void *data, size_t size, FILLP_INT flag,
+    FILLP_CONST struct FrameInfo *frame)
+{
+    return GetSoftBusStreamTestInterface()->FtSendFrame(fd, data, size, flag, frame);
+}
 }
 }

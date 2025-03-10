@@ -122,7 +122,7 @@ HWTEST_F(TransDfxTest, SoftbusReportTransInfoEvt001, TestSize.Level0)
 {
     SoftbusReportTransInfoEvt(g_testMsg);
     EXPECT_EQ("test", g_testMsg);
-    SoftbusReportTransInfoEvt(NULL);
+    SoftbusReportTransInfoEvt(nullptr);
 }
 
 /**

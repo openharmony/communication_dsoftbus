@@ -130,7 +130,7 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_003, TestSize.Level0)
     LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_NAME, DEPS_STATUS_SUCCESS);
     SoftBusSleepMs(1000);
     LnnInitSetDeviceInfoReady();
-    LnnInitMonitorInitComplete(NULL);
+    LnnInitMonitorInitComplete(nullptr);
     ret = IsLnnInitCheckSucceed(MONITOR_WIFI_NET);
     EXPECT_EQ(ret, true);
 
@@ -149,7 +149,7 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_004, TestSize.Level0)
     InitDepsStatus status;
     uint32_t ret;
 
-    ret = LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_MODULE_BUTT, NULL, 0, 0, false);
+    ret = LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_MODULE_BUTT, nullptr, 0, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_DEVICE_PROFILE, LnnInitMonitorCallbackFailed, 3, 0, false);
@@ -172,7 +172,7 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_005, TestSize.Level0)
     InitDepsStatus status;
     uint32_t ret;
 
-    ret = LnnInitModuleNotifyWithRetrySync(INIT_DEPS_MODULE_BUTT, NULL, 0, 0);
+    ret = LnnInitModuleNotifyWithRetrySync(INIT_DEPS_MODULE_BUTT, nullptr, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = LnnInitModuleNotifyWithRetrySync(INIT_DEPS_DEVICE_PROFILE, LnnInitMonitorCallbackFailed, 3, 0);

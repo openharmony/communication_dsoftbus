@@ -115,7 +115,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level0)
     EXPECT_NO_THROW(AddSocketResource(g_sessionName, nullptr));
 
     ChannelInfo *errChannel = TestGetErrorChannelInfo();
-    EXPECT_NO_THROW(AddSocketResource(NULL, errChannel));
+    EXPECT_NO_THROW(AddSocketResource(nullptr, errChannel));
 
     EXPECT_NO_THROW(AddSocketResource(g_sessionName, errChannel));
     SoftBusFree(errChannel);
@@ -308,7 +308,7 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
  */
 HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize.Level0)
 {
-    g_channelStatisticsList = NULL;
+    g_channelStatisticsList = nullptr;
     ClientTransStatisticsDeinit();
 
     int32_t ret = ClientTransStatisticsInit();
@@ -320,6 +320,6 @@ HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize
     ListAdd(&g_channelStatisticsList->list, &newItem->node);
 
     ClientTransStatisticsDeinit();
-    EXPECT_EQ(g_channelStatisticsList, NULL);
+    EXPECT_EQ(g_channelStatisticsList, nullptr);
 }
 } // namespace OHOS

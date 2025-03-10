@@ -236,7 +236,7 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyGetConnInfoByConnIdTest001, TestSi
 {
     ConnectOption connOptInfo;
 
-    int32_t ret = TransProxyGetConnInfoByConnId(3, NULL);
+    int32_t ret = TransProxyGetConnInfoByConnId(3, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyGetConnInfoByConnId(100, &connOptInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -259,7 +259,7 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyTransSendMsgTest001, TestSize.Leve
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     uint32_t connectionId = 1;
-    uint8_t *buf = NULL;
+    uint8_t *buf = nullptr;
     uint32_t len = 1;
     int32_t priority = 0;
     int32_t pid = 0;

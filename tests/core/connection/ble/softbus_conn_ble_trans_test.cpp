@@ -199,36 +199,36 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
     int32_t flag = 2;
     int32_t module = MODULE_CONNECTION;
     int64_t seq = 10;
-    int32_t ret = ConnBlePostBytesInner(connectionId, data, 0, pid, flag, module, seq, NULL);
+    int32_t ret = ConnBlePostBytesInner(connectionId, data, 0, pid, flag, module, seq, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     uint8_t *value = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
-    ret = ConnBlePostBytesInner(connectionId, value, MAX_DATA_LEN + 1, pid, flag, module, seq, NULL);
+    ret = ConnBlePostBytesInner(connectionId, value, MAX_DATA_LEN + 1, pid, flag, module, seq, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     NiceMock<ConnectionBleTransInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillOnce(Return(nullptr));
     uint8_t *value1 = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
-    ret = ConnBlePostBytesInner(connectionId, value1, dataLen, pid, flag, module, seq, NULL);
+    ret = ConnBlePostBytesInner(connectionId, value1, dataLen, pid, flag, module, seq, nullptr);
     EXPECT_EQ(SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, ret);
 
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(nullptr, connection);
     connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
-    SoftBusMutexInit(&connection->lock, NULL);
+    SoftBusMutexInit(&connection->lock, nullptr);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillOnce(Return(connection));
     uint8_t *value2 = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
-    ret = ConnBlePostBytesInner(connectionId, value2, dataLen, pid, flag, MODULE_AUTH_MSG, seq, NULL);
+    ret = ConnBlePostBytesInner(connectionId, value2, dataLen, pid, flag, MODULE_AUTH_MSG, seq, nullptr);
     EXPECT_EQ(SOFTBUS_CONN_BLE_CONNECTION_NOT_READY_ERR, ret);
 
     uint8_t *value3 = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     ConnBleConnection *bleConnectionconnection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(nullptr, connection);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillRepeatedly(Return(bleConnectionconnection));
-    SoftBusMutexInit(&bleConnectionconnection->lock, NULL);
+    SoftBusMutexInit(&bleConnectionconnection->lock, nullptr);
     bleConnectionconnection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
 
-    ret = ConnBlePostBytesInner(connectionId, value3, dataLen, pid, flag, MODULE_AUTH_MSG, seq, NULL);
+    ret = ConnBlePostBytesInner(connectionId, value3, dataLen, pid, flag, MODULE_AUTH_MSG, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusSleepMs(1000);
 }
@@ -418,7 +418,7 @@ HWTEST_F(ConnectionBleTransTest, QueueBlock, TestSize.Level1)
     ret = ConnBleEnqueueNonBlock(&queueNode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ConnBleDequeueBlock(NULL);
+    ret = ConnBleDequeueBlock(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     void *msg = nullptr;

@@ -670,6 +670,60 @@ HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, Test
 }
 
 /*
+* @tc.name: REG_BLE_RANGE_INNER_Test_001
+* @tc.desc: reg ble range cb inner test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
+{
+    IBleRangeCb cb;
+    (void)memset_s(&cb, sizeof(IBleRangeCb), 0, sizeof(IBleRangeCb));
+
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegBleRangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(RegBleRangeCbInner("pkgName", &cb), SOFTBUS_SERVER_NOT_INIT);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegBleRangeCb(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(RegBleRangeCbInner("pkgName", &cb), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: UNREG_BLE_RANGE_INNER_Test_001
+* @tc.desc: unReg ble range cb inner test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, UNREG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregBleRangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(UnregBleRangeCbInner("pkgName"), SOFTBUS_SERVER_NOT_INIT);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregBleRangeCb(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(UnregBleRangeCbInner("pkgName"), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TRIGGER_HB_FOR_RANGE_INNER_Test_001
+ * @tc.desc: reg ble range cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, TRIGGER_HB_FOR_RANGE_INNER_Test_001, TestSize.Level1)
+{
+    HbMode mode;
+
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcTriggerHbForMeasureDistance(_, _, _))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(TriggerHbForMeasureDistanceInner("pkgName", "123", &mode), SOFTBUS_SERVER_NOT_INIT);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcTriggerHbForMeasureDistance(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(TriggerHbForMeasureDistanceInner("pkgName", "123", &mode), SOFTBUS_OK);
+}
+
+/*
 * @tc.name: RESTART_REG_DATA_LEVEL_CHANGE_Test_001
 * @tc.desc: restart reg data level change test
 * @tc.type: FUNC
@@ -732,7 +786,7 @@ HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnLocalNetworkIdChanged(nullptr), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;
@@ -762,7 +816,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, Tes
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnNodeDeviceTrustedChange(nullptr, 0, nullptr, 0), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;
@@ -790,7 +844,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, T
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnHichainProofException(nullptr, nullptr, 0, 0, 0), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;
@@ -818,7 +872,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, Test
 */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_busCenterClient.lock, NULL);
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
     EXPECT_EQ(LnnOnTimeSyncResult(nullptr, 0), SOFTBUS_INVALID_PARAM);
 
     g_busCenterClient.isInit = false;

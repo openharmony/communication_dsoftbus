@@ -49,7 +49,7 @@ void TransClientSdkAuthManagerTest::TearDownTestCase(void) {}
  */
 HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest001, TestSize.Level0)
 {
-    int32_t ret = ClientTransAuthInit(NULL);
+    int32_t ret = ClientTransAuthInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -62,7 +62,7 @@ HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest001, TestSi
 HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest002, TestSize.Level0)
 {
     ChannelInfo channel;
-    int32_t ret = ClientTransAuthOnChannelOpened(NULL, &channel);
+    int32_t ret = ClientTransAuthOnChannelOpened(nullptr, &channel);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -77,10 +77,10 @@ HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest003, TestSi
     int32_t channelId = 0;
     uint32_t len = -1;
     SessionPktType type = TRANS_SESSION_BYTES;
-    int32_t ret = ClientTransAuthOnDataReceived(channelId, NULL, len, type);
+    int32_t ret = ClientTransAuthOnDataReceived(channelId, nullptr, len, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ClientTransAuthOnDataReceived(channelId, NULL, len, type);
+    ret = ClientTransAuthOnDataReceived(channelId, nullptr, len, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

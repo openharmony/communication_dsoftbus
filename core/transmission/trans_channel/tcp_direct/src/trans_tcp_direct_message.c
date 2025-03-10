@@ -333,6 +333,10 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->peerPort = conn->appInfo.peerData.port;
     info->linkType = conn->appInfo.linkType;
     info->dataConfig = conn->appInfo.myData.dataConfig;
+    info->timeStart = conn->appInfo.timeStart;
+    info->linkType = conn->appInfo.linkType;
+    info->connectType = conn->appInfo.connectType;
+    info->osType = conn->appInfo.osType;
 }
 
 static int32_t GetServerSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t len)
@@ -387,6 +391,14 @@ static int32_t GetClientSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t le
     return SOFTBUS_OK;
 }
 
+static void SetByteChannelTos(const AppInfo *info)
+{
+    if (info->businessType == BUSINESS_TYPE_BYTE && info->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        SetIpTos(info->fd, FAST_BYTE_TOS);
+    }
+    return;
+}
+
 static int32_t NotifyChannelOpened(int32_t channelId)
 {
     SessionConn conn;
@@ -394,8 +406,6 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
-    ChannelInfo info = { 0 };
-    GetChannelInfoFromConn(&info, &conn, channelId);
     char myIp[IP_LEN] = { 0 };
     int32_t ret = conn.serverSide ? GetServerSideIpInfo(&conn.appInfo, myIp, IP_LEN)
                                   : GetClientSideIpInfo(&conn.appInfo, myIp, IP_LEN);
@@ -404,6 +414,8 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         return ret;
     }
+    ChannelInfo info = { 0 };
+    GetChannelInfoFromConn(&info, &conn, channelId);
     info.myIp = myIp;
 
     char buf[NETWORK_ID_BUF_LEN] = { 0 };
@@ -414,10 +426,6 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         return ret;
     }
     info.peerDeviceId = buf;
-    info.timeStart = conn.appInfo.timeStart;
-    info.linkType = conn.appInfo.linkType;
-    info.connectType = conn.appInfo.connectType;
-    info.osType = conn.appInfo.osType;
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
@@ -648,7 +656,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
 
     ret = SetAppInfoById(channelId, &conn.appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "set app info by id failed.");
-
+    SetByteChannelTos(&conn.appInfo);
     if ((fastDataSize > 0 && (conn.appInfo.fastTransDataSize == fastDataSize)) || conn.appInfo.fastTransDataSize == 0) {
         ret = NotifyChannelOpened(channelId);
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
@@ -847,7 +855,7 @@ static void ReportTransEventExtra(
 static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
 {
     if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
+        TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
         ret = (char *)"Server check acl failed";
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
@@ -892,10 +900,6 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
-    errCode = CheckServerPermission(appInfo, ret);
-    if (errCode != SOFTBUS_OK) {
-        goto ERR_EXIT;
-    }
 
     if (TransTdcGetUidAndPid(appInfo->myData.sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
@@ -909,7 +913,10 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
         ret = (char *)"Get Uuid By ChanId failed";
         goto ERR_EXIT;
     }
-
+    errCode = CheckServerPermission(appInfo, ret);
+    if (errCode != SOFTBUS_OK) {
+        goto ERR_EXIT;
+    }
     errCode = TransTdcFillDataConfig(appInfo);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fill data config failed.");
@@ -949,7 +956,7 @@ static int32_t HandleDataBusReply(
         extra->result = EVENT_STAGE_RESULT_OK;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
     }
-
+    SetByteChannelTos(&conn->appInfo);
     if (conn->appInfo.routeType == WIFI_P2P) {
         if (LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId,
             conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK) {

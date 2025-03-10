@@ -111,6 +111,9 @@ public:
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual bool LnnSetDLDeviceNickName(const char *networkId, const char *name);
     virtual int32_t LnnUpdateLocalScreenStatus(bool isScreenOn) = 0;
+    virtual int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type) = 0;
+    virtual int32_t LnnSetStaticNetCap(uint32_t *capability, StaticNetCapability type) = 0;
+    virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -192,6 +195,9 @@ public:
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t(const char *, int32_t *));
     MOCK_METHOD2(LnnSetDLDeviceNickName, bool(const char *, const char *));
     MOCK_METHOD1(LnnUpdateLocalScreenStatus, int32_t(bool));
+    MOCK_METHOD2(LnnClearStaticNetCap, int32_t(uint32_t *, StaticNetCapability));
+    MOCK_METHOD2(LnnSetStaticNetCap, int32_t(uint32_t *, StaticNetCapability));
+    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(
         const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);

@@ -43,7 +43,7 @@ void MockSoftBusTimer(void) { }
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_DestroySoftBusList_001, TestSize.Level1)
 {
     SoftBusList *list = CreateSoftBusList();
-    EXPECT_TRUE(NULL != list);
+    EXPECT_TRUE(list != nullptr);
     DestroySoftBusList(list);
 }
 
@@ -56,7 +56,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_DestroySoftBusList_001, TestSize.Lev
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_001, TestSize.Level1)
 {
     int32_t timerFunId = SOFTBUS_CONN_TIMER_FUN;
-    TimerFunCallback callbac = NULL;
+    TimerFunCallback callbac = nullptr;
     int32_t ret = RegisterTimeoutCallback(timerFunId, callbac);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
@@ -127,7 +127,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftBusTimerDeInit_001, TestSize.Lev
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSize.Level1)
 {
-    unsigned char *outBuf = NULL;
+    unsigned char *outBuf = nullptr;
     uint32_t outBufLen = 0;
     const char *inBuf = "41424344";
     uint32_t inLen = 8;
@@ -137,7 +137,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
     unsigned char outBufArray[5] = "\0";
     outBuf = outBufArray;
     outBufLen = 5;
-    inBuf = NULL;
+    inBuf = nullptr;
     inLen = 0;
     ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -193,7 +193,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSize.Level1)
 {
-    char *outBuf = NULL;
+    char *outBuf = nullptr;
     uint32_t outBufLen = 0;
     const unsigned char inBuf[5] = "ABCD";
     uint32_t inLen = 4;
@@ -208,7 +208,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     outBufLen = 9;
-    const unsigned char *inBuf2 = NULL;
+    const unsigned char *inBuf2 = nullptr;
     inLen = 0;
     ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf2, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -241,7 +241,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_002, TestSiz
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_GenerateRandomStr_001, TestSize.Level1)
 {
-    char *str = NULL;
+    char *str = nullptr;
     uint32_t len = 4;
     int32_t ret = GenerateRandomStr(str, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -285,9 +285,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.Level1)
 {
-    const char *strMac = NULL;
+    const char *strMac = nullptr;
     uint32_t strMacLen = 0;
-    uint8_t *binMac = NULL;
+    uint8_t *binMac = nullptr;
     uint32_t binMacLen = 0;
     int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -301,9 +301,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_001, TestSize.Level1)
 {
-    char *strMac = NULL;
+    char *strMac = nullptr;
     uint32_t strMacLen = 0;
-    const uint8_t *binMac = NULL;
+    const uint8_t *binMac = nullptr;
     uint32_t binMacLen = 0;
     int32_t ret = ConvertBtMacToStr(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);

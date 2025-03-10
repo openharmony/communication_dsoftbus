@@ -21,3 +21,12 @@ int32_t LnnInitNetlinkMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t LnnInitNetlinkMonitorImplNotify(void)
+{
+    return SOFTBUS_OK;
+}
+
+void LnnDeInitNetlinkMonitorImpl(void)
+{
+}
