@@ -136,7 +136,7 @@ static bool StrIsEmpty(const char *string)
     return false;
 }
 
-static bool StrStartWith(const char *string, const char *target)
+bool StrStartWith(const char *string, const char *target)
 {
     if (string == NULL || target == NULL) {
         COMM_LOGE(COMM_PERM, "invalid param");
