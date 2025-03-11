@@ -32,6 +32,11 @@ void TransServerProxyDeInit(void)
     return;
 }
 
+void TransServerProxyClear(void)
+{
+    return;
+}
+
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     return TransCreateSessionServer(pkgName, sessionName, 0, 0);

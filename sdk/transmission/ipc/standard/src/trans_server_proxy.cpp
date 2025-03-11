@@ -32,6 +32,7 @@ using namespace OHOS;
 
 namespace {
 sptr<TransServerProxy> g_serverProxy = nullptr;
+sptr<IRemoteObject> g_oldObject = nullptr;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 constexpr int32_t MIN_CHANNEL_ID = 0; // UDP channelId minmum value
 constexpr int32_t MAX_CHANNEL_ID = 19; // UDP channelId maxmum value
@@ -69,6 +70,10 @@ static sptr<TransServerProxy> GetProxy()
 
     sptr<IRemoteObject> object = GetSystemAbility();
     TRANS_CHECK_AND_RETURN_RET_LOGE(object != nullptr, nullptr, TRANS_SDK, "Get remote softbus object failed");
+    if (object == g_oldObject) {
+        TRANS_LOGE(TRANS_SDK, "Failed to get latest remote object.");
+        return nullptr;
+    }
 
     g_serverProxy = new (std::nothrow) TransServerProxy(object);
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != nullptr, nullptr, TRANS_SDK, "Create trans server proxy failed");
@@ -96,10 +101,21 @@ int32_t TransServerProxyInit(void)
 {
     mallopt(M_DELAYED_FREE, M_DELAYED_FREE_ENABLE);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        GetProxy() != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "Failed to initialize the server proxy");
-
+        RetryGetProxy() != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "Failed to initialize the server proxy");
     TRANS_LOGI(TRANS_SDK, "Init success");
     return SOFTBUS_OK;
+}
+
+void TransServerProxyClear(void)
+{
+    TRANS_LOGI(TRANS_SDK, "enter");
+    std::lock_guard<std::mutex> lock(g_mutex);
+    if (g_serverProxy->GetRemoteObject(g_oldObject) != SOFTBUS_OK) {
+        g_oldObject = nullptr;
+        TRANS_LOGW(TRANS_SDK, "Failed to get old remote object.");
+    }
+    g_serverProxy.clear();
+    g_serverProxy = nullptr;
 }
 
 void TransServerProxyDeInit(void)
@@ -107,6 +123,7 @@ void TransServerProxyDeInit(void)
     TRANS_LOGI(TRANS_SDK, "enter");
     std::lock_guard<std::mutex> lock(g_mutex);
     g_serverProxy.clear();
+    g_serverProxy = nullptr;
 }
 
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
