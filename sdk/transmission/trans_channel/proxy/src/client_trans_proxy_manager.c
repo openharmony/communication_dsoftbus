@@ -147,11 +147,11 @@ static int32_t ProxyBuildTlvDataHead(DataHead *pktHead, int32_t finalSeq, int32_
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyParseTlv(const char *data, DataHeadTlvPacketHead *head, uint32_t *newDataHeadSize)
+static int32_t CheckLenAndCopyData(uint32_t len, uint32_t headSize, const char *data, DataHeadTlvPacketHead *head)
 {
-    if (data == NULL || head == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid.");
-        return SOFTBUS_INVALID_PARAM;
+    if (len < headSize) {
+        TRANS_LOGE(TRANS_SDK, "data len not enough, bufLen Less than headSize. len=%{public}u", len);
+        return SOFTBUS_DATA_NOT_ENOUGH;
     }
     if (memcpy_s(&head->magicNumber, MAGICNUM_SIZE, data, MAGICNUM_SIZE) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy magicNumber failed.");
@@ -161,12 +161,31 @@ static int32_t TransProxyParseTlv(const char *data, DataHeadTlvPacketHead *head,
         TRANS_LOGE(TRANS_SDK, "memcpy tlvCount failed.");
         return SOFTBUS_MEM_ERR;
     }
-    *newDataHeadSize += (MAGICNUM_SIZE + TLVCOUNT_SIZE);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead *head, uint32_t *headSize)
+{
+    if (data == NULL || head == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *headSize += (MAGICNUM_SIZE + TLVCOUNT_SIZE);
+    int32_t res = CheckLenAndCopyData(len, *headSize, data, head);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, res, TRANS_SDK, "CheckLenAndCopyData failed");
     errno_t ret = EOK;
     char *temp = (char *)data + MAGICNUM_SIZE + TLVCOUNT_SIZE;
     for (uint8_t index = 0; index < head->tlvCount; index++) {
         uint8_t *type = (uint8_t *)temp;
+        if (len < (*headSize + (TLV_TYPE_AND_LENTH * sizeof(uint8_t)))) {
+            TRANS_LOGE(TRANS_SDK, "check len contains tlv segment data fail, len=%{public}u", len);
+            return SOFTBUS_DATA_NOT_ENOUGH;
+        }
         uint8_t *length = (uint8_t *)(temp + sizeof(uint8_t));
+        if (len < (*headSize + (TLV_TYPE_AND_LENTH * sizeof(uint8_t)) + *length)) {
+            TRANS_LOGE(TRANS_SDK, "data len not enough. len=%{public}u", len);
+            return SOFTBUS_DATA_NOT_ENOUGH;
+        }
         temp += (TLV_TYPE_AND_LENTH * sizeof(uint8_t));
         switch (*type) {
             case TLV_TYPE_INNER_SEQ:
@@ -189,7 +208,7 @@ static int32_t TransProxyParseTlv(const char *data, DataHeadTlvPacketHead *head,
                 continue;
         }
         temp += *length;
-        *newDataHeadSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + *length);
+        *headSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + *length);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_SDK,
             "parse tlv memcpy failed, tlvType=%{public}d, ret=%{public}d", *type, ret);
     }
@@ -856,7 +875,7 @@ static int32_t ClientTransProxyNoSubPacketTlvProc(int32_t channelId, const char 
 {
     DataHeadTlvPacketHead pktHead;
     uint32_t newPktHeadSize = 0;
-    int32_t ret = TransProxyParseTlv(data, &pktHead, &newPktHeadSize);
+    int32_t ret = TransProxyParseTlv(len, data, &pktHead, &newPktHeadSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "proxy channel parse tlv failed, ret=%{public}d", ret);
         return ret;
