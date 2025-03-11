@@ -15,7 +15,6 @@
 #ifndef WIFI_DIRECT_ANONYMOUS_H
 #define WIFI_DIRECT_ANONYMOUS_H
 
-#include <string>
 #include <vector>
 
 namespace OHOS::SoftBus {

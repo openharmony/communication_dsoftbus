@@ -16,9 +16,7 @@
 #ifndef CLIENT_TRANS_PROXY_CHANNEL_H
 #define CLIENT_TRANS_PROXY_CHANNEL_H
 
-#include "client_trans_file_listener.h"
 #include "client_trans_session_callback.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

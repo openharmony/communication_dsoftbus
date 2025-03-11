@@ -16,7 +16,6 @@
 #ifndef LNN_FILE_UTILS_H
 #define LNN_FILE_UTILS_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

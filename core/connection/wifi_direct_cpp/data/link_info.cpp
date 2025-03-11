@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "link_info.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "protocol/wifi_direct_protocol.h"

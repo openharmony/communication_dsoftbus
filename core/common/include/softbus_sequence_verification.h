@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_SEQUENCE_VERIFICATION_H
 #define SOFTBUS_SEQUENCE_VERIFICATION_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "softbus_def.h"
 
 #ifdef __cplusplus

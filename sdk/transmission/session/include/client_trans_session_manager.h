@@ -16,8 +16,6 @@
 #ifndef CLIENT_TRANS_SESSION_MANAGER_H
 #define CLIENT_TRANS_SESSION_MANAGER_H
 
-#include "session.h"
-#include "socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 #include "client_trans_session_adapter.h"

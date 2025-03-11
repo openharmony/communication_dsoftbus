@@ -16,13 +16,8 @@
 #ifndef CONN_BR_MANAGER_H
 #define CONN_BR_MANAGER_H
 
-#include <stdint.h>
-
 #include "softbus_conn_br_connection.h"
-#include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_connreporter.h"
 
 #ifdef __cplusplus

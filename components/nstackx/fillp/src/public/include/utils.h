@@ -15,8 +15,6 @@
 
 #ifndef FILLP_UTILS_H
 #define FILLP_UTILS_H
-#include <time.h>
-#include "fillp_os.h"
 #include "opt.h"
 #include "fillp_function.h"
 #include "log.h"

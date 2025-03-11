@@ -16,7 +16,6 @@
 #include "trans_session_account_adapter.h"
 
 #include "os_account_manager.h"
-#include "softbus_error_code.h"
 #include "trans_log.h"
 
 using namespace OHOS;

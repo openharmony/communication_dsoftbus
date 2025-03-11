@@ -17,7 +17,6 @@
 #define LNN_LANE_GUIDE_LINK_H
 
 #include <stdint.h>
-#
 
 #ifdef __cplusplus
 extern "C" {

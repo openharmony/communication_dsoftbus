@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_CONN_BLE_TRANS_H
 #define SOFTBUS_CONN_BLE_TRANS_H
 
-#include <stdint.h>
-
-#include "common_list.h"
-#include "softbus_error_code.h"
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 

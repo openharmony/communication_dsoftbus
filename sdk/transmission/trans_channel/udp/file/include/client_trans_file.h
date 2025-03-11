@@ -17,7 +17,6 @@
 #define CLIENT_TRANS_FILE_H
 
 #include "client_trans_udp_manager.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

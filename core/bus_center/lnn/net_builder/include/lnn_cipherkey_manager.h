@@ -16,12 +16,8 @@
 #ifndef LNN_CIPHERKEY_MANAGER_H
 #define LNN_CIPHERKEY_MANAGER_H
 
-#include <stdint.h>
-
 #include "cJSON.h"
-#include "softbus_common.h"
 #include "lnn_data_cloud_sync.h"
-#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {

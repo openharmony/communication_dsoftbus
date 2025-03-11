@@ -16,12 +16,8 @@
 #ifndef SOFTBUS_SOCKET_H
 #define SOFTBUS_SOCKET_H
 
-#include <sys/types.h>
-#include <sys/uio.h>
-
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_interface.h"
-#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus

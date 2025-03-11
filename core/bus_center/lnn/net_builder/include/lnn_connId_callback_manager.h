@@ -16,10 +16,7 @@
 #ifndef LNN_CONNID_CALLBACK_MANAGER
 #define LNN_CONNID_CALLBACK_MANAGER
 
-#include <stdint.h>
-
 #include "common_list.h"
-#include "softbus_bus_center.h"
 #include "softbus_common.h"
 
 

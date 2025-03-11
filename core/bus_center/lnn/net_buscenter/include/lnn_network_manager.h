@@ -16,14 +16,8 @@
 #ifndef LNN_NETWORK_MANAGER_H
 #define LNN_NETWORK_MANAGER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "bus_center_info_key.h"
-#include "common_list.h"
-#include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
-#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus

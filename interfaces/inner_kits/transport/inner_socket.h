@@ -38,7 +38,6 @@
 
 #include "socket.h"
 #include "softbus_common.h"
-#include "trans_type.h"
 
 #ifdef __cplusplus
 extern "C" {

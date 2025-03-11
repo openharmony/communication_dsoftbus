@@ -15,7 +15,6 @@
 
 #ifndef SOFTBUS_CONN_INTERFACE_H
 #define SOFTBUS_CONN_INTERFACE_H
-#include <stdint.h>
 
 #include "softbus_common.h"
 #include "softbus_def.h"

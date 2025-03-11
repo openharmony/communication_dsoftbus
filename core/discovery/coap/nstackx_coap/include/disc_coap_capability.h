@@ -17,10 +17,8 @@
 #define DISC_COAP_CAPABILITY_H
 
 #include "nstackx.h"
-#include "disc_interface.h"
 #include "disc_manager.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_common.h"
 #include "softbus_json_utils.h"
 
 #ifdef __cplusplus

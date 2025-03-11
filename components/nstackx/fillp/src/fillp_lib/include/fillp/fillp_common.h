@@ -16,18 +16,13 @@
 #ifndef FILLP_COMMON_H
 #define FILLP_COMMON_H
 
-#include "fillptypes.h"
-#include "fillp_os.h"
 #include "spunge_stack.h"
 #include "socket_common.h"
 #include "hmac.h"
 #include "res.h"
 #include "fillp_buf_item.h"
-#include "dympool.h"
 #include "spunge_message.h"
 #include "fillp_flow_control.h"
-#include "utils.h"
-#include "fillp.h"
 
 #ifdef __cplusplus
 extern "C" {

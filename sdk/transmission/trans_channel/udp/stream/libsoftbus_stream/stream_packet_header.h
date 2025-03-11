@@ -17,16 +17,9 @@
 #define STREAM_PACKET_HEADER_H
 
 #include <arpa/inet.h>
-#include <chrono>
-#include <cstdint>
-#include <memory>
-#include <sys/types.h>
-#include <utility>
-#include <vector>
 
 #include "i_stream.h"
 #include "securec.h"
-#include "stream_common.h"
 #include "trans_log.h"
 
 using ::std::chrono::duration_cast;

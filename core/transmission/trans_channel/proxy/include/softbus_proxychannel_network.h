@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_NETWORK_H
 #define SOFTBUS_PROXYCHANNEL_NETWORK_H
 
-#include "stdint.h"
-
 #include "softbus_app_info.h"
 
 #ifdef __cplusplus

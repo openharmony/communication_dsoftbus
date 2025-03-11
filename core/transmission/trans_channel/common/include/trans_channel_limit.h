@@ -16,7 +16,6 @@
 #ifndef TRANS_CHANNEL_LIMIT_H
 #define TRANS_CHANNEL_LIMIT_H
 
-#include <stdlib.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus

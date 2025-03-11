@@ -17,8 +17,6 @@
 #define NSTACKX_FILE_MANAGER_H
 
 #include "nstackx_epoll.h"
-#include "nstackx_list.h"
-#include "nstackx_dfile_frame.h"
 #ifdef MBEDTLS_INCLUDED
 #include "nstackx_mbedtls.h"
 #else

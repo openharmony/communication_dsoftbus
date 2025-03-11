@@ -16,15 +16,9 @@
 #ifndef TRANS_CHANNEL_COMMON_H
 #define TRANS_CHANNEL_COMMON_H
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
-#include "lnn_node_info.h"
 #include "softbus_app_info.h"
-#include "softbus_conn_interface.h"
 #include "softbus_trans_def.h"
 #include "trans_event.h"
 

@@ -19,7 +19,6 @@
 #include "bus_center_event.h"
 #include "ble_range.h"
 #include "lnn_heartbeat_medium_mgr.h"
-#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {

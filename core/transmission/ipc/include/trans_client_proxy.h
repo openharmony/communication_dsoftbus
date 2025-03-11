@@ -16,7 +16,6 @@
 #ifndef TRANS_CLIENT_PROXY_H
 #define TRANS_CLIENT_PROXY_H
 
-#include "session.h"
 #include "socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"

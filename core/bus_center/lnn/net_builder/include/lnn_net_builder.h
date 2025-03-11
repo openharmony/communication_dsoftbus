@@ -16,8 +16,6 @@
 #ifndef LNN_NET_BUILDER_H
 #define LNN_NET_BUILDER_H
 
-#include <stdint.h>
-
 #include "auth_interface.h"
 #include "lnn_connId_callback_manager.h"
 #include "lnn_event.h"

@@ -15,9 +15,6 @@
 
 #include "stream_depacketizer.h"
 
-#include "common_inner.h"
-#include "i_stream.h"
-
 namespace Communication {
 namespace SoftBus {
 void StreamDepacketizer::DepacketizeHeader(const char *header)

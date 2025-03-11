@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_SESSION_CONNECT_H
 #define SOFTBUS_SESSION_CONNECT_H
 
-#include "softbus_app_info.h"
-#include "softbus_base_listener.h"
-#include "stdbool.h"
-#include "stdint.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 

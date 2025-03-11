@@ -15,9 +15,6 @@
 
 #ifndef NSTACKX_DFILE_DFX_H
 #define NSTACKX_DFILE_DFX_H
-#include <limits.h>
-#include "nstackx_dfile.h"
-#include "nstackx_list.h"
 #include "nstackx_dfile_session.h"
 typedef struct DFileSessionNode {
     List list;

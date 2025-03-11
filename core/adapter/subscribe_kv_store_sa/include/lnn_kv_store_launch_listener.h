@@ -16,8 +16,6 @@
 #ifndef LNN_KV_STORE_LAUNCH_LISTENER_H
 #define LNN_KV_STORE_LAUNCH_LISTENER_H
 
-#include <cstdint>
-#include <string>
 #include "system_ability_status_change_stub.h"
 
 namespace OHOS {

@@ -13,19 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstring>
-#include <securec.h>
-#include <string>
-
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_log.h"
-#include "lnn_node_info.h"
-#include "softbus_error_code.h"
-#include "softbus_def.h"
-#include "softbus_utils.h"
 #include "iservice_registry.h"
 #include "lnn_kv_store_launch_listener.h"
 #include "system_ability_definition.h"

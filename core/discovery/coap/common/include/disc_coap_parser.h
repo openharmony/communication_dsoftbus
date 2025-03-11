@@ -17,7 +17,6 @@
 #define DISC_COAP_PARSER_H
 
 #include "broadcast_protocol_constant.h"
-#include "disc_manager.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
 

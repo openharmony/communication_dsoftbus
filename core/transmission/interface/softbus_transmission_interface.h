@@ -20,7 +20,6 @@
 
 #include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus

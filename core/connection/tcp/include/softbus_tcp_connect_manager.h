@@ -16,12 +16,7 @@
 #ifndef SOFTBUS_TCP_CONNECT_MANAGER_H
 #define SOFTBUS_TCP_CONNECT_MANAGER_H
 
-#include <sys/select.h>
-
-#include "common_list.h"
-#include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
-#include "softbus_base_listener.h"
 
 #ifdef __cplusplus
 #if __cplusplus

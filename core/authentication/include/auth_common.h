@@ -16,14 +16,8 @@
 #ifndef AUTH_COMMON_H
 #define AUTH_COMMON_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_interface.h"
 #include "lnn_device_info_recovery.h"
-#include "softbus_common.h"
-#include "softbus_conn_interface.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #ifdef __cplusplus

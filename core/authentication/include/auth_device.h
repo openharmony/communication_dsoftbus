@@ -16,12 +16,7 @@
 #ifndef AUTH_DEVICE_H
 #define AUTH_DEVICE_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "auth_interface.h"
 #include "auth_session_fsm.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus

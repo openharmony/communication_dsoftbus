@@ -16,8 +16,6 @@
 #ifndef COMMAND_FACTORY_H
 #define COMMAND_FACTORY_H
 
-#include <functional>
-#include <memory>
 #include "command/connect_command.h"
 #include "command/disconnect_command.h"
 #include "command/force_disconnect_command.h"

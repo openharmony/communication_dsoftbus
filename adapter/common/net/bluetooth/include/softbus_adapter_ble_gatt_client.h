@@ -16,9 +16,6 @@
 #ifndef SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H
 #define SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H
 
-#include "stdbool.h"
-#include "stdint.h"
-
 #include "softbus_adapter_bt_common.h"
 #include "common_list.h"
 

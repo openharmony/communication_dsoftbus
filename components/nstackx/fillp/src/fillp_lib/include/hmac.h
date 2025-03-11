@@ -16,7 +16,6 @@
 #ifndef FILLP_HMAC_H
 #define FILLP_HMAC_H
 #include "sha256.h"
-#include "spunge.h"
 
 #ifdef __cplusplus
 extern "C" {

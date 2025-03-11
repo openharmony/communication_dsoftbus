@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_ADAPTER_BT_COMMON_H
 #define SOFTBUS_ADAPTER_BT_COMMON_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "softbus_type_def.h"
 #include "softbus_adapter_thread.h"
 
 #ifdef __cplusplus

@@ -16,19 +16,7 @@
 #ifndef VTP_STREAM_SOCKET_H
 #define VTP_STREAM_SOCKET_H
 
-#include <condition_variable>
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <string>
-#include <utility>
-
-#include "fillpinc.h"
-
 #include "common_inner.h"
-#include "i_stream.h"
-#include "i_stream_socket.h"
-#include "stream_common.h"
 #include "vtp_instance.h"
 #include "vtp_stream_opt.h"
 

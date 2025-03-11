@@ -16,8 +16,6 @@
 #ifndef LNN_SYNC_INFO_MANAGER_H
 #define LNN_SYNC_INFO_MANAGER_H
 
-#include <stdint.h>
-
 #include "softbus_common.h"
 
 #ifdef __cplusplus
