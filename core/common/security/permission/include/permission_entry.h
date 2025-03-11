@@ -76,6 +76,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
 int32_t DeleteDynamicPermission(const char *sessionName);
 int32_t CompareString(const char *src, const char *dest, bool regexp);
 bool CheckDBinder(const char *sessionName);
+bool StrStartWith(const char *string, const char *target);
 
 #ifdef __cplusplus
 #if __cplusplus
