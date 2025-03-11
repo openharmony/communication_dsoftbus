@@ -16,9 +16,7 @@
 #ifndef LNN_LANE_H
 #define LNN_LANE_H
 
-#include <stdint.h>
 #include "lnn_lane_def.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

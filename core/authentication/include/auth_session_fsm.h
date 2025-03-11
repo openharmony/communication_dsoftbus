@@ -16,15 +16,8 @@
 #ifndef AUTH_SESSION_H
 #define AUTH_SESSION_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_common.h"
-#include "auth_interface.h"
-#include "auth_session_key.h"
 #include "auth_device_common_key.h"
-#include "common_list.h"
-#include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
 #include "legacy/softbus_hisysevt_bus_center.h"

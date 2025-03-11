@@ -17,7 +17,6 @@
 #include <cstring>
 #include <mutex>
 #include <securec.h>
-#include <vector>
 
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
@@ -27,7 +26,6 @@
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"

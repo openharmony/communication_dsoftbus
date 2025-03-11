@@ -15,9 +15,6 @@
 
 #ifndef SPUNGE_APP_H
 #define SPUNGE_APP_H
-#include "sockets.h"
-#include "queue.h"
-#include "hlist.h"
 #include "fillpinc.h"
 
 #ifdef __cplusplus

@@ -16,13 +16,7 @@
 #ifndef AUTH_SESSION_KEY_H
 #define AUTH_SESSION_KEY_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_interface.h"
-#include "common_list.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus

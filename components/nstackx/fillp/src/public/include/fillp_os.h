@@ -16,7 +16,6 @@
 #ifndef FILLP_OS_H
 #define FILLP_OS_H
 
-#include "fillptypes.h"
 #include "fillpcallbacks.h"
 
 #ifdef __cplusplus

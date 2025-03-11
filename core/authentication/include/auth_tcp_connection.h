@@ -16,8 +16,6 @@
 #ifndef AUTH_TCP_CONNECTION_H
 #define AUTH_TCP_CONNECTION_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "auth_connection.h"
 
 #ifdef __cplusplus

@@ -15,8 +15,6 @@
 
 #include "stream_packetizer.h"
 
-#include "common_inner.h"
-#include "securec.h"
 #include "stream_packet_header.h"
 
 namespace Communication {

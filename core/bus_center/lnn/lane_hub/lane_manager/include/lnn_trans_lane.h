@@ -17,7 +17,6 @@
 #define LNN_TRANS_LANE_H
 
 #include "lnn_lane_assign.h"
-#include "lnn_lane_link.h"
 #include "lnn_lane_listener.h"
 
 #ifdef __cplusplus

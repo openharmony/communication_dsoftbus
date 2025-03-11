@@ -16,8 +16,6 @@
 #ifndef LNN_SYNC_LEDGER_ITEM_INFO_H
 #define LNN_SYNC_LEDGER_ITEM_INFO_H
 
-#include <stdint.h>
-
 #include "lnn_node_info.h"
 
 #ifdef __cplusplus

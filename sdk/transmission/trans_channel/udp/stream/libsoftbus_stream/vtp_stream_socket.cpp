@@ -15,27 +15,13 @@
 
 #include "vtp_stream_socket.h"
 
-#include <chrono>
 #include <ifaddrs.h>
-#include <memory>
-#include <netinet/in.h>
-#include <securec.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <thread>
 
-#include "fillpinc.h"
-#include "raw_stream_data.h"
-#include "session.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_error_code.h"
-#include "softbus_trans_def.h"
-#include "stream_common_data.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
-#include "vtp_stream_opt.h"
 
 namespace Communication {
 namespace SoftBus {

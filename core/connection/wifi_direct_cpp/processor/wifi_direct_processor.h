@@ -15,14 +15,9 @@
 #ifndef WIFI_DIRECT_PROCESSOR_H
 #define WIFI_DIRECT_PROCESSOR_H
 
-#include <string>
-
 #include "conn_log.h"
 #include "dfx/processor_snapshot.h"
-#include "softbus_error_code.h"
 
-#include "command/wifi_direct_command.h"
-#include "event/wifi_direct_event_base.h"
 #include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {

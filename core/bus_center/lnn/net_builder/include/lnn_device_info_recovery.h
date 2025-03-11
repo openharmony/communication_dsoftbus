@@ -17,11 +17,8 @@
 #define LNN_DEVICE_INFO_RECOVERY_H
 
 #include "cJSON.h"
-#include <stdint.h>
 #include "lnn_node_info.h"
-#include "lnn_map.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_json.h"
 
 #ifdef __cplusplus
 extern "C" {

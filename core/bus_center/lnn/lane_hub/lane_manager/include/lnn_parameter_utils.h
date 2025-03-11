@@ -16,7 +16,6 @@
 #ifndef LNN_PARAMETER_UTILS_H
 #define LNN_PARAMETER_UTILS_H
 
-#include <stdbool.h>
 #include "lnn_lane_interface.h"
 
 #ifdef __cplusplus

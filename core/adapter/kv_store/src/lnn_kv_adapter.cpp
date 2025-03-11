@@ -13,17 +13,12 @@
  * limitations under the License.
  */
 
-#include <cinttypes>
-#include <functional>
-#include <mutex>
 #include <unistd.h>
-#include <vector>
 
 #include "anonymizer.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
-#include "softbus_error_code.h"
 
 #include "datetime_ex.h"
 namespace OHOS {

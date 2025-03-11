@@ -16,8 +16,6 @@
 #ifndef BUS_CENTER_CLIENT_PROXY_H
 #define BUS_CENTER_CLIENT_PROXY_H
 
-#include <stdint.h>
-#include "softbus_bus_center.h"
 #include "data_level_inner.h"
 
 #ifdef __cplusplus

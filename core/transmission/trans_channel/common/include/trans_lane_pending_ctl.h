@@ -16,12 +16,8 @@
 #ifndef TRANS_LANE_PENDING_CTL_H
 #define TRANS_LANE_PENDING_CTL_H
 
-#include <stdint.h>
-
 #include "lnn_lane_interface.h"
-#include "session.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus

@@ -16,9 +16,6 @@
 #ifndef BUS_CENTER_EVENT_H
 #define BUS_CENTER_EVENT_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "softbus_bus_center.h"
 #include "bus_center_info_key.h"
 

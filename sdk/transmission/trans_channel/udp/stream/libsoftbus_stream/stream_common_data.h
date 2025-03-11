@@ -16,14 +16,7 @@
 #ifndef STREAM_COMMON_DATA_H
 #define STREAM_COMMON_DATA_H
 
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <sys/types.h>
-
 #include "i_stream.h"
-#include "stream_common.h"
 
 namespace Communication {
 namespace SoftBus {

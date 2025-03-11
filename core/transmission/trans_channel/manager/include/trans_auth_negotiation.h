@@ -16,8 +16,6 @@
 #ifndef TRANS_AUTH_NEGOTIATION_H
 #define TRANS_AUTH_NEGOTIATION_H
 
-#include <stdint.h>
-
 #include "auth_interface.h"
 
 #ifdef __cplusplus

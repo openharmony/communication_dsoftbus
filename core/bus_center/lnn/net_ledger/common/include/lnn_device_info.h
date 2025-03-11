@@ -16,9 +16,6 @@
 #ifndef LNN_DEVICE_INFO_H
 #define LNN_DEVICE_INFO_H
 
-#include <stdint.h>
-
-#include "bus_center_info_key.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 

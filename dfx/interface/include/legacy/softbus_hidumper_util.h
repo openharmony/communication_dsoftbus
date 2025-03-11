@@ -17,7 +17,6 @@
 #define SOFTBUS_HIDUMPER_UTIL_H
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus

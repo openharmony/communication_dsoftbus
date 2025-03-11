@@ -22,11 +22,9 @@
 #include "lnn_event_monitor_impl.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_strategy.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "parameter.h"
-#include "softbus_error_code.h"
 #include "lnn_init_monitor.h"
 
 static int32_t ProcessBootEvent(void)

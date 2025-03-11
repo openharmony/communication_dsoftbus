@@ -17,8 +17,6 @@
 #define LNN_DISTRIBUTED_NET_LEDGER_H
 
 #include "auth_interface.h"
-#include "bus_center_info_key.h"
-#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {

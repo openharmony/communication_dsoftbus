@@ -17,7 +17,6 @@
 #define NSTACKX_DEVICE_LOCAL_H
 
 #include "nstackx_device.h"
-#include "coap_app.h"
 
 #ifdef __cplusplus
 extern "C" {

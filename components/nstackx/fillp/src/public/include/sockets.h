@@ -15,10 +15,7 @@
 
 #ifndef FILLP_SOCKETS_H
 #define FILLP_SOCKETS_H
-#include "opt.h"
-#include "queue.h"
 #include "epoll.h"
-#include "hlist.h"
 #include "net.h"
 
 #ifdef FILLP_LINUX

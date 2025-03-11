@@ -15,10 +15,7 @@
 
 #include "trans_server_proxy_standard.h"
 
-#include "anonymizer.h"
 #include "ipc_skeleton.h"
-#include "ipc_types.h"
-#include "message_parcel.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"

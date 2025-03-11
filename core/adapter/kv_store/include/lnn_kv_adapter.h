@@ -16,12 +16,7 @@
 #ifndef LNN_KV_ADAPTER_H
 #define LNN_KV_ADAPTER_H
 
-#include <map>
-#include <memory>
-#include <string>
-
 #include "distributed_kv_data_manager.h"
-#include "kvstore_observer.h"
 
 namespace OHOS {
 class KVAdapter {

@@ -18,11 +18,8 @@
 
 #include "ble_range.h"
 #include "data_level.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
 #include "softbus_trans_def.h"
 
 namespace OHOS {

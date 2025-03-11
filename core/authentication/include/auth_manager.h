@@ -16,10 +16,6 @@
 #ifndef AUTH_MANAGER_H
 #define AUTH_MANAGER_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "auth_common.h"
 #include "auth_device.h"
 #include "auth_interface.h"
 #include "auth_normalize_request.h"

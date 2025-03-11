@@ -17,8 +17,6 @@
 #define AUTH_HICHAIN_ADAPTER_H
 
 #include "device_auth.h"
-#include <stdbool.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus

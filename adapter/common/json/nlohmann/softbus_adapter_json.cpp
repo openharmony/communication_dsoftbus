@@ -15,8 +15,6 @@
 
 #include "softbus_adapter_json.h"
 
-#include <vector>
-
 #include "comm_log.h"
 #include "nlohmann/json.hpp"
 #include "securec.h"

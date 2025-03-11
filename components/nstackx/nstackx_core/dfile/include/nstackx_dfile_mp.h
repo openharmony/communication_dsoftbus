@@ -16,7 +16,7 @@
 #ifndef NSTACKX_DFILE_MP_H
 #define NSTACKX_DFILE_MP_H
 #include "nstackx_dfile_session.h"
-#include "nstackx_dfile_transfer.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

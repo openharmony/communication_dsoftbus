@@ -17,8 +17,6 @@
 #define LNN_SECURE_STORAGE_H
 
 #include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

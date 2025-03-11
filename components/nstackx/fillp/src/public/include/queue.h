@@ -17,9 +17,7 @@
 #define FILLP_QUEUE_H
 
 #include "lf_ring.h"
-#include "log.h"
 #include "spunge_mem.h"
-#include "fillp_function.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -15,7 +15,6 @@
 #ifndef CLIENT_TRANS_STATISTICS_H
 #define CLIENT_TRANS_STATISTICS_H
 
-#include "softbus_def.h"
 #include "trans_network_statistics.h"
 
 #ifdef __cplusplus

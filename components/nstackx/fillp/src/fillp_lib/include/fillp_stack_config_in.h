@@ -17,7 +17,6 @@
 #define FILLP_STACK_CONFIG_IN_H
 
 #include "res.h"
-#include "spunge.h"
 #include "spunge_stack.h"
 
 #ifdef __cplusplus

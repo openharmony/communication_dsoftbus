@@ -15,27 +15,15 @@
 
 #include "lnn_netmanager_monitor.h"
 
-#include <cstring>
-#include <ctime>
-#include <regex>
-#include <securec.h>
-
 #include "anonymizer.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_event_monitor_impl.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "net_conn_client.h"
 #include "net_interface_callback_stub.h"
-#include "softbus_adapter_file.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_bus_center.h"
-#include "softbus_config_type.h"
-#include "softbus_error_code.h"
 #include "lnn_init_monitor.h"
 
 static const int32_t DELAY_LEN = 1000;

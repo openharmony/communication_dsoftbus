@@ -18,7 +18,6 @@
 
 #include "lnn_heartbeat_fsm.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {

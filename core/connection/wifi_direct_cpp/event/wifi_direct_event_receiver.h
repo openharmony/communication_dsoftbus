@@ -15,7 +15,6 @@
 #ifndef WIFI_DIRECT_EVENT_RECEIVER_H
 #define WIFI_DIRECT_EVENT_RECEIVER_H
 
-#include "wifi_direct_event_queue.h"
 #include "wifi_direct_event_sender.h"
 #include "wifi_direct_event_dispatcher.h"
 

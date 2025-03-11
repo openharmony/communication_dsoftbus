@@ -16,8 +16,6 @@
 #ifndef BUS_CENTER_MANAGER_H
 #define BUS_CENTER_MANAGER_H
 
-#include <stdint.h>
-
 #include "bus_center_info_key.h"
 #include "data_level.h"
 #include "disc_manager.h"

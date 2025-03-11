@@ -15,10 +15,7 @@
 #ifndef WIFI_DIRECT_EVENT_TEMPLATE_DISPATCHER_H
 #define WIFI_DIRECT_EVENT_TEMPLATE_DISPATCHER_H
 
-#include <functional>
-#include "conn_log.h"
 #include "wifi_direct_event_queue.h"
-#include "wifi_direct_event_wrapper.h"
 
 namespace OHOS::SoftBus {
 template<typename PrevDispatcher, typename Content>
