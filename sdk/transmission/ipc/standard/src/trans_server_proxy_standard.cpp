@@ -980,4 +980,15 @@ int32_t TransServerProxy::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, c
     }
     return ret;
 }
+
+int32_t TransServerProxy::GetRemoteObject(sptr<IRemoteObject> &object)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    object = remote;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

@@ -175,7 +175,7 @@ void ClientDeathProcTask(void)
         }
         g_serverProxy.clear();
     }
-    TransServerProxyDeInit();
+    TransServerProxyClear();
     BusCenterServerProxyDeInit();
 
     ListNode sessionServerInfoList;
