@@ -46,7 +46,7 @@
 #include "app_mgr_proxy.h"
 #endif
 
-const std::string DMS_SESSIONNAME = "ohos.distributedschedule.dms.connect";
+const std::string DMS_SESSIONNAME = "ohos.distributedschedule.dms";
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
     using namespace OHOS;
@@ -282,7 +282,11 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
-    if (appInfo->peerData.sessionName == DMS_SESSIONNAME || appInfo->myData.sessionName == DMS_SESSIONNAME) {
+    if (StrStartWith(appInfo->peerData.sessionName, DMS_SESSIONNAME.c_str()) ||
+        StrStartWith(appInfo->myData.sessionName, DMS_SESSIONNAME.c_str())) {
+        return SOFTBUS_OK;
+    }
+    if (CheckDBinder(appInfo->myData.sessionName) || CheckDBinder(appInfo->peerData.sessionName)) {
         return SOFTBUS_OK;
     }
     uint64_t myTokenId = -1;
