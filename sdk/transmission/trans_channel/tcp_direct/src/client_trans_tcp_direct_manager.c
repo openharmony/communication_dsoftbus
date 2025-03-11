@@ -152,9 +152,10 @@ void TransTdcCloseChannel(int32_t channelId)
         if (item->channelId != channelId) {
             continue;
         }
-        TransTdcReleaseFd(item->detail.fd);
+
         item->detail.needRelease = true;
         if (item->detail.fdRefCnt <= 0) {
+            TransTdcReleaseFd(item->detail.fd);
             (void)SoftBusMutexDestroy(&(item->detail.fdLock));
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -222,6 +223,17 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
     return SOFTBUS_OK;
 }
 
+static void TransTdcReleaseFdResources(int32_t fd, int32_t errCode)
+{
+    if (errCode == SOFTBUS_TRANS_NEGOTIATE_REJECTED) {
+        TransTdcCloseFd(fd);
+        TRANS_LOGI(
+            TRANS_SDK, "Server reject conn, fd=%{public}d", fd);
+    } else {
+        TransTdcReleaseFd(fd);
+    }
+}
+
 static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
 {
     TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%{public}d.", channelId);
@@ -238,15 +250,9 @@ static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
-            if (errCode == SOFTBUS_TRANS_NEGOTIATE_REJECTED) {
-                TransTdcCloseFd(item->detail.fd);
-                TRANS_LOGI(
-                    TRANS_SDK, "Server reject conn, channelId=%{public}d, fd=%{public}d", channelId, item->detail.fd);
-            } else {
-                TransTdcReleaseFd(item->detail.fd);
-            }
             item->detail.needRelease = true;
             if (item->detail.fdRefCnt <= 0) {
+                TransTdcReleaseFdResources(item->detail.fd, errCode);
                 (void)SoftBusMutexDestroy(&(item->detail.fdLock));
                 ListDelete(&item->node);
                 SoftBusFree(item);
@@ -494,6 +500,7 @@ void TransUpdateFdState(int32_t channelId)
         if (item->channelId == channelId) {
             item->detail.fdRefCnt--;
             if (item->detail.needRelease && item->detail.fdRefCnt <= 0) {
+                TransTdcReleaseFd(item->detail.fd);
                 (void)SoftBusMutexDestroy(&(item->detail.fdLock));
                 ListDelete(&item->node);
                 SoftBusFree(item);
