@@ -1568,6 +1568,7 @@ static int32_t CheckAndStopScan(int32_t listenerId)
     } else {
         int32_t filterSize = 0;
         SoftBusBcScanFilter *adapterFilter = NULL;
+        g_scanManager[listenerId].isScanning = false;
         ret = GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
         DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "get bc scan filters failed");
         DumpBcScanFilter(adapterFilter, filterSize);
@@ -1579,6 +1580,7 @@ static int32_t CheckAndStopScan(int32_t listenerId)
 
         ReleaseSoftBusBcScanFilter(adapterFilter, filterSize);
         if (ret != SOFTBUS_OK) {
+            g_scanManager[listenerId].isScanning = true;
             g_scanManager[listenerId].scanCallback->OnStartScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
             DISC_LOGE(DISC_BROADCAST, "call from adapter failed");
             return ret;
