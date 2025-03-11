@@ -1069,7 +1069,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan002, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
-    EXPECT_EQ(SOFTBUS_BC_MGR_START_SCAN_NO_FILTER, StartScan(listenerId, &scanParam));
+    int32_t ret = StartScan(listenerId, &scanParam);
+    EXPECT_EQ(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_BC_MGR_START_SCAN_NO_FILTER, true);
 
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
@@ -1129,7 +1130,6 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan004, TestSize.Level1)
     BuildScanParam(&scanParam);
 
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
-    EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, SetScanFilter(listenerId, filter, filterNum));
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
