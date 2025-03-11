@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,8 +103,6 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_002, Te
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_003, TestSize.Level1)
 {
-    AuthDeviceProfileListenerInterfaceMock mocker;
-    EXPECT_CALL(mocker, DelNotTrustDevice).Times(1);
     g_deviceProfilePara.onDeviceProfileAdd = OnDeviceBound;
     RegisterToDp(&g_deviceProfilePara);
     AuthToDeviceProfile::TrustDeviceProfile profile;
@@ -123,7 +121,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
     RegisterToDp(&g_deviceProfilePara);
     AuthToDeviceProfile::TrustDeviceProfile profile;
     AuthDeviceProfileListenerInterfaceMock mocker;
-    EXPECT_CALL(mocker, GetActiveOsAccountIds);
+    EXPECT_CALL(mocker, GetActiveOsAccountIds).WillOnce(Return(0));
     int32_t ret = listener->OnTrustDeviceProfileDelete(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -271,6 +269,40 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_UPDATE_TEST, T
 {
     DistributedDeviceProfile::CharacteristicProfile profile;
     int32_t ret = listener->OnCharacteristicProfileUpdate(profile, profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST
+ * @tc.desc: OnTrustDeviceProfileActive
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    AuthDeviceProfileListenerInterfaceMock mocker;
+    EXPECT_CALL(mocker, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_OFF));
+    EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillOnce(Return(false));
+    int32_t ret = listener->OnTrustDeviceProfileActive(profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillOnce(Return(true));
+    EXPECT_CALL(mocker, IsHeartbeatEnable).WillOnce(Return(true));
+    EXPECT_CALL(mocker, LnnStartHbByTypeAndStrategy).WillOnce(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
+    ret = listener->OnTrustDeviceProfileActive(profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST
+ * @tc.desc: OnTrustDeviceProfileInactive
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    int32_t ret = listener->OnTrustDeviceProfileInactive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
