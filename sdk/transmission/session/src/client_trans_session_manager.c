@@ -1156,11 +1156,18 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
 // Only need to operate on the action guidance ishare auth channel
 static void ClientSetAuthSessionTimer(const ClientSessionServer *serverNode, SessionInfo *sessionNode)
 {
-    if (IsRawAuthSession(serverNode->sessionName) == true && sessionNode->channelType == CHANNEL_TYPE_AUTH &&
-        sessionNode->actionId != 0) {
-        sessionNode->lifecycle.maxWaitTime = RAW_AUTH_SESSION_IDLE_TIME;
-        sessionNode->lifecycle.waitTime = 0;
-        TRANS_LOGI(TRANS_SDK, "set auth sessionId=%{public}d waitTime success.", sessionNode->sessionId);
+    if (sessionNode->channelType == CHANNEL_TYPE_AUTH && sessionNode->actionId != 0) {
+        if (strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) == 0) {
+            sessionNode->lifecycle.maxWaitTime = ISHARE_AUTH_SESSION_MAX_IDLE_TIME;
+            sessionNode->lifecycle.waitTime = 0;
+            TRANS_LOGI(TRANS_SDK, "set ISHARE auth sessionId=%{public}d waitTime success.", sessionNode->sessionId);
+            return;
+        } else if (strcmp(serverNode->sessionName, DM_AUTH_SESSION) == 0) {
+            sessionNode->lifecycle.maxWaitTime = DM_AUTH_SESSION_MAX_IDLE_TIME;
+            sessionNode->lifecycle.waitTime = 0;
+            TRANS_LOGI(TRANS_SDK, "set DM auth sessionId=%{public}d waitTime success.", sessionNode->sessionId);
+            return;
+        }
     }
 }
 
