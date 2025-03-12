@@ -25,6 +25,7 @@ extern "C" {
 
 int32_t TransServerProxyInit(void);
 void TransServerProxyDeInit(void);
+void TransServerProxyClear(void);
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName);
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName);
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info);
