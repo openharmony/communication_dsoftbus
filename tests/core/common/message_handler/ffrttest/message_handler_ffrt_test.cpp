@@ -69,7 +69,7 @@ void MessageHandlerFfrtTest::SetUp()
 void MessageHandlerFfrtTest::TearDown()
 {
     (void)SoftBusCondDestroy(&g_cond);
-    (void)SoftBusCondDestroy(&g_lock);
+    (void)SoftBusMutexDestroy(&g_lock);
 }
 
 static void CondSignal(void)
@@ -83,8 +83,8 @@ static void CondSignal(void)
         (void)SoftBusMutexUnlock(&g_lock);
         return;
     }
-    (void)SoftBusMutexUnlock(&g_lock);
     g_isNeedCondWait = false;
+    (void)SoftBusMutexUnlock(&g_lock);
 }
 
 static void CondWait(void)
