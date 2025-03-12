@@ -1131,7 +1131,7 @@ static void RemoveBadFd(void)
         }
         int32_t ret = SoftBusMutexLock(&node->lock);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "lock failed, module=%{public}d", module);
+            CONN_LOGE(CONN_COMMON, "lock failed, module=%{public}d, ret=%{public}d", module, ret);
             ReturnListenerNode(&node);
             continue;
         }
