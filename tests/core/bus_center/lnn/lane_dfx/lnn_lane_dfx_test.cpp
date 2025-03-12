@@ -384,6 +384,6 @@ HWTEST_F(LNNLaneDfxTest, LANE_EVENT_INFO_004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     LaneProcess laneProcess;
     ret = GetLaneEventInfo(laneHandle, &laneProcess);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
 }
 } // namespace OHOS
