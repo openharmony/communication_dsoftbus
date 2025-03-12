@@ -65,6 +65,7 @@ public:
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
     int32_t RegBleRangeCb(const char *pkgName) override;
     int32_t UnregBleRangeCb(const char *pkgName) override;
+    int32_t GetRemoteObject(sptr<IRemoteObject> &object);
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };
