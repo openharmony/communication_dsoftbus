@@ -26,7 +26,10 @@ extern "C" {
 
 #define IS_SERVER 0
 #define IS_CLIENT 1
-#define RAW_AUTH_SESSION_IDLE_TIME 5000 // 5s
+#define ISHARE_AUTH_SESSION "IShareAuthSession"
+#define DM_AUTH_SESSION "ohos.distributedhardware.devicemanager.resident"
+#define ISHARE_AUTH_SESSION_MAX_IDLE_TIME 5000 // 5s
+#define DM_AUTH_SESSION_MAX_IDLE_TIME 275000 // 275s
 
 typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
