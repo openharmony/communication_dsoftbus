@@ -324,6 +324,9 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, Eq(NUM_KEY_DISCOVERY_TYPE), _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartbeatUtilsMock, LnnGetRemoteNumU32Info(_, Eq(NUM_KEY_STATIC_NET_CAP), _))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(LnnDumpOnlineDeviceInfo());
     uint32_t ret = GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_600, HB_ADV_RANDOM_TIME_300);
     EXPECT_EQ(ret, HB_ADV_RANDOM_TIME_300);
