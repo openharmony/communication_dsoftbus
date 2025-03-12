@@ -1027,8 +1027,8 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
     }
     NodeInfo oldCacheInfo = { 0 };
     ret = LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo);
-    if (ret == SOFTBUS_OK && IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp, cacheInfo.stateVersion,
-            cacheInfo.updateTimestamp)) {
+    if (ret == SOFTBUS_OK && IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp,
+        cacheInfo.stateVersion, cacheInfo.updateTimestamp)) {
         return SOFTBUS_KV_IGNORE_OLD_DEVICE_INFO;
     }
     if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
