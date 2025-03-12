@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
     if (fd >= 0) {
         TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
         DelTrigger(node->listenMod, fd, RW_TRIGGER);
-        TransTdcSocketReleaseFd(fd);
+        TransTdcSocketReleaseFd(node->listenMod, fd);
     }
 }
 
@@ -214,8 +214,8 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 
 void TransTcpDirectDeinit(void)
 {
-    TransSrvDataListDeinit();
     (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
+    TransSrvDataListDeinit();
 }
 
 void TransTdcDeathCallback(const char *pkgName, int32_t pid)
@@ -246,7 +246,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
             AnonymizeFree(anonymizePkgName);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
-            TransTdcSocketReleaseFd(item->appInfo.fd);
+            TransTdcSocketReleaseFd(item->listenMod, item->appInfo.fd);
             SoftBusFree(item);
             continue;
         }

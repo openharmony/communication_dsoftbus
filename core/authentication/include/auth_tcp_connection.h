@@ -16,8 +16,6 @@
 #ifndef AUTH_TCP_CONNECTION_H
 #define AUTH_TCP_CONNECTION_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "auth_connection.h"
 
 #ifdef __cplusplus
@@ -48,6 +46,7 @@ void UnsetSocketCallback(void);
 // connect succ, return fd; otherwise, return -1.
 int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *remoteIp, int32_t port, bool isBlockMode);
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode);
+int32_t SocketSetDevice(int32_t fd, bool isBlockMode);
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode);
 
 void SocketDisconnectDevice(ListenerModule module, int32_t fd);
@@ -59,6 +58,10 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
 void StopSocketListening(ListenerModule moduleId);
 
 int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle);
+bool IsExistWifiConnItemByConnId(int32_t fd);
+void DeleteWifiConnItemByConnId(int32_t fd);
+int32_t WifiConnListLockInit(void);
+void WifiConnListLockDeinit(void);
 
 #ifdef __cplusplus
 #if __cplusplus

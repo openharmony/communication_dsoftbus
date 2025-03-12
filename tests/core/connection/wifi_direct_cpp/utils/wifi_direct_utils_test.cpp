@@ -15,21 +15,21 @@
 
 #define private   public
 #define protected public
-#include "duration_statistic.h"
-#include "wifi_direct_dfx.h"
+#include "dfx/duration_statistic.h"
+#include "dfx/wifi_direct_dfx.h"
 #undef protected
 #undef private
 
-#include "data/link_manager.h"
-#include "net_conn_client.h"
-#include "wifi_direct_mock.h"
-#include "wifi_direct_utils.h"
-#include "wifi_direct_anonymous.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <securec.h>
 #include <string>
+#include "data/link_manager.h"
+#include "net_conn_client.h"
+#include "wifi_direct_anonymous.h"
+#include "wifi_direct_mock.h"
+#include "wifi_direct_utils.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -331,15 +331,13 @@ HWTEST_F(WifiDirectUtilsTest, SyncLnnInfoForP2pTest, TestSize.Level1)
     WifiDirectRole role = WIFI_DIRECT_ROLE_AUTO;
     const std::string localMac = "11:22:33:44:55";
     const std::string goMac = "11:22:33:44:66";
-    bool expect = true;
 
     WifiDirectInterfaceMock mock;
 
     EXPECT_CALL(mock, LnnSetLocalNumInfo).WillOnce(Return(-1));
     EXPECT_CALL(mock, LnnSetLocalStrInfo).WillRepeatedly(Return(-1));
     EXPECT_CALL(mock, LnnSyncP2pInfo).WillOnce(Return(SOFTBUS_OK));
-    WifiDirectUtils::SyncLnnInfoForP2p(role, localMac, goMac);
-    EXPECT_EQ(expect, true);
+    EXPECT_NO_FATAL_FAILURE(WifiDirectUtils::SyncLnnInfoForP2p(role, localMac, goMac));
 }
 
 /*

@@ -16,7 +16,6 @@
 #ifndef LNN_FAST_OFFLINE_H
 #define LNN_FAST_OFFLINE_H
 
-#include <stdint.h>
 #include "lnn_node_info.h"
 #include "lnn_sync_info_manager.h"
 

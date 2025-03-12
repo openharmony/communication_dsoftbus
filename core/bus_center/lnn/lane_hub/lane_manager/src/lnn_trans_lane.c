@@ -49,7 +49,6 @@
 #define LANE_REQ_ID_TYPE_SHIFT 28
 #define DEFAULT_LINK_LATENCY 30000
 #define WIFI_DIRECET_NUM_LIMIT 4
-#define DB_MAGIC_NUMBER 0x5A5A5A5A
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -102,6 +101,7 @@ typedef struct {
     bool isCompleted;
     uint32_t actionAddr;
     bool isSupportIpv6;
+    bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
 } LaneLinkNodeInfo;
 
 typedef struct {
@@ -300,6 +300,7 @@ static int32_t TriggerLink(uint32_t laneReqId, TransOption *request,
     linkNode->triggerLinkTime = SoftBusGetSysTimeMs();
     linkNode->availableLinkTime = DEFAULT_LINK_LATENCY;
     linkNode->isCompleted = false;
+    linkNode->isInnerCalled = request->isInnerCalled;
     InitStatusList(linkNode);
     ListInit(&linkNode->node);
     if (Lock() != SOFTBUS_OK) {
@@ -507,7 +508,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     selectParam.transType = allocInfo->transType;
     selectParam.qosRequire = allocInfo->qosRequire;
     selectParam.allocedLaneId = allocLaneId;
-    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
         LNN_LOGE(LNN_LANE, "recommendLinkList malloc fail");
         return SOFTBUS_MALLOC_ERR;
@@ -955,8 +956,8 @@ static void DfxReportLinkResult(uint32_t laneReqId, LaneLinkType linkType, int32
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = laneReqId;
-    extra.laneLinkType = linkType;
+    extra.laneReqId = (int32_t)laneReqId;
+    extra.laneLinkType = (int32_t)linkType;
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
 
@@ -1120,6 +1121,7 @@ static int32_t CreateLinkRequestNode(const LaneLinkNodeInfo *nodeInfo, LinkReque
     requestInfo->psm = nodeInfo->psm;
     requestInfo->actionAddr = nodeInfo->actionAddr;
     requestInfo->isSupportIpv6 = nodeInfo->isSupportIpv6;
+    requestInfo->isInnerCalled = nodeInfo->isInnerCalled;
     if (memcpy_s(requestInfo->peerNetworkId, NETWORK_ID_BUF_LEN, nodeInfo->networkId, NETWORK_ID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy networkId fail");
         return SOFTBUS_MEM_ERR;

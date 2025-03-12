@@ -54,6 +54,8 @@ typedef enum {
     AUTH_LINK_TYPE_ENHANCED_P2P,
     AUTH_LINK_TYPE_RAW_ENHANCED_P2P,
     AUTH_LINK_TYPE_NORMALIZED,
+    AUTH_LINK_TYPE_SESSION,
+    AUTH_LINK_TYPE_SESSION_KEY,
     AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
@@ -88,7 +90,12 @@ typedef struct {
             int64_t authId; /* for open p2p auth conn */
             ListenerModule moduleId; /* for open enhance p2p auth conn */
             char udid[UDID_BUF_LEN];
+            int32_t fd;
         } ipInfo;
+        struct {
+            uint32_t connId;
+            char udid[UDID_BUF_LEN];
+        } sessionInfo;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
 } AuthConnInfo;
@@ -185,6 +192,7 @@ int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
 void AuthCloseConn(AuthHandle authHandle);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta);
+int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient);
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);
@@ -209,9 +217,7 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
 uint32_t AuthGetGroupType(const char *udid, const char *uuid);
 bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
-
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
-void AuthFreeConn(const AuthHandle *authHandle);
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle);
 
 int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConnInfo *connInfo);
 int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle);

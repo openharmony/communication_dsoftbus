@@ -16,10 +16,7 @@
 #ifndef LNN_HEARTBEAT_MEDIUM_MGR_H
 #define LNN_HEARTBEAT_MEDIUM_MGR_H
 
-#include <stdint.h>
-
 #include "lnn_heartbeat_utils.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {

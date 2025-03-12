@@ -266,12 +266,18 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
         WriteInt32(reply, SOFTBUS_NO_INIT);
         return SOFTBUS_NO_INIT;
     }
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    if (addr->type == CONNECTION_ADDR_BLE) {
+        param.blePriority = addr->info.ble.priority;
+    }
+
     ret = CheckOpenSessionPremission(sessionName, sessionName);
     if (ret != SOFTBUS_OK) {
         WriteInt32(reply, ret);
         return ret;
     }
-    ret = TransOpenAuthChannel(sessionName, &connOpt, "");
+    ret = TransOpenAuthChannel(sessionName, &connOpt, "", &param);
     WriteInt32(reply, ret);
     return ret;
 }
@@ -371,6 +377,32 @@ int32_t ServerReleaseResources(IpcIo *req, IpcIo *reply)
     }
 
     int32_t ret = TransReleaseUdpResources(channelId);
+    return ret;
+}
+
+int32_t ServerProcessInnerEvent(IpcIo *req, IpcIo *reply)
+{
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
+    if (req == NULL || reply == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t eventType = 0;
+    if (!ReadInt32(req, &eventType)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read eventType");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len = 0;
+    if (!ReadUint32(req, &len)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read len");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint8_t* buf = (uint8_t *)ReadRawData(req, len);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read buf");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = TransProcessInnerEvent(eventType, buf, len);
     return ret;
 }
 

@@ -19,6 +19,8 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
+#include "lnn_connection_fsm_process.c"
+#include "lnn_connection_fsm_process.h"
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
@@ -149,6 +151,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
     para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
     EXPECT_TRUE(para1 != nullptr);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isSession = false;
     EXPECT_CALL(serviceMock, LnnNotifyJoinResult).WillRepeatedly(Return());
     bool ret = AuthStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);

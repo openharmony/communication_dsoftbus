@@ -24,12 +24,14 @@
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_net_capability.h"
 #include "lnn_net_ledger.h"
+#include "lnn_net_ledger_common_mock.h"
 #include "lnn_node_info.h"
 #include "lnn_oobe_manager.h"
 #include "softbus_adapter_mem.h"
@@ -40,6 +42,7 @@
 #define ONE_BIT_MAX_HEX               15
 #define DEVICE_TYPE_MAX_LENGTH        3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH (DEVICE_TYPE_MAX_LENGTH * 4)
+#define DEFAUTL_LNN_FEATURE           0x3E2
 
 namespace OHOS {
 using namespace testing::ext;
@@ -107,7 +110,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
     uint16_t typeId = 0;
     int32_t ret = memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
     EXPECT_TRUE(ret == EOK);
-    EXPECT_TRUE(LnnGetDeviceName(nullptr) == NULL);
+    EXPECT_TRUE(LnnGetDeviceName(nullptr) == nullptr);
     LnnGetDeviceName(&info);
     EXPECT_TRUE(LnnSetDeviceName(nullptr, NODE_DEVICE_NAME) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDeviceName(&info, nullptr) == SOFTBUS_INVALID_PARAM);
@@ -795,6 +798,39 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_021, TestSize.Level1)
 }
 
 /*
+ * @tc.name: LNN_NODE_INFO_Test_022
+ * @tc.desc: lnn node info function test LnnSetScreenStatus
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_022, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint8_t data[USERID_CHECKSUM_LEN];
+
+    int32_t ret = LnnSetUserIdCheckSum(nullptr, data, USERID_CHECKSUM_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetUserIdCheckSum(&nodeInfo, nullptr, USERID_CHECKSUM_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetUserIdCheckSum(&nodeInfo, data, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetUserIdCheckSum(&nodeInfo, data, USERID_CHECKSUM_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = LnnGetUserIdCheckSum(nullptr, data, USERID_CHECKSUM_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetUserIdCheckSum(&nodeInfo, nullptr, USERID_CHECKSUM_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetUserIdCheckSum(&nodeInfo, data, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnGetUserIdCheckSum(&nodeInfo, data, USERID_CHECKSUM_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: LNN_NET_LEDGER_Test_001
  * @tc.desc: lnn net ledger function test
  * @tc.type: FUNC
@@ -1003,5 +1039,89 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
     EXPECT_TRUE(LnnIsMasterNode() == false);
     LnnDeinitLocalLedger();
     LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LNN_FEATURE_CAPABILTY_001
+ * @tc.desc: lnn feature capability test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_FEATURE_CAPABILTY_001, TestSize.Level1)
+{
+    uint64_t feature;
+    int32_t ret = LnnSetFeatureCapability(nullptr, BIT_FEATURE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetFeatureCapability(nullptr, BIT_BR_DUP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetFeatureCapability(&feature, BIT_FEATURE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetFeatureCapability(&feature, BIT_BR_DUP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(IsFeatureSupport(feature, BIT_BR_DUP), true);
+
+    ret = LnnClearFeatureCapability(nullptr, BIT_FEATURE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnClearFeatureCapability(nullptr, BIT_BR_DUP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnClearFeatureCapability(&feature, BIT_FEATURE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnClearFeatureCapability(&feature, BIT_BR_DUP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(IsFeatureSupport(feature, BIT_BR_DUP), false);
+}
+
+/*
+ * @tc.name: LNN_SET_DATA_LEVEL_001
+ * @tc.desc: lnn node info function test LnnSetDataLevel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DATA_LEVEL_001, TestSize.Level1)
+{
+    DataLevel dataLevel;
+    dataLevel.dynamicLevel = 0;
+    dataLevel.staticLevel = 0;
+    dataLevel.switchLevel = 0;
+    dataLevel.switchLength = 0;
+    bool isSwitchLevelChanged = false;
+    NetLedgerCommonInterfaceMock netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNumU16Info(_, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    uint32_t ret = LnnSetDataLevel(&dataLevel, &isSwitchLevelChanged);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
+}
+
+/*
+ * @tc.name: LNN_SET_DATA_LEVEL_002
+ * @tc.desc: lnn node info function test LnnSetDataLevel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DATA_LEVEL_002, TestSize.Level1)
+{
+    DataLevel *dataLevel = nullptr;
+    bool isSwitchLevelChanged = false;
+    uint32_t ret = LnnSetDataLevel(dataLevel, &isSwitchLevelChanged);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_SET_DATA_LEVEL_003
+ * @tc.desc: lnn node info function test LnnSetDataLevel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DATA_LEVEL_003, TestSize.Level1)
+{
+    DataLevel dataLevel;
+    dataLevel.dynamicLevel = 0;
+    dataLevel.staticLevel = 0;
+    dataLevel.switchLevel = 0;
+    dataLevel.switchLength = 0;
+    bool *isSwitchLevelChanged = nullptr;
+    uint32_t ret = LnnSetDataLevel(&dataLevel, isSwitchLevelChanged);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

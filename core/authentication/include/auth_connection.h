@@ -16,12 +16,7 @@
 #ifndef AUTH_CONNECTION_H
 #define AUTH_CONNECTION_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "auth_common.h"
-#include "auth_interface.h"
-#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 #if __cplusplus

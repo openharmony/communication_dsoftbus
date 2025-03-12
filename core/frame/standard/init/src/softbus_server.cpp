@@ -21,7 +21,6 @@
 #include "securec.h"
 #include "string_ex.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_disc_server.h"
 #include "legacy/softbus_hidumper_interface.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
@@ -113,6 +112,8 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
     }
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
     connOpt.type = ConvertConnectType(addrInfo->type);
     switch (connOpt.type) {
         case CONNECT_TCP:
@@ -138,6 +139,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             connOpt.bleOption.protocol = addrInfo->info.ble.protocol;
             connOpt.bleOption.psm = addrInfo->info.ble.psm;
             connOpt.bleOption.fastestConnectEnable = true;
+            param.blePriority = addrInfo->info.ble.priority;
             break;
         case CONNECT_BR:
             if (memcpy_s(connOpt.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
@@ -150,7 +152,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             COMM_LOGE(COMM_SVC, "connect type error");
             return SOFTBUS_TRANS_INVALID_CONNECT_TYPE;
     }
-    return TransOpenAuthChannel(sessionName, &connOpt, "");
+    return TransOpenAuthChannel(sessionName, &connOpt, "", &param);
 }
 
 int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
@@ -180,10 +182,10 @@ int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const
     return TransSendMsg(channelId, channelType, data, len, msgType);
 }
 
-int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    return LnnIpcServerJoin(pkgName, (int32_t)callingPid, addr, addrTypeLen);
+    return LnnIpcServerJoin(pkgName, (int32_t)callingPid, addr, addrTypeLen, isForceJoin);
 }
 
 int32_t SoftBusServer::LeaveLNN(const char *pkgName, const char *networkId)
@@ -301,6 +303,23 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t SoftBusServer::TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    return LnnIpcTriggerHbForMeasureDistance(pkgName, callerId, mode);
+}
+
+int32_t SoftBusServer::RegBleRangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcRegBleRangeCb(pkgName, callingPid);
+}
+
+int32_t SoftBusServer::UnregBleRangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcUnregBleRangeCb(pkgName, callingPid);
+}
+
 int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     return LnnIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
@@ -341,11 +360,16 @@ void SoftBusServer::OnStop() {}
 
 int32_t SoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
-    sptr<TransSpecObject> result = new(std::nothrow) TransSpecObject();
-    if (result == nullptr) {
-        return SOFTBUS_MEM_ERR;
+    static sptr<TransSpecObject> instance = nullptr;
+    static std::mutex instanceLock;
+    std::lock_guard<std::mutex> autoLock(instanceLock);
+    if (instance == nullptr) {
+        instance = new(std::nothrow) TransSpecObject();
+        if (instance == nullptr) {
+            return SOFTBUS_MEM_ERR;
+        }
     }
-    object = result;
+    object = instance;
     return SOFTBUS_OK;
 }
 
@@ -440,5 +464,10 @@ int32_t SoftBusServer::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, cons
         return SOFTBUS_INVALID_PARAM;
     }
     return TransPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+}
+
+int32_t SoftBusServer::SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return LnnIpcSetDisplayName(pkgName, nameData, len);
 }
 } // namespace OHOS

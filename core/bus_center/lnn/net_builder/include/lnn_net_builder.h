@@ -16,9 +16,8 @@
 #ifndef LNN_NET_BUILDER_H
 #define LNN_NET_BUILDER_H
 
-#include <stdint.h>
-
 #include "auth_interface.h"
+#include "lnn_connId_callback_manager.h"
 #include "lnn_event.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_bus_center.h"
@@ -54,6 +53,7 @@ typedef enum {
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_LEAVE_SPECIFIC,
     MSG_TYPE_LEAVE_BY_AUTH_ID,
+    MSG_TYPE_RE_SYNC_DEVICE_NAME = 15,
     MSG_TYPE_BUILD_MAX,
 } NetBuilderMessageType;
 
@@ -133,6 +133,8 @@ typedef struct {
 typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isNeedConnect;
+    bool isSession;
+    bool isForceJoin;
     ConnectionAddr addr;
     NodeInfo *dupInfo;
     LnnDfxDeviceInfoReport infoReport;
@@ -147,6 +149,7 @@ int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
+int32_t LnnSetReSyncDeviceName(void);
 int32_t LnnNotifyDiscoveryDevice(
     const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
@@ -184,7 +187,7 @@ void RemovePendingRequestByAddrType(const bool *addrType, uint32_t typeLen);
 void UpdateLocalNetCapability(void);
 void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size);
-int32_t ConifgLocalLedger(void);
+int32_t ConfigLocalLedger(void);
 int32_t SyncElectMessage(const char *networkId);
 ConnectionAddrType GetCurrentConnectType(void);
 NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo);
@@ -204,9 +207,11 @@ void ClearPcRestrictMap(void);
 void DeleteNodeFromPcRestrictMap(const char *udidHash);
 int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
 int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
-int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info);
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession);
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback);
 int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen);
 void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange);
+int32_t LnnUpdateLocalUuidAndIrk(void);
 #ifdef __cplusplus
 }
 #endif

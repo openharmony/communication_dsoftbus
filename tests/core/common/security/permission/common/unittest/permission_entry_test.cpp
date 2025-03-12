@@ -58,7 +58,7 @@ HWTEST_F(PermissionEntryTest, StrIsEmptyTest001, TestSize.Level0)
     int32_t ret;
     const char *sessionName = "";
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
-    ASSERT_TRUE(pItem != NULL);
+    ASSERT_TRUE(pItem != nullptr);
     ret = CheckPermissionEntry(sessionName, pItem);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -73,7 +73,7 @@ HWTEST_F(PermissionEntryTest, LoadPermissionJsonTest001, TestSize.Level0)
 {
     int32_t ret;
 
-    ret = LoadPermissionJson(NULL);
+    ret = LoadPermissionJson(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -89,21 +89,21 @@ HWTEST_F(PermissionEntryTest, CheckPermissionEntryTest001, TestSize.Level0)
     char sessionName[NUM] = "ABC";
     char sessionNameNormal[NUM] = "bbb";
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
-    ASSERT_TRUE(pItem != NULL);
+    ASSERT_TRUE(pItem != nullptr);
 
-    ret = CheckPermissionEntry(NULL, pItem);
+    ret = CheckPermissionEntry(nullptr, pItem);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = CheckPermissionEntry(g_sessionName, NULL);
+    ret = CheckPermissionEntry(g_sessionName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pItem->permType = NATIVE_APP;
-    ret = CheckPermissionEntry(sessionName, NULL);
+    ret = CheckPermissionEntry(sessionName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pItem->permType = NORMAL_APP;
     pItem->actions = ACTION_CREATE;
-    pItem->pkgName = NULL;
+    pItem->pkgName = nullptr;
 
     ret = CheckPermissionEntry(sessionName, pItem);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -124,7 +124,7 @@ HWTEST_F(PermissionEntryTest, PermIsSecLevelPublicTest001, TestSize.Level0)
     bool ret;
     const char sessionName[NUM] = "";
 
-    ret = PermIsSecLevelPublic(NULL);
+    ret = PermIsSecLevelPublic(nullptr);
     EXPECT_TRUE(ret == false);
 
     ret = PermIsSecLevelPublic(DBINDER_SERVICE_NAME);

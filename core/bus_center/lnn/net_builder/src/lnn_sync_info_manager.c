@@ -1141,7 +1141,8 @@ static bool IsNeedSyncByAuth(const char *networkId)
         LNN_LOGE(LNN_BUILDER, "get feature fail");
         return false;
     }
-    if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0 || (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) {
+    if ((local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0 ||
+        (remote & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) {
         LNN_LOGI(LNN_BUILDER, "not support wifi direct");
         return false;
     }
@@ -1321,4 +1322,53 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     SoftBusFree(authHandle);
     AnonymizeFree(anonyOfflineCode);
     return SOFTBUS_OK;
+}
+
+void LnnSendAsyncInfoMsg(void *param)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)param;
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+    if (data->msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        SoftBusFree(data);
+        return;
+    }
+    int32_t ret =
+        LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
+    }
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
+}
+
+SendSyncInfoParam *CreateSyncInfoParam(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc SendSyncInfoParam fail");
+        return NULL;
+    }
+
+    data->msg = (uint8_t *)SoftBusCalloc(len);
+    if (data->msg == NULL) {
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "malloc SendSyncInfoParam fail");
+        return NULL;
+    }
+
+    if (strcpy_s(data->networkId, strlen(networkId) + 1, networkId) != SOFTBUS_OK ||
+        memcpy_s(data->msg, len, (uint8_t *)msg, len) != SOFTBUS_OK) {
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        return NULL;
+    }
+    data->type = type;
+    data->len = len;
+    data->complete = complete;
+    return data;
 }

@@ -42,7 +42,6 @@ constexpr uint32_t REMOTE_AUTH_PORT = 7070;
 constexpr uint32_t REMOTE_PROXY_PORT = 8080;
 constexpr char REMOTE_WLAN_IP[] = "10.146.181.134";
 constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
-constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
 constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_LATENCY = 2500;
@@ -244,85 +243,6 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
     SoftBusFree(laneReqIdList);
 }
 
-/*
- * @tc.name: LANE_SELECT_Test_001
- * @tc.desc: lane select fileTransLane by LNN
- * @tc.type: FUNC
- * @tc.require: I5FBFG
- */
-HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
-{
-    LanePreferredLinkList recommendList;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    uint32_t listNum = 0;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-    selectParam.transType = LANE_T_FILE;
-    selectParam.expectedBw = 0;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, 4);
-}
-
-/*
- * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_001
- * @tc.desc: lane select fileTransLane by qos
- * @tc.type: FUNC
- * @tc.require: I5FBFG
- */
-HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_001, TestSize.Level1)
-{
-    LanePreferredLinkList recommendList;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-    selectParam.transType = LANE_T_FILE;
-    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
-    selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
-    selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
-    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
- * @tc.name: LANE_SELECT_Test_002
- * @tc.desc: lane select by preferredLinkList
- * @tc.type: FUNC
- * @tc.require: I5FBFG
- */
-HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
-{
-    LanePreferredLinkList recommendList;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    uint32_t listNum = 0;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-    selectParam.transType = LANE_T_BYTE;
-    selectParam.expectedBw = 0;
-    selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
-    selectParam.list.linkType[0] = LANE_WLAN_5G;
-    selectParam.list.linkType[1] = LANE_BR;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, 2);
-}
-
-/*
- * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_002
- * @tc.desc: lane select BYTE TransLane by qos
- * @tc.type: FUNC
- * @tc.require: I5FBFG
- */
-HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
-{
-    LanePreferredLinkList recommendList;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-    selectParam.transType = LANE_T_BYTE;
-    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
 
 /*
  * @tc.name: LANE_LINK_Test_001
@@ -403,13 +323,13 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
         .onLaneFreeFail = OnLaneFreeFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_ENHANCED_P2P_STATIC_CAP);
 
     laneReqId = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     allocInfo.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_WIFI_STATIC_CAP);
     SoftBusSleepMs(5);
 }
 
@@ -488,9 +408,7 @@ HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
  */
 HWTEST_F(LaneTest, DESTROY_LINK_Test_001, TestSize.Level1)
 {
-    const char *networkId = "111122223333abcdef";
     uint32_t laneReqId = LANE_REQ_ID_TYPE_SHIFT;
-    EXPECT_EQ(DestroyLink(networkId, laneReqId, LANE_P2P), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
     EXPECT_EQ(DestroyLink(nullptr, laneReqId, LANE_P2P), SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

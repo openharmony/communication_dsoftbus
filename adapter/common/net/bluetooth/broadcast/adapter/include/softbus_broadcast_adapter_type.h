@@ -138,6 +138,20 @@ typedef struct {
 } SoftBusBcScanResult;
 
 /**
+ * @brief Defines the Scan filter cmd
+ *
+ * @since 5.0
+ * @version 1.0
+ */
+typedef enum {
+    SOFTBUS_SCAN_FILTER_CMD_NONE, // No need update
+    SOFTBUS_SCAN_FILTER_CMD_ADD, // Add a scan filter.
+	SOFTBUS_SCAN_FILTER_CMD_DELETE, // Delete a scan filter.
+	SOFTBUS_SCAN_FILTER_CMD_MODIFY, // Modify a scan filter.
+	SOFTBUS_SCAN_FILTER_CMD_BUTT
+} SoftbusSetFilterCmd;
+
+/**
  * @brief Defines the broadcast parameters
  *
  * @since 4.1
@@ -178,6 +192,7 @@ typedef struct {
     uint8_t *serviceDataMask;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
+    uint8_t filterIndex;
 } SoftBusBcScanFilter;
 
 /**

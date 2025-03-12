@@ -44,7 +44,7 @@ public:
     virtual int32_t TryFileLock(int32_t fd, int32_t type, int32_t retryTimes) = 0;
     virtual int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType,
         int32_t *sessionId, bool isClosing) = 0;
-    virtual int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key) = 0;
+    virtual int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, TransSessionKey key) = 0;
     virtual int32_t ClientGetFileConfigInfoById(int32_t sessionId,
         int32_t *fileEncrypt, int32_t *algorithm, int32_t *crc) = 0;
     virtual int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener) = 0;
@@ -82,7 +82,7 @@ public:
     MOCK_METHOD3(TryFileLock, int32_t (int32_t fd, int32_t type, int32_t retryTimes));
     MOCK_METHOD4(ClientGetSessionIdByChannelId, int32_t (int32_t channelId, int32_t channelType,
         int32_t *sessionId, bool isClosing));
-    MOCK_METHOD4(ClientGetSessionDataById, int32_t (int32_t sessionId, char *data, uint16_t len, SessionKey key));
+    MOCK_METHOD4(ClientGetSessionDataById, int32_t (int32_t sessionId, char *data, uint16_t len, TransSessionKey key));
     MOCK_METHOD4(ClientGetFileConfigInfoById, int32_t (int32_t sessionId,
         int32_t *fileEncrypt, int32_t *algorithm, int32_t *crc));
     MOCK_METHOD2(TransGetFileListener, int32_t (const char *sessionName, FileListener *fileListener));

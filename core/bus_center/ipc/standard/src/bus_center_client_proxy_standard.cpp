@@ -16,8 +16,6 @@
 #include "bus_center_client_proxy_standard.h"
 
 #include "lnn_log.h"
-#include "message_parcel.h"
-#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
@@ -635,6 +633,31 @@ void BusCenterClientProxy::OnDataLevelChanged(const char *networkId, const DataL
     MessageParcel reply;
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_DATA_LEVEL_CHANGED, data, reply, option);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
+
+void BusCenterClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!data.WriteRawData(rangeInfo, sizeof(BleRangeInnerInfo))) {
+        LNN_LOGE(LNN_EVENT, "write ble range info failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int ret = remote->SendRequest(CLIENT_ON_BLE_RANGE_DONE, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }

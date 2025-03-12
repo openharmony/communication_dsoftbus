@@ -19,6 +19,7 @@
 #include <shared_mutex>
 
 #include "data/interface_info.h"
+#include "dfx/interface_snapshot.h"
 #include "wifi_direct_initiator.h"
 
 namespace OHOS::SoftBus {
@@ -43,6 +44,8 @@ public:
 
     static void Init();
     void InitInterface(InterfaceInfo::InterfaceType type);
+
+    void Dump(std::list<std::shared_ptr<InterfaceSnapshot>> &snapshots);
 
 private:
     class Initiator {

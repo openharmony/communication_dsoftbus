@@ -18,7 +18,6 @@
 
 #include "lnn_heartbeat_fsm.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,6 +61,7 @@ void LnnUnRegistParamMgrByType(LnnHeartbeatType type);
 
 int32_t LnnHbStrategyInit(void);
 void LnnHbStrategyDeinit(void);
+void LnnRemoveV0BroadcastAndCheckDev(void);
 
 #ifdef __cplusplus
 }

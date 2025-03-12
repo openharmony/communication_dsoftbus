@@ -16,12 +16,7 @@
 #ifndef PCB_H
 #define PCB_H
 
-#include "fillp_os.h"
 #include "fillp/fillp_pcb.h"
-#include "lf_ring.h"
-#include "log.h"
-#include "queue.h"
-#include "hlist.h"
 
 #ifdef __cplusplus
 extern "C" {

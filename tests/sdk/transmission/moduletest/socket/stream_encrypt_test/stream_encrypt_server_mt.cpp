@@ -85,7 +85,7 @@ static void OnStreamReceived(int32_t sessionId, const char *testCaseName, const 
 
     LOGI(">> OnStreamReceived, sessionId:%d", sessionId);
     LOGI(">> OnStreamReceived, testCaseName:%s", testCaseName);
-    LOGI(">> OnStreamReceived, buf:%s", (data->buf != NULL ? data->buf : "null"));
+    LOGI(">> OnStreamReceived, buf:%s", (data->buf != nullptr ? data->buf : "null"));
     LOGI(">> OnStreamReceived, bufLen:%d", data->bufLen);
 
     std::lock_guard<std::mutex> lock(g_recvMutex);
@@ -126,11 +126,11 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer001, TestSize.Level1)
     ISocketListener listener = {
         .OnBind = OnBindServer,
         .OnShutdown = OnShutdownServer,
-        .OnBytes = NULL,
-        .OnMessage = NULL,
+        .OnBytes = nullptr,
+        .OnMessage = nullptr,
         .OnStream = OnStreamReceivedWithNoDataType,
-        .OnFile = NULL,
-        .OnQos = NULL,
+        .OnFile = nullptr,
+        .OnQos = nullptr,
     };
 
     int32_t ret = Listen(socket, g_qosInfo, sizeof(g_qosInfo) / sizeof(g_qosInfo[0]), &listener);
@@ -245,11 +245,11 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer003, TestSize.Level1)
     ISocketListener listener = {
         .OnBind = OnBindServer,
         .OnShutdown = OnShutdownServer,
-        .OnBytes = NULL,
-        .OnMessage = NULL,
+        .OnBytes = nullptr,
+        .OnMessage = nullptr,
         .OnStream = OnStreamReceivedWithEncryptOpt,
-        .OnFile = NULL,
-        .OnQos = NULL,
+        .OnFile = nullptr,
+        .OnQos = nullptr,
     };
 
     int32_t ret = Listen(socket, g_qosInfo, sizeof(g_qosInfo) / sizeof(g_qosInfo[0]), &listener);

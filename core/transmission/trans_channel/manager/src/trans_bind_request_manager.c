@@ -73,17 +73,17 @@ static BindRequestManager *GetBindRequestManagerByPeer(BindRequestParam *bindReq
     return NULL;
 }
 
-static uint32_t GenerateParam(
+static int32_t GenerateParam(
     const char *mySocketName, const char *peerSocketName, const char *peerNetworkId, BindRequestParam *bindReqParam)
 {
-    int32_t ret = memcpy_s(bindReqParam->mySocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy mySocketName failed");
+    int32_t ret = memcpy_s(bindReqParam->mySocketName, SESSION_NAME_SIZE_MAX, mySocketName, SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy mySocketName failed");
 
-    ret = memcpy_s(bindReqParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerNetworkId, SESSION_NAME_SIZE_MAX);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerSocketName failed");
+    ret = memcpy_s(bindReqParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerSocketName failed");
 
     ret = memcpy_s(bindReqParam->peerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerNetworkId failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerNetworkId failed");
     return SOFTBUS_OK;
 }
 
@@ -218,7 +218,7 @@ static void TransDelTimestampFormList(BindRequestParam *bindRequestParam, uint64
                 break;
             }
         }
-        if (bindRequest->count == 0) {
+        if (bindRequest->count == 0 && !bindRequest->bindDeniedFlag) {
             ListDelete(&bindRequest->node);
             SoftBusFree(bindRequest);
         }
@@ -262,6 +262,8 @@ static void TransResetBindDeniedFlag(BindRequestParam *bindRequestParam)
     BindRequestManager *bindRequest = GetBindRequestManagerByPeer(bindRequestParam);
     if (bindRequest != NULL) {
         bindRequest->bindDeniedFlag = false;
+        ListDelete(&bindRequest->node);
+        SoftBusFree(bindRequest);
         TRANS_LOGI(TRANS_SVC, "close bind request protect.");
     }
     (void)SoftBusMutexUnlock(&g_bindRequestList->lock);

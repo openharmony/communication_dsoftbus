@@ -14,19 +14,7 @@
  */
 
 #include "wifi_direct_utils.h"
-#include "bus_center_manager.h"
-#include "data/link_manager.h"
-#include "conn_log.h"
-#include "lnn_p2p_info.h"
-#include "lnn_feature_capability.h"
-#include "lnn_distributed_net_ledger.h"
-#include "lnn_node_info.h"
-#include "securec.h"
-#include "softbus_error_code.h"
-#include "syspara/parameters.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "wifi_direct_defines.h"
-#include "lnn_lane_vap_info.h"
+
 #include <algorithm>
 #include <arpa/inet.h>
 #include <charconv>
@@ -34,10 +22,25 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <sstream>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "bus_center_manager.h"
+#include "conn_log.h"
+#include "data/link_manager.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
+#include "lnn_lane_vap_info.h"
+#include "lnn_node_info.h"
+#include "lnn_p2p_info.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
+#include "syspara/parameters.h"
+#include "utils/wifi_direct_anonymous.h"
+#include "wifi_direct_defines.h"
 
 namespace OHOS::SoftBus {
 std::vector<std::string> WifiDirectUtils::SplitString(const std::string &input, const std::string &delimiter)
@@ -146,7 +149,7 @@ int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
     int channelIdLnn = 0;
     ret = LnnGetRecommendChannel(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn fail, ret = %{public}d", ret);
     return channelIdLnn;
 }
 
@@ -590,7 +593,7 @@ static constexpr int DFS_CHANNEL_FIRST = 52;
 static constexpr int DFS_CHANNEL_LAST = 64;
 bool WifiDirectUtils::IsDfsChannel(const int &frequency)
 {
-    int32_t channel = FrequencyToChannel(frequency);
+    int channel = FrequencyToChannel(frequency);
     CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
     if (channel >= DFS_CHANNEL_FIRST && channel <= DFS_CHANNEL_LAST) {
         return true;
@@ -604,13 +607,13 @@ bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDev
     auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
 
     int32_t osType = OH_OS_TYPE;
-    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK || osType == OH_OS_TYPE) {
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
         return false;
     }
 
     LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
-        if (link.GetLinkType() == type && IsDfsChannel(link.GetFrequency())) {
+        if (link.GetLinkType() == type && osType != OH_OS_TYPE && IsDfsChannel(link.GetFrequency())) {
             dfsLinkIsExist = true;
             return true;
         }
@@ -690,5 +693,46 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
     CONN_LOGI(CONN_WIFI_DIRECT, "remote screen status %{public}d", screenStatus);
     SoftBusFree(nodeInfo);
     return screenStatus;
+}
+
+bool WifiDirectUtils::IsDeviceId(const std::string &remoteId)
+{
+    return remoteId.length() == UUID_BUF_LEN - 1;
+}
+
+std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDeviceId)
+{
+    auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
+    char remoteMac[MAC_ADDR_STR_LEN] {};
+    auto ret = LnnGetRemoteStrInfo(remoteNetworkId.c_str(), STRING_KEY_WIFIDIRECT_ADDR, remoteMac, MAC_ADDR_STR_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT,
+        "get wifi direct addr failed, ret=%{public}d", ret);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+    return remoteMac;
+}
+
+std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
+{
+    int32_t num = 0;
+    NodeBasicInfo *basicInfo = nullptr;
+    auto ret = LnnGetAllOnlineNodeInfo(&basicInfo, &num);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT,
+        "get online node info failed, ret=%{public}d", ret);
+
+    for (int32_t i = 0; i < num; i++) {
+        char wifiDirectAddr[MAC_ADDR_STR_LEN] {};
+        ret = LnnGetRemoteStrInfo(basicInfo[i].networkId, STRING_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_ADDR_STR_LEN);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "get wifi direct addr failed, remoteNetworkId=%{public}s, ret=%{public}d",
+                WifiDirectAnonymizeDeviceId(basicInfo[i].networkId).c_str(), ret);
+            continue;
+        }
+        if (remoteMac == wifiDirectAddr) {
+            SoftBusFree(basicInfo);
+            return NetworkIdToUuid(basicInfo[i].networkId);
+        }
+    }
+    SoftBusFree(basicInfo);
+    return "";
 }
 } // namespace OHOS::SoftBus

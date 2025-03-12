@@ -16,12 +16,10 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
+#include "ble_range.h"
 #include "data_level.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
 #include "softbus_trans_def.h"
 
 namespace OHOS {
@@ -42,7 +40,7 @@ public:
     virtual int32_t ReleaseResources(int32_t channelId) = 0;
     virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t msgType) = 0;
-    virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) = 0;
+    virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin) = 0;
     virtual int32_t LeaveLNN(const char *pkgName, const char *networkId) = 0;
     virtual int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) = 0;
     virtual int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) = 0;
@@ -69,6 +67,9 @@ public:
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
+    virtual int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
+    virtual int32_t RegBleRangeCb(const char *pkgName) = 0;
+    virtual int32_t UnregBleRangeCb(const char *pkgName) = 0;
     virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
@@ -76,6 +77,7 @@ public:
         uint32_t qosCount) = 0;
     virtual int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) = 0;
     virtual int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) = 0;
+    virtual int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,11 +56,6 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
         channel.myIp = (char *)ReadString(data, &size);
         ReadInt32(data, &(channel.streamType));
         ReadBool(data, &(channel.isUdpFile));
-        if (channel.isServer) {
-            int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
-            WriteInt32(reply, udpPort);
-            return udpPort;
-        }
         ReadInt32(data, &(channel.peerPort));
         channel.peerIp = (char *)ReadString(data, &size);
     }
@@ -184,14 +179,22 @@ int32_t ClientCheckCollabRelation(IpcIo *data, IpcIo *reply)
     (void)reply;
     CollabInfo sourceInfo = { 0 };
     CollabInfo sinkInfo = { 0 };
+    bool isSinkSide;
+    bool retReadBool = ReadBool(data, &isSinkSide);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        retReadBool, SOFTBUS_TRANS_PROXY_READBOOL_FAILED, COMM_SDK, "read isSinkSide failed.");
     int32_t ret = ReadCollabInfo(data, &sourceInfo);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read sourceInfo failed.");
     ret = ReadCollabInfo(data, &sinkInfo);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "read sinkInfo failed.");
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    ReadInt32(data, &channelId);
-    ReadInt32(data, &channelType);
-    (void)TransOnCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);
+    int32_t channelId = -1;
+    int32_t channelType = -1;
+    if (isSinkSide) {
+        COMM_CHECK_AND_RETURN_RET_LOGE(
+            ReadInt32(data, &channelId), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read channelId failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(
+            ReadInt32(data, &channelType), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read channelType failed");
+    }
+    (void)TransOnCheckCollabRelation(&sourceInfo, isSinkSide, &sinkInfo, channelId, channelType);
     return SOFTBUS_OK;
 }

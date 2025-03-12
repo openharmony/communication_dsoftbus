@@ -35,6 +35,7 @@
 #include "lnn_event.h"
 #include "lnn_extdata_config.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_link.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
@@ -48,11 +49,12 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_socket.h"
+#include "wifi_direct_manager.h"
 
-#define FLAG_COMPRESS_DEVICE_INFO 1
+#define FLAG_COMPRESS_DEVICE_INFO   1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
-#define FLAG_RELAY_DEVICE_INFO 1
-#define DEVICE_ID_STR_LEN 64 // for bt v1
+#define FLAG_RELAY_DEVICE_INFO      1
+#define DEVICE_ID_STR_LEN           64 // for bt v1
 
 static int32_t UnPackBtDeviceIdV1(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
@@ -89,7 +91,7 @@ static int32_t PostBtV1DevId(int64_t authSeq, const AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "client don't send Bt-v1 devId");
         return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
-    char uuid[UUID_BUF_LEN] = {0};
+    char uuid[UUID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get uuid fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
@@ -208,8 +210,8 @@ static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionIn
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_POST, extra);
 }
 
-static void SetCompressFlagByAuthInfo(const AuthSessionInfo *info, char *msg, int32_t *compressFlag,
-    uint8_t **compressData, uint32_t *compressLen)
+static void SetCompressFlagByAuthInfo(
+    const AuthSessionInfo *info, char *msg, int32_t *compressFlag, uint8_t **compressData, uint32_t *compressLen)
 {
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
         AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
@@ -232,6 +234,43 @@ static void SetIndataInfo(InDataInfo *inDataInfo, uint8_t *compressData, uint32_
         inDataInfo->inData = (uint8_t *)msg;
         inDataInfo->inLen = strlen(msg) + 1;
     }
+}
+
+int32_t PostAuthTestInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    char *msg = PackAuthTestInfoMessage(&(info->connInfo));
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_FSM, "pack test auth info fail");
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
+    }
+    InDataInfo inDataInfo = { 0 };
+    uint8_t *data = NULL;
+    uint32_t dataLen = 0;
+    SetIndataInfo(&inDataInfo, NULL, 0, msg);
+    SessionKeyList sessionKeyList;
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
+    if (EncryptInner(&sessionKeyList, info->connInfo.type, &inDataInfo, &data, &dataLen) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "encrypt device info fail");
+        JSON_Free(msg);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    JSON_Free(msg);
+    DestroySessionKeyList(&sessionKeyList);
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_TEST_AUTH,
+        .module = MODULE_AUTH_TEST,
+        .seq = authSeq,
+        .flag = 0,
+        .len = dataLen,
+    };
+    if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post device info fail");
+        SoftBusFree(data);
+        return SOFTBUS_AUTH_SEND_FAIL;
+    }
+    SoftBusFree(data);
+    return SOFTBUS_OK;
 }
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
@@ -282,6 +321,20 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
+int32_t TryUpdateLaneResourceLaneId(AuthSessionInfo *info)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    int32_t ret;
+    char localUDID[UDID_BUF_LEN] = { 0 };
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUDID, UDID_BUF_LEN);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "get local udid fail");
+    uint64_t oldLaneId = GenerateLaneId(localUDID, info->connInfo.info.ipInfo.ip, LANE_HML_RAW);
+    uint64_t newLaneId = GenerateLaneId(localUDID, info->nodeInfo.deviceInfo.deviceUdid, LANE_HML_RAW);
+    ret = UpdateLaneResourceLaneId(oldLaneId, newLaneId, info->nodeInfo.deviceInfo.deviceUdid);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update lane resource laneid fail");
+    return SOFTBUS_OK;
+}
+
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
@@ -309,7 +362,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         }
         AUTH_LOGI(AUTH_FSM, "after decompress, datalen=%{public}d", decompressLen);
     }
-    DevInfoData devInfo = {NULL, 0, info->connInfo.type, info->version};
+    DevInfoData devInfo = { NULL, 0, info->connInfo.type, info->version };
     if ((decompressData != NULL) && (decompressLen != 0)) {
         devInfo.msg = (const char *)decompressData;
         devInfo.len = decompressLen;
@@ -322,6 +375,10 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         SoftBusFree(msg);
         SoftBusFree(decompressData);
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+    }
+    GetWifiDirectManager()->refreshRelationShip(info->uuid, info->nodeInfo.wifiDirectAddr);
+    if (TryUpdateLaneResourceLaneId(info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "update lane resource laneid fail");
     }
     SoftBusFree(msg);
     SoftBusFree(decompressData);
@@ -452,8 +509,8 @@ static bool IsEmptyShortHashStr(char *udidHash)
         AUTH_LOGE(AUTH_FSM, "udidHash len is 0");
         return true;
     }
-    uint8_t emptyHash[SHORT_HASH_LEN] = {0};
-    char emptyHashStr[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    uint8_t emptyHash[SHORT_HASH_LEN] = { 0 };
+    char emptyHashStr[UDID_SHORT_HASH_HEX_STR + 1] = { 0 };
     if (ConvertBytesToHexString(emptyHashStr, UDID_SHORT_HASH_HEX_STR + 1, emptyHash, SHORT_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return false;
@@ -471,7 +528,7 @@ static int32_t GetLocalUdidHash(char *udid, char *udidHash, uint32_t len)
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint8_t hash[UDID_HASH_LEN] = {0};
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
     if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid), (unsigned char *)hash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "restore manager fail because generate strhash");
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
@@ -488,8 +545,8 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     if (info->isServer && strlen(info->udid) == 0) {
         info->localState = AUTH_STATE_UNKNOW;
-        AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 ", udid is null update local auth state=%{public}d",
-            authSeq, info->localState);
+        AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 ", udid is null update local auth state=%{public}d", authSeq,
+            info->localState);
         return SOFTBUS_OK;
     }
     if (info->peerState == AUTH_STATE_COMPATIBLE) {
@@ -502,7 +559,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 " local auth state=%{public}d", authSeq, info->localState);
         return SOFTBUS_OK;
     }
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
@@ -513,8 +570,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "get local udid hash fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
-    if (!GetUdidShortHash(info, udidHash, SHA_256_HEX_HASH_LEN) ||
-        IsEmptyShortHashStr(udidHash)) {
+    if (!GetUdidShortHash(info, udidHash, SHA_256_HEX_HASH_LEN) || IsEmptyShortHashStr(udidHash)) {
         AUTH_LOGI(AUTH_FSM, "unknow peer udidHash");
         info->localState = AUTH_STATE_UNKNOW;
     } else if (memcmp(localUdidHash, udidHash, SHORT_HASH_LEN) < 0) {
@@ -580,4 +636,21 @@ int32_t PostDeviceMessage(
     }
     SoftBusFree(data);
     return SOFTBUS_OK;
+}
+
+int32_t ProcessAuthTestDataMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
+    uint8_t *msg = NULL;
+    uint32_t msgSize = 0;
+    SessionKeyList sessionKeyList;
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
+    InDataInfo inDataInfo = { .inData = data, .inLen = len };
+    if (DecryptInner(&sessionKeyList, info->connInfo.type, &inDataInfo, &msg, &msgSize) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "decrypt device info fail");
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    DestroySessionKeyList(&sessionKeyList);
+    return UnpackAuthTestDataJson((const char *)msg, msgSize);
 }

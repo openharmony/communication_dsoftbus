@@ -20,7 +20,6 @@
 
 #include "softbus_conn_br_manager.h"
 #include "softbus_conn_common.h"
-#include "wrapper_br_interface.h"
 
 #ifdef __cplusplus
 extern "C" {

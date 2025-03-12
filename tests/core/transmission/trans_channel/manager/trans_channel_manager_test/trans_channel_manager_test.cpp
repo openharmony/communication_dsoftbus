@@ -75,6 +75,8 @@ void TransChannelManagerTest::SetUpTestCase(void)
     LooperInit();
     ConnServerInit();
     AuthInit();
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
@@ -178,11 +180,13 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     ASSERT_TRUE(connOpt != nullptr);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
-    int32_t ret = TransOpenAuthChannel(NULL, NULL, NULL);
+    int32_t ret = TransOpenAuthChannel(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(sessionName, NULL, NULL);
+    ret = TransOpenAuthChannel(sessionName, nullptr, nullptr, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(NULL, connOpt, NULL);
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    ret = TransOpenAuthChannel(nullptr, connOpt, nullptr, &param);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     SoftBusFree(connOpt);
 }
@@ -243,21 +247,21 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
     int32_t ret = TransRippleStats(channelId, channelType, trafficStats);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransRippleStats(channelId, channelType, NULL);
+    ret = TransRippleStats(channelId, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = -1;
     ret = TransStreamStats(channelId, channelType, data);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransStreamStats(channelId, channelType, NULL);
+    ret = TransStreamStats(channelId, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransLaneMgrDeinit();
     ret = TransStreamStats(channelId, channelType, data);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    if (data != NULL) {
+    if (data != nullptr) {
         SoftBusFree(data);
     }
 }
@@ -310,22 +314,22 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     int32_t channelType = 222;
 
     channelId++;
-    int32_t ret = TransCloseChannel(NULL, channelId, channelType);
+    int32_t ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_UDP;
-    ret = TransCloseChannel(NULL, channelId, channelType);
+    ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_AUTH;
-    ret = TransCloseChannel(NULL, channelId, channelType);
+    ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransCloseChannel(NULL, channelId, channelType);
+    ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -354,8 +358,8 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
 
     int32_t pid = 1;
 
-    TransProxyDeathCallback(NULL, pid);
-    TransChannelDeathCallback(NULL, pid);
+    TransProxyDeathCallback(nullptr, pid);
+    TransChannelDeathCallback(nullptr, pid);
 }
 
 /**
@@ -375,11 +379,11 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
     uint16_t pkgLen = 1;
     uint16_t sessionNameLen = 2;
 
-    int32_t ret = TransGetNameByChanId(NULL, pkgName, sessionName, pkgLen, sessionNameLen);
+    int32_t ret = TransGetNameByChanId(nullptr, pkgName, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransGetNameByChanId(info, NULL, sessionName, pkgLen, sessionNameLen);
+    ret = TransGetNameByChanId(info, nullptr, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransGetNameByChanId(info, pkgName, NULL, pkgLen, sessionNameLen);
+    ret = TransGetNameByChanId(info, pkgName, nullptr, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     info->channelType = 8888;
@@ -394,7 +398,7 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
     ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    if (info != NULL) {
+    if (info != nullptr) {
         SoftBusFree(info);
     }
 }
@@ -432,7 +436,7 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
     ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    if (appInfo != NULL) {
+    if (appInfo != nullptr) {
         SoftBusFree(appInfo);
     }
 }
@@ -477,7 +481,7 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId002, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, GenerateProxyChannelId001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_myIdLock, NULL);
+    SoftBusMutexInit(&g_myIdLock, nullptr);
     int32_t channelId = GenerateProxyChannelId();
     EXPECT_EQ(TEST_PROXY_CHANNEL_ID, channelId);
     channelId = GenerateTdcChannelId();
@@ -598,7 +602,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -632,7 +636,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CONN_OPT_FAILED, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -663,7 +667,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel005, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -696,7 +700,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel006, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -824,8 +828,8 @@ HWTEST_F(TransChannelManagerTest, PrivilegeCloseListAddItem001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = PrivilegeCloseListAddItem(&privilegeCloseList, pid, g_pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    PrivilegeCloseChannelInfo *pos = NULL;
-    PrivilegeCloseChannelInfo *tmp = NULL;
+    PrivilegeCloseChannelInfo *pos = nullptr;
+    PrivilegeCloseChannelInfo *tmp = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &privilegeCloseList, PrivilegeCloseChannelInfo, node) {
         ListDelete(&(pos->node));
         SoftBusFree(pos);

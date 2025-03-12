@@ -14,16 +14,10 @@
  */
 
 #include "p2p_connect_state.h"
-#include "common_timer_errors.h"
-#include "conn_log.h"
 #include "p2p_entity.h"
-#include "p2p_operation_result.h"
 #include "p2p_unavailable_state.h"
-#include "softbus_error_code.h"
 #include "softbus_adapter_crypto.h"
 #include "utils/wifi_direct_anonymous.h"
-#include "data/interface_manager.h"
-#include "data/link_manager.h"
 
 namespace OHOS::SoftBus {
 static constexpr int IP_SUFFIX_RANGE = 253;

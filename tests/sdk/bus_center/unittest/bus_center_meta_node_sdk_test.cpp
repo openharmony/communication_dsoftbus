@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-
 #include <securec.h>
 
 #include "softbus_access_token_test.h"
@@ -36,20 +35,14 @@ public:
 
 void BusCenterMetaNodeSdkTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("busCenterTest");
 }
 
-void BusCenterMetaNodeSdkTest::TearDownTestCase()
-{
-}
+void BusCenterMetaNodeSdkTest::TearDownTestCase() { }
 
-void BusCenterMetaNodeSdkTest::SetUp()
-{
-}
+void BusCenterMetaNodeSdkTest::SetUp() { }
 
-void BusCenterMetaNodeSdkTest::TearDown()
-{
-}
+void BusCenterMetaNodeSdkTest::TearDown() { }
 
 /*
  * @tc.name: BUS_CENTER_SDK_META_NODE_Test_001
@@ -60,7 +53,7 @@ void BusCenterMetaNodeSdkTest::TearDown()
 HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_001, TestSize.Level0)
 {
     char udid[] = "0123456789987654321001234567899876543210012345678998765432100123";
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum = MAX_META_NODE_NUM;
     MetaNodeConfigInfo configInfo;
@@ -91,7 +84,7 @@ HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_001, TestSize.L
 HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_002, TestSize.Level0)
 {
     char udid[] = "0123456789987654321001234567899876543210012345678998765432100123";
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum = MAX_META_NODE_NUM;
     MetaNodeConfigInfo configInfo;
@@ -126,7 +119,7 @@ HWTEST_F(BusCenterMetaNodeSdkTest, BUS_CENTER_SDK_META_NODE_Test_003, TestSize.L
     char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum = MAX_META_NODE_NUM;
-    MetaNodeConfigInfo configInfo;
+    MetaNodeConfigInfo configInfo = {};
 
     EXPECT_EQ(ActiveMetaNode(nullptr, &configInfo, metaNodeId), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(ActiveMetaNode(TEST_PKG_NAME, nullptr, metaNodeId), SOFTBUS_INVALID_PARAM);

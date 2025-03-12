@@ -71,7 +71,7 @@ void TransSessionManagerTest::TearDownTestCase(void)
 static SessionServer *BuildSessionServer()
 {
     SessionServer *sessionServer = (SessionServer*)SoftBusCalloc(sizeof(SessionServer));
-    if (sessionServer == NULL) {
+    if (sessionServer == nullptr) {
         return nullptr;
     }
     int32_t ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
@@ -111,7 +111,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest01, TestSize.Level1)
  */
 HWTEST_F(TransSessionManagerTest, TransSessionManagerTest02, TestSize.Level1)
 {
-    bool res = TransSessionServerIsExist(NULL);
+    bool res = TransSessionServerIsExist(nullptr);
     EXPECT_FALSE(res);
     res = TransSessionServerIsExist(g_sessionName);
     EXPECT_FALSE(res);
@@ -125,7 +125,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest02, TestSize.Level1)
  */
 HWTEST_F(TransSessionManagerTest, TransSessionManagerTest03, TestSize.Level1)
 {
-    int32_t ret = TransSessionServerAddItem(NULL);
+    int32_t ret = TransSessionServerAddItem(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
     ASSERT_TRUE(sessionServer != nullptr);
@@ -176,9 +176,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest06, TestSize.Level1)
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    ret = TransGetPkgNameBySessionName(NULL, pkgName, PKG_NAME_SIZE_MAX);
+    ret = TransGetPkgNameBySessionName(nullptr, pkgName, PKG_NAME_SIZE_MAX);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransGetPkgNameBySessionName(g_sessionName, NULL, PKG_NAME_SIZE_MAX);
+    ret = TransGetPkgNameBySessionName(g_sessionName, nullptr, PKG_NAME_SIZE_MAX);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransGetPkgNameBySessionName(g_sessionName, pkgName, 0);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
@@ -202,7 +202,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest07, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     bool res = TransSessionServerIsExist(g_sessionName);
     EXPECT_TRUE(res);
-    TransDelItemByPackageName(NULL, TRANS_TEST_INVALID_PID);
+    TransDelItemByPackageName(nullptr, TRANS_TEST_INVALID_PID);
     res = TransSessionServerIsExist(g_sessionName);
     EXPECT_TRUE(res);
     TransSessionMgrDeinit();
@@ -219,11 +219,11 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest08, TestSize.Level1)
 {
     int32_t pid = 0;
     int32_t uid = 0;
-    int32_t ret = TransGetUidAndPid(NULL, &uid, &pid);
+    int32_t ret = TransGetUidAndPid(nullptr, &uid, &pid);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransGetUidAndPid(g_sessionName, NULL, &pid);
+    ret = TransGetUidAndPid(g_sessionName, nullptr, &pid);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransGetUidAndPid(g_sessionName, &uid, NULL);
+    ret = TransGetUidAndPid(g_sessionName, &uid, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransGetUidAndPid(g_sessionName, &uid, &pid);
     EXPECT_NE(ret,  SOFTBUS_OK);
@@ -292,7 +292,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest11, TestSize.Level1)
     bool res = TransSessionServerIsExist(g_sessionName);
     EXPECT_TRUE(res);
     SessionServer *newSessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
-    EXPECT_TRUE(newSessionServer != NULL);
+    EXPECT_TRUE(newSessionServer != nullptr);
     memset_s(newSessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
     ret = strcpy_s(newSessionServer->sessionName, sizeof(newSessionServer->sessionName), g_sessionName);
     EXPECT_EQ(ret, EOK);
@@ -342,9 +342,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest13, TestSize.Level1)
 {
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    TransOnLinkDown(NULL, NULL, NULL, NULL, WIFI_P2P);
+    TransOnLinkDown(nullptr, nullptr, nullptr, nullptr, WIFI_P2P);
     TransSessionMgrDeinit();
-    TransOnLinkDown(g_networkid, NULL, NULL, NULL, WIFI_P2P);
+    TransOnLinkDown(g_networkid, nullptr, nullptr, nullptr, WIFI_P2P);
 }
 
 /**
@@ -363,7 +363,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest14, TestSize.Level1)
     sessionServer->uid = TRANS_TEST_INVALID_UID;
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    TransOnLinkDown(g_networkid, NULL, NULL, NULL, WIFI_P2P);
+    TransOnLinkDown(g_networkid, nullptr, nullptr, nullptr, WIFI_P2P);
 }
 
 /**
@@ -384,7 +384,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
         ret = sprintf_s(pkgName, PKG_NAME_SIZE_MAX, "%s%d", g_pkgName, i);
         EXPECT_GT(ret, 0);
         SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
-        EXPECT_TRUE(sessionServer != NULL);
+        EXPECT_TRUE(sessionServer != nullptr);
         memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
         ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), sessionNme);
         EXPECT_EQ(ret, EOK);
@@ -395,7 +395,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
     }
 
     SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
-    EXPECT_TRUE(sessionServer != NULL);
+    EXPECT_TRUE(sessionServer != nullptr);
     memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
     ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
     EXPECT_EQ(ret, EOK);

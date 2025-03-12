@@ -24,3 +24,17 @@ bool IsPowerControlEnabled(void)
 {
     return false;
 }
+
+int32_t SetWifiConfigRemoteBaseMac(uint8_t *mac, uint8_t *wifiConfig, int32_t *cfgLen)
+{
+    (void)mac;
+    (void)wifiConfig;
+    (void)cfgLen;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t GetWifiConfigBaseMac(char *mac)
+{
+    (void)mac;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

@@ -66,13 +66,13 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusBase64Encode002, TestSize.Level0)
     char dst[100];
     char src[] = "abcde";
     size_t olen = 10;
-    int32_t ret = SoftBusBase64Encode(NULL, sizeof(dst), &olen, (unsigned char *)src, sizeof(src));
+    int32_t ret = SoftBusBase64Encode(nullptr, sizeof(dst), &olen, (unsigned char *)src, sizeof(src));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), NULL, (unsigned char *)src, sizeof(src));
+    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), nullptr, (unsigned char *)src, sizeof(src));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), &olen, NULL, sizeof(src));
+    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), &olen, nullptr, sizeof(src));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -124,13 +124,13 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusBase64Decode002, TestSize.Level0)
     size_t olen = 10;
     size_t slen = 1;
 
-    int32_t ret = SoftBusBase64Decode(NULL, dlen, &olen, (unsigned char *)src, slen);
+    int32_t ret = SoftBusBase64Decode(nullptr, dlen, &olen, (unsigned char *)src, slen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, NULL, (unsigned char *)src, slen);
+    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, nullptr, (unsigned char *)src, slen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, &olen, NULL, slen);
+    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, &olen, nullptr, slen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -178,7 +178,7 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusGenerateSessionKey001, TestSize.Level0
 HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusGenerateSessionKey002, TestSize.Level0)
 {
     int32_t len = 10;
-    int32_t ret = SoftBusGenerateSessionKey(NULL, len);
+    int32_t ret = SoftBusGenerateSessionKey(nullptr, len);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
@@ -220,10 +220,10 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusGenerateStrHash002, TestSize.Level0)
 {
     char str[] = "abcde";
     char hash[100];
-    int32_t ret = SoftBusGenerateStrHash(NULL, sizeof(str), (unsigned char *)hash);
+    int32_t ret = SoftBusGenerateStrHash(nullptr, sizeof(str), (unsigned char *)hash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusGenerateStrHash((unsigned char *)str, sizeof(str), NULL);
+    ret = SoftBusGenerateStrHash((unsigned char *)str, sizeof(str), nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     uint32_t len = 0;

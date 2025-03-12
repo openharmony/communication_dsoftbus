@@ -38,9 +38,13 @@ ohos_fuzztest("AuthManagerFuzzTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
   ]
 
-  sources = [ "authmanager_fuzzer.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "authmanager_fuzzer.cpp",
+  ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",

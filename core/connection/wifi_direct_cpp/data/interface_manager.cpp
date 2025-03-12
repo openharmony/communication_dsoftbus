@@ -17,8 +17,6 @@
 
 #include "adapter/p2p_adapter.h"
 #include "conn_log.h"
-#include "data/interface_info.h"
-#include "link_info.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 
@@ -96,5 +94,13 @@ void InterfaceManager::Init()
 {
     GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
     GetInstance().InitInterface(InterfaceInfo::InterfaceType::HML);
+}
+
+void InterfaceManager::Dump(std::list<std::shared_ptr<InterfaceSnapshot>> &snapshots)
+{
+    std::shared_lock lock(lock_);
+    for (const auto &interface : interfaces_) {
+        snapshots.push_back(std::make_shared<InterfaceSnapshot>(interface));
+    }
 }
 } // namespace OHOS::SoftBus

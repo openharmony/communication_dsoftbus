@@ -14,6 +14,7 @@
  */
 
 #include <math.h>
+
 #include "comm_log.h"
 #include "softbus_adapter_range.h"
 #include "softbus_error_code.h"
@@ -41,4 +42,22 @@ int SoftBusGetBlePower(int8_t *power)
     }
     *power = MOCK_POWER;
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusBleRangeAsync(const SoftBusRangeParam *param)
+{
+    (void)param;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusRegRangeCb(SoftBusRangeModule module, const SoftBusRangeCallback *callback)
+{
+    (void)module;
+    (void)callback;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void SoftBusUnregRangeCb(SoftBusRangeModule module)
+{
+    (void)module;
 }

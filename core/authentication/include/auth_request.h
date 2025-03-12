@@ -16,8 +16,6 @@
 #ifndef AUTH_REQUEST_H
 #define AUTH_REQUEST_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "auth_interface.h"
 
 #ifdef __cplusplus

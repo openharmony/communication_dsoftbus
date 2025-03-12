@@ -16,19 +16,21 @@
 #ifndef LNN_LANE_COMMUNICATION_CAPABILITY_H
 #define LNN_LANE_COMMUNICATION_CAPABILITY_H
 
-#include "softbus_common.h"
 #include "lnn_lane_interface.h"
+#include "softbus_bus_center.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
-    bool (*getStaticCommCapa)(const char *networkId);
-    bool (*getDynamicCommCapa)(const char *networkId);
+    int32_t (*getStaticCommCapa)(const char *networkId);
+    int32_t (*getDynamicCommCapa)(const char *networkId);
 } LaneCommCapa;
 
 LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType);
+void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex);
 
 #ifdef __cplusplus
 }

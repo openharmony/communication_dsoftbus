@@ -79,7 +79,10 @@ typedef struct tagLnnConnectionFsm {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isDead;
     bool isNeedConnect;
+    bool isSession;
     uint16_t id;
+    int32_t localDeviceKeyId;
+    int32_t remoteDeviceKeyId;
 
     LnnConnectionFsmStopCallback stopCallback;
     ListNode node;
@@ -95,7 +98,7 @@ int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
 int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback);
 bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type);
 
-int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin);
 int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode);
 int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);

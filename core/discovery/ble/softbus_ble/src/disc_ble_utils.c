@@ -36,9 +36,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define WIDE_CHAR_MAX_LEN 8
-#define WIDE_STR_MAX_LEN 128
-
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
 #define MAC_BIT_TWO 2
@@ -50,8 +47,6 @@
 #define HYPHEN_ZH        "的"
 #define HYPHEN_EXCEPT_ZH "-"
 #define EMPTY_STRING     ""
-
-static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
@@ -104,7 +99,7 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
     DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name size is 0");
 
     char localDevName[DEVICE_NAME_BUF_LEN] = {0};
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, size);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "get local device name failed");
 
     uint32_t truncateLen = 0;
@@ -154,68 +149,6 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
         DISC_BLE, "DiscBleGetShortUserIdHash get local user id failed");
     DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(hashStr, len, account, len) == EOK,
         SOFTBUS_MEM_ERR, DISC_BLE, "DiscBleGetShortUserIdHash memcpy_s failed");
-    return SOFTBUS_OK;
-}
-
-static int32_t SetLocale(char **localeBefore)
-{
-    *localeBefore = setlocale(LC_CTYPE, NULL);
-    if (*localeBefore == NULL) {
-        DISC_LOGW(DISC_BLE, "get locale failed");
-    }
-
-    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
-    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_DISCOVER_SET_LOCALE_FAILED;
-}
-
-static void RestoreLocale(const char *localeBefore)
-{
-    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
-        DISC_LOGW(DISC_BLE, "restore locale failed");
-    }
-}
-
-// Calculate the truncated length in wide characters, ensuring that the truncation is performed in wide character
-static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
-{
-    size_t multiByteStrLen = strlen(multiByteStr);
-    if (multiByteStrLen == 0) {
-        *truncatedSize = 0;
-        return SOFTBUS_OK;
-    }
-    DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= WIDE_STR_MAX_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
-        "multi byte str too long: %{public}zu", multiByteStrLen);
-
-    char *localeBefore = NULL;
-    int32_t ret = SetLocale(&localeBefore);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "set locale failed");
-
-    // convert multi byte str to wide str
-    wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
-    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
-    if (numConverted == 0 || numConverted > multiByteStrLen) {
-        DISC_LOGE(DISC_BLE, "mbstowcs failed");
-        RestoreLocale(localeBefore);
-        return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
-    }
-
-    // truncate wide str until <= capacity
-    uint32_t truncateTotal = 0;
-    int32_t truncateIndex = (int32_t)numConverted - 1;
-    char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
-    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
-        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
-        if (truncateCharLen <= 0) {
-            DISC_LOGE(DISC_BLE, "wctomb failed on w_char. truncateIndex=%{public}d", truncateIndex);
-            RestoreLocale(localeBefore);
-            return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
-        }
-        truncateTotal += (uint32_t)truncateCharLen;
-        truncateIndex--;
-    }
-
-    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
-    RestoreLocale(localeBefore);
     return SOFTBUS_OK;
 }
 
@@ -457,7 +390,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     errno_t retMem = memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
         &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "copy accountHash failed");
-    device->info->capabilityBitmap[0] = serviceData[POS_CAPABLITY];
+    device->info->capabilityBitmap[0] = serviceData[POS_CAPABILITY];
 
     uint32_t bcTlvLen = reportInfo->packet.bcData.payloadLen - POS_TLV;
 
@@ -485,3 +418,30 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     return ret;
 }
 
+int32_t DiscSoftbusBleBuildReportJson(DeviceInfo *device, uint32_t handleId)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && handleId > 0, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "invalid parm");
+
+    cJSON *json = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE,
+        "create json failed");
+    
+    if (!AddNumberToJsonObject(json, BLE_REPORT_HANDLE_JSON_LEY, handleId)) {
+        DISC_LOGE(DISC_BLE, "add handle failed");
+        cJSON_Delete(json);
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    char *custData = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    DISC_CHECK_AND_RETURN_RET_LOGE(custData != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE,
+        "to json str failed");
+    
+    if (strcpy_s(device->custData, DISC_MAX_CUST_DATA_LEN, custData) != EOK) {
+        DISC_LOGE(DISC_BLE, "copy cust data failed");
+        cJSON_free(custData);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    cJSON_free(custData);
+    return SOFTBUS_OK;
+}

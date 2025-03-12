@@ -17,11 +17,8 @@
 #define LNN_DEVICE_INFO_RECOVERY_H
 
 #include "cJSON.h"
-#include <stdint.h>
 #include "lnn_node_info.h"
-#include "lnn_map.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_json.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,6 +62,7 @@ extern "C" {
 #define DEVICE_INFO_FEATURE "FEATURE"
 #define DEVICE_INFO_CONN_SUB_FEATURE "CONN_SUB_FEATURE"
 #define DEVICE_INFO_META_INFO_JSON_TAG "MetaNodeInfoOfEar"
+#define DEVICE_INFO_STATIC_NET_CAP "STATIC_NET_CAP"
 #define DEVICE_INFO_CONN_CAP "CONN_CAP"
 #define DEVICE_INFO_NEW_CONN_CAP "NEW_CONN_CAP"
 #define DEVICE_INFO_AUTH_CAP "AUTH_CAP"
@@ -83,6 +81,8 @@ extern "C" {
 #define DEVICE_INFO_BROADCAST_CIPHER_KEY "BROADCAST_CIPHER_KEY"
 #define DEVICE_INFO_BROADCAST_CIPHER_IV "BROADCAST_CIPHER_IV"
 #define DEVICE_INFO_DEVICE_SECURITY_LEVEL "DEVICE_SECURITY_LEVEL"
+#define DEVICE_INFO_DEVICE_PRODUCT_ID "DEVICE_PRODUCT_ID"
+#define DEVICE_INFO_DEVICE_MODEL_NAME "DEVICE_MODEL_NAME"
 #define DEVICE_INFO_PTK "PTK"
 #define DEVICE_INFO_STATIC_CAP "STATIC_CAP"
 #define DEVICE_INFO_STATIC_CAP_LEN "STATIC_CAP_LEN"
@@ -95,6 +95,8 @@ extern "C" {
 #define DEVICE_INFO_USERID_CHECKSUM "USERID_CHECKSUM"
 #define IS_SUPPORT_IPV6 "IS_SUPPORT_IPV6"
 #define IS_AUTH_EXCHANGE_UDID "IS_AUTH_EXCHANGE_UDID"
+#define IS_ACK_SEQ "IS_ACK_SEQ"
+#define DEVICE_INFO_PEER_UDID "DEVICE_INFO_PEER_UDID"
 
 int32_t LnnLoadLocalDeviceInfo(void);
 int32_t LnnLoadRemoteDeviceInfo(void);
@@ -103,7 +105,8 @@ int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo);
 int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums);
 int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo);
-int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo);
+int32_t LnnRetrieveDeviceInfo(const char *udidHash, NodeInfo *deviceInfo);
+int32_t LnnRetrieveDeviceInfoByUdid(const char *udid, NodeInfo *deviceInfo);
 int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info);
 void LnnDeleteDeviceInfo(const char *udid);
 void ClearDeviceInfo(void);
@@ -115,6 +118,7 @@ int32_t LnnPackCloudSyncDeviceInfo(cJSON *json, const NodeInfo *cloudSyncInfo);
 int32_t LnnUnPackCloudSyncDeviceInfo(cJSON *json, NodeInfo *cloudSyncInfo);
 void LnnUpdateAuthExchangeUdid(void);
 void LnnClearAuthExchangeUdid(const char *networkId);
+int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid);
 #ifdef __cplusplus
 }
 #endif

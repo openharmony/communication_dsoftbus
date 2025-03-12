@@ -49,21 +49,21 @@ void SoftbusTimeTest::TearDown() { }
  */
 HWTEST_F(SoftbusTimeTest, SoftBusTimerTest001, TestSize.Level1)
 {
-    void *timerId = NULL;
+    void *timerId = nullptr;
     SoftBusSysTime times = { 0 };
     int32_t ret;
 
-    ret = SoftBusStartTimer(NULL, TIMER_TIMEOUT);
+    ret = SoftBusStartTimer(nullptr, TIMER_TIMEOUT);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftBusCreateTimer(NULL, TIMER_TYPE_ONCE);
+    SoftBusCreateTimer(nullptr, TIMER_TYPE_ONCE);
     SoftBusCreateTimer(&timerId, TIMER_TYPE_ONCE);
     ret = SoftBusStartTimer(timerId, TIMER_TIMEOUT);
     EXPECT_NE(SOFTBUS_ERR, ret);
-    ret = SoftBusDeleteTimer(NULL);
+    ret = SoftBusDeleteTimer(nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = SoftBusDeleteTimer(timerId);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusGetTime(NULL);
+    ret = SoftBusGetTime(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusGetTime(&times);
     EXPECT_EQ(SOFTBUS_OK, ret);

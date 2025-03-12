@@ -350,7 +350,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetDataBufNodeById0010, TestSi
 {
     int32_t channelId = 1;
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
-    EXPECT_TRUE(node == NULL || node->data == NULL);
+    EXPECT_TRUE(node == nullptr || node->data == nullptr);
 }
 
 /**
@@ -522,7 +522,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SendFailToFlushDeviceTest001, TestSize
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtDataTest001, TestSize.Level1)
 {
     SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, NULL);
+    EXPECT_NE(con, nullptr);
 
     int32_t ret = TransTdcPostFastData(con);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -565,7 +565,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest002, TestSize.Level1
  */
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfigTest001, TestSize.Level1)
 {
-    int32_t ret = TransTdcProcessDataConfig(NULL);
+    int32_t ret = TransTdcProcessDataConfig(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     AppInfo *appInfo = TestSetAppInfo();
@@ -599,7 +599,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.
     uint32_t seq = 1;
     uint32_t flags = 1;
 
-    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, NULL);
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -615,7 +615,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     uint32_t seq = 1;
     uint32_t flags = 1;
 
-    int32_t ret = OpenDataBusRequestReply(NULL, channelId, seq, flags);
+    int32_t ret = OpenDataBusRequestReply(nullptr, channelId, seq, flags);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
@@ -632,7 +632,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
     uint32_t flags = 1;
     int32_t errCode = -1;
 
-    int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
+    int32_t ret = OpenDataBusRequestError(channelId, seq, nullptr, errCode, flags);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
@@ -665,7 +665,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Le
  */
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSize.Level1)
 {
-    int32_t ret = TransTdcFillDataConfig(NULL);
+    int32_t ret = TransTdcFillDataConfig(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     AppInfo *appInfo = TestSetAppInfo();
@@ -846,11 +846,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConnTest001, TestSize.Le
 {
     SessionConn *chan = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(chan != nullptr);
-    ReleaseSessionConn(chan);
 
     int32_t channelId = TEST_CHANNEL_ID;
-    int32_t ret = NotifyChannelBind(channelId);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    int32_t ret = NotifyChannelBind(channelId, chan);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    ReleaseSessionConn(chan);
 }
 
 /**

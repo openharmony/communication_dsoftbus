@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_MANAGER_H
 #define SOFTBUS_PROXYCHANNEL_MANAGER_H
 
-#include "stdint.h"
-#include "auth_interface.h"
-#include "softbus_app_info.h"
-#include "softbus_conn_interface.h"
 #include "softbus_proxychannel_message.h"
 #include "trans_channel_callback.h"
 
@@ -55,7 +51,7 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uin
 int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo);
 
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo);
-void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId);
+void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCode);
 
 int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,

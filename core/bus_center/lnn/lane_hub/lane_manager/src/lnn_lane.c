@@ -22,7 +22,6 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ctrl_lane.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_event_form.h"
@@ -33,14 +32,16 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_conflict.h"
+#include "lnn_lane_link_ledger.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
+#include "lnn_lane_reliability.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
-#include "lnn_log.h"
-#include "lnn_trans_lane.h"
-#include "lnn_lane_reliability.h"
 #include "lnn_lane_vap_info.h"
+#include "lnn_log.h"
+#include "lnn_select_rule.h"
+#include "lnn_trans_lane.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -310,10 +311,10 @@ static void DfxReportSelectLaneResult(uint32_t laneReqId, const LaneAllocInfo *a
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = laneReqId;
-    extra.minBW = allocInfo->qosRequire.minBW;
-    extra.maxLaneLatency = allocInfo->qosRequire.maxLaneLatency;
-    extra.minLaneLatency = allocInfo->qosRequire.minLaneLatency;
+    extra.laneReqId = (int32_t)laneReqId;
+    extra.minBW = (int32_t)allocInfo->qosRequire.minBW;
+    extra.maxLaneLatency = (int32_t)allocInfo->qosRequire.maxLaneLatency;
+    extra.minLaneLatency = (int32_t)allocInfo->qosRequire.minLaneLatency;
     int32_t discoveryType = 0;
     if (LnnGetRemoteNumInfo(allocInfo->networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) == SOFTBUS_OK) {
         extra.onlineType = discoveryType;
@@ -475,7 +476,7 @@ static LnnLaneManager g_LaneManager = {
     .unRegisterLaneListener = UnRegisterLaneListener,
 };
 
-LnnLaneManager* GetLaneManager(void)
+LnnLaneManager *GetLaneManager(void)
 {
     return &g_LaneManager;
 }
@@ -647,10 +648,19 @@ static int32_t InitLaneFirstStep(void)
         LNN_LOGE(LNN_LANE, "InitLaneLinkConflict fail");
         return SOFTBUS_NO_INIT;
     }
+    if (InitLaneSelectRule() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "InitLaneSelectRule fail");
+        return SOFTBUS_NO_INIT;
+    }
     int32_t ret = LnnInitVapInfo();
     if (ret != SOFTBUS_OK) {
         /* optional case, ignore result */
         LNN_LOGW(LNN_LANE, "init vap info err, ret=%{public}d", ret);
+    }
+    ret = InitLinkLedger();
+    if (ret != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "init link build info ledger err, ret=%{public}d", ret);
     }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_NO_INIT;
@@ -670,11 +680,6 @@ static int32_t InitLaneSecondStep(void)
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         LNN_LOGI(LNN_LANE, "transLane get instance succ");
         g_laneObject[LANE_TYPE_TRANS]->init(&g_laneIdListener);
-    }
-    g_laneObject[LANE_TYPE_CTRL] = CtrlLaneGetInstance();
-    if (g_laneObject[LANE_TYPE_CTRL] != NULL) {
-        LNN_LOGI(LNN_LANE, "ctrl get instance succ");
-        g_laneObject[LANE_TYPE_CTRL]->init(&g_laneIdListener);
     }
     ListInit(&g_laneListenerList.list);
     g_laneListenerList.cnt = 0;
@@ -702,13 +707,12 @@ void DeinitLane(void)
     DeinitLaneListener();
     LnnDeinitScore();
     LnnDeinitVapInfo();
+    DeinitLaneSelectRule();
     DeinitLaneLinkConflict();
     DeinitLaneEvent();
+    DeinitLinkLedger();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
-    }
-    if (g_laneObject[LANE_TYPE_CTRL] != NULL) {
-        g_laneObject[LANE_TYPE_CTRL]->deinit();
     }
     (void)SoftBusMutexDestroy(&g_laneMutex);
 }

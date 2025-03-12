@@ -142,6 +142,16 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
     return GetLnnConnInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);
 }
 
+void LnnNotifyStateForSession(char *udid, int32_t retCode)
+{
+    return GetLnnConnInterface()->LnnNotifyStateForSession(udid, retCode);
+}
+
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
+{
+    return GetLnnConnInterface()->AuthRemoveAuthManagerByAuthHandle(authHandle);
+}
+
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     return GetLnnConnInterface()->LnnConvAddrTypeToDiscType(type);
@@ -160,6 +170,51 @@ void LnnNotifyHichainProofException(const char *proofInfo, uint32_t proofLen, ui
 void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
     return GetLnnConnInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
+}
+
+int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
+{
+    return GetLnnConnInterface()->GetAuthRequest(requestId, request);
+}
+
+void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId)
+{
+    return GetLnnConnInterface()->UpdateDpSameAccount(accountId, deviceId, peerUserId);
+}
+
+int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
+{
+    return GetLnnConnInterface()->LnnGetAddrTypeByIfName(ifName, type);
+}
+
+bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType)
+{
+    return GetLnnConnInterface()->LnnConvertAuthConnInfoToAddr(addr, connInfo, hintType);
+}
+
+int32_t LnnUpdateAccountInfo(const NodeInfo *info)
+{
+    return GetLnnConnInterface()->LnnUpdateAccountInfo(info);
+}
+
+int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
+{
+    return GetLnnConnInterface()->LnnUpdateRemoteDeviceName(info);
+}
+
+bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
+{
+    return GetLnnConnInterface()->LnnIsSameConnectionAddr(addr1, addr2, isShort);
+}
+
+void DelSessionKeyProfile(int32_t sessionKeyId)
+{
+    return GetLnnConnInterface()->DelSessionKeyProfile(sessionKeyId);
+}
+
+bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
+{
+    return GetLnnConnInterface()->GetSessionKeyProfile(sessionKeyId, sessionKey, length);
 }
 }
 } // namespace OHOS

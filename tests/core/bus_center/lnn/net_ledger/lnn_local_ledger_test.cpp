@@ -281,7 +281,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     int32_t ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     for (uint32_t i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
-        if (g_localKeyTable[i].getInfo != NULL) {
+        if (g_localKeyTable[i].getInfo != nullptr) {
             EXPECT_EQ(g_localKeyTable[i].getInfo((void *)infoCharNull, len), SOFTBUS_INVALID_PARAM);
         }
     }
@@ -371,7 +371,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
         .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     for (uint32_t i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
-        if (g_localKeyTable[i].getInfo != NULL) {
+        if (g_localKeyTable[i].getInfo != nullptr) {
             EXPECT_EQ(g_localKeyTable[i].getInfo(nullptr, 0), SOFTBUS_INVALID_PARAM);
         }
     }
@@ -412,7 +412,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_SET_P2P_INFO_FAIL);
     ret = LnnInitLocalNodeInfo(nodeInfo);
     EXPECT_EQ(ret, SOFTBUS_SET_P2P_INFO_FAIL);
-    if (nodeInfo != NULL) {
+    if (nodeInfo != nullptr) {
         SoftBusFree(nodeInfo);
     }
 }
@@ -425,21 +425,21 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
 {
-    int32_t ret = LnnSetLocalUnifiedName(NULL);
+    int32_t ret = LnnSetLocalUnifiedName(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     const char *unifiedName = "testJohn";
     ret = LnnSetLocalUnifiedName(unifiedName);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
-    ret = UpdateLocalPubMac(NULL);
+    ret = UpdateLocalPubMac(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     const void *testId = "testId";
     ret = UpdateLocalPubMac(testId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = LlUpdateStaticCapability(NULL);
+    ret = LlUpdateStaticCapability(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = LlUpdateStaticCapability(testId);
@@ -455,13 +455,13 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
 {
     uint32_t len = 101;
-    int32_t ret = LlGetStaticCapability(NULL, 1);
+    int32_t ret = LlGetStaticCapability(nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LlGetIrk(NULL, len);
+    ret = LlGetIrk(nullptr, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LlGetPubMac(NULL, len);
+    ret = LlGetPubMac(nullptr, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LlGetCipherInfoKey(NULL, len);
+    ret = LlGetCipherInfoKey(nullptr, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     void *buf = SoftBusCalloc(100);

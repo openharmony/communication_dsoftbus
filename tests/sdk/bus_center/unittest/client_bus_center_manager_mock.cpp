@@ -76,9 +76,9 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     return GetBusCenterManagerInterface()->ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen, bool isForceJoin)
 {
-    return GetBusCenterManagerInterface()->ServerIpcJoinLNN(pkgName, addr, addrTypeLen);
+    return GetBusCenterManagerInterface()->ServerIpcJoinLNN(pkgName, addr, addrTypeLen, isForceJoin);
 }
 
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
@@ -129,6 +129,21 @@ int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName)
 int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
 {
     return GetBusCenterManagerInterface()->ServerIpcSetDataLevel(dataLevel);
+}
+
+int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->ServerIpcRegBleRangeCb(pkgName);
+}
+
+int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->ServerIpcUnregBleRangeCb(pkgName);
+}
+
+int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    return GetBusCenterManagerInterface()->ServerIpcTriggerHbForMeasureDistance(pkgName, callerId, mode);
 }
 
 int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)

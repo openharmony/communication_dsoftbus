@@ -34,6 +34,8 @@
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_base_listener.h"
+#include "softbus_conn_interface.h"
 #include "softbus_config_type.h"
 
 namespace OHOS {
@@ -53,10 +55,14 @@ public:
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
     virtual void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state) = 0;
     virtual int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen) = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+        void *para, uint64_t delayMillis) = 0;
+    virtual int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener) = 0;
+    virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {
 public:
@@ -73,10 +79,13 @@ public:
     MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *));
     MOCK_METHOD2(LnnNotifyBtAclStateChangeEvent, void(const char *, SoftBusBtAclState));
     MOCK_METHOD4(ConvertBtMacToStr, int32_t(char *, uint32_t, const uint8_t *, uint32_t));
-    MOCK_METHOD1(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *));
+    MOCK_METHOD2(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *, int32_t *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void(void *));
     MOCK_METHOD2(LnnNotifyNetlinkStateChangeEvent, void(NetManagerIfNameState, const char *));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD2(StartBaseClient, int32_t (ListenerModule module, const SoftbusBaseListener *listener));
+    MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
 };
 } // namespace OHOS
 #endif // NET_WORK_MOCK_H

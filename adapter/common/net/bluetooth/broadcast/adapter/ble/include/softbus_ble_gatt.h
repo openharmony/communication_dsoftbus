@@ -30,6 +30,14 @@
 extern "C"{
 #endif
 
+#define GATT_SCAN_MAX_NUM      4
+
+#define CHANEL_LP           0
+#define CHANEL_STEADY       1
+#define CHANEL_SHARE        2
+#define CHANEL_UNSTEADY     3
+#define CHANEL_UNKNOW       1999
+
 void SoftbusBleAdapterInit(void);
 void SoftbusBleAdapterDeInit(void);
 

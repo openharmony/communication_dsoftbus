@@ -173,7 +173,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
             EXPECT_EQ(SOFTBUS_CONN_FAIL, AddTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
-            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
         }
     }
@@ -214,7 +214,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
                 fd, static_cast<TriggerType>(triggerType)));
             EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
-            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
         }
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
@@ -262,7 +262,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
                 fdArray[1023], static_cast<TriggerType>(triggerType)));
             EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
                 fdArray[1023], static_cast<TriggerType>(triggerType)));
-            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(static_cast<ListenerModule>(module),
                 fdArray[1023], static_cast<TriggerType>(triggerType)));
         }
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
@@ -319,9 +319,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener010, TestSize.Level1)
  */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener016, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(PROXY - 1), NULL));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(PROXY - 1), nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseClient(static_cast<ListenerModule>(DIRECT_CHANNEL_SERVER_WIFI + 1), NULL));
+        StartBaseClient(static_cast<ListenerModule>(DIRECT_CHANNEL_SERVER_WIFI + 1), nullptr));
 };
 
 /*
@@ -602,7 +602,7 @@ HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
     int32_t ret;
 
-    ret = ConnGetPeerSocketAddr(TEST_FD, NULL);
+    ret = ConnGetPeerSocketAddr(TEST_FD, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftbusAdapterMock mock;
@@ -779,7 +779,7 @@ static int32_t OnGetAllFdEvent(ListNode *list)
 HWTEST_F(SoftbusConnCommonTest, AddEvent001, TestSize.Level1)
 {
     int32_t fd = -1;
-    int32_t ret = AddEvent(NULL, fd, READ_TRIGGER);
+    int32_t ret = AddEvent(nullptr, fd, READ_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -819,7 +819,7 @@ HWTEST_F(SoftbusConnCommonTest, ModifyEvent001, TestSize.Level1)
 {
     int32_t fd = -1;
  
-    int32_t ret = ModifyEvent(NULL, fd, READ_TRIGGER);
+    int32_t ret = ModifyEvent(nullptr, fd, READ_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -859,7 +859,7 @@ HWTEST_F(SoftbusConnCommonTest, RemoveEvent001, TestSize.Level1)
 {
     int32_t fd = -1;
  
-    int32_t ret = RemoveEvent(NULL, fd);
+    int32_t ret = RemoveEvent(nullptr, fd);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -900,7 +900,7 @@ HWTEST_F(SoftbusConnCommonTest, WatchEvent001, TestSize.Level1)
     ListNode fdEventNode;
     ListInit(&fdEventNode);
  
-    int32_t ret = WatchEvent(NULL, -1, &fdEventNode);
+    int32_t ret = WatchEvent(nullptr, -1, &fdEventNode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};

@@ -21,19 +21,14 @@
 #endif
 
 #include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <netinet/in.h>
 #include <netinet/udp.h>
 #include <net/if.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
-#include <sys/select.h>
-#include <sys/types.h>
 #include <syscall.h>
 #include <unistd.h>
 

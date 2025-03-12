@@ -17,7 +17,6 @@
 #define CLIENT_TRANS_AUTH_MANAGER_H
 
 #include "client_trans_session_callback.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

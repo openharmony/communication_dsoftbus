@@ -31,6 +31,7 @@ auth_manager_include = [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/adapter/common/include/",
   "$dsoftbus_root_path/tests/sdk/common/include",
+  "$dsoftbus_root_path/core/bus_center/monitor/include",
   "unittest/common/",
   "$dsoftbus_root_path/core/authentication/src",
   "$dsoftbus_root_path/core/discovery/manager/include",
@@ -46,4 +47,7 @@ auth_manager_include = [
   "$dsoftbus_root_path/core/adapter/authentication/include",
 ]
 
-auth_manager_source = [ "$dsoftbus_root_path/tests/core/authentication/unittest/auth_manager_test.cpp" ]
+auth_manager_source = [
+  "$dsoftbus_root_path/tests/core/authentication/unittest/auth_manager_test.cpp",
+  "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+]

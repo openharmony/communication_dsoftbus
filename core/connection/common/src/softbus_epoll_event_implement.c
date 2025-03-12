@@ -57,6 +57,9 @@ static int32_t SoftBusSocketEpollWait(int32_t fd, struct epoll_event *ev, int32_
     int32_t ret = epoll_wait(fd, ev, cnt, timeoutMs);
     if (ret < 0) {
         CONN_LOGE(CONN_COMMON, "epoll wait failed errno=%{public}s, ret=%{public}d", strerror(errno), ret);
+        if (errno == EINTR) {
+            return SOFTBUS_ADAPTER_SOCKET_EINTR;
+        }
         return SOFTBUS_ERRNO(KERNELS_SUB_MODULE_CODE) + abs(errno);
     }
 
@@ -78,9 +81,9 @@ EventWatcher* RegisterEventWatcher(GetAllFdEventCallback callback)
     return watcher;
 }
 
-static int32_t TriggerEventToEpollEvent(uint32_t triggerEvent)
+static uint32_t TriggerEventToEpollEvent(uint32_t triggerEvent)
 {
-    int32_t events = 0;
+    uint32_t events = 0;
     if ((triggerEvent & READ_TRIGGER) != 0) {
         events |= EPOLLIN;
     }
@@ -125,7 +128,7 @@ int32_t RemoveEvent(EventWatcher *watcher, int32_t fd)
     return OperateEpollEvent(watcher->watcherId, EPOLL_CTL_DEL, fd, 0);
 }
 
-static uint32_t EpollEventToTriggerEvent(int32_t epollEvent)
+static uint32_t EpollEventToTriggerEvent(uint32_t epollEvent)
 {
     uint32_t events = 0;
     if ((epollEvent & EPOLLIN) != 0) {
@@ -195,7 +198,7 @@ static int32_t WaitEpollReadyEvent(struct epoll_event fdEvent, int32_t fd, int32
     return ret;
 }
 
-static int32_t EpollProcess(int32_t fd, int32_t epollEvent, int32_t timeout)
+static int32_t EpollProcess(int32_t fd, uint32_t epollEvent, int32_t timeout)
 {
     struct epoll_event fdEvent = {0};
     fdEvent.data.fd = fd;

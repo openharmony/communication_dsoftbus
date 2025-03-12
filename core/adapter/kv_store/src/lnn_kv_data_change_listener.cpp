@@ -15,16 +15,12 @@
 
 #include "lnn_kv_data_change_listener.h"
 
-#include <cinttypes>
-#include <cstring>
 #include <thread>
 
 #include "anonymizer.h"
-#include "lnn_data_cloud_sync.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 
 namespace OHOS {
 namespace {

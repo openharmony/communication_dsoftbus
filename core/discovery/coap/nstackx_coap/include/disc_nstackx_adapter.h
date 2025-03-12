@@ -16,7 +16,6 @@
 #ifndef DISC_NSTACKX_ADAPTER_H
 #define DISC_NSTACKX_ADAPTER_H
 
-#include <stdint.h>
 #include "disc_manager.h"
 
 #ifdef __cplusplus

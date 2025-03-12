@@ -32,23 +32,31 @@
 #include "lnn_event_monitor.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
+#include "lnn_file_utils.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_interface.h"
 #include "lnn_meta_node_ledger.h"
+#include "lnn_network_id.h"
+#include "lnn_net_builder.h"
 #include "lnn_p2p_info.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "lnn_init_monitor.h"
 
+#define RETRY_TIMES                      5
+#define DELAY_REG_DP_TIME                10000
 static bool g_isRestore = false;
+static bool g_isDeviceInfoSet = false;
 
 int32_t LnnInitNetLedger(void)
 {
-    if (LnnInitHuksInterface() != SOFTBUS_OK) {
+    if (LnnInitModuleNotifyWithRetrySync(INIT_DEPS_HUKS, LnnInitHuksInterface, RETRY_TIMES, DELAY_REG_DP_TIME) !=
+        SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init huks interface fail");
         return SOFTBUS_HUKS_INIT_FAILED;
     }
@@ -83,17 +91,74 @@ static bool IsCapacityChange(NodeInfo *info)
     uint32_t authCapacity = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
+            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}u->%{public}u", info->authCapacity, authCapacity);
             return true;
         }
     }
     uint32_t heartbeatCapacity = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_HB_CAP, &heartbeatCapacity) == SOFTBUS_OK) {
         if (heartbeatCapacity != info->heartbeatCapacity) {
-            LNN_LOGW(LNN_LEDGER, "hbCapacity=%{public}d->%{public}d", info->heartbeatCapacity, heartbeatCapacity);
+            LNN_LOGW(LNN_LEDGER, "hbCapacity=%{public}u->%{public}u", info->heartbeatCapacity, heartbeatCapacity);
             return true;
         }
     }
+    uint32_t staticNetCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap) == SOFTBUS_OK) {
+        if (staticNetCap != info->staticNetCap) {
+            LNN_LOGW(LNN_LEDGER, "staticNetCap=%{public}u->%{public}u", info->staticNetCap, staticNetCap);
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool IsLocalIrkInfoChange(NodeInfo *info)
+{
+    unsigned char localIrk[LFINDER_IRK_LEN] = { 0 };
+    if (LnnGetLocalByteInfo(BYTE_KEY_IRK, localIrk, LFINDER_IRK_LEN) == SOFTBUS_OK) {
+        if (memcmp(info->rpaInfo.peerIrk, localIrk, LFINDER_IRK_LEN) != 0) {
+            LNN_LOGI(LNN_LEDGER, "local irk change");
+            if (memcpy_s(info->rpaInfo.peerIrk, LFINDER_IRK_LEN, localIrk, LFINDER_IRK_LEN) != EOK) {
+                LNN_LOGE(LNN_LEDGER, "memcpy local irk fail");
+                (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+                return true;
+            }
+            (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+            return true;
+        }
+        LNN_LOGI(LNN_LEDGER, "local irk same");
+        (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+        return false;
+    }
+    LNN_LOGI(LNN_LEDGER, "get local irk fail, ignore");
+    (void)memset_s(localIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+    return false;
+}
+
+static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
+{
+    BroadcastCipherInfo linkKey;
+    (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+    if (LnnGetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, linkKey.key, SESSION_KEY_LENGTH) == SOFTBUS_OK &&
+        LnnGetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, linkKey.iv, BROADCAST_IV_LEN) == SOFTBUS_OK) {
+        if (memcmp(info->cipherInfo.key, linkKey.key, SESSION_KEY_LENGTH) != 0 ||
+            memcmp(info->cipherInfo.iv, linkKey.iv, BROADCAST_IV_LEN) != 0) {
+            LNN_LOGI(LNN_LEDGER, "local link key change");
+            if (memcpy_s(info->cipherInfo.key, SESSION_KEY_LENGTH, linkKey.key, SESSION_KEY_LENGTH) != EOK ||
+                memcpy_s(info->cipherInfo.iv, BROADCAST_IV_LEN, linkKey.iv, BROADCAST_IV_LEN) != EOK) {
+                LNN_LOGE(LNN_LEDGER, "memcpy local link key fail");
+                (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+                return true;
+            }
+            (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+            return true;
+        }
+        LNN_LOGI(LNN_LEDGER, "local link key same");
+        (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+        return false;
+    }
+    LNN_LOGI(LNN_LEDGER, "get local link key fail, ignore");
+    (void)memset_s(&linkKey, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
     return false;
 }
 
@@ -128,6 +193,12 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     if ((LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) &&
         (level != info->deviceSecurityLevel)) {
         LNN_LOGW(LNN_LEDGER, "deviceSecurityLevel=%{public}d->%{public}d", info->deviceSecurityLevel, level);
+        return true;
+    }
+    if (IsLocalIrkInfoChange(info)) {
+        return true;
+    }
+    if (IsLocalBroadcastLinKeyChange(info)) {
         return true;
     }
     return false;
@@ -174,16 +245,51 @@ static void ProcessLocalDeviceInfo(void)
     }
 }
 
+void LnnLedgerInfoStatusSet(void)
+{
+    if (g_isDeviceInfoSet) {
+        return;
+    }
+    const NodeInfo *node = LnnGetLocalNodeInfo();
+    if (node == NULL) {
+        LNN_LOGE(LNN_LEDGER, "node is null");
+        return;
+    }
+
+    InitDepsStatus uuidStat = node->uuid[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_UUID, uuidStat);
+    InitDepsStatus udidStat = node->deviceInfo.deviceUdid[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_UDID, udidStat);
+    InitDepsStatus netStat = node->networkId[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
+    LnnInitDeviceInfoStatusSet(LEDGER_INFO_NETWORKID, netStat);
+
+    if ((netStat == DEPS_STATUS_SUCCESS) && (udidStat == DEPS_STATUS_SUCCESS) && (netStat == DEPS_STATUS_SUCCESS)) {
+        LNN_LOGI(LNN_TEST, "Device info all ready.");
+        g_isDeviceInfoSet = true;
+        LnnInitSetDeviceInfoReady();
+    }
+}
+
 void RestoreLocalDeviceInfo(void)
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
     LnnSetLocalFeature();
     if (g_isRestore) {
-        LNN_LOGI(LNN_LEDGER, "aready init");
+        LNN_LOGI(LNN_LEDGER, "already init");
+        LnnLedgerInfoStatusSet();
         return;
     }
-    if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LEDGER, "get local device info fail");
+    int32_t ret = LnnLoadLocalDeviceInfo();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "get local device info fail, ret=%{public}d", ret);
+        if (ret == SOFTBUS_HUKS_UPDATE_ERR || ret == SOFTBUS_PARSE_JSON_ERR) {
+            LNN_LOGE(LNN_LEDGER, "replace mainboard, device storage data need update");
+            LnnRemoveStorageConfigPath(LNN_FILE_ID_UUID);
+            LnnRemoveStorageConfigPath(LNN_FILE_ID_IRK_KEY);
+            if (LnnUpdateLocalUuidAndIrk() != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "update local uuid or irk fail");
+            }
+        }
         const NodeInfo *temp = LnnGetLocalNodeInfo();
         if (LnnSaveLocalDeviceInfo(temp) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save local device info fail");
@@ -193,6 +299,8 @@ void RestoreLocalDeviceInfo(void)
     } else {
         ProcessLocalDeviceInfo();
     }
+    LnnLedgerInfoStatusSet();
+
     AuthLoadDeviceKey();
     LnnLoadPtkInfo();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
@@ -275,6 +383,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         case NODE_KEY_DEVICE_SCREEN_STATUS:
             return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool *)info, NODE_SCREEN_STATUS_LEN);
+        case NODE_KEY_STATIC_NETWORK_CAP:
+            return LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, (uint32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -314,6 +424,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         case NODE_KEY_DEVICE_SCREEN_STATUS:
             return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
+        case NODE_KEY_STATIC_NETWORK_CAP:
+            return LnnGetRemoteNumU32Info(networkId, NUM_KEY_STATIC_NET_CAP, (uint32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -608,7 +720,7 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintDynamicNetCap(int fd, NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "Invalid parameter");
@@ -672,6 +784,23 @@ static int32_t SoftbusDumpPrintScreenStatus(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_NOT_FIND;
     }
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "isScreenOn", isScreenOn ? "on" : "off");
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusDumpPrintStaticNetCap(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_STATIC_NETWORK_CAP;
+    uint32_t staticNetCap = 0;
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&staticNetCap, sizeof(staticNetCap)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo staticNetCap failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    SOFTBUS_DPRINTF(fd, "  %-15s->%u\n", "StaticNetCap", staticNetCap);
     return SOFTBUS_OK;
 }
 
@@ -807,8 +936,8 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     if (SoftbusDumpPrintUuid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUuid failed");
     }
-    if (SoftbusDumpPrintNetCapacity(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetCapacity failed");
+    if (SoftbusDumpPrintDynamicNetCap(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintDynamicNetCap failed");
     }
     if (SoftbusDumpPrintNetType(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetType failed");
@@ -818,6 +947,9 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintScreenStatus(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintScreenStatus failed");
+    }
+    if (SoftbusDumpPrintStaticNetCap(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintStaticNetCap failed");
     }
 }
 
@@ -871,4 +1003,51 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
     SoftbusDumpDeviceInfo(fd, nodeInfo);
     SoftbusDumpDeviceAddr(fd, nodeInfo);
     SoftbusDumpDeviceCipher(fd, nodeInfo);
+}
+
+static void LnnClearLocalPtkList(void)
+{
+    LnnClearPtkList();
+}
+
+int32_t LnnUpdateLocalDeviceInfo(void)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+
+    ClearDeviceInfo();
+    AuthClearDeviceKey();
+    LnnClearLocalPtkList();
+
+    int32_t ret = LnnUpdateLocalUuidAndIrk();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update local uuid or irk failed");
+        return ret;
+    }
+    ret = LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local networkId failed");
+        return ret;
+    }
+    ret = LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set local networkId failed");
+        return ret;
+    }
+    ret = GenerateNewLocalCipherKey();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate new local cipher key failed");
+        return ret;
+    }
+    LnnRemoveDb();
+    ret = InitTrustedDevInfoTable();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init trusted device info failed");
+        return ret;
+    }
+    ret = LnnGenBroadcastCipherInfo();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate cipher failed");
+        return ret;
+    }
+    return SOFTBUS_OK;
 }

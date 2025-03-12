@@ -15,8 +15,6 @@
 
 #ifndef FILLP_OUTPUT_H
 #define FILLP_OUTPUT_H
-#include "fillptypes.h"
-#include "fillp_pcb.h"
 #include "fillp.h"
 
 #ifdef __cplusplus

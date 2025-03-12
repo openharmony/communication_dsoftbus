@@ -16,7 +16,6 @@
 #ifndef LNN_PARAMETER_UTILS_H
 #define LNN_PARAMETER_UTILS_H
 
-#include <stdbool.h>
 #include "lnn_lane_interface.h"
 
 #ifdef __cplusplus
@@ -25,6 +24,8 @@ extern "C" {
 
 bool IsCloudSyncEnabled(void);
 bool IsPowerControlEnabled(void);
+int32_t SetWifiConfigRemoteBaseMac(uint8_t *mac, uint8_t *wifiConfig, int32_t *cfgLen);
+int32_t GetWifiConfigBaseMac(char *mac);
 
 #ifdef __cplusplus
 }

@@ -26,6 +26,7 @@
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_state_machine.h"
+#include "softbus_adapter_thread.h"
 
 namespace OHOS {
 class HeartBeatFSMStrategyInterface {
@@ -68,6 +69,9 @@ public:
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax) = 0;
     virtual bool LnnIsMultiDeviceOnline(void) = 0;
+    virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex) = 0;
+    virtual int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType) = 0;
+    virtual int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type) = 0;
 };
 
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
@@ -107,6 +111,9 @@ public:
     MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
     MOCK_METHOD2(GenerateRandomNumForHb, uint32_t(uint32_t, uint32_t));
     MOCK_METHOD0(LnnIsMultiDeviceOnline, bool());
+    MOCK_METHOD1(SoftBusMutexLockInner, int32_t(SoftBusMutex *));
+    MOCK_METHOD2(LnnPostTransStateMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatEventType));
+    MOCK_METHOD2(LnnPostUpdateSendInfoMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatUpdateInfoType));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H

@@ -43,7 +43,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         GetNodeKeyInfo(reinterpret_cast<const char *>(tmp),
                        reinterpret_cast<const char *>(tmp), key, udid, UDID_BUF_LEN);
         free(tmp);

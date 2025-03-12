@@ -158,7 +158,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(&transInfo, NULL, laneHandle, isQosLane, myData);
+    ret = TransLaneMgrAddLane(&transInfo, nullptr, laneHandle, isQosLane, myData);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     transInfo.channelId = 1;
@@ -170,10 +170,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
     ret = TransGetChannelInfoByLaneHandle(laneHandle, &transInfo.channelId, &transInfo.channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    if (myData != NULL) {
+    if (myData != nullptr) {
         SoftBusFree(myData);
     }
-    if (connInfo != NULL) {
+    if (connInfo != nullptr) {
         SoftBusFree(connInfo);
     }
 }
@@ -225,10 +225,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     ret = TransLaneMgrDelLane(channelId, channelType, true);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 end");
-    if (myData != NULL) {
+    if (myData != nullptr) {
         SoftBusFree(myData);
     }
-    if (connInfo != NULL) {
+    if (connInfo != nullptr) {
         SoftBusFree(connInfo);
     }
 }
@@ -265,7 +265,7 @@ HWTEST_F(TransLaneManagerTest, TransGetLaneReqIdByChannelId001, TestSize.Level1)
     int32_t channelId = 2112;
     uint32_t laneHandle = 22;
 
-    int32_t ret = TransGetLaneHandleByChannelId(channelId, NULL);
+    int32_t ret = TransGetLaneHandleByChannelId(channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
@@ -291,10 +291,10 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneReqId001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
 
-    ret = TransGetChannelInfoByLaneHandle(laneHandle, NULL, &channelType);
+    ret = TransGetChannelInfoByLaneHandle(laneHandle, nullptr, &channelType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransGetChannelInfoByLaneHandle(laneHandle, &channelId, NULL);
+    ret = TransGetChannelInfoByLaneHandle(laneHandle, &channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
@@ -330,7 +330,7 @@ HWTEST_F(TransLaneManagerTest, TransSocketChannelInfoTest001, TestSize.Level1)
     ret = TransUpdateSocketChannelLaneInfoBySession(sessionName, sessionId, lanHandele, false, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
     lanHandele = INVALID_CHANNEL_ID;
-    ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &lanHandele, NULL, NULL);
+    ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &lanHandele, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(lanHandele, 1);
     ret = TransGetSocketChannelStateByChannel(channelId, channelType, &state);
@@ -377,7 +377,7 @@ HWTEST_F(TransLaneManagerTest, TransGetSocketChannelStateBySession001, TestSize.
     CoreSessionState state;
     int32_t ret = TransGetSocketChannelStateBySession(sessionName, sessionId, &state);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-    ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &laneHandle, NULL, NULL);
+    ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &laneHandle, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionId, &pid);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
@@ -389,15 +389,15 @@ HWTEST_F(TransLaneManagerTest, TransGetSocketChannelStateBySession001, TestSize.
     ret = TransAddSocketChannelInfo(
         sessionName, sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransGetSocketChannelStateBySession(sessionName, sessionId, NULL);
+    ret = TransGetSocketChannelStateBySession(sessionName, sessionId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionId, NULL);
+    ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransGetSocketChannelStateBySession(sessionName, sessionId + 1, &state);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionId + 1, &pid);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-    ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId + 1, &laneHandle, NULL, NULL);
+    ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId + 1, &laneHandle, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     ret = TransGetLaneIdByChannelId(0, &laneId);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
@@ -416,7 +416,7 @@ HWTEST_F(TransLaneManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
 
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
-    EXPECT_TRUE(sessionParam != NULL);
+    EXPECT_TRUE(sessionParam != nullptr);
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
 
     int32_t ret = CopyAppInfoFromSessionParam(appInfo, sessionParam);
@@ -446,7 +446,7 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelType001, TestSize.Level1)
     TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
 
-    transInfo->channelType = TransGetChannelType(NULL, connInfo->type);
+    transInfo->channelType = TransGetChannelType(nullptr, connInfo->type);
     EXPECT_EQ(CHANNEL_TYPE_BUTT, transInfo->channelType);
 
     connInfo->type = LANE_BR;

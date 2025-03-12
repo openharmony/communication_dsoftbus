@@ -15,27 +15,15 @@
 
 #include "softbus_server_proxy_frame.h"
 
-#include <chrono>
-#include <cstdlib>
-#include <ctime>
-#include <mutex>
 #include <thread>
 #include "client_bus_center_manager.h"
-#include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "bus_center_server_proxy.h"
-#include "comm_log.h"
 #include "ipc_skeleton.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
-#include "iremote_proxy.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_client_death_recipient.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_client_stub_interface.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
@@ -175,7 +163,7 @@ void ClientDeathProcTask(void)
         }
         g_serverProxy.clear();
     }
-    TransServerProxyDeInit();
+    TransServerProxyClear();
     BusCenterServerProxyDeInit();
 
     ListNode sessionServerInfoList;

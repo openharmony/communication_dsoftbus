@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,8 @@
 
 #include "trans_client_proxy.h"
 
-#include <unistd.h>
-
 #include "softbus_access_token_adapter.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_trans_def.h"
 #include "trans_client_proxy_standard.h"
 #include "trans_log.h"
 
@@ -40,10 +35,6 @@ static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 
 int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
 {
-    if (pkgName == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "pkgName is null");
-        return SOFTBUS_INVALID_PKGNAME;
-    }
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
@@ -276,5 +267,6 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     
-    return clientProxy->OnCheckCollabRelation(sourceInfo, sinkInfo, transInfo->channelId, transInfo->channelType);
+    return clientProxy->OnCheckCollabRelation(
+        sourceInfo, sinkInfo->pid != -1, sinkInfo, transInfo->channelId, transInfo->channelType);
 }

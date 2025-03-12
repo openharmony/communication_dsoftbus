@@ -56,6 +56,23 @@ uint64_t LnnGetFeatureCapabilty(void)
         LNN_LOGE(LNN_LEDGER, "get lnn feature fail, use default value");
         configValue = DEFAUTL_LNN_FEATURE;
     }
+#if !defined(DSOFTBUS_FEATURE_CONN_PV2) && !defined(DSOFTBUS_FEATURE_CONN_HV1)
+    LnnClearFeatureCapability(&configValue, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
+    LNN_LOGI(LNN_LEDGER, "clear feature TLV configValue=%{public}" PRIu64, configValue);
+#endif
+#ifndef DSOFTBUS_FEATURE_CONN_HV2
+    LnnClearFeatureCapability(&configValue, BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
+    LNN_LOGI(LNN_LEDGER, "clear feature CONN_HV2 configValue=%{public}" PRIu64, configValue);
+#endif
+#ifndef DSOFTBUS_FEATURE_CONN_COC
+    LnnClearFeatureCapability(&configValue, BIT_COC_CONNECT_CAPABILITY);
+    LNN_LOGI(LNN_LEDGER, "clear feature CONN_COC configValue=%{public}" PRIu64, configValue);
+#endif
+#ifndef DSOFTBUS_FEATURE_CONN_BLE_DIRECT
+    LnnClearFeatureCapability(&configValue, BIT_BLE_DIRECT_CONNECT_CAPABILITY);
+    LnnClearFeatureCapability(&configValue, BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY);
+    LNN_LOGI(LNN_LEDGER, "clear feature CONN_BLE_DIRECT configValue=%{public}" PRIu64, configValue);
+#endif
     LNN_LOGI(LNN_LEDGER, "lnn feature configValue=%{public}" PRIu64, configValue);
     return configValue;
 }

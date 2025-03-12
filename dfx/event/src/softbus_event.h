@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_EVENT_H
 #define SOFTBUS_EVENT_H
 
-#include <stdlib.h>
-
 #include "form/softbus_event_form.h"
 
 #ifdef __cplusplus

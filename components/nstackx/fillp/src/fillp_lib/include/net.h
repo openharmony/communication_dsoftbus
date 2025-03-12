@@ -16,9 +16,7 @@
 #ifndef FILLP_NET_H
 #define FILLP_NET_H
 
-#include "fillp_os.h"
 #include "pcb.h"
-#include "spunge_mem.h"
 #include "fillp.h"
 #include "sysio.h"
 #ifdef __cplusplus

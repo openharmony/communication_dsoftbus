@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_ADAPTER_BT_COMMON_H
 #define SOFTBUS_ADAPTER_BT_COMMON_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "softbus_type_def.h"
 #include "softbus_adapter_thread.h"
 
 #ifdef __cplusplus
@@ -125,7 +121,7 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len);
 
 int SoftBusSetBtName(const char *name);
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener);
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId);
 
 int SoftBusRemoveBtStateListener(int listenerId);
 

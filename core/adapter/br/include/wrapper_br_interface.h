@@ -16,9 +16,6 @@
 #ifndef WRAPPER_BR_INTERFACE_H
 #define WRAPPER_BR_INTERFACE_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "softbus_adapter_bt_common.h"
 #include "softbus_def.h"
 

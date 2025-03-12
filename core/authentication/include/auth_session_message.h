@@ -16,12 +16,7 @@
 #ifndef AUTH_MESSAGE_H
 #define AUTH_MESSAGE_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_manager.h"
-#include "auth_session_fsm.h"
-#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -58,6 +53,9 @@ int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint3
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len);
+
+int32_t PostAuthTestInfoMessage(int64_t authSeq, const AuthSessionInfo *info);
+int32_t ProcessAuthTestDataMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len);
 
 int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data, uint32_t len);

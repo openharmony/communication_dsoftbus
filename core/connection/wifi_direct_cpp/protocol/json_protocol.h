@@ -15,7 +15,6 @@
 #ifndef WIFI_DIRECT_JSON_PROTOCOL_H
 #define WIFI_DIRECT_JSON_PROTOCOL_H
 
-#include "data/serializable.h"
 #include "protocol/wifi_direct_protocol.h"
 #include "nlohmann/json.hpp"
 

@@ -60,7 +60,7 @@ typedef enum {
     NUM_KEY_AUTH_PORT,
     NUM_KEY_PROXY_PORT,
     NUM_KEY_META_NODE,
-    NUM_KEY_NET_CAP,
+    NUM_KEY_NET_CAP, /* dynamic network capabilities, depends on the user settings */
     NUM_KEY_FEATURE_CAPA,
     NUM_KEY_DEV_TYPE_ID,
     NUM_KEY_MASTER_NODE_WEIGHT,
@@ -84,6 +84,7 @@ typedef enum {
     NUM_KEY_CONN_SUB_FEATURE_CAPA,
     NUM_KEY_HB_CAP,
     NUM_KEY_USERID,
+    NUM_KEY_STATIC_NET_CAP, /* static network capabilities, depends on the chip */
     NUM_KEY_END,
     BOOL_KEY_BEGIN,
     BOOL_KEY_TLV_NEGOTIATION = BOOL_KEY_BEGIN,

@@ -16,13 +16,9 @@
 #ifndef LNN_NODE_INFO_H
 #define LNN_NODE_INFO_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "lnn_connect_info.h"
 #include "lnn_device_info.h"
 #include "lnn_net_capability.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,6 +75,7 @@ typedef enum {
     DISCOVERY_TYPE_BR,
     DISCOVERY_TYPE_P2P,
     DISCOVERY_TYPE_LSA,
+    DISCOVERY_TYPE_SESSION_KEY,
     DISCOVERY_TYPE_COUNT,
 } DiscoveryType;
 
@@ -114,6 +111,7 @@ typedef enum {
     BIT_SUPPORT_BR_DUP_BLE = 3,
     BIT_SUPPORT_ADV_OFFLINE = 4,
     BIT_SUPPORT_ENHANCEDP2P_DUP_BLE = 5,
+    BIT_SUPPORT_SESSION_DUP_BLE = 6,
 } AuthCapability;
 
 typedef struct {
@@ -145,11 +143,13 @@ typedef struct {
     unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
     char remotePtk[PTK_DEFAULT_LEN];
     char remoteMetaPtk[PTK_DEFAULT_LEN];
+    bool isNeedReSyncDeviceName;
     bool isScreenOn;
     bool initPreventFlag;
     bool isAuthExchangeUdid;
     bool isSupportIpv6;
     bool isBleP2p; // true: this device support connect p2p via ble connection
+    bool isSupportSv;
     uint8_t staticCapability[STATIC_CAP_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
@@ -163,6 +163,7 @@ typedef struct {
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
+    uint32_t staticNetCap;
     uint32_t netCapacity;
     uint32_t authCapacity;
     uint32_t heartbeatCapacity;

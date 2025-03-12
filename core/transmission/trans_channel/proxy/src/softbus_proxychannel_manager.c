@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,6 +152,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->appInfo.crc = info->appInfo.crc;
             item->appInfo.myData.dataConfig = info->appInfo.myData.dataConfig;
             item->appInfo.peerHandleId = info->appInfo.peerHandleId;
+            item->appInfo.channelCapability = info->appInfo.channelCapability;
             if (memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                 &(info->appInfo.peerData), sizeof(info->appInfo.peerData)) != EOK ||
                 memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
@@ -333,7 +334,7 @@ void TransProxyDelChanByChanId(int32_t chanlId)
     return;
 }
 
-void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
+void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCode)
 {
     ProxyChannelInfo *item = NULL;
     TRANS_CHECK_AND_RETURN_LOGE(
@@ -353,7 +354,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
     }
 
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    if (!isUsing) {
+    if (!isUsing && errCode != SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND) {
         TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
         TransProxyCloseConnChannel(connId, false);
     }
@@ -1013,7 +1014,7 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
     if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(chan->appInfo.callingTokenId) != SOFTBUS_OK) {
+        TransCheckServerAccessControl(&chan->appInfo) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
 
@@ -1159,8 +1160,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     TRANS_CHECK_AND_RETURN_LOGW(!(chan == NULL), TRANS_CTRL, "proxy handshake calloc failed.");
     int32_t ret = TransProxyFillChannelInfo(msg, chan);
-    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED) &&
-        (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
+    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED ||
+         ret == SOFTBUS_PERMISSION_SERVER_DENIED) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = { 0 };
@@ -1172,12 +1173,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     int32_t proxyChannelId = chan->channelId;
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(proxyChannelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     TransCreateConnByConnId(chan->connId, (bool)chan->isServer);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         ReleaseProxyChannelId(proxyChannelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     if (chan->appInfo.appType == APP_TYPE_NORMAL) {
@@ -1186,6 +1189,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
             return;
         } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+            (void)TransProxyAckHandshake(chan->connId, chan, ret);
+            TransProxyDelChanByChanId(proxyChannelId);
             goto EXIT_ERR;
         }
     }
@@ -1195,7 +1200,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
     return;
 EXIT_ERR:
-    ReleaseChannelInfo(chan);
     extra.result = EVENT_STAGE_RESULT_FAILED;
     extra.errcode = ret;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -1607,6 +1611,37 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     return SOFTBUS_OK;
 }
 
+static void TransProxyUpdateBlePriority(int32_t channelId, uint32_t connId, BlePriority priority)
+{
+    if (priority <= BLE_PRIORITY_DEFAULT || priority >= BLE_PRIORITY_MAX) {
+        TRANS_LOGD(TRANS_CTRL, "not need updated ble priority");
+        return;
+    }
+    ConnectBlePriority blePriority = CONN_BLE_PRIORITY_BALANCED;
+    switch (priority) {
+        case BLE_PRIORITY_BALANCED:
+            blePriority = CONN_BLE_PRIORITY_BALANCED;
+            break;
+        case BLE_PRIORITY_HIGH:
+            blePriority = CONN_BLE_PRIORITY_HIGH;
+            break;
+        case BLE_PRIORITY_LOW_POWER:
+            blePriority = CONN_BLE_PRIORITY_LOW_POWER;
+            break;
+        default:
+            return;
+    }
+    UpdateOption option = {
+        .type = CONNECT_BLE,
+        .bleOption = {
+            .priority = blePriority,
+        }
+    };
+    int32_t ret = ConnUpdateConnection(connId, &option);
+    TRANS_LOGI(TRANS_CTRL, "update ble priority. channelId=%{public}d, connId=%{public}u, "
+        "blePriority=%{public}d, ret=%{public}d", channelId, connId, priority, ret);
+}
+
 void TransProxyOpenProxyChannelSuccess(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "send handshake msg. channelId=%{public}d", channelId);
@@ -1617,6 +1652,9 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId)
         SoftBusFree(channelInfo);
         TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", channelId);
         return;
+    }
+    if (channelInfo->type == CONNECT_BLE) {
+        TransProxyUpdateBlePriority(channelId, channelInfo->connId, channelInfo->appInfo.blePriority);
     }
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
@@ -1678,7 +1716,10 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
-
+    if (info->type == CONNECT_BLE && info->appInfo.blePriority > BLE_PRIORITY_BALANCED &&
+        info->appInfo.blePriority < BLE_PRIORITY_MAX) {
+        TransProxyUpdateBlePriority(channelId, info->connId, BLE_PRIORITY_BALANCED);
+    }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     TransProxyCloseProxyOtherRes(channelId, info);
     return SOFTBUS_OK;
@@ -1968,13 +2009,13 @@ static void TransProxyManagerDeinitInner(void)
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 
     DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = NULL;
 }
 
 void TransProxyManagerDeinit(void)
 {
-    TransProxyManagerDeinitInner();
-
     (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
+    TransProxyManagerDeinitInner();
 }
 
 static void TransProxyDestroyChannelList(const ListNode *destroyList)

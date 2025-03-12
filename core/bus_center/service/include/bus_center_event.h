@@ -16,9 +16,6 @@
 #ifndef BUS_CENTER_EVENT_H
 #define BUS_CENTER_EVENT_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "softbus_bus_center.h"
 #include "bus_center_info_key.h"
 
@@ -58,6 +55,8 @@ typedef enum {
     LNN_EVENT_NODE_NET_TYPE,
     LNN_EVENT_DEVICE_INFO_CHANGED,
     LNN_EVENT_NET_LINK_STATE_CHANGE,
+    /* event from sa monitor */
+    LNN_EVENT_WIFI_SERVICE_START,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -335,11 +334,15 @@ void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
 
 void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
 
+void LnnNotifyStateForSession(char *udid, int32_t retCode);
+
 void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType);
 
 void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state);
 
 void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName);
+
+void LnnNotifyWifiServiceStart(void *para);
 
 #ifdef __cplusplus
 }

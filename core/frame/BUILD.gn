@@ -60,6 +60,7 @@ if (defined(ohos_lite)) {
       ]
       sources = dsoftbus_server_common_src
       sources += [
+        "common/src/softbus_ddos_virtual.c",
         "common/src/softbus_server_frame.c",
         "mini/src/softbus_server_stub.c",
       ]
@@ -141,6 +142,7 @@ if (defined(ohos_lite)) {
       ]
       sources = dsoftbus_server_common_src
       sources += [
+        "common/src/softbus_ddos_virtual.c",
         "common/src/softbus_server_frame.c",
         "small/client_manager/src/softbus_client_info_manager.c",
         "small/init/src/bus_center_server_stub.c",
@@ -260,6 +262,7 @@ if (defined(ohos_lite)) {
       "$os_type/init/src/softbus_server.cpp",
       "$os_type/init/src/softbus_server_death_recipient.cpp",
       "$os_type/init/src/softbus_server_stub.cpp",
+      "common/src/softbus_ddos.c",
       "common/src/softbus_server_frame.c",
     ]
     deps = dsoftbus_server_common_deps
@@ -277,7 +280,7 @@ if (defined(ohos_lite)) {
     dsoftbus_server_common_external_deps =
         bus_center_server_external_deps + disc_server_external_deps +
         softbus_permission_external_deps + trans_session_external_deps +
-        conn_manager_external_deps + ble_discovery_external_deps
+        conn_manager_external_deps
     if (is_standard_system) {
       external_deps += dsoftbus_server_common_external_deps
       external_deps += [
@@ -305,10 +308,6 @@ if (defined(ohos_lite)) {
       }
       if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
-        external_deps += [
-          "bundle_framework:appexecfwk_base",
-          "bundle_framework:appexecfwk_core",
-        ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
       if (!defined(global_parts_info) ||

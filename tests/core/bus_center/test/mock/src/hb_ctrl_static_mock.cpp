@@ -122,9 +122,9 @@ int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
     return HeartBeatCtrlStaticInterface()->LnnGetLocalNodeInfoSafe(info);
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
 {
-    return HeartBeatCtrlStaticInterface()->LnnLedgerAllDataSyncToDB(info);
+    return HeartBeatCtrlStaticInterface()->LnnLedgerAllDataSyncToDB(info, isAckSeq, peerudid);
 }
 
 ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
@@ -247,24 +247,18 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
     return HeartBeatCtrlStaticInterface()->LnnSetLocalByteInfo(key, info, len);
 }
 
-void LnnUpdateDeviceName(void)
-{
-    return HeartBeatCtrlStaticInterface()->LnnUpdateDeviceName();
-}
-
 int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
 {
     return HeartBeatCtrlStaticInterface()->LnnStartHbByTypeAndStrategyEx(msgPara);
 }
 
-void RegisterNameMonitor(void)
-{
-    return HeartBeatCtrlStaticInterface()->RegisterNameMonitor();
-}
-
 int32_t LnnSyncBleOfflineMsg(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnSyncBleOfflineMsg();
+}
+void LnnRemoveV0BroadcastAndCheckDev(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnRemoveV0BroadcastAndCheckDev();
 }
 }
 } // namespace OHOS

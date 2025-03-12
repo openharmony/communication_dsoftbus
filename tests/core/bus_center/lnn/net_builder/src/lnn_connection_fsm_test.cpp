@@ -21,6 +21,8 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
+#include "lnn_connection_fsm_process.c"
+#include "lnn_connection_fsm_process.h"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
 #include "lnn_map.h"
@@ -159,7 +161,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
     ON_CALL(serviceMock, AuthGenRequestId).WillByDefault(Return(1));
     EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
-    ret = LnnSendJoinRequestToConnFsm(connFsm2);
+    ret = LnnSendJoinRequestToConnFsm(connFsm2, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(1000);
 }

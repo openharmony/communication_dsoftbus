@@ -16,12 +16,7 @@
 #ifndef AUTH_DEVICE_H
 #define AUTH_DEVICE_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "auth_interface.h"
 #include "auth_session_fsm.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -53,7 +48,7 @@ void AuthNotifyDeviceVerifyPassed(AuthHandle authHandle, const NodeInfo *nodeInf
 void AuthNotifyDeviceDisconnect(AuthHandle authHandle);
 void AuthAddNodeToLimitMap(const char *udid, int32_t reason);
 void AuthDeleteLimitMap(const char *udidHash);
-void AuthRegisterToDpDelay(void *para);
+int32_t AuthRegisterToDpDelay(void);
 
 #ifdef __cplusplus
 #if __cplusplus

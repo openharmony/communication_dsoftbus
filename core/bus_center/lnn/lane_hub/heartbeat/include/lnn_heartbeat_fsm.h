@@ -16,7 +16,6 @@
 #ifndef LNN_HEARTBEAT_FSM_H
 #define LNN_HEARTBEAT_FSM_H
 
-#include "common_list.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_state_machine.h"
 
@@ -89,6 +88,7 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
+    int32_t duration;
     uint64_t checkDelay;
     char callerId[PKG_NAME_SIZE_MAX];
 } LnnProcessSendOnceMsgPara;

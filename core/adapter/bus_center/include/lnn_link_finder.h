@@ -16,7 +16,6 @@
 #ifndef LNN_LINKFINDER_H
 #define LNN_LINKFINDER_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

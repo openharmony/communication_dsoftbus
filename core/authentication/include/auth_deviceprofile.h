@@ -24,10 +24,19 @@ extern "C" {
 #endif
 #endif
 
-bool IsPotentialTrustedDeviceDp(const char *deviceIdHash);
+typedef enum {
+    UPDATE_ACL_SUCC = 0,
+    UPDATE_ACL_NOT_MATCH,
+    GET_ALL_ACL_FAIL,
+    GET_ALL_ACL_IS_EMPTY,
+} UpdateDpAclResult;
+
+bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
 bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId);
 void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId);
 void DelNotTrustDevice(const char *udid);
+void DelSessionKeyProfile(int32_t sessionKeyId);
+bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length);
 
 #ifdef __cplusplus
 #if __cplusplus

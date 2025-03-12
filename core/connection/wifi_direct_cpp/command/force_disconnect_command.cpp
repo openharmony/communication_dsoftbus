@@ -14,7 +14,6 @@
  */
 
 #include "force_disconnect_command.h"
-#include "conn_log.h"
 #include "processor_selector_factory.h"
 #include "channel/auth_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"

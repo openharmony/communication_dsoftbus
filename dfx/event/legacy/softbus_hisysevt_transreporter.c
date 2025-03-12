@@ -115,9 +115,11 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_DEACTIVE_META_NODE, "DeactiveMetaNode"},
     {SERVER_GET_ALL_META_NODE_INFO, "GetAllMetaNodeInfo"},
     {SERVER_SHIFT_LNN_GEAR, "ShiftLNNGear"},
+    {SERVER_TRIGGER_HB_FOR_RANGE, "TriggerHbForMeasureDistance"},
     {SERVER_SYNC_TRUSTED_RELATION, "SyncTrustedRelationShip"},
     {SERVER_RIPPLE_STATS, "RippleStats"},
     {SERVER_CTRL_LNN_BLE_HB, "CtrlLNNBleHb"},
+    {SERVER_SET_DISPLAY_NAME, "SetDisplayName"},
 };
 
 typedef struct {
@@ -287,8 +289,13 @@ static char *GetApiNameByCode(uint32_t code)
 
 static void AddInfoNodeToList(bool isAppDiff, const char *appName, char *apiName)
 {
+#define MAX_PKG_NAME_CNT 200
     CalledApiInfoStruct *apiInfoNode = NULL;
     if (isAppDiff) {
+        if (g_calledApiInfoList->cnt > MAX_PKG_NAME_CNT) {
+            COMM_LOGE(COMM_EVENT, "the number %{public}u of callers exceeds the limit", g_calledApiInfoList->cnt);
+            return;
+        }
         apiInfoNode = GetNewApiInfo(appName, apiName);
         if (apiInfoNode == NULL) {
             COMM_LOGE(COMM_EVENT, "GetNewApiInfo fail");

@@ -15,8 +15,6 @@
 
 #ifndef SOFTBUS_PROXYCHANNEL_MESSAGE_H
 #define SOFTBUS_PROXYCHANNEL_MESSAGE_H
-#include "stdint.h"
-#include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 
@@ -66,6 +64,7 @@ typedef enum {
 #define JSON_KEY_CALLING_TOKEN_ID "CALLING_TOKEN_ID"
 #define JSON_KEY_ACCOUNT_ID "ACCOUNT_ID"
 #define JSON_KEY_USER_ID "USER_ID"
+#define TRANS_CAPABILITY "TRANS_CAPABILITY"
 
 typedef struct {
     uint8_t type; // MsgType

@@ -45,6 +45,7 @@
 #define JSON_KEY_CALLING_TOKEN_ID "CALLING_TOKEN_ID"
 #define ACCOUNT_ID "ACCOUNT_ID"
 #define USER_ID "USER_ID"
+#define TRANS_CAPABILITY "TRANS_CAPABILITY"
 
 #ifdef __cplusplus
 extern "C" {

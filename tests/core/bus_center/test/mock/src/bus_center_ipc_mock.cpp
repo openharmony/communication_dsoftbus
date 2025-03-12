@@ -167,9 +167,9 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     return BusCenterIpcInterfaceInstance()->ClientOnRefreshDeviceFound(pkgName, pid, device, deviceLen);
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
 {
-    return BusCenterIpcInterfaceInstance()->LnnServerJoin(addr, pkgName);
+    return BusCenterIpcInterfaceInstance()->LnnServerJoin(addr, pkgName, isForceJoin);
 }
 }
 } // namespace OHOS

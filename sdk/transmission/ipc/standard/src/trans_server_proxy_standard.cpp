@@ -15,10 +15,7 @@
 
 #include "trans_server_proxy_standard.h"
 
-#include "anonymizer.h"
 #include "ipc_skeleton.h"
-#include "ipc_types.h"
-#include "message_parcel.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
@@ -717,11 +714,12 @@ int32_t TransServerProxy::RemovePermission(const char *sessionName)
     return ret;
 }
 
-int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)pkgName;
     (void)addr;
     (void)addrTypeLen;
+    (void)isForceJoin;
     return SOFTBUS_OK;
 }
 
@@ -783,6 +781,18 @@ int32_t TransServerProxy::UnregDataLevelChangeCb(const char *pkgName)
 int32_t TransServerProxy::SetDataLevel(const DataLevel *dataLevel)
 {
     (void)dataLevel;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::RegBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::UnregBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
     return SOFTBUS_OK;
 }
 
@@ -966,5 +976,16 @@ int32_t TransServerProxy::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, c
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     return ret;
+}
+
+int32_t TransServerProxy::GetRemoteObject(sptr<IRemoteObject> &object)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    object = remote;
+    return SOFTBUS_OK;
 }
 } // namespace OHOS

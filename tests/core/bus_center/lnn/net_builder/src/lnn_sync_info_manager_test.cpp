@@ -166,7 +166,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_002
- * @tc.desc: networkId == NULL
+ * @tc.desc: networkId == nullptr
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  */
@@ -221,7 +221,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005
- * @tc.desc: msg == NULL
+ * @tc.desc: msg == nullptr
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  */
@@ -360,14 +360,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.L
 
 /*
  * @tc.name: FindSyncChannelInfoByChannelId_001
- * @tc.desc: return NULL
+ * @tc.desc: return nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(LNNSyncInfoManagerTest, FindSyncChannelInfoByChannelId_001, TestSize.Level1)
 {
     ClearSyncChannelInfo();
-    EXPECT_EQ(FindSyncChannelInfoByChannelId(10), NULL);
+    EXPECT_EQ(FindSyncChannelInfoByChannelId(10), nullptr);
 }
 
 /*
@@ -379,7 +379,7 @@ HWTEST_F(LNNSyncInfoManagerTest, FindSyncChannelInfoByChannelId_001, TestSize.Le
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -388,7 +388,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
     SoftBusSysTime sysTime;
     info->accessTime = sysTime;
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info sync error!");
         return;
     }
@@ -410,7 +410,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpMsgExcludeListNode_001, TestSize.Level1)
     EXPECT_EQ(DumpMsgExcludeListNode(nullptr), nullptr);
 
     SyncInfoMsg *newItem = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (newItem == NULL) {
+    if (newItem == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info sync error!");
         return;
     }
@@ -430,12 +430,12 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncInfoMsgList_001, TestSize.Level1)
     EXPECT_EQ(DumpSyncInfoMsgList(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
 
     SyncChannelInfo *newInfo = CreateSyncChannelInfo(NETWORKID);
-    if (newInfo == NULL) {
+    if (newInfo == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -457,7 +457,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncChannelInfo_001, TestSize.Level1)
     SoftBusSysTime now;
     SoftBusGetTime(&now);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -480,13 +480,13 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncChannelInfo_001, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsgFromList_001, TestSize.Level1)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
     info->clientChannelId = 10;
     SyncInfoMsg *newItem = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (newItem == NULL) {
+    if (newItem == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info sync error!");
         return;
     }
@@ -512,7 +512,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_001, TestSize.Level1)
     int32_t channelId = 10;
     unsigned char isServer = true;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -536,7 +536,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_002, TestSize.Level1)
     int32_t *oldChannelId = new int32_t(0);
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -592,12 +592,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_002, TestSize.Level1)
     const char *peerUuid = nullptr;
     ClearSyncChannelInfo();
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -627,7 +627,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_003, TestSize.Level1)
     ClearSyncChannelInfo();
 
     SyncChannelInfo *info = CreateSyncChannelInfo(NODE_NETWORK_ID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -651,7 +651,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_001, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -672,7 +672,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_002, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -693,7 +693,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_003, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -720,7 +720,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_001, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelOpenFailed_002
- * @tc.desc: info == NULL
+ * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -741,12 +741,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_002, TestSize.Level1)
     ClearSyncChannelInfo();
 
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -779,12 +779,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnConvertDlId(_, _, _, _, _)).Times(1).WillOnce(Invoke(mockHandler));
 
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -800,7 +800,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelClosed_001
- * @tc.desc: info == NULL
+ * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -814,7 +814,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_001, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelClosed_002
- * @tc.desc: info == NULL
+ * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -824,7 +824,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
 
     ClearSyncChannelInfo();
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -836,7 +836,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
 
 /*
  * @tc.name: OnMessageReceived_001
- * @tc.desc: len <= MSG_HEAD_LEN   &   len <= MSG_HEAD_LEN   &   info == NULL
+ * @tc.desc: len <= MSG_HEAD_LEN   &   len <= MSG_HEAD_LEN   &   info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -867,7 +867,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
 
     ListDelete(&g_syncInfoManager.channelInfoList);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -880,7 +880,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
 
 /*
  * @tc.name: OnMessageReceived_003
- * @tc.desc: handler == NULL
+ * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -891,7 +891,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
 
     ListDelete(&g_syncInfoManager.channelInfoList);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -905,7 +905,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
 
 /*
  * @tc.name: PackBleOfflineMsg_001
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -970,7 +970,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_003, TestSize.Level1)
 
 /*
  * @tc.name: PackWifiOfflineMsg_001
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1343,7 +1343,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_005, TestSize.Level1)
 
 /*
  * @tc.name: WlanOffLineProcess_001
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1479,7 +1479,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
 
 /*
  * @tc.name: OnP2pNetworkingDataRecv_001
- * @tc.desc: data == NULL
+ * @tc.desc: data == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1514,7 +1514,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_002, TestSize.Level1)
 
 /*
  * @tc.name: OnP2pNetworkingDataRecv_003
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1613,7 +1613,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_006, TestSize.Level1)
 
 /*
  * @tc.name: LnnSyncManagerHandleOffline_001
- * @tc.desc: item == NULL
+ * @tc.desc: item == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1633,7 +1633,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_001, TestSize.Level
 HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_002, TestSize.Level1)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -1666,7 +1666,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnLnnOnlineStateChange_001, TestSize.Level1)
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_001
- * @tc.desc: data == NULL
+ * @tc.desc: data == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1697,7 +1697,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_002, TestSize.Level1)
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_003
- * @tc.desc: auth == NULL
+ * @tc.desc: auth == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1766,7 +1766,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_005, TestSize.Level1)
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_006
- * @tc.desc: handler == NULL
+ * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1791,7 +1791,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_006, TestSize.Level1)
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_007
- * @tc.desc: handler == NULL
+ * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1942,7 +1942,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_003, TestSize.Level1)
     };
 
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
@@ -1996,7 +1996,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoByNewChannel_002, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
 {
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
@@ -2004,7 +2004,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
     ListDelete(&g_syncInfoManager.channelInfoList);
 
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -2098,14 +2098,14 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_002, TestSize.Level1)
 
 /*
  * @tc.name: TrySendSyncInfoMsgByAuth_003
- * @tc.desc: msg->complete != NULL
+ * @tc.desc: msg->complete != nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_003, TestSize.Level1)
 {
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
@@ -2232,7 +2232,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
 
 /*
  * @tc.name: IsNeedSyncByAuth_004
- * @tc.desc: (local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0
+ * @tc.desc: (local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -2504,7 +2504,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
 
 /*
  * @tc.name: LnnSendWifiOfflineInfoMsg_003
- * @tc.desc: msg == NULL
+ * @tc.desc: msg == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */

@@ -15,25 +15,17 @@
 #ifndef P2P_ENTITY_H
 #define P2P_ENTITY_H
 
-#include <memory>
-#include <mutex>
 #include <queue>
-#include <string>
-#include <vector>
 
 #include "conn_log.h"
-#include "kits/c/wifi_p2p.h"
 
-#include "adapter/p2p_adapter.h"
 #include "channel/auth_negotiate_channel.h"
+#include "dfx/p2p_entity_snapshot.h"
 #include "p2p_available_state.h"
 #include "p2p_broadcast_receiver.h"
 #include "p2p_create_group_state.h"
 #include "p2p_destroy_group_state.h"
-#include "p2p_entity_state.h"
-#include "p2p_operation.h"
 #include "wifi_direct_entity.h"
-#include "wifi_direct_initiator.h"
 
 namespace OHOS::SoftBus {
 using P2pCreateGroupParam = P2pAdapter::CreateGroupParam;
@@ -46,6 +38,7 @@ struct ClientJoinEvent {
     std::string remoteMac_;
 };
 
+class P2pEntitySnapshot;
 class P2pEntity : public WifiDirectEntity {
 public:
     static constexpr int TIMEOUT_WAIT_CLIENT_JOIN_MS = 10000;
@@ -89,6 +82,8 @@ public:
 
     void UpdateInterfaceManagerWhenStateChanged(P2pState state);
     static void Listener(BroadcastReceiverAction action, const struct BroadcastParam &param);
+    
+    void Dump(P2pEntitySnapshot &snapshot);
 
     void Lock()
     {

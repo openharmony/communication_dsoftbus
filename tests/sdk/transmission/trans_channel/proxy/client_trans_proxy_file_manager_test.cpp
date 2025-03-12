@@ -66,8 +66,8 @@ const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_peerNetworkId = "1234567789";
 const char *g_groupId = "123";
-FILE *g_fileTest = NULL;
-FILE *g_fileSs = NULL;
+FILE *g_fileTest = nullptr;
+FILE *g_fileSs = nullptr;
 int32_t g_fd = 0;
 char g_writeData[128] = "test111111111111111111111111111111111111111111111111111111111111";
 const char *g_rootDir = "/data";
@@ -181,7 +181,7 @@ public:
 
 void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
     g_fileTest = fopen(g_testProxyFileList[0], "w+");
     EXPECT_NE(g_fileTest, nullptr);
 
@@ -199,10 +199,10 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 {
     int32_t ret = fclose(g_fileTest);
     EXPECT_EQ(ret, 0);
-    g_fileTest = NULL;
+    g_fileTest = nullptr;
     ret = fclose(g_fileSs);
     EXPECT_EQ(ret, 0);
-    g_fileSs = NULL;
+    g_fileSs = nullptr;
     close(g_fd);
     g_fd = -1;
     ret = remove(g_testProxyFileList[0]);
@@ -1290,7 +1290,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint8_t *emptyBuff = (uint8_t *)SoftBusCalloc(TEST_FILE_SIZE);
-    if (emptyBuff == NULL) {
+    if (emptyBuff == nullptr) {
         return;
     }
     FileFrame frame = {
@@ -1814,7 +1814,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathT
     int32_t sessionId = TEST_SESSION_ID;
     FileListener *fileListener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
 
-    fileListener->socketRecvCallback = NULL;
+    fileListener->socketRecvCallback = nullptr;
     int32_t ret = UpdateFileReceivePath(sessionId, fileListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

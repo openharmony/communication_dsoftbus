@@ -591,6 +591,10 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
 
 static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
 {
+    if (manager->scenarioItemList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return;
+    }
     TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer=%{public}d", manager->macIfacePairList->cnt);
     MacIfacePair *pair = NULL;
     MacIfacePair *nextPair = NULL;
@@ -619,6 +623,10 @@ static void ScenarioManagerClearBusinessCounterList(ListNode *list)
 
 static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
 {
+    if (manager->scenarioItemList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return;
+    }
     TRANS_LOGI(TRANS_CTRL, "before clean:scenarioItemList numer=%{public}d", manager->scenarioItemList->cnt);
     ScenarioItem *item = NULL;
     ScenarioItem *tmp = NULL;

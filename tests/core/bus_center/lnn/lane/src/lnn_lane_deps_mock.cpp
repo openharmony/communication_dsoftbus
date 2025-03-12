@@ -179,9 +179,9 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
     return GetLaneDepsInterface()->GetAuthLinkTypeList(networkId, linkTypeList);
 }
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
 {
-    return GetLaneDepsInterface()->AuthAllocConn(networkId, authRequestId, callback);
+    return GetLaneDepsInterface()->AuthAllocLane(networkId, authRequestId, callback);
 }
 
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
@@ -423,16 +423,6 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     GetLaneDepsInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
-void LnnDumpLocalBasicInfo(void)
-{
-    GetLaneDepsInterface()->LnnDumpLocalBasicInfo();
-}
-
-void LnnDumpOnlineDeviceInfo(void)
-{
-    GetLaneDepsInterface()->LnnDumpOnlineDeviceInfo();
-}
-
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetLaneDepsInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
@@ -466,6 +456,11 @@ int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
 int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
 {
     return GetLaneDepsInterface()->AuthCheckMetaExist(connInfo, isExist);
+}
+
+int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
+{
+    return GetLaneDepsInterface()->LnnSetDLConnCapability(networkId, connCapability);
 }
 }
 } // namespace OHOS

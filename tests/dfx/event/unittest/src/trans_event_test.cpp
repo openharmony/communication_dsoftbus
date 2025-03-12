@@ -142,11 +142,11 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .firstTokenName = "",
         .firstTokenId = 0,
         .firstTokenType = -1,
-        .minBW = 0,
-        .maxLatency = 0,
-        .minLatency = 0,
+        .minBW = -2,
+        .maxLatency = -3,
+        .minLatency = -4,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 6; // result, errcode and firstTokenId is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode and firstTokenId is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -184,11 +184,11 @@ HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest005, TestSize.Level0)
 {
     TransAlarmExtra extra = {
-        .conflictName = NULL,
-        .conflictedName = NULL,
-        .occupyedName = NULL,
-        .permissionName = NULL,
-        .sessionName = NULL,
+        .conflictName = nullptr,
+        .conflictedName = nullptr,
+        .occupyedName = nullptr,
+        .permissionName = nullptr,
+        .sessionName = nullptr,
         .result = 1,
         .errcode = 2233,
         .minBw = 32,
@@ -345,14 +345,14 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest008, TestSize.Level0)
 {
     TransAuditExtra extra = {
-        .localIp = NULL,
-        .localPort = NULL,
-        .localDevId = NULL,
-        .localSessName = NULL,
-        .peerIp = NULL,
-        .peerPort = NULL,
-        .peerDevId = NULL,
-        .peerSessName = NULL,
+        .localIp = nullptr,
+        .localPort = nullptr,
+        .localDevId = nullptr,
+        .localSessName = nullptr,
+        .peerIp = nullptr,
+        .peerPort = nullptr,
+        .peerDevId = nullptr,
+        .peerSessName = nullptr,
         .hostPkg = "a.b.c.transSudit",
         .result = 2,
         .errcode = 9527,

@@ -58,7 +58,7 @@ public:
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
-    virtual int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info) = 0;
+    virtual int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
@@ -84,10 +84,9 @@ public:
     virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len) = 0;
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
-    virtual void LnnUpdateDeviceName(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
-    virtual void RegisterNameMonitor(void) = 0;
     virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
+    virtual void LnnRemoveV0BroadcastAndCheckDev(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -111,7 +110,7 @@ public:
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
     MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t(const LnnHeartbeatMediumParam *));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *info));
-    MOCK_METHOD1(LnnLedgerAllDataSyncToDB, int32_t(NodeInfo *info));
+    MOCK_METHOD3(LnnLedgerAllDataSyncToDB, int32_t(NodeInfo *info, bool, char *));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType(LnnHeartbeatType type));
     MOCK_METHOD2(LnnStopScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
@@ -137,10 +136,9 @@ public:
     MOCK_METHOD4(
         HbBuildUserIdCheckSum, int32_t(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
-    MOCK_METHOD0(LnnUpdateDeviceName, void(void));
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
-    MOCK_METHOD0(RegisterNameMonitor, void(void));
     MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
+    MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void (void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

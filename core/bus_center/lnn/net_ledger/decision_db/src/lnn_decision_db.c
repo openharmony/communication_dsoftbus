@@ -48,6 +48,7 @@ static bool g_isDbListInit = false;
 
 #define LNN_DB_KEY_LEN 1024
 #define LNN_DB_KEY_AILAS "dsoftbus_decision_db_key_alias"
+#define DEFAULT_USER_ID "0"
 
 static struct HksBlob g_keyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
 static struct HksBlob g_ceKeyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
@@ -507,9 +508,13 @@ static int32_t BuildTrustedDevInfoRecordEx(const char *udid, TrustedDevInfoRecor
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (LnnGetOhosAccountInfoByUserId(localUserId, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local account hash failed");
-        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+        if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID,
+            strlen(DEFAULT_USER_ID), (unsigned char *)accountHash) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "generate default str hash fail");
+            return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+        }
     }
     if (memset_s(record, sizeof(TrustedDevInfoRecord), 0, sizeof(TrustedDevInfoRecord)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memset_s record failed");
@@ -833,7 +838,7 @@ static int32_t InitDbList(void)
     return RecoveryTrustedDevInfo();
 }
 
-static int32_t InitTrustedDevInfoTable(void)
+int32_t InitTrustedDevInfoTable(void)
 {
     bool isExist = false;
     int32_t rc = SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED;
@@ -922,4 +927,9 @@ int32_t LnnInitDecisionDbDelay(void)
         return TryRecoveryTrustedDevInfoTable();
     }
     return SOFTBUS_OK;
+}
+
+void LnnRemoveDb(void)
+{
+    SoftBusRemoveFile(DATABASE_NAME);
 }

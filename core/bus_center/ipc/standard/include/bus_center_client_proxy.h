@@ -16,8 +16,6 @@
 #ifndef BUS_CENTER_CLIENT_PROXY_H
 #define BUS_CENTER_CLIENT_PROXY_H
 
-#include <stdint.h>
-#include "softbus_bus_center.h"
 #include "data_level_inner.h"
 
 #ifdef __cplusplus
@@ -50,6 +48,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
 int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen);
 int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *networkId,
     const DataLevelInfo *dataLevelInfo);
+int32_t ClientOnBleRange(const char *pkgName, int32_t pid, const BleRangeInnerInfo *rangeInfo);
 
 #ifdef __cplusplus
 #if __cplusplus

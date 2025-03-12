@@ -36,7 +36,7 @@ static TransLaneDepsInterface *GetTransLaneIf()
     return reinterpret_cast<TransLaneDepsInterface *>(g_transLaneIf);
 }
 
-int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkSuccess(const LinkRequest *reqInfo,
+int32_t TransLaneDepsInterfaceMock::ActionOfBuildLinkSuccess(const LinkRequest *reqInfo,
     uint32_t reqId, const LaneLinkCb *cb)
 {
     LaneLinkInfo linkInfo = {
@@ -46,7 +46,7 @@ int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkSuccess(const LinkRequest *r
     return SOFTBUS_OK;
 }
 
-int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkFail(const LinkRequest *reqInfo,
+int32_t TransLaneDepsInterfaceMock::ActionOfBuildLinkFail(const LinkRequest *reqInfo,
     uint32_t reqId, const LaneLinkCb *cb)
 {
     cb->onLaneLinkFail(reqId, SOFTBUS_LANE_TRIGGER_LINK_FAIL, reqInfo->linkType);

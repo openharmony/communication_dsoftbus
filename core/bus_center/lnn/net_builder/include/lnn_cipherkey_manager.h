@@ -16,12 +16,8 @@
 #ifndef LNN_CIPHERKEY_MANAGER_H
 #define LNN_CIPHERKEY_MANAGER_H
 
-#include <stdint.h>
-
 #include "cJSON.h"
-#include "softbus_common.h"
 #include "lnn_data_cloud_sync.h"
-#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,12 +38,17 @@ void LoadBleBroadcastKey(void);
 bool IsCipherManagerFindKey(const char *udid);
 bool PackCipherKeySyncMsg(void *json);
 void ProcessCipherKeySyncInfo(const void *json, const char *networkId);
+int32_t GenerateNewLocalCipherKey(void);
 int32_t LnnLoadLocalBroadcastCipherKey(void);
 int32_t LnnGetLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 int32_t LnnSaveLocalBroadcastCipherKey(const BroadcastCipherKey *broadcastKey);
 int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 int32_t LnnGetLocalBroadcastCipherInfo(CloudSyncInfo *info);
 int32_t LnnSetRemoteBroadcastCipherInfo(const char *value, const char *udid);
+int32_t LnnSyncBroadcastLinkKey(const char *networkId);
+bool IsNeedSyncBroadcastLinkKey(const char *networkId);
+int32_t LnnInitBroadcastLinkKey(void);
+void LnnDeinitBroadcastLinkKey(void);
 #ifdef __cplusplus
 }
 #endif

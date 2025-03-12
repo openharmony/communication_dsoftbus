@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,7 +119,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt001, TestSize.Level0)
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
     uint32_t encryptedDataLen = 0;
-    uint8_t *encryptedData = NULL;
+    uint8_t *encryptedData = nullptr;
 
     int32_t ret = SoftBusGetPublicKey(publicKey, pKeyLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -145,7 +145,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt002, TestSize.Level0)
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
     uint32_t encryptedDataLen = 0;
-    uint8_t *encryptedData = NULL;
+    uint8_t *encryptedData = nullptr;
 
     int32_t ret = SoftBusGetPublicKey(publicKey, pKeyLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -177,7 +177,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt003, TestSize.Level0)
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
     uint32_t encryptedDataLen = 0;
-    uint8_t *encryptedData = NULL;
+    uint8_t *encryptedData = nullptr;
 
     int32_t ret = SoftBusGetPublicKey(publicKey, pKeyLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -202,9 +202,9 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt002, TestSize.Level0)
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
     uint32_t encryptedDataLen = 0;
-    uint8_t *encryptedData = NULL;
+    uint8_t *encryptedData = nullptr;
     uint32_t decryptedDataLen = 0;
-    uint8_t *decryptedData = NULL;
+    uint8_t *decryptedData = nullptr;
 
     int32_t ret = SoftBusGetPublicKey(publicKey, pKeyLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -237,9 +237,9 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
     uint32_t encryptedDataLen = 0;
-    uint8_t *encryptedData = NULL;
+    uint8_t *encryptedData = nullptr;
     uint32_t decryptedDataLen = 0;
-    uint8_t *decryptedData = NULL;
+    uint8_t *decryptedData = nullptr;
     uint32_t srcDataLen1 = 0;
 
     int32_t ret = SoftBusGetPublicKey(publicKey, pKeyLen);
@@ -252,6 +252,9 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
 
     ret = SoftBusRsaDecrypt(encryptedData, srcDataLen1, &decryptedData, &decryptedDataLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftBusRsaDecrypt(encryptedData, encryptedDataLen, &decryptedData, &decryptedDataLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(decryptedData);
     SoftBusFree(encryptedData);
 }
 
@@ -267,13 +270,13 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
     int32_t ret = NotifyNearByUpdateMigrateOption(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    const char *peerDeviceId = NULL;
+    const char *peerDeviceId = nullptr;
     int32_t routeType = 0;
     bool isUpgrade = true;
     ret = NotifyNearByOnMigrateEvents(peerDeviceId, routeType, isUpgrade);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    const char *busName = NULL;
+    const char *busName = nullptr;
     ret = NotifyNearByGetBrAgingTimeoutByBusName(busName);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

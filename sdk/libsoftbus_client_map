@@ -25,7 +25,11 @@
         "DisableSessionListener";
         "SetFileSendListener";
         "ShiftLNNGear";
+        "TriggerHbForMeasureDistance";
+        "RegBleRangeCb";
+        "UnregBleRangeCb";
         "SyncTrustedRelationShip";
+        "SetDisplayName";
         "GetNodeKeyInfo";
         "GetSessionKey";
         "SendFile";
@@ -60,6 +64,7 @@
         "StopPublishLNN";
         "GetPeerSessionName";
         "SendBytes";
+        "SendBytesAsync";
         "RegistFileSchema";
         "UnregistFileSchema";
         "TransRegistFileSchema";
@@ -177,6 +182,10 @@
         "CtrlLNNBleHb";
         "PrivilegeShutdown";
         "RegisterRelationChecker";
+        "SoftBusResolveConflict";
+        "SetPreLinkParam";
+        "GetPreLinkParam";
+        "RegPreLinkParamListener";
     local:
         *;
 };

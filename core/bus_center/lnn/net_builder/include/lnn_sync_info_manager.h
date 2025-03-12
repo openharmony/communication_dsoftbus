@@ -16,7 +16,7 @@
 #ifndef LNN_SYNC_INFO_MANAGER_H
 #define LNN_SYNC_INFO_MANAGER_H
 
-#include <stdint.h>
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +43,7 @@ typedef enum {
     LNN_INFO_TYPE_ROUTE_LSU,
     LNN_INFO_TYPE_PTK,
     LNN_INFO_TYPE_USERID,
+    LNN_INFO_TYPE_SYNC_BROADCASTLINKKEY,
     LNN_INFO_TYPE_COUNT,
     //LNN_INFO_TYPE_P2P_ROLE = 256,
 } LnnSyncInfoType;
@@ -60,6 +61,18 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
 int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability);
 int32_t LnnSendWifiOfflineInfoMsg(void);
+
+typedef struct {
+    LnnSyncInfoType type;
+    char networkId[NETWORK_ID_BUF_LEN];
+    uint8_t *msg;
+    uint32_t len;
+    LnnSyncInfoMsgComplete complete;
+} SendSyncInfoParam;
+
+void LnnSendAsyncInfoMsg(void *param);
+SendSyncInfoParam *CreateSyncInfoParam(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
 
 #ifdef __cplusplus
 }

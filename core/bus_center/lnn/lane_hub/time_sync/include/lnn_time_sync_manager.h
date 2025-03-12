@@ -17,7 +17,6 @@
 #define LNN_TIME_SYNC_MANAGER_H
 
 #include "bus_center_event.h"
-#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {

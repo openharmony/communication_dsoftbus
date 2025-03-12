@@ -16,7 +16,6 @@
 #ifndef TRANS_SESSION_SERVICE_H
 #define TRANS_SESSION_SERVICE_H
 
-#include <stdint.h>
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus

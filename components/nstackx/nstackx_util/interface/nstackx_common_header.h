@@ -18,19 +18,13 @@
 
 #include "sys_common_header.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
 // C standard library header files
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <string.h>
-#include <time.h>
 
 #define PIPE_OUT 0
 #define PIPE_IN 1

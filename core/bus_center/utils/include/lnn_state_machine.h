@@ -16,8 +16,6 @@
 #ifndef LNN_STATE_MACHINE_H
 #define LNN_STATE_MACHINE_H
 
-#include <stdint.h>
-
 #include "common_list.h"
 #include "message_handler.h"
 

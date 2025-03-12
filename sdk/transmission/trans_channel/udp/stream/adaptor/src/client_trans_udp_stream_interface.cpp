@@ -17,14 +17,10 @@
 
 #include <map>
 #include <mutex>
-#include <string>
 
-#include "securec.h"
 #include "softbus_error_code.h"
 #include "stream_adaptor.h"
 #include "stream_adaptor_listener.h"
-#include "stream_common.h"
-#include "trans_log.h"
 
 using namespace OHOS;
 
@@ -191,7 +187,11 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     }
 
     auto newAdaptor = it->second;
-    newAdaptor->InitAdaptor(channelId, param, true, callback);
+    if (newAdaptor->InitAdaptor(channelId, param, true, callback) != true) {
+        CloseVtpStreamChannel(channelId, param->pkgName);
+        TRANS_LOGE(TRANS_STREAM, "adaptor already existed channelId=%{public}d.", channelId);
+        return SOFTBUS_ALREADY_EXISTED;
+    }
 
     Communication::SoftBus::IpAndPort ipPort;
     ipPort.ip = param->myIp;
@@ -236,7 +236,11 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     }
 
     auto newAdaptor = it->second;
-    newAdaptor->InitAdaptor(channelId, param, false, callback);
+    if (newAdaptor->InitAdaptor(channelId, param, false, callback) != true) {
+        CloseVtpStreamChannel(channelId, param->pkgName);
+        TRANS_LOGE(TRANS_STREAM, "adaptor already existed channelId=%{public}d.", channelId);
+        return SOFTBUS_ALREADY_EXISTED;
+    }
 
     Communication::SoftBus::IpAndPort ipPort;
     ipPort.ip = param->myIp;

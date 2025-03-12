@@ -21,12 +21,17 @@
 #define INT32_MAX_BIT_NUM 32
 #define MAX_CAP_NUM (CAPABILITY_NUM * INT32_MAX_BIT_NUM)
 
-#define BLE_SCAN_FILTER_LEN 5
+#define BLE_SCAN_FILTER_LEN 7
 #define SOFTBUS_BLE_CLIENT_ID 0x1
 
 #define SHA_HASH_LEN 32
 
 #define BT_ADDR_LEN 6
+#define BLE_DISCOVERY_TYPE_VAL_MAX_LEN 16
+
+#define BLE_DISCOVERY_TYPE          "discType"
+#define BLE_DISCOVERY_TYPE_HANDLE   "handle"
+#define BLE_REPORT_HANDLE_JSON_LEY  "handleId"
 
 /* TLV constant defination */
 #define TLV_TYPE_END 0x00
@@ -41,8 +46,8 @@
 #define POS_BUSINESS 1
 #define POS_BUSINESS_EXTENSION 2
 #define POS_USER_ID_HASH 3
-#define POS_CAPABLITY 5
-#define POS_CAPABLITY_EXTENSION 6
+#define POS_CAPABILITY 5
+#define POS_CAPABILITY_EXTENSION 6
 #define POS_TLV 7
 
 #define SHORT_USER_ID_HASH_LEN 2

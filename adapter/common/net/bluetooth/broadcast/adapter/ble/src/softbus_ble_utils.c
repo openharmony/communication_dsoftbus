@@ -243,6 +243,7 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
     DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE_ADAPTER, "bc scan filter is null!");
     DISC_CHECK_AND_RETURN_LOGE(filterSize > 0, DISC_BLE_ADAPTER, "filter size is 0 or smaller!");
     while (filterSize-- > 0) {
+        (nativeFilter + filterSize)->filterIndex = (filter + filterSize)->filterIndex;
         (nativeFilter + filterSize)->address = (char *)(filter + filterSize)->address;
         (nativeFilter + filterSize)->deviceName = (char *)(filter + filterSize)->deviceName;
         (nativeFilter + filterSize)->manufactureData = (unsigned char *)(filter + filterSize)->manufactureData;
@@ -382,7 +383,14 @@ uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, NULL, DISC_BLE_ADAPTER, "data is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(dataLen != NULL, NULL, DISC_BLE_ADAPTER, "data len is null!");
-    uint16_t payloadLen = (data->bcData.payloadLen > BC_DATA_MAX_LEN) ? BC_DATA_MAX_LEN : data->bcData.payloadLen;
+    uint16_t payloadLen = 0;
+    if (data->isSupportFlag) {
+        payloadLen = (data->bcData.payloadLen > BC_DATA_MAX_LEN) ? BC_DATA_MAX_LEN : data->bcData.payloadLen;
+    } else {
+        /* if not support flag, adv data can take more 3bytes, max adv dataLen is 27 */
+        payloadLen = (data->bcData.payloadLen > (BC_DATA_MAX_LEN + BC_FLAG_LEN)) ?
+            BC_DATA_MAX_LEN + BC_FLAG_LEN : data->bcData.payloadLen;
+    }
     uint16_t len = data->isSupportFlag ? payloadLen + BC_HEAD_LEN : payloadLen + BC_HEAD_LEN - BC_FLAG_LEN;
     uint8_t *advData = (uint8_t *)SoftBusCalloc(len);
     if (advData == NULL) {
@@ -494,10 +502,8 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             }
             SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
             data->payloadLen = len - ID_LEN - 1;
-            if (data->payloadLen < 0 || index + ID_LEN >= advLen) {
-                DISC_LOGE(DISC_BLE_ADAPTER, "parse payload failed");
-                return SOFTBUS_BC_ADAPTER_PARSE_FAIL;
-            }
+            DISC_CHECK_AND_RETURN_RET_LOGE(data->payloadLen >= 0 && index + ID_LEN < advLen,
+                SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse payload failed");
             isRsp = !isRsp;
             data->type = BtAdvTypeToSoftbus(type);
             data->id = ((uint16_t)advData[index + ID_LEN] << BC_SHIFT_BIT) | (uint16_t)advData[index + ID_LEN - 1];
@@ -509,6 +515,8 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
             DISC_CHECK_AND_RETURN_RET_LOGE(data->payload != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE_ADAPTER,
                 "malloc payload failed");
+            DISC_CHECK_AND_RETURN_RET_LOGE(index + ID_LEN + 1 < advLen, SOFTBUS_BC_ADAPTER_PARSE_FAIL,
+                DISC_BLE_ADAPTER, "advLen is invalid");
             (void)memcpy_s(data->payload, data->payloadLen, &advData[index + ID_LEN + 1], data->payloadLen);
         }
         index += len;

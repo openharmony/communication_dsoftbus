@@ -29,6 +29,7 @@
 #include "auth_meta_manager.h"
 #include "auth_session_json.h"
 #include "auth_session_key.h"
+#include "auth_pre_link.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
@@ -67,6 +68,7 @@ public:
     virtual int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen) = 0;
     virtual int32_t AuthFindLatestNormalizeKey(const char *udidHash,
         AuthDeviceKeyInfo *deviceKey, bool clearOldKey) = 0;
+    virtual bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time) = 0;
     virtual int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey) = 0;
     virtual void AuthGetLatestIdByUuid(const char *uuid,
         AuthLinkType type, bool isMeta, AuthHandle *authHandle) = 0;
@@ -76,6 +78,7 @@ public:
     virtual void DelDupAuthManager(AuthManager *auth) = 0;
     virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType,
         const char *deviceId, bool isPrecise, bool isPointToPoint) = 0;
+    virtual bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isPointToPoint) = 0;
     virtual int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen,
         const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen,
@@ -148,6 +151,7 @@ public:
     virtual bool PackCipherKeySyncMsg(void *json) = 0;
     virtual int32_t LnnGetP2pRole(const NodeInfo *info) = 0;
     virtual int32_t LnnGetStaFrequency(const NodeInfo *info) = 0;
+    virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -163,12 +167,14 @@ public:
     MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
     MOCK_METHOD3(LnnGetUdidByBrMac, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t (const char *, AuthDeviceKeyInfo *, bool));
+    MOCK_METHOD2(AuthIsLatestNormalizeKeyInTime, bool (const char *, uint64_t));
     MOCK_METHOD3(AuthFindDeviceKey, int32_t (const char *, int32_t, AuthDeviceKeyInfo *));
     MOCK_METHOD4(AuthGetLatestIdByUuid, void (const char *, AuthLinkType, bool, AuthHandle *));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t authId));
     MOCK_METHOD4(GetLatestSessionKey, int32_t (const SessionKeyList *, AuthLinkType, int32_t *, SessionKey *));
     MOCK_METHOD1(DelDupAuthManager, void (AuthManager *));
     MOCK_METHOD4(IsPotentialTrustedDevice, bool (TrustedRelationIdType, const char *, bool, bool));
+    MOCK_METHOD2(IsPotentialTrustedDeviceDp, bool (const char *, bool));
     MOCK_METHOD4(ConvertBytesToUpperCaseHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
     MOCK_METHOD4(ConvertHexStringToBytes, int32_t (unsigned char *, uint32_t, const char *, uint32_t));
     MOCK_METHOD3(LnnDecryptAesGcm, int32_t (AesGcmInputParam *, uint8_t **, uint32_t *));
@@ -208,6 +214,7 @@ public:
     MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(GenerateCertificate, int32_t (SoftbusCertChain *, const AuthSessionInfo *));
     MOCK_METHOD1(FreeSoftbusChain, void (SoftbusCertChain *));
+    MOCK_METHOD2(FindAuthPreLinkNodeById, int32_t (uint32_t, AuthPreLinkNode *));
     MOCK_METHOD1(InitSoftbusChain, int32_t (SoftbusCertChain *));
     MOCK_METHOD3(VerifyCertificate, int32_t (SoftbusCertChain *, const NodeInfo *, const AuthSessionInfo *));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));

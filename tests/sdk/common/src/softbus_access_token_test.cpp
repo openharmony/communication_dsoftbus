@@ -19,7 +19,7 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 
-void SetAceessTokenPermission(const char *processName)
+void SetAccessTokenPermission(const char *processName)
 {
     uint64_t tokenId;
     const char **perms = new const char *[2];

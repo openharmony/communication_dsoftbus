@@ -130,7 +130,7 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback001, TestSize.Level
     ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     res = 1;
-    ret = RegisterEventCallback(EVENT_SERVER_DEATH, NULL, data.get() + FRAME_HEADER_LEN);
+    ret = RegisterEventCallback(EVENT_SERVER_DEATH, nullptr, data.get() + FRAME_HEADER_LEN);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
 
@@ -227,14 +227,14 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback003, TestSize.Level
 HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
 {
     const char *pkgName = "000";
-    int32_t ret = InitSoftBus(NULL);
+    int32_t ret = InitSoftBus(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     ret = InitSoftBus(pkgName);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     char *clientName[SOFTBUS_PKGNAME_MAX_NUM] = {0};
-    uint32_t clientNameNum = GetSoftBusClientNameList(NULL, SOFTBUS_PKGNAME_MAX_NUM);
+    uint32_t clientNameNum = GetSoftBusClientNameList(nullptr, SOFTBUS_PKGNAME_MAX_NUM);
     EXPECT_EQ(0, clientNameNum);
     clientNameNum = GetSoftBusClientNameList(clientName, 0);
     EXPECT_EQ(0, clientNameNum);

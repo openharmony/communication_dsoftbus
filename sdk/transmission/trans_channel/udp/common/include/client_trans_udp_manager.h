@@ -16,11 +16,7 @@
 #ifndef CLIENT_TRANS_UDP_MANAGER_H
 #define CLIENT_TRANS_UDP_MANAGER_H
 
-#include <stdint.h>
-
 #include "client_trans_session_callback.h"
-#include "session.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,11 +51,12 @@ typedef struct {
     int32_t channelId;
     int32_t dfileId;
     int32_t businessType;
-    bool isEnable;
     sessionNeed info;
     int32_t routeType;
     int32_t sessionId;
     OnRenameFileCallback onRenameFile;
+    bool isEnable;
+    bool isTosSet;
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
@@ -95,6 +92,10 @@ int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId);
 int32_t TransSetUdpChannelRenameHook(int32_t channelId, OnRenameFileCallback onRenameFile);
 
 int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optValue);
+
+int32_t TransSetUdpChannelTos(int32_t channelId);
+
+int32_t TransGetUdpChannelTos(int32_t channelId, bool *isTosSet);
 #ifdef __cplusplus
 }
 #endif

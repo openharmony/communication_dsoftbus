@@ -97,7 +97,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
     ret = GetSessionKey(-1, key, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetSessionKey(sessionId, NULL, len);
+    ret = GetSessionKey(sessionId, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = GetSessionKey(sessionId, key, 0);
@@ -139,7 +139,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
     ret = GetSessionHandle(-1, &handle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetSessionHandle(sessionId, NULL);
+    ret = GetSessionHandle(sessionId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -198,13 +198,13 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level0)
 {
     int32_t ret;
 
-    ret = OpenAuthSession(NULL, &(g_addrInfo), 1, NULL);
+    ret = OpenAuthSession(nullptr, &(g_addrInfo), 1, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = OpenAuthSession(g_testSessionName, NULL, 1, NULL);
+    ret = OpenAuthSession(g_testSessionName, nullptr, 1, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = OpenAuthSession(g_testSessionName, &(g_addrInfo), -1, NULL);
+    ret = OpenAuthSession(g_testSessionName, &(g_addrInfo), -1, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -218,7 +218,7 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level0)
 {
     int32_t ret;
 
-    ret = OpenAuthSession(g_testSessionName, &(g_addrInfo), 1, NULL);
+    ret = OpenAuthSession(g_testSessionName, &(g_addrInfo), 1, nullptr);
     EXPECT_GE(SOFTBUS_OK, ret);
 }
 
@@ -245,14 +245,14 @@ HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
 HWTEST_F(TransSessionTest, SendFileTest001, TestSize.Level0)
 {
     int32_t sessionId = 1;
-    int32_t ret = SendFile(sessionId, NULL, NULL, 1);
+    int32_t ret = SendFile(sessionId, nullptr, nullptr, 1);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *sFileList[] = { TEST_FILE_NAME };
-    ret = SendFile(sessionId, sFileList, NULL, 0);
+    ret = SendFile(sessionId, sFileList, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendFile(sessionId, sFileList, NULL, 1);
+    ret = SendFile(sessionId, sFileList, nullptr, 1);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -286,7 +286,7 @@ HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level0)
     (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
     (void)ClientAddSession(&param, &sessionId, &isEnabled);
 
-    int32_t ret = SendFile(sessionId, sFileList, NULL, 1);
+    int32_t ret = SendFile(sessionId, sFileList, nullptr, 1);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -321,8 +321,8 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
     ListNode sessionServerList;
     ListInit(&sessionServerList);
     ClientCleanAllSessionWhenServerDeath(&sessionServerList);
-    SessionServerInfo *infoNode = NULL;
-    SessionServerInfo *infoNodeNext = NULL;
+    SessionServerInfo *infoNode = nullptr;
+    SessionServerInfo *infoNodeNext = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -351,8 +351,8 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ClientCleanAllSessionWhenServerDeath(&sessionServerList);
-    infoNode = NULL;
-    infoNodeNext = NULL;
+    infoNode = nullptr;
+    infoNodeNext = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
