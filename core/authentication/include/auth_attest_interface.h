@@ -16,11 +16,6 @@
 #ifndef AUTH_ATTEST_INTERFACE_H
 #define AUTH_ATTEST_INTERFACE_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "lnn_node_info.h"
-#include "auth_interface.h"
 #include "auth_session_fsm.h"
 
 #ifdef __cplusplus

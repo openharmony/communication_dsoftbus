@@ -252,6 +252,7 @@ typedef enum {
     CONNECTION_ADDR_ETH,      /**< Ethernet */
     CONNECTION_ADDR_SESSION,  /**< SESSION */
     CONNECTION_ADDR_USB,      /**< USB */
+    CONNECTION_ADDR_SESSION_WITH_KEY, /**< Session with key */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
@@ -265,6 +266,18 @@ typedef enum  {
     BLE_COC,
     BLE_PROTOCOL_MAX
 } BleProtocolType;
+
+/**
+ * @brief Enumerates {@link BlePriority} types of ble priority
+ *
+ */
+typedef enum  {
+    BLE_PRIORITY_DEFAULT = 0,
+    BLE_PRIORITY_BALANCED,
+    BLE_PRIORITY_HIGH,
+    BLE_PRIORITY_LOW_POWER,
+    BLE_PRIORITY_MAX
+} BlePriority;
 
 /**
  * @brief Defines the address of a device that is added to a LNN.
@@ -288,6 +301,7 @@ typedef struct {
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
             uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
             uint32_t psm;
+            BlePriority priority;
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {
@@ -304,6 +318,8 @@ typedef struct {
             int32_t sessionId;  /**< Session Id in int format */
             int32_t channelId;  /**< Channel Id in int format */
             int32_t type;   /**< Session type in int format */
+            int32_t localDeviceKeyId;
+            int32_t remoteDeviceKeyId;
         } session;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
@@ -387,7 +403,11 @@ typedef enum {
     /**virtual link capability */
     VLINK_CAPABILITY_BITMAP,
     /**Touch capability */
-    TOUCH_CAPABILITY_BITMAP
+    TOUCH_CAPABILITY_BITMAP,
+    /**Oop capability */
+    OOP_CAPABILITY_BITMAP,
+    /**Oh Approach capability */
+    OH_APPROACH_CAPABILITY_BITMAP
 } DataBitMap;
 
 typedef struct {
@@ -422,7 +442,9 @@ static const CapabilityMap g_capabilityMap[] = {
     {SHARE_CAPABILITY_BITMAP, (char *)"share"},
     {APPROACH_CAPABILITY_BITMAP, (char *)"approach"},
     {VLINK_CAPABILITY_BITMAP, (char *)"virtualLink"},
-    {TOUCH_CAPABILITY_BITMAP, (char *)"touch"}
+    {TOUCH_CAPABILITY_BITMAP, (char *)"touch"},
+    {OOP_CAPABILITY_BITMAP, (char *)"oop"},
+    {OH_APPROACH_CAPABILITY_BITMAP, (char *)"oh_approach"}
 };
 
 /**

@@ -16,13 +16,7 @@
 #ifndef AUTH_DEVICE_COMMON_KEY_H
 #define AUTH_DEVICE_COMMON_KEY_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "auth_interface.h"
 #include "auth_session_key.h"
-#include "lnn_node_info.h"
-#include "softbus_def.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -49,6 +43,7 @@ void AuthUpdateNormalizeKeyIndex(const char *udidHash, int64_t index, AuthLinkTy
     bool isServer);
 int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey);
 int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey);
+bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time);
 void AuthClearDeviceKey(void);
 
 #ifdef __cplusplus

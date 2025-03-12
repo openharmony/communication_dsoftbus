@@ -16,8 +16,6 @@
 #ifndef CLIENT_TRANS_SESSION_MANAGER_H
 #define CLIENT_TRANS_SESSION_MANAGER_H
 
-#include "session.h"
-#include "socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 #include "client_trans_session_adapter.h"
@@ -29,7 +27,9 @@ extern "C" {
 #define IS_SERVER 0
 #define IS_CLIENT 1
 #define ISHARE_AUTH_SESSION "IShareAuthSession"
+#define DM_AUTH_SESSION "ohos.distributedhardware.devicemanager.resident"
 #define ISHARE_AUTH_SESSION_MAX_IDLE_TIME 5000 // 5s
+#define DM_AUTH_SESSION_MAX_IDLE_TIME 275000 // 275s
 
 typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
@@ -105,6 +105,8 @@ typedef struct {
     uint32_t actionId;
     int32_t osType;
     CachedQosEvent cachedQosEvent;
+    bool isSupportTlv;
+    bool needAck;
 } SessionInfo;
 
 typedef struct {
@@ -135,7 +137,7 @@ typedef enum {
     KEY_PEER_UID,
     KEY_PKG_NAME,
     KEY_ACTION_ID,
-} SessionKey;
+} TransSessionKey;
 
 typedef struct {
     ListNode node;
@@ -178,9 +180,9 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName);
 
 int32_t ClientDeleteSession(int32_t sessionId);
 
-int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key);
+int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, TransSessionKey key);
 
-int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key);
+int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, TransSessionKey key);
 
 int32_t ClientGetChannelBySessionId(
     int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus);
@@ -190,6 +192,8 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType);
 
 int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data);
+
+int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck);
 
 int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType, SessionState *sessionState);
 
@@ -310,6 +314,12 @@ int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *maxIdleTime);
 int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime);
 
 void ClientTransOnPrivilegeClose(const char *peerNetworkId);
+
+int32_t TransGetSupportTlvBySocket(int32_t socket, bool *supportTlv, int32_t *optValueSize);
+
+int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck);
+
+bool IsRawAuthSession(const char *sessionName);
 #ifdef __cplusplus
 }
 #endif

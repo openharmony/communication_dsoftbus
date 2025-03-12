@@ -92,12 +92,12 @@ HWTEST_F(TransPendingPktTest, CreatePendingItem001, TestSize.Level1)
 {
     int32_t seqNum = 1111;
     int32_t channelId = 222;
-    PendingPktInfo *item = NULL;
+    PendingPktInfo *item = nullptr;
     item = CreatePendingItem(channelId, seqNum);
-    EXPECT_TRUE(item != NULL);
+    EXPECT_TRUE(item != nullptr);
 
     ReleasePendingItem(item);
-    ReleasePendingItem(NULL);
+    ReleasePendingItem(nullptr);
 }
 
 /**

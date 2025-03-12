@@ -16,26 +16,13 @@
 #ifndef TRANS_LANE_PENDING_CTL_H
 #define TRANS_LANE_PENDING_CTL_H
 
-#include <stdint.h>
-
 #include "lnn_lane_interface.h"
-#include "session.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef enum {
-    PARA_ACTION = 1,
-    PARA_BUTT,
-} ParaType;
-
-typedef struct {
-    uint32_t actionId;
-} ActionAddr;
 
 typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];

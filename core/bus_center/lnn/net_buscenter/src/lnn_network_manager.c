@@ -34,12 +34,13 @@
 #include "lnn_ohos_account.h"
 #include "lnn_oobe_manager.h"
 #include "lnn_physical_subnet_manager.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "lnn_connection_fsm.h"
-#include "lnn_settingdata_event_monitor.h"
+#include "lnn_init_monitor.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","
@@ -52,7 +53,7 @@
 
 #define LNN_CHECK_OOBE_DELAY_LEN (5 * 60 * 1000LL)
 
-static SoftBusMutex g_dataShareMutex;
+static SoftBusMutex g_dataShareLock;
 static bool g_isDataShareInit = false;
 
 typedef enum {
@@ -82,6 +83,8 @@ static SoftBusUserState g_backgroundState = SOFTBUS_USER_FOREGROUND;
 
 int32_t RegistIPProtocolManager(void);
 int32_t RegistNewIPProtocolManager(void);
+int32_t LnnInitUsbChannelManager(void);
+void LnnDeinitUsbChannelManager(void);
 
 int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
 {
@@ -92,6 +95,16 @@ int32_t __attribute__((weak)) RegistBtProtocolManager(void)
 {
     LNN_LOGW(LNN_BUILDER, "regist virtual bt protocol manager");
     return SOFTBUS_OK;
+}
+
+int32_t __attribute__((weak)) LnnInitUsbChannelManager(void)
+{
+    LNN_LOGW(LNN_BUILDER, "regist virtual usb channel manager");
+    return SOFTBUS_OK;
+}
+
+void __attribute__((weak)) LnnDeinitUsbChannelManager(void)
+{
 }
 
 static LnnNetIfManagerBuilder g_netifBuilders[LNN_MAX_NUM_TYPE] = {0};
@@ -243,7 +256,7 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
-    bool addrType[CONNECTION_ADDR_MAX] = {false};
+    bool addrType[CONNECTION_ADDR_MAX] = { false };
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusUserState userState = (SoftBusUserState)event->status;
     switch (userState) {
@@ -343,12 +356,12 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "Data share get invalid param");
         return;
     }
-    
+
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusDataShareState state = (SoftBusDataShareState)event->status;
     switch (state) {
         case SOFTBUS_DATA_SHARE_READY:
-            if (SoftBusMutexLock(&g_dataShareMutex) != SOFTBUS_OK) {
+            if (SoftBusMutexLock(&g_dataShareLock) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
                 return;
             }
@@ -356,18 +369,20 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
             if (!g_isDataShareInit) {
                 g_isDataShareInit = true;
                 LnnInitOOBEStateMonitorImpl();
-                LnnInitDeviceNameMonitorImpl();
                 RetryCheckOOBEState(NULL);
             }
-            (void)SoftBusMutexUnlock(&g_dataShareMutex);
+            (void)SoftBusMutexUnlock(&g_dataShareLock);
+            LnnInitModuleStatusSet(INIT_DEPS_DATA_SHARE, DEPS_STATUS_SUCCESS);
             break;
         default:
-            if (SoftBusMutexLock(&g_dataShareMutex) != SOFTBUS_OK) {
+            LnnInitModuleStatusSet(INIT_DEPS_DATA_SHARE, DEPS_STATUS_FAILED);
+            LnnInitModuleReturnSet(INIT_DEPS_DATA_SHARE, SOFTBUS_NETWORK_DATA_SHARE_QUERY_FAILED);
+            if (SoftBusMutexLock(&g_dataShareLock) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
                 return;
             }
             g_isDataShareInit = false;
-            (void)SoftBusMutexUnlock(&g_dataShareMutex);
+            (void)SoftBusMutexUnlock(&g_dataShareLock);
     }
 }
 
@@ -377,12 +392,12 @@ void LnnGetDataShareInitResult(bool *isDataShareInit)
         LNN_LOGE(LNN_BUILDER, "Data share get invalid param");
         return;
     }
-    if (SoftBusMutexLock(&g_dataShareMutex) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_dataShareLock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "gen data share mutex fail");
         return;
     }
     *isDataShareInit = g_isDataShareInit;
-    (void)SoftBusMutexUnlock(&g_dataShareMutex);
+    (void)SoftBusMutexUnlock(&g_dataShareLock);
 }
 
 int32_t LnnClearNetConfigList(void)
@@ -700,7 +715,6 @@ static int32_t RegistProtocolManager(void)
     return SOFTBUS_OK;
 }
 
-
 static int32_t LnnRegisterEvent(void)
 {
     if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
@@ -732,7 +746,7 @@ static int32_t LnnRegisterEvent(void)
 
 int32_t LnnInitNetworkManager(void)
 {
-    if (SoftBusMutexInit(&g_dataShareMutex, NULL) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&g_dataShareLock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "softbus mutex init fail");
         return SOFTBUS_NO_INIT;
     }
@@ -764,6 +778,11 @@ int32_t LnnInitNetworkManager(void)
         return ret;
     }
 #endif
+    ret = LnnInitUsbChannelManager();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "init usb channel manager failed, ret=%{public}d", ret);
+        return ret;
+    }
     ProtocolType type = 0;
     if (!LnnVisitProtocol(GetAllProtocols, &type)) {
         LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
@@ -788,8 +807,8 @@ void LnnSetUnlockState(void)
 int32_t LnnInitNetworkManagerDelay(void)
 {
     uint32_t i;
-
     char udid[UDID_BUF_LEN] = {0};
+
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get local udid error");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
@@ -815,6 +834,12 @@ int32_t LnnInitNetworkManagerDelay(void)
 
 bool LnnIsAutoNetWorkingEnabled(void)
 {
+    int32_t localDevTypeId = 0;
+    bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_WIFI_NET);
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
+        localDevTypeId == TYPE_WATCH_ID) {
+        return false;
+    }
     bool isConfigEnabled = false;
     if (IsActiveOsAccountUnlocked()) {
         g_isUnLock = true;
@@ -826,10 +851,11 @@ bool LnnIsAutoNetWorkingEnabled(void)
     }
     LNN_LOGI(LNN_BUILDER,
         "wifi condition state:config=%{public}d, background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, "
-        "unlock=%{public}d",
-        isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock);
+        "unlock=%{public}d, init check=%{public}d",
+        isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock,
+        isInitCheckSuc);
     return isConfigEnabled && (g_backgroundState == SOFTBUS_USER_FOREGROUND) && !g_isNightMode &&
-        g_isOOBEEnd && g_isUnLock;
+        g_isOOBEEnd && g_isUnLock && isInitCheckSuc;
 }
 
 void LnnDeinitNetworkManager(void)
@@ -851,6 +877,7 @@ void LnnDeinitNetworkManager(void)
 #ifdef ENABLE_FEATURE_LNN_WIFI
     LnnDeinitPhysicalSubnetManager();
 #endif
+    LnnDeinitUsbChannelManager();
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
         if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->deinit == NULL) {
             continue;
@@ -864,7 +891,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
-    (void)SoftBusMutexDestroy(&g_dataShareMutex);
+    (void)SoftBusMutexDestroy(&g_dataShareLock);
 }
 
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)

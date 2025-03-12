@@ -15,14 +15,7 @@
 
 #ifndef FILLP_PCB_H
 #define FILLP_PCB_H
-#include "opt.h"
-#include "fillp_os.h"
 #include "fillpinc.h"
-#include "hlist.h"
-#include "lf_ring.h"
-#include "queue.h"
-#include "log.h"
-#include "opt.h"
 #include "skiplist.h"
 #include "timing_wheel.h"
 #include "fillp_algorithm.h"

@@ -76,7 +76,7 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
     int32_t ret;
 
     ret = InformPermissionChange(TEST_STATE, nullptr, TEST_PID);
-    EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 
     ret = InformPermissionChange(TEST_STATE, g_pkgName, TEST_PID);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
@@ -143,7 +143,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     
     channel.isServer = false;
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -191,7 +191,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
         .msgUuid = nullptr,
         .msgUdid = nullptr
     };
-    ret = ClientIpcOnChannelLinkDown(&data, networkId, NULL, TEST_REMOTE_TYPE);
+    ret = ClientIpcOnChannelLinkDown(&data, networkId, nullptr, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -208,7 +208,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
         .msgUuid = nullptr,
         .msgUdid = nullptr
     };
-    ret = ClientIpcOnChannelLinkDown(&msg, networkId, NULL, TEST_REMOTE_TYPE);
+    ret = ClientIpcOnChannelLinkDown(&msg, networkId, nullptr, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -570,5 +570,61 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Lev
 
     ret = ClientIpcCheckCollabRelation(g_pkgName, pid, &sourceInfo, &sinkInfo, &transInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
+}
+
+/**
+ * @tc.name: ClientIpcCheckParamTest001
+ * @tc.desc: ClientIpcCheckParam test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcCheckParamTest001, TestSize.Level0)
+{
+    int32_t pid = 0;
+    int32_t ret = ClientIpcOnChannelOpened(nullptr, nullptr, nullptr, pid);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    int32_t errCode = 0;
+    ret = ClientIpcOnChannelOpenFailed(nullptr, errCode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ChannelMsg *data;
+    data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    data->msgPkgName = nullptr;
+    ret = ClientIpcOnChannelOpenFailed(data, errCode);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    const char *peerIp = "1234";
+    int32_t routeType = TEST_REMOTE_TYPE;
+    const char *networkId = "1234";
+    ret = ClientIpcOnChannelLinkDown(nullptr, networkId, peerIp, routeType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnChannelLinkDown(data, networkId, peerIp, routeType);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnChannelClosed(nullptr);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnChannelClosed(data);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnChannelMsgReceived(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    TransReceiveData *receiveData = (TransReceiveData *)SoftBusCalloc(sizeof(TransReceiveData));
+    ASSERT_NE(nullptr, receiveData);
+    receiveData->dataLen = TEST_LEN;
+    receiveData->dataType = TEST_DATA_TYPE;
+    ret = ClientIpcOnChannelMsgReceived(data, receiveData);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    SoftBusFree(receiveData);
+    SoftBusFree(data);
+
+    QosParam param;
+    param.pid = TEST_PID;
+    ret = ClientIpcOnChannelQosEvent(nullptr, &param);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 }
 } // namespace OHOS

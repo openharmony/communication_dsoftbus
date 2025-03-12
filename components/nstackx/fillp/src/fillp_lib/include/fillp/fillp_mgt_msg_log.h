@@ -17,7 +17,6 @@
 #define FILLP_MGT_MSG_LOG_H
 
 #include "fillp.h"
-#include "log.h"
 
 #ifdef __cplusplus
 extern "C" {

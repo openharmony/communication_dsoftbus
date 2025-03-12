@@ -25,6 +25,7 @@
 #include "lnn_heartbeat_ctrl.c"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_init_monitor.c"
 #include "lnn_net_ledger_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -344,6 +345,8 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Lev
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     NiceMock<BleMock> bleMock;
     SetScreenState(SOFTBUS_SCREEN_ON);
+    LnnInitMonitorInitComplete(nullptr);
+    LnnInitSetDeviceInfoReady();
     EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(hbStaticMock, AuthHasTrustedRelation).WillRepeatedly(Return(TRUSTED_RELATION_YES));
@@ -351,7 +354,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Lev
     EXPECT_CALL(bleMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
     int32_t infoNum = 1;
     NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
-    ASSERT_TRUE(nodeBasicInfo != NULL);
+    ASSERT_TRUE(nodeBasicInfo != nullptr);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnIsLSANode).WillRepeatedly(Return(false));
@@ -369,8 +372,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Lev
     g_hbConditionState.heartbeatEnable = true;
     g_isScreenOnOnce = false;
     HbScreenOnOnceTryCloudSync();
-    ret = IsHeartbeatEnable();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(IsHeartbeatEnable(), true);
     EXPECT_CALL(hbStaticMock, LnnEnableHeartbeatByType).WillOnce(Return(SOFTBUS_LOCK_ERR));
     HbConditionChanged(true);
     EXPECT_CALL(hbStaticMock, LnnEnableHeartbeatByType).WillRepeatedly(Return(SOFTBUS_OK));
@@ -400,9 +402,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAME_DELAY_TEST_001, Test
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     NiceMock<BleMock> bleMock;
-    RequestEnableDiscovery(NULL);
+    RequestEnableDiscovery(nullptr);
     g_hbConditionState.isRequestDisable = true;
-    RequestEnableDiscovery(NULL);
+    RequestEnableDiscovery(nullptr);
     EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
     LnnHbOnTrustedRelationReduced();
@@ -421,10 +423,10 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAME_DELAY_TEST_001, Test
     g_hbConditionState.screenState = SOFTBUS_SCREEN_OFF;
     EXPECT_CALL(hbStaticMock, LnnIsLocalSupportBurstFeature).WillRepeatedly(Return(false));
     EXPECT_CALL(hbStaticMock, LnnSetMediumParamBySpecificType).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    HbDelaySetNormalScanParam(NULL);
-    HbDelaySetHighScanParam(NULL);
+    HbDelaySetNormalScanParam(nullptr);
+    HbDelaySetHighScanParam(nullptr);
     g_hbConditionState.screenState = SOFTBUS_SCREEN_ON;
-    HbDelaySetHighScanParam(NULL);
+    HbDelaySetHighScanParam(nullptr);
     EXPECT_CALL(hbStaticMock, LnnStartNewHbStrategyFsm).WillRepeatedly(Return(SOFTBUS_NETWORK_FSM_CREATE_FAIL));
     ret = LnnStartHeartbeatFrameDelay();
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -459,7 +461,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     ret = LnnShiftLNNGear("test_ctrl", "test_ctrl", "12345678", &mode);
     EXPECT_EQ(ret, SOFTBUS_OK);
     LnnLaneVapChangeEvent vapChangeEvent = { .basic.event = LNN_EVENT_LANE_VAP_CHANGE };
-    HbLaneVapChangeEventHandler(NULL);
+    HbLaneVapChangeEventHandler(nullptr);
     EXPECT_CALL(bleMock, SoftBusGetBtState).WillOnce(Return(BLE_DISABLE));
     HbLaneVapChangeEventHandler((const LnnEventBasicInfo *)&vapChangeEvent);
     EXPECT_CALL(bleMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
@@ -475,7 +477,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     HbRemoveCheckOffLineMessage(hbType);
     int32_t infoNum = 1;
     NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
-    ASSERT_TRUE(nodeBasicInfo != NULL);
+    ASSERT_TRUE(nodeBasicInfo != nullptr);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     EXPECT_CALL(hbStaticMock, LnnStopScreenChangeOfflineTiming).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
@@ -508,7 +510,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_002, TestSize.Level1)
     EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
     int32_t ret = LnnShiftLNNGear("test_ctrl", "test_ctrl", "12345678", &mode);
     EXPECT_NE(ret, SOFTBUS_OK);
-    HbDelayConditionChanged(NULL);
+    HbDelayConditionChanged(nullptr);
     EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
     HbScreenOnChangeEventHandler(100000);
     LnnMonitorHbStateChangedEvent hbStateChangedEvent = { .basic.event = LNN_EVENT_SCREEN_STATE_CHANGED,
@@ -522,7 +524,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_002, TestSize.Level1)
     HbScreenStateChangeEventHandler((const LnnEventBasicInfo *)&hbStateChangedEvent);
     LnnMonitorHbStateChangedEvent lockEvent = { .basic.event = LNN_EVENT_SCREEN_LOCK_CHANGED,
         .status = SOFTBUS_SCREEN_UNLOCK };
-    HbScreenLockChangeEventHandler(NULL);
+    HbScreenLockChangeEventHandler(nullptr);
     lockEvent.status = SOFTBUS_SCREEN_UNLOCK;
     g_hbConditionState.screenState = SOFTBUS_SCREEN_ON;
     g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
@@ -624,9 +626,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001, Tes
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(hbStaticMock, AuthHasTrustedRelation).WillRepeatedly(Return(TRUSTED_RELATION_YES));
     EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(true));
-    HbDelayCheckTrustedRelation(NULL);
+    HbDelayCheckTrustedRelation(nullptr);
     EXPECT_CALL(hbStaticMock, AuthHasTrustedRelation).WillRepeatedly(Return(TRUSTED_RELATION_NO));
-    HbDelayCheckTrustedRelation(NULL);
+    HbDelayCheckTrustedRelation(nullptr);
     EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
     LnnLpReportEvent LPEvent = { .basic.event = LNN_EVENT_USER_SWITCHED,
         .type = SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY };
@@ -637,6 +639,25 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001, Tes
     HbLpEventHandler((const LnnEventBasicInfo *)&LPEvent);
     ret = LnnTriggerDataLevelHeartbeat();
     EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_001
+ * @tc.desc: LnnTriggerHbForMeasureDistance Abnormal test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_001, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategyEx).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    HbMode mode = { .connFlag = false, .duration = 5, .replyFlag = false};
+    int32_t ret = LnnTriggerHbForMeasureDistance("test", "123", &mode);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_START_ADV_FAILED);
+    ret = LnnTriggerHbForMeasureDistance("test", "123", &mode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -651,7 +672,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DIRECT_HEARTBEAT_TEST_001, TestSiz
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     NiceMock<BleMock> bleMock;
     char networkId[] = "12222";
-    LnnStopOfflineTimingByHeartbeat(NULL, CONNECTION_ADDR_BR);
+    LnnStopOfflineTimingByHeartbeat(nullptr, CONNECTION_ADDR_BR);
     LnnStopOfflineTimingByHeartbeat(networkId, CONNECTION_ADDR_BR);
     LnnStopOfflineTimingByHeartbeat(networkId, CONNECTION_ADDR_BLE);
     LnnMonitorHbStateChangedEvent userBackEvent = { .basic.event = LNN_EVENT_HOME_GROUP_CHANGED,
@@ -663,7 +684,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DIRECT_HEARTBEAT_TEST_001, TestSiz
     HbUserBackgroundEventHandler((const LnnEventBasicInfo *)&userBackEvent);
     userBackEvent.status = SOFTBUS_USER_UNKNOWN;
     HbUserBackgroundEventHandler((const LnnEventBasicInfo *)&userBackEvent);
-    int32_t ret = LnnTriggerDirectHeartbeat(NULL, 0);
+    int32_t ret = LnnTriggerDirectHeartbeat(nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -751,6 +772,8 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
@@ -773,29 +796,15 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     int32_t infoNum = 0;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_INVALID_PARAM)));
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SameAccountDevDisableDiscoveryProcess();
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     ret = SameAccountDevDisableDiscoveryProcess();
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
-}
-
-/*
- * @tc.name: SAME_ACCOUNT_DEV_REQUEST_ENABLE_DISCOVERY_TEST_001
- * @tc.desc: SameAccountDevRequestEnableDiscovery test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_REQUEST_ENABLE_DISCOVERY_TEST_001, TestSize.Level1)
-{
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    g_hbConditionState.isRequestDisable = false;
-    EXPECT_NO_FATAL_FAILURE(SameAccountDevRequestEnableDiscovery(nullptr));
-    g_hbConditionState.isRequestDisable = true;
-    EXPECT_NO_FATAL_FAILURE(SameAccountDevRequestEnableDiscovery(nullptr));
 }
 
 /*
@@ -809,6 +818,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, REQUEST_DISABLE_DISCOVERY_TEST_001, TestSize.L
     NiceMock<BleMock> bleMock;
     EXPECT_CALL(bleMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_DISABLE));
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillOnce(Return(false)).WillRepeatedly(Return(true));

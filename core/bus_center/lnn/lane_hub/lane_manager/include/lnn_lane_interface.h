@@ -16,7 +16,6 @@
 #ifndef LNN_LANE_INTERFACE_H
 #define LNN_LANE_INTERFACE_H
 
-#include <stdint.h>
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
@@ -28,6 +27,8 @@ extern "C" {
 
 #define INVALID_LANE_REQ_ID 0
 #define INVALID_LANE_ID 0
+#define DB_MAGIC_NUMBER 0x5A5A5A5A
+#define MESH_MAGIC_NUMBER 0xA5A5A5A5
 
 typedef enum {
     LANE_BR = 0x0,
@@ -191,6 +192,7 @@ typedef struct {
     uint32_t minLaneLatency;
     LaneRttLevel rttLevel;
     bool continuousTask;
+    bool reuseBestEffort;
 } QosInfo;
 
 typedef struct {
@@ -204,6 +206,7 @@ typedef struct {
     bool networkDelegate;
     bool p2pOnly;
     bool isSupportIpv6;
+    bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
     LaneTransType transType;
     ProtocolType acceptableProtocols;
     int32_t pid;
@@ -282,7 +285,7 @@ typedef struct {
     int32_t (*unRegisterLaneListener)(LaneType type);
 } LnnLaneManager;
 
-LnnLaneManager* GetLaneManager(void);
+LnnLaneManager *GetLaneManager(void);
 
 int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
 uint32_t ApplyLaneReqId(LaneType type);

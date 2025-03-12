@@ -22,11 +22,20 @@
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 
+#define BASE_VAILD_NUM 2
+
 static void MatchDiscEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
 {
     EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
     EXPECT_EQ(params[index].t, g_discAssigners[index].type);
     EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchTransEventNameTypeExtraInt64Param(const HiSysEventParam *params, int32_t index, int64_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
+    EXPECT_EQ(params[index].v.i64, extraParam);
 }
 
 static void MatchDiscEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char * extraParam)
@@ -57,6 +66,8 @@ MATCHER_P2(DiscValidParamArrayMatcher, inExtra, validSize, "disc valid param arr
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.initType);
     MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.serverType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.advHandle);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.bcOverMaxCnt);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.interFuncType);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.capabilityBit);
     MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.capabilityData);
@@ -65,11 +76,18 @@ MATCHER_P2(DiscValidParamArrayMatcher, inExtra, validSize, "disc valid param arr
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.coapChangeType);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.broadcastType);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.broadcastFreq);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.minInterval);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.maxInterval);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.currentNum);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.scanType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.scanCount);
     MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.scanCycle);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.discType);
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.discMode);
-    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.costTime);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.successCnt);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.failCnt);
+    MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.startTime);
+    MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.costTime);
     MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.localNetworkId);
     MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
@@ -91,6 +109,7 @@ MATCHER_P2(DiscInvalidParamArrayMatcher, inExtra, validSize, "disc invalid param
     int32_t index = 0;
     MatchDiscEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
     MatchDiscEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
+    index += BASE_VAILD_NUM;
     EXPECT_EQ(++index, validSize);
     return true;
 }

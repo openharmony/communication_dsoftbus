@@ -16,11 +16,8 @@
 #ifndef SOFTBUS_CONN_COMMON_H
 #define SOFTBUS_CONN_COMMON_H
 
-#include <stdint.h>
-
 #include "common_list.h"
 #include "message_handler.h"
-#include "softbus_error_code.h"
 #include "softbus_queue.h"
 #include "softbus_adapter_thread.h"
 
@@ -36,6 +33,7 @@ extern "C" {
 
 #define WAIT_TIMEOUT_OCCUPY                        (3 * 1000)
 #define WAIT_TIMEOUT_TRY_AGAIN                     (1 * 1000)
+#define WAIT_DISCONNECT_TIME_MS                    60
 
 // provide remove event compare function field
 typedef struct {

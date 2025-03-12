@@ -16,9 +16,7 @@
 #ifndef AUTH_META_PTK_PROC_H
 #define AUTH_META_PTK_PROC_H
 
-#include "auth_interface.h"
 #include "lnn_node_info.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus

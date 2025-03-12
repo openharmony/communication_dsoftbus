@@ -83,9 +83,9 @@ void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
     return GetNetworkInterface()->LnnNotifyBtAclStateChangeEvent(btMac, state);
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return GetNetworkInterface()->SoftBusAddBtStateListener(listener);
+    return GetNetworkInterface()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
 int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
@@ -101,6 +101,22 @@ void LnnNotifyBtStateChangeEvent(void *state)
 void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName)
 {
     return GetNetworkInterface()->LnnNotifyNetlinkStateChangeEvent(state, ifName);
+}
+
+int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis)
+{
+    return GetNetworkInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
+{
+    return GetNetworkInterface()->StartBaseClient(module, listener);
+}
+
+int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    return GetNetworkInterface()->AddTrigger(module, fd, trigger);
 }
 }
 }

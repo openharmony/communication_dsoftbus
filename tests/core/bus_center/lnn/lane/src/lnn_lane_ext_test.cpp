@@ -31,6 +31,7 @@
 #include "lnn_lane_select.h"
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"
+#include "lnn_lane_link_ledger.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -59,6 +60,7 @@ constexpr uint32_t FREQUENCY_2G_FIRST = 2412;
 constexpr uint32_t LOCAL_NUM = 8192;
 constexpr uint32_t ROM_NUM = 8;
 constexpr uint32_t ROM_NUM2 = 2;
+constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 
 static NodeInfo g_NodeInfo = {
     .p2pInfo.p2pRole = 1,
@@ -491,6 +493,8 @@ HWTEST_F(LNNLaneExtMockTest, LNN_SELECT_LANE_004, TestSize.Level1)
     uint32_t listNum = 0;
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_ACTIVED));
     EXPECT_CALL(linkMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
@@ -524,6 +528,8 @@ HWTEST_F(LNNLaneExtMockTest, LNN_SELECT_LANE_005, TestSize.Level1)
     uint32_t listNum = 0;
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_ACTIVED));
     EXPECT_CALL(linkMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
@@ -644,6 +650,59 @@ HWTEST_F(LNNLaneExtMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_003, TestSize.Level1
     selectParam.qosRequire.rttLevel = LANE_RTT_LEVEL_LOW;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_004
+* @tc.desc: lane select fileTransLane by qos
+* @tc.type: FUNC
+* @tc.require: I5FBFG
+*/
+HWTEST_F(LNNLaneExtMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_004, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = LANE_T_FILE;
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+            .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+            .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_005
+ * @tc.desc: lane select fileTransLane by qos
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
+HWTEST_F(LNNLaneExtMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_005, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+            .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+            .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = LANE_T_BYTE;
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1165,9 +1224,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_SELECT_02, TestSize.Level1)
 
     EXPECT_CALL(mock, SoftBusGetBtState)
         .WillRepeatedly(Return(1));
-    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BR), SOFTBUS_LANE_LOCAL_NO_BR_CAP);
-    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
-    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_DIRECT), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BR), SOFTBUS_LANE_LOCAL_NO_BR_STATIC_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE), SOFTBUS_LANE_LOCAL_NO_BLE_STATIC_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_DIRECT), SOFTBUS_LANE_LOCAL_NO_BLE_STATIC_CAP);
 }
 
 /*
@@ -1431,7 +1490,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_14, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
 
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_BAND_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_STATIC_CAP);
 }
 
 /*
@@ -1462,7 +1521,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_15, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 }
 
 /*
@@ -1493,7 +1552,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_16, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 }
 
 /*
@@ -1516,9 +1575,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_17, TestSize.Level1)
     selectParam.list.linkType[1] = LANE_COC_DIRECT;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     EXPECT_CALL(mock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(16), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(63), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(16), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(63), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
@@ -1555,9 +1614,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_18, TestSize.Level1)
     selectParam.list.linkType[1] = LANE_COC_DIRECT;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     EXPECT_CALL(mock, LnnGetLocalNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(16), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(63), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(16), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(63), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
@@ -1595,7 +1654,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_19, TestSize.Level1)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_NUM), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(LOCAL_NUM), Return(SOFTBUS_OK)));
     int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
-    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_COC_CAP);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_COC_FEATURE);
 }
 
 /*
@@ -1615,7 +1674,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_20, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_DEACTIVATING));
     int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
-    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_P2P_STATIC_CAP);
 }
 
 /*
@@ -1635,7 +1694,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_21, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
     int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
-    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_P2P_STATIC_CAP);
 }
 
 /*
@@ -1657,8 +1716,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_22, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
-    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
-
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_P2P_REUSE_FEATURE);
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_INACTIVE));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(ROM_NUM2), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
@@ -1713,9 +1773,90 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_24, TestSize.Level1)
 */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_25, TestSize.Level1)
 {
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
     LaneLinkType linkType = LANE_ETH;
     int32_t ret = LaneCheckLinkValid(NODE_NETWORK_ID, linkType, LANE_T_BUTT);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_ETH_STATIC_CAP);
+}
+
+/*
+* @tc.name: LNN_LANE_26
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_26, TestSize.Level1)
+{
+    LaneLinkType linkType = LANE_ETH;
+    int32_t ret = LaneCheckLinkValid(nullptr, linkType, LANE_T_BUTT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_LANE_27
+ * @tc.desc: lane select fileTransLane by LNN
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_27, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = LANE_T_FILE;
+    selectParam.expectedBw = 0;
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(listNum, 4);
+}
+
+/*
+ * @tc.name: LNN_LANE_28
+ * @tc.desc: lane select fileTransLane by LNN
+ * @tc.type: FUNC
+ * @tc.require: I5FBFG
+ */
+HWTEST_F(LNNLaneExtMockTest, LNN_LANE_28, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(63), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = LANE_T_BYTE;
+    selectParam.expectedBw = 0;
+    selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
+    selectParam.list.linkType[0] = LANE_WLAN_5G;
+    selectParam.list.linkType[1] = LANE_BR;
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(listNum, 2);
 }
 
 /*

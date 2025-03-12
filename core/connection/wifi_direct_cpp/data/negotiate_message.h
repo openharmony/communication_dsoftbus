@@ -17,12 +17,7 @@
 
 #include <map>
 #include <set>
-#include "info_container.h"
-#include "ipv4_info.h"
 #include "interface_info.h"
-#include "link_info.h"
-
-#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 enum class LegacyCommandType {

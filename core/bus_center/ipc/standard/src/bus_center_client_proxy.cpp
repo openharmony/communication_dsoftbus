@@ -18,10 +18,6 @@
 #include "bus_center_client_proxy_standard.h"
 #include "lnn_log.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_bus_center.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_permission.h"
 
 using namespace OHOS;
 
@@ -68,6 +64,10 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnNodeOnlineStateChanged(proxy.first.c_str(), isOnline, info, infoTypeLen);
     }
     return SOFTBUS_OK;
@@ -79,6 +79,10 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnNodeBasicInfoChanged(proxy.first.c_str(), info, infoTypeLen, type);
     }
     return SOFTBUS_OK;
@@ -94,6 +98,10 @@ int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type
     }
     for (const auto &proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnNodeStatusChanged(proxy.first.c_str(), info, infoTypeLen, type);
     }
     return SOFTBUS_OK;
@@ -105,6 +113,10 @@ int32_t ClinetOnLocalNetworkIdChanged()
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnLocalNetworkIdChanged(proxy.first.c_str());
     }
     return SOFTBUS_OK;
@@ -120,6 +132,10 @@ int32_t ClinetNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t 
             continue;
         }
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnNodeDeviceTrustedChange(proxy.first.c_str(), type, msg, msgLen);
     }
     return SOFTBUS_OK;
@@ -222,5 +238,21 @@ int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *n
         return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
     }
     clientProxy->OnDataLevelChanged(networkId, dataLevelInfo);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnBleRange(const char *pkgName, int32_t pid, const BleRangeInnerInfo *rangeInfo)
+{
+    if (pkgName == nullptr || rangeInfo == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+    }
+    clientProxy->OnBleRangeDone(rangeInfo);
     return SOFTBUS_OK;
 }

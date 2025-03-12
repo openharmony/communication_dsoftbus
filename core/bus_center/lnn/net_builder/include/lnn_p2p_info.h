@@ -16,11 +16,7 @@
 #ifndef LNN_P2P_INFO_H
 #define LNN_P2P_INFO_H
 
-#include <stdint.h>
-
-#include "common_list.h"
 #include "lnn_node_info.h"
-#include "softbus_common.h"
 #include "softbus_json_utils.h"
 
 #ifdef __cplusplus
@@ -60,6 +56,7 @@ int32_t LnnInitWifiDirect(void);
 void LnnDeinitWifiDirect(void);
 int32_t LnnInitPtk(void);
 void LnnDeinitPtk(void);
+void LnnClearPtkList(void);
 int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len);
 int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
 int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len);

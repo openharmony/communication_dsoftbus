@@ -263,8 +263,8 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
     TryFinishAuthSession(&authFsm);
     EXPECT_TRUE(AuthSessionHandleDeviceNotTrusted(INVALID_UDID_TEST) == SOFTBUS_OK);
     EXPECT_TRUE(AuthSessionHandleDeviceNotTrusted(UDID_TEST) == SOFTBUS_OK);
-    EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID_1) == SOFTBUS_OK);
-    EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID_1, true) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID, true) == SOFTBUS_OK);
     AuthSessionFsmExit();
 }
 
@@ -348,7 +348,7 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001, TestSize.L
     int32_t ret = RecoveryNormalizedDeviceKey(authFsm);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    authFsm->info.normalizedKey = (SessionKey *)SoftBusMalloc(sizeof(SessionKey));
+    authFsm->info.normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
     if (authFsm->info.normalizedKey == nullptr) {
         SoftBusFree(authFsm);
         return;

@@ -51,7 +51,7 @@ public:
     const IStreamListener *GetListenerCallback();
     std::shared_ptr<Communication::SoftBus::IStreamManager> GetStreamManager();
     void SetAliveState(bool state);
-    void InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
+    bool InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
         const IStreamListener *callback);
     void ReleaseAdaptor();
     bool GetAliveState();

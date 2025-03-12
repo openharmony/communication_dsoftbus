@@ -16,8 +16,6 @@
 #ifndef LNN_LANE_WIFI_DIRECT_LINK_H
 #define LNN_LANE_WIFI_DIRECT_LINK_H
 
-#include "lnn_lane_link.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

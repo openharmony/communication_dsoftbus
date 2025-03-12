@@ -16,7 +16,6 @@
 #ifndef TRANS_UDP_NEGOTIATION_H
 #define TRANS_UDP_NEGOTIATION_H
 
-#include <stdint.h>
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"

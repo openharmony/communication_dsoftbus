@@ -73,9 +73,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level1)
     ConnectOption option;
     memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_BR;
-    LnnDCReportConnectException(&option, 1);
+    EXPECT_NO_FATAL_FAILURE(LnnDCReportConnectException(&option, 1));
     option.type = CONNECT_P2P;
-    LnnDCReportConnectException(&option, 1);
+    EXPECT_NO_FATAL_FAILURE(LnnDCReportConnectException(&option, 1));
 }
 
 /*
@@ -89,9 +89,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest002, TestSize.Level1)
     ConnectOption option;
     memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_BR;
-    LnnDCClearConnectException(&option);
+    EXPECT_NO_FATAL_FAILURE(LnnDCClearConnectException(&option));
     option.type = CONNECT_P2P;
-    LnnDCClearConnectException(&option);
+    EXPECT_NO_FATAL_FAILURE(LnnDCClearConnectException(&option));
 }
 
 /*
@@ -105,11 +105,11 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest003, TestSize.Level1)
     NodeBasicInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     bool isOnline = true;
-    LnnDCProcessOnlineState(isOnline, &info);
+    EXPECT_NO_FATAL_FAILURE(LnnDCProcessOnlineState(isOnline, &info));
     isOnline = false;
-    LnnDCProcessOnlineState(isOnline, &info);
+    EXPECT_NO_FATAL_FAILURE(LnnDCProcessOnlineState(isOnline, &info));
     (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
-    LnnDCProcessOnlineState(isOnline, &info);
+    EXPECT_NO_FATAL_FAILURE(LnnDCProcessOnlineState(isOnline, &info));
 }
 
 /*

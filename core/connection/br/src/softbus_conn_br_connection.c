@@ -286,12 +286,13 @@ static void *StartServerServe(void *serveCtx)
         int32_t ret = LoopRead(connection);
         CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
             connection->connectionId, socketHandle, ret);
-
-        if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, socket=%{public}d", connection->connectionId,
-                socketHandle);
+        ret = SoftBusMutexLock(&connection->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, socket=%{public}d, err=%{public}d",
+                connection->connectionId, socketHandle, ret);
             g_sppDriver->DisConnect(socketHandle);
-            g_eventListener.onConnectionException(connection->connectionId, SOFTBUS_LOCK_ERR);
+            connection->socketHandle = INVALID_SOCKET_HANDLE;
+            g_eventListener.onConnectionException(connection->connectionId, ret);
             break;
         }
         if (connection->socketHandle != INVALID_SOCKET_HANDLE) {
@@ -492,14 +493,26 @@ int32_t ConnBrDisconnectNow(ConnBrConnection *connection)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR,
         "br disconnect now: lock failed, connId=%{public}u", connection->connectionId);
-    int32_t status = SOFTBUS_OK;
-    if (connection->socketHandle != INVALID_SOCKET_HANDLE) {
-        status = g_sppDriver->DisConnect(connection->socketHandle);
-        connection->socketHandle = INVALID_SOCKET_HANDLE;
+    int32_t socketHandle = connection->socketHandle;
+    if (socketHandle == INVALID_SOCKET_HANDLE) {
+        connection->state = BR_CONNECTION_STATE_CLOSED;
+        SoftBusMutexUnlock(&connection->lock);
+        return SOFTBUS_OK;
     }
+    connection->socketHandle = INVALID_SOCKET_HANDLE;
+    connection->state = BR_CONNECTION_STATE_CONNECTING;
+    SoftBusMutexUnlock(&connection->lock);
+    // ensure that the underlayer schedules read/write before disconnection
+    SoftBusSleepMs(WAIT_DISCONNECT_TIME_MS);
+    int32_t ret = g_sppDriver->DisConnect(socketHandle);
+    CONN_LOGI(CONN_BR, "disConnect connId=%{public}u, socketHandle=%{public}d, status=%{public}d",
+        connection->connectionId, socketHandle, ret);
+    ret = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_BR,
+        "lock failed, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
     connection->state = BR_CONNECTION_STATE_CLOSED;
     SoftBusMutexUnlock(&connection->lock);
-    return status;
+    return ret;
 }
 
 static int32_t BrPostReplyMessage(uint32_t connectionId, int32_t localRc)

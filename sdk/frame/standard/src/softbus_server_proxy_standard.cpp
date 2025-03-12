@@ -15,10 +15,7 @@
 
 #include "softbus_server_proxy_standard.h"
 
-#include "comm_log.h"
-#include "message_parcel.h"
 #include "softbus_client_stub.h"
-#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
@@ -149,11 +146,12 @@ int32_t SoftBusServerProxyFrame::SendMessage(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)pkgName;
     (void)addr;
     (void)addrTypeLen;
+    (void)isForceJoin;
     return SOFTBUS_OK;
 }
 
@@ -208,7 +206,6 @@ int32_t SoftBusServerProxyFrame::RegDataLevelChangeCb(const char *pkgName)
     return SOFTBUS_OK;
 }
 
-
 int32_t SoftBusServerProxyFrame::UnregDataLevelChangeCb(const char *pkgName)
 {
     (void)pkgName;
@@ -218,6 +215,18 @@ int32_t SoftBusServerProxyFrame::UnregDataLevelChangeCb(const char *pkgName)
 int32_t SoftBusServerProxyFrame::SetDataLevel(const DataLevel *dataLevel)
 {
     (void)dataLevel;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::RegBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::UnregBleRangeCb(const char *pkgName)
+{
+    (void)pkgName;
     return SOFTBUS_OK;
 }
 

@@ -408,7 +408,49 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return g_serverProxy->Invoke(g_serverProxy, SERVER_SET_DATA_LEVEL, &request, NULL, NULL);
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_REG_BLE_RANGE_CB, &request, NULL, NULL);
+}
+
+int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_UNREG_BLE_RANGE_CB, &request, NULL, NULL);
+}
+
+int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_TRIGGER_HB_FOR_RANGE, &request, NULL, NULL);
+}
+
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     LNN_LOGD(LNN_EVENT, "join Lnn ipc client push");
     if (addr == NULL || pkgName == NULL) {
@@ -425,6 +467,7 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
     WriteString(&request, pkgName);
     WriteUint32(&request, addrTypeLen);
     WriteBuffer(&request, addr, addrTypeLen);
+    WriteBool(&request, isForceJoin);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_JOIN_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -772,5 +815,13 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     (void)pkgName;
     (void)msg;
     (void)msgLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    (void)pkgName;
+    (void)nameData;
+    (void)len;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,9 @@
 #define INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 
 #include "data_level_inner.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "session.h"
 #include "socket.h"
-#include "softbus_common.h"
 #include "softbus_def.h"
 
 namespace OHOS {
@@ -77,6 +74,8 @@ public:
 
     virtual void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 
+    virtual void OnBleRangeDone(const BleRangeInnerInfo *rangeInfo);
+
     virtual int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos);
 
     virtual int32_t OnChannelBind(int32_t channelId, int32_t channelType);
@@ -84,8 +83,8 @@ public:
     virtual int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
 
-    virtual int32_t OnCheckCollabRelation(
-        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType);
+    virtual int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo,
+        int32_t channelId, int32_t channelType);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

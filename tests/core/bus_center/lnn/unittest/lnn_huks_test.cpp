@@ -26,6 +26,7 @@ using namespace testing::ext;
 
 static constexpr char KEY_ALIAS[] = "dsoftbus_test_key_alias";
 static constexpr char RANDOM_KEY[] = "b0d8bfed90d1e018c84f0a1abd4cbcc7f33481b42476719b401b1d70d3998a7c";
+constexpr uint32_t TIME_SIZE = 3;
 
 static struct HksBlob g_keyAlias = { 0 };
 
@@ -124,6 +125,162 @@ HWTEST_F(LNNHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
 }
 
 /*
+ * @tc.name: LNN_GENERATE_CEKEY_BY_HUKS_Test_001
+ * @tc.desc: keyAlias data is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, LNN_GENERATE_CEKEY_BY_HUKS_Test_001, TestSize.Level0)
+{
+    struct HksBlob *keyAlias = nullptr;
+    int32_t ret = LnnGenerateCeKeyByHuks(keyAlias);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_DELETE_CEKEY_BY_HUKS_Test_001
+ * @tc.desc: keyAlias data is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, LNN_DELETE_CEKEY_BY_HUKS_Test_001, TestSize.Level0)
+{
+    struct HksBlob *keyAlias = nullptr;
+    int32_t ret = LnnDeleteCeKeyByHuks(keyAlias);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_001
+ * @tc.desc: keyAlias is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_001, TestSize.Level0)
+{
+    struct HksBlob *keyAlias = nullptr;
+    struct HksBlob inData = { 0 };
+    inData.size = TIME_SIZE;
+    inData.data = (uint8_t *)SoftBusCalloc(inData.size);
+    if (inData.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc inData data fail";
+        return;
+    }
+    struct HksBlob outData = { 0 };
+    outData.size = TIME_SIZE;
+    outData.data = (uint8_t *)SoftBusCalloc(outData.size);
+    if (outData.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc outData data fail";
+        SoftBusFree(inData.data);
+        return;
+    }
+    int32_t ret = LnnCeEncryptDataByHuks(keyAlias, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData.data);
+    SoftBusFree(inData.data);
+}
+
+/*
+ * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_002
+ * @tc.desc: inData is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_002, TestSize.Level0)
+{
+    struct HksBlob keyAlias = { 0 };
+    keyAlias.size = TIME_SIZE;
+    keyAlias.data = (uint8_t *)SoftBusCalloc(keyAlias.size);
+    if (keyAlias.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc keyAlias data fail";
+        return;
+    }
+    struct HksBlob *inData = nullptr;
+    struct HksBlob outData = { 0 };
+    outData.size = TIME_SIZE;
+    outData.data = (uint8_t *)SoftBusCalloc(outData.size);
+    if (outData.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc outData data fail";
+        SoftBusFree(keyAlias.data);
+        return;
+    }
+    int32_t ret = LnnCeEncryptDataByHuks(&keyAlias, inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData.data);
+    SoftBusFree(keyAlias.data);
+}
+
+/*
+ * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_003
+ * @tc.desc: outData data is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_003, TestSize.Level0)
+{
+    struct HksBlob keyAlias = { 0 };
+    keyAlias.size = TIME_SIZE;
+    keyAlias.data = (uint8_t *)SoftBusCalloc(keyAlias.size);
+    if (keyAlias.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc keyAlias data fail";
+        return;
+    }
+    struct HksBlob inData = { 0 };
+    inData.size = TIME_SIZE;
+    inData.data = (uint8_t *)SoftBusCalloc(inData.size);
+    if (inData.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc inData data fail";
+        SoftBusFree(keyAlias.data);
+        return;
+    }
+    struct HksBlob *outData = nullptr;
+    int32_t ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(inData.data);
+    SoftBusFree(keyAlias.data);
+}
+
+/*
+ * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_004
+ * @tc.desc: inData size is INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_004, TestSize.Level0)
+{
+    struct HksBlob keyAlias = { 0 };
+    keyAlias.size = TIME_SIZE;
+    keyAlias.data = (uint8_t *)SoftBusCalloc(keyAlias.size);
+    if (keyAlias.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc keyAlias data fail";
+        return;
+    }
+    struct HksBlob inData = { 0 };
+    inData.size = TIME_SIZE;
+    inData.data = (uint8_t *)SoftBusCalloc(inData.size);
+    if (inData.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc inData data fail";
+        SoftBusFree(keyAlias.data);
+        return;
+    }
+    struct HksBlob outData = { 0 };
+    outData.size = TIME_SIZE;
+    outData.data = (uint8_t *)SoftBusCalloc(outData.size);
+    if (outData.data == nullptr) {
+        GTEST_LOG_(INFO) << "calloc outData data fail";
+        SoftBusFree(inData.data);
+        SoftBusFree(keyAlias.data);
+        return;
+    }
+    inData.size = 0;
+    int32_t ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData.data);
+    SoftBusFree(inData.data);
+    SoftBusFree(keyAlias.data);
+}
+
+/*
  * @tc.name: Decrypt_Data_Test_001
  * @tc.desc: decrypt data test
  * @tc.type: FUNC
@@ -141,7 +298,7 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
 
     struct HksBlob decryptData = { 0 };
     decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
-    if (decryptData.data == NULL) {
+    if (decryptData.data == nullptr) {
         SoftBusFree(encryptData.data);
         return;
     }

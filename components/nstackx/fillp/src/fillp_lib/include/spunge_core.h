@@ -15,14 +15,7 @@
 
 #ifndef SPUNGE_CORE_H
 #define SPUNGE_CORE_H
-#include "fillpinc.h"
 #include "spunge.h"
-#include "lf_ring.h"
-#include "queue.h"
-#include "log.h"
-#include "hlist.h"
-#include "pcb.h"
-#include "spunge_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

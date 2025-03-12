@@ -15,7 +15,6 @@
 
 #ifndef SOFTBUS_CONN_INTERFACE_H
 #define SOFTBUS_CONN_INTERFACE_H
-#include <stdint.h>
 
 #include "softbus_common.h"
 #include "softbus_def.h"
@@ -36,6 +35,7 @@ typedef enum {
     MODULE_AUTH_CHANNEL = 8,
     MODULE_AUTH_MSG = 9,
     MODULE_BLUETOOTH_MANAGER = 9,
+    MODULE_AUTH_TEST = 10,
     MODULE_CONNECTION = 11,
     MODULE_DIRECT_CHANNEL = 12,
     MODULE_PROXY_CHANNEL = 13,
@@ -50,6 +50,7 @@ typedef enum {
     MODULE_P2P_NEGO = 22,
     MODULE_AUTH_SYNC_INFO = 23,
     MODULE_PTK_VERIFY = 24,
+    MODULE_SESSION_AUTH = 25,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_NIP_BR_CHANNEL = 201,

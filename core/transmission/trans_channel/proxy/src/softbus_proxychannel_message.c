@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,6 +247,10 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
 
 static int32_t TransProxyParseMessageNoDecrypt(ProxyMessage *msg)
 {
+    if (msg->dateLen > (PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN)) {
+        TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
     uint8_t *allocData = (uint8_t *)SoftBusCalloc((uint32_t)msg->dateLen);
     if (allocData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc data fail");
@@ -268,7 +272,8 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
     int32_t ret = TransProxyParseMessageHead(data, len, msg);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
-        if (msg->dateLen <= 0 || (uint32_t)msg->dateLen < sizeof(uint32_t)) {
+        if ((uint32_t)msg->dateLen < (sizeof(uint32_t) + OVERHEAD_LEN) ||
+            (uint32_t)msg->dateLen > (PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN + sizeof(uint32_t))) {
             TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
@@ -426,7 +431,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 
 static void TransProxyCheckIsApp(AppInfo *appInfo, cJSON *root)
 {
-    if (!SoftBusCheckIsApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
+    if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
 
@@ -506,6 +511,9 @@ static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
         !AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, info->appInfo.myData.dataConfig)) {
         return false;
     }
+    if (!AddNumberToJsonObject(root, TRANS_CAPABILITY, info->appInfo.channelCapability)) {
+        return false;
+    }
     return true;
 }
 
@@ -564,21 +572,18 @@ EXIT:
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, NULL, TRANS_CTRL, "invalid param.");
-
     AppInfo *appInfo = &(chan->appInfo);
-    if (appInfo == NULL || appInfo->appType == APP_TYPE_NOT_CARE) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, NULL, TRANS_CTRL, "invalid param.");
+    if (appInfo->appType == APP_TYPE_NOT_CARE) {
+        TRANS_LOGE(TRANS_CTRL, "invalid appType.");
         return NULL;
     }
 
     cJSON *root = cJSON_CreateObject();
-    if (root == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
-        return NULL;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, NULL, TRANS_CTRL, "create json object failed.");
     if (!AddStringToJsonObject(root, JSON_KEY_IDENTITY, chan->identity) ||
-        !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId)) {
+        !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
+        !AddNumberToJsonObject(root, TRANS_CAPABILITY, appInfo->channelCapability)) {
         cJSON_Delete(root);
         return NULL;
     }
@@ -714,6 +719,9 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
                                  sizeof(chanInfo->appInfo.peerData.pkgName))) {
         TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
     }
+    if (!GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&(chanInfo->appInfo.channelCapability))) {
+        chanInfo->appInfo.channelCapability = 0;
+    }
     cJSON_Delete(root);
     return SOFTBUS_OK;
 }
@@ -804,7 +812,9 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         appInfo->callingTokenId = TOKENID_NOT_SET;
     }
     (void)GetJsonObjectSignedNumber64Item(root, JSON_KEY_ACCOUNT_ID, &(appInfo->peerData.accountId));
-    (void)GetJsonObjectNumberItem(root, JSON_KEY_USER_ID, &(appInfo->peerData.userId));
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_USER_ID, &(appInfo->peerData.userId))) {
+        appInfo->peerData.userId = INVALID_USER_ID;
+    }
     return SOFTBUS_OK;
 }
 
@@ -857,6 +867,9 @@ static int32_t TransProxyGetJsonObject(cJSON *root, const char *msg, int32_t len
     if (!GetJsonObjectNumberItem(root, API_VERSION, (int32_t *)&(chan->appInfo.myData.apiVersion))) {
         TRANS_LOGD(TRANS_CTRL, "peer apiVersion is null.");
     }
+    uint32_t remoteCapability = 0;
+    (void)GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&remoteCapability);
+    chan->appInfo.channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     return SOFTBUS_OK;
 }
 

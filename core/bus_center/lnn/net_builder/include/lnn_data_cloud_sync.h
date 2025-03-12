@@ -16,11 +16,8 @@
 #ifndef LNN_DATA_CLOUD_SYNC_H
 #define LNN_DATA_CLOUD_SYNC_H
 
-#include <stdint.h>
-
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_timer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,7 +67,7 @@ typedef enum {
 
 void LnnInitCloudSyncModule(void);
 void LnnDeInitCloudSyncModule(void);
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info);
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid);
 int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info);
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength);
 int32_t LnnDeleteSyncToDB(void);

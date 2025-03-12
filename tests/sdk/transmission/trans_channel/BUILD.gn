@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -142,8 +142,10 @@ if (defined(ohos_lite)) {
     sources = [ "proxy/client_trans_proxy_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
-    include_dirs +=
-        [ "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src" ]
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+    ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
     if (is_standard_system) {
@@ -164,8 +166,21 @@ if (defined(ohos_lite)) {
     sources = [ "udp/common/client_trans_udp_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+    ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
+    if (enhanced) {
+      include_dirs += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface" ]
+      deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
+    } else {
+      include_dirs +=
+          [ "$dsoftbus_root_path/components/nstackx/nstackx_util/interface" ]
+      deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
+    }
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
@@ -222,6 +237,7 @@ if (defined(ohos_lite)) {
     sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
       "$dsoftbus_root_path/sdk/transmission/ipc/include",
@@ -253,6 +269,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
       "$dsoftbus_root_path/sdk/transmission/ipc/include",

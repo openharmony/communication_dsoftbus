@@ -15,10 +15,6 @@
 
 #include "null_processor.h"
 
-#include "conn_log.h"
-#include "softbus_error_code.h"
-
-#include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_executor.h"
 
 namespace OHOS::SoftBus {

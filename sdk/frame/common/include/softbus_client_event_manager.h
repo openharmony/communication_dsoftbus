@@ -17,7 +17,6 @@
 #define SOFTBUS_CLIENT_EVENT_MANAGER_H
 
 #include "softbus.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {

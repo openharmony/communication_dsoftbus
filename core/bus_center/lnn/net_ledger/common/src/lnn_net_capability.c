@@ -22,6 +22,7 @@
 
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16
+#define DEFAUTL_LNN_STATIC_CAPABILITY 0x3F
 
 bool LnnHasCapability(uint32_t capability, NetCapability type)
 {
@@ -91,3 +92,70 @@ uint32_t LnnGetNetCapabilty(void)
     }
     return capability;
 }
+
+bool LnnHasStaticNetCap(uint32_t capability, StaticNetCapability type)
+{
+    if (type >= STATIC_CAP_BIT_COUNT) {
+        LNN_LOGE(LNN_LEDGER, "in para error");
+        return false;
+    }
+    uint32_t cap = 0;
+    (void)LnnSetStaticNetCap(&cap, type);
+    if ((capability & cap) != 0) {
+        return true;
+    }
+    return false;
+}
+
+int32_t LnnSetStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    if (capability == NULL || type >= STATIC_CAP_BIT_COUNT) {
+        LNN_LOGE(LNN_LEDGER, "in para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *capability = (*capability) | (1 << (uint32_t)type);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    if (capability == NULL || type >= STATIC_CAP_BIT_COUNT) {
+        LNN_LOGE(LNN_LEDGER, "in para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *capability = (*capability) & (~(1 << (uint32_t)type));
+    return SOFTBUS_OK;
+}
+
+uint32_t LnnGetDefaultStaticNetCap(void)
+{
+    uint32_t capability = 0;
+    uint32_t configValue;
+
+    if (SoftbusGetConfig(SOFTBUS_INT_STATIC_NET_CAPABILITY,
+        (unsigned char *)&configValue, sizeof(configValue)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get lnn capbility fail, use default value");
+        configValue = DEFAUTL_LNN_STATIC_CAPABILITY;
+    }
+    LNN_LOGI(LNN_LEDGER, "lnn static capbility configValue=%{public}u", configValue);
+    if ((configValue & (1 << STATIC_CAP_BIT_BLE)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    }
+    if ((configValue & (1 << STATIC_CAP_BIT_BR)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BR);
+    }
+    if ((configValue & (1 << STATIC_CAP_BIT_WIFI)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_WIFI);
+    }
+    if ((configValue & (1 << STATIC_CAP_BIT_P2P)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_P2P);
+    }
+    if ((configValue & (1 << STATIC_CAP_BIT_ENHANCED_P2P)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ENHANCED_P2P);
+    }
+    if ((configValue & (1 << STATIC_CAP_BIT_ETH)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ETH);
+    }
+    return capability;
+}
+

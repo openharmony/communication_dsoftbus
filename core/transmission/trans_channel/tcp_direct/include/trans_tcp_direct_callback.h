@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_TCP_DIRECT_CALLBACK_H
 #define SOFTBUS_TCP_DIRECT_CALLBACK_H
 
-#include <stdint.h>
-
 #include "trans_channel_callback.h"
 
 #ifdef __cplusplus

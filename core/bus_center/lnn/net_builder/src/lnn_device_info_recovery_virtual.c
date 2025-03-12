@@ -65,6 +65,13 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnRetrieveDeviceInfoByUdid(const char *udid, NodeInfo *deviceInfo)
+{
+    (void)udid;
+    (void)deviceInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info)
 {
     (void)networkId;
@@ -131,4 +138,11 @@ void LnnClearAuthExchangeUdid(const char *networkId)
 {
     (void)networkId;
     return;
+}
+
+int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid)
+{
+    (void)json;
+    (void)peerudid;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

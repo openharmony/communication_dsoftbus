@@ -17,8 +17,8 @@
 #define LNN_HEARTBEAT_CTRL_H
 
 #include "bus_center_event.h"
+#include "ble_range.h"
 #include "lnn_heartbeat_medium_mgr.h"
-#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +26,7 @@ extern "C" {
 
 SoftBusScreenState GetScreenState(void);
 void SetScreenState(SoftBusScreenState state);
+void HbEnableDiscovery(void);
 int32_t LnnStartHeartbeatFrameDelay(void);
 int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
@@ -33,6 +34,7 @@ void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType a
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 int32_t LnnShiftLNNGearWithoutPkgName(
     const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType);
+int32_t LnnTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 
@@ -49,6 +51,9 @@ void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
 bool IsHeartbeatEnable(void);
 bool LnnIsCloudSyncEnd(void);
+
+void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback);
+void LnnUnregBleRangeCb(void);
 
 #ifdef __cplusplus
 }

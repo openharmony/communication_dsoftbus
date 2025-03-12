@@ -31,9 +31,9 @@ int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionNa
     return SOFTBUS_OK;
 }
 
-int32_t TransCheckServerAccessControl(uint64_t firstCallingId)
+int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
 {
-    (void)firstCallingId;
+    (void)appInfo;
     return SOFTBUS_OK;
 }
 uint64_t TransACLGetFirstTokenID(void)

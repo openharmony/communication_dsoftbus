@@ -40,7 +40,7 @@ public:
     int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t msgType) override;
 
-    int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) override;
+    int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin) override;
     int32_t LeaveLNN(const char *pkgName, const char *networkId) override;
     int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) override;
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
@@ -65,7 +65,11 @@ public:
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) override;
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
+    int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode) override;
+    int32_t RegBleRangeCb(const char *pkgName) override;
+    int32_t UnregBleRangeCb(const char *pkgName) override;
     int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
+    int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) override;

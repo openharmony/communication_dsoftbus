@@ -341,7 +341,7 @@ static int32_t JudgingBleState(uint32_t remote)
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (((local & (1 << BIT_BLE)) == 0) || ((remote & (1 << BIT_BLE)) == 0)) {
-        LNN_LOGE(LNN_BUILDER, "can't support BLE, loal=%{public}u, remote=%{public}u", local, remote);
+        LNN_LOGE(LNN_BUILDER, "can't support BLE, local=%{public}u, remote=%{public}u", local, remote);
         return SOFTBUS_BLUETOOTH_OFF;
     }
     return SOFTBUS_OK;
@@ -353,8 +353,20 @@ static int32_t ProcessEnhancedP2pDupBle(const DeviceVerifyPassMsgPara *msgPara)
         LNN_LOGE(LNN_BUILDER, "can't support BLE");
         return SOFTBUS_BLUETOOTH_OFF;
     }
-
-    return ProcessBleOnline(msgPara->nodeInfo, &(msgPara->addr), BIT_SUPPORT_ENHANCEDP2P_DUP_BLE);
+    int32_t ret = 0;
+    switch (msgPara->authHandle.type) {
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            ret = ProcessBleOnline(msgPara->nodeInfo, &(msgPara->addr), BIT_SUPPORT_ENHANCEDP2P_DUP_BLE);
+            break;
+        case AUTH_LINK_TYPE_SESSION:
+            ret = ProcessBleOnline(msgPara->nodeInfo, &(msgPara->addr), BIT_SUPPORT_SESSION_DUP_BLE);
+            AuthRemoveAuthManagerByAuthHandle(msgPara->authHandle);
+            break;
+        default:
+            LNN_LOGE(LNN_BUILDER, "auth type is %{public}d, not support", msgPara->authHandle.type);
+            ret = SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return ret;
 }
 
 static int32_t ProcessDeviceVerifyPass(const void *para)
@@ -373,8 +385,9 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
-        LNN_LOGI(LNN_BUILDER, "auth type is enhanced p2p, start dup ble");
+    if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P ||
+            msgPara->authHandle.type == AUTH_LINK_TYPE_SESSION) {
+        LNN_LOGI(LNN_BUILDER, "auth type is %{public}d, start dup ble.", msgPara->authHandle.type);
         rc = ProcessEnhancedP2pDupBle(msgPara);
         if (msgPara->nodeInfo != NULL) {
             SoftBusFree((void *)msgPara->nodeInfo);
@@ -770,6 +783,26 @@ static int32_t ProcessLeaveByAuthId(const void *para)
     return rc;
 }
 
+static int32_t ProcessSetReSyncDeviceName(const void *para)
+{
+    (void)para;
+    LnnConnectionFsm *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &LnnGetNetBuilder()->fsmList, LnnConnectionFsm, node) {
+        if (!item->isDead && (item->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
+            if (item->connInfo.nodeInfo != NULL) {
+                LNN_LOGI(LNN_BUILDER, "[id=%{public}u] need resync device name, authId: %{public}" PRId64, item->id,
+                    item->connInfo.authHandle.authId);
+                item->connInfo.nodeInfo->isNeedReSyncDeviceName = true;
+            }
+        }
+    }
+    if (para != NULL) {
+        SoftBusFree((void *)para);
+        para = NULL;
+    }
+    return SOFTBUS_OK;
+}
+
 static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_BUILD_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
@@ -786,6 +819,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_BUILD_MAX] = {
     ProcessLeaveByAddrType,
     ProcessLeaveSpecific,
     ProcessLeaveByAuthId,
+    ProcessSetReSyncDeviceName,
 };
 
 void NetBuilderMessageHandler(SoftBusMessage *msg)

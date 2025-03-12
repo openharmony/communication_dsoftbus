@@ -101,7 +101,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest001, TestSize.Level1)
     ConnectOption *connInfo = (ConnectOption *)SoftBusMalloc(sizeof(ConnectOption));
     ASSERT_TRUE(connInfo != nullptr);
    
-    int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, NULL);
+    int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusFree(appInfo);

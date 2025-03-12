@@ -35,6 +35,7 @@
 #include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
+#include "lnn_init_monitor.h"
 
 #define SHORT_ACCOUNT_HASH_LEN 2
 
@@ -111,8 +112,7 @@ bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
     return ((feature & (1 << (uint32_t)capaBit)) != 0);
 }
 
-static void NotifyTransDataReceived(AuthHandle authHandle,
-    const AuthDataHead *head, const uint8_t *data, uint32_t len)
+static void NotifyTransDataReceived(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
     AuthTransListener *listener = NULL;
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
@@ -230,22 +230,21 @@ int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_CONN, "not found auth manager, type=%{public}d, authId=%{public}" PRId64,
-            authHandle->type, authHandle->authId);
+        AUTH_LOGE(AUTH_CONN, "not found auth manager, type=%{public}d, authId=%{public}" PRId64, authHandle->type,
+            authHandle->authId);
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     int32_t ret = SOFTBUS_OK;
     if (!CheckSessionKeyListExistType(&auth->sessionKeyList, (AuthLinkType)authHandle->type)) {
-        AUTH_LOGI(AUTH_CONN, "sessionkey invalid, authId=%{public}" PRId64", type=%{public}d",
-            authHandle->authId, authHandle->type);
+        AUTH_LOGI(AUTH_CONN, "sessionkey invalid, authId=%{public}" PRId64 ", type=%{public}d", authHandle->authId,
+            authHandle->type);
         ret = SOFTBUS_AUTH_SESSION_KEY_INVALID;
     }
     DelDupAuthManager(auth);
     return ret;
 }
 
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
-    bool isMeta)
+int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
 {
     if (info == NULL || callback == NULL) {
         AUTH_LOGE(AUTH_CONN, "info or callback is null");
@@ -286,23 +285,13 @@ void AuthCloseConn(AuthHandle authHandle)
     AuthMetaCloseConn(authHandle.authId);
 }
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
 {
-    if (networkId == NULL || callback == NULL) {
-        AUTH_LOGE(AUTH_CONN, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return AuthAllocLane(networkId, authRequestId, callback);
-}
-
-void AuthFreeConn(const AuthHandle *authHandle)
-{
-    if (authHandle == NULL) {
-        AUTH_LOGE(AUTH_CONN, "param invalid");
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
         return;
     }
-    AuthFreeLane(authHandle);
-    DelAuthReqInfoByAuthHandle(authHandle);
+    RemoveAuthManagerByAuthId(authHandle);
 }
 
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
@@ -319,6 +308,14 @@ int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo 
         return SOFTBUS_INVALID_PARAM;
     }
     return AuthDeviceGetConnInfoByType(uuid, type, connInfo);
+}
+
+int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient)
+{
+    if (isMeta) {
+        return AuthMetaGetConnInfoBySide(uuid, isClient, connInfo);
+    }
+    return AuthDeviceGetPreferConnInfo(uuid, connInfo);
 }
 
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
@@ -367,8 +364,7 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
     return AuthDeviceGetIdByUuid(uuid, type, isServer);
 }
 
-int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index,
-    AuthHandle *authHandle)
+int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index, AuthHandle *authHandle)
 {
     if (connInfo == NULL || authHandle == NULL) {
         AUTH_LOGE(AUTH_CONN, "param is null");
@@ -380,6 +376,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             ret = LnnGetRemoteNodeInfoByKey(connInfo->info.ipInfo.ip, &info);
             if (ret != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by ip failed, ret=%{public}d", ret);
@@ -416,10 +413,10 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
     return AuthDeviceGetAuthHandleByIndex(info.deviceInfo.deviceUdid, isServer, index, authHandle);
 }
 
-static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeInfo, AuthDeviceKeyInfo *keyInfo,
-    bool hasDeviceKey)
+static int32_t FillAuthSessionInfo(
+    AuthSessionInfo *info, const NodeInfo *nodeInfo, AuthDeviceKeyInfo *keyInfo, bool hasDeviceKey)
 {
-    uint8_t localUdidHash[UDID_HASH_LEN] = {0};
+    uint8_t localUdidHash[UDID_HASH_LEN] = { 0 };
     if (LnnGetLocalByteInfo(BYTE_KEY_UDID_HASH, localUdidHash, UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "get local udid hash fail");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
@@ -486,8 +483,8 @@ static int32_t AuthDirectOnlineWithoutSessionKey(AuthSessionInfo *info, AuthDevi
     return SOFTBUS_OK;
 }
 
-int32_t AuthRestoreAuthManager(const char *udidHash,
-    const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
+int32_t AuthRestoreAuthManager(
+    const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
     if (udidHash == NULL || connInfo == NULL || nodeInfo == NULL || authId == NULL) {
         AUTH_LOGE(AUTH_CONN, "restore manager fail because para error");
@@ -495,7 +492,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     }
     // get device key
     bool hasDeviceKey = false;
-    AuthDeviceKeyInfo keyInfo = {0};
+    AuthDeviceKeyInfo keyInfo = { 0 };
     bool isSupportCloud = IsCloudSyncEnabled() && IsFeatureSupport(nodeInfo->feature, BIT_CLOUD_SYNC_DEVICE_INFO);
     if (AuthFindLatestNormalizeKey(udidHash, &keyInfo, !isSupportCloud) == SOFTBUS_OK ||
         AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) == SOFTBUS_OK) {
@@ -529,8 +526,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     return ret;
 }
 
-int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen)
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (authHandle == NULL) {
         AUTH_LOGE(AUTH_KEY, "authHandle is null");
@@ -544,8 +540,7 @@ int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLe
     return AuthMetaEncrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
-int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen)
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (authHandle == NULL) {
         AUTH_LOGE(AUTH_KEY, "authHandle is null");
@@ -640,7 +635,7 @@ uint32_t AuthGetGroupType(const char *udid, const char *uuid)
 
 bool AuthIsPotentialTrusted(const DeviceInfo *device)
 {
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     DeviceInfo defaultInfo;
     (void)memset_s(&defaultInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
 
@@ -666,7 +661,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return true;
     }
     if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, true) ||
-        IsPotentialTrustedDeviceDp(device->devId)) {
+        IsPotentialTrustedDeviceDp(device->devId, true)) {
         AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
@@ -746,8 +741,11 @@ int32_t AuthInit(void)
     ret = RegHichainSaStatusListener();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
         AUTH_LOGE(AUTH_INIT, "regHichainSaStatusListener failed");
+        LnnInitModuleStatusSet(INIT_DEPS_HICHAIN, DEPS_STATUS_FAILED);
+        LnnInitModuleReturnSet(INIT_DEPS_HICHAIN, ret);
         return SOFTBUS_AUTH_HICHAIN_SA_PROC_ERR;
     }
+    LnnInitModuleStatusSet(INIT_DEPS_HICHAIN, DEPS_STATUS_SUCCESS);
     ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
         AUTH_LOGI(AUTH_INIT, "customized protocol init failed, ret=%{public}d", ret);

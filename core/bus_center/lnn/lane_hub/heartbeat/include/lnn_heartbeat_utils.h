@@ -16,9 +16,6 @@
 #ifndef LNN_HEARTBEAT_UTILS_H
 #define LNN_HEARTBEAT_UTILS_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "data_level_inner.h"
 #include "softbus_common.h"
 
@@ -155,6 +152,10 @@ typedef enum {
 typedef struct {
     int32_t (*onDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
 } IDataLevelChangeCallback;
+
+typedef struct {
+    void (*onRangeDone)(const BleRangeInnerInfo *info);
+} IBleRangeInnerCallback;
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);

@@ -895,18 +895,18 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaAddLaneReqToList001, TestSize.Le
     g_authWithParaAsyncReqLaneList = nullptr;
     uint32_t laneReqId = TEST_LANE_ID;
     const char *sessionName = TEST_SESSION_NAME;
-    LinkPara linkPara;
+    bool accountInfo = true;
     int32_t channelId = TEST_CHANNEL_ID;
-    int32_t ret = TransAuthWithParaAddLaneReqToList(laneReqId, nullptr, &linkPara, channelId);
+    int32_t ret = TransAuthWithParaAddLaneReqToList(laneReqId, nullptr, accountInfo, channelId);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     g_authWithParaAsyncReqLaneList = TestCreateSessionList();
     ASSERT_TRUE(g_authWithParaAsyncReqLaneList != nullptr);
-    ret = TransAuthWithParaAddLaneReqToList(laneReqId, nullptr, &linkPara, channelId);
+    ret = TransAuthWithParaAddLaneReqToList(laneReqId, nullptr, accountInfo, channelId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, nullptr, channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, accountInfo, channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     DestroySoftBusList(g_authWithParaAsyncReqLaneList);
     g_authWithParaAsyncReqLaneList = nullptr;
@@ -924,10 +924,10 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaAddLaneReqToList002, TestSize.Le
     ASSERT_TRUE(g_authWithParaAsyncReqLaneList != nullptr);
     uint32_t laneReqId = TEST_LANE_ID;
     const char *sessionName = TEST_SESSION_NAME;
-    LinkPara linkPara;
+    bool accountInfo = false;
     int32_t channelId = TEST_CHANNEL_ID;
 
-    int32_t ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, &linkPara, channelId);
+    int32_t ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, accountInfo, channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransAuthWithParaDelLaneReqById(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -955,9 +955,9 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaDelLaneReqById001, TestSize.Leve
     EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *sessionName = TEST_SESSION_NAME;
-    LinkPara linkPara;
+    bool accountInfo = false;
     int32_t channelId = TEST_CHANNEL_ID;
-    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, &linkPara, channelId);
+    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, accountInfo, channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransAuthWithParaDelLaneReqById(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -986,9 +986,9 @@ HWTEST_F(TransLanePendingTest, TransUpdateAuthWithParaLaneConnInfo001, TestSize.
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     const char *sessionName = TEST_SESSION_NAME;
-    LinkPara linkPara;
+    bool accountInfo = false;
     int32_t channelId = TEST_CHANNEL_ID;
-    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, &linkPara, channelId);
+    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, accountInfo, channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransUpdateAuthWithParaLaneConnInfo(laneReqId, true, &connInfo, SOFTBUS_OK);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1022,9 +1022,9 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaGetLaneReqByLaneReqId001, TestSi
     EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *sessionName = TEST_SESSION_NAME;
-    LinkPara linkPara;
+    bool accountInfo = false;
     int32_t channelId = TEST_CHANNEL_ID;
-    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, &linkPara, channelId);
+    ret = TransAuthWithParaAddLaneReqToList(laneReqId, sessionName, accountInfo, channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransAuthWithParaGetLaneReqByLaneReqId(laneReqId, &paraNode);
     EXPECT_EQ(SOFTBUS_OK, ret);

@@ -189,7 +189,7 @@ static int32_t TestGenerateChannInfo(ChannelInfo *channel)
     char *deviceId = (char*)SoftBusCalloc(DEVICE_ID_SIZE_MAX * sizeof(char));
     char *groupId = (char*)SoftBusCalloc(GROUP_ID_SIZE_MAX * sizeof(char));
 
-    if (sessionName == NULL || deviceId == NULL || groupId == NULL ||
+    if (sessionName == nullptr || deviceId == nullptr || groupId == nullptr ||
         strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, g_sessionName) != EOK ||
         strcpy_s(deviceId, SESSION_NAME_SIZE_MAX, g_deviceId) != EOK ||
         strcpy_s(groupId, SESSION_NAME_SIZE_MAX, g_groupid) != EOK) {
@@ -219,15 +219,15 @@ static int32_t TestGenerateChannInfo(ChannelInfo *channel)
 static SessionInfo *TestGenerateSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
-    if (session == NULL) {
-        return NULL;
+    if (session == nullptr) {
+        return nullptr;
     }
 
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, param->groupId) != EOK) {
         SoftBusFree(session);
-        return NULL;
+        return nullptr;
     }
 
     session->sessionId = TRANS_TEST_SESSION_ID;
@@ -247,19 +247,19 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
 
 static void RelesseChannInfo(ChannelInfo *channel)
 {
-    if (channel != NULL) {
-        if (channel->peerSessionName != NULL) {
+    if (channel != nullptr) {
+        if (channel->peerSessionName != nullptr) {
             SoftBusFree(channel->peerSessionName);
         }
-        if (channel->peerDeviceId != NULL) {
+        if (channel->peerDeviceId != nullptr) {
             SoftBusFree(channel->peerDeviceId);
         }
-        if (channel->groupId != NULL) {
+        if (channel->groupId != nullptr) {
             SoftBusFree(channel->groupId);
         }
         SoftBusFree(channel);
     }
-    channel = NULL;
+    channel = nullptr;
 }
 
 /**
@@ -272,12 +272,12 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest01, TestS
 {
     int32_t sessionId = 0;
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
-    ASSERT_TRUE(channel != NULL);
+    ASSERT_TRUE(channel != nullptr);
     ret = TestGenerateChannInfo(channel);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = AcceptSessionAsServer(g_sessionName, channel, TYPE_BUTT, &sessionId);
@@ -286,7 +286,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest01, TestS
     ret = AcceptSessionAsServer(sessionName, channel, TYPE_BUTT, &sessionId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED);
     SoftBusFree(channel->groupId);
-    channel->groupId = NULL;
+    channel->groupId = nullptr;
     ret = AcceptSessionAsServer(g_sessionName, channel, TYPE_BUTT, &sessionId);
     EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
@@ -307,19 +307,19 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest02, TestS
     int32_t ret = GetSessionCallbackByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT,
                                                 &sessionId, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = GetSessionCallbackByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, NULL, &listener);
+    ret = GetSessionCallbackByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, nullptr, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = GetSessionCallbackByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId, NULL);
+    ret = GetSessionCallbackByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetSessionCallbackByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId, &listener);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = GetSessionCallbackByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId, &listener);
@@ -338,28 +338,28 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest02, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestSize.Level1)
 {
     ISessionListener sessionlistener = {
-        .OnSessionOpened = NULL,
+        .OnSessionOpened = nullptr,
         .OnSessionClosed = OnSessionClosed,
         .OnBytesReceived = OnBytesReceived,
         .OnMessageReceived = OnMessageReceived,
     };
     ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
-    ASSERT_TRUE(channel != NULL);
+    ASSERT_TRUE(channel != nullptr);
     int32_t ret = TestGenerateChannInfo(channel);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionOpened(NULL, channel, TYPE_BUTT);
+    ret = TransOnSessionOpened(nullptr, channel, TYPE_BUTT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransOnSessionOpened(g_sessionName, NULL, TYPE_BUTT);
+    ret = TransOnSessionOpened(g_sessionName, nullptr, TYPE_BUTT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT);
@@ -379,16 +379,16 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestSize.Level1)
 {
     ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
-    ASSERT_TRUE(channel != NULL);
+    ASSERT_TRUE(channel != nullptr);
     int32_t ret = TestGenerateChannInfo(channel);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     channel->channelType = TYPE_BUTT;
@@ -416,10 +416,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
@@ -447,7 +447,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest06, TestS
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -473,10 +473,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest07, TestS
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     session->channelType = CHANNEL_TYPE_PROXY;
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -523,10 +523,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest08, TestS
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnOnStreamRecevied(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &data, &ext, &param);
@@ -552,15 +552,15 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest09, TestS
         .OnSessionClosed = OnSessionClosed,
         .OnBytesReceived = OnBytesReceived,
         .OnMessageReceived = OnMessageReceived,
-        .OnStreamReceived = NULL,
+        .OnStreamReceived = nullptr,
     };
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnOnStreamRecevied(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &data, &ext, &param);
@@ -579,17 +579,17 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest09, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest10, TestSize.Level1)
 {
     QosTv *tvList = (QosTv*)SoftBusCalloc(sizeof(QosTv));
-    ASSERT_TRUE(tvList != NULL);
+    ASSERT_TRUE(tvList != nullptr);
     int32_t ret = TransOnQosEvent(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, TRANS_TEST_EVENT_ID,
                                   TRANS_TEST_TV_COUNT, tvList);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnQosEvent(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, TRANS_TEST_EVENT_ID, TRANS_TEST_TV_COUNT, tvList);
@@ -609,22 +609,22 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest10, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest11, TestSize.Level1)
 {
     QosTv *tvList = (QosTv*)SoftBusCalloc(sizeof(QosTv));
-    ASSERT_TRUE(tvList != NULL);
+    ASSERT_TRUE(tvList != nullptr);
     ISessionListener sessionlistener = {
         .OnSessionOpened = OnSessionOpened,
         .OnSessionClosed = OnSessionClosed,
         .OnBytesReceived = OnBytesReceived,
         .OnMessageReceived = OnMessageReceived,
         .OnStreamReceived = OnStreamReceived,
-        .OnQosEvent = NULL,
+        .OnQosEvent = nullptr,
     };
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnQosEvent(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, TRANS_TEST_EVENT_ID, TRANS_TEST_TV_COUNT, tvList);
@@ -644,7 +644,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest11, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest12, TestSize.Level1)
 {
     ISessionListener sessionlistener = {
-        .OnSessionOpened = NULL,
+        .OnSessionOpened = nullptr,
         .OnSessionClosed = OnSessionClosed,
         .OnBytesReceived = OnBytesReceived,
         .OnMessageReceived = OnMessageReceived,
@@ -654,10 +654,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest12, TestS
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_NO_INIT);
@@ -681,10 +681,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest13, TestS
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     session->channelType = CHANNEL_TYPE_UDP;
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -728,7 +728,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest14, TestS
 {
     SocketLifecycleData lifecycle;
     lifecycle.bindErrCode = 0;
-    int32_t ret = HandleAsyncBindSuccess(1, NULL, &lifecycle);
+    int32_t ret = HandleAsyncBindSuccess(1, nullptr, &lifecycle);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
@@ -765,10 +765,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest16, TestS
     SessionListenerAdapter sessionCallback;
     bool isServer = true;
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
 
     int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -807,10 +807,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest17, TestS
     SessionListenerAdapter sessionCallback;
     bool isServer = true;
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     session->isClosing = true;
 
     int32_t ret = GetSocketCallbackAdapterByUdpChannelId(channelId,
@@ -846,10 +846,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest17, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest18, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     int32_t socketId = TRANS_TEST_SESSION_ID;
 
     int32_t ret = TransOnBindSuccess(socketId, nullptr);
@@ -879,10 +879,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest18, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest19, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     int32_t socketId = TRANS_TEST_SESSION_ID;
 
     int32_t ret = TransOnNegotiate(socketId, nullptr);
@@ -951,10 +951,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest21, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest22, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     bool isSocket =  true;
 
     int32_t ret = ClientTransIfChannelForSocket(nullptr, &isSocket);
@@ -984,10 +984,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest22, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestSize.Level1)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
-    ASSERT_TRUE(sessionParam != NULL);
+    ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
-    ASSERT_TRUE(session != NULL);
+    ASSERT_TRUE(session != nullptr);
     int32_t channelId = TRANS_TEST_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_BUTT;
     QoSEvent event = QOS_NOT_SATISFIED;
@@ -997,7 +997,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestS
     int32_t ret = ClientTransOnQos(channelId, channelType, event, nullptr, count);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientTransOnQos(channelId, channelType, event, &qos, count);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);

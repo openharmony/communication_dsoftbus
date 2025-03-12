@@ -53,7 +53,7 @@ public:
 
 void DiscSdkTest::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("discTest");
+    SetAccessTokenPermission("discTest");
 }
 
 void DiscSdkTest::TearDownTestCase(void)

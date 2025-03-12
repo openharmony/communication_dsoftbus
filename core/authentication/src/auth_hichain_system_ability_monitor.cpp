@@ -15,16 +15,10 @@
 
 #include "auth_hichain.h"
 
-#include <atomic>
-#include <cstdint>
-#include <string>
-#include <mutex>
-
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "iservice_registry.h"
 #include "lnn_async_callback_utils.h"
-#include "softbus_error_code.h"
 #include "system_ability_definition.h"
 #include "system_ability_status_change_stub.h"
 

@@ -29,6 +29,7 @@
 #define WAIT_SERVER_READY_INTERVAL_COUNT 50
 
 static IClientProxy *g_serverProxy = NULL;
+static IClientProxy *g_oldServerProxy = NULL;
 
 static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
@@ -107,8 +108,9 @@ int32_t TransServerProxyInit(void)
         }
 
         int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
-        if (ret != EC_SUCCESS || g_serverProxy == NULL) {
+        if (ret != EC_SUCCESS || g_serverProxy == NULL || g_serverProxy == g_oldServerProxy) {
             TRANS_LOGE(TRANS_SDK, "QueryInterface failed ret=%{public}d", ret);
+            g_serverProxy = NULL;
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
@@ -119,6 +121,13 @@ int32_t TransServerProxyInit(void)
 void TransServerProxyDeInit(void)
 {
     g_serverProxy = NULL;
+}
+
+void TransServerProxyClear(void)
+{
+    g_oldServerProxy = g_serverProxy;
+    g_serverProxy = NULL;
+    return;
 }
 
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
@@ -461,7 +470,7 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&request, eventType);
-    WriteInt32(&request, len);
+    WriteUint32(&request, len);
     bool value = WriteRawData(&request, buf, len);
     if (!value) {
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;

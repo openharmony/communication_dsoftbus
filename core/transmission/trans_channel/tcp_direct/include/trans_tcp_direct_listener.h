@@ -15,7 +15,6 @@
 #ifndef SOFTBUS_SESSION_LISTENER
 #define SOFTBUS_SESSION_LISTENER
 
-#include "auth_interface.h"
 #include "softbus_base_listener.h"
 
 #ifdef __cplusplus
@@ -36,9 +35,9 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
 
 int32_t TransTdcStopSessionListener(ListenerModule module);
 
-void TransTdcSocketReleaseFd(int32_t fd);
+void TransTdcSocketReleaseFd(ListenerModule module, int32_t fd);
 
-void CloseTcpDirectFd(int32_t fd);
+void CloseTcpDirectFd(ListenerModule module, int32_t fd);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,15 +37,13 @@
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_session_account_adapter.h"
+#include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 #include "wifi_direct_manager.h"
-
-#define DMS_UID 5522
-#define DMS_SESSIONNAME "ohos.distributedschedule.dms.connect"
 
 typedef struct {
     int32_t channelType;
@@ -159,8 +157,6 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
         transType == LANE_T_RAW_STREAM) {
         return CHANNEL_TYPE_UDP;
-    } else if ((transType == LANE_T_MSG) && (type != LANE_P2P) && (type != LANE_P2P_REUSE) && (type != LANE_HML)) {
-        return CHANNEL_TYPE_PROXY;
     }
     return CHANNEL_TYPE_TCP_DIRECT;
 }
@@ -324,6 +320,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
     appInfo->callingTokenId = TransACLGetCallingTokenID();
     appInfo->isClient = true;
+    appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return SOFTBUS_OK;
 }
@@ -670,6 +667,50 @@ static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
     (void)LnnGetRemoteStrInfo(netWorkId, STRING_KEY_DEV_UDID, sourceInfo->deviceId, UDID_BUF_LEN);
 }
 
+int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid)
+{
+    if (sinkNetworkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, sinkNetworkId is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t dmsPid = 0;
+    int32_t ret = SOFTBUS_OK;
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    TransInfo transInfo = {.channelId = -1, .channelType = -1};
+    char dmsPkgName[PKG_NAME_SIZE_MAX] = {0};
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, sourceInfo.deviceId, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get sourceInfo udid failed. ret=%{public}d", ret);
+        return ret;
+    }
+    sourceInfo.userId = TransGetForegroundUserId();
+    ret = GetCurrentAccount(&sourceInfo.accountId);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
+        sourceInfo.accountId = INVALID_ACCOUNT_ID;
+    }
+    ret = TransGetCallingFullTokenId(&sourceInfo.tokenId);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get callingTokenId failed. ret=%{public}d", ret);
+        return ret;
+    }
+    sourceInfo.pid = sourcePid;
+
+    TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    sinkInfo.pid = -1;
+    (void)LnnGetRemoteStrInfo(sinkNetworkId, STRING_KEY_DEV_UDID, sinkInfo.deviceId, UDID_BUF_LEN);
+    ret = ClientIpcCheckCollabRelation(dmsPkgName, dmsPid, &sourceInfo, &sinkInfo, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "channelId=%{public}d check Collaboration relation fail, ret=%{public}d",
+            transInfo.channelId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType)
 {
     if (appInfo == NULL) {
@@ -677,22 +718,24 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
         return SOFTBUS_INVALID_PARAM;
     }
 
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    GetSourceRelation(appInfo, &sourceInfo);
+    if (sourceInfo.userId == INVALID_USER_ID) {
+        TRANS_LOGW(TRANS_CTRL, "userId is invalid.");
+        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
+    }
+
     CollabInfo sinkInfo;
     (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    sinkInfo.pid = -1;
     int32_t ret = GetSinkRelation(appInfo, &sinkInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get sink relation failed.");
         return ret;
     }
-    if (!SoftBusCheckIsApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
+    if (!SoftBusCheckIsCollabApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
         TRANS_LOGE(TRANS_CTRL, "check is not app.");
-        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
-    }
-    CollabInfo sourceInfo;
-    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
-    GetSourceRelation(appInfo, &sourceInfo);
-    if (sourceInfo.userId == DEFAULT_USER_ID) {
-        TRANS_LOGE(TRANS_CTRL, "userId is invalid.");
         return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
     }
 

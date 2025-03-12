@@ -25,6 +25,7 @@
 #include "channel/auth_negotiate_channel.h"
 #include "data/interface_manager.h"
 #include "data/link_manager.h"
+#include "dfx/wifi_direct_dfx.h"
 #include "entity/p2p_entity.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
@@ -35,6 +36,7 @@
 
 namespace OHOS::SoftBus {
 static constexpr int DECIMAL_BASE = 10;
+static constexpr const char *PROCESSOR_NAME = "P2PV1Processor";
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
     {"AvailableState",             &P2pV1Processor::AvailableState           },
     { "WaitingReqResponseState",   &P2pV1Processor::WaitingReqResponseState  },
@@ -1702,6 +1704,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
+        LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, msg.GetRemoteDeviceId());
         P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { IF_NAME_P2P });
         return result.errorCode_;
     }
@@ -1746,7 +1749,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
     std::vector<int> goChannels;
     int32_t ret = P2pAdapter::GetChannel5GListIntArray(goChannels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local Channels list failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local channel list failed, error=%{public}d", ret);
 
     for (auto goChannel : goChannels) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
@@ -2115,4 +2118,13 @@ void P2pV1Processor::Terminate()
     throw ProcessorTerminate();
 }
 
+std::string P2pV1Processor::GetProcessorName() const
+{
+    return PROCESSOR_NAME;
+}
+
+std::string P2pV1Processor::GetState() const
+{
+    return GetStateName(state_);
+}
 } // namespace OHOS::SoftBus

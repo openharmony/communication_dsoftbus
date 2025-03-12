@@ -58,7 +58,7 @@ void ClientTransUdpManagerStaticTest::TearDownTestCase(void) {}
  */
 HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize.Level0)
 {
-    int32_t ret = ClientTransUdpMgrInit(NULL);
+    int32_t ret = ClientTransUdpMgrInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransOnUdpChannelBind(TEST_CHANNELID, TEST_CHANNELTYPE);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
@@ -135,7 +135,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = ClientTransUdpMgrInit(cb);
-    ret = TransGetUdpChannel(TEST_CHANNELID, NULL);
+    ret = TransGetUdpChannel(TEST_CHANNELID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClosePeerUdpChannel(TEST_CHANNELID);
@@ -191,7 +191,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    ret = ClientTransAddUdpChannel(NULL);
+    ret = ClientTransAddUdpChannel(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     UdpChannel udpChannel;
@@ -298,7 +298,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, Te
  */
 HWTEST_F(ClientTransUdpManagerStaticTest, NotifyCallbackTest001, TestSize.Level0)
 {
-    UdpChannel *testChannel = NULL;
+    UdpChannel *testChannel = nullptr;
     NotifyCallback(testChannel, TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
 
     UdpChannel channel;
@@ -338,7 +338,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelProc001, TestSize.Level
     ret = CloseUdpChannelProc(&udpChannel, TEST_CLOSEID, SHUTDOWN_REASON_LOCAL);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = CloseUdpChannelProc(NULL, TEST_CLOSEID, SHUTDOWN_REASON_PEER);
+    ret = CloseUdpChannelProc(nullptr, TEST_CLOSEID, SHUTDOWN_REASON_PEER);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -396,7 +396,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest003, TestS
 {
     int32_t channelId = TEST_CHANNELID;
     bool encrypt = true;
-    int32_t ret = OnRawStreamEncryptOptGet(channelId, NULL);
+    int32_t ret = OnRawStreamEncryptOptGet(channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = ERR_CHANNELID;
@@ -452,5 +452,17 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, Te
     udpChannel.isEnable = true;
     ret = TransUdpChannelSetStreamMultiLayer(TEST_CHANNELID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: TransSendLimitChangeDataToCoreTest001
+ * @tc.desc: TransSendLimitChangeDataToCore
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSendLimitChangeDataToCoreTest001, TestSize.Level0)
+{
+    int32_t ret = TransSendLimitChangeDataToCore(TEST_CHANNELID, FILE_PRIORITY_BK, NSTACKX_EOK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

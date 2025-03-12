@@ -56,5 +56,16 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
 {
     return GetSyncInterface()->LnnSendP2pSyncInfoMsg(networkId, netCapability);
 }
+
+void LnnSendAsyncInfoMsg(void *param)
+{
+    return GetSyncInterface()->LnnSendAsyncInfoMsg(param);
+}
+
+SendSyncInfoParam *CreateSyncInfoParam(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
+{
+    return GetSyncInterface()->CreateSyncInfoParam(type, networkId, msg, len, complete);
+}
 }
 } // namespace OHOS

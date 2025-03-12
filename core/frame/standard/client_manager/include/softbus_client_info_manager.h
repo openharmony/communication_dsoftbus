@@ -17,11 +17,6 @@
 #define SOFTBUS_CLIENT_INFO_MANAGER_H
 
 #include <map>
-#include <mutex>
-#include <list>
-#include <unordered_map>
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "session.h"
 

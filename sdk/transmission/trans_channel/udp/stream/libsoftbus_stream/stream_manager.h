@@ -16,18 +16,8 @@
 #ifndef STREAM_MANAGER_H
 #define STREAM_MANAGER_H
 
-#include <memory>
-#include <string>
-#include <utility>
-
-#include "common_inner.h"
-#include "i_stream.h"
 #include "i_stream_manager.h"
-#include "i_stream_msg_manager.h"
 #include "i_stream_socket.h"
-#include "session.h"
-#include "softbus_def.h"
-#include "stream_common.h"
 
 namespace Communication {
 namespace SoftBus {

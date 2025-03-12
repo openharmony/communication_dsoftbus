@@ -40,6 +40,7 @@ std::string g_testData = "TransSessionTest_GetSessionKeyTestData";
 #define TEST_SESSION_NAME_LEN (64)
 #define TEST_NETWORK_ID_LEN (64)
 #define TEST_GROUP_ID_LEN (64)
+#define TRANS_TEST_ID 1
 
 class ClientTransStatisticsTest : public testing::Test {
 public:
@@ -68,7 +69,7 @@ ChannelInfo *TestGetErrorChannelInfo(void)
     ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = g_peerSessionName;
-    info->channelId = 1;
+    info->channelId = TRANS_TEST_ID;
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
     info->sessionKey = g_peerSessionKey;
     info->fd = g_fd;
@@ -80,7 +81,7 @@ ChannelInfo *TestGetServerChannelInfo(void)
     ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = g_peerSessionName;
-    info->channelId = 1;
+    info->channelId = TRANS_TEST_ID;
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
     info->sessionKey = g_peerSessionKey;
     info->fd = g_fd;
@@ -94,7 +95,7 @@ ChannelInfo *TestGetRightChannelInfo(void)
     ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = g_peerSessionName;
-    info->channelId = 1;
+    info->channelId = TRANS_TEST_ID;
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
     info->sessionKey = g_peerSessionKey;
     info->fd = g_fd;
@@ -111,20 +112,20 @@ ChannelInfo *TestGetRightChannelInfo(void)
  */
 HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level0)
 {
-    AddSocketResource(g_sessionName, nullptr);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, nullptr));
 
     ChannelInfo *errChannel = TestGetErrorChannelInfo();
-    AddSocketResource(NULL, errChannel);
+    EXPECT_NO_THROW(AddSocketResource(nullptr, errChannel));
 
-    AddSocketResource(g_sessionName, errChannel);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, errChannel));
     SoftBusFree(errChannel);
 
     ChannelInfo *serverChannel = TestGetServerChannelInfo();
-    AddSocketResource(g_sessionName, serverChannel);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, serverChannel));
     SoftBusFree(serverChannel);
 
     ChannelInfo *rightChannel = TestGetRightChannelInfo();
-    AddSocketResource(g_sessionName, rightChannel);
+    EXPECT_NO_THROW(AddSocketResource(g_sessionName, rightChannel));
     SoftBusFree(rightChannel);
 }
 
@@ -139,11 +140,11 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Lev
     int32_t ret = ClientTransStatisticsInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int32_t socketId = 1;
-    int64_t len = 1;
+    int32_t socketId = TRANS_TEST_ID;
+    int64_t len = TRANS_TEST_ID;
     UpdateChannelStatistics(socketId, len);
 
-    int32_t channelId = 1;
+    int32_t channelId = TRANS_TEST_ID;
     int32_t channelType = CHANNEL_TYPE_UDP;
     DeleteSocketResourceByChannelId(channelId, channelType);
 
@@ -164,8 +165,8 @@ HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level0
     CreateSocketResource(item, sessionName, channel);
     EXPECT_EQ(item, nullptr);
     item = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
-    uint64_t laneId = 1;
-    int32_t channelId = 1;
+    uint64_t laneId = TRANS_TEST_ID;
+    int32_t channelId = TRANS_TEST_ID;
     int32_t channelType = CHANNEL_TYPE_UDP;
     channel->laneId = laneId;
     channel->channelId = channelId;
@@ -187,7 +188,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
     SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
     ASSERT_NE(newItem, nullptr);
-    newItem->socketId = 1;
+    newItem->socketId = TRANS_TEST_ID;
     ListInit(&newItem->node);
     ListAdd(&g_channelStatisticsList->list, &newItem->node);
 
@@ -195,8 +196,8 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
     ChannelInfo *rightChannel = TestGetRightChannelInfo();
     AddSocketResource(g_sessionName, rightChannel);
 
-    g_channelStatisticsList->cnt = static_cast<int32_t>(MAX_SOCKET_RESOURCE_NUM - 1);
-    rightChannel->channelId = -1;
+    g_channelStatisticsList->cnt = static_cast<int32_t>(MAX_SOCKET_RESOURCE_NUM - TRANS_TEST_ID);
+    rightChannel->channelId = INVALID_VALUE;
     AddSocketResource(g_sessionName, rightChannel);
     EXPECT_NE(g_channelStatisticsList, nullptr);
     SoftBusFree(rightChannel);
@@ -211,8 +212,8 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
  */
 HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Level0)
 {
-    int32_t socketId = 1;
-    int64_t len = 1;
+    int32_t socketId = TRANS_TEST_ID;
+    int64_t len = TRANS_TEST_ID;
     UpdateChannelStatistics(socketId, len);
     EXPECT_EQ(g_channelStatisticsList, nullptr);
 
@@ -272,12 +273,12 @@ HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSi
  */
 HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, TestSize.Level0)
 {
-    int32_t channelId = -1;
+    int32_t channelId = INVALID_VALUE;
     int32_t channelType = CHANNEL_TYPE_UDP;
-    int32_t socketId = 1;
-    int64_t len = 1;
+    int32_t socketId = TRANS_TEST_ID;
+    int64_t len = TRANS_TEST_ID;
     DeleteSocketResourceByChannelId(channelId, channelType);
-    channelId = 1;
+    channelId = TRANS_TEST_ID;
     DeleteSocketResourceByChannelId(channelId, channelType);
     EXPECT_EQ(g_channelStatisticsList, nullptr);
 
@@ -290,11 +291,11 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
     newItem->socketId = socketId;
     ListInit(&newItem->node);
     ListAdd(&g_channelStatisticsList->list, &newItem->node);
-    g_channelStatisticsList->cnt = 1;
+    g_channelStatisticsList->cnt = TRANS_TEST_ID;
 
     UpdateChannelStatistics(socketId, len);
     DeleteSocketResourceByChannelId(channelId, channelType);
-    EXPECT_EQ(g_channelStatisticsList->cnt, 1);
+    EXPECT_EQ(g_channelStatisticsList->cnt, TRANS_TEST_ID);
 
     ClientTransStatisticsDeinit();
 }
@@ -307,18 +308,18 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
  */
 HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize.Level0)
 {
-    g_channelStatisticsList = NULL;
+    g_channelStatisticsList = nullptr;
     ClientTransStatisticsDeinit();
 
     int32_t ret = ClientTransStatisticsInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
     ASSERT_NE(newItem, nullptr);
-    newItem->channelId = 1;
+    newItem->channelId = TRANS_TEST_ID;
     ListInit(&newItem->node);
     ListAdd(&g_channelStatisticsList->list, &newItem->node);
 
     ClientTransStatisticsDeinit();
-    EXPECT_EQ(g_channelStatisticsList, NULL);
+    EXPECT_EQ(g_channelStatisticsList, nullptr);
 }
 } // namespace OHOS

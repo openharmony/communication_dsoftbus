@@ -47,6 +47,7 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$softbus_adapter_common/security/access_token/include",
   ]
@@ -152,7 +153,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
@@ -223,7 +224,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
@@ -313,9 +314,13 @@ if (defined(ohos_lite)) {
                                    "$ble_enhanced_impl",
                                  ],
                                  "value")
-    if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
+    if (enhanced_range && defined(global_parts_info.msdp_algorithm) &&
+        defined(global_parts_info.msdp_range_measure)) {
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-      external_deps += [ "algorithm:msdp_ble_range" ]
+      external_deps += [
+        "algorithm:msdp_ble_range",
+        "spatial_awareness:msdp_range_measure",
+      ]
     } else {
       sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
     }

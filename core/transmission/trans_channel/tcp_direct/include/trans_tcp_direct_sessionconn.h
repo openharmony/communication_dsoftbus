@@ -16,12 +16,8 @@
 #ifndef SOFTBUS_TCP_DIRECT_SESSIONCONN_H
 #define SOFTBUS_TCP_DIRECT_SESSIONCONN_H
 
-#include <stdint.h>
-#include "auth_interface.h"
-#include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus

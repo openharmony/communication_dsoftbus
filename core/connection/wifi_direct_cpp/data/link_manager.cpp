@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "link_manager.h"
 
 #include "conn_log.h"
@@ -195,7 +196,7 @@ void LinkManager::RemoveLink(const std::string &remoteMac)
     }
 }
 
-void LinkManager::RemoveLinks(InnerLink::LinkType type)
+void LinkManager::RemoveLinks(InnerLink::LinkType type, bool onlyRemoveConnected)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::vector<std::shared_ptr<InnerLink>> links;
@@ -203,7 +204,10 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
         std::lock_guard lock(lock_);
         auto it = links_.begin();
         while (it != links_.end()) {
-            if (it->first.first == type) {
+            auto condition = onlyRemoveConnected ?
+                (it->first.first == type && it->second->GetState() == InnerLink::LinkState::CONNECTED) :
+                it->first.first == type;
+            if (condition) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
                           WifiDirectAnonymizeDeviceId(it->second->GetRemoteDeviceId()).c_str());
                 links.push_back(it->second);
@@ -317,5 +321,13 @@ void LinkManager::Dump() const
     if (links_.empty()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
     }
+}
+
+void LinkManager::Dump(std::list<std::shared_ptr<LinkSnapshot>> &snapshots)
+{
+    LinkManager::GetInstance().ForEach([&snapshots](const InnerLink &link) {
+        snapshots.push_back(std::make_shared<LinkSnapshot>(link));
+        return true;
+    });
 }
 } // namespace OHOS::SoftBus

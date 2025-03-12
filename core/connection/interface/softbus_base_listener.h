@@ -16,9 +16,7 @@
 #ifndef SOFTBUS_BASE_LISTENER_H
 #define SOFTBUS_BASE_LISTENER_H
 
-#include "common_list.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "softbus_utils.h"
 
 #ifdef __cplusplus

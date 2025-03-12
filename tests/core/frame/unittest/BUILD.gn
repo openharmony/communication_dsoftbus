@@ -28,11 +28,13 @@ ohos_unittest("SoftbusServerStubTest") {
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/connection/interface",
@@ -42,7 +44,10 @@ ohos_unittest("SoftbusServerStubTest") {
     "$dsoftbus_root_path/core/frame/standard/init/include",
     "$dsoftbus_root_path/core/frame/standard/init/src",
     "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/ipc/include",
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -65,8 +70,12 @@ ohos_unittest("SoftbusServerStubTest") {
       "googletest:gmock",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
+    if (has_ces_part) {
+      external_deps += [ "common_event_service:cesfwk_innerkits" ]
+    }
   }
   if (dsoftbus_access_token_feature) {
     external_deps += [
@@ -107,6 +116,7 @@ ohos_unittest("SoftbusServerTest") {
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
+      "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
   }

@@ -69,7 +69,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
+    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen, false);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcServerJoin failed");
         return ret;
@@ -702,4 +702,25 @@ int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply)
 ERR_RETURN:
     WriteInt32(reply, SOFTBUS_INVALID_PARAM);
     return SOFTBUS_IPC_ERR;
+}
+
+int32_t ServerTriggerHbForMeasureDistance(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerRegBleRangeCb(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerUnregBleRangeCb(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }

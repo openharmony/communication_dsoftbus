@@ -91,6 +91,11 @@ bool IsBleEnabled()
     return MockBluetooth::GetMocker()->IsBleEnabled();
 }
 
+bool IsLpDeviceAvailable()
+{
+    return true;
+}
+
 bool GetLocalAddr(unsigned char *mac, unsigned int len)
 {
     return MockBluetooth::GetMocker()->GetLocalAddr(mac, len);
@@ -135,6 +140,13 @@ int32_t BleStartScanEx(
     int32_t scannerId, const BleScanConfigs *configs, const BleScanNativeFilter *filter, uint32_t filterSize)
 {
     return MockBluetooth::GetMocker()->BleStartScanEx(scannerId, configs, filter, filterSize);
+}
+
+int BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
+    uint32_t filterSize, uint32_t filterAction)
+{
+    return MockBluetooth::GetMocker()->BleChangeScanParams(scannerId, config, filter,
+        filterSize, filterAction);
 }
 
 int32_t BleStopScan(int32_t scannerId)
@@ -292,9 +304,9 @@ int32_t BleGattsSendIndication(int32_t serverId, GattsSendIndParam *param)
     return MockBluetooth::GetMocker()->BleGattsSendIndication(serverId, param);
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return MockBluetooth::GetMocker()->SoftBusAddBtStateListener(listener);
+    return MockBluetooth::GetMocker()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
 int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface)

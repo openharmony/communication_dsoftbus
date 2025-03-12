@@ -149,7 +149,7 @@ static uint32_t ConvertMsgToUserId(int32_t *userId, const uint8_t *msg, uint32_t
         return SOFTBUS_INVALID_PARAM;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *userId = *userId | (*(msg + i) << (BITS * i));
+        *userId = ((uint32_t)*userId) | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -476,6 +476,67 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
+static int32_t GetEnhancedP2PCap(uint32_t *staticNetCap)
+{
+    if (staticNetCap == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getHmlCapabilityCode == NULL) {
+        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+    HmlCapabilityCode code = GetWifiDirectManager()->getHmlCapabilityCode();
+    LNN_LOGE(LNN_BUILDER, "hml capability code=%{public}d.", code);
+    int32_t ret;
+    if (code == CONN_HML_SUPPORT) {
+        ret = LnnSetStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return ret;
+        }
+        return SOFTBUS_OK;
+    }
+    if (code == CONN_HML_CAP_UNKNOWN || code == CONN_HML_NOT_SUPPORT) {
+        ret = LnnClearStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return ret;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
+{
+    LNN_LOGI(LNN_BUILDER, "wifi service on start.");
+    if (info == NULL || info->event != LNN_EVENT_WIFI_SERVICE_START) {
+        LNN_LOGE(LNN_BUILDER, "invalid param.");
+        return;
+    }
+    uint32_t staticNetCap = 0;
+    uint32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    uint32_t oldCap = staticNetCap;
+    ret = GetEnhancedP2PCap(&staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "update enhanced p2p static cap failed, ret=%{public}d.", ret);
+        return;
+    }
+    if (oldCap == staticNetCap) {
+        return;
+    }
+
+    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
+}
+
 static bool IsSupportApCoexist(const char *coexistCap)
 {
     cJSON *coexistObj = cJSON_ParseWithLength(coexistCap, strlen(coexistCap) + 1);
@@ -552,6 +613,11 @@ int32_t LnnInitNetworkInfo(void)
         LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail, ret=%{public}d", ret);
         return ret;
     }
+    ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_SERVICE_START, WifiServiceOnStartHandle);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "register wifi service start fail, ret=%{public}d", ret);
+        return ret;
+    }
     ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -566,8 +632,11 @@ int32_t LnnInitNetworkInfo(void)
 
 void LnnDeinitNetworkInfo(void)
 {
+    (void)LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_USERID, OnReceiveUserIdSyncInfoMsg);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_SERVICE_START, WifiServiceOnStartHandle);
 }
 
 static void LnnProcessUserChangeMsg(LnnSyncInfoType syncType, const char *networkId, const uint8_t *msg, uint32_t len)
@@ -586,6 +655,27 @@ void OnLnnProcessUserChangeMsgDelay(void *para)
     SoftBusFree(para);
 }
 
+static void LnnAsyncSendUserId(void *param)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)param;
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+    if (data->msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        SoftBusFree(data);
+        return;
+    }
+    int32_t ret = LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
+        LnnRequestLeaveSpecific(data->networkId, CONNECTION_ADDR_MAX);
+    }
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
+}
+
 static void DoSendUserId(const char *udid, uint8_t *msg)
 {
     #define USER_CHANGE_DELAY_TIME 5
@@ -602,9 +692,18 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
         return;
     }
 
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    SendSyncInfoParam *data =
+        CreateSyncInfoParam(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create async info fail");
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        return;
+    }
+    ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnAsyncSendUserId, (void *)data);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "sync info msg failed! ret:%{public}d", ret);
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "async userid to peer fail");
         LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
         return;
     }
@@ -617,6 +716,7 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
     ret = memcpy_s(networkId, NETWORK_ID_BUF_LEN, nodeInfo.networkId, NETWORK_ID_BUF_LEN);
     if (ret != EOK) {
         LNN_LOGI(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
+        SoftBusFree(networkId);
         return;
     }
 
@@ -636,7 +736,7 @@ static uint8_t *ConvertUserIdToMsg(int32_t userId)
         return NULL;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *(arr + i) = (userId >> (i * BITS)) & 0xFF;
+        *(arr + i) = ((uint32_t)userId >> (i * BITS)) & 0xFF;
     }
     return arr;
 }

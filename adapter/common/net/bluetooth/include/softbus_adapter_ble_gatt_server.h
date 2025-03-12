@@ -16,9 +16,6 @@
 #ifndef SOFTBUS_ADAPTER_BLE_GATT_SERVER_H
 #define SOFTBUS_ADAPTER_BLE_GATT_SERVER_H
 
-#include "stdbool.h"
-#include "stdint.h"
-#include "common_list.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_def.h"
 
@@ -172,4 +169,4 @@ int InitSoftbusAdapterServer(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif /* SOFTBUS_ADAPTER_BLE_GATT_SERVER_H */
+#endif

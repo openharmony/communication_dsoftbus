@@ -41,7 +41,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         SetNodeDataChangeFlag(reinterpret_cast<const char *>(tmp),
                               reinterpret_cast<const char *>(tmp), DATA_CHANGE_FLAG);
         free(tmp);

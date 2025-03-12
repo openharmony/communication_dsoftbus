@@ -778,6 +778,18 @@ static int32_t DlGetNodeP2pIp(const char *networkId, bool checkOnline, void *buf
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetStaticNetCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    if (len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((uint32_t *)buf) = info->staticNetCap;
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -812,6 +824,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_STATIC_CAP_LEN, DlGetStaticCapLen},
     {NUM_KEY_DEVICE_SECURITY_LEVEL, DlGetDeviceSecurityLevel},
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, DlGetConnSubFeatureCap},
+    {NUM_KEY_STATIC_NET_CAP, DlGetStaticNetCap},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BOOL_KEY_SCREEN_STATUS, DlGetNodeScreenOnFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
@@ -1949,4 +1962,35 @@ bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
 EXIT:
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return false;
+}
+
+bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
+{
+    if (udid == NULL || info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, SHORT_UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate udid hex string hash fail");
+        return false;
+    }
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "no this device info, ignore update");
+        return true;
+    }
+    if (memcmp(cacheInfo.cipherInfo.key, info->key, SESSION_KEY_LENGTH) == 0 &&
+        memcmp(cacheInfo.cipherInfo.iv, info->iv, BROADCAST_IV_LEN) == 0) {
+        LNN_LOGI(LNN_LEDGER, "remote link key same, ignore update");
+        return true;
+    }
+    if (memcpy_s(cacheInfo.cipherInfo.key, SESSION_KEY_LENGTH, info->key, SESSION_KEY_LENGTH) != EOK ||
+        memcpy_s(cacheInfo.cipherInfo.iv, BROADCAST_IV_LEN, info->iv, BROADCAST_IV_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy link key failed");
+        return false;
+    }
+    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    return true;
 }

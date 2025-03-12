@@ -16,7 +16,6 @@
 #ifndef JSON_PAYLOAD_H
 #define JSON_PAYLOAD_H
 
-#include <stdint.h>
 #include "nstackx.h"
 
 #ifdef __cplusplus

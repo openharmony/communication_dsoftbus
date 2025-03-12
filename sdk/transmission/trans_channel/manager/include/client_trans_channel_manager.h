@@ -17,7 +17,6 @@
 #define CLIENT_TRANS_CHANNEL_MANAGER_H
 
 #include "session.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +29,9 @@ void ClientTransChannelDeinit(void);
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type);
 
 int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void *data, uint32_t len);
+
+int32_t ClientTransChannelAsyncSendBytes(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
+    uint32_t dataSeq);
 
 int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const void *data, uint32_t len);
 

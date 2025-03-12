@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "auth_lane.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_interface.h"
@@ -339,19 +340,14 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
 static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
 {
     AuthLinkTypeList authList;
-    if (memset_s(&authList, sizeof(AuthLinkTypeList), 0, sizeof(AuthLinkTypeList)) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
+    (void)memset_s(&authList, sizeof(AuthLinkTypeList), 0, sizeof(AuthLinkTypeList));
     int32_t ret = GetAuthLinkTypeList(allocInfo->networkId, &authList);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get authList fail");
         return ret;
     }
     LanePreferredLinkList request;
-    if (memset_s(&request, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList)) != EOK) {
-        LNN_LOGE(LNN_LANE, "memset_s request fail");
-        return SOFTBUS_MEM_ERR;
-    }
+    (void)memset_s(&request, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     ret = ConvertAuthLinkToLaneLink(&authList, &request);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "convert authLink to laneLink fail");
@@ -385,6 +381,7 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
         LNN_LOGE(LNN_LANE, "trigger link fail, laneHandle=%{public}u", laneHandle);
         return ret;
     }
+    SoftBusFree(recommendLinkList);
     return SOFTBUS_OK;
 }
 

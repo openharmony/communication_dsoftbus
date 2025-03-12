@@ -565,10 +565,10 @@ EXIT_ERR:
 }
 
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
-    const char *reqId)
+    const char *reqId, const ConnectParam *param)
 {
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
         return channelId;
     }
     char callerPkg[PKG_NAME_SIZE_MAX] = {0};
@@ -587,6 +587,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
             TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo failed");
             goto EXIT_ERR;
         }
+        appInfo->blePriority = param->blePriority;
         appInfo->connectType = connOpt->type;
         if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "strcpy_s reqId failed");
@@ -798,6 +799,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
     TransTdcChannelInfoDeathCallback(pkgName, pid);
     TransLaneMgrDeathCallback(pkgName, pid);
     TransUdpDeathCallback(pkgName, pid);
+    TransAuthDeathCallback(pkgName, pid);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
@@ -826,7 +828,7 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
     if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
         ret = TransGetPidByChanId(channelId, channelType, &curChannelPid);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
             return ret;
         }
     } else {
@@ -834,7 +836,8 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
         ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
         (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d, ret=%{public}d",
+                channelId, ret);
             return ret;
         }
         curChannelPid = appInfo.myData.pid;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,10 @@ extern "C" {
 
 #define TIMER_TIMEOUT 1000 // 1s
 #define BT_MAC_NO_COLON_LEN 13
+#define TRANS_CAPABILITY_TLV_OFFSET 0
+#define TRANS_CHANNEL_INNER_ENCRYPT_OFFSET 1
+#define TRANS_CHANNEL_INNER_ENCRYPT (1u << TRANS_CHANNEL_INNER_ENCRYPT_OFFSET) /* bit1 */
+#define TRANS_CHANNEL_CAPABILITY 0x03 /* bit0 & bit1 */
 
 #define MAC_DELIMITER ':'
 #define IP_DELIMITER '.'
@@ -55,6 +59,8 @@ typedef enum {
     SOFTBUS_NIP_NODE_AGING_TIMER_FUN,
     SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN,
     SOFTBUS_TRNAS_REQUEST_TIMEOUT_TIMER_FUN,
+    SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN,
+    SOFTBUS_DDOS_TIMER_FUN,
     SOFTBUS_MAX_TIMER_FUN_NUM
 } SoftBusTimerFunEnum;
 
@@ -106,6 +112,8 @@ int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_
 
 int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data);
 
+int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
+
 void SetSignalingMsgSwitchOn(void);
 void SetSignalingMsgSwitchOff(void);
 bool GetSignalingMsgSwitch(void);
@@ -122,6 +130,10 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
 void DataMasking(const char *data, uint32_t length, char delimiter, char *container);
 int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,
     uint32_t hashStrLen);
+
+void EnableCapabilityBit(uint32_t *value, uint32_t offSet);
+
+bool GetCapabilityBit(uint32_t *value, uint32_t offSet);
 #ifdef __cplusplus
 #if __cplusplus
 }

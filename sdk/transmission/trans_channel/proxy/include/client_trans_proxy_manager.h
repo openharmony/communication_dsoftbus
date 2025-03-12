@@ -16,9 +16,7 @@
 #ifndef CLIENT_TRANS_PROXY_CHANNEL_H
 #define CLIENT_TRANS_PROXY_CHANNEL_H
 
-#include "client_trans_file_listener.h"
 #include "client_trans_session_callback.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -89,7 +87,12 @@ void ClientTransProxyCloseChannel(int32_t channelId);
 int32_t TransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t len,
     ProxyChannelInfoDetail* info, SessionPktType pktType);
 
-int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len);
+int32_t TransProxyAsyncPackAndSendData(int32_t channelId, const void *data, uint32_t len, uint32_t dataSeq,
+    SessionPktType pktType);
+
+int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len, bool neeedAck);
+
+int32_t TransProxyChannelAsyncSendBytes(int32_t channelId, const void *data, uint32_t len, uint32_t dataSeq);
 
 int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32_t len);
 

@@ -42,28 +42,15 @@ static NetBuilderDepsInterface *GetNetBuilderDepsInterface()
     return reinterpret_cast<NetBuilderDepsInterfaceMock *>(g_netBuilderDepsInterface);
 }
 
-int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    if (deviceName == NULL) {
-        LNN_LOGE(LNN_TEST, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
-        LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -75,11 +62,6 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicIn
 }
 
 extern "C" {
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    return GetNetBuilderDepsInterface()->LnnGetSettingDeviceName(deviceName, len);
-}
-
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);
@@ -315,14 +297,14 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
     return GetNetBuilderDepsInterface()->ConnDisconnectDeviceAllConn(option);
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len, isUpdate);
 }
 
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len, isUpdate);
 }
 
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
@@ -470,9 +452,9 @@ void AuthMetaReleaseVerify(int64_t authId)
     return GetNetBuilderDepsInterface()->AuthMetaReleaseVerify(authId);
 }
 
-int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin)
 {
-    return GetNetBuilderDepsInterface()->LnnSendJoinRequestToConnFsm(connFsm);
+    return GetNetBuilderDepsInterface()->LnnSendJoinRequestToConnFsm(connFsm, isForceJoin);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -660,6 +642,26 @@ int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what)
     return GetNetBuilderDepsInterface()->LnnFsmRemoveMessageByType(fsm, what);
 }
 
+int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
+{
+    return GetNetBuilderDepsInterface()->TransAuthGetConnIdByChanId(channelId, connId);
+}
+
+int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len)
+{
+    return GetNetBuilderDepsInterface()->TransAuthGetPeerUdidByChanId(channelId, peerUdid, len);
+}
+
+void LnnNotifyStateForSession(char *udid, int32_t retCode)
+{
+    return GetNetBuilderDepsInterface()->LnnNotifyStateForSession(udid, retCode);
+}
+
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
+{
+    return GetNetBuilderDepsInterface()->AuthRemoveAuthManagerByAuthHandle(authHandle);
+}
+
 void LnnDeinitBusCenterEvent(void)
 {
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
@@ -747,6 +749,11 @@ void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo)
     return GetNetBuilderDepsInterface()->GetLnnTriggerInfo(triggerInfo);
 }
 
+void LnnGetDataShareInitResult(bool *isDataShareInit)
+{
+    return GetNetBuilderDepsInterface()->LnnGetDataShareInitResult(isDataShareInit);
+}
+
 int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum)
 {
     return GetNetBuilderDepsInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
@@ -757,9 +764,15 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
     return GetNetBuilderDepsInterface()->LnnNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 
-void LnnGetDataShareInitResult(bool *isDataShareInit)
+int32_t LnnInitSaStatusMonitor()
 {
-    return GetNetBuilderDepsInterface()->LnnGetDataShareInitResult(isDataShareInit);
+    return GetNetBuilderDepsInterface()->LnnInitSaStatusMonitor();
 }
+
+void LnnDeInitSaStatusMonitor()
+{
+    GetNetBuilderDepsInterface()->LnnDeInitSaStatusMonitor();
+}
+
 } // extern "C"
 } // namespace OHOS

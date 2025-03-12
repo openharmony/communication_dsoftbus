@@ -139,7 +139,7 @@ bool DistributeStreamTestAgent::SetUp()
     msgFunMap["TerminalServer"] = &DistributeStreamTestAgent::TerminalServer;
     msgFunMap["removeSessionServer"] = &DistributeStreamTestAgent::RemoverTestSessionServer;
 
-    SetAceessTokenPermission("distributed_stream_test");
+    SetAccessTokenPermission("distributed_stream_test");
 
     cout << "agent start" <<endl;
     return true;

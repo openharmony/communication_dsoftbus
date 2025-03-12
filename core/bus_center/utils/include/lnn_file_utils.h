@@ -16,7 +16,6 @@
 #ifndef LNN_FILE_UTILS_H
 #define LNN_FILE_UTILS_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -37,6 +36,7 @@ typedef enum {
 } LnnFileId;
 
 int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len);
+int32_t LnnRemoveStorageConfigPath(LnnFileId id);
 
 #ifdef __cplusplus
 }

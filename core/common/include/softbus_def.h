@@ -20,7 +20,6 @@
 #include "softbus_adapter_thread.h"
 #include "stdint.h"
 
-
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -50,6 +49,8 @@ extern "C" {
 #define SESSION_NAME_SIZE_MAX 256
 #define DEVICE_ID_SIZE_MAX 65
 #define DEVICE_VERSION_SIZE_MAX 128
+#define PRODUCT_ID_SIZE_MAX 128
+#define MODEL_NAME_SIZE_MAX 128
 #define GROUP_ID_SIZE_MAX 128
 #define REQ_ID_SIZE_MAX 65
 #define AUTH_STATE_SIZE_MAX 65
@@ -153,6 +154,7 @@ typedef struct {
     bool isEncrypt;
     bool isUdpFile;
     bool isFastData;
+    bool isSupportTlv;
     int32_t channelId;
     int32_t channelType;
     int32_t businessType;

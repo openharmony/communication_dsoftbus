@@ -130,7 +130,7 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, con
         *groupNum = GRUOP_NUM2;
     }
     *returnGroupVec = reinterpret_cast<char *>(SoftBusCalloc(*groupNum));
-    if (*returnGroupVec == NULL) {
+    if (*returnGroupVec == nullptr) {
         return HC_ERR_INVALID_PARAMS;
     }
     return HC_SUCCESS;
@@ -195,7 +195,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     (void)groupId;
     *deviceNum = 1;
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         AUTH_LOGI(AUTH_TEST, "create jsonObject err");
         return SOFTBUS_CREATE_JSON_ERR;
     }
@@ -222,7 +222,7 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
     (void)groupId;
     *deviceNum = 1;
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         AUTH_LOGI(AUTH_TEST, "create jsonObject err");
         return SOFTBUS_CREATE_JSON_ERR;
     }

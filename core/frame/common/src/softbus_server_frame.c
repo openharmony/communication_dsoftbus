@@ -18,6 +18,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
+#include "softbus_ddos.h"
 #include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
 #include "softbus_adapter_bt_common.h"
@@ -29,6 +30,7 @@
 #include "softbus_utils.h"
 #include "trans_session_service.h"
 #include "wifi_direct_manager.h"
+#include "lnn_init_monitor.h"
 
 static bool g_isInit = false;
 
@@ -50,6 +52,7 @@ static void ServerModuleDeinit(void)
     LooperDeinit();
     SoftBusHiDumperDeinit();
     DeinitSoftbusSysEvt();
+    DeinitDdos();
 }
 
 bool GetServerIsInit(void)
@@ -103,7 +106,6 @@ static int32_t InitServicesAndModules(void)
         COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
         return SOFTBUS_DFX_INIT_FAILED;
     }
-
     InstRegister(NULL);
     return SOFTBUS_OK;
 }
@@ -111,7 +113,7 @@ static int32_t InitServicesAndModules(void)
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
-
+    LnnInitMonitorInit();
     if (ServerStubInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "server stub init failed.");
         return;
@@ -127,6 +129,10 @@ void InitSoftBusServer(void)
         return;
     }
 
+    if (InitDdos() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus ddos init failed.");
+    }
+
     int32_t ret = InitServicesAndModules();
     if (ret != SOFTBUS_OK) {
         ServerModuleDeinit();
@@ -136,10 +142,14 @@ void InitSoftBusServer(void)
 
     ret = SoftBusBtInit();
     if (ret != SOFTBUS_OK) {
+        LnnInitModuleReturnSet(INIT_DEPS_BLUETOOTH, ret);
+        LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_FAILED);
         ServerModuleDeinit();
         COMM_LOGE(COMM_SVC, "softbus bt init failed, err = %{public}d", ret);
         return;
     }
+    LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_SUCCESS);
+    LnnModuleInitMonitorCheckStart();
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

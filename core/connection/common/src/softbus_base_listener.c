@@ -205,7 +205,7 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
     return node;
 }
 
-static int32_t AddFdNode(ListNode *fdList, int32_t fd, int32_t event)
+static int32_t AddFdNode(ListNode *fdList, int32_t fd, uint32_t event)
 {
     struct FdNode *fdNode = (struct FdNode *)SoftBusCalloc(sizeof(struct FdNode));
     CONN_CHECK_AND_RETURN_RET_LOGE(fdNode != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON, "calloc fdNode failed");
@@ -799,7 +799,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
             CONN_LOGW(CONN_COMMON, "fd node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d",
                 module, fd, trigger);
             // consider delete trigger success,
-            status = SOFTBUS_OK;
+            status = SOFTBUS_NOT_FIND;
             break;
         }
 
@@ -1013,7 +1013,6 @@ static void ProcessServerAcceptEvent(
                     status = ProcessSpecifiedServerAcceptEvent(
                         node->module, listenFd, connectType, socketIf, listener, wakeupTrace);
                 }
-                it->eventProcessed = true;
             }
         }
         switch (status) {
@@ -1041,7 +1040,7 @@ static void ProcessFdEvent(SoftbusListenerNode *node, struct FdNode fdEvent,
     struct FdNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, fdNode, struct FdNode, node) {
         if (it->fd == fdEvent.fd) {
-            int32_t triggerSet = fdEvent.triggerSet & it->triggerSet;
+            uint32_t triggerSet = fdEvent.triggerSet & it->triggerSet;
             if ((triggerSet & READ_TRIGGER) != 0) {
                 CONN_LOGD(CONN_COMMON, "trigger IN event, wakeupTrace=%{public}d, "
                     "module=%{public}d, fd=%{public}d, triggerSet=%{public}u",
@@ -1060,7 +1059,6 @@ static void ProcessFdEvent(SoftbusListenerNode *node, struct FdNode fdEvent,
                     wakeupTrace, node->module, fdEvent.fd, fdEvent.triggerSet);
                 DispatchFdEvent(fdEvent.fd, node->module, SOFTBUS_SOCKET_EXCEPTION, listener, wakeupTrace);
             }
-            it->eventProcessed = true;
         }
     }
 }
@@ -1102,15 +1100,45 @@ static void ProcessEvent(ListNode *fdNode, const WatchThreadState *watchState, i
         ProcessSpecifiedListenerNodeEvent(node, fdNode, wakeupTrace);
         ReturnListenerNode(&node);
     }
-    struct FdNode *it = NULL;
-    LIST_FOR_EACH_ENTRY(it, fdNode, struct FdNode, node) {
-        if (it->eventProcessed == false) {
-            CONN_LOGE(CONN_COMMON, "fd is not exist, remove fd event, fd=%{public}d, trigger=%{public}d",
-                it->fd, it->triggerSet);
-            (void)RemoveEvent(g_eventWatcher, it->fd);
+}
+
+static void RemoveBadFd(void)
+{
+    for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
+        SoftbusListenerNode *node = GetListenerNode(module);
+        if (node == NULL) {
+            continue;
         }
+        int32_t ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "lock failed, module=%{public}d", module);
+            ReturnListenerNode(&node);
+            continue;
+        }
+        if (node->info.status != LISTENER_RUNNING) {
+            SoftBusMutexUnlock(&node->lock);
+            ReturnListenerNode(&node);
+            continue;
+        }
+        if (node->info.listenFd > 0 && SoftBusSocketGetError(node->info.listenFd) == SOFTBUS_CONN_BAD_FD) {
+            CONN_LOGE(CONN_COMMON, "remove bad listen fd, fd=%{public}d, module=%{public}d",
+                node->info.listenFd, module);
+            node->info.listenFd = -1;
+        }
+        struct FdNode *it = NULL;
+        struct FdNode *next = NULL;
+        LIST_FOR_EACH_ENTRY_SAFE(it, next, &node->info.waitEventFds, struct FdNode, node) {
+            if (SoftBusSocketGetError(it->fd) == SOFTBUS_CONN_BAD_FD) {
+                CONN_LOGE(CONN_COMMON, "remove bad fd, fd=%{public}d, module=%{public}d", it->fd, module);
+                ListDelete(&it->node);
+                SoftBusFree(it);
+            }
+        }
+        SoftBusMutexUnlock(&node->lock);
+        ReturnListenerNode(&node);
     }
 }
+
 
 static void *WatchTask(void *arg)
 {
@@ -1149,6 +1177,9 @@ static void *WatchTask(void *arg)
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
                 WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
             ReleaseFdNode(&fdEvents);
+            if (nEvents == SOFTBUS_ADAPTER_SOCKET_EBADF) {
+                RemoveBadFd();
+            }
             SoftBusSleepMs(WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }

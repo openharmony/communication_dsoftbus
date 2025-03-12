@@ -128,3 +128,8 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
     }
     return SOFTBUS_OK;
 }
+
+int32_t LnnDisSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return DiscSetDisplayName(pkgName, nameData, len);
+}

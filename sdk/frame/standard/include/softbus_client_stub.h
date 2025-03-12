@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include <map>
 #include "if_softbus_client.h"
-#include "iremote_object.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -58,12 +57,13 @@ public:
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
+    void OnBleRangeDone(const BleRangeInnerInfo *rangeInfo) override;
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
     int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
-    int32_t OnCheckCollabRelation(
-        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType) override;
+    int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo,
+        bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -87,6 +87,7 @@ private:
     int32_t OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBleRangeDoneInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply);

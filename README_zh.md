@@ -242,6 +242,7 @@
         void (*OnFile)(int32_t socket, FileEvent *event);
         void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
         void (*OnError)(int32_t socket, int32_t errCode);
+        void (*OnBytesSent)(int32_t socket, uint32_t dataSeq, int32_t errCode);
     } ISocketListener;
 
     typedef enum {
@@ -273,6 +274,8 @@
     ```C
     // 发送字节数据
     int32_t SendBytes(int32_t socket, const void *data, uint32_t len);
+    // 异步发送字节数据, dataSeq是无符号的不为0值的整数
+    int32_t SendBytesAsync(int32_t socket, uint32_t dataSeq, const void *data, uint32_t len);
     // 发送消息数据
     int32_t SendMessage(int32_t socket, const void *data, uint32_t len);
     // 发送流数据

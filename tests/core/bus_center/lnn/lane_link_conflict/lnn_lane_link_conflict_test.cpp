@@ -92,7 +92,7 @@ static int32_t GenerateConflictDevInfo(LinkConflictInfo *inputInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     char (*devIdList)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
-    if (devIdList == NULL) {
+    if (devIdList == nullptr) {
         GTEST_LOG_(INFO) << "calloc devIdList fail";
         return SOFTBUS_MALLOC_ERR;
     }
@@ -104,7 +104,7 @@ static int32_t GenerateConflictDevInfo(LinkConflictInfo *inputInfo)
     }
     inputInfo->devIdCnt++;
     char (*devIpList)[CONFLICT_DEV_IP_LEN] = (char (*)[CONFLICT_DEV_IP_LEN])SoftBusCalloc(CONFLICT_DEV_IP_LEN);
-    if (devIpList == NULL) {
+    if (devIpList == nullptr) {
         GTEST_LOG_(INFO) << "calloc devIpList fail";
         FreeConflictDevInfo(inputInfo);
         return SOFTBUS_MALLOC_ERR;

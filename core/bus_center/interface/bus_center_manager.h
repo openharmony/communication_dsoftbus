@@ -16,8 +16,6 @@
 #ifndef BUS_CENTER_MANAGER_H
 #define BUS_CENTER_MANAGER_H
 
-#include <stdint.h>
-
 #include "bus_center_info_key.h"
 #include "data_level.h"
 #include "disc_manager.h"
@@ -89,8 +87,9 @@ bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout);
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName);
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);
+int32_t LnnDisSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);

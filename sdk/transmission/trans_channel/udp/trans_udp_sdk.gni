@@ -25,7 +25,11 @@ if (dsoftbus_feature_trans_udp == true &&
   trans_udp_channel_sdk_src =
       [ "$dsoftbus_udp_sdk_path/common/src/client_trans_udp_virtual.c" ]
 }
-trans_udp_channel_sdk_inc = [ "$dsoftbus_udp_sdk_path/common/include" ]
+trans_udp_channel_sdk_inc = [
+  "$dsoftbus_udp_sdk_path/common/include",
+  "$dsoftbus_udp_sdk_path/stream/include",
+]
+trans_udp_channel_sdk_inc += trans_dstream_inc + trans_file_sdk_inc
 trans_udp_channel_sdk_deps = []
 
 if (defined(ohos_lite)) {
@@ -37,11 +41,9 @@ if (defined(ohos_lite)) {
     }
   } else {
     trans_udp_channel_sdk_src += trans_dstream_src + trans_file_sdk_src
-    trans_udp_channel_sdk_inc += trans_dstream_inc + trans_file_sdk_inc
     trans_udp_channel_sdk_deps += trans_dstream_deps + trans_file_sdk_deps
   }
 } else {
   trans_udp_channel_sdk_src += trans_dstream_src + trans_file_sdk_src
-  trans_udp_channel_sdk_inc += trans_dstream_inc + trans_file_sdk_inc
   trans_udp_channel_sdk_deps += trans_dstream_deps + trans_file_sdk_deps
 }

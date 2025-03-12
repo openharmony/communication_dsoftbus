@@ -18,8 +18,6 @@
 
 #include <stdint.h>
 
-#include "event_form_enum.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "trans_udp_channel_manager.h"
 
 #include "common_list.h"
+#include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -130,6 +131,7 @@ int32_t TransUdpChannelMgrInit(void)
 
 void TransUdpChannelMgrDeinit(void)
 {
+    (void)RegisterTimeoutCallback(SOFTBUS_UDP_CHANNEL_TIMER_FUN, NULL);
     if (g_udpChannelMgr == NULL) {
         return;
     }
@@ -274,7 +276,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
     NotifyUdpChannelCloseInList(&udpDeleteChannelList);
 }
 
-int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
+int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isReply)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -293,7 +295,7 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
             if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -376,7 +378,7 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
+int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isReply)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -390,7 +392,7 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
             udpChannelNode->status = status;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
@@ -426,7 +428,7 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
+void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isReply)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
@@ -445,7 +447,8 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq) {
+        if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
+            udpChannelNode->isReply = false;
             if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
             }
@@ -455,6 +458,31 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%{public}" PRId64, seq);
+}
+
+void TransSetUdpChannelMsgType(uint32_t requestId)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        return;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->requestId == requestId) {
+            udpChannelNode->isReply = true;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. reqId=%{public}u", requestId);
+    return;
 }
 
 int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel)
@@ -865,4 +893,20 @@ int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     return SOFTBUS_OK;
+}
+
+bool CompareSessionName(const char *dstSessionName, const char *srcSessionName)
+{
+    if (dstSessionName == NULL || srcSessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid sessionName");
+        return false;
+    }
+    regex_t regComp;
+    if (regcomp(&regComp, dstSessionName, REG_EXTENDED | REG_NOSUB) != REG_OK) {
+        TRANS_LOGE(TRANS_CTRL, "regcomp failed.");
+        return false;
+    }
+    bool compare = regexec(&regComp, srcSessionName, 0, NULL, 0) == REG_OK;
+    regfree(&regComp);
+    return compare;
 }

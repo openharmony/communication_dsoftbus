@@ -15,10 +15,6 @@
 #ifndef P2P_BROADCAST_RECEIVER_H
 #define P2P_BROADCAST_RECEIVER_H
 
-#include <map>
-#include <memory>
-#include <string>
-
 #include "kits/c/wifi_p2p.h"
 
 #include "adapter/p2p_adapter.h"

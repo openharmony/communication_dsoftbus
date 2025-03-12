@@ -27,16 +27,11 @@ typedef enum {
     DEVICE_NAME_TYPE_NICK_NAME,
 } DeviceNameType;
 
-typedef void (*LnnDeviceNameHandler)(DeviceNameType type, const char *deviceName);
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len);
 int32_t LnnGetUnifiedDisplayDeviceName(char *unifiedDisplayName, uint32_t len);
 int32_t LnnGetUnifiedDeviceName(char *unifiedName, uint32_t len);
 int32_t LnnGetUnifiedDefaultDeviceName(char *unifiedDefaultName, uint32_t len);
 int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, char *nickName, uint32_t len);
 int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len);
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler);
-int32_t LnnInitDeviceNameMonitorImpl(void);
-void RegisterNameMonitor(void);
 
 #ifdef __cplusplus
 }

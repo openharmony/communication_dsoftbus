@@ -75,7 +75,7 @@ namespace OHOS {
 static const char *g_sessionKey = "www.test.com";
 static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-static SessionConn *g_conn = NULL;
+static SessionConn *g_conn = nullptr;
 
 class TransServerTcpDirectTest : public testing::Test {
 public:
@@ -95,7 +95,7 @@ void TestAddTestSessionConn(void)
 {
     g_conn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
     g_conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (g_conn == NULL) {
+    if (g_conn == nullptr) {
         printf("create session conn failed.\n");
         return;
     }
@@ -158,7 +158,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
     }
 
     AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -175,7 +175,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
     }
 
     SessionKey *sessionKey = (SessionKey*)SoftBusCalloc(sizeof(SessionKey));
-    if (sessionKey ==  NULL) {
+    if (sessionKey ==  nullptr) {
         SoftBusFree(info);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -194,7 +194,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
 static void TestDelAuthManager(int64_t authId)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
-    if (auth != NULL) {
+    if (auth != nullptr) {
         DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     }
 }
@@ -202,7 +202,7 @@ static void TestDelAuthManager(int64_t authId)
 static int32_t TestAddSessionConn(bool isServerSide)
 {
     SessionConn *session = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, isServerSide);
-    if (session == NULL) {
+    if (session == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -291,9 +291,9 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, StartVerifySession002, TestSize.Level1)
 {
-    static SessionConn *tmpSessionConn = NULL;
+    static SessionConn *tmpSessionConn = nullptr;
     tmpSessionConn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
-    if (tmpSessionConn == NULL) {
+    if (tmpSessionConn == nullptr) {
         printf("create session conn failed.\n");
         return;
     }
@@ -472,10 +472,10 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcPostBytes001, TestSize.Level1)
     };
     int32_t channelId = 0;
 
-    int32_t ret = TransTdcPostBytes(channelId, NULL, bytes);
+    int32_t ret = TransTdcPostBytes(channelId, nullptr, bytes);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, NULL);
+    ret = TransTdcPostBytes(channelId, &packetHead, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     packetHead.dataLen = 0;
@@ -584,6 +584,8 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     
     TransTdcTimerProc();
+    NotifyTdcChannelTimeOut(nullptr);
+    NotifyTdcChannelStopProc(nullptr);
     TransTdcStopSessionProc(AUTH);
 
     TransDelSessionConnById(channelId);
@@ -636,13 +638,13 @@ HWTEST_F(TransServerTcpDirectTest, TransOpenDirectChannel001, TestSize.Level1)
     }
     int32_t fd = 1;
 
-    int32_t ret = TransOpenDirectChannel(NULL, &connInfo, &fd);
+    int32_t ret = TransOpenDirectChannel(nullptr, &connInfo, &fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransOpenDirectChannel(&appInfo, NULL, &fd);
+    ret = TransOpenDirectChannel(&appInfo, nullptr, &fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
+    ret = TransOpenDirectChannel(&appInfo, &connInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOpenDirectChannel(&appInfo, &connInfo, &fd);
@@ -659,15 +661,15 @@ HWTEST_F(TransServerTcpDirectTest, TransOpenDirectChannel001, TestSize.Level1)
 HWTEST_F(TransServerTcpDirectTest, UnpackReplyErrCode001, TestSize.Level1)
 {
     int32_t errCode = SOFTBUS_MEM_ERR;
-    int32_t ret = UnpackReplyErrCode(NULL, &errCode);
+    int32_t ret = UnpackReplyErrCode(nullptr, &errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = UnpackReplyErrCode(NULL, NULL);
+    ret = UnpackReplyErrCode(nullptr, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     std::string str = TEST_JSON;
     cJSON *msg = cJSON_Parse(str.c_str());
-    ret = UnpackReplyErrCode(msg, NULL);
+    ret = UnpackReplyErrCode(msg, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_Delete(msg);
 
@@ -696,7 +698,7 @@ HWTEST_F(TransServerTcpDirectTest, TransServerOnChannelOpenFailed001, TestSize.L
     int32_t ret = TransServerOnChannelOpenFailed(pkgName, pid, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransServerOnChannelOpenFailed(NULL, pid, channelId, channelType, errCode);
+    ret = TransServerOnChannelOpenFailed(nullptr, pid, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -712,5 +714,10 @@ HWTEST_F(TransServerTcpDirectTest, TransGetAuthTypeByNetWorkId001, TestSize.Leve
     std::string networkId = TEST_NETWORK_ID;
     bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
     EXPECT_NE(true, ret);
+
+    SessionConn *node = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
+    EXPECT_NE(nullptr, node);
+    OnSessionOpenFailProc(node, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+    SoftBusFree(node);
 }
 } // namespace OHOS

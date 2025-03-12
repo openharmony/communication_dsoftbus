@@ -16,15 +16,8 @@
 #ifndef AUTH_SESSION_H
 #define AUTH_SESSION_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_common.h"
-#include "auth_interface.h"
-#include "auth_session_key.h"
 #include "auth_device_common_key.h"
-#include "common_list.h"
-#include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
@@ -85,6 +78,7 @@ typedef struct {
     bool isSupportCompress;
     bool isSupportFastAuth;
     bool isNeedFastAuth;
+    bool isSupportDmDeviceKey;
     int64_t oldIndex;
     int32_t idType;
     int32_t userId;
@@ -120,6 +114,7 @@ typedef struct {
     bool isFastAuth;
 } AuthParam;
 
+void AuthSessionSetReSyncDeviceName(void);
 int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo);
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
@@ -133,8 +128,9 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len);
+int32_t AuthSessionProcessAuthTestData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
-int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect);
 int32_t AuthNotifyRequestVerify(int64_t authSeq);
 AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer, bool isConnectSide);
 void AuthSessionFsmExit(void);

@@ -15,7 +15,6 @@
 
 #include "negotiate_command.h"
 #include "conn_log.h"
-#include "softbus_error_code.h"
 #include "processor_selector_factory.h"
 
 namespace OHOS::SoftBus {

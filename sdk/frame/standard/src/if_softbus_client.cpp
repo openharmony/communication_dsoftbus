@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 #include "comm_log.h"
 #include "if_softbus_client.h"
-#include "softbus_error_code.h"
 
 namespace OHOS {
 int32_t ISoftBusClient::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -164,6 +163,11 @@ void ISoftBusClient::OnDataLevelChanged(const char *networkId, const DataLevelIn
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }
 
+void ISoftBusClient::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+}
+
 int32_t ISoftBusClient::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
@@ -189,9 +193,10 @@ int32_t ISoftBusClient::OnClientChannelOnQos(
 }
 
 int32_t ISoftBusClient::OnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+    const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
     (void)sourceInfo;
+    (void)isSinkSide;
     (void)sinkInfo;
     (void)channelId;
     (void)channelType;

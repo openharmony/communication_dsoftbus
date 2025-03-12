@@ -22,29 +22,36 @@
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
-#include "auth_normalize_request.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_normalize_request.h"
 #include "auth_request.h"
+#include "auth_pre_link.h"
 #include "auth_session_json.h"
 #include "auth_session_message.h"
+#include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "softbus_adapter_bt_common.h"
-#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
+#include "softbus_socket.h"
+#include "wifi_direct_manager.h"
 
-#define AUTH_TIMEOUT_MS (10 * 1000)
-#define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)
-#define SHORT_UDID_HASH_LEN 8
+#define AUTH_TIMEOUT_MS            (10 * 1000)
+#define TO_AUTH_FSM(ptr)           CONTAINER_OF(ptr, AuthFsm, fsm)
+#define SHORT_UDID_HASH_LEN        8
 #define HICHAIN_RETURN_NOT_TRUSTED (-425919748)
+#define PTK_32_BIT_LEN 16
 
 typedef enum {
     FSM_MSG_RECV_DEVICE_ID,
     FSM_MSG_RECV_AUTH_DATA,
+    FSM_MSG_RECV_TEST_AUTH_DATA,
     FSM_MSG_SAVE_SESSION_KEY,
     FSM_MSG_AUTH_ERROR,
     FSM_MSG_RECV_DEVICE_INFO,
@@ -63,19 +70,20 @@ typedef struct {
 } StateMsgMap;
 
 static const StateMsgMap g_StateMsgMap[] = {
-    {FSM_MSG_RECV_DEVICE_ID, (char *)"RECV_DEVICE_ID"},
-    {FSM_MSG_RECV_AUTH_DATA, (char *)"RECV_AUTH_DATA"},
-    {FSM_MSG_SAVE_SESSION_KEY, (char *)"SAVE_SESSION_KEY"},
-    {FSM_MSG_AUTH_ERROR, (char *)"AUTH_ERROR"},
-    {FSM_MSG_RECV_DEVICE_INFO, (char *)"RECV_DEVICE_INFO"},
-    {FSM_MSG_RECV_CLOSE_ACK, (char *)"RECV_CLOSE_ACK"},
-    {FSM_MSG_AUTH_FINISH, (char *)"AUTH_FINISH"},
-    {FSM_MSG_AUTH_TIMEOUT, (char *)"AUTH_TIMEOUT"},
-    {FSM_MSG_DEVICE_NOT_TRUSTED, (char *)"DEVICE_NOT_TRUSTED"},
-    {FSM_MSG_DEVICE_DISCONNECTED, (char *)"DEVICE_DISCONNECTED"},
-    {FSM_MSG_DEVICE_POST_DEVICEID, (char *)"DEVICE_POST_DEVICEID"},
-    {FSM_MSG_STOP_AUTH_FSM, (char *)"STOP_AUTH_FSM"},
-    {FSM_MSG_UNKNOWN, (char *)"UNKNOWN MSG!!"},
+    { FSM_MSG_RECV_DEVICE_ID,       (char *)"RECV_DEVICE_ID"       },
+    { FSM_MSG_RECV_AUTH_DATA,       (char *)"RECV_AUTH_DATA"       },
+    { FSM_MSG_RECV_TEST_AUTH_DATA,  (char *)"RECV_TEST_AUTH_DATA"  },
+    { FSM_MSG_SAVE_SESSION_KEY,     (char *)"SAVE_SESSION_KEY"     },
+    { FSM_MSG_AUTH_ERROR,           (char *)"AUTH_ERROR"           },
+    { FSM_MSG_RECV_DEVICE_INFO,     (char *)"RECV_DEVICE_INFO"     },
+    { FSM_MSG_RECV_CLOSE_ACK,       (char *)"RECV_CLOSE_ACK"       },
+    { FSM_MSG_AUTH_FINISH,          (char *)"AUTH_FINISH"          },
+    { FSM_MSG_AUTH_TIMEOUT,         (char *)"AUTH_TIMEOUT"         },
+    { FSM_MSG_DEVICE_NOT_TRUSTED,   (char *)"DEVICE_NOT_TRUSTED"   },
+    { FSM_MSG_DEVICE_DISCONNECTED,  (char *)"DEVICE_DISCONNECTED"  },
+    { FSM_MSG_DEVICE_POST_DEVICEID, (char *)"DEVICE_POST_DEVICEID" },
+    { FSM_MSG_STOP_AUTH_FSM,        (char *)"STOP_AUTH_FSM"        },
+    { FSM_MSG_UNKNOWN,              (char *)"UNKNOWN MSG!!"        },
 };
 
 typedef struct {
@@ -108,6 +116,8 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm);
 static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static void AuthFsmDeinitCallback(FsmStateMachine *fsm);
+static void HandleMsgRecvAuthTestData(AuthFsm *authFsm, const MessagePara *para);
+static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para);
 
 static FsmState g_states[STATE_NUM_MAX] = {
     [STATE_SYNC_NEGOTIATION] = {
@@ -189,8 +199,10 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
     }
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_BR:
+        case AUTH_LINK_TYPE_SESSION:
             break;
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             (void)memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, request.connInfo.info.ipInfo.deviceIdHash,
                 UDID_HASH_LEN);
             break;
@@ -205,7 +217,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
                 return;
             }
             break;
-        default :
+        default:
             AUTH_LOGE(AUTH_FSM, "error type");
     }
 }
@@ -222,7 +234,7 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
             AUTH_LOGE(AUTH_FSM, "get auth request fail");
             return SOFTBUS_AUTH_NOT_FOUND;
         }
-        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
         int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
             (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
         if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
@@ -249,8 +261,8 @@ static int32_t FillSessionInfoModule(uint32_t requestId, AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t connId,
-    const AuthConnInfo *connInfo, bool isServer)
+static AuthFsm *CreateAuthFsm(
+    int64_t authSeq, uint32_t requestId, uint64_t connId, const AuthConnInfo *connInfo, bool isServer)
 {
     AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
     if (authFsm == NULL) {
@@ -266,6 +278,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
     authFsm->info.idType = EXCHANGE_UDID;
+    authFsm->info.isSupportDmDeviceKey = false;
     if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
         SoftBusFree(authFsm);
@@ -355,6 +368,7 @@ static SoftBusLinkType ConvertAuthLinkTypeToHisysEvtLinkType(AuthLinkType type)
 {
     switch (type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             return SOFTBUS_HISYSEVT_LINK_TYPE_WLAN;
         case AUTH_LINK_TYPE_BR:
             return SOFTBUS_HISYSEVT_LINK_TYPE_BR;
@@ -439,8 +453,7 @@ static void SaveDeviceKey(AuthFsm *authFsm, int32_t keyType, AuthLinkType type)
         AUTH_LOGE(AUTH_FSM, "get session key fail");
         return;
     }
-    if (memcpy_s(deviceKey.deviceKey, sizeof(deviceKey.deviceKey),
-        sessionKey.value, sizeof(sessionKey.value)) != EOK) {
+    if (memcpy_s(deviceKey.deviceKey, sizeof(deviceKey.deviceKey), sessionKey.value, sizeof(sessionKey.value)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "session key cpy fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;
@@ -499,8 +512,7 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
             AUTH_LOGI(AUTH_FSM, "only hichain verify, save the device key");
             SaveDeviceKey(authFsm, AUTH_LINK_TYPE_NORMALIZED, authFsm->info.connInfo.type);
         } else if ((authFsm->info.normalizedType == NORMALIZED_NOT_SUPPORT) &&
-            (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) &&
-            !authFsm->info.isSupportFastAuth) {
+            (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) && !authFsm->info.isSupportFastAuth) {
             AUTH_LOGI(AUTH_FSM, "save device key for fast auth");
             SaveDeviceKey(authFsm, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_BLE);
         }
@@ -558,9 +570,9 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
                     "auth fsm wait for the finish event, ignore this disconnect event. authSeq=%{public}" PRId64 "",
                     authFsm->authSeq);
                 /*
-                * Note: Local hichain NOT onFinish, but remote hichain already onFinish
-                *      Regard this situation as auth finish
-                */
+                 * Note: Local hichain NOT onFinish, but remote hichain already onFinish
+                 *      Regard this situation as auth finish
+                 */
                 CompleteAuthSession(authFsm, SOFTBUS_OK);
                 break;
             }
@@ -571,8 +583,7 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
             StopAuthFsm(authFsm);
             break;
         default:
-            AUTH_LOGE(AUTH_FSM,
-                "auth fsm cannot handle msgType. authSeq=%{public}" PRId64 ", msgType=%{public}d",
+            AUTH_LOGE(AUTH_FSM, "auth fsm cannot handle msgType. authSeq=%{public}" PRId64 ", msgType=%{public}d",
                 authFsm->authSeq, msgType);
             break;
     }
@@ -667,9 +678,9 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
 static void SaveLastAuthSeq(const unsigned char *udidHash, int64_t authSeq)
 {
     AUTH_LOGI(AUTH_FSM, "save auth seq.authSeq=%{public}" PRId64, authSeq);
-    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1,
-        udidHash, SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (ConvertBytesToHexString(
+        hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash, SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert udidhash to hexstr fail.");
         return;
     }
@@ -691,15 +702,15 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "normalizedKey is NULL, auth fail");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return ret;
     }
-    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
-        hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1, hash, SHORT_UDID_HASH_LEN) !=
+        SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
@@ -708,8 +719,8 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
     if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
         SaveLastAuthSeq(hash, authFsm->authSeq);
     }
-    ret = AuthSessionSaveSessionKey(authFsm->authSeq, authFsm->info.normalizedKey->value,
-        authFsm->info.normalizedKey->len);
+    ret = AuthSessionSaveSessionKey(
+        authFsm->authSeq, authFsm->info.normalizedKey->value, authFsm->info.normalizedKey->len);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
         return ret;
@@ -719,16 +730,16 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
 
 static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
 {
-    AuthDeviceKeyInfo key = {0};
-    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    AuthDeviceKeyInfo key = { 0 };
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return ret;
     }
-    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
-        hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1, hash, SHORT_UDID_HASH_LEN) !=
+        SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
@@ -751,6 +762,35 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
     }
     (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
+}
+
+static int32_t ReuseDeviceKey(AuthFsm *authFsm)
+{
+    AuthDeviceKeyInfo key = { 0 };
+    AuthPreLinkNode node;
+    int32_t ret;
+    (void)memset_s(&node, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
+    if (FindAuthPreLinkNodeById(authFsm->info.requestId, &node) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get reuse device key fail");
+        return SOFTBUS_AUTH_SESSION_KEY_NOT_FOUND;
+    }
+    if (node.keyLen == 0) {
+        AUTH_LOGE(AUTH_FSM, "get reuse device key length is 0");
+        return SOFTBUS_AUTH_SESSION_KEY_NOT_FOUND;
+    }
+    if (memcpy_s(key.deviceKey, SESSION_KEY_LENGTH, node.localDeviceKey, SESSION_KEY_LENGTH) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy device key fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    key.keyLen = node.keyLen;
+    ret = AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post save sessionKey event");
+        (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+        return ret;
+    }
+    (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    return SOFTBUS_OK;
 }
 
 static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
@@ -780,6 +820,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             Anonymize(info->connInfo.info.ipInfo.ip, &anonyIp);
             if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, AnonymizeWrapper(anonyIp)) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "IP COPY ERROR");
@@ -822,8 +863,8 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_NETWORKID, reportInfo->localNetworkId, NETWORK_ID_BUF_LEN);
     char *anonyLocalNetworkId = NULL;
     Anonymize(reportInfo->localNetworkId, &anonyLocalNetworkId);
-    if (strcpy_s((char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN,
-        AnonymizeWrapper(anonyLocalNetworkId)) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN, AnonymizeWrapper(anonyLocalNetworkId)) !=
+        EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL NETWORKID COPY ERROR");
     }
     AnonymizeFree(anonyLocalNetworkId);
@@ -831,8 +872,8 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, reportInfo->localDevName, DEVICE_NAME_BUF_LEN);
     char *anonyLocalDevName = NULL;
     Anonymize(reportInfo->localDevName, &anonyLocalDevName);
-    if (strcpy_s((char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN,
-        AnonymizeWrapper(anonyLocalDevName)) != EOK) {
+    if (strcpy_s((char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN, AnonymizeWrapper(anonyLocalDevName)) !=
+        EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL DEVICE NAME COPY ERROR");
     }
     AnonymizeFree(anonyLocalDevName);
@@ -851,8 +892,8 @@ static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
     (void)LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort);
     (void)LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort);
     (void)LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &lnnAuditExtra->localDevType);
-    char udid[UDID_BUF_LEN] = {0};
-    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
+    uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UUID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid fail");
         return;
@@ -874,8 +915,8 @@ static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
     AnonymizeFree(anonyLocalUdid);
 }
 
-static void BuildLnnAuditEvent(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info, int32_t result,
-    int32_t errCode, SoftbusAuditType auditType)
+static void BuildLnnAuditEvent(
+    LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info, int32_t result, int32_t errCode, SoftbusAuditType auditType)
 {
     if (lnnAuditExtra == NULL || info == NULL) {
         AUTH_LOGE(AUTH_FSM, "lnnAuditExtra or info is null");
@@ -926,9 +967,8 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
     do {
         if (ProcessDeviceIdMessage(info, para->data, para->len) != SOFTBUS_OK) {
             ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
-            LnnAuditExtra lnnAuditExtra = {0};
-            BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
-                ret, AUDIT_EVENT_PACKETS_ERROR);
+            LnnAuditExtra lnnAuditExtra = { 0 };
+            BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH, ret, AUDIT_EVENT_PACKETS_ERROR);
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
@@ -959,9 +999,8 @@ static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
     do {
         if (ProcessDeviceIdMessage(info, para->data, para->len) != SOFTBUS_OK) {
             ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
-            LnnAuditExtra lnnAuditExtra = {0};
-            BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
-                ret, AUDIT_EVENT_PACKETS_ERROR);
+            LnnAuditExtra lnnAuditExtra = { 0 };
+            BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH, ret, AUDIT_EVENT_PACKETS_ERROR);
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
@@ -1011,8 +1050,8 @@ static bool SyncNegotiationStateProcess(FsmStateMachine *fsm, int32_t msgType, v
         return false;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
-    AUTH_LOGI(AUTH_FSM, "auth fsm process. authSeq=%{public}" PRId64 ", message=%{public}s",
-        authFsm->authSeq, FsmMsgTypeToStr(msgType));
+    AUTH_LOGI(AUTH_FSM, "auth fsm process. authSeq=%{public}" PRId64 ", message=%{public}s", authFsm->authSeq,
+        FsmMsgTypeToStr(msgType));
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_ID:
             HandleMsgRecvDeviceIdNego(authFsm, msgPara);
@@ -1038,8 +1077,8 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         return false;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
-    AUTH_LOGI(AUTH_FSM, "auth fsm process. authSeq=%{public}" PRId64 ", message=%{public}s",
-        authFsm->authSeq, FsmMsgTypeToStr(msgType));
+    AUTH_LOGI(AUTH_FSM, "auth fsm process. authSeq=%{public}" PRId64 ", message=%{public}s", authFsm->authSeq,
+        FsmMsgTypeToStr(msgType));
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_ID:
             HandleMsgRecvDeviceId(authFsm, msgPara);
@@ -1060,9 +1099,9 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len);
     if (ret != SOFTBUS_OK) {
-        LnnAuditExtra lnnAuditExtra = {0};
-        BuildLnnAuditEvent(&lnnAuditExtra, &authFsm->info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
-            ret, AUDIT_EVENT_PACKETS_ERROR);
+        LnnAuditExtra lnnAuditExtra = { 0 };
+        BuildLnnAuditEvent(
+            &lnnAuditExtra, &authFsm->info, AUDIT_HANDLE_MSG_FAIL_END_AUTH, ret, AUDIT_EVENT_PACKETS_ERROR);
         LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_AUTH_DATA, lnnAuditExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
@@ -1073,19 +1112,64 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
     }
 }
 
+static int32_t TrySendAuthTestInfo(int64_t authSeq, const AuthSessionInfo *info)
+{
+    switch (info->connInfo.type) {
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            if (!info->isServer) {
+                return PostAuthTestInfoMessage(authSeq, info);
+            }
+            return SOFTBUS_OK;
+        default:
+            return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_CONN_TYPE_INVALID;
+}
+
+static int32_t SoftbusCertChainParallel(const AuthSessionInfo *info)
+{
+    if (info == NULL || !IsSupportUDIDAbatement() || !info->isNeedPackCert) {
+        AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
+        return SOFTBUS_OK;
+    }
+    SoftbusCertChain *softbusCertChain = (SoftbusCertChain *)SoftBusCalloc(sizeof(SoftbusCertChain));
+    if (softbusCertChain == NULL) {
+        AUTH_LOGI(AUTH_FSM, "malloc gencert parallel node failed. skip");
+        return SOFTBUS_OK;
+    }
+    if (AddAuthGenCertParaNode(info->requestId) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "add gencert parallel node failed. skip");
+    }
+    if (GenerateCertificate(softbusCertChain, info) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "GenerateCertificate fail");
+        if (UpdateAuthGenCertParaNode(info->requestId, false, false, softbusCertChain) != SOFTBUS_OK) {
+            AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+        }
+        return SOFTBUS_OK;
+    }
+    if (UpdateAuthGenCertParaNode(info->requestId, false, true, softbusCertChain) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
 {
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             /* WIFI: client firstly send device info, server just reponse it. */
             if (!info->isServer) {
                 return PostDeviceInfoMessage(authSeq, info);
+            } else {
+                return SoftbusCertChainParallel(info);
             }
             return SOFTBUS_OK;
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION:
             return PostDeviceInfoMessage(authSeq, info);
         default:
             break;
@@ -1093,45 +1177,11 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_AUTH_CONN_TYPE_INVALID;
 }
 
-static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
-{
-    SessionKey sessionKey = {.len = para->len};
-    if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "copy session key fail.");
-        (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-        return;
-    }
-    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey, true, false) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "auth fsm save session key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
-    }
-
-    (void)CalcHKDF((uint8_t *)(&sessionKey.value), sessionKey.len,
-        (uint8_t *)(&authFsm->info.sessionKeyRandomNum), sizeof(authFsm->info.sessionKeyRandomNum));
-    (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-    if (LnnGenerateLocalPtk(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate ptk fail");
-    }
-    if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "auth fsm sync device info fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
-        CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
-        return;
-    }
-    if (authFsm->info.deviceInfoData != NULL) {
-        AUTH_LOGE(AUTH_FSM, "auth fsm dispatch device info to next state. authSeq=%{public}" PRId64, authFsm->authSeq);
-        (void)AuthSessionProcessDevInfoData(authFsm->authSeq,
-            authFsm->info.deviceInfoData, authFsm->info.deviceInfoDataLen);
-        SoftBusFree(authFsm->info.deviceInfoData);
-        authFsm->info.deviceInfoData = NULL;
-    }
-    LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO);
-    authFsm->curState = STATE_SYNC_DEVICE_INFO;
-}
-
 static void HandleMsgAuthError(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t result = *((int32_t *)(para->data));
-    AUTH_LOGE(AUTH_FSM,
-        "auth fsm handle hichain error, authSeq=%{public}" PRId64", reason=%{public}d", authFsm->authSeq, result);
+    AUTH_LOGE(AUTH_FSM, "auth fsm handle hichain error, authSeq=%{public}" PRId64 ", reason=%{public}d",
+        authFsm->authSeq, result);
     if (result == HICHAIN_RETURN_NOT_TRUSTED) {
         AUTH_LOGE(AUTH_FSM, "device not has trust relation, begin to offline");
         AuthDeviceNotTrust(authFsm->info.udid);
@@ -1181,6 +1231,15 @@ static void HandleMsgAuthFinish(AuthFsm *authFsm, MessagePara *para)
 static int32_t TryRecoveryKey(AuthFsm *authFsm)
 {
     int32_t ret = SOFTBUS_OK;
+    if (authFsm->info.isSupportDmDeviceKey) {
+        AUTH_LOGI(AUTH_FSM, "reuse device key");
+        if (ReuseDeviceKey(authFsm) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "reuse device key fail");
+            authFsm->info.isSupportDmDeviceKey = false;
+            ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+        }
+        return ret;
+    }
     if (authFsm->info.normalizedType == NORMALIZED_SUPPORT) {
         AUTH_LOGI(AUTH_FSM, "normalized auth succ");
         if (RecoveryNormalizedDeviceKey(authFsm) != SOFTBUS_OK) {
@@ -1207,8 +1266,8 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     }
     char *anonyUdid = NULL;
     Anonymize(authFsm->info.udid, &anonyUdid);
-    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s peerUserId=%{public}d",
-        AnonymizeWrapper(anonyUdid), authFsm->info.userId);
+    AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s peerUserId=%{public}d", AnonymizeWrapper(anonyUdid),
+        authFsm->info.userId);
     AnonymizeFree(anonyUdid);
     return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid, authFsm->info.userId);
 }
@@ -1228,7 +1287,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
     AUTH_LOGI(AUTH_FSM, "auth state enter, authSeq=%{public}" PRId64, authFsm->authSeq);
     authFsm->curState = STATE_DEVICE_AUTH;
     AuthSessionInfo *info = &authFsm->info;
-    if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {
+    if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth || info->isSupportDmDeviceKey) {
         ret = TryRecoveryKey(authFsm);
         if (ret != SOFTBUS_OK) {
             goto ERR_EXIT;
@@ -1256,14 +1315,17 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
         return false;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
-    AUTH_LOGI(AUTH_FSM, "auth fsm process. authSeq=%{public}" PRId64", message=%{public}s",
-        authFsm->authSeq, FsmMsgTypeToStr(msgType));
+    AUTH_LOGI(AUTH_FSM, "auth fsm process. authSeq=%{public}" PRId64 ", message=%{public}s", authFsm->authSeq,
+        FsmMsgTypeToStr(msgType));
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_ID:
             HandleMsgRecvDeviceId(authFsm, msgPara);
             break;
         case FSM_MSG_RECV_AUTH_DATA:
             HandleMsgRecvAuthData(authFsm, msgPara);
+            break;
+        case FSM_MSG_RECV_TEST_AUTH_DATA:
+            HandleMsgRecvAuthTestData(authFsm, msgPara);
             break;
         case FSM_MSG_SAVE_SESSION_KEY:
             HandleMsgSaveSessionKey(authFsm, msgPara);
@@ -1302,16 +1364,148 @@ static int32_t HandleCloseAckMessage(AuthFsm *authFsm, const AuthSessionInfo *in
     return SOFTBUS_OK;
 }
 
+static AuthFsm *GetAuthFsmByRequestId(uint64_t requestId)
+{
+    AuthFsm *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
+        if (item->info.requestId == requestId) {
+            return item;
+        }
+    }
+    AUTH_LOGE(AUTH_FSM, "auth fsm not found. ");
+    return NULL;
+}
+
+
+static void OnPtkSyncCallBack(const char *uuid, int32_t result)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get invalid param");
+        return;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "require auth lock fail");
+        return;
+    }
+    AuthPreLinkNode reuseKeyNode;
+    (void)memset_s(&reuseKeyNode, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
+    if (FindAuthPreLinkNodeByUuid(uuid, &reuseKeyNode) != SOFTBUS_OK) {
+        ReleaseAuthLock();
+        AUTH_LOGE(AUTH_FSM, "auth reuse devicekey not found");
+        return;
+    }
+    AuthFsm *authFsm = GetAuthFsmByRequestId(reuseKeyNode.requestId);
+    AuthSessionInfo *info = &authFsm->info;
+    if (authFsm == NULL) {
+        ReleaseAuthLock();
+        AUTH_LOGE(AUTH_FSM, "auth fsm not found");
+        return;
+    }
+    if (result != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "sync ptk fail");
+        ReleaseAuthLock();
+        CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_PTK_ERR);
+        return;
+    }
+    ReleaseAuthLock();
+    DelAuthGenCertParaNodeById(reuseKeyNode.requestId);
+    AuthManagerSetAuthPassed(authFsm->authSeq, info);
+    TryFinishAuthSession(authFsm);
+}
+
+static void TrySyncPtkClient(AuthSessionInfo *info)
+{
+    struct WifiDirectManager *wdMgr = GetWifiDirectManager();
+    if (wdMgr == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get wifiDirect mgr fail");
+        return;
+    }
+    char localPtk[PTK_DEFAULT_LEN] = { 0 };
+    char ptk[PTK_STR_LEN] = { 0 };
+    if (LnnGetLocalPtkByUuid(info->uuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+        return;
+    }
+    if (ConvertBytesToHexString(ptk, PTK_STR_LEN, (unsigned char *)localPtk,
+        PTK_32_BIT_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert ptk fail");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+        (void)memset_s(ptk, PTK_STR_LEN, 0, PTK_STR_LEN);
+    }
+    SyncPtkListener listener = OnPtkSyncCallBack;
+    wdMgr->addSyncPtkListener(listener);
+    if (wdMgr->savePTK(info->uuid, ptk) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "client save ptk fail");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+        (void)memset_s(ptk, PTK_STR_LEN, 0, PTK_STR_LEN);
+        return;
+    }
+    AUTH_LOGI(AUTH_FSM, "try sync ptk");
+    (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+    (void)memset_s(ptk, PTK_STR_LEN, 0, PTK_STR_LEN);
+    if (wdMgr->syncPTK(info->uuid) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "client sync ptk fail");
+    }
+}
+
+static void TrySavePtkServer(AuthSessionInfo *info)
+{
+    char ptk[PTK_STR_LEN] = { 0 };
+    struct WifiDirectManager *wdMgr = GetWifiDirectManager();
+    if (wdMgr == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get wifiDirect mgr fail");
+        return;
+    }
+    if (ConvertBytesToHexString(ptk, PTK_STR_LEN, (unsigned char *)info->nodeInfo.remotePtk,
+        PTK_32_BIT_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "client save ptk fail");
+        (void)memset_s(ptk, PTK_STR_LEN, 0, PTK_STR_LEN);
+    }
+    if (wdMgr->savePTK(info->uuid, ptk) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "server save ptk fail");
+    }
+    (void)memset_s(ptk, PTK_STR_LEN, 0, PTK_STR_LEN);
+}
+
+static void TryAddSyncPtkListenerServer(void)
+{
+    struct WifiDirectManager *wdMgr = GetWifiDirectManager();
+    if (wdMgr == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get wifiDirect mgr fail");
+        return;
+    }
+    AUTH_LOGI(AUTH_FSM, "wait to ptk sync");
+    SyncPtkListener listener = OnPtkSyncCallBack;
+    wdMgr->addSyncPtkListener(listener);
+}
+
+static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *info)
+{
+    LnnAuditExtra lnnAuditExtra = { 0 };
+    BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL,
+        AUDIT_EVENT_PACKETS_ERROR);
+    LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_INFO, lnnAuditExtra);
+    AUTH_LOGE(AUTH_FSM, "process device info msg fail");
+    CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
+}
+
+static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info)
+{
+    LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
+        TrySyncPtkClient(info);
+        return;
+    }
+    AuthManagerSetAuthPassed(authFsm->authSeq, info);
+    TryFinishAuthSession(authFsm);
+}
+
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
 {
     AuthSessionInfo *info = &authFsm->info;
     if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
-        LnnAuditExtra lnnAuditExtra = {0};
-        BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
-            SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL, AUDIT_EVENT_PACKETS_ERROR);
-        LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_INFO, lnnAuditExtra);
-        AUTH_LOGE(AUTH_FSM, "process device info msg fail");
-        CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
+        TryCompleteAuthSessionForError(authFsm, info);
         return;
     }
     info->isNodeInfoReceived = true;
@@ -1319,13 +1513,17 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
         AUTH_LOGE(AUTH_FSM, "copy uuid fail.");
         return;
     }
-    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
+        UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
+    }
+    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {
-            LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-            AuthManagerSetAuthPassed(authFsm->authSeq, info);
-            TryFinishAuthSession(authFsm);
+            ClientTryCompleteAuthSession(authFsm, info);
             return;
+        }
+        if (IsAuthPreLinkNodeExist(info->requestId)) {
+            TrySavePtkServer(info);
         }
         /* WIFI: server should response device info */
         if (PostDeviceInfoMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
@@ -1334,6 +1532,10 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             return;
         }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
+        if (IsAuthPreLinkNodeExist(info->requestId)) {
+            TryAddSyncPtkListenerServer();
+            return;
+        }
         AuthManagerSetAuthPassed(authFsm->authSeq, info);
         TryFinishAuthSession(authFsm);
         return;
@@ -1479,8 +1681,8 @@ static int32_t PostMessageToAuthFsm(int32_t msgType, int64_t authSeq, const uint
     return SOFTBUS_OK;
 }
 
-static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bool isServer,
-    const uint8_t *data, uint32_t len)
+static int32_t PostMessageToAuthFsmByConnId(
+    int32_t msgType, uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
 {
     MessagePara *para = NewMessagePara(data, len);
     if (para == NULL) {
@@ -1556,12 +1758,13 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
-    AuthFsm *authFsm = CreateAuthFsm(authParam->authSeq, authParam->requestId, authParam->connId,
-        connInfo, authParam->isServer);
+    AuthFsm *authFsm =
+        CreateAuthFsm(authParam->authSeq, authParam->requestId, authParam->connId, connInfo, authParam->isServer);
     if (authFsm == NULL) {
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
     }
+    DeleteWifiConnItemByConnId(GetConnId(authParam->connId));
     authFsm->info.isNeedFastAuth = authParam->isFastAuth;
     (void)UpdateLocalAuthState(authFsm->authSeq, &authFsm->info);
     AuthFsmStateIndex nextState = STATE_SYNC_DEVICE_ID;
@@ -1614,7 +1817,7 @@ int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
         AUTH_LOGE(AUTH_FSM, "udid is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthSessionInfo info = {0};
+    AuthSessionInfo info = { 0 };
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
         return SOFTBUS_AUTH_GET_SESSION_INFO_FAIL;
     }
@@ -1644,6 +1847,15 @@ int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason)
     return PostMessageToAuthFsm(FSM_MSG_AUTH_ERROR, authSeq, (uint8_t *)&reason, sizeof(reason));
 }
 
+int32_t AuthSessionProcessAuthTestData(int64_t authSeq, const uint8_t *data, uint32_t len)
+{
+    if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return PostMessageToAuthFsm(FSM_MSG_RECV_TEST_AUTH_DATA, authSeq, data, len);
+}
+
 int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
@@ -1662,8 +1874,7 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
     return PostMessageToAuthFsm(FSM_MSG_RECV_CLOSE_ACK, authSeq, data, len);
 }
 
-int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data,
-    uint32_t len)
+int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         AUTH_LOGE(AUTH_FSM, "data is null");
@@ -1672,8 +1883,7 @@ int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, co
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_DEVICE_INFO, connId, isServer, data, len);
 }
 
-int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data,
-    uint32_t len)
+int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         AUTH_LOGE(AUTH_FSM, "data is null");
@@ -1725,12 +1935,14 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect)
 {
     if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "get auth lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     AuthFsm *item = NULL;
+    bool isDisconnected = false;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
         if (item->info.connId != connId) {
             continue;
@@ -1739,9 +1951,23 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
             AUTH_LOGE(AUTH_FSM, "auth fsm has dead. authSeq=%{public}" PRId64 "", item->authSeq);
             continue;
         }
+        if ((GetConnType(item->info.connId) == AUTH_LINK_TYPE_WIFI ||
+            GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P)) {
+            if (isNeedDisconnect) {
+                DisconnectAuthDevice(&item->info.connId);
+                isDisconnected = true;
+            } else {
+                UpdateFd(&item->info.connId, AUTH_INVALID_FD);
+            }
+        }
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);
     }
     ReleaseAuthLock();
+    if (isNeedDisconnect && !isDisconnected && GetConnType(connId) == AUTH_LINK_TYPE_WIFI &&
+        IsExistWifiConnItemByConnId(GetConnId(connId))) {
+        DeleteWifiConnItemByConnId(GetConnId(connId));
+        DisconnectAuthDevice(&connId);
+    }
     return SOFTBUS_OK;
 }
 
@@ -1762,5 +1988,110 @@ void AuthSessionFsmExit(void)
         DestroyAuthFsm(item);
     }
     ListInit(&g_authFsmList);
+    ReleaseAuthLock();
+}
+
+static void HandleMsgRecvAuthTestData(AuthFsm *authFsm, const MessagePara *para)
+{
+    int32_t ret = SOFTBUS_OK;
+    AuthSessionInfo *info = &authFsm->info;
+    do {
+        if (info->isServer) {
+            if (PostAuthTestInfoMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
+                ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+                break;
+            }
+        }
+        if (ProcessAuthTestDataMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
+            ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+            break;
+        }
+    } while (false);
+    if (ret != SOFTBUS_OK) {
+        RemoveAuthSessionKeyByIndex(authFsm->authSeq, authFsm->authSeq, authFsm->info.connInfo.type);
+        if (!info->isServer) {
+            ret = ProcessClientAuthState(authFsm);
+            if (ret != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "auth fsm auth fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+                CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
+            }
+        }
+        return;
+    }
+    if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm sync device info fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+        CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
+        return;
+    }
+    if (authFsm->info.deviceInfoData != NULL) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm dispatch device info to next state. authSeq=%{public}" PRId64, authFsm->authSeq);
+        (void)AuthSessionProcessDevInfoData(
+            authFsm->authSeq, authFsm->info.deviceInfoData, authFsm->info.deviceInfoDataLen);
+        SoftBusFree(authFsm->info.deviceInfoData);
+        authFsm->info.deviceInfoData = NULL;
+    }
+    LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO);
+    authFsm->curState = STATE_SYNC_DEVICE_INFO;
+    AuthSessionHandleAuthFinish(authFsm->authSeq);
+}
+
+static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
+{
+    SessionKey sessionKey = { .len = para->len };
+    if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "copy session key fail.");
+        (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+        return;
+    }
+    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey, true, false) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm save session key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+    }
+
+    (void)CalcHKDF((uint8_t *)(&sessionKey.value), sessionKey.len, (uint8_t *)(&authFsm->info.sessionKeyRandomNum),
+        sizeof(authFsm->info.sessionKeyRandomNum));
+    (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+    if (LnnGenerateLocalPtk(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "generate ptk fail");
+    }
+    authFsm->info.nodeInfo.isNeedReSyncDeviceName = false;
+    if (authFsm->info.isSupportDmDeviceKey) {
+        if (TrySendAuthTestInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
+            AUTH_LOGI(AUTH_FSM, "auth fsm reuse dm device key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+            if (ProcessClientAuthState(authFsm) != SOFTBUS_OK) {
+                AUTH_LOGI(AUTH_FSM, "auth fsm sync device info fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+                CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
+            }
+        }
+        return;
+    }
+    if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm sync device info fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+        CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
+        return;
+    }
+    if (authFsm->info.deviceInfoData != NULL) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm dispatch device info to next state. authSeq=%{public}" PRId64, authFsm->authSeq);
+        (void)AuthSessionProcessDevInfoData(
+            authFsm->authSeq, authFsm->info.deviceInfoData, authFsm->info.deviceInfoDataLen);
+        SoftBusFree(authFsm->info.deviceInfoData);
+        authFsm->info.deviceInfoData = NULL;
+    }
+    LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO);
+    authFsm->curState = STATE_SYNC_DEVICE_INFO;
+}
+void AuthSessionSetReSyncDeviceName(void)
+{
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "get auth lock fail");
+        return;
+    }
+    AuthFsm *item = NULL;
+    AuthFsm *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authFsmList, AuthFsm, node) {
+        if (item->curState >= STATE_SYNC_DEVICE_INFO) {
+            AUTH_LOGI(AUTH_FSM, "need resync latest device name authSeq=%{public}" PRId64, item->authSeq);
+            item->info.nodeInfo.isNeedReSyncDeviceName = true;
+        }
+    }
     ReleaseAuthLock();
 }

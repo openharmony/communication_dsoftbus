@@ -22,7 +22,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
-static ListNode g_authRequestList = {&g_authRequestList, &g_authRequestList};
+static ListNode g_authRequestList = { &g_authRequestList, &g_authRequestList };
 
 static AuthRequest *FindAuthRequestByRequestId(uint64_t requestId)
 {
@@ -49,8 +49,7 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request, ListNode *wait
             continue;
         }
         if (request->addTime - item->addTime < AUTH_REQUEST_TIMTOUR) {
-            AUTH_LOGD(AUTH_CONN,
-                "The two request addr are same. requestId1=%{public}u, requestId2=%{public}u",
+            AUTH_LOGD(AUTH_CONN, "The two request addr are same. requestId1=%{public}u, requestId2=%{public}u",
                 request->requestId, item->requestId);
             num++;
             continue;
@@ -66,7 +65,6 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request, ListNode *wait
         ListTailInsert(waitNotifyList, &tmpRequest->node);
         ListDelete(&item->node);
         SoftBusFree(item);
-        num++;
     }
     return num;
 }
@@ -86,7 +84,7 @@ uint32_t AddAuthRequest(const AuthRequest *request)
     }
     newRequest->addTime = GetCurrentTimeMs();
     ListTailInsert(&g_authRequestList, &newRequest->node);
-    ListNode waitNotifyList = {&waitNotifyList, &waitNotifyList};
+    ListNode waitNotifyList = { &waitNotifyList, &waitNotifyList };
     uint32_t waitNum = GetAuthRequestWaitNum(newRequest, &waitNotifyList);
     ReleaseAuthLock();
     AuthRequest *item = NULL;
@@ -140,8 +138,7 @@ int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *req
     }
     AuthRequest *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authRequestList, AuthRequest, node) {
-        if (item->type != REQUEST_TYPE_VERIFY ||
-            !CompareConnInfo(&item->connInfo, connInfo, true)) {
+        if (item->type != REQUEST_TYPE_VERIFY || !CompareConnInfo(&item->connInfo, connInfo, true)) {
             continue;
         }
         *request = *item;

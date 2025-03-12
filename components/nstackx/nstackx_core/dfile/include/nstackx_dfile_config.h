@@ -16,9 +16,6 @@
 #ifndef NSTACKX_DFILE_CONFIG_H
 #define NSTACKX_DFILE_CONFIG_H
 
-#include <stdint.h>
-
-#include "nstackx_config.h"
 #include "nstackx_util.h"
 #include "nstackx_dfile_frame.h"
 #ifdef __cplusplus

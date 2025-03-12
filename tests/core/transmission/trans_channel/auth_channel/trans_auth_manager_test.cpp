@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
-static IServerChannelCallBack *cb = NULL;
+static IServerChannelCallBack *cb = nullptr;
 
 class TransAuthManagerTest : public testing::Test {
 public:
@@ -74,7 +74,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    int32_t ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, NULL, sessionName,
+    int32_t ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, nullptr, sessionName,
                                            PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, nullptr,
@@ -94,14 +94,14 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
 HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
 {
     ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
-    ASSERT_TRUE(connOpt != NULL);
+    ASSERT_TRUE(connOpt != nullptr);
     int32_t channelId = 0;
-    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, NULL);
+    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     connOpt->type = CONNECT_TCP;
-    ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, NULL, NULL);
+    ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, nullptr, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransOpenAuthMsgChannel(g_sessionName, NULL, &channelId, NULL);
+    ret = TransOpenAuthMsgChannel(g_sessionName, nullptr, &channelId, nullptr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     SoftBusFree(connOpt);
 }
@@ -118,6 +118,45 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
     ASSERT_EQ(ret,  SOFTBUS_OK);
     ret = TransCloseAuthChannel(TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
+    GetAuthChannelListHead();
+    TransAuthDeinit();
+}
+
+/**
+ * @tc.name: TransAuthGetRoleByAuthIdTest001
+ * @tc.desc: Transmission auth manager get role by authId with wrong parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest001, TestSize.Level1)
+{
+    int32_t authId = TRANS_TEST_CHANNEL_ID;
+    bool *isClient = nullptr;
+    int32_t ret = TransAuthGetRoleByAuthId(authId, isClient);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ret = TransAuthInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAuthGetRoleByAuthId(authId, isClient);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    TransAuthDeinit();
+}
+
+/**
+ * @tc.name: TransAuthGetRoleByAuthIdTest002
+ * @tc.desc: Transmission auth manager get role by authId with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest002, TestSize.Level1)
+{
+    int32_t authId = TRANS_TEST_CHANNEL_ID;
+    bool isClient = false;
+
+    int32_t ret = TransAuthInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAuthGetRoleByAuthId(authId, &isClient);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
     TransAuthDeinit();
 }
 }

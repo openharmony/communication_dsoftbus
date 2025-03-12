@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@
 #include "auth_request.h"
 #include "auth_session_message.h"
 #include "bus_center_adapter.h"
-#include "lnn_connection_mock.h"
 #include "lnn_hichain_mock.h"
 #include "lnn_socket_mock.h"
 #include "message_handler.h"
@@ -68,8 +67,8 @@ const AuthConnInfo g_connInfo = {
     .peerUid = "002",
 };
 const AuthVerifyCallback callBack = {
-    .onVerifyPassed = LnnConnectInterfaceMock::OnVerifyPassed,
-    .onVerifyFailed = LnnConnectInterfaceMock::onVerifyFailed,
+    .onVerifyPassed = AuthCommonInterfaceMock::OnVerifyPassed,
+    .onVerifyFailed = AuthCommonInterfaceMock::OnVerifyFailed,
 };
 const AuthSessionInfo info = {
     .isServer = true,
@@ -81,7 +80,7 @@ const AuthSessionInfo info2 = {
     .connInfo = g_connInfo,
 };
 struct MockInterfaces {
-    LnnConnectInterfaceMock *connMock;
+    AuthCommonInterfaceMock *connMock;
     LnnHichainInterfaceMock *hichainMock;
     AuthNetLedgertInterfaceMock *ledgerMock;
     LnnSocketInterfaceMock *socketMock;
@@ -148,7 +147,7 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     groupManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
     authManager.authDevice = LnnHichainInterfaceMock::InvokeAuthDevice;
     ON_CALL(*mockInterface->connMock, ConnSetConnectCallback(_, _))
-        .WillByDefault(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
+        .WillByDefault(AuthCommonInterfaceMock::ActionofConnSetConnectCallback);
     ON_CALL(*mockInterface->connMock, ConnGetHeadSize()).WillByDefault(Return(sizeof(ConnPktHead)));
     ON_CALL(*mockInterface->hichainMock, InitDeviceAuthService()).WillByDefault(Return(0));
     ON_CALL(*mockInterface->hichainMock, GetGaInstance()).WillByDefault(Return(&authManager));
@@ -160,7 +159,7 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->connMock, ConnPostBytes).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*mockInterface->socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*mockInterface->connMock, ConnGetConnectionInfo)
-        .WillByDefault(LnnConnectInterfaceMock::ActionofConnGetConnectionInfo);
+        .WillByDefault(AuthCommonInterfaceMock::ActionofConnGetConnectionInfo);
     ON_CALL(*mockInterface->ledgerMock, LnnGetDeviceName).WillByDefault(Return(DEV_NAME));
     ON_CALL(*mockInterface->ledgerMock, LnnConvertIdToDeviceType).WillByDefault(Return(const_cast<char *>(TYPE_PAD)));
     ON_CALL(*mockInterface->ledgerMock, LnnGetDeviceUdid).WillByDefault(Return(TEST_UDID));
@@ -253,7 +252,7 @@ void AuthTestCallBackTest::TearDown()
     LooperDeinit();
 }
 
-void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock, GroupAuthManager authManager,
+void AuthInitMock(AuthCommonInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock, GroupAuthManager authManager,
     DeviceGroupManager groupManager)
 {
     groupManager.regDataChangeListener = LnnHichainInterfaceMock::InvokeDataChangeListener;
@@ -276,7 +275,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
 {
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
-    NiceMock<LnnConnectInterfaceMock> connMock;
+    NiceMock<AuthCommonInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
@@ -292,7 +291,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
     char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
+    AuthCommonInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
     authManager.processData = LnnHichainInterfaceMock::ActionOfProcessData;
     HichainProcessData(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
@@ -301,7 +300,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     WaitForSignal();
     SoftBusFree(data);
     char *data2 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devAuthHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data2, TEST_DATA_LEN);
+    AuthCommonInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data2, TEST_DATA_LEN);
     WaitForSignal();
     SoftBusFree(data2);
     EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
@@ -311,14 +310,14 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     LnnHichainInterfaceMock::g_devAuthCb.onFinish(SEQ_SERVER, OPER_CODE, g_retData);
     WaitForSignal();
     EXPECT_CALL(connMock, ConnPostBytes)
-        .WillRepeatedly(DoAll(SendSignal, LnnConnectInterfaceMock::ActionOfConnPostBytes));
+        .WillRepeatedly(DoAll(SendSignal, AuthCommonInterfaceMock::ActionOfConnPostBytes));
     PostDeviceInfoMessage(SEQ_SERVER, &info2);
     WaitForSignal();
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(
-        g_connId, MODULE_ID, SEQ_SERVER, LnnConnectInterfaceMock::g_encryptData, TEST_DATA_LEN);
+    AuthCommonInterfaceMock::g_conncallback.OnDataReceived(
+        g_connId, MODULE_ID, SEQ_SERVER, AuthCommonInterfaceMock::g_encryptData, TEST_DATA_LEN);
     WaitForSignal();
     char *data4 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, closeAckHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);
+    AuthCommonInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);
     WaitForSignal();
     SoftBusFree(data4);
 }

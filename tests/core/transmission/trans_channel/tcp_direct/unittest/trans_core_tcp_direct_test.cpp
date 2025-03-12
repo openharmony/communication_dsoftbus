@@ -109,7 +109,7 @@ SessionConn *TestSetSessionConn()
 string TestGetMsgPack()
 {
     cJSON *msg = cJSON_CreateObject();
-    if (msg == NULL) {
+    if (msg == nullptr) {
         cJSON_Delete(msg);
         return nullptr;
     }
@@ -148,7 +148,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransTcpDirectDeinit();
 
-    ret = TransTcpDirectInit(NULL);
+    ret = TransTcpDirectInit(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     TransTcpDirectDeinit();
@@ -229,7 +229,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
-    ret = TransOpenDirectChannel(NULL, &connOpt, &channelId);
+    ret = TransOpenDirectChannel(nullptr, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(appInfo);
 }
@@ -314,10 +314,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port, NULL);
+    char *ret = VerifyP2pPack(g_ip, g_port, nullptr);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port, NULL);
+    ret = VerifyP2pPack(nullptr, g_port, nullptr);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -335,7 +335,7 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
-    char *pack = VerifyP2pPack(g_ip, g_port, NULL);
+    char *pack = VerifyP2pPack(g_ip, g_port, nullptr);
     EXPECT_TRUE(pack != nullptr);
 
     int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
@@ -344,7 +344,7 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2pUnPack(NULL, const_cast<char *>(g_ip), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }
@@ -433,7 +433,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
     int32_t ret = TransTdcSetCallBack(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransTdcSetCallBack(NULL);
+    ret = TransTdcSetCallBack(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

@@ -15,6 +15,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     "activemetanode_fuzzer:ActiveMetaNodeFuzzTest",
+    "blerange_fuzzer:TriggerBleRangeFuzzTest",
     "deactivemetanode_fuzzer:DeactiveMetaNodeFuzzTest",
     "getallmetanodeinfo_fuzzer:GetAllMetaNodeInfoFuzzTest",
     "getallnodedeviceinfo_fuzzer:GetAllNodeDeviceInfoFuzzTest",

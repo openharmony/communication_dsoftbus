@@ -32,6 +32,7 @@ public:
     virtual bool EnableBle() = 0;
     virtual bool DisableBle() = 0;
     virtual bool IsBleEnabled() = 0;
+    virtual bool IsLpDeviceAvailable() = 0;
     virtual bool GetLocalAddr(unsigned char *mac, unsigned int len) = 0;
     virtual bool SetLocalName(unsigned char *localName, unsigned char length) = 0;
     virtual int32_t GapRegisterCallbacks(BtGapCallBacks *func) = 0;
@@ -84,10 +85,11 @@ public:
     virtual int32_t BleGattsDisconnect(int32_t serverId, BdAddr bdAddr, int32_t connId) = 0;
     virtual int32_t BleGattsSendResponse(int32_t serverId, GattsSendRspParam *param) = 0;
     virtual int32_t BleGattsSendIndication(int32_t serverId, GattsSendIndParam *param) = 0;
-
+    virtual int BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
+    uint32_t filterSize, uint32_t filterAction) = 0;
     virtual int32_t RegisterBroadcastMediumFunction(
         SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface) = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
 };
 
 class MockBluetooth : public BluetoothInterface {
@@ -98,6 +100,7 @@ public:
     MOCK_METHOD(bool, EnableBle, (), (override));
     MOCK_METHOD(bool, DisableBle, (), (override));
     MOCK_METHOD(bool, IsBleEnabled, (), (override));
+    MOCK_METHOD(bool, IsLpDeviceAvailable, (), (override));
     MOCK_METHOD(bool, GetLocalAddr, (unsigned char *mac, unsigned int len), (override));
     MOCK_METHOD(bool, SetLocalName, (unsigned char *localName, unsigned char length), (override));
     MOCK_METHOD(int32_t, GapRegisterCallbacks, (BtGapCallBacks * func), (override));
@@ -112,6 +115,8 @@ public:
         (int32_t scannerId, const BleScanConfigs *configs, const BleScanNativeFilter *filter, uint32_t filterSize),
         (override));
     MOCK_METHOD(int32_t, BleStopScan, (int32_t scannerId), (override));
+    MOCK_METHOD(int, BleChangeScanParams, (int32_t scannerId, const BleScanConfigs *config,
+    const BleScanNativeFilter *filter, uint32_t filterSize, uint32_t filterAction), (override));
     MOCK_METHOD(
         int32_t, BleStartAdvEx, (int32_t * advId, const StartAdvRawData rawData, BleAdvParams advParam), (override));
     MOCK_METHOD(int32_t, BleStopAdv, (int32_t advId), (override));
@@ -149,6 +154,7 @@ public:
     MOCK_METHOD(int32_t, BleGattsAddCharacteristic,
         (int32_t serverId, int32_t srvcHandle, BtUuid characUuid, int32_t properties, int32_t permissions),
         (override));
+
     MOCK_METHOD(int32_t, BleGattsAddDescriptor,
         (int32_t serverId, int32_t srvcHandle, BtUuid descUuid, int32_t permissions), (override));
     MOCK_METHOD(int32_t, BleGattsStartService, (int32_t serverId, int32_t srvcHandle), (override));
@@ -159,7 +165,8 @@ public:
     MOCK_METHOD(int32_t, BleGattsSendIndication, (int32_t serverId, GattsSendIndParam *param), (override));
     MOCK_METHOD(int32_t, RegisterBroadcastMediumFunction,
         (SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface), (override));
-    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
+        (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     static MockBluetooth *GetMocker();
 
     static BtGapCallBacks *btGapCallback;

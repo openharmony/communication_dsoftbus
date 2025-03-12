@@ -16,12 +16,7 @@
 #ifndef AUTH_DEVICE_PROFILE_LISTENER_H
 #define AUTH_DEVICE_PROFILE_LISTENER_H
 
-#include "softbus_error_code.h"
-
 #include "distributed_device_profile_client.h"
-#include "i_profile_change_listener.h"
-#include "profile_change_listener_stub.h"
-#include "service_profile.h"
 
 namespace OHOS {
 namespace AuthToDeviceProfile {

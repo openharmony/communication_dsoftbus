@@ -75,7 +75,7 @@ int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-LnnLaneManager* GetLaneManager(void)
+LnnLaneManager *GetLaneManager(void)
 {
     return NULL;
 }

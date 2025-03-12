@@ -16,11 +16,8 @@
 #ifndef CB_MANAGER_H
 #define CB_MANAGER_H
 
-#include <vector>
-
 #include "common_inner.h"
 #include "i_stream_msg_manager.h"
-#include "stream_common.h"
 
 namespace Communication {
 namespace SoftBus {

@@ -208,26 +208,26 @@ static bool CheckFeature(const PublishOption *option)
     uint32_t capabilityBit = option->capabilityBitmap[0];
     switch (capabilityBit) {
         case 1 << DDMP_CAPABILITY_BITMAP:
-#ifdef ENABLE_DISC_LNN_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_LNN_COAP
             return true;
 #else
             DISC_LOGW(DISC_COAP, "coap publish not support lnn");
             return false;
-#endif /* ENABLE_DISC_LNN_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_LNN_COAP */
         case 1 << SHARE_CAPABILITY_BITMAP:
-#ifdef ENABLE_DISC_SHARE_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
             return true;
 #else
             DISC_LOGW(DISC_COAP, "coap publish not support share");
             return false;
-#endif /* ENABLE_DISC_SHARE_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
         default:
-#ifdef ENABLE_DISC_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_COAP
             return true;
 #else
             DISC_LOGW(DISC_COAP, "coap publish not support");
             return false;
-#endif /* ENABLE_DISC_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_COAP */
     }
 }
 
@@ -253,12 +253,12 @@ static int32_t Publish(const PublishOption *option, bool isActive)
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         goto PUB_FAIL;
     }
-#ifdef ENABLE_DISC_SHARE_COAP
+#ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
     if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
         DISC_LOGW(DISC_COAP, "register capability data to dfinder failed.");
         goto PUB_FAIL;
     }
-#endif /* ENABLE_DISC_SHARE_COAP */
+#endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
     if (isActive) {
         DiscCoapOption discCoapOption;
         DiscOption discOption = {

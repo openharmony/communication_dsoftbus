@@ -34,8 +34,6 @@
 #include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
-#define DB_MAGIC_NUMBER 0x5A5A5A5A
-#define MESH_MAGIC_NUMBER 0xA5A5A5A5
 
 static char *GetLinkTypeStrng(LaneLinkType preferredLink)
 {
@@ -278,7 +276,10 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     }
     LanePreferredLinkList laneLinkList = {0};
     int32_t ret = SOFTBUS_LANE_SELECT_FAIL;
-    if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
+    if (request->qosRequire.reuseBestEffort) {
+        LNN_LOGI(LNN_LANE, "select lane by reuse best effort");
+        ret = DecideReuseLane(networkId, request, &laneLinkList);
+    } else if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
         request->qosRequire.minLaneLatency == 0) {
         LNN_LOGI(LNN_LANE, "select lane by default linkList");
         ret = DecideDefaultLink(networkId, request->transType, laneLinkList.linkType, &(laneLinkList.linkTypeNum));

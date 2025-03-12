@@ -126,29 +126,28 @@ defines += [ "OPENSSL_NO_FILENAMES" ]
 
 if (dsoftbus_feature_disc_notification &&
     dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "ENABLE_NOTIFICATION_TX" ]
+  defines += [ "DSOFTBUS_FEATURE_DISC_NOTIFICATION" ]
 }
 
 if (dsoftbus_feature_disc_notification_rx &&
     dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "ENABLE_NOTIFICATION_RX" ]
+  defines += [ "DSOFTBUS_FEATURE_DISC_NOTIFICATION_RX" ]
 }
 
-if (dsoftbus_feature_disc_notification &&
-    dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "ENABLE_LINK_BLE" ]
+if (dsoftbus_feature_disc_link_ble && dsoftbus_feature_inner_disc_broadcast) {
+  defines += [ "DSOFTBUS_FEATURE_DISC_LINK_BLE" ]
 }
 
 if (dsoftbus_feature_disc_coap && dsoftbus_feature_inner_disc_coap) {
-  defines += [ "ENABLE_DISC_COAP" ]
+  defines += [ "DSOFTBUS_FEATURE_DISC_COAP" ]
 }
 
 if (dsoftbus_feature_disc_lnn_coap && dsoftbus_feature_inner_disc_coap) {
-  defines += [ "ENABLE_DISC_LNN_COAP" ]
+  defines += [ "DSOFTBUS_FEATURE_DISC_LNN_COAP" ]
 }
 
 if (dsoftbus_feature_disc_share_coap && dsoftbus_feature_inner_disc_coap) {
-  defines += [ "ENABLE_DISC_SHARE_COAP" ]
+  defines += [ "DSOFTBUS_FEATURE_DISC_SHARE_COAP" ]
 }
 
 if (defined(global_parts_info) &&
@@ -158,7 +157,7 @@ if (defined(global_parts_info) &&
   dsoftbus_feature_lnn_cloud_sync = true
 }
 
-if (defined(global_parts_info) && !defined(global_parts_info.i18n)) {
+if (defined(global_parts_info) && !defined(global_parts_info.global_i18n)) {
   support_i18n = false
 } else {
   support_i18n = true
@@ -178,4 +177,25 @@ if (dsoftbus_feature_lnn_wifi) {
 
 if (dsoftbus_feature_lnn_ble) {
   defines += [ "ENABLE_FEATURE_LNN_BLE" ]
+}
+
+if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
+    dsoftbus_feature_conn_tcp_comm) {
+  defines += [ "DSOFTBUS_FEATURE_CONN_PV1" ]
+  if (dsoftbus_feature_conn_pv2 && dsoftbus_feature_conn_pv1) {
+    defines += [ "DSOFTBUS_FEATURE_CONN_PV2" ]
+  }
+  if (dsoftbus_feature_conn_action) {
+    defines += [ "DSOFTBUS_FEATURE_CONN_ACTION" ]
+    if (dsoftbus_feature_conn_hv2 && dsoftbus_feature_disc_link_ble) {
+      defines += [ "DSOFTBUS_FEATURE_CONN_HV2" ]
+      if (dsoftbus_feature_conn_hv1 && dsoftbus_feature_conn_pv2 &&
+          dsoftbus_feature_conn_pv1) {
+        defines += [ "DSOFTBUS_FEATURE_CONN_HV1" ]
+      }
+      if (dsoftbus_feature_conn_hv2c) {
+        defines += [ "DSOFTBUS_FEATURE_CONN_HV2C" ]
+      }
+    }
+  }
 }

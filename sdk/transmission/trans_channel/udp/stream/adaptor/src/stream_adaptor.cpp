@@ -15,17 +15,8 @@
 
 #include "stream_adaptor.h"
 
-#include <map>
-#include <mutex>
-#include <string>
-
-#include "client_trans_udp_stream_interface.h"
-#include "securec.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "stream_adaptor_listener.h"
-#include "trans_log.h"
 
 using namespace OHOS;
 
@@ -74,24 +65,27 @@ void StreamAdaptor::SetAliveState(bool state)
     aliveState_.exchange(state);
 }
 
-void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
+bool StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
     const IStreamListener *callback)
 {
     if (param == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "param invalid");
-        return;
+        return false;
     }
     auto adaptor = shared_from_this();
     auto adaptorListener = std::make_shared<StreamAdaptorListener>(adaptor);
     streamManager_ =  Communication::SoftBus::IStreamManager::GetInstance(nullptr, adaptorListener);
-    streamManager_->PrepareEnvironment(param->pkgName);
+    if (streamManager_->PrepareEnvironment(param->pkgName) != true) {
+        TRANS_LOGE(TRANS_STREAM, "PrepareEnvironment already existed pkgName=%{public}s", param->pkgName);
+        return false;
+    }
     serverSide_ = isServerSide;
     if (sessionKey_.first == nullptr) {
         sessionKey_.first = new uint8_t[param->keyLen];
     }
     if (memcpy_s(sessionKey_.first, param->keyLen, param->sessionKey, param->keyLen) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return;
+        return false;
     }
 
     sessionKey_.second = param->keyLen;
@@ -99,6 +93,7 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
     streamType_ = param->type;
     channelId_ = channelId;
     isRawStreamEncrypt_ = param->isRawStreamEncrypt;
+    return true;
 }
 
 void StreamAdaptor::ReleaseAdaptor()

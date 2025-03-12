@@ -16,13 +16,7 @@
 #ifndef SOFTBUS_CONN_BLE_MANAGER_H
 #define SOFTBUS_CONN_BLE_MANAGER_H
 
-#include <semaphore.h>
-
-#include "common_list.h"
 #include "softbus_conn_ble_connection.h"
-#include "softbus_conn_interface.h"
-#include "softbus_conn_manager.h"
-#include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_connreporter.h"
 
 #ifdef __cplusplus
@@ -125,6 +119,7 @@ void ConnBleReturnConnection(ConnBleConnection **connection);
 void NotifyReusedConnected(uint32_t connectionId, uint16_t challengeCode);
 int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time);
 int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId);
+int32_t ConnBleDumper(ListNode *connectionSnapshots);
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback);
 

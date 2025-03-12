@@ -16,10 +16,7 @@
 #ifndef LNN_COAP_DISCOVERY_IMPL_H
 #define LNN_COAP_DISCOVERY_IMPL_H
 
-#include <stdint.h>
-
 #include "form/lnn_event_form.h"
-#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 #if __cplusplus

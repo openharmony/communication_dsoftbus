@@ -14,23 +14,22 @@
  */
 
 #include "lnn_bus_center_ipc.h"
-
 #include <cstring>
 #include <mutex>
 #include <securec.h>
-#include <vector>
 
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
+#include "ipc_skeleton.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
+#include "softbus_ddos.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 
@@ -57,11 +56,17 @@ struct DataLevelChangeReqInfo {
     int32_t pid;
 };
 
+struct BleRangeReqInfo {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
+};
+
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
 static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
+static std::vector<BleRangeReqInfo *> g_bleRangeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);
@@ -74,6 +79,12 @@ static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *da
 
 static IDataLevelChangeCallback g_dataLevelChangeCb = {
     .onDataLevelChanged = OnDataLevelChanged,
+};
+
+static void OnBleRangeDone(const BleRangeInnerInfo *info);
+
+static IBleRangeInnerCallback g_bleRangeCb = {
+    .onRangeDone = OnBleRangeDone,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -178,7 +189,19 @@ static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *da
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
+static void OnBleRangeDone(const BleRangeInnerInfo *info)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    const char *msdpPkgName = "ohos.msdp.spatialawareness";
+    for (const auto &iter : g_bleRangeRequestInfo) {
+        if (strcmp(msdpPkgName, iter->pkgName) != 0) {
+            continue;
+        }
+        (void)ClientOnBleRange(msdpPkgName, iter->pid, info);
+    }
+}
+
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
@@ -191,11 +214,15 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
+    int32_t ret = IsOverThreshold(pkgName, SERVER_JOIN_LNN);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     if (IsRepeatJoinLNNRequest(pkgName, callingPid, connAddr)) {
         LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%{public}s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerJoin(connAddr, pkgName);
+    ret = LnnServerJoin(connAddr, pkgName, isForceJoin);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinLNNInfo(pkgName, callingPid, connAddr);
     }
@@ -209,11 +236,15 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
+    int32_t ret = IsOverThreshold(pkgName, SERVER_LEAVE_LNN);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     if (IsRepeatLeaveLNNRequest(pkgName, callingPid, networkId)) {
         LNN_LOGE(LNN_EVENT, "repeat leave lnn request pkgName=%{public}s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerLeave(networkId, pkgName);
+    ret = LnnServerLeave(networkId, pkgName);
     if (ret == SOFTBUS_OK) {
         ret = AddLeaveLNNInfo(pkgName, callingPid, networkId);
     }
@@ -227,12 +258,21 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
         LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%{public}d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
+    int32_t ret = IsOverThreshold(pkgName, SERVER_GET_ALL_ONLINE_NODE_INFO);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnGetAllOnlineNodeInfo(reinterpret_cast<NodeBasicInfo **>(info), infoNum);
 }
 
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
+
+    int32_t ret = IsOverThreshold(pkgName, SERVER_GET_LOCAL_DEVICE_INFO);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnGetLocalDeviceInfo(reinterpret_cast<NodeBasicInfo *>(info));
 }
 
@@ -243,6 +283,10 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t
         LNN_LOGE(LNN_EVENT, "the process has been abandoned");
         return SOFTBUS_INVALID_PARAM;
     }
+    int32_t ret = IsOverThreshold(pkgName, SERVER_GET_NODE_KEY_INFO);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
@@ -250,6 +294,10 @@ int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId,
     uint16_t dataChangeFlag)
 {
     (void)pkgName;
+    int32_t ret = IsOverThreshold(pkgName, SERVER_SET_NODE_DATA_CHANGE_FLAG);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
 }
 
@@ -275,7 +323,7 @@ int32_t LnnIpcRegDataLevelChangeCb(const char *pkgName, int32_t callingPid)
 
 int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
 {
-    // unregister data level chagne callback to heartbeta
+    // unregister data level chagne callback to heartbeat
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<DataLevelChangeReqInfo *>::iterator iter;
     for (iter = g_dataLevelChangeRequestInfo.begin(); iter != g_dataLevelChangeRequestInfo.end();) {
@@ -284,6 +332,7 @@ int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
             g_dataLevelChangeRequestInfo.erase(iter);
             break;
         }
+        ++iter;
     }
     LnnUnregDataLevelChangeCb();
     return SOFTBUS_OK;
@@ -311,21 +360,37 @@ int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
 int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char *targetNetworkId,
     int32_t accuracy, int32_t period)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_START_TIME_SYNC);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_STOP_TIME_SYNC);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_PUBLISH_LNN);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnPublishService(pkgName, info, false);
 }
 
 int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_STOP_PUBLISH_LNN);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
@@ -381,12 +446,15 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const Subscrib
     LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
         LNN_EVENT, "pkgName invalid");
-
+    int32_t ret = IsOverThreshold(pkgName, SERVER_REFRESH_LNN);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     if (IsRepeatRefreshLnnRequest(pkgName, callingPid, info->subscribeId)) {
         LNN_LOGD(LNN_EVENT, "repeat refresh lnn request pkgName=%{public}s, subscribeId=%{public}d",
             pkgName, info->subscribeId);
     } else {
-        int32_t ret = AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
+        ret = AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
         LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_EVENT,
             "add refresh info failed, ret=%{public}d", ret);
     }
@@ -401,6 +469,10 @@ int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t su
     LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
         LNN_EVENT, "pkgName invalid");
+    int32_t ret = IsOverThreshold(pkgName, SERVER_STOP_REFRESH_LNN);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
 
     if (IsRepeatRefreshLnnRequest(pkgName, callingPid, subscribeId) &&
         DeleteRefreshLnnInfo(pkgName, callingPid, subscribeId) != SOFTBUS_OK) {
@@ -412,28 +484,96 @@ int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t su
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_ACTIVE_META_NODE);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnActiveMetaNode(info, metaNodeId);
 }
 
 int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_DEACTIVE_META_NODE);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnDeactiveMetaNode(metaNodeId);
 }
 
 int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_GET_ALL_META_NODE_INFO);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
 int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_SHIFT_LNN_GEAR);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
+int32_t LnnIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+{
+    return LnnTriggerHbForMeasureDistance(pkgName, callerId, mode);
+}
+
+int32_t LnnIpcRegBleRangeCb(const char *pkgName, int32_t callingPid)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    BleRangeReqInfo *info = new (std::nothrow) BleRangeReqInfo();
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SVC, "new object is nullptr");
+        return SOFTBUS_NETWORK_REG_CB_FAILED;
+    }
+    if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+        delete info;
+        return SOFTBUS_STRCPY_ERR;
+    }
+    info->pid = callingPid;
+    g_bleRangeRequestInfo.push_back(info);
+    LnnRegBleRangeCb(&g_bleRangeCb);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcUnregBleRangeCb(const char *pkgName, int32_t callingPid)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<BleRangeReqInfo *>::iterator iter;
+    for (iter = g_bleRangeRequestInfo.begin(); iter != g_bleRangeRequestInfo.end();) {
+        if (strcmp(pkgName, (*iter)->pkgName) == 0 && callingPid == (*iter)->pid) {
+            delete *iter;
+            g_bleRangeRequestInfo.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+    LnnUnregBleRangeCb();
+    return SOFTBUS_OK;
 }
 
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
+    int32_t ret = IsOverThreshold(pkgName, SERVER_SYNC_TRUSTED_RELATION);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
+int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return LnnDisSetDisplayName(pkgName, nameData, len);
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
@@ -454,6 +594,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
         info.pid = (*iter)->pid;
         if (strcpy_s(info.pkgName, PKG_NAME_SIZE_MAX, (*iter)->pkgName) != EOK) {
             LNN_LOGE(LNN_EVENT, "strcpy_s fail");
+            ++iter;
             continue;
         }
         ClientOnJoinLNNResult(&info, addr, addrTypeLen, networkId, retCode);

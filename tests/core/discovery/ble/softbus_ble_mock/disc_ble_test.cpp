@@ -52,6 +52,8 @@ public:
     static inline std::string g_customCapData = "name=Bill";
     static inline DeviceInfo g_foundDeviceInfo;
     static constexpr char FOUND_DEVICE_ID[] = "e831f7630b7619ae";
+    static inline std::string validRefreshData = R"({"discType":"handle"})";
+    static inline std::string invalidRefreshData = R"({"discType":"unkonw"})";
 };
 
 static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
@@ -85,6 +87,19 @@ static SubscribeOption GetSubscribeOptionForCastPlus()
     option.isWakeRemote = false;
     option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleTest::g_customCapData.data());
     option.dataLen = DiscBleTest::g_customCapData.length();
+
+    SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
+    return option;
+}
+
+static SubscribeOption GetSubscribeOptionForCastPlusGetHandle(const std::string custData)
+{
+    SubscribeOption option {};
+    option.freq = LOW;
+    option.isSameAccount = false;
+    option.isWakeRemote = false;
+    option.capabilityData = reinterpret_cast<uint8_t *>(const_cast<char *>(custData.data()));
+    option.dataLen = custData.length();
 
     SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
     return option;
@@ -239,10 +254,35 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
     busMock.SetupSuccessStub();
 
     SubscribeOption option = GetSubscribeOptionForOsd();
+    const char *pkgName = "ohos.distributedhardware.devicemanager";
+    const char *nameData = "{\"raw\": \"My Device\",\"name18\": \"Display Name 18\","
+        "\"name21\": \"Display Name 21\",\"name24\": \"Display Name 24\"}";
+    DiscSetDisplayName(pkgName, nameData, strlen(nameData));
     EXPECT_EQ(g_interface->mediumInterface->StartAdvertise(&option), SOFTBUS_OK);
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
 
     DISC_LOGI(DISC_TEST, "StartActiveDiscovery002 end ----");
+}
+
+/*
+ * @tc.name: StartActiveDiscovery003
+ * @tc.desc: start the second capability to update advertiser
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleTest, StartActiveDiscovery003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "StartActiveDiscovery003 begin ----");
+
+    SubscribeOption option = GetSubscribeOptionForCastPlusGetHandle(validRefreshData);
+
+    EXPECT_EQ(g_interface->mediumInterface->StartAdvertise(&option), SOFTBUS_OK);
+    EXPECT_EQ(g_interface->mediumInterface->StopAdvertise(&option), SOFTBUS_OK);
+
+    option = GetSubscribeOptionForCastPlusGetHandle(invalidRefreshData);
+    EXPECT_EQ(g_interface->mediumInterface->StartAdvertise(&option), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_interface->mediumInterface->StopAdvertise(&option), SOFTBUS_INVALID_PARAM);
+    DISC_LOGI(DISC_TEST, "StartActiveDiscovery003 end ----");
 }
 
 /*
