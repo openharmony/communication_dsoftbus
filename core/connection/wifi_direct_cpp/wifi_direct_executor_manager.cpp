@@ -20,8 +20,20 @@ namespace OHOS::SoftBus {
 std::shared_ptr<WifiDirectExecutor> WifiDirectExecutorManager::Find(const std::string &remoteId)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(!remoteId.empty(), nullptr, CONN_WIFI_DIRECT, "remote id is empty");
-    for (const auto &node : executors_) {
-        if (remoteId == node.remoteDeviceId_ || remoteId == node.remoteMac_) {
+    std::string remoteDeviceId;
+    std::string remoteMac;
+    if (WifiDirectUtils::IsDeviceId(remoteId)) {
+        remoteDeviceId = remoteId;
+        remoteMac = WifiDirectUtils::RemoteDeviceIdToMac(remoteId);
+    } else {
+        remoteDeviceId = WifiDirectUtils::RemoteMacToDeviceId(remoteId);
+        remoteMac = remoteId;
+    }
+    for (auto &node : executors_) {
+        if ((!remoteDeviceId.empty() && remoteDeviceId == node.remoteDeviceId_)
+            || (!remoteMac.empty() && remoteMac == node.remoteMac_)) {
+            node.remoteDeviceId_ = node.remoteDeviceId_.empty() ? remoteDeviceId : node.remoteDeviceId_;
+            node.remoteMac_ = node.remoteMac_.empty() ? remoteMac : node.remoteMac_;
             CONN_LOGI(CONN_WIFI_DIRECT, "find remoteId=%{public}s, remoteDeviceId=%{public}s, remoteMac=%{public}s",
                 GetDumpString(remoteId).c_str(), WifiDirectAnonymizeDeviceId(node.remoteDeviceId_).c_str(),
                 WifiDirectAnonymizeMac(node.remoteMac_).c_str());
