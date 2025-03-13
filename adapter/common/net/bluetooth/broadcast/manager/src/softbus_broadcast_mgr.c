@@ -2392,6 +2392,7 @@ int32_t StopScan(int32_t listenerId)
         g_firstSetIndex[g_scanManager[listenerId].filter[i].filterIndex] = false;
         g_scanManager[listenerId].filter[i].filterIndex = 0;
     }
+    ReleaseScanIdx(listenerId);
     g_scanManager[listenerId].isFliterChanged = true;
     g_scanManager[listenerId].isScanning = false;
     g_scanManager[listenerId].scanCallback->OnStopScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
@@ -2400,28 +2401,29 @@ int32_t StopScan(int32_t listenerId)
     return SOFTBUS_OK;
 }
 
-bool CompareSameFilter(BcScanFilter srcFilter, BcScanFilter dstFilter)
+bool CompareSameFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(&srcFilter != NULL, false, DISC_BROADCAST, "left filter is null");
-    DISC_CHECK_AND_RETURN_RET_LOGE(&dstFilter != NULL, false, DISC_BROADCAST, "right filter is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(srcFilter != NULL, false, DISC_BROADCAST, "left filter is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter != NULL, false, DISC_BROADCAST, "right filter is null");
 
-    return srcFilter.advIndReport == dstFilter.advIndReport &&
-        srcFilter.serviceUuid == dstFilter.serviceUuid &&
-        srcFilter.serviceDataLength == dstFilter.serviceDataLength &&
-        srcFilter.manufactureId == dstFilter.manufactureId &&
-        srcFilter.manufactureDataLength == dstFilter.manufactureDataLength &&
-        ((srcFilter.serviceData != NULL && dstFilter.serviceData != NULL &&
-        srcFilter.serviceDataMask != NULL && dstFilter.serviceDataMask != NULL &&
-        memcmp(srcFilter.serviceData, dstFilter.serviceData, srcFilter.serviceDataLength) == 0 &&
-        memcmp(srcFilter.serviceDataMask, dstFilter.serviceDataMask, srcFilter.serviceDataLength) == 0) ||
-        (srcFilter.serviceData == NULL && dstFilter.serviceData == NULL &&
-        srcFilter.serviceDataMask == NULL && dstFilter.serviceDataMask == NULL)) &&
-        ((srcFilter.manufactureData != NULL && dstFilter.manufactureData != NULL &&
-        srcFilter.manufactureDataMask != NULL && dstFilter.manufactureDataMask != NULL &&
-        memcmp(srcFilter.manufactureData, dstFilter.manufactureData, srcFilter.manufactureDataLength) == 0 &&
-        memcmp(srcFilter.manufactureDataMask, dstFilter.manufactureDataMask, srcFilter.manufactureDataLength) == 0) ||
-        (srcFilter.manufactureData == NULL && dstFilter.manufactureData == NULL &&
-        srcFilter.manufactureDataMask == NULL && dstFilter.manufactureDataMask == NULL));
+    return srcFilter->advIndReport == dstFilter->advIndReport &&
+        srcFilter->serviceUuid == dstFilter->serviceUuid &&
+        srcFilter->serviceDataLength == dstFilter->serviceDataLength &&
+        srcFilter->manufactureId == dstFilter->manufactureId &&
+        srcFilter->manufactureDataLength == dstFilter->manufactureDataLength &&
+        ((srcFilter->serviceData != NULL && dstFilter->serviceData != NULL &&
+        srcFilter->serviceDataMask != NULL && dstFilter->serviceDataMask != NULL &&
+        memcmp(srcFilter->serviceData, dstFilter->serviceData, srcFilter->serviceDataLength) == 0 &&
+        memcmp(srcFilter->serviceDataMask, dstFilter->serviceDataMask, srcFilter->serviceDataLength) == 0) ||
+        (srcFilter->serviceData == NULL && dstFilter->serviceData == NULL &&
+        srcFilter->serviceDataMask == NULL && dstFilter->serviceDataMask == NULL)) &&
+        ((srcFilter->manufactureData != NULL && dstFilter->manufactureData != NULL &&
+        srcFilter->manufactureDataMask != NULL && dstFilter->manufactureDataMask != NULL &&
+        memcmp(srcFilter->manufactureData, dstFilter->manufactureData, srcFilter->manufactureDataLength) == 0 &&
+        memcmp(srcFilter->manufactureDataMask, dstFilter->manufactureDataMask,
+            srcFilter->manufactureDataLength) == 0) ||
+        (srcFilter->manufactureData == NULL && dstFilter->manufactureData == NULL &&
+        srcFilter->manufactureDataMask == NULL && dstFilter->manufactureDataMask == NULL));
 }
 
 static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter, uint8_t filterNum)
@@ -2435,13 +2437,17 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
     g_scanManager[listenerId].deleteSize = 0;
 
     for (int i = 0; i < g_scanManager[listenerId].filterSize; i++) {
+        bool isSameFilter = false;
         for (int j = 0; j < filterNum; j++) {
-            if (CompareSameFilter(g_scanManager[listenerId].filter[i], filter[j])) {
+            if (CompareSameFilter(&g_scanManager[listenerId].filter[i], &filter[j])) {
                 filter[j].filterIndex = g_scanManager[listenerId].filter[i].filterIndex;
                 DISC_LOGI(DISC_BROADCAST, "same filter, equal index=%{public}d",
                     g_scanManager[listenerId].filter[i].filterIndex);
+                isSameFilter = true;
                 break;
             }
+        }
+        if (!isSameFilter) {
             g_scanManager[listenerId].deleted[g_scanManager[listenerId].deleteSize++] =
                 g_scanManager[listenerId].filter[i].filterIndex;
             DISC_LOGI(DISC_BROADCAST, "old filter del index, filterIndex=%{public}d",
@@ -2454,7 +2460,6 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
             if (GetFilterIndex(&filter[i].filterIndex) == SOFTBUS_OK) {
                 g_scanManager[listenerId].added[g_scanManager[listenerId].addSize++] = i;
                 DISC_LOGI(DISC_BROADCAST, "new filter add index, filterIndex=%{public}d", filter[i].filterIndex);
-                break;
             } else {
                 DISC_LOGI(DISC_BROADCAST, "filter add index failed");
                 return SOFTBUS_INVALID_PARAM;
@@ -2466,7 +2471,7 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
 
 int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter set scan filter");
+    DISC_LOGI(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(filterNum != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filterNum is 0");
     int32_t ret = SoftBusMutexLock(&g_scanLock);
