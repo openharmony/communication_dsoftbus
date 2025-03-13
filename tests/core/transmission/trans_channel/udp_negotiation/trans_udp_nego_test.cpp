@@ -962,11 +962,13 @@ HWTEST_F(TransUdpNegoTest, NotifyUdpChannelOpenedTest002, TestSize.Level0)
     bool isServerSide = false;
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
+    int32_t ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     
-    int32_t ret = LnnInitDistributedLedger();
+    ret = LnnInitDistributedLedger();
     EXPECT_EQ(SOFTBUS_OK, ret);
     NodeInfo nodeInfo = {
         .authCapacity = 127,
@@ -985,7 +987,6 @@ HWTEST_F(TransUdpNegoTest, NotifyUdpChannelOpenedTest002, TestSize.Level0)
     LnnDeinitDistributedLedger();
     TransUdpChannelMgrDeinit();
     SoftBusFree(appInfo);
-    SoftBusFree(channel);
 }
 
 /**
