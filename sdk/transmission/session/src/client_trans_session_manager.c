@@ -2782,9 +2782,5 @@ bool IsRawAuthSession(const char *sessionName)
             return true;
         }
     }
-    char *tmpName = NULL;
-    Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found sessionName=%{public}s", AnonymizeWrapper(tmpName));
-    AnonymizeFree(tmpName);
     return false;
 }
