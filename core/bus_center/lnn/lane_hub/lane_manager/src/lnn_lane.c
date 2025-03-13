@@ -28,6 +28,7 @@
 #include "lnn_lane_assign.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
+#include "lnn_lane_dfx.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_conflict.h"
@@ -625,7 +626,7 @@ static int32_t LaneDelayInit(void)
     return ret;
 }
 
-int32_t InitLane(void)
+static int32_t InitLaneFirstStep(void)
 {
     if (InitLaneModel() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "init laneModel fail");
@@ -664,6 +665,15 @@ int32_t InitLane(void)
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_NO_INIT;
     }
+    if (InitLaneEvent() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "init laneEvent fail");
+        return SOFTBUS_NO_INIT;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t InitLaneSecondStep(void)
+{
     g_laneIdListener.OnLaneIdEnabled = LaneIdEnabled;
     g_laneIdListener.OnLaneIdDisabled = LaneIdDisabled;
     g_laneObject[LANE_TYPE_TRANS] = TransLaneGetInstance();
@@ -676,6 +686,20 @@ int32_t InitLane(void)
     return SOFTBUS_OK;
 }
 
+int32_t InitLane(void)
+{
+    int32_t ret = InitLaneFirstStep();
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = InitLaneSecondStep();
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    LNN_LOGI(LNN_INIT, "lane init ok");
+    return SOFTBUS_OK;
+}
+
 void DeinitLane(void)
 {
     DeinitLaneModel();
@@ -685,6 +709,7 @@ void DeinitLane(void)
     LnnDeinitVapInfo();
     DeinitLaneSelectRule();
     DeinitLaneLinkConflict();
+    DeinitLaneEvent();
     DeinitLinkLedger();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
