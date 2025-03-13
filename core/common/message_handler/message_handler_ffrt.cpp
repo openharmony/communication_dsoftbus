@@ -45,7 +45,6 @@ typedef struct {
 
 struct FfrtMsgQueue {
     ffrt::queue *msgQueue;
-    MsgEventInfo handlingMsg;
 };
 
 typedef struct {
@@ -60,6 +59,7 @@ struct SoftBusLooperContext {
     unsigned int msgSize;
     ffrt::mutex *mtx;
     volatile bool stop; // destroys looper, stop = true
+    MsgEventInfo handlingMsg;
 };
 
 static int64_t UptimeMicros(void)
@@ -159,12 +159,14 @@ static void ReleaseLooper(const SoftBusLooper *looper)
 
 static void DumpMsgInfo(const SoftBusMessage *msg)
 {
-    if (msg->handler == nullptr) {
+    if (msg->handler == nullptr || msg->handler->looper == nullptr ||
+        msg->handler->looper->context == nullptr) {
+        COMM_LOGE(COMM_UTILS, "invalid para when dump msg info");
         return;
     }
-    COMM_LOGD(COMM_UTILS, "DumpMsgInfo.handler=%{public}s, what=%{public}" PRId32 ", arg1=%{public}" PRIu64 ", "
-        "arg2=%{public}" PRIu64 ", time=%{public}" PRId64 "",
-        msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
+    COMM_LOGI(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
+        "%{public}" PRIu64 ", %{public}" PRId64 "",
+        msg->handler->looper->context->name, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
 }
 
 static void UpdateHandlingMsg(const SoftBusMessage *currentMsg, const SoftBusLooper *looper)
@@ -173,7 +175,7 @@ static void UpdateHandlingMsg(const SoftBusMessage *currentMsg, const SoftBusLoo
         COMM_LOGE(COMM_UTILS, "invalid para when update handling msg");
         return;
     }
-    MsgEventInfo *tmpMsg = &(looper->queue->handlingMsg);
+    MsgEventInfo *tmpMsg = &(looper->context->handlingMsg);
     if (tmpMsg->handler != nullptr) {
         SoftBusFree(tmpMsg->handler);
         tmpMsg->handler = nullptr;
@@ -374,9 +376,9 @@ static void DestroyLooperWithFfrt(SoftBusLooper *looper)
         delete (looper->queue->msgQueue);
         looper->queue->msgQueue = nullptr;
     }
-    if (looper->queue->handlingMsg.handler != nullptr) {
-        SoftBusFree(looper->queue->handlingMsg.handler);
-        looper->queue->handlingMsg.handler = nullptr;
+    if (looper->context->handlingMsg.handler != nullptr) {
+        SoftBusFree(looper->context->handlingMsg.handler);
+        looper->context->handlingMsg.handler = nullptr;
     }
     SoftBusFree(looper->queue);
     looper->queue = nullptr;
@@ -483,34 +485,31 @@ void SetLooperDumpable(SoftBusLooper *looper, bool dumpable)
     looper->dumpable = dumpable;
     looper->context->mtx->unlock();
 }
-
-static int32_t CreateNewFfrtQueue(FfrtMsgQueue **ffrtQueue, const char *name)
+/* create new ffrt queue depend on create new context success */
+static int32_t CreateNewFfrtQueue(FfrtMsgQueue **ffrtQueue, const char *name, const SoftBusLooperContext *context)
 {
     FfrtMsgQueue *tmpQueue = static_cast<FfrtMsgQueue *>(SoftBusCalloc(sizeof(FfrtMsgQueue)));
     if (tmpQueue == nullptr) {
         COMM_LOGE(COMM_UTILS, "softbus msgQueue SoftBusCalloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    tmpQueue->handlingMsg.what = 0;
-    tmpQueue->handlingMsg.arg1 = 0;
-    tmpQueue->handlingMsg.arg2 = 0;
-    tmpQueue->handlingMsg.time = 0;
-    tmpQueue->handlingMsg.handler = nullptr;
-    (void)memset_s(tmpQueue->handlingMsg.looper, LOOP_NAME_LEN, 0, LOOP_NAME_LEN);
-    std::function<void()> callbackFunc = [tmpQueue]() {
-        if (tmpQueue == nullptr) {
-            COMM_LOGE(COMM_UTILS, "abnormal handle long time task with invalid FfrtMsgQueue");
+    std::function<void()> callbackFunc = [context]() {
+        if (context == nullptr || context->mtx == nullptr) {
+            COMM_LOGE(COMM_UTILS, "abnormal handle long time task with invalid task context");
             return;
         }
-        if (tmpQueue->handlingMsg.handler != nullptr) {
+        context->mtx->lock();
+        if (context->handlingMsg.handler != nullptr) {
             COMM_LOGE(COMM_UTILS, "abnormal handle long time task, what=%{public}" PRId32 ", "
                 "arg1=%{public}" PRIu64 ", arg2=%{public}" PRIu64 ", time=%{public}" PRId64 ", "
-                "handler=%{public}s, looper=%{public}s", tmpQueue->handlingMsg.what, tmpQueue->handlingMsg.arg1,
-                tmpQueue->handlingMsg.arg2, tmpQueue->handlingMsg.time, tmpQueue->handlingMsg.handler,
-                tmpQueue->handlingMsg.looper);
+                "handler=%{public}s, looper=%{public}s", context->handlingMsg.what, context->handlingMsg.arg1,
+                context->handlingMsg.arg2, context->handlingMsg.time, context->handlingMsg.handler,
+                context->handlingMsg.looper);
         } else {
-            COMM_LOGE(COMM_UTILS, "abnormal handle long time task with invalid msg info");
+            COMM_LOGE(COMM_UTILS, "abnormal handle long time task with invalid msg info, looper=%{public}s",
+                context->handlingMsg.looper);
         }
+        context->mtx->unlock();
     };
     tmpQueue->msgQueue = new (std::nothrow)ffrt::queue(name,
         ffrt::queue_attr().timeout(TASK_HANDLE_TIMEOUT * TIME_THOUSANDS_MULTIPLIER).callback(callbackFunc));
@@ -544,6 +543,12 @@ static int32_t CreateNewContext(SoftBusLooperContext **context, const char *name
         return SOFTBUS_MALLOC_ERR;
     }
     tmpContext->stop = false;
+    tmpContext->handlingMsg.what = 0;
+    tmpContext->handlingMsg.arg1 = 0;
+    tmpContext->handlingMsg.arg2 = 0;
+    tmpContext->handlingMsg.time = 0;
+    tmpContext->handlingMsg.handler = nullptr;
+    (void)memset_s(tmpContext->handlingMsg.looper, LOOP_NAME_LEN, 0, LOOP_NAME_LEN);
     *context = tmpContext;
     return SOFTBUS_OK;
 }
@@ -571,7 +576,7 @@ SoftBusLooper *CreateNewLooper(const char *name)
         return nullptr;
     }
     FfrtMsgQueue *ffrtQueue = nullptr;
-    if (CreateNewFfrtQueue(&ffrtQueue, name) != SOFTBUS_OK) {
+    if (CreateNewFfrtQueue(&ffrtQueue, name, context) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "create new ffrtQueue fail");
         delete (context->mtx);
         SoftBusFree(context);
