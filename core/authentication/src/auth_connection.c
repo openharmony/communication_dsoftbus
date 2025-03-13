@@ -561,7 +561,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
         connInfo.type = AUTH_LINK_TYPE_SESSION;
         connInfo.info.sessionInfo.connId = (uint32_t)fd;
         AUTH_LOGI(AUTH_CONN, "set connInfo for AUTH_LINK_TYPE_SESSION, fd=%{public}d", fd);
-    } else if (IsSessionAuth(head->module)) {
+    } else if (IsSessionKeyAuth(head->module)) {
         connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
     } else {
         if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
@@ -916,7 +916,8 @@ static int32_t PostBytesForSessionKey(int32_t fd, const AuthDataHead *head, cons
     }
     AuthDataHead tmpHead = *head;
     if (tmpHead.dataType == DATA_TYPE_DEVICE_INFO || tmpHead.dataType == DATA_TYPE_DEVICE_ID ||
-        tmpHead.dataType == DATA_TYPE_TEST_AUTH || tmpHead.dataType == DATA_TYPE_AUTH) {
+        tmpHead.dataType == DATA_TYPE_TEST_AUTH || tmpHead.dataType == DATA_TYPE_AUTH ||
+        tmpHead.dataType == DATA_TYPE_CLOSE_ACK) {
         tmpHead.module = MODULE_SESSION_KEY_AUTH;
     }
     int32_t ret = PackAuthData(&tmpHead, data, buf, size);
