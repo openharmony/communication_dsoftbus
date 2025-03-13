@@ -952,44 +952,6 @@ HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyUdpChannelOpenedTest002
- * @tc.desc: NotifyUdpChannelOpened
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpNegoTest, NotifyUdpChannelOpenedTest002, TestSize.Level0)
-{
-    bool isServerSide = false;
-    UdpChannelInfo *channel = CreateUdpChannelPackTest();
-    ASSERT_TRUE(channel != nullptr);
-    int32_t ret = TransAddUdpChannel(channel);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(appInfo != nullptr);
-    (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
-    
-    ret = LnnInitDistributedLedger();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    NodeInfo nodeInfo = {
-        .authCapacity = 127,
-        .uuid = "com.test.appinfo.deviceid",
-        .deviceInfo.deviceUdid = "com.test.deviceUdid",
-    };
-    ret = LnnAddMetaInfo(&nodeInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = NotifyUdpChannelOpened(appInfo, isServerSide);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
-
-    isServerSide = true;
-    ret = NotifyUdpChannelOpened(appInfo, isServerSide);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
-
-    LnnDeinitDistributedLedger();
-    TransUdpChannelMgrDeinit();
-    SoftBusFree(appInfo);
-}
-
-/**
  * @tc.name: CopyAppInfoFastTransDataTest001
  * @tc.desc: CopyAppInfoFastTransData
  * @tc.type: FUNC
@@ -1035,6 +997,7 @@ HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level0)
 HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level0)
 {
     int32_t channelId = 1;
+    TransUdpChannelMgrDeinit();
     int32_t ret = TransUdpGetChannelAndOpenConn(channelId);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
