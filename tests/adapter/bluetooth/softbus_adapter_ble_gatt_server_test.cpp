@@ -31,6 +31,8 @@ using ::testing::Return;
 #define MOCK_GATT_SERVICE_HANDLE    1
 #define MOCK_GATT_CHARA_HANDLE      2
 #define MOCK_GATT_DESCRIPTOR_HANDLE 3
+#define MOCK_GATT_INCLUDE_SERVICE_HANDLE 4
+#define SOFTBUS_TEST_MTU_SIZE 512
 
 namespace OHOS {
 
@@ -72,6 +74,7 @@ public:
     static StRecordCtx responseConfirmationCtx;
     static StRecordCtx notifySentCtx;
     static StRecordCtx mtuChangeCtx;
+    static StRecordCtx isConcernedAttrHandleCtx;
 };
 
 static SoftBusGattsCallback *GetStubGattsCallback();
@@ -618,6 +621,178 @@ HWTEST_F(AdapterBleGattServerTest, BleServiceAddCallback, TestSize.Level3)
 }
 
 /**
+ * @tc.name: AdapterBleGattServerTest_BleDescriptorAddCallback
+ * @tc.desc: test descriptor add callback
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattServerTest, BleDescriptorAddCallback, TestSize.Level3)
+{
+    gattServerCallback->characteristicAddCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, nullptr,
+        MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_CHARA_HANDLE);
+
+    // 注册service
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    MockBluetooth mocker;
+    MockAll(mocker);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service), SOFTBUS_OK);
+    gattServerCallback->includeServiceAddCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, MOCK_GATT_SERVICE_HANDLE,
+        MOCK_GATT_INCLUDE_SERVICE_HANDLE);
+
+    const char *netCharacteristic = "00002B00-0000-1000-8000-00805F9B34FB";
+    BtUuid btCharacteristic = {
+        .uuidLen = strlen(netCharacteristic),
+        .uuid = (char *)netCharacteristic,
+    };
+    gattServerCallback->characteristicAddCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, &btCharacteristic,
+        SOFTBUS_INVALID_PARAM, MOCK_GATT_CHARA_HANDLE);
+
+    gattServerCallback->descriptorAddCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, nullptr,
+        MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_DESCRIPTOR_HANDLE);
+
+    // 注册desciptor
+    const char *connDesciptor = "00002902-0000-1000-8000-00805F9B34FB";
+    BtUuid btDescriptor = {
+        .uuidLen = strlen(connDesciptor),
+        .uuid = (char *)connDesciptor,
+    };
+    gattServerCallback->descriptorAddCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, &btDescriptor,
+        MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_DESCRIPTOR_HANDLE);
+    gattServerCallback->descriptorAddCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, &btDescriptor,
+        SOFTBUS_INVALID_PARAM, MOCK_GATT_DESCRIPTOR_HANDLE);
+    SoftBusBtUuid descriptor = {
+        .uuidLen = strlen(connDesciptor),
+        .uuid = (char *)connDesciptor,
+    };
+    ASSERT_FALSE(
+        descriptorAddCtx.Expect(MOCK_GATT_SERVICE_HANDLE, SOFTBUS_OK, MOCK_GATT_DESCRIPTOR_HANDLE, &descriptor));
+    SoftBusUnRegisterGattsCallbacks(service);
+}
+
+/**
+ * @tc.name: AdapterBleGattServerTest_BleRequestReadCallback
+ * @tc.desc: test ble request read callback
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattServerTest, BleRequestReadCallback, TestSize.Level3)
+{
+    gattServerCallback->serviceStartCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, MOCK_GATT_SERVICE_HANDLE);
+    gattServerCallback->serviceStopCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, MOCK_GATT_SERVICE_HANDLE);
+    gattServerCallback->serviceDeleteCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, MOCK_GATT_SERVICE_HANDLE);
+
+    // 注册service
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    MockBluetooth mocker;
+    MockAll(mocker);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service), SOFTBUS_OK);
+
+    gattServerCallback->serviceStartCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, SOFTBUS_INVALID_PARAM);
+    gattServerCallback->serviceStopCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, SOFTBUS_INVALID_PARAM);
+    gattServerCallback->serviceDeleteCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, SOFTBUS_INVALID_PARAM);
+    gattServerCallback->responseConfirmationCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE);
+    gattServerCallback->indicationSentCb(1, OHOS_BT_STATUS_SUCCESS);
+
+    // server建链
+    BdAddr bdAddr = {
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
+    };
+    gattServerCallback->connectServerCb(1, MOCK_GATT_SERVER_HANDLE, &bdAddr);
+    BtReqReadCbPara btReadParam = {
+        .connId = -1,
+        .transId = 0,
+        .bdAddr = &bdAddr,
+        .attrHandle = MOCK_GATT_CHARA_HANDLE,
+        .offset = 0,
+        .isLong = false,
+    };
+    gattServerCallback->requestReadCb(btReadParam);
+    gattServerCallback->indicationSentCb(1, OHOS_BT_STATUS_SUCCESS);
+    SoftBusBtAddr addr = {
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
+    };
+    SoftBusGattReadRequest readParam = {
+        .connId = 1,
+        .transId = 0,
+        .btAddr = &addr,
+        .attrHandle = MOCK_GATT_CHARA_HANDLE,
+        .offset = 0,
+        .isLong = false,
+    };
+    GetStubGattsCallback()->requestReadCallback(readParam);
+    ASSERT_TRUE(ExpectGattReadRequest(requestReadCtx, readParam));
+    SoftBusUnRegisterGattsCallbacks(service);
+}
+
+/**
+ * @tc.name: AdapterBleGattServerTest_BleRequestWriteCallback
+ * @tc.desc: test ble request write callback
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattServerTest, BleRequestWriteCallback, TestSize.Level3)
+{
+    // 注册service
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    MockBluetooth mocker;
+    MockAll(mocker);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service), SOFTBUS_OK);
+
+    // server建链
+    BdAddr bdAddr = {
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
+    };
+    gattServerCallback->connectServerCb(1, MOCK_GATT_SERVER_HANDLE, &bdAddr);
+    SoftBusBtAddr addr = {
+        .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
+    };
+    GetStubGattsCallback()->connectServerCallback(1, &addr);
+    ASSERT_TRUE(connectServerCtx.Expect(1, &addr));
+
+    const char *valueExample = "hello gatt server, this is client";
+    BtReqWriteCbPara btWriteParam = {
+        .connId = -1,
+        .transId = 0,
+        .bdAddr = &bdAddr,
+        .attrHandle = MOCK_GATT_CHARA_HANDLE,
+        .offset = 0,
+        .length = strlen(valueExample),
+        .needRsp = true,
+        .isPrep = false,
+        .value = (unsigned char *)valueExample,
+    };
+    gattServerCallback->mtuChangeCb(-1, 0);
+    gattServerCallback->mtuChangeCb(1, SOFTBUS_TEST_MTU_SIZE);
+    gattServerCallback->requestWriteCb(btWriteParam);
+    SoftBusGattWriteRequest writeParam = {
+        .connId = 1,
+        .transId = 0,
+        .btAddr = &addr,
+        .attrHandle = MOCK_GATT_CHARA_HANDLE,
+        .offset = 0,
+        .length = strlen(valueExample),
+        .needRsp = true,
+        .isPrep = false,
+        .value = (unsigned char *)valueExample,
+    };
+    GetStubGattsCallback()->requestWriteCallback(writeParam);
+    ASSERT_TRUE(ExpectGattWriteRequest(requestWriteCtx, writeParam));
+    SoftBusUnRegisterGattsCallbacks(service);
+}
+
+/**
  * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
@@ -912,6 +1087,7 @@ SoftBusGattWriteRequest AdapterBleGattServerTest::requestWriteCtx = { 0 };
 StRecordCtx AdapterBleGattServerTest::responseConfirmationCtx("ResponseConfirmationCallback");
 StRecordCtx AdapterBleGattServerTest::notifySentCtx("NotifySentCallback");
 StRecordCtx AdapterBleGattServerTest::mtuChangeCtx("MtuChangeCallback");
+StRecordCtx AdapterBleGattServerTest::isConcernedAttrHandleCtx("isConcernedAttrHandle");
 
 static void StubServiceAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle)
 {
@@ -977,6 +1153,11 @@ static void StubMtuChangeCallback(int32_t connId, int32_t mtu)
     AdapterBleGattServerTest::mtuChangeCtx.Update(connId, mtu);
 }
 
+static bool StubIsConcernedAttrHandle(int32_t srvcHandle, int32_t attrHandle)
+{
+    return AdapterBleGattServerTest::isConcernedAttrHandleCtx.Update(srvcHandle, attrHandle);
+}
+
 static SoftBusGattsCallback *GetStubGattsCallback()
 {
     static SoftBusGattsCallback callbacks = {
@@ -993,6 +1174,7 @@ static SoftBusGattsCallback *GetStubGattsCallback()
         .responseConfirmationCallback = StubResponseConfirmationCallback,
         .notifySentCallback = StubNotifySentCallback,
         .mtuChangeCallback = StubMtuChangeCallback,
+        .isConcernedAttrHandle = StubIsConcernedAttrHandle,
     };
     return &callbacks;
 }
