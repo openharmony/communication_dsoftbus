@@ -24,6 +24,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane.h"
 #include "lnn_lane_communication_capability.h"
+#include "lnn_lane_dfx.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_ledger.h"
 #include "lnn_lane_query.h"
