@@ -262,12 +262,14 @@ int32_t SoftBusServer::RippleStats(int32_t channelId, int32_t channelType, const
 
 int32_t SoftBusServer::PublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    return LnnIpcPublishLNN(pkgName, info);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcPublishLNN(pkgName, (int32_t)callingPid, info);
 }
 
 int32_t SoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
 {
-    return LnnIpcStopPublishLNN(pkgName, publishId);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcStopPublishLNN(pkgName, (int32_t)callingPid, publishId);
 }
 
 int32_t SoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *info)

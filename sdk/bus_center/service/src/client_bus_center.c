@@ -31,6 +31,9 @@
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 
+#define MODULE_LNN      "MODULE_LNN"
+#define MODULE_CONN     "MODULE_CONN"
+
 static const char *g_dbPkgName = "distributeddata-default";
 #define DM_PKG_NAME "ohos.distributedhardware.devicemanager"
 static const char *g_msdpPkgName = "ohos.msdp.spatialawareness";
@@ -477,6 +480,15 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
     return StopTimeSyncInner(pkgName, targetNetworkId);
 }
 
+static int32_t ValidatePkgName(const char *pkgName)
+{
+    if (strcmp(pkgName, MODULE_LNN) == 0 || strcmp(pkgName, MODULE_CONN) == 0) {
+        LNN_LOGE(LNN_STATE, "package name is not allowed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
 {
     if (pkgName == NULL || info == NULL || cb == NULL) {
@@ -484,6 +496,10 @@ int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishC
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_PUBLISH, pkgName, ret);
@@ -505,6 +521,10 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
@@ -522,6 +542,10 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
@@ -543,6 +567,10 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, ret);

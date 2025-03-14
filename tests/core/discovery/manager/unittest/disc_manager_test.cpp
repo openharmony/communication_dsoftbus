@@ -392,27 +392,27 @@ void DiscPublishTestAbstract001(DiscModule module, PublishInfo *info)
 
     int32_t ret = DiscPublish(module, info);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnpublish(module, info->publishId);
+    DiscUnpublish(module, info->publishId, 0);
 
     info->freq = MID;
     ret = DiscPublish(module, info);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnpublish(module, info->publishId);
+    DiscUnpublish(module, info->publishId, 0);
 
     info->freq = HIGH;
     ret = DiscPublish(module, info);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnpublish(module, info->publishId);
+    DiscUnpublish(module, info->publishId, 0);
 
     info->freq = SUPER_HIGH;
     ret = DiscPublish(module, info);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnpublish(module, info->publishId);
+    DiscUnpublish(module, info->publishId, 0);
 
     info->freq = EXTREME_HIGH;
     ret = DiscPublish(module, info);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnpublish(module, info->publishId);
+    DiscUnpublish(module, info->publishId, 0);
 
     info->freq = LOW;
     DiscMgrDeinit();
@@ -502,7 +502,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest007, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscStartScanTest001, TestSize.Level1)
 {
-    int32_t ret = DiscStartScan(MODULE_CONN, &g_pInnerInfo);
+    int32_t ret = DiscStartScan(MODULE_CONN, &g_pInnerInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -524,27 +524,27 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest002, TestSize.Level1)
 
     DiscMgrInit();
 
-    int32_t ret = DiscStartScan((DiscModule)TEST_ERRO_MOUDULE, &testInfo);
+    int32_t ret = DiscStartScan((DiscModule)TEST_ERRO_MOUDULE, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
-    ret = DiscStartScan(MODULE_LNN, &testInfo);
+    ret = DiscStartScan(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
-    ret = DiscStartScan(MODULE_LNN, &testInfo);
+    ret = DiscStartScan(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
     testInfo.capability = "hicall";
     testInfo.capabilityData = nullptr;
-    ret = DiscStartScan(MODULE_LNN, &testInfo);
+    ret = DiscStartScan(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
 
     testInfo.dataLen = ERRO_CAPDATA_LEN;
-    ret = DiscStartScan(MODULE_LNN, &testInfo);
+    ret = DiscStartScan(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
 
@@ -561,7 +561,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest003, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartScan(MODULE_LNN, &g_pInnerInfo);
+    int32_t ret = DiscStartScan(MODULE_LNN, &g_pInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -577,7 +577,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest004, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartScan(MODULE_LNN, &g_pInnerInfo1);
+    int32_t ret = DiscStartScan(MODULE_LNN, &g_pInnerInfo1, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -599,7 +599,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest005, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1") };
 
-    int32_t ret = DiscStartScan(MODULE_LNN, &testInfo);
+    int32_t ret = DiscStartScan(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -615,20 +615,20 @@ void DiscStartScanTestAbstract001(DiscModule module, PublishInfo *info, DiscModu
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartScan(erroModule, info);
+    int32_t ret = DiscStartScan(erroModule, info, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     info->medium = (ExchangeMedium)(AUTO - 1);
-    ret = DiscStartScan(module, info);
+    ret = DiscStartScan(module, info, 0);
     TEST_ASSERT_TRUE(ret != 0);
     info->medium = COAP;
 
     info->freq = (ExchangeFreq)(LOW - 1);
-    ret = DiscStartScan(module, info);
+    ret = DiscStartScan(module, info, 0);
     TEST_ASSERT_TRUE(ret != 0);
     info->freq = LOW;
 
-    ret = DiscStartScan(module, nullptr);
+    ret = DiscStartScan(module, nullptr, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -661,7 +661,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest006, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
 {
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -685,27 +685,27 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
 
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE, &testInfo);
+    int32_t ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
-    ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
+    ret = DiscStartAdvertise(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
-    ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
+    ret = DiscStartAdvertise(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
     testInfo.capability = "hicall";
     testInfo.capabilityData = nullptr;
-    ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
+    ret = DiscStartAdvertise(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
 
     testInfo.dataLen = ERRO_CAPDATA_LEN;
-    ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
+    ret = DiscStartAdvertise(MODULE_LNN, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
 
@@ -722,7 +722,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -738,7 +738,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest004, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo1);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo1, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -758,20 +758,20 @@ void DiscStartAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE1, info);
+    int32_t ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE1, info, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     info->medium = (ExchangeMedium)(AUTO - 1);
-    ret = DiscStartAdvertise(module, info);
+    ret = DiscStartAdvertise(module, info, 0);
     TEST_ASSERT_TRUE(ret != 0);
     info->medium = COAP;
 
     info->freq = (ExchangeFreq)(LOW - 1);
-    ret = DiscStartAdvertise(module, info);
+    ret = DiscStartAdvertise(module, info, 0);
     TEST_ASSERT_TRUE(ret != 0);
     info->freq = LOW;
 
-    ret = DiscStartAdvertise(module, nullptr);
+    ret = DiscStartAdvertise(module, nullptr, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     info->freq = MID;
@@ -798,7 +798,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
     DiscStartAdvertiseTestAbstract001(MODULE_LNN, &discStartAdvertiseTestAbstractInfo001);
 
     discStartAdvertiseTestAbstractInfo001.medium = COAP;
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &discStartAdvertiseTestAbstractInfo001);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &discStartAdvertiseTestAbstractInfo001, 0);
     TEST_ASSERT_TRUE(ret == 0);
 }
 
@@ -816,29 +816,29 @@ void DiscStartAdvertiseTestAbstract002(DiscModule module, SubscribeInfo *info)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_LNN, info);
+    int32_t ret = DiscStartAdvertise(MODULE_LNN, info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopAdvertise(MODULE_LNN, info->subscribeId);
+    DiscStopAdvertise(MODULE_LNN, info->subscribeId, 0);
 
     info->freq = MID;
-    ret = DiscStartAdvertise(MODULE_LNN, info);
+    ret = DiscStartAdvertise(MODULE_LNN, info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopAdvertise(MODULE_LNN, info->subscribeId);
+    DiscStopAdvertise(MODULE_LNN, info->subscribeId, 0);
 
     info->freq = HIGH;
-    ret = DiscStartAdvertise(MODULE_LNN, info);
+    ret = DiscStartAdvertise(MODULE_LNN, info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopAdvertise(MODULE_LNN, info->subscribeId);
+    DiscStopAdvertise(MODULE_LNN, info->subscribeId, 0);
 
     info->freq = SUPER_HIGH;
-    ret = DiscStartAdvertise(MODULE_LNN, info);
+    ret = DiscStartAdvertise(MODULE_LNN, info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopAdvertise(MODULE_LNN, info->subscribeId);
+    DiscStopAdvertise(MODULE_LNN, info->subscribeId, 0);
 
     info->freq = EXTREME_HIGH;
-    ret = DiscStartAdvertise(MODULE_LNN, info);
+    ret = DiscStartAdvertise(MODULE_LNN, info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopAdvertise(MODULE_LNN, info->subscribeId);
+    DiscStopAdvertise(MODULE_LNN, info->subscribeId, 0);
 
     info->freq = LOW;
     DiscMgrDeinit();
@@ -1040,7 +1040,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest006, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscUnpublishTest001, TestSize.Level1)
 {
-    int32_t ret = DiscUnpublish(MODULE_CONN, TEST_PUBLISHINNER_ID);
+    int32_t ret = DiscUnpublish(MODULE_CONN, TEST_PUBLISHINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -1055,7 +1055,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest002, TestSize.Level1)
     DiscMgrInit();
     DiscPublish(MODULE_LNN, &g_pInnerInfo1);
 
-    int32_t ret = DiscUnpublish((DiscModule)TEST_ERRO_MOUDULE, TEST_PUBLISHINNER_ID);
+    int32_t ret = DiscUnpublish((DiscModule)TEST_ERRO_MOUDULE, TEST_PUBLISHINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1072,7 +1072,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest003, TestSize.Level1)
     DiscMgrInit();
     DiscPublish(MODULE_LNN, &g_pInnerInfo1);
 
-    int32_t ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1);
+    int32_t ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -1089,9 +1089,9 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest004, TestSize.Level1)
     DiscMgrInit();
     DiscPublish(MODULE_LNN, &g_pInnerInfo1);
 
-    int32_t ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1);
+    int32_t ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1, 0);
 
-    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1);
+    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1108,7 +1108,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest005, TestSize.Level1)
     DiscMgrInit();
     DiscPublish(MODULE_LNN, &g_pInnerInfo1);
 
-    int32_t ret = DiscUnpublish((DiscModule)TEST_ERRO_MOUDULE1, TEST_PUBLISHINNER_ID);
+    int32_t ret = DiscUnpublish((DiscModule)TEST_ERRO_MOUDULE1, TEST_PUBLISHINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1123,7 +1123,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest005, TestSize.Level1)
 HWTEST_F(DiscManagerTest, DiscUnpublishTest006, TestSize.Level1)
 {
     DiscMgrInit();
-    int32_t ret = DiscUnpublish(MODULE_CONN, TEST_PUBLISHINNER_ID);
+    int32_t ret = DiscUnpublish(MODULE_CONN, TEST_PUBLISHINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
     DiscMgrDeinit();
 }
@@ -1141,27 +1141,27 @@ void DiscUnpublishTestAbstract001(DiscModule module, PublishInfo *info)
     DiscMgrInit();
 
     DiscPublish(module, info);
-    int32_t ret = DiscUnpublish(module, info->publishId);
+    int32_t ret = DiscUnpublish(module, info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = MID;
     DiscPublish(module, info);
-    ret = DiscUnpublish(module, info->publishId);
+    ret = DiscUnpublish(module, info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = HIGH;
     DiscPublish(module, info);
-    ret = DiscUnpublish(module, info->publishId);
+    ret = DiscUnpublish(module, info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = SUPER_HIGH;
     DiscPublish(module, info);
-    ret = DiscUnpublish(module, info->publishId);
+    ret = DiscUnpublish(module, info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = EXTREME_HIGH;
     DiscPublish(module, info);
-    ret = DiscUnpublish(module, info->publishId);
+    ret = DiscUnpublish(module, info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = LOW;
@@ -1201,7 +1201,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest007, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
 {
-    int32_t ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    int32_t ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -1214,9 +1214,9 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
 HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo);
+    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo, 0);
 
-    int32_t ret = DiscStopAdvertise((DiscModule)TEST_ERRO_MOUDULE, TEST_SUBSCRIBEINNER_ID);
+    int32_t ret = DiscStopAdvertise((DiscModule)TEST_ERRO_MOUDULE, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1231,9 +1231,9 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
 HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo);
+    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo, 0);
 
-    int32_t ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID);
+    int32_t ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -1248,10 +1248,10 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
 HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo);
+    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo, 0);
 
-    int32_t ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID);
-    ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID);
+    int32_t ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID, 0);
+    ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1268,9 +1268,9 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
 HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest005, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo);
+    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo, 0);
 
-    int32_t ret = DiscStopAdvertise((DiscModule)TEST_ERRO_MOUDULE1, TEST_SUBSCRIBEINNER_ID);
+    int32_t ret = DiscStopAdvertise((DiscModule)TEST_ERRO_MOUDULE1, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1285,7 +1285,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest005, TestSize.Level1)
 HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest006, TestSize.Level1)
 {
     DiscMgrInit();
-    int32_t ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    int32_t ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
     DiscMgrDeinit();
 }
@@ -1304,28 +1304,28 @@ void DiscStopAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
 {
     DiscMgrInit();
 
-    DiscStartAdvertise(module, info);
-    int32_t ret = DiscStopAdvertise(module, info->subscribeId);
+    DiscStartAdvertise(module, info, 0);
+    int32_t ret = DiscStopAdvertise(module, info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = MID;
-    DiscStartAdvertise(module, info);
-    ret = DiscStopAdvertise(module, info->subscribeId);
+    DiscStartAdvertise(module, info, 0);
+    ret = DiscStopAdvertise(module, info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = HIGH;
-    DiscStartAdvertise(module, info);
-    ret = DiscStopAdvertise(module, info->subscribeId);
+    DiscStartAdvertise(module, info, 0);
+    ret = DiscStopAdvertise(module, info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = SUPER_HIGH;
-    DiscStartAdvertise(module, info);
-    ret = DiscStopAdvertise(module, info->subscribeId);
+    DiscStartAdvertise(module, info, 0);
+    ret = DiscStopAdvertise(module, info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = EXTREME_HIGH;
-    DiscStartAdvertise(module, info);
-    ret = DiscStopAdvertise(module, info->subscribeId);
+    DiscStartAdvertise(module, info, 0);
+    ret = DiscStopAdvertise(module, info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = LOW;
@@ -1365,7 +1365,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest007, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, PublishServiceTest001, TestSize.Level1)
 {
-    int32_t ret = DiscPublishService("pkgname1", &g_pInfo);
+    int32_t ret = DiscPublishService("pkgname1", &g_pInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -1387,41 +1387,44 @@ HWTEST_F(DiscManagerTest, PublishServiceTest002, TestSize.Level1)
 
     DiscMgrInit();
 
-    int32_t ret = DiscPublishService(nullptr, &testInfo);
+    int32_t ret = DiscPublishService(nullptr, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscPublishService(g_erroPkgName, &testInfo);
+    ret = DiscPublishService(g_erroPkgName, &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscPublishService("pkgname1", nullptr);
+    ret = DiscPublishService("pkgname1", nullptr, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
+    TEST_ASSERT_TRUE(ret != 0);
+
+    ret = DiscPublishService("MODULE_LNN", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.mode = (DiscoverMode)(DISCOVER_MODE_ACTIVE + 1);
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
     testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
     testInfo.capability = "dvKit";
     testInfo.capabilityData = nullptr;
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
 
     testInfo.dataLen = ERRO_CAPDATA_LEN;
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
 
@@ -1438,13 +1441,13 @@ HWTEST_F(DiscManagerTest, PublishServiceTest003, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscPublishService("pkgname1", &g_pInfo);
+    int32_t ret = DiscPublishService("pkgname1", &g_pInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscPublishService("pkgname1", &g_pInfo1);
+    ret = DiscPublishService("pkgname1", &g_pInfo1, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscPublishService(g_corrPkgName, &g_pInfo);
+    ret = DiscPublishService(g_corrPkgName, &g_pInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -1460,8 +1463,8 @@ HWTEST_F(DiscManagerTest, PublishServiceTest004, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscPublishService("pkgname1", &g_pInfo);
-    ret = DiscPublishService("pkgname1", &g_pInfo);
+    int32_t ret = DiscPublishService("pkgname1", &g_pInfo, 0);
+    ret = DiscPublishService("pkgname1", &g_pInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1486,12 +1489,12 @@ HWTEST_F(DiscManagerTest, PublishServiceTest005, TestSize.Level1)
     DiscMgrInit();
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
-    int32_t ret = DiscPublishService("pkgname1", &testInfo);
+    int32_t ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.freq = (ExchangeFreq)(LOW - 1);
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
@@ -1517,12 +1520,12 @@ HWTEST_F(DiscManagerTest, PublishServiceTest006, TestSize.Level1)
     DiscMgrInit();
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
-    int32_t ret = DiscPublishService("pkgname1", &testInfo);
+    int32_t ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.freq = (ExchangeFreq)(LOW - 1);
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
@@ -1548,12 +1551,12 @@ HWTEST_F(DiscManagerTest, PublishServiceTest007, TestSize.Level1)
     DiscMgrInit();
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
-    int32_t ret = DiscPublishService("pkgname1", &testInfo);
+    int32_t ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.freq = (ExchangeFreq)(LOW - 1);
-    ret = DiscPublishService("pkgname1", &testInfo);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
@@ -1572,29 +1575,29 @@ void PublishServiceTestAbstract001(PublishInfo *info)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscPublishService("pkgname1", info);
+    int32_t ret = DiscPublishService("pkgname1", info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnPublishService("pkgname1", info->publishId);
+    DiscUnPublishService("pkgname1", info->publishId, 0);
 
     info->freq = MID;
-    ret = DiscPublishService("pkgname1", info);
+    ret = DiscPublishService("pkgname1", info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnPublishService("pkgname1", info->publishId);
+    DiscUnPublishService("pkgname1", info->publishId, 0);
 
     info->freq = HIGH;
-    ret = DiscPublishService("pkgname1", info);
+    ret = DiscPublishService("pkgname1", info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnPublishService("pkgname1", info->publishId);
+    DiscUnPublishService("pkgname1", info->publishId, 0);
 
     info->freq = SUPER_HIGH;
-    ret = DiscPublishService("pkgname1", info);
+    ret = DiscPublishService("pkgname1", info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnPublishService("pkgname1", info->publishId);
+    DiscUnPublishService("pkgname1", info->publishId, 0);
 
     info->freq = EXTREME_HIGH;
-    ret = DiscPublishService("pkgname1", info);
+    ret = DiscPublishService("pkgname1", info, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscUnPublishService("pkgname1", info->publishId);
+    DiscUnPublishService("pkgname1", info->publishId, 0);
 
     info->freq = LOW;
     DiscMgrDeinit();
@@ -1641,7 +1644,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest008, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, StartDiscoveryTest001, TestSize.Level1)
 {
-    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -1665,41 +1668,44 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
 
     DiscMgrInit();
 
-    int32_t ret = DiscStartDiscovery(nullptr, &testInfo, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery(nullptr, &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscStartDiscovery(g_erroPkgName, &testInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery(g_erroPkgName, &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscStartDiscovery("pkgname1", nullptr, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", nullptr, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscStartDiscovery("pkgname1", &testInfo, nullptr);
+    ret = DiscStartDiscovery("pkgname1", &testInfo, nullptr, 0);
+    TEST_ASSERT_TRUE(ret != 0);
+
+    ret = DiscStartDiscovery("MODULE_LNN", &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(COAP + 1);
-    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
     testInfo.mode = (DiscoverMode)(DISCOVER_MODE_ACTIVE + 1);
-    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
     testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
-    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
     testInfo.capability = "dvKit";
     testInfo.capabilityData = nullptr;
-    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";
 
     testInfo.dataLen = ERRO_CAPDATA_LEN;
-    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
 
@@ -1716,13 +1722,13 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest003, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStartDiscovery("pkgname1", &g_sInfo1, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", &g_sInfo1, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStartDiscovery(g_corrPkgName, &g_sInfo, &g_subscribeCb);
+    ret = DiscStartDiscovery(g_corrPkgName, &g_sInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -1738,8 +1744,8 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest004, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
-    ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
+    ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1760,12 +1766,12 @@ void StartDiscoveryTestAbstract002(SubscribeInfo *info)
     DiscMgrInit();
 
     info->medium = (ExchangeMedium)(AUTO - 1);
-    int32_t ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     info->medium = COAP;
 
     info->freq = (ExchangeFreq)(LOW - 1);
-    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret != 0);
     info->freq = LOW;
 
@@ -1807,29 +1813,29 @@ void StartDiscoveryTestAbstract001(SubscribeInfo *info)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStopDiscovery("pkgname1", info->subscribeId, 0);
 
     info->freq = MID;
-    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStopDiscovery("pkgname1", info->subscribeId, 0);
 
     info->freq = HIGH;
-    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStopDiscovery("pkgname1", info->subscribeId, 0);
 
     info->freq = SUPER_HIGH;
-    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStopDiscovery("pkgname1", info->subscribeId, 0);
 
     info->freq = EXTREME_HIGH;
-    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
+    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStopDiscovery("pkgname1", info->subscribeId, 0);
 
     DiscMgrDeinit();
 }
@@ -1876,7 +1882,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest006, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, UnPublishServiceTest001, TestSize.Level1)
 {
-    int32_t ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID);
+    int32_t ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -1889,15 +1895,18 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest001, TestSize.Level1)
 HWTEST_F(DiscManagerTest, UnPublishServiceTest002, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscPublishService("pkgname1", &g_pInfo);
+    DiscPublishService("pkgname1", &g_pInfo, 0);
 
-    int32_t ret = DiscUnPublishService(nullptr, TEST_PUBLISH_ID);
+    int32_t ret = DiscUnPublishService(nullptr, TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscUnPublishService(g_erroPkgName, TEST_PUBLISH_ID);
+    ret = DiscUnPublishService(g_erroPkgName, TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscUnPublishService("pkgname2", TEST_PUBLISH_ID);
+    ret = DiscUnPublishService("pkgname2", TEST_PUBLISH_ID, 0);
+    TEST_ASSERT_TRUE(ret != 0);
+
+    ret = DiscUnPublishService("MODULE_LNN", TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1912,17 +1921,17 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest002, TestSize.Level1)
 HWTEST_F(DiscManagerTest, UnPublishServiceTest003, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscPublishService("pkgname1", &g_pInfo);
-    DiscPublishService("pkgname1", &g_pInfo1);
-    DiscPublishService(g_corrPkgName, &g_pInfo);
+    DiscPublishService("pkgname1", &g_pInfo, 0);
+    DiscPublishService("pkgname1", &g_pInfo1, 0);
+    DiscPublishService(g_corrPkgName, &g_pInfo, 0);
 
-    int32_t ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID);
+    int32_t ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID1);
+    ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID1, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscUnPublishService(g_corrPkgName, TEST_PUBLISH_ID);
+    ret = DiscUnPublishService(g_corrPkgName, TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -1937,10 +1946,10 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest003, TestSize.Level1)
 HWTEST_F(DiscManagerTest, UnPublishServiceTest004, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscPublishService("pkgname1", &g_pInfo);
+    DiscPublishService("pkgname1", &g_pInfo, 0);
 
-    int32_t ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID);
-    ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID);
+    int32_t ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID, 0);
+    ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -1950,28 +1959,28 @@ void UnPublishServiceTestAbstract001(PublishInfo *info)
 {
     DiscMgrInit();
 
-    DiscPublishService("pkgname1", info);
-    int32_t ret = DiscUnPublishService("pkgname1", info->publishId);
+    DiscPublishService("pkgname1", info, 0);
+    int32_t ret = DiscUnPublishService("pkgname1", info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = MID;
-    DiscPublishService("pkgname1", info);
-    ret = DiscUnPublishService("pkgname1", info->publishId);
+    DiscPublishService("pkgname1", info, 0);
+    ret = DiscUnPublishService("pkgname1", info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = HIGH;
-    DiscPublishService("pkgname1", info);
-    ret = DiscUnPublishService("pkgname1", info->publishId);
+    DiscPublishService("pkgname1", info, 0);
+    ret = DiscUnPublishService("pkgname1", info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = SUPER_HIGH;
-    DiscPublishService("pkgname1", info);
-    ret = DiscUnPublishService("pkgname1", info->publishId);
+    DiscPublishService("pkgname1", info, 0);
+    ret = DiscUnPublishService("pkgname1", info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = EXTREME_HIGH;
-    DiscPublishService("pkgname1", info);
-    ret = DiscUnPublishService("pkgname1", info->publishId);
+    DiscPublishService("pkgname1", info, 0);
+    ret = DiscUnPublishService("pkgname1", info->publishId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2019,7 +2028,7 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest005, TestSize.Level1)
  */
 HWTEST_F(DiscManagerTest, StopDiscoveryTest001, TestSize.Level1)
 {
-    int32_t ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID);
+    int32_t ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -2032,15 +2041,18 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest001, TestSize.Level1)
 HWTEST_F(DiscManagerTest, StopDiscoveryTest002, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
 
-    int32_t ret = DiscStopDiscovery(nullptr, TEST_SUBSCRIBE_ID);
+    int32_t ret = DiscStopDiscovery(nullptr, TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscStopDiscovery(g_erroPkgName, TEST_SUBSCRIBE_ID);
+    ret = DiscStopDiscovery(g_erroPkgName, TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscStopDiscovery("pkgname2", TEST_SUBSCRIBE_ID);
+    ret = DiscStopDiscovery("pkgname2", TEST_SUBSCRIBE_ID, 0);
+    TEST_ASSERT_TRUE(ret != 0);
+
+    ret = DiscStopDiscovery("MODULE_LNN", TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -2055,17 +2067,17 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest002, TestSize.Level1)
 HWTEST_F(DiscManagerTest, StopDiscoveryTest003, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
-    DiscStartDiscovery("pkgname1", &g_sInfo1, &g_subscribeCb);
-    DiscStartDiscovery(g_corrPkgName, &g_sInfo, &g_subscribeCb);
+    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
+    DiscStartDiscovery("pkgname1", &g_sInfo1, &g_subscribeCb, 0);
+    DiscStartDiscovery(g_corrPkgName, &g_sInfo, &g_subscribeCb, 0);
 
-    int32_t ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID);
+    int32_t ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID1);
+    ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID1, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStopDiscovery(g_corrPkgName, TEST_SUBSCRIBE_ID);
+    ret = DiscStopDiscovery(g_corrPkgName, TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2080,10 +2092,10 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest003, TestSize.Level1)
 HWTEST_F(DiscManagerTest, StopDiscoveryTest004, TestSize.Level1)
 {
     DiscMgrInit();
-    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
 
-    int32_t ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID);
-    ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID);
+    int32_t ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID, 0);
+    ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID, 0);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -2103,28 +2115,28 @@ void StopDiscoveryTestAbstract001(SubscribeInfo *info)
 {
     DiscMgrInit();
 
-    DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    int32_t ret = DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
+    int32_t ret = DiscStopDiscovery("pkgname1", info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = MID;
-    DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    ret = DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
+    ret = DiscStopDiscovery("pkgname1", info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = HIGH;
-    DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    ret = DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
+    ret = DiscStopDiscovery("pkgname1", info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = SUPER_HIGH;
-    DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    ret = DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
+    ret = DiscStopDiscovery("pkgname1", info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = EXTREME_HIGH;
-    DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    ret = DiscStopDiscovery("pkgname1", info->subscribeId);
+    DiscStartDiscovery("pkgname1", info, &g_subscribeCb, 0);
+    ret = DiscStopDiscovery("pkgname1", info->subscribeId, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2176,10 +2188,10 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest001, TestSize.Level1)
     int32_t ret = DiscSetDiscoverCallback(MODULE_CONN, &g_innerCallback);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2195,13 +2207,13 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest002, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     ret = DiscSetDiscoverCallback(MODULE_CONN, &g_innerCallback);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2217,7 +2229,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
 {
     DeviceInfo devInfo;
     DiscMgrInit();
-    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    int32_t ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
@@ -2236,7 +2248,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
     DeviceInfo devInfo;
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     ret = DiscSetDiscoverCallback(MODULE_CONN, &g_innerCallback);
@@ -2245,7 +2257,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
     TestInnerDeviceFound(&devInfo, nullptr);
 
-    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2262,13 +2274,13 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
     DeviceInfo devInfo;
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
     TestInnerDeviceFound(&devInfo, nullptr);
 
-    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -2284,13 +2296,13 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest006, TestSize.Level1)
 {
     DiscMgrInit();
 
-    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
+    int32_t ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     ret = DiscSetDiscoverCallback(MODULE_CONN, nullptr);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
+    ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID, 0);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();

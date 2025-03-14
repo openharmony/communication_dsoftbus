@@ -27,30 +27,31 @@ public:
     DiscManagerInterface() {};
     virtual ~DiscManagerInterface() {};
 
-    virtual int32_t DiscPublishService(const char *packageName, const PublishInfo *info) = 0;
-    virtual int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info) = 0;
-    virtual int32_t DiscUnPublishService(const char *packageName, int32_t publishId) = 0;
-    virtual int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId) = 0;
+    virtual int32_t DiscPublishService(const char *packageName, const PublishInfo *info, int32_t callingPid) = 0;
+    virtual int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info, int32_t callingPid) = 0;
+    virtual int32_t DiscUnPublishService(const char *packageName, int32_t publishId, int32_t callingPid) = 0;
+    virtual int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId, int32_t callingPid) = 0;
     virtual int32_t DiscStartDiscovery(
-        const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb) = 0;
+        const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb, int32_t callingPid) = 0;
     virtual int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback) = 0;
-    virtual int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info) = 0;
-    virtual int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId) = 0;
-    virtual int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId) = 0;
+    virtual int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info, int32_t callingPid) = 0;
+    virtual int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId, int32_t callingPid) = 0;
+    virtual int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId, int32_t callingPid) = 0;
 };
 class DiscManagerInterfaceMock : public DiscManagerInterface {
 public:
     DiscManagerInterfaceMock();
     ~DiscManagerInterfaceMock() override;
-    MOCK_METHOD2(DiscPublishService, int32_t(const char *, const PublishInfo *));
-    MOCK_METHOD2(DiscStartScan, int32_t(DiscModule, const PublishInfo *));
-    MOCK_METHOD2(DiscUnPublishService, int32_t(const char *, int32_t));
-    MOCK_METHOD2(DiscUnpublish, int32_t(DiscModule, int32_t));
-    MOCK_METHOD3(DiscStartDiscovery, int32_t(const char *, const SubscribeInfo *, const IServerDiscInnerCallback *));
+    MOCK_METHOD3(DiscPublishService, int32_t(const char *, const PublishInfo *, int32_t));
+    MOCK_METHOD3(DiscStartScan, int32_t(DiscModule, const PublishInfo *, int32_t));
+    MOCK_METHOD3(DiscUnPublishService, int32_t(const char *, int32_t, int32_t));
+    MOCK_METHOD3(DiscUnpublish, int32_t(DiscModule, int32_t, int32_t));
+    MOCK_METHOD4(DiscStartDiscovery,
+        int32_t(const char *, const SubscribeInfo *, const IServerDiscInnerCallback *, int32_t));
     MOCK_METHOD2(DiscSetDiscoverCallback, int32_t(DiscModule, const DiscInnerCallback *));
-    MOCK_METHOD2(DiscStartAdvertise, int32_t(DiscModule, const SubscribeInfo *));
-    MOCK_METHOD2(DiscStopDiscovery, int32_t(const char *, int32_t));
-    MOCK_METHOD2(DiscStopAdvertise, int32_t(DiscModule, int32_t));
+    MOCK_METHOD3(DiscStartAdvertise, int32_t(DiscModule, const SubscribeInfo *, int32_t));
+    MOCK_METHOD3(DiscStopDiscovery, int32_t(const char *, int32_t, int32_t));
+    MOCK_METHOD3(DiscStopAdvertise, int32_t(DiscModule, int32_t, int32_t));
 };
 } // namespace OHOS
 #endif // DISC_MANAGER_MOCK_H

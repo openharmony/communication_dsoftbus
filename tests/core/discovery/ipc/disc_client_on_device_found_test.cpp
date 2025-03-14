@@ -65,8 +65,9 @@ public:
     virtual int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device,
         uint32_t deviceLen) = 0;
     virtual int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
-        bool isInnerRequest) = 0;
-    virtual int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest) = 0;
+        bool isInnerRequest, int32_t callingPid) = 0;
+    virtual int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest,
+        int32_t callingPid) = 0;
     virtual void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
         const InnerDeviceInfoAddtions *additions) = 0;
 };
@@ -90,9 +91,9 @@ public:
     MOCK_METHOD(int32_t, ClientOnRefreshDeviceFound, (const char *pkgName, int32_t pid, const void *device,
         uint32_t deviceLen), (override));
     MOCK_METHOD(int32_t, LnnStartDiscDevice, (const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
-        bool isInnerRequest), (override));
+        bool isInnerRequest, int32_t callingPid), (override));
     MOCK_METHOD(int32_t, LnnStopDiscDevice, (const char *pkgName, int32_t subscribeId,
-        bool isInnerRequest), (override));
+        bool isInnerRequest, int32_t callingPid), (override));
     MOCK_METHOD(void, LnnRefreshDeviceOnlineStateAndDevIdInfo, (const char *pkgName, DeviceInfo *device,
         const InnerDeviceInfoAddtions *additions), (override));
 
@@ -101,7 +102,7 @@ public:
         return mock_;
     }
     static int32_t ActionLnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
-        bool isInnerRequest)
+        bool isInnerRequest, int32_t callingPid)
     {
         if (cb == nullptr || cb->serverCb.OnServerDeviceFound == nullptr) {
             return SOFTBUS_INVALID_PARAM;
@@ -130,14 +131,14 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
 }
 
 int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
-    bool isInnerRequest)
+    bool isInnerRequest, int32_t callingPid)
 {
-    return BusCenterMock::GetMock()->LnnStartDiscDevice(pkgName, info, cb, isInnerRequest);
+    return BusCenterMock::GetMock()->LnnStartDiscDevice(pkgName, info, cb, isInnerRequest, callingPid);
 }
 
-int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest)
+int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest, int32_t callingPid)
 {
-    return BusCenterMock::GetMock()->LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
+    return BusCenterMock::GetMock()->LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, callingPid);
 }
 
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
@@ -195,13 +196,15 @@ HWTEST_F(DiscClientOnDeviceFoundTest, LnnIpcRefreshLNNSuccess001, TestSize.Level
     int32_t ret = SOFTBUS_OK;
     {
         EXPECT_CALL(mock, LnnStartDiscDevice(EqStr(g_pkgName1),
-            Field(&SubscribeInfo::subscribeId, Eq(g_subscribeInfoCast.subscribeId)), NotNull(), _)).Times(1);
+            Field(&SubscribeInfo::subscribeId, Eq(g_subscribeInfoCast.subscribeId)), NotNull(), _,
+            g_callingPid1)).Times(1);
         ret = LnnIpcRefreshLNN(g_pkgName1.c_str(), g_callingPid1, &g_subscribeInfoCast);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     {
         EXPECT_CALL(mock, LnnStartDiscDevice(EqStr(g_pkgName2),
-            Field(&SubscribeInfo::subscribeId, Eq(g_subscribeInfoOsd.subscribeId)), NotNull(), _)).Times(1);
+            Field(&SubscribeInfo::subscribeId, Eq(g_subscribeInfoOsd.subscribeId)), NotNull(), _,
+            g_callingPid2)).Times(1);
         ret = LnnIpcRefreshLNN(g_pkgName2.c_str(), g_callingPid2, &g_subscribeInfoOsd);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
@@ -236,12 +239,14 @@ HWTEST_F(DiscClientOnDeviceFoundTest, LnnIpcStopRefreshLNNSuccess001, TestSize.L
     NiceMock<BusCenterMock> mock;
     int32_t ret = SOFTBUS_OK;
     {
-        EXPECT_CALL(mock, LnnStopDiscDevice(EqStr(g_pkgName1), g_subscribeInfoCast.subscribeId, _)).Times(1);
+        EXPECT_CALL(mock, LnnStopDiscDevice(EqStr(g_pkgName1), g_subscribeInfoCast.subscribeId, _,
+        g_callingPid1)).Times(1);
         ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid1, g_subscribeInfoCast.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     {
-        EXPECT_CALL(mock, LnnStopDiscDevice(EqStr(g_pkgName2), g_subscribeInfoOsd.subscribeId, _)).Times(1);
+        EXPECT_CALL(mock, LnnStopDiscDevice(EqStr(g_pkgName2), g_subscribeInfoOsd.subscribeId, _,
+        g_callingPid2)).Times(1);
         ret = LnnIpcStopRefreshLNN(g_pkgName2.c_str(), g_callingPid2, g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }

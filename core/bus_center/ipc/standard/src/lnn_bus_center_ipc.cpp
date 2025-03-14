@@ -376,22 +376,22 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int
     return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
+int32_t LnnIpcPublishLNN(const char *pkgName, int32_t callingPid, const PublishInfo *info)
 {
     int32_t ret = IsOverThreshold(pkgName, SERVER_PUBLISH_LNN);
     if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
         LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
     }
-    return LnnPublishService(pkgName, info, false);
+    return LnnPublishService(pkgName, info, false, callingPid);
 }
 
-int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t callingPid, int32_t publishId)
 {
     int32_t ret = IsOverThreshold(pkgName, SERVER_STOP_PUBLISH_LNN);
     if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
         LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
     }
-    return LnnUnPublishService(pkgName, publishId, false);
+    return LnnUnPublishService(pkgName, publishId, false, callingPid);
 }
 
 static bool IsRepeatRefreshLnnRequest(const char *pkgName, int32_t callingPid, int32_t subscribeId)
@@ -461,7 +461,7 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const Subscrib
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    return LnnStartDiscDevice(pkgName, info, &callback, false);
+    return LnnStartDiscDevice(pkgName, info, &callback, false, callingPid);
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t subscribeId)
@@ -479,7 +479,7 @@ int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t su
         LNN_LOGE(LNN_EVENT, "stop refresh lnn, clean info fail");
         return SOFTBUS_NETWORK_STOP_REFRESH_LNN_FAILED;
     }
-    return LnnStopDiscDevice(pkgName, subscribeId, false);
+    return LnnStopDiscDevice(pkgName, subscribeId, false, callingPid);
 }
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
