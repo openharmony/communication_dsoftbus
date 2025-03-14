@@ -88,7 +88,7 @@ typedef struct {
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Published self information successfully.
  */
-int32_t DiscPublishService(const char *packageName, const PublishInfo *info);
+int32_t DiscPublishService(const char *packageName, const PublishInfo *info, int32_t callingPid);
 
 /**
  * @brief If the service is cancelled, the remote device cannot obtain its own information.
@@ -103,7 +103,7 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Unpublished service succeeded.
  */
-int32_t DiscUnPublishService(const char *packageName, int32_t publishId);
+int32_t DiscUnPublishService(const char *packageName, int32_t publishId, int32_t callingPid);
 
 /**
  * @brief Start discovery, other devices can be discovered.
@@ -127,7 +127,8 @@ int32_t DiscUnPublishService(const char *packageName, int32_t publishId);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Passive discovery function successfully started.
  */
-int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb);
+int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb,
+    int32_t callingPid);
 
 /**
  * @brief Stop discovering, stop discovering other devices.
@@ -142,7 +143,7 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, c
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Passive stop discovery function stopped successfully
  */
-int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId);
+int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId, int32_t callingPid);
 
 int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 

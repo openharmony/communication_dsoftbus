@@ -83,25 +83,25 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_
     return BusCenterIpcInterfaceInstance()->LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
-int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
+int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest, int32_t callingPid)
 {
-    return BusCenterIpcInterfaceInstance()->LnnPublishService(pkgName, info, isInnerRequest);
+    return BusCenterIpcInterfaceInstance()->LnnPublishService(pkgName, info, isInnerRequest, callingPid);
 }
 
-int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest)
+int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest, int32_t callingPid)
 {
-    return BusCenterIpcInterfaceInstance()->LnnUnPublishService(pkgName, publishId, isInnerRequest);
+    return BusCenterIpcInterfaceInstance()->LnnUnPublishService(pkgName, publishId, isInnerRequest, callingPid);
 }
 
 int32_t LnnStartDiscDevice(
-    const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest)
+    const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest, int32_t callingPid)
 {
-    return BusCenterIpcInterfaceInstance()->LnnStartDiscDevice(pkgName, info, cb, isInnerRequest);
+    return BusCenterIpcInterfaceInstance()->LnnStartDiscDevice(pkgName, info, cb, isInnerRequest, callingPid);
 }
 
-int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest)
+int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest, int32_t callingPid)
 {
-    return BusCenterIpcInterfaceInstance()->LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
+    return BusCenterIpcInterfaceInstance()->LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, callingPid);
 }
 
 int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)

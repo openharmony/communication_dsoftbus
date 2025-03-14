@@ -38,11 +38,11 @@ typedef union  {
     DiscInnerCallback innerCb;
 } InnerCallback;
 
-int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest);
-int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest);
+int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest, int32_t callingPid);
+int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest, int32_t callingPid);
 int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
-    bool isInnerRequest);
-int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest);
+    bool isInnerRequest, int32_t callingPid);
+int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest, int32_t callingPid);
 
 int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len);
 int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info);

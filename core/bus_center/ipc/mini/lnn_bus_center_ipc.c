@@ -106,29 +106,27 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int
     return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
+int32_t LnnIpcPublishLNN(const char *pkgName, int32_t callingPid, const PublishInfo *info)
 {
-    return LnnPublishService(pkgName, info, false);
+    return LnnPublishService(pkgName, info, false, callingPid);
 }
 
-int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t callingPid, int32_t publishId)
 {
-    return LnnUnPublishService(pkgName, publishId, false);
+    return LnnUnPublishService(pkgName, publishId, false, callingPid);
 }
 
 int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
-    (void)callingPid;
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    return LnnStartDiscDevice(pkgName, info, &callback, false);
+    return LnnStartDiscDevice(pkgName, info, &callback, false, callingPid);
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
 {
-    (void)callingPid;
-    return LnnStopDiscDevice(pkgName, refreshId, false);
+    return LnnStopDiscDevice(pkgName, refreshId, false, callingPid);
 }
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
