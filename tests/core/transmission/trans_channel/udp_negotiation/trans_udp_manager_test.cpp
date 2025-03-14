@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -974,5 +974,279 @@ HWTEST_F(TransUdpManagerTest, TransUdpResetReplyCnt002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransDelUdpChannel(TEST_CHANNEL_ID);
     TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSetUdpChannelOptTypeTest001
+ * @tc.desc: TransSetUdpChannelOptType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransSetUdpChannelOptTypeTest001, TestSize.Level0)
+{
+    UdpChannelOptType type = TYPE_INVALID_CHANNEL;
+    int32_t ret = TransSetUdpChannelOptType(INVALID_CHAN_ID, type);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: TransGetUdpAppInfoByChannelIdTest001
+ * @tc.desc: TransGetUdpAppInfoByChannelId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransGetUdpAppInfoByChannelIdTest001, TestSize.Level0)
+{
+    AppInfo appInfo;
+    int32_t ret = TransGetUdpAppInfoByChannelId(INVALID_CHAN_ID, &appInfo);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: UdpChannelFileTransRecoveryLimitTest001
+ * @tc.desc: UdpChannelFileTransRecoveryLimit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, UdpChannelFileTransRecoveryLimitTest001, TestSize.Level0)
+{
+    uint8_t tos = FILE_PRIORITY_BK;
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = UdpChannelFileTransRecoveryLimit(tos);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransUdpChannelMgrDeinit();
+    ret = UdpChannelFileTransRecoveryLimit(tos);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: IsUdpRecoveryTransLimitTest001
+ * @tc.desc: IsUdpRecoveryTransLimit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, IsUdpRecoveryTransLimitTest001, TestSize.Level0)
+{
+    int32_t ret = IsUdpRecoveryTransLimit();
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: TransUdpUpdateReplyCntTest001
+ * @tc.desc: TransUdpUpdateReplyCnt
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpUpdateReplyCntTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    int32_t ret = TransUdpUpdateReplyCnt(channelId);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpUpdateReplyCnt(channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpUpdateUdpPortTest001
+ * @tc.desc: TransUdpUpdateUdpPort
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpUpdateUdpPortTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    int32_t udpPort = 1;
+    int32_t ret = TransUdpUpdateUdpPort(channelId, udpPort);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = channelId;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpUpdateUdpPort(channelId, udpPort);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(channelId);
+    ret = TransUdpUpdateUdpPort(channelId, udpPort);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransCheckUdpChannelOpenStatusTest001
+ * @tc.desc: TransCheckUdpChannelOpenStatus
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransCheckUdpChannelOpenStatusTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    int32_t *curCount = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    ASSERT_TRUE(curCount != nullptr);
+    int32_t ret = TransCheckUdpChannelOpenStatus(channelId, curCount);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = channelId;
+    channel->info.waitOpenReplyCnt = CHANNEL_OPEN_SUCCESS -1;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransCheckUdpChannelOpenStatus(channelId, curCount);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransCheckUdpChannelOpenStatus(channelId, curCount);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(channelId);
+    ret = TransCheckUdpChannelOpenStatus(channelId, curCount);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    TransUdpChannelMgrDeinit();
+    SoftBusFree(curCount);
+}
+
+/**
+ * @tc.name: TransSetTosTest001
+ * @tc.desc: TransSetTos
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint8_t tos = FILE_PRIORITY_BK;
+    int32_t ret = TransSetTos(channelId, tos);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = channelId;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransSetTos(channelId, tos);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(channelId);
+    ret = TransSetTos(channelId, tos);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpGetPrivilegeCloseListTest001
+ * @tc.desc: TransUdpGetPrivilegeCloseList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest001, TestSize.Level0)
+{
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    channel->info.callingTokenId = tokenId;
+    channel->info.myData.pid = pid;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpGetPrivilegeCloseListTest002
+ * @tc.desc: TransUdpGetPrivilegeCloseList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest002, TestSize.Level0)
+{
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    channel->info.callingTokenId = 0;
+    channel->info.myData.pid = pid;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpGetPrivilegeCloseListTest003
+ * @tc.desc: TransUdpGetPrivilegeCloseList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest003, TestSize.Level0)
+{
+    uint64_t tokenId = 1;
+    int32_t pid = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    channel->info.callingTokenId = tokenId;
+    channel->info.myData.pid = 0;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: CompareSessionNameTest001
+ * @tc.desc: CompareSessionName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, CompareSessionNameTest001, TestSize.Level0)
+{
+    int32_t ret = CompareSessionName(nullptr, nullptr);
+    EXPECT_EQ(false, ret);
+
+    const char *dstSessionName = "test sessionName";
+    ret = CompareSessionName(dstSessionName, nullptr);
+    EXPECT_EQ(false, ret);
 }
 }

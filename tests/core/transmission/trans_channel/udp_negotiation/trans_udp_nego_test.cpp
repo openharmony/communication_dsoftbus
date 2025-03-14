@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -949,5 +949,105 @@ HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
 
     CodeType ret = getCodeType(appInfo);
     EXPECT_EQ(ret, CODE_EXCHANGE_UDP_INFO);
+}
+
+/**
+ * @tc.name: CopyAppInfoFastTransDataTest001
+ * @tc.desc: CopyAppInfoFastTransData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level0)
+{
+    UdpChannelInfo *channel = CreateUdpChannelPackTest();
+    ASSERT_TRUE(channel != nullptr);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
+    uint8_t data = 1;
+    appInfo->fastTransData = &data;
+    appInfo->fastTransDataSize = 1;
+
+    int32_t ret = CopyAppInfoFastTransData(channel, appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(appInfo);
+    SoftBusFree(channel);
+}
+
+/**
+ * @tc.name: CloseUdpChannelTest001
+ * @tc.desc: CloseUdpChannel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level0)
+{
+    AppInfo appInfo;
+    bool isServerSide = false;
+    int32_t ret = CloseUdpChannel(&appInfo, isServerSide);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransUdpGetChannelAndOpenConnTest001
+ * @tc.desc: TransUdpGetChannelAndOpenConn
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    TransUdpChannelMgrDeinit();
+    int32_t ret = TransUdpGetChannelAndOpenConn(channelId);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: TransDealUdpChannelOpenResultTest001
+ * @tc.desc: TransDealUdpChannelOpenResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t openResult = SOFTBUS_NO_INIT;
+    int32_t udpPort = 1;
+    int32_t ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = channelId;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransDealUdpChannelOpenResultTest002
+ * @tc.desc: TransDealUdpChannelOpenResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t openResult = SOFTBUS_OK;
+    int32_t udpPort = 1;
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = channelId;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+    TransUdpChannelMgrDeinit();
 }
 } // namespace OHOS
