@@ -40,7 +40,7 @@ namespace OHOS {
 const uint8_t *BASE_FUZZ_DATA = nullptr;
 size_t g_baseFuzzPos;
 size_t g_baseFuzzSize = 0;
-const int32_t listenderId= 15;
+const int32_t listenderId = 15;
 
 class SoftbusBroadcastMgrTest : public testing::Test {
 public:
@@ -332,7 +332,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit002, TestSize.Level1)
 HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit003, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastMgrInit003 begin ----");
-    ManagerMock managerMock; 
+    ManagerMock managerMock;
     EXPECT_CALL(managerMock, BleAsyncCallbackDelayHelper)
         .WillRepeatedly(Return(SOFTBUS_ERR));
 
@@ -1760,7 +1760,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter004, TestSize.Level1)
         srcFilter.manufactureDataMask = test;
         dstFilter.manufactureDataLength = sizeof(test) / sizeof(test[0]);
         dstFilter.manufactureData = test;
-        dstFilter.manufactureDataMask = test;  
+        dstFilter.manufactureDataMask = test;
     }
     EXPECT_TRUE(CompareSameFilter(&srcFilter, &dstFilter));
 

@@ -30,7 +30,7 @@ public:
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual int32_t SoftBusRemoveBtStateListener(int32_t listenerId) = 0;
     virtual int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis) = 0;
+        void *para, uint64_t delayMillis) = 0;
     virtual int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time) = 0;
 };
 
@@ -45,10 +45,10 @@ public:
     MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
         (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
-    MOCK_METHOD(int32_t, BleAsyncCallbackDelayHelper, 
+    MOCK_METHOD(int32_t, BleAsyncCallbackDelayHelper,
         (SoftBusLooper *looper, BleAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis), (override));
-    MOCK_METHOD(int32_t, SoftBusCondWait, 
+            void *para, uint64_t delayMillis), (override));
+    MOCK_METHOD(int32_t, SoftBusCondWait,
         (SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time), (override));
 
     static const SoftbusBroadcastCallback *broadcastCallback;
