@@ -1219,7 +1219,7 @@ int32_t P2pDirectChannelInit(void)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "P2pDirectChannelInit set cb fail");
 
     ret = RegAuthTransListener(MODULE_SESSION_KEY_AUTH, &p2pTransCb);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "P2pDirectChannelInit set sessionkey cb fail");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set sessionkey cb fail");
 
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnP2pVerifyMsgReceived,
