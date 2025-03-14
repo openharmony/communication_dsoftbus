@@ -122,7 +122,8 @@ HWTEST(SoftbusBleUtilsTest, SoftbusAdvParamToBt, TestSize.Level3)
                                         + SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_ANY);
     softbusAdvParam.advType = (SOFTBUS_BC_ADV_DIRECT_IND_LOW + SOFTBUS_BC_ADV_DIRECT_IND_HIGH);
     SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
-    EXPECT_EQ(static_cast<int>(bleAdvParams.advFilterPolicy), static_cast<int>(SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY));
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advFilterPolicy),
+             static_cast<int>(SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY));
     EXPECT_EQ(static_cast<int>(bleAdvParams.advType), static_cast<int>(SOFTBUS_BC_ADV_IND));
 }
 
