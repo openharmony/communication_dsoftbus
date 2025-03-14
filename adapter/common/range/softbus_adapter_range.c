@@ -14,6 +14,7 @@
  */
 
 #include <math.h>
+#include <stdint.h>
 
 #include "comm_log.h"
 #include "softbus_adapter_range.h"
@@ -38,6 +39,16 @@ int SoftBusGetBlePower(int8_t *power)
 {
     if (power == NULL) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusGetBlePower param is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *power = MOCK_POWER;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetAdvPower(int8_t *power)
+{
+    if (power == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "SoftBusGetAdvPower param is null.");
         return SOFTBUS_INVALID_PARAM;
     }
     *power = MOCK_POWER;
