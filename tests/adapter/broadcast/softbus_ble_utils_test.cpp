@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,8 @@
 using namespace testing::ext;
 
 namespace OHOS {
-/* *
+
+/**
  * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
  * @tc.desc: test bt status convert to softbus status
  * @tc.type: FUNC
@@ -73,7 +74,7 @@ HWTEST(SoftbusBleUtilsTest, BtStatusToSoftBus, TestSize.Level3)
     EXPECT_EQ(status, SOFTBUS_BC_STATUS_DUPLICATED_ADDR);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_SoftbusAdvParamToBt
  * @tc.desc: test softbus adv param convert to bt adv params
  * @tc.type: FUNC
@@ -124,7 +125,7 @@ HWTEST(SoftbusBleUtilsTest, SoftbusAdvParamToBt, TestSize.Level3)
     EXPECT_EQ(bleAdvParams.advType, 0);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus001
  * @tc.desc: test bt scan result convert to softbus scan result
  * @tc.type: FUNC
@@ -156,7 +157,7 @@ HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus001, TestSize.Level3)
 }
 
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus002
  * @tc.desc: test bt scan result convert to softbus scan result for BtScanDataStatusToSoftbus
  * @tc.type: FUNC
@@ -210,7 +211,7 @@ HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus002, TestSize.Level3)
     EXPECT_EQ(softbusScanResult.primaryPhy, 0);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus003
  * @tc.desc: test bt scan result convert to softbus scan result for BtScanDataStatusToSoftbus
  * @tc.type: FUNC
@@ -260,7 +261,7 @@ HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus003, TestSize.Level3)
     EXPECT_EQ(softbusScanResult.eventType, 0);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_SoftbusFilterToBt
  * @tc.desc: test softbus scan filter convert to bt scan filter
  * @tc.type: FUNC
@@ -287,7 +288,7 @@ HWTEST(SoftbusBleUtilsTest, SoftbusFilterToBt, TestSize.Level3)
     EXPECT_EQ(bleScanNativeFilter.manufactureDataLength, softBusBcScanFilter.manufactureDataLength);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_FreeBtFilter
  * @tc.desc: test free bt scan filter
  * @tc.type: FUNC
@@ -299,7 +300,7 @@ HWTEST(SoftbusBleUtilsTest, FreeBtFilter, TestSize.Level3)
     FreeBtFilter(bleScanNativeFilter, 1);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_DumpBleScanFilter
  * @tc.desc: test dump scan filter
  * @tc.type: FUNC
@@ -312,7 +313,7 @@ HWTEST(SoftbusBleUtilsTest, DumpBleScanFilter, TestSize.Level3)
     free(bleScanNativeFilter);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_GetBtScanMode
  * @tc.desc: test get bt scan mode
  * @tc.type: FUNC
@@ -357,7 +358,7 @@ HWTEST(SoftbusBleUtilsTest, GetBtScanMode, TestSize.Level3)
     EXPECT_NE(scanMode, OHOS_BLE_SCAN_MODE_OP_P75_30_40);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_AssembleAdvData
  * @tc.desc: test assemble ble adv data
  * @tc.type: FUNC
@@ -386,7 +387,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleAdvData, TestSize.Level3)
     free(data);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_AssembleRspData
  * @tc.desc: test assemble ble rsp data
  * @tc.type: FUNC
@@ -409,7 +410,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleRspData, TestSize.Level3)
     SoftBusFree(data);
 }
 
-/* *
+/**
  * @tc.name: SoftbusBleUtilsTest_ParseScanResult
  * @tc.desc: test parse ble scan result as softbus scan result
  * @tc.type: FUNC
@@ -429,7 +430,7 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult, TestSize.Level3)
     EXPECT_EQ(softBusBcScanResult.data.bcData.type, BROADCAST_DATA_TYPE_SERVICE);
 }
 
-/* *
+/**
  * @tc.name: SoftbusSetManufactureFilterTest001
  * @tc.desc: test SoftbusSetManufactureFilter when success
  * @tc.type: FUNC
@@ -451,7 +452,7 @@ HWTEST(SoftbusBleUtilsTest, SoftbusSetManufactureFilterTest001, TestSize.Level3)
     }
 }
 
-/* *
+/**
  * @tc.name: SoftbusSetManufactureFilterTest002
  * @tc.desc: test SoftbusSetManufactureFilter when nativeFilter is nullptr
  * @tc.type: FUNC
@@ -464,7 +465,7 @@ HWTEST(SoftbusBleUtilsTest, SoftbusSetManufactureFilterTest002, TestSize.Level3)
     EXPECT_EQ(filterSize, 2);
 }
 
-/* *
+/**
  * @tc.name: SoftbusSetManufactureFilterTest003
  * @tc.desc: test SoftbusSetManufactureFilter when filterSize = 0
  * @tc.type: FUNC
