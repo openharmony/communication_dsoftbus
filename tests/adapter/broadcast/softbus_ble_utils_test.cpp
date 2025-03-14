@@ -106,23 +106,24 @@ HWTEST(SoftbusBleUtilsTest, SoftbusAdvParamToBt, TestSize.Level3)
     EXPECT_EQ(bleAdvParams.duration, softbusAdvParam.duration);
     EXPECT_EQ(bleAdvParams.txPower, softbusAdvParam.txPower);
 
-    softbusAdvParam.advFilterPolicy = 2;
-    softbusAdvParam.advType = 2;
+    softbusAdvParam.advFilterPolicy = SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_WLST;
+    softbusAdvParam.advType = SOFTBUS_BC_ADV_SCAN_IND;
     SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
-    EXPECT_EQ(bleAdvParams.advFilterPolicy, softbusAdvParam.advFilterPolicy);
-    EXPECT_EQ(bleAdvParams.advType, softbusAdvParam.advType);
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advFilterPolicy), static_cast<int>(softbusAdvParam.advFilterPolicy));
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advType), static_cast<int>(softbusAdvParam.advType));
 
-    softbusAdvParam.advFilterPolicy = 3;
-    softbusAdvParam.advType = 4;
+    softbusAdvParam.advFilterPolicy = SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_WLST;
+    softbusAdvParam.advType = SOFTBUS_BC_ADV_DIRECT_IND_LOW;
     SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
-    EXPECT_EQ(bleAdvParams.advFilterPolicy, softbusAdvParam.advFilterPolicy);
-    EXPECT_EQ(bleAdvParams.advType, softbusAdvParam.advType);
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advFilterPolicy), static_cast<int>(softbusAdvParam.advFilterPolicy));
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advType), static_cast<int>(softbusAdvParam.advType));
 
-    softbusAdvParam.advFilterPolicy = 4;
-    softbusAdvParam.advType = 5;
+    softbusAdvParam.advFilterPolicy = (SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_WLST
+                                        + SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_ANY);
+    softbusAdvParam.advType = (SOFTBUS_BC_ADV_DIRECT_IND_LOW + SOFTBUS_BC_ADV_DIRECT_IND_HIGH);
     SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
-    EXPECT_EQ(bleAdvParams.advFilterPolicy, 0);
-    EXPECT_EQ(bleAdvParams.advType, 0);
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advFilterPolicy), static_cast<int>(SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY));
+    EXPECT_EQ(static_cast<int>(bleAdvParams.advType), static_cast<int>(SOFTBUS_BC_ADV_IND));
 }
 
 /**
@@ -173,42 +174,43 @@ HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus002, TestSize.Level3)
 
     SoftBusBcScanResult softbusScanResult = {};
 
-    btScanResult.eventType = 0;
-    btScanResult.dataStatus = 2;
-    btScanResult.addrType = 0;
-    btScanResult.primaryPhy = 0;
+    btScanResult.eventType = OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE;
+    btScanResult.dataStatus = OHOS_BLE_DATA_INCOMPLETE_TRUNCATED;
+    btScanResult.addrType = OHOS_BLE_PUBLIC_DEVICE_ADDRESS;
+    btScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_NO_PACKET;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
     EXPECT_EQ(softbusScanResult.dataStatus, btScanResult.dataStatus);
     EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
     EXPECT_EQ(softbusScanResult.primaryPhy, btScanResult.primaryPhy);
 
-    btScanResult.eventType = 2;
-    btScanResult.dataStatus = 3;
-    btScanResult.addrType = 2;
-    btScanResult.primaryPhy = 2;
+    btScanResult.eventType = OHOS_BLE_EVT_SCANNABLE;
+    btScanResult.dataStatus = (OHOS_BLE_DATA_INCOMPLETE_TRUNCATED +
+                               OHOS_BLE_DATA_INCOMPLETE_MORE_TO_COME);
+    btScanResult.addrType = OHOS_BLE_PUBLIC_IDENTITY_ADDRESS;
+    btScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_2M;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
-    EXPECT_EQ(softbusScanResult.dataStatus, 2);
+    EXPECT_EQ(softbusScanResult.dataStatus, SOFTBUS_BC_DATA_INCOMPLETE_TRUNCATED);
     EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
     EXPECT_EQ(softbusScanResult.primaryPhy, btScanResult.primaryPhy);
 
-    btScanResult.eventType = 4;
-    btScanResult.dataStatus = 1;
-    btScanResult.addrType = 3;
-    btScanResult.primaryPhy = 3;
+    btScanResult.eventType = OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED;
+    btScanResult.dataStatus = OHOS_BLE_DATA_INCOMPLETE_MORE_TO_COME;
+    btScanResult.addrType = OHOS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS;
+    btScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_CODED;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
     EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
     EXPECT_EQ(softbusScanResult.primaryPhy, btScanResult.primaryPhy);
 
-    btScanResult.eventType = 5;
-    btScanResult.addrType = 254;
-    btScanResult.primaryPhy = 4;
+    btScanResult.eventType = OHOS_BLE_EVT_CONNECTABLE_DIRECTED;
+    btScanResult.addrType = OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS;
+    btScanResult.primaryPhy = (OHOS_BLE_SCAN_PHY_CODED + OHOS_BLE_SCAN_PHY_1M);
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
     EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
-    EXPECT_EQ(softbusScanResult.primaryPhy, 0);
+    EXPECT_EQ(softbusScanResult.primaryPhy, SOFTBUS_BC_SCAN_PHY_NO_PACKET);
 }
 
 /**
@@ -227,38 +229,39 @@ HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus003, TestSize.Level3)
 
     SoftBusBcScanResult softbusScanResult = {};
 
-    btScanResult.eventType = 6;
-    btScanResult.addrType = 255;
+    btScanResult.eventType = OHOS_BLE_EVT_SCANNABLE_DIRECTED;
+    btScanResult.addrType = OHOS_BLE_NO_ADDRESS;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
     EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
 
-    btScanResult.eventType = 16;
-    btScanResult.addrType = 200;
+    btScanResult.eventType = OHOS_BLE_EVT_LEGACY_NON_CONNECTABLE;
+    btScanResult.addrType = (OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS -
+                             OHOS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS);
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
-    EXPECT_EQ(softbusScanResult.addrType, 255);
+    EXPECT_EQ(softbusScanResult.addrType, OHOS_BLE_NO_ADDRESS);
 
-    btScanResult.eventType = 18;
-    btScanResult.addrType = 1;
-    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
-    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
-
-    btScanResult.eventType = 21;
+    btScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCANNABLE;
+    btScanResult.addrType = OHOS_BLE_RANDOM_DEVICE_ADDRESS;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
 
-    btScanResult.eventType = 26;
+    btScanResult.eventType = OHOS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
 
-    btScanResult.eventType = 27;
+    btScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
     EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
 
-    btScanResult.eventType = 28;
+    btScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV;
     BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
-    EXPECT_EQ(softbusScanResult.eventType, 0);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+
+    btScanResult.eventType = (OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV + OHOS_BLE_EVT_CONNECTABLE);
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, SOFTBUS_BC_EVT_NON_CONNECTABLE_NON_SCANNABLE);
 }
 
 /**
