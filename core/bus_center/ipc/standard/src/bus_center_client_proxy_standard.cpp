@@ -16,6 +16,7 @@
 #include "bus_center_client_proxy_standard.h"
 
 #include "lnn_log.h"
+#include "message_option.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
@@ -656,7 +657,7 @@ void BusCenterClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     int ret = remote->SendRequest(CLIENT_ON_BLE_RANGE_DONE, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
