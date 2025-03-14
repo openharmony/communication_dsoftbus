@@ -233,6 +233,18 @@ static bool IsSameAccount(int64_t accountId)
     return false;
 }
 
+static void DumpDpAclInfo(const std::string peerUdid, int32_t localUserId, int32_t peerUserId,
+    const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
+{
+    char *anonyUdid = nullptr;
+    Anonymize(peerUdid.c_str(), &anonyUdid);
+    LNN_LOGI(LNN_STATE,
+        "dp has acl. udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d, "
+        "Status=%{public}d",
+        AnonymizeWrapper(anonyUdid), localUserId, peerUserId, aclProfile.GetStatus());
+    AnonymizeFree(anonyUdid);
+}
+
 static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int32_t peerUserId)
 {
     if (peerUserId == 0) {
@@ -253,6 +265,11 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
 
     UpdateDpAclResult updateResult = UPDATE_ACL_NOT_MATCH;
     int32_t localUserId = GetActiveOsAccountIds();
+    char udid[UDID_BUF_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local udid fail");
+    }
+    std::string localUdid(udid);
     for (auto &aclProfile :aclProfiles) {
         if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             aclProfile.GetTrustDeviceId().empty() ||
@@ -262,11 +279,12 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
             aclProfile.GetAccessee().GetAccesseeUserId() != peerUserId) {
             continue;
         }
-        char *anonyUdid = nullptr;
-        Anonymize(peerUdid.c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "dp has acl. udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d, "
-            "Status=%{public}d", AnonymizeWrapper(anonyUdid), localUserId, peerUserId, aclProfile.GetStatus());
-        AnonymizeFree(anonyUdid);
+        if (aclProfile.GetAccessee().GetAccesseeDeviceId() == peerUdid &&
+            aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid) {
+            LNN_LOGI(LNN_STATE, "localUdid change, need update accessControlProfile");
+            continue;
+        }
+        DumpDpAclInfo(peerUdid, localUserId, peerUserId, aclProfile);
         if (aclProfile.GetStatus() != (int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE) {
             aclProfile.SetStatus((int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
             ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
