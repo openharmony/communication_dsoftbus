@@ -22,12 +22,16 @@
 #include "softbus_ble_gatt.h"
 #include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_manager.h"
+#include "softbus_broadcast_mgr_utils.h"
 
 class BleGattInterface {
 public:
     virtual void SoftbusBleAdapterInit() = 0;
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual int32_t SoftBusRemoveBtStateListener(int32_t listenerId) = 0;
+    virtual int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis) = 0;
+    virtual int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time) = 0;
 };
 
 class ManagerMock : public BleGattInterface {
@@ -41,6 +45,11 @@ public:
     MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
         (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
+    MOCK_METHOD(int32_t, BleAsyncCallbackDelayHelper, 
+        (SoftBusLooper *looper, BleAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis), (override));
+    MOCK_METHOD(int32_t, SoftBusCondWait, 
+        (SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time), (override));
 
     static const SoftbusBroadcastCallback *broadcastCallback;
     static const SoftbusScanCallback *scanCallback;

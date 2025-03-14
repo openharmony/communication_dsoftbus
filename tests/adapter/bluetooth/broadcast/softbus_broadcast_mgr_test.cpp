@@ -22,9 +22,11 @@
 #include "softbus_ble_mock.h"
 #include "softbus_broadcast_utils.h"
 #include "softbus_error_code.h"
+#include "softbus_broadcast_mgr_mock.h"
 
 using namespace testing::ext;
 using ::testing::Return;
+using namespace testing;
 
 #define BC_ADV_FLAG             0x2
 #define BC_ADV_TX_POWER_DEFAULT (-6)
@@ -35,6 +37,11 @@ using ::testing::Return;
 #define SRV_TYPE_INVALID        (-1)
 
 namespace OHOS {
+const uint8_t *BASE_FUZZ_DATA = nullptr;
+size_t g_baseFuzzPos;
+size_t g_baseFuzzSize = 0;
+const int32_t listenderId= 15;
+
 class SoftbusBroadcastMgrTest : public testing::Test {
 public:
     static void SetUpTestCase()
@@ -94,6 +101,81 @@ static void BuildScanParam(BcScanParams *scanParam)
     scanParam->scanFilterPolicy = SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL;
 }
 
+static void ConvertBcParams(const BroadcastParam *srcParam, SoftbusBroadcastParam *dstParam)
+{
+    DISC_LOGD(DISC_BROADCAST, "enter covert bc param");
+    dstParam->minInterval = srcParam->minInterval;
+    dstParam->maxInterval = srcParam->maxInterval;
+    dstParam->advType = srcParam->advType;
+    dstParam->advFilterPolicy = srcParam->advFilterPolicy;
+    dstParam->ownAddrType = srcParam->ownAddrType;
+    dstParam->peerAddrType = srcParam->peerAddrType;
+    if (memcpy_s(dstParam->peerAddr.addr, SOFTBUS_ADDR_MAC_LEN, srcParam->peerAddr.addr, BC_ADDR_MAC_LEN) != EOK) {
+        DISC_LOGE(DISC_BROADCAST, "memcpy peerAddr failed");
+        return;
+    }
+    dstParam->channelMap = srcParam->channelMap;
+    dstParam->duration = srcParam->duration;
+    dstParam->txPower = srcParam->txPower;
+    dstParam->isSupportRpa = srcParam->isSupportRpa;
+    if (memcpy_s(dstParam->ownIrk, SOFTBUS_IRK_LEN, srcParam->ownIrk, BC_IRK_LEN) != EOK) {
+        DISC_LOGE(DISC_BROADCAST, "memcpy ownIrk failed");
+        return;
+    }
+    if (memcpy_s(dstParam->ownUdidHash, SOFTBUS_UDID_HASH_LEN, srcParam->ownUdidHash, BC_UDID_HASH_LEN) != EOK) {
+        DISC_LOGE(DISC_BROADCAST, "memcpy ownUdidHash failed");
+        return;
+    }
+    if (memcpy_s(dstParam->localAddr.addr, BC_ADDR_MAC_LEN, srcParam->localAddr.addr,
+        BC_ADDR_MAC_LEN) != EOK) {
+        DISC_LOGE(DISC_BROADCAST, "memcpy localAddr failed");
+        return;
+    }
+}
+
+template <class T> T GetData()
+{
+    T object{};
+    size_t objectSize = sizeof(object);
+    if (BASE_FUZZ_DATA == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, BASE_FUZZ_DATA + g_baseFuzzPos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_baseFuzzPos += objectSize;
+    return object;
+}
+
+static LpScanParam BuildLpScanParam()
+{
+    LpScanParam lpScanParam;
+    g_baseFuzzPos = 0;
+    BcScanParams scanParam;
+    scanParam.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
+    scanParam.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
+    scanParam.scanType = GetData<bool>();
+    scanParam.scanPhy = GetData<uint8_t>() % SOFTBUS_BC_SCAN_PHY_CODED;
+    scanParam.scanFilterPolicy = GetData<uint8_t>() % SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST_AND_RPA;
+    lpScanParam.scanParam = scanParam;
+
+    return lpScanParam;
+}
+
+static int32_t BuildLpBroadcastParam(LpBroadcastParam *lpBcParam)
+{
+    g_baseFuzzPos = 0;
+    lpBcParam->bcHandle = GetData<int32_t>();
+    BuildBroadcastParam(&lpBcParam->bcParam);
+    BuildBroadcastPacketExceptPayload(&lpBcParam->packet);
+    lpBcParam->packet.bcData.payloadLen = sizeof(SoftbusBroadcastMgrTest::BC_DATA_PAYLOAD);
+    lpBcParam->packet.bcData.payload = SoftbusBroadcastMgrTest::BC_DATA_PAYLOAD;
+    lpBcParam->packet.rspData.payloadLen = sizeof(SoftbusBroadcastMgrTest::RSP_DATA_PAYLOAD);
+    lpBcParam->packet.rspData.payload = SoftbusBroadcastMgrTest::RSP_DATA_PAYLOAD;
+    return SOFTBUS_OK;
+}
+
 // filter is released in UnRegisterScanListener
 static BcScanFilter *GetBcScanFilter(void)
 {
@@ -148,6 +230,21 @@ static void BleBcDataCallback(int32_t channel, int32_t status)
     DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
+static void BcSetBroadcastingParamCallback(int32_t channel, int32_t status)
+{
+    DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
+}
+
+static void BcDisableBroadcastingCallback(int32_t channel, int32_t status)
+{
+    DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
+}
+
+static void BcEnableBroadcastingCallback(int32_t channel, int32_t status)
+{
+    DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
+}
+
 static void BleOnScanStart(int32_t listenerId, int32_t status)
 {
     (void)listenerId;
@@ -174,6 +271,9 @@ static BroadcastCallback *GetBroadcastCallback()
         .OnStopBroadcastingCallback = BleBcDisableCallback,
         .OnUpdateBroadcastingCallback = BleBcUpdateCallback,
         .OnSetBroadcastingCallback = BleBcDataCallback,
+        .OnSetBroadcastingParamCallback = BcSetBroadcastingParamCallback,
+        .OnDisableBroadcastingCallback = BcDisableBroadcastingCallback,
+        .OnEnableBroadcastingCallback = BcEnableBroadcastingCallback,
     };
     return &g_bcCallback;
 }
@@ -221,6 +321,25 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastMgrInit002 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastMgrInit003
+ * @tc.desc: Init successful.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastMgrInit003 begin ----");
+    ManagerMock managerMock; 
+    EXPECT_CALL(managerMock, BleAsyncCallbackDelayHelper)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastMgrInit003 end ----");
 }
 
 /*
@@ -770,7 +889,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting002, TestSiz
     packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_WAIT_COND_FAIL, UpdateBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_OK, UpdateBroadcasting(bcId, &bcParam, &packet));
 
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
@@ -1550,5 +1669,391 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice002, Te
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
     DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice002 end ----");
+}
+
+/*
+ * @tc.name: CompareSameFilter001
+ * @tc.desc: CompareSameFilter001 CompareSameFilter is FALSE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_FALSE(CompareSameFilter(NULL, NULL));
+
+    DISC_LOGI(DISC_TEST, "CompareSameFilter001 end ----");
+}
+
+/*
+ * @tc.name: CompareSameFilter002
+ * @tc.desc: CompareSameFilter002 CompareSameFilter is FALSE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter002 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    BcScanFilter *filter = GetBcScanFilter();
+
+    EXPECT_FALSE(CompareSameFilter(filter, NULL));
+
+    DISC_LOGI(DISC_TEST, "CompareSameFilter002 end ----");
+}
+
+/*
+ * @tc.name: CompareSameFilter003
+ * @tc.desc: CompareSameFilter003 CompareSameFilter is TRUE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter003 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    BcScanFilter *filter = GetBcScanFilter();
+    BcScanFilter *filter2 = GetBcScanFilter();
+
+    EXPECT_TRUE(CompareSameFilter(filter, filter2));
+
+    DISC_LOGI(DISC_TEST, "CompareSameFilter003 end ----");
+}
+
+/*
+ * @tc.name: CompareSameFilter004
+ * @tc.desc: CompareSameFilter004 CompareSameFilter is FALSE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter004, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter004 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    BcScanFilter *filter = GetBcScanFilter();
+    BcScanFilter *filter2 = GetBcScanFilter();
+
+    BcScanFilter srcFilter = *filter;
+    BcScanFilter dstFilter = *filter2;
+    if (srcFilter.serviceData != NULL && dstFilter.serviceData != NULL &&
+    srcFilter.serviceDataMask != NULL && dstFilter.serviceDataMask != NULL &&
+    memcmp(srcFilter.serviceData, dstFilter.serviceData, srcFilter.serviceDataLength) == 0 &&
+    memcmp(srcFilter.serviceDataMask, dstFilter.serviceDataMask, srcFilter.serviceDataLength) == 0) {
+        std::cout << "srcFilter.serviceData != NULL" << std::endl;
+        srcFilter.serviceData = NULL;
+        dstFilter.serviceData = NULL;
+        srcFilter.serviceDataMask = NULL;
+        dstFilter.serviceDataMask = NULL;
+    }
+
+    if (srcFilter.manufactureData == NULL && dstFilter.manufactureData == NULL &&
+    srcFilter.manufactureDataMask == NULL && dstFilter.manufactureDataMask == NULL) {
+        std::cout << "srcFilter.manufactureData == NULL" << std::endl;
+        uint8_t test[] = {1, 2};
+        srcFilter.manufactureDataLength = sizeof(test) / sizeof(test[0]);
+        srcFilter.manufactureData = test;
+        srcFilter.manufactureDataMask = test;
+        dstFilter.manufactureDataLength = sizeof(test) / sizeof(test[0]);
+        dstFilter.manufactureData = test;
+        dstFilter.manufactureDataMask = test;  
+    }
+    EXPECT_TRUE(CompareSameFilter(&srcFilter, &dstFilter));
+
+    DISC_LOGI(DISC_TEST, "CompareSameFilter004 end ----");
+}
+
+/*
+ * @tc.name: PerformSetBroadcastingParam001
+ * @tc.desc: PerformSetBroadcastingParam001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam001 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    BroadcastParam bcParam = {};
+    BuildBroadcastParam(&bcParam);
+    SoftbusBroadcastParam adapterParam = {};
+    ConvertBcParams(&bcParam, &adapterParam);
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, PerformSetBroadcastingParam(bcId, &adapterParam));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam001 end ----");
+}
+
+/*
+ * @tc.name: PerformSetBroadcastingParam002
+ * @tc.desc: PerformSetBroadcastingParam002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam002 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    BroadcastParam bcParam = {};
+    BuildBroadcastParam(&bcParam);
+    SoftbusBroadcastParam adapterParam = {};
+    ConvertBcParams(&bcParam, &adapterParam);
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+    int32_t bcIdTest = bcId + 1;
+
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, PerformSetBroadcastingParam(bcIdTest, &adapterParam));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam002 end ----");
+}
+
+/*
+ * @tc.name: PerformSetBroadcastingParam003
+ * @tc.desc: PerformSetBroadcastingParam003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam003 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    BroadcastParam bcParam = {};
+    BroadcastPacket packet = {};
+    BuildBroadcastParam(&bcParam);
+    SoftbusBroadcastParam adapterParam = {};
+    ConvertBcParams(&bcParam, &adapterParam);
+    BuildBroadcastPacketExceptPayload(&packet);
+
+    packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
+    packet.bcData.payload = BC_DATA_PAYLOAD;
+    packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+    
+    EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_OK, PerformSetBroadcastingParam(bcId, &adapterParam));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam003 end ----");
+}
+
+/*
+ * @tc.name: PerformSetBroadcastingParam004
+ * @tc.desc: PerformSetBroadcastingParam004
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam004, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam004 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+
+    BroadcastParam bcParam = {};
+    BroadcastPacket packet = {};
+    BuildBroadcastParam(&bcParam);
+    SoftbusBroadcastParam adapterParam = {};
+    ConvertBcParams(&bcParam, &adapterParam);
+    BuildBroadcastPacketExceptPayload(&packet);
+
+    packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
+    packet.bcData.payload = BC_DATA_PAYLOAD;
+    packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+    
+    EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_BC_MGR_WAIT_COND_FAIL, PerformSetBroadcastingParam(bcId, &adapterParam));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam004 end ----");
+}
+
+/*
+ * @tc.name: EnableBroadcasting001
+ * @tc.desc: EnableBroadcasting001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, EnableBroadcasting001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "EnableBroadcasting001 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+
+    BroadcastParam bcParam = {};
+    BroadcastPacket packet = {};
+    BuildBroadcastParam(&bcParam);
+    SoftbusBroadcastParam adapterParam = {};
+    ConvertBcParams(&bcParam, &adapterParam);
+    BuildBroadcastPacketExceptPayload(&packet);
+
+    packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
+    packet.bcData.payload = BC_DATA_PAYLOAD;
+    packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+    int32_t bcIdTest = bcId + 1;
+    
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, EnableBroadcasting(bcIdTest));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "EnableBroadcasting001 end ----");
+}
+
+/*
+ * @tc.name: EnableBroadcasting002
+ * @tc.desc: EnableBroadcasting002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, EnableBroadcasting002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "EnableBroadcasting002 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+
+    BroadcastParam bcParam = {};
+    BroadcastPacket packet = {};
+    BuildBroadcastParam(&bcParam);
+    SoftbusBroadcastParam adapterParam = {};
+    ConvertBcParams(&bcParam, &adapterParam);
+    BuildBroadcastPacketExceptPayload(&packet);
+
+    packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
+    packet.bcData.payload = BC_DATA_PAYLOAD;
+    packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+    
+    EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, EnableBroadcasting(bcId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "EnableBroadcasting002 end ----");
+}
+
+/*
+ * @tc.name: QueryBroadcastStatus001
+ * @tc.desc: QueryBroadcastStatus001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, QueryBroadcastStatus001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "QueryBroadcastStatus001 begin ----");
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftBusCondWait)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, QueryBroadcastStatus(bcId, &bcId));
+    DISC_LOGI(DISC_TEST, "QueryBroadcastStatus001 end ----");
+}
+
+/*
+ * @tc.name: BroadcastSetAdvDeviceParam001
+ * @tc.desc: BroadcastSetAdvDeviceParam001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam001 begin ----");
+    ManagerMock managerMock;
+
+    g_baseFuzzPos = 0;
+    uint8_t type = GetData<uint8_t>();
+    LpScanParam lpScanParam = BuildLpScanParam();
+    lpScanParam.listenerId = listenderId;
+    LpBroadcastParam lpBcParam;
+    BuildLpBroadcastParam(&lpBcParam);
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    EXPECT_FALSE(BroadcastSetAdvDeviceParam(static_cast<LpServerType>(type), &lpBcParam, &lpScanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam001 end ----");
+}
+
+/*
+ * @tc.name: BroadcastSetAdvDeviceParam002
+ * @tc.desc: BroadcastSetAdvDeviceParam002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam002 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &bcId, GetScanCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    g_baseFuzzPos = 0;
+    uint8_t type = GetData<uint8_t>();
+    LpScanParam lpScanParam = BuildLpScanParam();
+    lpScanParam.listenerId = bcId;
+    uint8_t filterNum = 1;
+    BcScanFilter *filter = GetBcScanFilter();
+    LpBroadcastParam lpBcParam;
+    BuildLpBroadcastParam(&lpBcParam);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(bcId, filter, filterNum));
+    EXPECT_FALSE(BroadcastSetAdvDeviceParam(static_cast<LpServerType>(type), &lpBcParam, &lpScanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam002 end ----");
 }
 } // namespace OHOS
