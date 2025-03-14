@@ -27,6 +27,7 @@ extern "C" {
 #define HB_SHORT_UUID_LEN          2
 #define USERID_CHECKSUM_LEN        4
 #define USERID_LEN                 4
+#define HB_ADV_POWER_LEN           1
 #define HB_SHORT_UDID_HASH_LEN     8
 #define HB_SHORT_UDID_HASH_HEX_LEN 16
 #define HB_SHORT_ACCOUNT_HASH_LEN  2
@@ -134,6 +135,7 @@ typedef struct {
     uint16_t switchLength;
     uint32_t switchLevel;
     int32_t preferChannel;
+    int8_t advPower;
 } HbRespData;
 
 typedef enum {

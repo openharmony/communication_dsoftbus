@@ -15,6 +15,7 @@
 
 #include "softbus_client_stub.h"
 
+#include "anonymizer.h"
 #include "client_bus_center_manager.h"
 #include "client_trans_channel_callback.h"
 #include "client_trans_socket_manager.h"
@@ -723,6 +724,12 @@ int32_t SoftBusClientStub::OnBleRangeDoneInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SDK, "read ble range info failed");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
+    char *anonyNetworkId = nullptr;
+    Anonymize(info->networkId, &anonyNetworkId);
+    COMM_LOGI(COMM_SDK,
+        "range=%{public}d, subrange=%{public}d, distance=%{public}f, confidence=%{public}lf, networkId=%{public}s",
+        info->range, info->subRange, info->distance, info->confidence, AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
     OnBleRangeDone(info);
     return SOFTBUS_OK;
 }

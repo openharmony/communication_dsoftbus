@@ -40,6 +40,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_def.h"
 #include "softbus_feature_config.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
@@ -1992,20 +1993,8 @@ static int32_t PackDeviceInfoMac(JsonObj *json, const NodeInfo *info, bool isMet
     return SOFTBUS_OK;
 }
 
-static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
+static int32_t PackDeviceBaseInfo(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
-    AUTH_LOGI(AUTH_FSM, "pack deviceInfo bt-v1");
-    if (PackDeviceInfoMac(json, info, isMetaAuth) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "add packdevice mac info fail ");
-        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
-    }
-    char localDevName[DEVICE_NAME_BUF_LEN] = { 0 };
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
-    if (ret == SOFTBUS_OK) {
-        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
-    } else {
-        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
-    }
     if (!JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_VERSION_TYPE, info->versionType) ||
         !JSON_AddStringToObject(json, UUID, info->uuid) ||
@@ -2021,8 +2010,31 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         !JSON_AddInt32ToObject(json, P2P_ROLE, info->p2pInfo.p2pRole) ||
         !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
         !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
+        !JSON_AddStringToObject(json, PRODUCT_ID, info->deviceInfo.productId) ||
+        !JSON_AddStringToObject(json, MODEL_NAME, info->deviceInfo.modelName) ||
         !JSON_AddInt32ToObject(json, STATE_VERSION_CHANGE_REASON, info->stateVersionReason)) {
         AUTH_LOGE(AUTH_FSM, "add wifi info fail");
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
+{
+    AUTH_LOGI(AUTH_FSM, "pack deviceInfo bt-v1");
+    if (PackDeviceInfoMac(json, info, isMetaAuth) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "add packdevice mac info fail ");
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
+    }
+    char localDevName[DEVICE_NAME_BUF_LEN] = { 0 };
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+    if (PackDeviceBaseInfo(json, info, isMetaAuth) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "add packdevice wifi info fail");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     return SOFTBUS_OK;
@@ -2035,12 +2047,12 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
         !JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN) ||
         !JSON_GetStringFromOject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN) ||
         !JSON_GetStringFromOject(json, UUID, info->uuid, UUID_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, BR_MAC_ADDR, info->connectInfo.macAddr, MAC_LEN) ||
-        !JSON_GetStringFromOject(json, PRODUCT_ID, info->deviceInfo.productId, PRODUCT_ID_SIZE_MAX) ||
-        !JSON_GetStringFromOject(json, MODEL_NAME, info->deviceInfo.modelName, MODEL_NAME_SIZE_MAX)) {
+        !JSON_GetStringFromOject(json, BR_MAC_ADDR, info->connectInfo.macAddr, MAC_LEN)) {
         AUTH_LOGE(AUTH_FSM, "parse devinfo fail, invalid msg");
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
+    OptString(json, PRODUCT_ID, info->deviceInfo.productId, PRODUCT_ID_SIZE_MAX, "");
+    OptString(json, MODEL_NAME, info->deviceInfo.modelName, MODEL_NAME_SIZE_MAX, "");
     (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
     OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
     OptString(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN, "");
