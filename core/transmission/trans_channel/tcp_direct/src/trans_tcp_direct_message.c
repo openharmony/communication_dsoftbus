@@ -216,6 +216,9 @@ static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
     if (cipherFlag & FLAG_ENHANCE_P2P) {
         return AUTH_LINK_TYPE_ENHANCED_P2P;
     }
+    if (cipherFlag & FLAG_SESSION_KEY) {
+        return AUTH_LINK_TYPE_SESSION_KEY;
+    }
     return AUTH_LINK_TYPE_WIFI;
 }
 
@@ -873,7 +876,7 @@ static int32_t TransTdcCheckCollabRelation(const AppInfo *appInfo, int32_t chann
     OpenDataBusRequestOutSessionName(appInfo->myData.sessionName, appInfo->peerData.sessionName);
     TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
         appInfo->myData.pid, appInfo->peerData.pid);
-    
+
     char *errDesc = NULL;
     int32_t errCode = CheckCollabRelation(appInfo, channelId, CHANNEL_TYPE_TCP_DIRECT);
     if (errCode == SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {

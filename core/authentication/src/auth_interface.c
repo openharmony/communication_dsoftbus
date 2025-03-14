@@ -72,6 +72,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_PTK_VERIFY,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_SESSION_KEY_AUTH,
+        .listener = { NULL, NULL },
     }
 };
 

@@ -287,7 +287,7 @@ static bool CompareWifiConnInfo(const AuthConnInfo *info1, const AuthConnInfo *i
 
 static bool CompareSessionKeyConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
-    if (info2->type == AUTH_LINK_TYPE_SESSION_KEY && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+    if (info2->type == AUTH_LINK_TYPE_SESSION_KEY) {
         return true;
     }
     return false;

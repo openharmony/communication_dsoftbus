@@ -915,11 +915,7 @@ static int32_t PostBytesForSessionKey(int32_t fd, const AuthDataHead *head, cons
         return SOFTBUS_MALLOC_ERR;
     }
     AuthDataHead tmpHead = *head;
-    if (tmpHead.dataType == DATA_TYPE_DEVICE_INFO || tmpHead.dataType == DATA_TYPE_DEVICE_ID ||
-        tmpHead.dataType == DATA_TYPE_TEST_AUTH || tmpHead.dataType == DATA_TYPE_AUTH ||
-        tmpHead.dataType == DATA_TYPE_CLOSE_ACK) {
-        tmpHead.module = MODULE_SESSION_KEY_AUTH;
-    }
+    tmpHead.module = MODULE_SESSION_KEY_AUTH;
     int32_t ret = PackAuthData(&tmpHead, data, buf, size);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "PackAuthData fail");
