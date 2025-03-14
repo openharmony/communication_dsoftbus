@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,8 +25,7 @@
 using namespace testing::ext;
 
 namespace OHOS {
-
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_BtStatusToSoftBus
  * @tc.desc: test bt status convert to softbus status
  * @tc.type: FUNC
@@ -69,9 +68,12 @@ HWTEST(SoftbusBleUtilsTest, BtStatusToSoftBus, TestSize.Level3)
 
     status = BtStatusToSoftBus(OHOS_BT_STATUS_AUTH_REJECTED);
     EXPECT_EQ(status, SOFTBUS_BC_STATUS_AUTH_REJECTED);
+
+    status = BtStatusToSoftBus(OHOS_BT_STATUS_DUPLICATED_ADDR);
+    EXPECT_EQ(status, SOFTBUS_BC_STATUS_DUPLICATED_ADDR);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_SoftbusAdvParamToBt
  * @tc.desc: test softbus adv param convert to bt adv params
  * @tc.type: FUNC
@@ -102,15 +104,33 @@ HWTEST(SoftbusBleUtilsTest, SoftbusAdvParamToBt, TestSize.Level3)
     EXPECT_EQ(bleAdvParams.channelMap, softbusAdvParam.channelMap);
     EXPECT_EQ(bleAdvParams.duration, softbusAdvParam.duration);
     EXPECT_EQ(bleAdvParams.txPower, softbusAdvParam.txPower);
+
+    softbusAdvParam.advFilterPolicy = 2;
+    softbusAdvParam.advType = 2;
+    SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
+    EXPECT_EQ(bleAdvParams.advFilterPolicy, softbusAdvParam.advFilterPolicy);
+    EXPECT_EQ(bleAdvParams.advType, softbusAdvParam.advType);
+
+    softbusAdvParam.advFilterPolicy = 3;
+    softbusAdvParam.advType = 4;
+    SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
+    EXPECT_EQ(bleAdvParams.advFilterPolicy, softbusAdvParam.advFilterPolicy);
+    EXPECT_EQ(bleAdvParams.advType, softbusAdvParam.advType);
+
+    softbusAdvParam.advFilterPolicy = 4;
+    softbusAdvParam.advType = 5;
+    SoftbusAdvParamToBt(&softbusAdvParam, &bleAdvParams);
+    EXPECT_EQ(bleAdvParams.advFilterPolicy, 0);
+    EXPECT_EQ(bleAdvParams.advType, 0);
 }
 
-/**
- * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus
+/* *
+ * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus001
  * @tc.desc: test bt scan result convert to softbus scan result
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus, TestSize.Level3)
+HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus001, TestSize.Level3)
 {
     BtScanResultData btScanResult = {};
     btScanResult.eventType = 1;
@@ -135,7 +155,112 @@ HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus, TestSize.Level3)
     EXPECT_EQ(softbusScanResult.rssi, btScanResult.rssi);
 }
 
-/**
+
+/* *
+ * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus002
+ * @tc.desc: test bt scan result convert to softbus scan result for BtScanDataStatusToSoftbus
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus002, TestSize.Level3)
+{
+    BtScanResultData btScanResult = {};
+    btScanResult.secondaryPhy = 1;
+    btScanResult.advSid = 1;
+    btScanResult.txPower = 1;
+    btScanResult.rssi = 1;
+
+    SoftBusBcScanResult softbusScanResult = {};
+
+    btScanResult.eventType = 0;
+    btScanResult.dataStatus = 2;
+    btScanResult.addrType = 0;
+    btScanResult.primaryPhy = 0;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+    EXPECT_EQ(softbusScanResult.dataStatus, btScanResult.dataStatus);
+    EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
+    EXPECT_EQ(softbusScanResult.primaryPhy, btScanResult.primaryPhy);
+
+    btScanResult.eventType = 2;
+    btScanResult.dataStatus = 3;
+    btScanResult.addrType = 2;
+    btScanResult.primaryPhy = 2;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+    EXPECT_EQ(softbusScanResult.dataStatus, 2);
+    EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
+    EXPECT_EQ(softbusScanResult.primaryPhy, btScanResult.primaryPhy);
+
+    btScanResult.eventType = 4;
+    btScanResult.dataStatus = 1;
+    btScanResult.addrType = 3;
+    btScanResult.primaryPhy = 3;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+    EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
+    EXPECT_EQ(softbusScanResult.primaryPhy, btScanResult.primaryPhy);
+
+    btScanResult.eventType = 5;
+    btScanResult.addrType = 254;
+    btScanResult.primaryPhy = 4;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+    EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
+    EXPECT_EQ(softbusScanResult.primaryPhy, 0);
+}
+
+/* *
+ * @tc.name: SoftbusBleUtilsTest_BtScanResultToSoftbus003
+ * @tc.desc: test bt scan result convert to softbus scan result for BtScanDataStatusToSoftbus
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, BtScanResultToSoftbus003, TestSize.Level3)
+{
+    BtScanResultData btScanResult = {};
+    btScanResult.secondaryPhy = 1;
+    btScanResult.advSid = 1;
+    btScanResult.txPower = 1;
+    btScanResult.rssi = 1;
+
+    SoftBusBcScanResult softbusScanResult = {};
+
+    btScanResult.eventType = 6;
+    btScanResult.addrType = 255;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+    EXPECT_EQ(softbusScanResult.addrType, btScanResult.addrType);
+
+    btScanResult.eventType = 16;
+    btScanResult.addrType = 200;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+    EXPECT_EQ(softbusScanResult.addrType, 255);
+
+    btScanResult.eventType = 18;
+    btScanResult.addrType = 1;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+
+    btScanResult.eventType = 21;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+
+    btScanResult.eventType = 26;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+
+    btScanResult.eventType = 27;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, btScanResult.eventType);
+
+    btScanResult.eventType = 28;
+    BtScanResultToSoftbus(&btScanResult, &softbusScanResult);
+    EXPECT_EQ(softbusScanResult.eventType, 0);
+}
+
+/* *
  * @tc.name: SoftbusBleUtilsTest_SoftbusFilterToBt
  * @tc.desc: test softbus scan filter convert to bt scan filter
  * @tc.type: FUNC
@@ -162,7 +287,7 @@ HWTEST(SoftbusBleUtilsTest, SoftbusFilterToBt, TestSize.Level3)
     EXPECT_EQ(bleScanNativeFilter.manufactureDataLength, softBusBcScanFilter.manufactureDataLength);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_FreeBtFilter
  * @tc.desc: test free bt scan filter
  * @tc.type: FUNC
@@ -174,7 +299,7 @@ HWTEST(SoftbusBleUtilsTest, FreeBtFilter, TestSize.Level3)
     FreeBtFilter(bleScanNativeFilter, 1);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_DumpBleScanFilter
  * @tc.desc: test dump scan filter
  * @tc.type: FUNC
@@ -187,7 +312,7 @@ HWTEST(SoftbusBleUtilsTest, DumpBleScanFilter, TestSize.Level3)
     free(bleScanNativeFilter);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_GetBtScanMode
  * @tc.desc: test get bt scan mode
  * @tc.type: FUNC
@@ -232,7 +357,7 @@ HWTEST(SoftbusBleUtilsTest, GetBtScanMode, TestSize.Level3)
     EXPECT_NE(scanMode, OHOS_BLE_SCAN_MODE_OP_P75_30_40);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_AssembleAdvData
  * @tc.desc: test assemble ble adv data
  * @tc.type: FUNC
@@ -261,7 +386,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleAdvData, TestSize.Level3)
     free(data);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_AssembleRspData
  * @tc.desc: test assemble ble rsp data
  * @tc.type: FUNC
@@ -284,7 +409,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleRspData, TestSize.Level3)
     SoftBusFree(data);
 }
 
-/**
+/* *
  * @tc.name: SoftbusBleUtilsTest_ParseScanResult
  * @tc.desc: test parse ble scan result as softbus scan result
  * @tc.type: FUNC
@@ -304,4 +429,52 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult, TestSize.Level3)
     EXPECT_EQ(softBusBcScanResult.data.bcData.type, BROADCAST_DATA_TYPE_SERVICE);
 }
 
+/* *
+ * @tc.name: SoftbusSetManufactureFilterTest001
+ * @tc.desc: test SoftbusSetManufactureFilter when success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, SoftbusSetManufactureFilterTest001, TestSize.Level3)
+{
+    const uint8_t filterSize = 2;
+    BleScanNativeFilter nativeFilter[filterSize];
+    SoftbusSetManufactureFilter(nativeFilter, filterSize);
+
+    for (uint8_t i = 0; i < filterSize; i++) {
+        EXPECT_NE(nativeFilter[i].manufactureData, nullptr);
+        EXPECT_EQ(nativeFilter[i].manufactureDataLength, 1);
+        EXPECT_NE(nativeFilter[i].manufactureDataMask, nullptr);
+        EXPECT_EQ(nativeFilter[i].manufactureId, 0x027D);
+        SoftBusFree(nativeFilter[i].manufactureData);
+        SoftBusFree(nativeFilter[i].manufactureDataMask);
+    }
+}
+
+/* *
+ * @tc.name: SoftbusSetManufactureFilterTest002
+ * @tc.desc: test SoftbusSetManufactureFilter when nativeFilter is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, SoftbusSetManufactureFilterTest002, TestSize.Level3)
+{
+    const uint8_t filterSize = 2;
+    SoftbusSetManufactureFilter(nullptr, filterSize);
+    EXPECT_EQ(filterSize, 2);
+}
+
+/* *
+ * @tc.name: SoftbusSetManufactureFilterTest003
+ * @tc.desc: test SoftbusSetManufactureFilter when filterSize = 0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, SoftbusSetManufactureFilterTest003, TestSize.Level3)
+{
+    const uint8_t filterSize = 0;
+    BleScanNativeFilter nativeFilter[1];
+    SoftbusSetManufactureFilter(nativeFilter, filterSize);
+    EXPECT_EQ(filterSize, 0);
+}
 } // namespace OHOS
