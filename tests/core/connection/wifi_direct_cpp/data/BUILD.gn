@@ -67,7 +67,10 @@ ohos_unittest("LinkInfoTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }
@@ -96,7 +99,10 @@ ohos_unittest("NegotiateMessageTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }
@@ -172,7 +178,10 @@ ohos_unittest("InnerLinkTest") {
     "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 
@@ -257,7 +266,10 @@ ohos_unittest("LinkManagerTest") {
     "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 
@@ -300,7 +312,10 @@ ohos_unittest("InterfaceInfoTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }
@@ -334,7 +349,10 @@ ohos_unittest("InterfaceManagerTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }
@@ -365,7 +383,10 @@ ohos_unittest("WifiConfigInfoTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }

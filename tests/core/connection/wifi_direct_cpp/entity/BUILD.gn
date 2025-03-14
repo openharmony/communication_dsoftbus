@@ -129,7 +129,10 @@ ohos_unittest("P2pEntityTest") {
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }

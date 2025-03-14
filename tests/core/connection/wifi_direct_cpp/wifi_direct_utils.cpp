@@ -644,4 +644,9 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
 {
     return {};
 }
+
+int WifiDirectUtils::GetChload()
+{
+    return SOFTBUS_OK;
+}
 } // namespace OHOS::SoftBus

@@ -91,8 +91,9 @@ CONN_ASSIGNER(Errcode, EnableWideBandwidth, enableWideBandwidth)
 CONN_ASSIGNER(Errcode, P2pRole, p2pRole)
 CONN_ASSIGNER(Errcode, NeedHmlConnect, needHmlConnect)
 CONN_ASSIGNER(String, BusinessTag, businessTag)
+CONN_ASSIGNER(Errcode, StaChload, staChload)
 
-#define CONN_ASSIGNER_SIZE 57 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 58 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -151,6 +152,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "P2P_ROLE",               HISYSEVENT_INT32,  ConnAssignerP2pRole             },
     { "NEED_HML_CONNECT",       HISYSEVENT_INT32,  ConnAssignerNeedHmlConnect      },
     { "BUSINESS_TAG",           HISYSEVENT_STRING, ConnAssignerBusinessTag         },
+    { "STA_CHLOAD",             HISYSEVENT_INT32,  ConnAssignerStaChload           },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
