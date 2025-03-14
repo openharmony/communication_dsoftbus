@@ -209,6 +209,7 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
             scanManager->filter[i].filterIndex = 0;
         }
         ReleaseScanIdx(managerId);
+        scanManager->isFliterChanged = true;
         scanManager->isScanning = false;
         ScanCallback callback = *(scanManager->scanCallback);
         SoftBusMutexUnlock(&g_scanLock);
