@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,14 +24,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#define GATT_ADV_MAX_NUM  20
+#define GATT_ADV_MAX_NUM 20
 
 using namespace testing::ext;
 using ::testing::AtMost;
 using ::testing::Return;
 
 namespace OHOS {
-
 class ScanResultCtx : public RecordCtx {
 public:
     explicit ScanResultCtx(const char *identifier);
@@ -79,10 +78,12 @@ static void StubOnScanResult(int32_t scannerId, const SoftBusBcScanResult *repor
 
 static SoftbusScanCallback *GetStubScanListener()
 {
-    static SoftbusScanCallback listener = { .OnStartScanCallback = nullptr,
+    static SoftbusScanCallback listener = {
+        .OnStartScanCallback = nullptr,
         .OnStopScanCallback = nullptr,
         .OnReportScanDataCallback = StubOnScanResult,
-        .OnScanStateChanged = nullptr };
+        .OnScanStateChanged = nullptr
+    };
     return &listener;
 }
 
@@ -157,7 +158,7 @@ EXIT:
     return nullptr;
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusGattInit
  * @tc.desc: Test lnit will return SOFTBUS_OK when called more than once
  * @tc.type: FUNC
@@ -172,7 +173,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusGattInit001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusGattDeInit
  * @tc.desc: Test DeInit will return SOFTBUS_OK when called more than once
  * @tc.type: FUNC
@@ -187,7 +188,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusGattDeInit001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterAdvCb
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_INVALID_PARAM when called more than once
  * @tc.type: FUNC
@@ -213,7 +214,7 @@ static SoftbusBroadcastCallback g_softbusBcBleCbTest = {
     .OnSetBroadcastingCallback = FakeBcBleCallback,
 };
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterAdvCb002
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_LOCK_ERR when called more than once
  * @tc.type: FUNC
@@ -226,7 +227,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterAdvCb003
  * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
@@ -247,7 +248,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterAdvCb004
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks
  * @tc.type: FUNC
@@ -267,7 +268,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUnRegisterAdvCb001
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -283,7 +284,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUnRegisterAdvCb002
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -296,7 +297,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUnRegisterAdvCb003
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_OK when given vaild param
  * @tc.type: FUNC
@@ -318,7 +319,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterScanCb001
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -365,7 +366,7 @@ static SoftbusScanCallback g_softbusBcBleScanCbTest = {
     .OnLpDeviceInfoCallback = FakeLpDeviceInfoCallback,
 };
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterScanCb002
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -378,7 +379,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterScanCb003
  * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
@@ -399,7 +400,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusRegisterScanCb004
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_BC_ADAPTER_REGISTER_FAIL when scan channel are all uesd
  * @tc.type: FUNC
@@ -426,7 +427,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUnRegisterScanCb001
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -442,7 +443,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUnRegisterScanCb002
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -455,7 +456,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUnRegisterScanCb003
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_OK when successfully unregistered
  * @tc.type: FUNC
@@ -479,7 +480,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStartAdv001
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -524,7 +525,7 @@ const char ADV_DATA_EXAMPLE[] = {
 };
 const unsigned char SCAN_RSP_DATA_EXAMPLE[] = { 0x03, 0xFF, 0x7D, 0x02 };
 
-/**
+/* *
  * @tc.name: TestSoftbusStartAdv002
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -544,7 +545,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStartAdv003
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld is not used
  * @tc.type: FUNC
@@ -573,7 +574,38 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
+ * @tc.name: TestSoftbusStartAdv004
+ * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_ALREADY_TRIGGERED
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv004, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advld = 0;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mocker, BleStartAdvEx).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = {};
+    data.bcData.payloadLen = sizeof(ADV_DATA_EXAMPLE);
+    data.bcData.payload = (uint8_t *)ADV_DATA_EXAMPLE;
+    data.rspData.payloadLen = sizeof(SCAN_RSP_DATA_EXAMPLE);
+    data.rspData.payload = (uint8_t *)SCAN_RSP_DATA_EXAMPLE;
+
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
  * @tc.name: TestSoftbusStopAdv001
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_LOCK_ERR when never called lnit
  * @tc.type: FUNC
@@ -586,7 +618,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStopAdv002
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld never registed
  * @tc.type: FUNC
@@ -604,7 +636,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStopAdv004
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_OK when advld has been registed
  * @tc.type: FUNC
@@ -629,7 +661,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStopAdv005
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_OK when advld has been stopped
  * @tc.type: FUNC
@@ -657,7 +689,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusSetAdvData001
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -670,7 +702,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusSetAdvData002
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_LOCK_ERR when never lnit
  * @tc.type: FUNC
@@ -689,7 +721,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusSetAdvData003
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld is not used
  * @tc.type: FUNC
@@ -713,7 +745,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusSetAdvData005
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_ALREADY_TRIGGERED when broadcast has already registed
  * @tc.type: FUNC
@@ -743,7 +775,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUpdateAdvData001
  * @tc.desc: Test SoftbusUpdateAdvData will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -756,7 +788,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUpdateAdvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusUpdateAdvData002
  * @tc.desc: Test SoftbusUpdateAdvData will return SOFTBUS_INVALID_PARAM when given invalid params
  * @tc.type: FUNC
@@ -781,7 +813,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUpdateAdvData002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStartScan001
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_INVALID_PARAM when given invalid params
  * @tc.type: FUNC
@@ -794,7 +826,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStartScan002
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -824,7 +856,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/* *
  * @tc.name: TestSoftbusStartScan003
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when given invalid params scannerld
  * @tc.type: FUNC
@@ -859,7 +891,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusGetBroadcastHandle001
  * @tc.desc: Test SoftbusGetBroadcastHandle is  SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL
  * @tc.type: FUNC
@@ -880,7 +912,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGetBroadcastHandle001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusGetBroadcastHandle002
  * @tc.desc: Test SoftbusGetBroadcastHandle is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -907,7 +939,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGetBroadcastHandle002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusEnableSyncDataToLp
  * @tc.desc: Test SoftbusEnableSyncDataToLp is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -927,7 +959,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusEnableSyncDataToLp, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusDisableSyncDataToLp
  * @tc.desc: Test DisableSyncDataToLpDevice is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -947,7 +979,7 @@ HWTEST_F(SoftbusBleGattTest, DisableSyncDataToLpDevice, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusSetScanReportChanToLp001
  * @tc.desc: Test SoftbusSetScanReportChanToLp is  SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL
  * @tc.type: FUNC
@@ -966,7 +998,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetScanReportChanToLp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusSetLpAdvParam
  * @tc.desc: Test SoftbusSetLpAdvParam is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -992,7 +1024,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetLpAdvParam, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: SoftbusStopScan001
  * @tc.desc: Test SoftbusStopScan is  SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL
  * @tc.type: FUNC
@@ -1011,7 +1043,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopScan001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestWrapperAdvEnableCb
  * @tc.desc: Test WrapperAdvEnableCb
  * @tc.type: FUNC
@@ -1037,7 +1069,7 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperAdvEnableCb, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestWrapperScanStateChangeCb0
  * @tc.desc: Test WrapperScanStateChangeCb0
  * @tc.type: FUNC
@@ -1062,7 +1094,7 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperScanStateChangeCb0, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestWrapperLpDeviceInfoCb
  * @tc.desc: Test WrapperLpDeviceInfoCb
  * @tc.type: FUNC
@@ -1090,7 +1122,7 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperLpDeviceInfoCb, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
  * @tc.name: TestIsLpAvailable
  * @tc.desc: Test IsLpAvailable
  * @tc.type: FUNC
@@ -1109,13 +1141,13 @@ HWTEST_F(SoftbusBleGattTest, TestIsLpAvailable, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
- * @tc.name: TestSoftbusSetLpParam
+/* *
+ * @tc.name: TestSoftbusSetLpParam001
  * @tc.desc: Test SoftbusSetLpParam
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam001, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -1131,7 +1163,30 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/* *
+ * @tc.name: TestSoftbusSetLpParam002
+ * @tc.desc: Test SoftbusSetLpParam
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam002, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusLpBroadcastParam bcParam = {};
+    SoftBusLpScanParam scanParam = {};
+    scanParam.filterSize = 1;
+
+    ret = MockBluetooth::interface->SetAdvFilterParam(SOFTBUS_HEARTBEAT_TYPE, &bcParam, &scanParam);
+    EXPECT_EQ(ret, false);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
  * @tc.name: AdapterBleGattTest_RegisterScanListener
  * @tc.desc: test register scan listener
  * @tc.type: FUNC
@@ -1156,7 +1211,7 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
     }
 }
 
-/**
+/* *
  * @tc.name: AdapterBleGattTest_UnRegisterScanListener
  * @tc.desc: test unregister scan listener
  * @tc.type: FUNC
@@ -1173,7 +1228,7 @@ HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener, TestSize.Level3)
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(scannerId), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/* *
  * @tc.name: AdapterBleGattTest_ScanLifecycle
  * @tc.desc: test complete scan life cycle
  * @tc.type: FUNC
@@ -1205,7 +1260,7 @@ HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(scannerId), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/* *
  * @tc.name: AdapterBleGattTest_ScanResultCb
  * @tc.desc: test scan result callback
  * @tc.type: FUNC
@@ -1261,7 +1316,7 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
     ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
 }
 
-/**
+/* *
  * @tc.name: AdapterBleGattTest_RegisterBroadcaster
  * @tc.desc: test register adv callback
  * @tc.type: FUNC
@@ -1329,7 +1384,7 @@ testing::AssertionResult ScanResultCtx::Expect(int32_t id, const SoftBusBcScanRe
 
     if (this->scanResult.data.bcData.payloadLen == scanResultParam->data.bcData.payloadLen &&
         memcmp(this->scanResult.data.bcData.payload, scanResultParam->data.bcData.payload,
-            scanResultParam->data.bcData.payloadLen) == 0) {
+        scanResultParam->data.bcData.payloadLen) == 0) {
         result = testing::AssertionSuccess();
         goto ClEANUP;
     }
@@ -1339,4 +1394,207 @@ ClEANUP:
     return result;
 }
 
+/* *
+ * @tc.name: SoftbusSetAdvParamterTest001
+ * @tc.desc: Test SoftbusSetAdvParamter when param == NULL
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest001, TestSize.Level1)
+{
+    int32_t advId = 0;
+    int32_t ret = MockBluetooth::interface->SetBroadcastingParam(advId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/* *
+ * @tc.name: SoftbusSetAdvParamterTest002
+ * @tc.desc: Test SoftbusSetAdvParamter when SoftBusMutexLock return error
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest002, TestSize.Level1)
+{
+    int32_t advId = 0;
+    SoftbusBroadcastParam params = {};
+    int32_t ret = MockBluetooth::interface->SetBroadcastingParam(advId, &params);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/* *
+ * @tc.name: SoftbusSetAdvParamterTest003
+ * @tc.desc: Test SoftbusSetAdvParamter when CheckAdvChanInUsed return false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest003, TestSize.Level1)
+{
+    int32_t advId = GATT_ADV_MAX_NUM;
+    SoftbusBroadcastParam params = {};
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->SetBroadcastingParam(advId, &params);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
+ * @tc.name: SoftbusSetAdvParamterTest004
+ * @tc.desc: Test SoftbusSetAdvParamter when isAdvertising is false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest004, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advId = 0;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advId, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBroadcastParam params = {};
+
+    ret = MockBluetooth::interface->SetBroadcastingParam(advId, &params);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
+ * @tc.name: SoftbusEnableBroadcastingTest001
+ * @tc.desc: Test SoftbusEnableBroadcasting when SoftBusMutexLock return error
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcastingTest001, TestSize.Level1)
+{
+    int32_t advId = 0;
+    int32_t ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/* *
+ * @tc.name: SoftbusEnableBroadcasting002
+ * @tc.desc: Test SoftbusEnableBroadcasting when CheckAdvChanInUsed return false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcasting002, TestSize.Level1)
+{
+    int32_t advId = GATT_ADV_MAX_NUM;
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
+ * @tc.name: SoftbusEnableBroadcastingTest003
+ * @tc.desc: Test SoftbusEnableBroadcasting when isAdvertising is false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcastingTest003, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advId = 0;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advId, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
+ * @tc.name: SoftbusDisableBroadcastingTest001
+ * @tc.desc: Test SoftbusDisableBroadcasting when SoftBusMutexLock return error
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcastingTest001, TestSize.Level1)
+{
+    int32_t advId = 0;
+    int32_t ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/* *
+ * @tc.name: SoftbusDisableBroadcasting002
+ * @tc.desc: Test SoftbusDisableBroadcasting when CheckAdvChanInUsed return false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcasting002, TestSize.Level1)
+{
+    int32_t advId = GATT_ADV_MAX_NUM;
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
+ * @tc.name: SoftbusDisableBroadcastingTest003
+ * @tc.desc: Test SoftbusDisableBroadcasting when isAdvertising is false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcastingTest003, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advId = 0;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advId, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/* *
+ * @tc.name: SoftbusSetScanParamsTest001
+ * @tc.desc: Test SoftbusSetScanParams when param is nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetScanParamsTest001, TestSize.Level1)
+{
+    int32_t scannerId = 0;
+    SoftBusBcScanFilter scanFilter = {};
+    int32_t filterSize = 0;
+    SoftbusSetFilterCmd cmdId = {};
+    int32_t ret = MockBluetooth::interface->SetScanParams(scannerId, nullptr, &scanFilter, filterSize, cmdId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS
