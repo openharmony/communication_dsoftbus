@@ -55,6 +55,8 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
             return FLAG_P2P;
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return FLAG_ENHANCE_P2P;
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return FLAG_SESSION_KEY;
         default:
             return FLAG_WIFI;
     }
@@ -316,7 +318,7 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
             .errcode = errCode,
             .result = EVENT_STAGE_RESULT_FAILED
         };
-        
+
         if (ret != SOFTBUS_OK || !conn.serverSide) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         } else {
