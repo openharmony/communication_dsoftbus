@@ -79,6 +79,17 @@ int32_t SoftBusRemoveBtStateListener(int32_t listenerId)
     return ManagerMock::GetMock()->SoftBusRemoveBtStateListener(listenerId);
 }
 
+int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis)
+{
+    return ManagerMock::GetMock()->BleAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time)
+{
+    return ManagerMock::GetMock()->SoftBusCondWait(cond, mutex, time);
+}
+
 static int32_t MockRegisterBroadcaster(int32_t *bcId, const SoftbusBroadcastCallback *cb)
 {
     ManagerMock::broadcastCallback = cb;
