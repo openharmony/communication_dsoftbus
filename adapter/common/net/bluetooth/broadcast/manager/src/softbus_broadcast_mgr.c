@@ -1290,8 +1290,9 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
             srcFilter->manufactureDataMask, srcFilter->manufactureDataLength) == EOK,
             SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter manufactureDataMask failed");
     }
-    DISC_CHECK_AND_RETURN_RET_LOGE(srcFilter->filterIndex != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST,
-        "invalid filterIndex");
+    if (srcFilter->filterIndex == 0) {
+        DISC_LOGW(DISC_BROADCAST, "invaild filterIndex");
+    }
     dstFilter->filterIndex = srcFilter->filterIndex;
     dstFilter->advIndReport = srcFilter->advIndReport;
     return SOFTBUS_OK;
@@ -2602,7 +2603,8 @@ bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcPar
         ReleaseSoftBusBcScanFilter(scanDstParam.filter, filterNum);
         return false;
     }
-
+    DISC_LOGI(DISC_BROADCAST, "set adv dev param, bcId=%{public}d, listenerId=%{public}d",
+        bcParam->bcHandle, scanParam->listenerId);
     ret = g_interface[g_interfaceId]->SetAdvFilterParam(type, &bcDstParam, &scanDstParam);
     ReleaseSoftbusBroadcastData(&bcDstParam.advData);
     ReleaseSoftBusBcScanFilter(scanDstParam.filter, filterNum);
