@@ -1122,6 +1122,43 @@ static int32_t CollectWaitEventFdSet(SoftBusFdSet *readSet, SoftBusFdSet *writeS
     return maxFd;
 }
 
+static void RemoveBadFd(void)
+{
+    for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
+        SoftbusListenerNode *node = GetListenerNode(module);
+        if (node == NULL) {
+            continue;
+        }
+        int32_t ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "lock failed, module=%{public}d, ret=%{public}d", module, ret);
+            ReturnListenerNode(&node);
+            continue;
+        }
+        if (node->info.status != LISTENER_RUNNING) {
+            SoftBusMutexUnlock(&node->lock);
+            ReturnListenerNode(&node);
+            continue;
+        }
+        if (node->info.listenFd > 0 && SoftBusSocketGetError(node->info.listenFd) == SOFTBUS_CONN_BAD_FD) {
+            CONN_LOGE(CONN_COMMON, "remove bad listen fd, fd=%{public}d, module=%{public}d",
+                node->info.listenFd, module);
+            node->info.listenFd = -1;
+        }
+        FdNode *it = NULL;
+        FdNode *next = NULL;
+        LIST_FOR_EACH_ENTRY_SAFE(it, next, &node->info.waitEventFds, FdNode, node) {
+            if (SoftBusSocketGetError(it->fd) == SOFTBUS_CONN_BAD_FD) {
+                CONN_LOGE(CONN_COMMON, "remove bad fd, fd=%{public}d, module=%{public}d", it->fd, module);
+                ListDelete(&it->node);
+                SoftBusFree(it);
+            }
+        }
+        SoftBusMutexUnlock(&node->lock);
+        ReturnListenerNode(&node);
+    }
+}
+
 static void *SelectTask(void *arg)
 {
     static int32_t wakeupTraceIdGenerator = 0;
@@ -1178,6 +1215,9 @@ static void *SelectTask(void *arg)
             CONN_LOGE(CONN_COMMON, "unexpect wakeup, retry after some times. "
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
                 SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
+            if (nEvents == SOFTBUS_ADAPTER_SOCKET_EBADF) {
+                RemoveBadFd();
+            }
             SoftBusSleepMs(SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
