@@ -1583,7 +1583,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcastingTest003, TestSize.Level1)
 
 /**
  * @tc.name: SoftbusSetScanParamsTest001
- * @tc.desc: Test SoftbusSetScanParams when param is nullptr 
+ * @tc.desc: Test SoftbusSetScanParams when param is nullptr
  * @tc.type: FUNC
  * @tc.require: NONE
  */
