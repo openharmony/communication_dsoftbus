@@ -80,6 +80,7 @@ typedef struct {
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);
 int SoftBusGetBlePower(int8_t *power);
+int32_t SoftBusGetAdvPower(int8_t *power);
 
 int32_t SoftBusBleRangeAsync(const SoftBusRangeParam *param);
 int32_t SoftBusRegRangeCb(SoftBusRangeModule module, const SoftBusRangeCallback *callback);
