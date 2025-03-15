@@ -2179,4 +2179,67 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_LOCAL_UUID_AND_IRK_TEST_001, TestSize
     EXPECT_TRUE(LnnUpdateLocalUuidAndIrk() != SOFTBUS_OK);
     EXPECT_TRUE(LnnUpdateLocalUuidAndIrk() == SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: NotifyStateForSession_Test_001
+ * @tc.desc: NotifyStateForSession test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, NotifyStateForSession_Test_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(NotifyStateForSession(nullptr));
+    auto ret = PostJoinRequestToConnFsm(nullptr, nullptr, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(TryElectAsMasterState(nullptr, false));
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(nullptr));
+    EXPECT_NO_FATAL_FAILURE(TryElectAsMasterState("networkId", false));
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<1>(*NODE_UDID), Return(SOFTBUS_OK)))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(NODE_UDID));
+    EXPECT_NO_FATAL_FAILURE(TryElectAsMasterState("networkId", false));
+}
+
+/*
+ * @tc.name: AccountStateChangeHandler_Test_001
+ * @tc.desc: AccountStateChangeHandler test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, AccountStateChangeHandler_Test_001, TestSize.Level1)
+{
+    LnnMonitorHbStateChangedEvent info;
+    info.status = SOFTBUS_ACCOUNT_LOG_IN;
+    EXPECT_NO_FATAL_FAILURE(AccountStateChangeHandler(&info.basic));
+    info.status = SOFTBUS_ACCOUNT_LOG_OUT;
+    EXPECT_NO_FATAL_FAILURE(AccountStateChangeHandler(&info.basic));
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
+            .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+            .WillRepeatedly(Return(SOFTBUS_OK));
+    auto ret = LnnInitNetBuilderDelay();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: InitSyncInfoReg_Test_001
+ * @tc.desc: InitSyncInfoReg test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, InitSyncInfoReg_Test_001, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnRegSyncInfoHandler(_, _))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    auto ret = InitSyncInfoReg();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS
