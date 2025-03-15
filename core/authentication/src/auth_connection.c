@@ -540,13 +540,18 @@ static bool IsSessionAuth(int32_t module)
     return (module == MODULE_SESSION_AUTH);
 }
 
+static bool IsSessionKeyAuth(int32_t module)
+{
+    return (module == MODULE_SESSION_KEY_AUTH);
+}
+
 static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
 
     if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module) &&
-        !IsSessionAuth(head->module)) {
+        !IsSessionAuth(head->module) && !IsSessionKeyAuth(head->module)) {
         return;
     }
     bool fromServer = false;
@@ -556,6 +561,12 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
         connInfo.type = AUTH_LINK_TYPE_SESSION;
         connInfo.info.sessionInfo.connId = (uint32_t)fd;
         AUTH_LOGI(AUTH_CONN, "set connInfo for AUTH_LINK_TYPE_SESSION, fd=%{public}d", fd);
+    } else if (IsSessionKeyAuth(head->module)) {
+        if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "session key get connInfo fail, fd=%{public}d", fd);
+            return;
+        }
+        connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
     } else {
         if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
@@ -899,6 +910,31 @@ static int32_t PostBytesForSession(int32_t fd, const AuthDataHead *head, const u
     return ret;
 }
 
+static int32_t PostBytesForSessionKey(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+{
+    uint32_t size = GetAuthDataSize(head->len);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    if (buf == NULL) {
+        AUTH_LOGE(AUTH_CONN, "calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    AuthDataHead tmpHead = *head;
+    tmpHead.module = MODULE_SESSION_KEY_AUTH;
+    int32_t ret = PackAuthData(&tmpHead, data, buf, size);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "PackAuthData fail");
+        SoftBusFree(buf);
+        return ret;
+    }
+    tmpHead.len = size;
+    ret = SocketPostBytes(fd, &tmpHead, buf);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SocketPostBytes fail");
+    }
+    SoftBusFree(buf);
+    return ret;
+}
+
 int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
@@ -910,7 +946,6 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
         GetAuthSideStr(toServer));
     switch (GetConnType(connId)) {
         case AUTH_LINK_TYPE_WIFI:
-        case AUTH_LINK_TYPE_SESSION_KEY:
             return SocketPostBytes(GetFd(connId), head, data);
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
@@ -919,6 +954,8 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
             return PostCommData(GetConnId(connId), toServer, head, data);
         case AUTH_LINK_TYPE_SESSION:
             return PostBytesForSession(GetFd(connId), head, data);
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return PostBytesForSessionKey(GetFd(connId), head, data);
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
             break;
