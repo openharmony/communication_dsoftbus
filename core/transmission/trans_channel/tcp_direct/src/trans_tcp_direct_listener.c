@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,7 @@ static void TransTdcCheckIsApp(AppInfo *appInfo)
         appInfo->myData.accountId = INVALID_ACCOUNT_ID;
         TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
     }
-    appInfo->myData.userId = TransGetForegroundUserId();
+    appInfo->myData.userId = TransGetForegroundLocalId(appInfo->myData.sessionName);
 }
 
 static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)

@@ -648,7 +648,7 @@ static int32_t GetSinkRelation(const AppInfo *appInfo, CollabInfo *sinkInfo)
         sinkInfo->accountId = INVALID_ACCOUNT_ID;
     }
     sinkInfo->pid = appInfo->myData.pid;
-    sinkInfo->userId = TransGetForegroundUserId();
+    sinkInfo->userId = TransGetForegroundLocalId(appInfo->myData.sessionName);
     if (sinkInfo->userId == INVALID_USER_ID) {
         TRANS_LOGE(TRANS_CTRL, "get userId failed.");
         return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;

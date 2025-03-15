@@ -439,7 +439,7 @@ static void TransProxyCheckIsApp(AppInfo *appInfo, cJSON *root)
         appInfo->myData.accountId = INVALID_ACCOUNT_ID;
         TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
-    appInfo->myData.userId = TransGetForegroundUserId();
+    appInfo->myData.userId = TransGetForegroundLocalId(appInfo->myData.sessionName);
     (void)AddNumber64ToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
     (void)AddNumberToJsonObject(root, JSON_KEY_USER_ID, appInfo->myData.userId);
 }
