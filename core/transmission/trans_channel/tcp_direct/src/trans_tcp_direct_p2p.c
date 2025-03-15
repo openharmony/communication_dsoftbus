@@ -955,8 +955,8 @@ static void OnAuthDataRecv(AuthHandle authHandle, const AuthTransData *data)
     }
     TRANS_LOGI(TRANS_CTRL, "module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u",
         data->module, data->seq, data->len);
-    if (data->module != MODULE_P2P_LISTEN) {
-        TRANS_LOGE(TRANS_CTRL, "module is not MODULE_P2P_LISTEN");
+    if (data->module != MODULE_P2P_LISTEN && data->module != MODULE_SESSION_KEY_AUTH) {
+        TRANS_LOGE(TRANS_CTRL, "module is not MODULE_P2P_LISTEN and MODULE_SESSION_KEY_AUTH");
         return;
     }
 
@@ -1217,6 +1217,9 @@ int32_t P2pDirectChannelInit(void)
 
     ret = RegAuthTransListener(MODULE_P2P_LISTEN, &p2pTransCb);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "P2pDirectChannelInit set cb fail");
+
+    ret = RegAuthTransListener(MODULE_SESSION_KEY_AUTH, &p2pTransCb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set sessionkey cb fail");
 
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnP2pVerifyMsgReceived,

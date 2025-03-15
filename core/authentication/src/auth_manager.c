@@ -42,6 +42,7 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
@@ -1538,29 +1539,6 @@ static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, boo
     }
 }
 
-static void OnDataReceivedCheckType(uint64_t *connId, const AuthConnInfo *connInfo)
-{
-    if (connId == NULL || connInfo == NULL) {
-        AUTH_LOGE(AUTH_CONN, "invalid param");
-        return;
-    }
-    if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
-        SoftBusSockAddrIn addr = { 0 };
-        int32_t socketFd = GetFd(*connId);
-        int32_t rc = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&addr);
-        if (rc == SOFTBUS_OK) {
-            if (addr.sinFamily == SOFTBUS_AF_INET6) {
-                AUTH_LOGI(AUTH_FSM, "ipv6 socket");
-                AuthConnInfo *connInfoTmp = (AuthConnInfo *)connInfo;
-                connInfoTmp->type = AUTH_LINK_TYPE_SESSION_KEY;
-                *connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, socketFd);
-            }
-        } else {
-            AUTH_LOGI(AUTH_CONN, "GetPerrName fd=%{public}d, rc=%{public}d", socketFd, rc);
-        }
-    }
-}
-
 static void OnDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1570,7 +1548,6 @@ static void OnDataReceived(
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)head->seq);
     CorrectFromServer(connId, connInfo, &fromServer);
-    OnDataReceivedCheckType(&connId, connInfo);
     AUTH_LOGI(AUTH_CONN,
         "auth recv data. type=0x%{public}x, module=%{public}d, seq=%{public}" PRId64 ", "
         "flag=%{public}d, len=%{public}u, " CONN_INFO ", fromServer=%{public}s",
@@ -2240,6 +2217,7 @@ void DelAuthManagerByConnectionId(uint32_t connectionId)
     int64_t authIds[2]; /* 2: client and server may use same connection. */
     authIds[num++] = GetAuthIdByConnId(connId, false);
     authIds[num++] = GetAuthIdByConnId(connId, true);
+    (void)DelTrigger(AUTH, connectionId, RW_TRIGGER);
     for (uint32_t i = 0; i < num; i++) {
         if (authIds[i] == AUTH_INVALID_ID) {
             continue;

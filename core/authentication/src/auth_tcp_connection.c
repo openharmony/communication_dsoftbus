@@ -168,6 +168,20 @@ static void SessionNotifyDataReceived(ListenerModule module, int32_t fd,
     }
 }
 
+static void SessionKeyNotifyDataReceived(ListenerModule module, int32_t fd,
+    uint32_t len, const uint8_t *data)
+{
+    AuthDataHead head = {0};
+    const uint8_t *body = UnpackAuthData(data, len, &head);
+    if (body == NULL) {
+        AUTH_LOGE(AUTH_CONN, "unpack auth data fail.");
+        return;
+    }
+    if (g_callback.onDataReceived != NULL) {
+        g_callback.onDataReceived(module, fd, &head, body);
+    }
+}
+
 static void NotifyDataReceived(ListenerModule module, int32_t fd,
     const SocketPktHead *pktHead, const uint8_t *data)
 {
@@ -181,6 +195,10 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
     }
     if (pktHead->module == MODULE_SESSION_AUTH) {
         SessionNotifyDataReceived(module, fd, pktHead->len, data);
+        return;
+    }
+    if (pktHead->module == MODULE_SESSION_KEY_AUTH) {
+        SessionKeyNotifyDataReceived(module, fd, pktHead->len, data);
         return;
     }
     AuthDataHead head = {
