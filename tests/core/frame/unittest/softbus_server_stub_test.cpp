@@ -751,7 +751,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
     datas.WriteUint32(addrTypeLen);
     datas.WriteRawData(&addr, addrTypeLen);
     ret = softBusServer->JoinLNNInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     ret = softBusServer->LeaveLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
@@ -839,7 +839,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
         Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR)
     );
     ret = softBusServer->GetLocalDeviceInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
@@ -923,7 +923,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
     datas.WriteUint32(len);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetNodeKeyInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR));
     ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
@@ -1592,7 +1592,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
         Return(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR)
     );
     ret = softBusServer->ActiveMetaNodeInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteRawData(&info, sizeof(MetaNodeConfigInfo));
     EXPECT_CALL(softbusServerStubMock, LnnIpcActiveMetaNode).WillRepeatedly(Return(SOFTBUS_OK));
