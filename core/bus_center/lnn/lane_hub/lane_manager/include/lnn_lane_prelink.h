@@ -35,7 +35,7 @@ typedef struct {
     uint8_t chbaMac[RAW_MAC_LEN];
     uint8_t btMac[RAW_MAC_LEN];
     int32_t linkStatus;
-    char shortUdidHash[UDID_BUF_LEN];
+    char shortUdidHash[AUTH_UDID_HASH_LEN];
     char reserved[RESERVED_LEN];
 } PreLinkPara;
 
@@ -44,7 +44,7 @@ typedef struct {
     uint32_t actionId;
     uint32_t laneReqId;
     uint8_t actionMac[RAW_MAC_LEN];
-    char shortUdidHash[UDID_BUF_LEN];
+    char shortUdidHash[AUTH_UDID_HASH_LEN];
 } ActionBleConNodeInfo;
 
 int32_t GetConcurrencyPeerUdidByActionId(uint32_t actionId, char *peerUdid);
