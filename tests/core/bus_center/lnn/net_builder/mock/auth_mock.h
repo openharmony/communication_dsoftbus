@@ -72,6 +72,28 @@ public:
         AuthHandle *authHandle) = 0;
     virtual int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta) = 0;
 
+    virtual uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen) = 0;
+    virtual uint32_t AuthGetDecryptSize(uint32_t inLen) = 0;
+    virtual int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+        uint32_t *outLen) = 0;
+    virtual int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+        uint32_t *outLen) = 0;
+    virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
+
+    virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
+    virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
+    virtual int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth) = 0;
+    virtual uint32_t AuthGetGroupType(const char *udid, const char *uuid) = 0;
+    virtual bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit) = 0;
+    virtual void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle) = 0;
+
+    virtual int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConnInfo *connInfo) = 0;
+    virtual int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle) = 0;
+    virtual int32_t AuthInit(void) = 0;
+    virtual void AuthDeinit(void) = 0;
+    virtual int32_t AuthRestoreAuthManager(const char *udidHash,
+        const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId) = 0;
+    virtual int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist) = 0;
 };
 
 class AuthInterfaceMock : public AuthInterface {
@@ -119,7 +141,27 @@ public:
     MOCK_METHOD4(AuthGetLatestAuthSeqListByType, int32_t(const char *, int64_t *, uint64_t *, DiscoveryType));
     MOCK_METHOD4(AuthGetLatestIdByUuid, void(const char *, AuthLinkType, bool, AuthHandle *));
     MOCK_METHOD4(AuthGetAuthHandleByIndex, int32_t(const AuthConnInfo *, bool, int32_t, AuthHandle *));
-    MOCK_METHOD4(AuthGetIdByUuid, int64_t(const char *, bool, bool));
+    MOCK_METHOD3(AuthGetIdByUuid, int64_t(const char *, bool, bool));
+
+    MOCK_METHOD2(AuthGetEncryptSize, uint32_t(int64_t, uint32_t));
+    MOCK_METHOD1(AuthGetDecryptSize, uint32_t(uint32_t));
+    MOCK_METHOD5(AuthEncrypt, int32_t(AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
+    MOCK_METHOD5(AuthDecrypt, int32_t(AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
+    MOCK_METHOD2(AuthSetP2pMac, int32_t(int64_t, const char *));
+
+    MOCK_METHOD2(AuthGetConnInfo, int32_t(AuthHandle, AuthConnInfo *));
+    MOCK_METHOD2(AuthGetServerSide, int32_t(int64_t, bool *));
+    MOCK_METHOD2(AuthGetMetaType, int32_t(int64_t, bool *));
+    MOCK_METHOD2(AuthGetGroupType, uint32_t(const char *, const char *));
+    MOCK_METHOD2(IsSupportFeatureByCapaBit, bool(uint32_t, AuthCapability));
+    MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
+
+    MOCK_METHOD2(AuthCheckSessionKeyValidByConnInfo, int32_t(const char *, const AuthConnInfo *));
+    MOCK_METHOD1(AuthCheckSessionKeyValidByAuthHandle, bool(const AuthHandle *));
+    MOCK_METHOD0(AuthInit, int32_t(void));
+    MOCK_METHOD0(AuthDeinit, void(void));
+    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *, int64_t *));
+    MOCK_METHOD2(AuthCheckMetaExist, int32_t(const AuthConnInfo *, bool *));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H
