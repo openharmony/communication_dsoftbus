@@ -562,6 +562,10 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
         connInfo.info.sessionInfo.connId = (uint32_t)fd;
         AUTH_LOGI(AUTH_CONN, "set connInfo for AUTH_LINK_TYPE_SESSION, fd=%{public}d", fd);
     } else if (IsSessionKeyAuth(head->module)) {
+        if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "session key get connInfo fail, fd=%{public}d", fd);
+            return;
+        }
         connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
     } else {
         if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
