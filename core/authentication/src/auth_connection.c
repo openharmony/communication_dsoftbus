@@ -1024,7 +1024,6 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
         }
         case AUTH_LINK_TYPE_RAW_ENHANCED_P2P: {
             info.socketOption.moduleId = AUTH_RAW_P2P_SERVER;
-            info.socketOption.port = 0;
             return StartSocketListening(AUTH_RAW_P2P_SERVER, &info);
         }
         default:
