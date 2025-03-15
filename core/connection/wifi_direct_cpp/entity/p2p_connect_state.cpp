@@ -197,7 +197,6 @@ void P2pConnectState::OnTimeout()
         P2pEntity::GetInstance().Unlock();
         return;
     }
-
     SoftBusErrNo resultCode = SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT;
     if (DetectDhcpTimeout()) {
         resultCode = SOFTBUS_CONN_CONNECT_DHCP_TIMEOUT;
