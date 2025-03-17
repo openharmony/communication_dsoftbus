@@ -15,6 +15,8 @@
 
 #include "softbusbroadcast_fuzzer.h"
 #include "softbus_broadcast_manager.h"
+#include "softbus_ble_utils.h"
+#include "softbus_ble_gatt.h"
 
 #include <cstddef>
 #include <securec.h>
@@ -32,6 +34,7 @@
 #define ADV_DATA_MAX_LEN 24
 #define RESP_DATA_MAX_LEN 26
 #define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
+#define FILTER_SIZE 1
 
 namespace OHOS {
 
@@ -52,6 +55,37 @@ template <class T> T GetData()
     }
     g_baseFuzzPos += objectSize;
     return object;
+}
+
+template <class T> T* GetDataArray()
+{
+    size_t outSize = sizeof(T);
+    size_t outLength = g_baseFuzzSize / outSize;
+    T* array = static_cast<T*>(malloc(outLength * outSize));
+    if (BASE_FUZZ_DATA == nullptr || array == nullptr) {
+        return nullptr;
+    }
+    errno_t ret = memcpy_s(array, outLength * outSize, BASE_FUZZ_DATA, outLength * outSize);
+    if (ret != EOK) {
+        return nullptr;
+    }
+    return array;
+}
+
+template <class T> void GetDataArray(T *dst, size_t dstLength)
+{
+    size_t dstLen = dstLength * sizeof(T);
+    size_t copyLen = (g_baseFuzzSize < dstLen) ? g_baseFuzzSize : dstLen;
+    errno_t ret = memcpy_s(dst, dstLen, BASE_FUZZ_DATA, copyLen);
+    if (ret != EOK) {
+        return;
+    }
+    if (copyLen < dstLen) {
+        ret = memset_s(static_cast<uint8_t*>(dst) + copyLen, dstLen, 0, dstLen - copyLen);
+        if (ret != EOK) {
+            return;
+        }
+    }
 }
 
 static int32_t BuildBroadcastParam(const uint8_t* data, size_t size, BroadcastParam *param)
@@ -134,6 +168,59 @@ static BcScanParams BuildScanParam()
     scanParam.scanPhy = GetData<uint8_t>() % SOFTBUS_BC_SCAN_PHY_CODED;
     scanParam.scanFilterPolicy = GetData<uint8_t>() % SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST_AND_RPA;
     return scanParam;
+}
+
+static BcScanFilter BuildScanFilter()
+{
+    g_baseFuzzPos = 0;
+    BcScanFilter scanFilter;
+    scanFilter.advIndReport = GetData<bool>();
+    scanFilter.serviceUuid = GetData<uint16_t>();
+    scanFilter.serviceDataLength = GetData<uint32_t>();
+    scanFilter.manufactureId = GetData<uint16_t>();
+    scanFilter.manufactureDataLength = GetData<uint32_t>();
+    scanFilter.filterIndex = GetData<uint8_t>();
+    scanFilter.address = GetDataArray<int8_t>();
+    scanFilter.deviceName = GetDataArray<int8_t>();
+    scanFilter.serviceData = GetDataArray<uint8_t>();
+    scanFilter.serviceDataMask = GetDataArray<uint8_t>();
+    scanFilter.manufactureData = GetDataArray<uint8_t>();
+    scanFilter.manufactureDataMask = GetDataArray<uint8_t>();
+    return scanFilter;
+}
+
+static BleScanNativeFilter BuildBleScanNativeFilter()
+{
+    g_baseFuzzPos = 0;
+    BleScanNativeFilter nativeFilter;
+    nativeFilter.serviceUuidLength = GetData<unsigned int>();
+    nativeFilter.serviceDataLength = GetData<unsigned int>();
+    nativeFilter.manufactureDataLength = GetData<unsigned int>();
+    nativeFilter.manufactureId = GetData<unsigned short>();
+    nativeFilter.advIndReport = GetData<bool>();
+    nativeFilter.filterIndex = GetData<uint8_t>();
+    nativeFilter.address = GetDataArray<char>();
+    nativeFilter.deviceName = GetDataArray<char>();
+    nativeFilter.serviceUuid = GetDataArray<unsigned char>();
+    nativeFilter.serviceUuidMask = GetDataArray<unsigned char>();
+    nativeFilter.serviceData = GetDataArray<unsigned char>();
+    nativeFilter.serviceDataMask = GetDataArray<unsigned char>();
+    nativeFilter.manufactureData = GetDataArray<unsigned char>();
+    nativeFilter.manufactureDataMask = GetDataArray<unsigned char>();
+    return nativeFilter;
+}
+
+static SoftbusBroadcastPayload BuildSoftbusBroadcastPayload()
+{
+    g_baseFuzzPos = 0;
+    SoftbusBroadcastPayload payload;
+    size_t enumRange = BROADCAST_DATA_TYPE_BUTT - BROADCAST_DATA_TYPE_SERVICE + 1;
+    uint8_t adjustedValue = GetData<uint8_t>() % enumRange;
+    payload.type = (SoftbusBcDataType)adjustedValue;
+    payload.id = GetData<uint16_t>();
+    payload.payloadLen = g_baseFuzzSize;
+    payload.payload = GetDataArray<uint8_t>();
+    return payload;
 }
 
 static int32_t BuildLpBroadcastParam(const uint8_t* data, size_t size, LpBroadcastParam *lpBcParam)
@@ -304,6 +391,188 @@ void BroadcastSetLpAdvParamFuzzTest()
     BroadcastSetLpAdvParam(duration, maxExtAdvEvents, window, interval, lpAdvBCHandle);
 }
 
+void SetBroadcastingParamFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
+{
+    BroadcastParam param;
+    BuildBroadcastParam(data, size, &param);
+
+    SetBroadcastingParam(bcId, &param);
+}
+
+void SetScanFilterFuzzTest(int32_t listenerId)
+{
+    g_baseFuzzPos = 0;
+    uint8_t filterNum = GetData<uint8_t>();
+    BcScanFilter scanFilter = BuildScanFilter();
+
+    SetScanFilter(listenerId, &scanFilter, filterNum);
+}
+
+void GetScanFilterFuzzTest(int32_t listenerId)
+{
+    g_baseFuzzPos = 0;
+    uint8_t filterNum = GetData<uint8_t>();
+    BcScanFilter *scanFilterRef = nullptr;
+
+    GetScanFilter(listenerId, &scanFilterRef, &filterNum);
+}
+
+void QueryBroadcastStatusFuzzTest(int32_t bcId)
+{
+    int32_t *status = GetDataArray<int32_t>();
+
+    QueryBroadcastStatus(bcId, status);
+}
+
+void BtStatusToSoftBusFuzzTest()
+{
+    size_t enumRange = OHOS_BT_STATUS_DUPLICATED_ADDR - OHOS_BT_STATUS_SUCCESS + 1;
+    uint8_t adjustedValue = GetData<uint8_t>() % enumRange;
+
+    BtStatusToSoftBus((BtStatus)adjustedValue);
+}
+
+void SoftbusAdvParamToBtFuzzTest()
+{
+    g_baseFuzzPos = 0;
+    SoftbusBroadcastParam param;
+    param.advType = GetData<uint8_t>();
+    param.advFilterPolicy = GetData<uint8_t>();
+    param.ownAddrType = GetData<uint8_t>();
+    param.peerAddrType = GetData<uint8_t>();
+    param.txPower = GetData<int8_t>();
+    param.isSupportRpa = GetData<bool>();
+    param.peerAddr = GetData<SoftbusMacAddr>();
+    param.localAddr = GetData<SoftbusMacAddr>();
+    param.minInterval = GetData<int32_t>();
+    param.maxInterval = GetData<int32_t>();
+    param.channelMap = GetData<int32_t>();
+    param.duration = GetData<int32_t>();
+    GetDataArray<uint8_t>(param.ownIrk, SOFTBUS_IRK_LEN);
+    GetDataArray<uint8_t>(param.ownUdidHash, SOFTBUS_UDID_HASH_LEN);
+
+    BleAdvParams advParams;
+    param.minInterval = GetData<int>();
+    param.maxInterval = GetData<int>();
+    param.advType = GetData<BleAdvType>();
+    param.ownAddrType = GetData<unsigned char>();
+    param.peerAddrType = GetData<unsigned char>();
+    param.channelMap = GetData<int>();
+    param.advFilterPolicy = GetData<BleAdvFilter>();
+    param.txPower = GetData<int>();
+    param.duration = GetData<int>();
+    GetDataArray<unsigned char>(param.peerAddr.addr, OHOS_BD_ADDR_LEN);
+
+    SoftbusAdvParamToBt(&param, &advParams);
+}
+
+void BtScanResultToSoftbusFuzzTest()
+{
+    BtScanResultData src;
+    src.eventType = GetData<unsigned char>();
+    src.dataStatus = GetData<unsigned char>();
+    src.addrType = GetData<unsigned char>();
+    src.addr = GetData<BdAddr>();
+    src.primaryPhy = GetData<unsigned char>();
+    src.secondaryPhy = GetData<unsigned char>();
+    src.advSid = GetData<unsigned char>();
+    src.txPower = GetData<char>();
+    src.rssi = GetData<char>();
+    src.periodicAdvInterval = GetData<unsigned short>();
+    src.directAddrType = GetData<unsigned char>();
+    src.directAddr = GetData<BdAddr>();
+    src.advLen = GetData<unsigned char>();
+    src.advData = GetDataArray<unsigned char>();
+    SoftBusBcScanResult dst;
+    dst.eventType = GetData<uint8_t>();
+    dst.dataStatus = GetData<uint8_t>();
+    dst.primaryPhy = GetData<uint8_t>();
+    dst.secondaryPhy = GetData<uint8_t>();
+    dst.advSid = GetData<uint8_t>();
+    dst.txPower = GetData<int8_t>();
+    dst.rssi = GetData<int8_t>();
+    dst.addrType = GetData<uint8_t>();
+    dst.addr = GetData<SoftbusMacAddr>();
+    dst.data.isSupportFlag = GetData<bool>();
+    dst.data.flag = GetData<uint8_t>();
+    GetDataArray<uint8_t>(dst.localName, SOFTBUS_LOCAL_NAME_LEN_MAX);
+    dst.deviceName = GetDataArray<int8_t>();
+    dst.data.bcData = BuildSoftbusBroadcastPayload();
+    dst.data.rspData = BuildSoftbusBroadcastPayload();
+
+    BtScanResultToSoftbus(&src, &dst);
+}
+
+void SoftbusSetManufactureFilterFuzzTest()
+{
+    BleScanNativeFilter nativeFilter = BuildBleScanNativeFilter();
+
+    SoftbusSetManufactureFilter(&nativeFilter, FILTER_SIZE);
+}
+
+void FreeBtFilterFuzzTest()
+{
+    BleScanNativeFilter nativeFilter = BuildBleScanNativeFilter();
+
+    FreeBtFilter(&nativeFilter, FILTER_SIZE);
+}
+
+void GetBtScanModeFuzzTest()
+{
+    uint16_t scanInterval = GetData<uint16_t>();
+    uint16_t scanWindow = GetData<uint16_t>();
+
+    GetBtScanMode(scanInterval, scanWindow);
+}
+
+void AssembleAdvDataFuzzTest()
+{
+    uint16_t dataLen = GetData<uint16_t>();
+    SoftbusBroadcastData data;
+    data.flag = GetData<uint8_t>();
+    data.bcData = BuildSoftbusBroadcastPayload();
+    data.rspData = BuildSoftbusBroadcastPayload();
+
+    AssembleAdvData(&data, &dataLen);
+}
+
+void AssembleRspDataFuzzTest()
+{
+    SoftbusBroadcastPayload payload = BuildSoftbusBroadcastPayload();
+    uint16_t dataLen = GetData<uint16_t>();
+    
+    AssembleRspData(&payload, &dataLen);
+}
+
+void ParseScanResultFuzzTest()
+{
+    SoftBusBcScanResult dst;
+    dst.eventType = GetData<uint8_t>();
+    dst.dataStatus = GetData<uint8_t>();
+    dst.primaryPhy = GetData<uint8_t>();
+    dst.secondaryPhy = GetData<uint8_t>();
+    dst.advSid = GetData<uint8_t>();
+    dst.txPower = GetData<int8_t>();
+    dst.rssi = GetData<int8_t>();
+    dst.addrType = GetData<uint8_t>();
+    dst.addr = GetData<SoftbusMacAddr>();
+    dst.data.isSupportFlag = GetData<bool>();
+    dst.data.flag = GetData<uint8_t>();
+    GetDataArray<uint8_t>(dst.localName, SOFTBUS_LOCAL_NAME_LEN_MAX);
+    dst.deviceName = GetDataArray<int8_t>();
+    dst.data.bcData = BuildSoftbusBroadcastPayload();
+    dst.data.rspData = BuildSoftbusBroadcastPayload();
+    uint8_t *data = GetDataArray<uint8_t>();
+
+    ParseScanResult(data, g_baseFuzzSize, &dst);
+}
+
+void DumpSoftbusAdapterDataFuzzTest()
+{
+    char *description = GetDataArray<char>();
+    uint8_t *data = GetDataArray<uint8_t>();
+    DumpSoftbusAdapterData(description, data, g_baseFuzzSize);
+}
 } // OHOS namespace
 
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -331,6 +600,17 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::BroadcastGetBroadcastHandleFuzzTest(bcId);
     OHOS::BroadcastSetScanReportChannelToLpDeviceFuzzTest(listenerId);
     OHOS::BroadcastSetLpAdvParamFuzzTest();
+    OHOS::SetBroadcastingParamFuzzTest(bcId, data, size);
+    OHOS::GetScanFilterFuzzTest(listenerId);
+    OHOS::QueryBroadcastStatusFuzzTest(bcId);
+    OHOS::BtStatusToSoftBusFuzzTest();
+    OHOS::SoftbusAdvParamToBtFuzzTest();
+    OHOS::BtScanResultToSoftbusFuzzTest();
+    OHOS::GetBtScanModeFuzzTest();
+    OHOS::AssembleAdvDataFuzzTest();
+    OHOS::AssembleRspDataFuzzTest();
+    OHOS::ParseScanResultFuzzTest();
+    OHOS::DumpSoftbusAdapterDataFuzzTest();
 
     UnRegisterScanListener(listenerId);
     UnRegisterBroadcaster(bcId);
