@@ -24,6 +24,9 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
+constexpr uint64_t TEST_TIME = 1234567;
+constexpr char PEER_UDID[] = "111122223333abcdef";
+
 class LNNLaneLinkLedgerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -63,5 +66,90 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_ADD_LINK_BUILD_INFO_TEST_001, TestSize.Level
 {
     int32_t ret = LnnAddLinkLedgerInfo(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_ADD_LINK_BUILD_INFO_TEST_002
+* @tc.desc: test lane add link build info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkLedgerTest, LNN_ADD_LINK_BUILD_INFO_TEST_002, TestSize.Level1)
+{
+    LinkLedgerInfo info = {
+        .lastTryBuildTime = TEST_TIME,
+    };
+    int32_t ret = LnnAddLinkLedgerInfo(PEER_UDID, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(LnnDeleteLinkLedgerInfo(PEER_UDID));
+}
+
+/*
+* @tc.name: LNN_GET_LINK_BUILD_INFO_TEST_001
+* @tc.desc: test lane get link build info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkLedgerTest, LNN_GET_LINK_BUILD_INFO_TEST_001, TestSize.Level1)
+{
+    int32_t ret = LnnGetLinkLedgerInfo(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLinkLedgerInfo(PEER_UDID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_GET_LINK_BUILD_INFO_TEST_002
+* @tc.desc: test lane get link build info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkLedgerTest, LNN_GET_LINK_BUILD_INFO_TEST_002, TestSize.Level1)
+{
+    LinkLedgerInfo queryInfo;
+    (void)memset_s(&queryInfo, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
+    int32_t ret = LnnGetLinkLedgerInfo(PEER_UDID, &queryInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/*
+* @tc.name: LNN_GET_LINK_BUILD_INFO_TEST_003
+* @tc.desc: test lane get link build info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkLedgerTest, LNN_GET_LINK_BUILD_INFO_TEST_003, TestSize.Level1)
+{
+    LinkLedgerInfo info = {
+        .lastTryBuildTime = TEST_TIME,
+    };
+    int32_t ret = LnnAddLinkLedgerInfo(PEER_UDID, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    LinkLedgerInfo queryInfo;
+    (void)memset_s(&queryInfo, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
+    ret = LnnGetLinkLedgerInfo(PEER_UDID, &queryInfo);
+    EXPECT_EQ(info.lastTryBuildTime, queryInfo.lastTryBuildTime);
+    EXPECT_NO_FATAL_FAILURE(LnnDeleteLinkLedgerInfo(PEER_UDID));
+}
+
+/*
+* @tc.name: LNN_GET_LINK_BUILD_INFO_TEST_004
+* @tc.desc: test lane get link build info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkLedgerTest, LNN_GET_LINK_BUILD_INFO_TEST_004, TestSize.Level1)
+{
+    LinkLedgerInfo info = {
+        .lastTryBuildTime = TEST_TIME,
+    };
+    int32_t ret = LnnAddLinkLedgerInfo(PEER_UDID, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    LnnDeleteLinkLedgerInfo(nullptr);
+    LnnDeleteLinkLedgerInfo(PEER_UDID);
+    LinkLedgerInfo queryInfo;
+    (void)memset_s(&queryInfo, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
+    ret = LnnGetLinkLedgerInfo(PEER_UDID, &queryInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 } // namespace OHOS
