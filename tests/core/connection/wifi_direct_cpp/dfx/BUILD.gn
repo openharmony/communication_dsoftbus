@@ -126,6 +126,9 @@ ohos_unittest("WifiDirectDfxTest") {
     "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }
