@@ -2337,7 +2337,11 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
                 continue;
             }
             ret = GetFilterIndex(&g_scanManager[listenerId].filter[i].filterIndex);
-            DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "no available index");
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_BROADCAST, "no available index");
+                SoftBusMutexUnlock(&g_scanLock);
+                return ret;
+            }
             DISC_LOGI(DISC_BROADCAST, "add filter filterIndex = %{public}d",
                 g_scanManager[listenerId].filter[i].filterIndex);
         }
@@ -2488,8 +2492,11 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
     BcScanFilter *filter = (BcScanFilter *)scanFilter;
     if (g_scanManager[listenerId].isScanning) {
         ret = CompareFilterAndGetIndex(listenerId, filter, filterNum);
-        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, DISC_BROADCAST,
-            "set scan filter failed");
+        if (ret != SOFTBUS_OK) {
+            DISC_LOGE(DISC_BROADCAST, "set scan filter failed");
+            SoftBusMutexUnlock(&g_scanLock);
+            return SOFTBUS_INVALID_PARAM;
+        }
     } else {
         if (g_scanManager[listenerId].filterSize != 0) {
             for (int i = 0; i < g_scanManager[listenerId].filterSize; i++) {
