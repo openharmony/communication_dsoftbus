@@ -36,6 +36,7 @@ enum {
 
 #define NSTACKX_CIPHER_AES_GCM                       NBITS(CIPHER_AES_GCM)
 #define NSTACKX_CIPHER_CHACHA                        NBITS(CIPHER_CHACHA)
+#define NSTACKX_CIPHER_AES_NI                        NBITS(CIPHER_AES_NI)
 
 #ifdef __cplusplus
 }
