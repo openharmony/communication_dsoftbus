@@ -1291,6 +1291,27 @@ static int32_t NotifyRawLinkSucc(uint32_t p2pRequestId, const struct WifiDirectL
     return SOFTBUS_OK;
 }
 
+static void TryDelPreLinkByConnReqId(uint32_t connReqId)
+{
+    if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId)) {
+        uint32_t *laneReqIdPtr = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+        if (laneReqIdPtr == NULL) {
+            LNN_LOGE(LNN_LANE, "create lane req id fail");
+            return;
+        }
+        if (GetConcurrencyLaneReqIdByConnReqId(connReqId, laneReqIdPtr) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get lane req id fail");
+            return;
+        }
+        if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnFreePreLink, (void *)laneReqIdPtr) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "async call LnnFreePreLink fail");
+            SoftBusFree(laneReqIdPtr);
+            laneReqIdPtr = NULL;
+        }
+    }
+}
+
+
 static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiDirectLink *link)
 {
     int ret = SOFTBUS_OK;
@@ -1308,6 +1329,7 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
     LNN_LOGI(LNN_LANE,
         "wifidirect conn succ, requestId=%{public}u, linkType=%{public}d, linkId=%{public}d, isReuse=%{public}d",
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
+    TryDelPreLinkByConnReqId(p2pRequestId);
     SetRemoteDynamicNetCap(linkInfo.peerUdid, BIT_WIFI_P2P);
     LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
     if (linkInfo.type == LANE_HML_RAW && link->isReuse) {

@@ -43,15 +43,22 @@ typedef struct {
     ListNode node;
     uint32_t actionId;
     uint32_t laneReqId;
+    uint32_t laneReqIdReuse;
+    uint32_t connReqIdReuse;
     uint8_t actionMac[RAW_MAC_LEN];
     char shortUdidHash[AUTH_UDID_HASH_LEN];
 } ActionBleConNodeInfo;
 
 int32_t GetConcurrencyPeerUdidByActionId(uint32_t actionId, char *peerUdid);
+int32_t GetConcurrencyLaneReqIdByActionId(uint32_t actionId, uint32_t *laneReqId);
+int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId);
+bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId);
+int32_t GetConcurrencyLaneReqIdByConnReqId(uint32_t connReqId, uint32_t *laneReqId);
 bool HaveConcurrencyBleGuideChannel(uint32_t actionId);
 int32_t InitActionBleConcurrency(void);
 void DeinitActionBleConcurrency(void);
 int32_t LnnTriggerPreLink(const void *msg);
+void LnnFreePreLink(void *para);
 
 #ifdef __cplusplus
 }
