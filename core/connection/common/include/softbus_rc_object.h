@@ -45,10 +45,10 @@ typedef void (*SoftBusRcFreeHook)(SoftBusRcObject *object);
     SoftBusRcFreeHook freehook;                      \
                                                      \
     /* concrete object identifier */                 \
-    const char *name;
+    const char *name
 
 struct SoftBusRcObject {
-    SOFT_BUS_RC_OBJECT_BASE
+    SOFT_BUS_RC_OBJECT_BASE;
 };
 
 int32_t SoftBusRcObjectConstruct(const char *name, SoftBusRcObject *object, SoftBusRcFreeHook hook);
