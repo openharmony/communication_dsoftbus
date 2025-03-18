@@ -15,14 +15,14 @@
 #ifndef SOFTBUS_RC_OBJECT_H
 #define SOFTBUS_RC_OBJECT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 
 #include "common_list.h"
 #include "softbus_adapter_thread.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct SoftBusRcObject;
 typedef struct SoftBusRcObject SoftBusRcObject;
@@ -45,7 +45,7 @@ typedef void (*SoftBusRcFreeHook)(SoftBusRcObject *object);
     SoftBusRcFreeHook freehook;                      \
                                                      \
     /* concrete object identifier */                 \
-    const char *name;                                \
+    const char *name;
 
 struct SoftBusRcObject {
     SOFT_BUS_RC_OBJECT_BASE

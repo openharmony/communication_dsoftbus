@@ -15,15 +15,15 @@
 #ifndef SOFTBUS_RC_COLLECTION_H
 #define SOFTBUS_RC_COLLECTION_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_rc_object.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef uint32_t (*SoftBusRcIdGenerator)(const SoftBusRcObject *object, uint16_t index);
 typedef bool (*SoftBusRcObjectMatcher)(const SoftBusRcObject *object, const void *arg);

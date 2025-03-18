@@ -34,7 +34,7 @@ static uint32_t AllocateUniqueIdUnsafe(SoftBusRcCollection *collection, SoftBusR
     LIST_FOR_EACH_ENTRY(it, &objects->list, SoftBusRcObject, node) {
         if (id == it->id) {
             COMM_LOGW(
-                COMM_UTILS, "%{public}s, object id=%{public}u is already used, try next one", collection->name, id);
+                COMM_UTILS, "%{public}s, object id=%{public}u is already used, retry next one", collection->name, id);
             return AllocateUniqueIdUnsafe(collection, object, maxRetry - 1);
         }
     }
@@ -110,7 +110,7 @@ static bool IdMatcher(const SoftBusRcObject *object, const void *arg)
 
 SoftBusRcObject *SoftBusRcGetById(SoftBusRcCollection *collection, uint32_t id)
 {
-    return SoftBusRcGetCommon(collection != NULL, IdMatcher, &id);
+    return SoftBusRcGetCommon(collection, IdMatcher, &id);
 }
 
 static bool PointerMatcher(const SoftBusRcObject *object, const void *arg)
@@ -163,7 +163,8 @@ void SoftBusRcCollectionDestruct(SoftBusRcCollection *collection)
     COMM_CHECK_AND_RETURN_LOGE(collection != NULL, COMM_UTILS, "collection is null");
     SoftBusList *objects = collection->objects;
     if (objects != NULL) {
-        SoftBusRcObject *it = NULL, *next = NULL;
+        SoftBusRcObject *it = NULL;
+        SoftBusRcObject *next = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(it, next, &objects->list, SoftBusRcObject, node) {
             COMM_LOGW(COMM_UTILS,
                 "%{public}s, object still in collection, remove it before destructing: object id=%{public}d",

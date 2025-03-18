@@ -88,8 +88,8 @@ HWTEST_F(SoftbusRcTest, ObjectOperationTest, TestSize.Level1)
 
     auto arf = std::make_shared<DummyObject>();
     auto foo = arf.get();
-    ret = SoftBusRcObjectConstruct(
-        "foo-object", reinterpret_cast<SoftBusRcObject *>(foo), ConnCommonTestMock::freeHook_);
+    ret =
+        SoftBusRcObjectConstruct("foo-object", reinterpret_cast<SoftBusRcObject *>(foo), ConnCommonTestMock::freeHook_);
     EXPECT_EQ(ret, SOFTBUS_OK);
     const int32_t payload = 100;
     foo->payload = payload;
