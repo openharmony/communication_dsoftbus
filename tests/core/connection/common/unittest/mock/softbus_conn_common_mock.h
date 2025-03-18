@@ -45,7 +45,7 @@ public:
     ConnCommonTestMock();
     ~ConnCommonTestMock() override;
 
-    MOCK_METHOD(uint32_t, IdGeneratorHook, (const SoftBusRcObject * object, uint16_t index), (override));
+    MOCK_METHOD(uint32_t, IdGeneratorHook, (const SoftBusRcObject *object, uint16_t index), (override));
     MOCK_METHOD(void, FreeObjectHook, (SoftBusRcObject * object), (override));
 
 private:
