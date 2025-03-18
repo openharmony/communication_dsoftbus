@@ -43,3 +43,32 @@ ohos_unittest("SoftbusConnCommonTest") {
     "hilog:libhilog",
   ]
 }
+
+ohos_unittest("SoftbusRcTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock",
+  ]
+
+  sources = [
+    "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object.c",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock/softbus_conn_common_mock.cpp",
+    "softbus_rc_object_collection_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
