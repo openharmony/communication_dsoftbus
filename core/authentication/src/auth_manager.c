@@ -1414,29 +1414,10 @@ static int32_t PostDecryptFailAuthData(
     return SOFTBUS_OK;
 }
 
-static void HandleConnectionData(
-    uint64_t connId, AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+static void HandleConnectionDataInner(uint64_t connId, AuthManager *auth, AuthConnInfo *connInfo,
+    const AuthDataHead *head, const uint8_t *data)
 {
-    if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
-        connInfo->type = AUTH_LINK_TYPE_SESSION_KEY;
-        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
-    }
-    if (!RequireAuthLock()) {
-        return;
-    }
     char udid[UDID_BUF_LEN] = { 0 };
-    AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
-    if (auth == NULL) {
-        PrintAuthConnInfo(connInfo);
-        AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
-        ReleaseAuthLock();
-        if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI ||
-            connInfo->type == AUTH_LINK_TYPE_SESSION_KEY) {
-            return;
-        }
-        (void)PostDecryptFailAuthData(connId, fromServer, head, data);
-        return;
-    }
     int64_t authId = auth->authId;
     AuthLinkType type = connInfo->type;
     uint8_t *decData = NULL;
@@ -1467,6 +1448,31 @@ static void HandleConnectionData(
         g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
     }
     SoftBusFree(decData);
+}
+
+static void HandleConnectionData(
+    uint64_t connId, AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
+        connInfo->type = AUTH_LINK_TYPE_SESSION_KEY;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+    }
+    if (!RequireAuthLock()) {
+        return;
+    }
+    AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
+    if (auth == NULL) {
+        PrintAuthConnInfo(connInfo);
+        AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
+        ReleaseAuthLock();
+        if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI ||
+            connInfo->type == AUTH_LINK_TYPE_SESSION_KEY) {
+            return;
+        }
+        (void)PostDecryptFailAuthData(connId, fromServer, head, data);
+        return;
+    }
+    HandleConnectionDataInner(connId, auth, connInfo, head, data);
 }
 
 static void HandleDecryptFailData(

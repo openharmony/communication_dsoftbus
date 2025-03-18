@@ -2314,6 +2314,25 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     return SOFTBUS_OK;
 }
 
+static void TryConcurrencyToConn(const LinkRequest *request, uint32_t laneLinkReqId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    if (HaveConcurrencyBleGuideChannel(request->actionAddr)) {
+        wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+        wifiDirectInfo->ipAddrType = IPV4;
+        uint32_t recordLaneReqId = 0;
+        if (GetConcurrencyLaneReqIdByActionId(request->actionAddr, &recordLaneReqId) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "not found pre link lane req id");
+        }
+        if (recordLaneReqId != laneLinkReqId) {
+            if (UpdateConcurrencyReuseLaneReqIdByActionId(request->actionAddr, laneLinkReqId,
+                wifiDirectInfo->requestId) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LANE, "pre link update reuse link lane req id fail");
+            }
+        }
+    }
+}
+
 static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     if (request == NULL || callback == NULL) {
@@ -2333,12 +2352,10 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     LNN_CHECK_AND_RETURN_RET_LOGE(errCode == SOFTBUS_OK, errCode, LNN_LANE, "add new connect node failed");
     wifiDirectInfo.pid = request->pid;
     wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
-    if (HaveConcurrencyBleGuideChannel(request->actionAddr)) {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
-    }
     wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
     wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    TryConcurrencyToConn(request, laneLinkReqId, &wifiDirectInfo);
     wifiDirectInfo.bandWidth = (int32_t)reqInfo.allocInfo.qosRequire.minBW;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "copy networkId failed");
