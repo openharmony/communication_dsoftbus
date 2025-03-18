@@ -55,9 +55,7 @@ ohos_unittest("SoftbusRcTest") {
   sources = [
     "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object.c",
-
     "$dsoftbus_root_path/tests/core/connection/common/unittest/mock/softbus_conn_common_mock.cpp",
-
     "softbus_rc_object_collection_test.cpp",
   ]
 
