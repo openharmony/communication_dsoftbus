@@ -43,8 +43,8 @@ static uint32_t AllocateUniqueIdUnsafe(SoftBusRcCollection *collection, SoftBusR
 
 int32_t SoftBusRcSave(SoftBusRcCollection *collection, SoftBusRcObject *object)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(collection, SOFTBUS_INVALID_PARAM, COMM_UTILS, "collection is null");
-    COMM_CHECK_AND_RETURN_RET_LOGE(object, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(collection != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "collection is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(object != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
 
     SoftBusList *objects = collection->objects;
     int32_t code = SoftBusMutexLock(&objects->lock);
@@ -74,8 +74,8 @@ int32_t SoftBusRcSave(SoftBusRcCollection *collection, SoftBusRcObject *object)
 
 SoftBusRcObject *SoftBusRcGetCommon(SoftBusRcCollection *collection, SoftBusRcObjectMatcher matcher, const void *arg)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(collection, NULL, COMM_UTILS, "collection is null");
-    COMM_CHECK_AND_RETURN_RET_LOGE(matcher, NULL, COMM_UTILS, "matcher is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(collection != NULL, NULL, COMM_UTILS, "collection is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(matcher != NULL, NULL, COMM_UTILS, "matcher is null");
     // arg is nullable
 
     SoftBusList *objects = collection->objects;
@@ -110,7 +110,7 @@ static bool IdMatcher(const SoftBusRcObject *object, const void *arg)
 
 SoftBusRcObject *SoftBusRcGetById(SoftBusRcCollection *collection, uint32_t id)
 {
-    return SoftBusRcGetCommon(collection, IdMatcher, &id);
+    return SoftBusRcGetCommon(collection != NULL, IdMatcher, &id);
 }
 
 static bool PointerMatcher(const SoftBusRcObject *object, const void *arg)
@@ -120,8 +120,8 @@ static bool PointerMatcher(const SoftBusRcObject *object, const void *arg)
 
 void SoftBusRcRemove(SoftBusRcCollection *collection, SoftBusRcObject *object)
 {
-    COMM_CHECK_AND_RETURN_LOGE(collection, COMM_UTILS, "collection is null");
-    COMM_CHECK_AND_RETURN_LOGE(object, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_LOGE(collection != NULL, COMM_UTILS, "collection is null");
+    COMM_CHECK_AND_RETURN_LOGE(object != NULL, COMM_UTILS, "object is null");
 
     SoftBusList *objects = collection->objects;
     int32_t code = SoftBusMutexLock(&objects->lock);
@@ -145,8 +145,8 @@ void SoftBusRcRemove(SoftBusRcCollection *collection, SoftBusRcObject *object)
 
 int32_t SoftBusRcCollectionConstruct(const char *name, SoftBusRcCollection *collection, SoftBusRcIdGenerator generator)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(name, SOFTBUS_INVALID_PARAM, COMM_UTILS, "name is null");
-    COMM_CHECK_AND_RETURN_RET_LOGE(collection, SOFTBUS_INVALID_PARAM, COMM_UTILS, "collection is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(name != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "name is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(collection != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "collection is null");
     // generator is nullable
 
     SoftBusList *objects = CreateSoftBusList();
@@ -160,7 +160,7 @@ int32_t SoftBusRcCollectionConstruct(const char *name, SoftBusRcCollection *coll
 
 void SoftBusRcCollectionDestruct(SoftBusRcCollection *collection)
 {
-    COMM_CHECK_AND_RETURN_LOGE(collection, COMM_UTILS, "collection is null");
+    COMM_CHECK_AND_RETURN_LOGE(collection != NULL, COMM_UTILS, "collection is null");
     SoftBusList *objects = collection->objects;
     if (objects != NULL) {
         SoftBusRcObject *it = NULL, *next = NULL;

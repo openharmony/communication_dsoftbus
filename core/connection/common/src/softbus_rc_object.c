@@ -18,19 +18,19 @@
 
 static int32_t Lock(SoftBusRcObject *object)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(object, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(object != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
     return SoftBusMutexLock(&object->mutex);
 }
 
 static void Unlock(SoftBusRcObject *object)
 {
-    COMM_CHECK_AND_RETURN_LOGE(object, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_LOGE(object != NULL, COMM_UTILS, "object is null");
     (void)SoftBusMutexUnlock(&object->mutex);
 }
 
 int32_t Reference(SoftBusRcObject *object)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(object, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(object != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
 
     int32_t ret = Lock(object);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS,
@@ -42,9 +42,9 @@ int32_t Reference(SoftBusRcObject *object)
 
 void Deference(SoftBusRcObject **ptr)
 {
-    COMM_CHECK_AND_RETURN_LOGE(ptr, COMM_UTILS, "ptr is null");
+    COMM_CHECK_AND_RETURN_LOGE(ptr != NULL, COMM_UTILS, "ptr is null");
     SoftBusRcObject *object = *ptr;
-    COMM_CHECK_AND_RETURN_LOGE(object, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_LOGE(object != NULL, COMM_UTILS, "object is null");
 
     int32_t ret = Lock(object);
     COMM_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, COMM_UTILS, "%{public}s lock failed: id=%{public}d, error=%{public}d",
@@ -63,9 +63,9 @@ void Deference(SoftBusRcObject **ptr)
 
 int32_t SoftBusRcObjectConstruct(const char *name, SoftBusRcObject *object, SoftBusRcFreeHook hook)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(name, SOFTBUS_INVALID_PARAM, COMM_UTILS, "name is null");
-    COMM_CHECK_AND_RETURN_RET_LOGE(object, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
-    COMM_CHECK_AND_RETURN_RET_LOGE(hook, SOFTBUS_INVALID_PARAM, COMM_UTILS, "free hook is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(name != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "name is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(object != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(hook != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "free hook is null");
 
     ListInit(&object->node);
     object->id = 0;
@@ -91,7 +91,7 @@ int32_t SoftBusRcObjectConstruct(const char *name, SoftBusRcObject *object, Soft
 
 void SoftBusRcObjectDestruct(SoftBusRcObject *object)
 {
-    COMM_CHECK_AND_RETURN_LOGE(object, COMM_UTILS, "object is null");
+    COMM_CHECK_AND_RETURN_LOGE(object != NULL, COMM_UTILS, "object is null");
 
     ListDelete(&object->node);
     object->id = 0;
