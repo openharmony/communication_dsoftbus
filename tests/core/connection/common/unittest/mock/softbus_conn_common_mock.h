@@ -22,6 +22,7 @@
 
 #include "softbus_conn_async_helper.h"
 #include "softbus_rc_collection.h"
+#include "softbus_conn_bytes_delivery.h"
 
 namespace OHOS::SoftBus {
 class ConnCommonTestInterface {
@@ -34,6 +35,9 @@ public:
 
     virtual void AsyncFunctionHook(int32_t callId, void *arg) = 0;
     virtual void FreeAsyncArgHook(void *arg) = 0;
+
+    virtual void BytesHandlerHook(
+        uint32_t id, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq) = 0;
 };
 
 class ConnCommonTestMock : public ConnCommonTestInterface {
@@ -49,6 +53,8 @@ public:
     static ConnAsyncFunction asyncFunction_;
     static ConnAsyncFreeHook asyncFreeHook_;
 
+    static ConnBytesHandler bytesHandler_;
+
     ConnCommonTestMock();
     ~ConnCommonTestMock() override;
 
@@ -57,6 +63,9 @@ public:
 
     MOCK_METHOD(void, AsyncFunctionHook, (int32_t callId, void *arg), (override));
     MOCK_METHOD(void, FreeAsyncArgHook, (void *arg), (override));
+
+    MOCK_METHOD(void, BytesHandlerHook,
+        (uint32_t id, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq), (override));
 
 private:
     static inline std::atomic<ConnCommonTestMock *> mock = nullptr;
