@@ -27,7 +27,7 @@ int32_t GetConcurrencyLaneReqIdByActionId(uint32_t actionId, uint32_t *laneReqId
 {
     (void)actionId;
     (void)laneReqId;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId)
@@ -35,7 +35,7 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t re
     (void)actionId;
     (void)reuseLaneReqId;
     (void)connReqId;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId)
@@ -48,7 +48,7 @@ int32_t GetConcurrencyLaneReqIdByConnReqId(uint32_t connReqId, uint32_t *laneReq
 {
     (void)connReqId;
     (void)laneReqId;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void LnnFreePreLink(void *para)
