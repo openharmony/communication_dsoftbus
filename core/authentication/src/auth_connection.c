@@ -922,15 +922,15 @@ static bool IsAuthSessionKeyModule(const AuthDataHead *head)
 
 static int32_t PostBytesForSessionKey(int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
-    uint32_t size = GetAuthDataSize(head->len);
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
-    if (buf == NULL) {
-        AUTH_LOGE(AUTH_CONN, "calloc fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
     int32_t ret = SOFTBUS_MALLOC_ERR;
-    AuthDataHead tmpHead = *head;
     if (IsAuthSessionKeyModule(head)) {
+        uint32_t size = GetAuthDataSize(head->len);
+        uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+        if (buf == NULL) {
+            AUTH_LOGE(AUTH_CONN, "calloc fail");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        AuthDataHead tmpHead = *head;
         tmpHead.module = MODULE_SESSION_KEY_AUTH;
         int32_t ret = PackAuthData(&tmpHead, data, buf, size);
         if (ret != SOFTBUS_OK) {
