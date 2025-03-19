@@ -1301,6 +1301,7 @@ static void TryDelPreLinkByConnReqId(uint32_t connReqId)
         }
         if (GetConcurrencyLaneReqIdByConnReqId(connReqId, laneReqIdPtr) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "get lane req id fail");
+            SoftBusFree(laneReqIdPtr);
             return;
         }
         if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnFreePreLink, (void *)laneReqIdPtr) != SOFTBUS_OK) {
