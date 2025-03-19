@@ -1451,10 +1451,11 @@ static void HandleConnectionDataInner(uint64_t connId, AuthManager *auth, AuthCo
 }
 
 static void HandleConnectionData(
-    uint64_t connId, AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
-        connInfo->type = AUTH_LINK_TYPE_SESSION_KEY;
+        AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
+        connInfoMut->type = AUTH_LINK_TYPE_SESSION_KEY;
         connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
     }
     if (!RequireAuthLock()) {
