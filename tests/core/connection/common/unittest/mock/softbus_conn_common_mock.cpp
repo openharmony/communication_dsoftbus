@@ -34,6 +34,24 @@ SoftBusRcFreeHook ConnCommonTestMock::freeHook_ = [](SoftBusRcObject *object) {
     mock->FreeObjectHook(object);
 };
 
+ConnAsyncFunction ConnCommonTestMock::asyncFunction_ = [](int32_t callId, void *arg) {
+    auto mock = ConnCommonTestMock::GetMock();
+    if (mock == nullptr) {
+        ADD_FAILURE() << "mock is nullptr";
+        return;
+    }
+    mock->AsyncFunctionHook(callId, arg);
+};
+
+ConnAsyncFreeHook ConnCommonTestMock::asyncFreeHook_ = [](void *arg) {
+    auto mock = ConnCommonTestMock::GetMock();
+    if (mock == nullptr) {
+        ADD_FAILURE() << "mock is nullptr";
+        return;
+    }
+    mock->FreeAsyncArgHook(arg);
+};
+
 ConnCommonTestMock::ConnCommonTestMock()
 {
     mock.store(this);
