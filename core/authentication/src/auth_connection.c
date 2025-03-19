@@ -915,8 +915,8 @@ static bool IsAuthSessionKeyModule(const AuthDataHead *head)
     if (head->dataType == DATA_TYPE_AUTH || head->dataType == DATA_TYPE_DEVICE_INFO ||
         head->dataType == DATA_TYPE_DEVICE_ID || head->dataType == DATA_TYPE_CLOSE_ACK ||
         head->dataType == DATA_TYPE_TEST_AUTH) {
-            return true;
-        }
+        return true;
+    }
     return false;
 }
 
