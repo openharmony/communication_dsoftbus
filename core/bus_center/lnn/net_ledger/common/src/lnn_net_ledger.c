@@ -238,7 +238,6 @@ static void ProcessLocalDeviceInfo(void)
         LNN_LOGE(LNN_LEDGER, "set deviceName fail");
     }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
-    LnnNotifyLocalNetworkIdChanged();
     if (info.networkIdTimestamp != 0) {
         LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
         LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
@@ -300,8 +299,6 @@ void RestoreLocalDeviceInfo(void)
         ProcessLocalDeviceInfo();
     }
     LnnLedgerInfoStatusSet();
-
-    AuthLoadDeviceKey();
     LnnLoadPtkInfo();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "load remote deviceInfo fail");
@@ -313,8 +310,7 @@ void RestoreLocalDeviceInfo(void)
 
 int32_t LnnInitNetLedgerDelay(void)
 {
-    LnnLoadLocalDeviceAccountIdInfo();
-    RestoreLocalDeviceInfo();
+    AuthLoadDeviceKey();
     int32_t ret = LnnInitLocalLedgerDelay();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
@@ -1050,4 +1046,9 @@ int32_t LnnUpdateLocalDeviceInfo(void)
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+int32_t InitUdidChangedEvent(void)
+{
+    return HandleDeviceInfoIfUdidChanged();
 }

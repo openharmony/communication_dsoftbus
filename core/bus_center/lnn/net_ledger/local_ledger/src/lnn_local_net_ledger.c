@@ -2480,7 +2480,7 @@ int32_t LnnInitLocalLedger(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitLocalLedgerDelay(void)
+int32_t HandleDeviceInfoIfUdidChanged(void)
 {
     NodeInfo localNodeInfo;
     (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -2505,6 +2505,23 @@ int32_t LnnInitLocalLedgerDelay(void)
             return SOFTBUS_NETWORK_INVALID_DEV_INFO;
         }
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitLocalLedgerDelay(void)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
+    DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
+    if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     int32_t ret = LnnInitOhosAccount();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init default ohos account failed");

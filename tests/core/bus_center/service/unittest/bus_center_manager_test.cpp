@@ -212,6 +212,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, InitDecisionCenter()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(BusCenterManagerMock, InitUdidChangedEvent()).WillOnce(Return(SOFTBUS_OK));
     ret = BusCenterServerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
