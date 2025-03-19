@@ -42,11 +42,9 @@ void HandelNotifyFreeLaneResult(SoftBusMessage *msg)
 
 static void ReportLaneEvent(uint32_t laneHandle, LnnEventLaneStage stage, int32_t retCode)
 {
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){retCode});
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_STAGE,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){stage});
-    ReportLaneEventInfo(laneHandle);
+    UpdateLaneEventInfo(laneHandle, EVENT_LANE_STAGE,
+        LANE_PROCESS_TYPE_UINT32, (void *)(&stage));
+    ReportLaneEventInfo(laneHandle, retCode);
 }
 
 static uint64_t GetCostTime(uint64_t triggerLinkTime)
@@ -68,8 +66,8 @@ static void UpdateLaneEventWithFreeLinkTime(uint32_t laneHandle)
         return;
     }
     uint64_t freeLinkTime = GetCostTime(laneProcess.laneProcessList64Bit[EVENT_FREE_LINK_TIME]);
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_FREE_LINK_TIME,
-        LANE_PROCESS_TYPE_UINT64, (void *)&(uint64_t){freeLinkTime});
+    UpdateLaneEventInfo(laneHandle, EVENT_FREE_LINK_TIME,
+        LANE_PROCESS_TYPE_UINT64, (void *)(&freeLinkTime));
 }
 
 static void ReportLaneEventWithFreeLinkInfo(uint32_t laneReqId, int32_t errCode)
@@ -231,9 +229,9 @@ static int32_t FreeLink(uint32_t laneReqId, uint64_t laneId, LaneType type)
     LNN_LOGI(LNN_LANE, "free lane, laneReqId=%{public}u, laneId=%{public}" PRIu64 ", delayDestroy=%{public}s",
         laneReqId, laneId, isDelayDestroy ? "true" : "false");
     if (isDelayDestroy) {
-        bool isDelayFree = true;
-        UpdateLaneEventInfo(laneReqId, (uint32_t)EVENT_DELAY_FREE,
-            LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){isDelayFree});
+        uint32_t isDelayFree = (uint32_t)(isDelayDestroy);
+        UpdateLaneEventInfo(laneReqId, EVENT_DELAY_FREE,
+            LANE_PROCESS_TYPE_UINT32, (void *)(&isDelayFree));
         PostDelayDestroyMessage(laneReqId, INVALID_LANE_ID, 0);
         return SOFTBUS_OK;
     }
