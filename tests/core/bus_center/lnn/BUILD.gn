@@ -1059,7 +1059,6 @@ ohos_unittest("LNNNetworkManagerMockTest") {
 ohos_unittest("LNNIpNetworkImplMockTest") {
   module_out_path = module_output_path
   sources = [
-    "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_buscenter/lnn_ip_network_impl_mock.cpp",
     "net_buscenter/lnn_ip_network_impl_test.cpp",
   ]
