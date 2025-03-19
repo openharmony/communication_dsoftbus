@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 
+#include "softbus_conn_async_helper.h"
 #include "softbus_rc_collection.h"
 
 namespace OHOS::SoftBus {
@@ -30,6 +31,9 @@ public:
 
     virtual uint32_t IdGeneratorHook(const SoftBusRcObject *object, uint16_t index) = 0;
     virtual void FreeObjectHook(SoftBusRcObject *object) = 0;
+
+    virtual void AsyncFunctionHook(int32_t callId, void *arg) = 0;
+    virtual void FreeAsyncArgHook(void *arg) = 0;
 };
 
 class ConnCommonTestMock : public ConnCommonTestInterface {
@@ -42,11 +46,17 @@ public:
     static SoftBusRcIdGenerator idGenerator_;
     static SoftBusRcFreeHook freeHook_;
 
+    static ConnAsyncFunction asyncFunction_;
+    static ConnAsyncFreeHook asyncFreeHook_;
+
     ConnCommonTestMock();
     ~ConnCommonTestMock() override;
 
     MOCK_METHOD(uint32_t, IdGeneratorHook, (const SoftBusRcObject *object, uint16_t index), (override));
     MOCK_METHOD(void, FreeObjectHook, (SoftBusRcObject * object), (override));
+
+    MOCK_METHOD(void, AsyncFunctionHook, (int32_t callId, void *arg), (override));
+    MOCK_METHOD(void, FreeAsyncArgHook, (void *arg), (override));
 
 private:
     static inline std::atomic<ConnCommonTestMock *> mock = nullptr;
