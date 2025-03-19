@@ -2403,8 +2403,9 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "init local deviceSecurityLevel fail, deviceSecurityLevel=%{public}d",
             nodeInfo->deviceSecurityLevel);
         LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_FAILED);
+    } else {
+        LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_SUCCESS);
     }
-    LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_SUCCESS);
     ret = InitConnectInfo(&nodeInfo->connectInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local connect info error");

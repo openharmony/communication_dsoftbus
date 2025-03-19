@@ -34,8 +34,8 @@ typedef struct {
 
 typedef struct {
     uint32_t module;
-    ModuleInitCallBack callback;
     uint32_t retryMax;
+    ModuleInitCallBack callback;
     uint32_t retry;
     uint32_t delay;
 } InitDepsCbParam;
@@ -47,7 +47,7 @@ typedef struct {
 
 static InitDepsInfo g_lnnEnableModuleDeps[INIT_DEPS_MODULE_BUTT];
 static InitDepsInfo g_lnnDeviceInfoDeps[LEDGER_INFO_BUTT];
-static LnnInitMonitorInfo g_lnnInitMonitorInfoMgr;
+static LnnInitMonitorInfo g_lnnInitMonitorInfoMgr = { 0 };
 
 void LnnInitModuleReturnSet(uint32_t module, uint32_t ret)
 {
