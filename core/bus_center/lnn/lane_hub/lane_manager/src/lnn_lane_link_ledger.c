@@ -131,7 +131,7 @@ int32_t LnnGetLinkLedgerInfo(const char *udid, LinkLedgerInfo *info)
 
 void LnnDeleteLinkLedgerInfo(const char *udid)
 {
-    if (udid == NULL) {
+    if (udid == NULL || strlen(udid) == 0) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
