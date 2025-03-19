@@ -1417,10 +1417,10 @@ static int32_t PostDecryptFailAuthData(
 static void HandleConnectionDataInner(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
-    char udid[UDID_BUF_LEN] = { 0 };
     if (!RequireAuthLock()) {
         return;
     }
+    char udid[UDID_BUF_LEN] = { 0 };
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
     if (auth == NULL) {
         PrintAuthConnInfo(connInfo);
