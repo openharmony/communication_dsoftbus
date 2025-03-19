@@ -39,6 +39,7 @@ if (defined(ohos_lite)) {
         "access_token:libaccesstoken_sdk",
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
+        "cJSON:cjson_static",
       ]
     } else {
       sources += [ "src/softbus_access_token_test_virtual.c" ]
