@@ -29,6 +29,7 @@ int32_t LnnUpdateLocalDeviceInfo(void);
 void RestoreLocalDeviceInfo(void);
 void LnnDeinitNetLedger(void);
 void LnnLedgerInfoStatusSet(void);
+int32_t InitUdidChangedEvent(void);
 
 #ifdef __cplusplus
 }

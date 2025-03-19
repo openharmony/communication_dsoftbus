@@ -152,5 +152,15 @@ int32_t LnnInitLaneHubDelay(void)
 {
     return GetBusCenterManagerDepsInterface()->LnnInitLaneHubDelay();
 }
+
+int32_t LnnLoadLocalDeviceAccountIdInfo(void)
+{
+    return GetBusCenterManagerDepsInterface()->LnnLoadLocalDeviceAccountIdInfo();
+}
+
+int32_t InitUdidChangedEvent(void)
+{
+    return GetBusCenterManagerDepsInterface()->InitUdidChangedEvent();
+}
 }
 } // namespace OHOS
