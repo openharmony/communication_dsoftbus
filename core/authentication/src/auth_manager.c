@@ -1414,7 +1414,7 @@ static int32_t PostDecryptFailAuthData(
     return SOFTBUS_OK;
 }
 
-static void HandleConnectionData(
+static void HandleConnectionDataInner(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     if (!RequireAuthLock()) {
@@ -1463,6 +1463,17 @@ static void HandleConnectionData(
         g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
     }
     SoftBusFree(decData);
+}
+
+static void HandleConnectionData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
+        AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
+        connInfoMut->type = AUTH_LINK_TYPE_SESSION_KEY;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+    }
+    HandleConnectionDataInner(connId, connInfo, fromServer, head, data);
 }
 
 static void HandleDecryptFailData(
@@ -1533,6 +1544,18 @@ static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, boo
     }
     if (authIds[1] != AUTH_INVALID_ID) {
         *fromServer = false;
+    }
+    if (authIds[0] == AUTH_INVALID_ID && authIds[1] == AUTH_INVALID_ID) {
+        num = 0;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+        authIds[num++] = GetAuthIdByConnId(connId, false);
+        authIds[num++] = GetAuthIdByConnId(connId, true);
+        if (authIds[0] != AUTH_INVALID_ID) {
+            *fromServer = true;
+        }
+        if (authIds[1] != AUTH_INVALID_ID) {
+            *fromServer = false;
+        }
     }
     if (tmp != *fromServer) {
         AUTH_LOGE(AUTH_CONN, "CorrectFromServer succ.");
