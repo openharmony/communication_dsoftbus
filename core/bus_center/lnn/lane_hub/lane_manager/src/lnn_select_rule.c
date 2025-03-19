@@ -464,16 +464,6 @@ static int32_t CheckLinkParam(LaneLinkType linkType, LaneTransType transType)
     return ret;
 }
 
-static int32_t CheckStaticCap(const char *networkId, LaneLinkType linkType)
-{
-    LaneCommCapa *capaManager = GetLinkCapaByLinkType(linkType);
-    if (capaManager == NULL) {
-        LNN_LOGE(LNN_LANE, "capaManager is nullptr");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return capaManager->getStaticCommCapa(networkId);
-}
-
 static int32_t CheckFeature(const char *networkId, LaneLinkType linkType)
 {
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
@@ -481,16 +471,6 @@ static int32_t CheckFeature(const char *networkId, LaneLinkType linkType)
         return SOFTBUS_INVALID_PARAM;
     }
     return linkAttr->linkFeatureCheck(networkId);
-}
-
-static int32_t CheckDynamicCap(const char *networkId, LaneLinkType linkType)
-{
-    LaneCommCapa *capaManager = GetLinkCapaByLinkType(linkType);
-    if (capaManager == NULL) {
-        LNN_LOGE(LNN_LANE, "capaManager is nullptr");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return capaManager->getDynamicCommCapa(networkId);
 }
 
 int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTransType transType)
@@ -504,7 +484,7 @@ int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTra
         LNN_LOGE(LNN_LANE, "check link with transType err, ret=%{public}d", ret);
         return ret;
     }
-    ret = CheckStaticCap(networkId, linkType);
+    ret = CheckStaticNetCap(networkId, linkType);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "static cap disable. linkType=%{public}d, ret=%{public}d", linkType, ret);
         return ret;
@@ -514,7 +494,7 @@ int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTra
         LNN_LOGE(LNN_LANE, "feature disable. linkType=%{public}d, ret=%{public}d", linkType, ret);
         return ret;
     }
-    ret = CheckDynamicCap(networkId, linkType);
+    ret = CheckDynamicNetCap(networkId, linkType);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "dynamic cap disable. linkType=%{public}d, ret=%{public}d", linkType, ret);
         return ret;
@@ -1071,7 +1051,7 @@ static void DecideLinksWithStaticCapa(const char *networkId, LaneLinkType *linkL
     uint32_t resNum = 0;
     LaneLinkType resList[LANE_LINK_TYPE_BUTT] = {0};
     for (uint32_t i = 0; i < *linksNum; i++) {
-        int32_t ret = CheckStaticCap(networkId, linkList[i]);
+        int32_t ret = CheckStaticNetCap(networkId, linkList[i]);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "static cap disable. linkType=%{public}d, ret=%{public}d", linkList[i], ret);
             continue;
@@ -1114,7 +1094,7 @@ static int32_t AllowSelectNoCapLink(const char *networkId)
     (void)memset_s(&info, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
     ret = LnnGetLinkLedgerInfo(udid, &info);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_FIND) {
-        LNN_LOGI(LNN_LANE, "get link build info fail, ret=%{public}d", ret);
+        LNN_LOGI(LNN_LANE, "get link ledger fail, ret=%{public}d", ret);
         return ret;
     }
     if (ret == SOFTBUS_OK) {
@@ -1145,7 +1125,7 @@ static void DecideLinksWithDynamicCapa(const char *networkId, LaneLinkType *link
     LaneLinkType resList[LANE_LINK_TYPE_BUTT] = {0};
     LaneLinkType remoteNoCapList[LANE_LINK_TYPE_BUTT] = {0};
     for (uint32_t i = 0; i < *linksNum; i++) {
-        int32_t ret = CheckDynamicCap(networkId, linkList[i]);
+        int32_t ret = CheckDynamicNetCap(networkId, linkList[i]);
         if (ret == SOFTBUS_OK) {
             resList[resNum++] = linkList[i];
             LNN_LOGI(LNN_LANE, "available linkType=%{public}d", linkList[i]);

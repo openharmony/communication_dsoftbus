@@ -486,7 +486,7 @@ static int32_t GetEnhancedP2PCap(uint32_t *staticNetCap)
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
     HmlCapabilityCode code = GetWifiDirectManager()->getHmlCapabilityCode();
-    LNN_LOGE(LNN_BUILDER, "hml capability code=%{public}d.", code);
+    LNN_LOGI(LNN_BUILDER, "enhanced p2p capability code=%{public}d.", code);
     int32_t ret;
     if (code == CONN_HML_SUPPORT) {
         ret = LnnSetStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
