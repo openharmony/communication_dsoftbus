@@ -1331,7 +1331,7 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
         "wifidirect conn succ, requestId=%{public}u, linkType=%{public}d, linkId=%{public}d, isReuse=%{public}d",
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
     TryDelPreLinkByConnReqId(p2pRequestId);
-    SetRemoteDynamicNetCap(linkInfo.peerUdid, BIT_WIFI_P2P);
+    SetRemoteDynamicNetCap(linkInfo.peerUdid, linkInfo.type);
     LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
     if (linkInfo.type == LANE_HML_RAW && link->isReuse) {
         ret = NotifyRawLinkSucc(p2pRequestId, link, &linkInfo);
