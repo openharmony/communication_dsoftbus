@@ -58,6 +58,7 @@ int32_t SoftBusGetAdvPower(int8_t *power)
 int32_t SoftBusBleRangeAsync(const SoftBusRangeParam *param)
 {
     (void)param;
+    COMM_LOGW(COMM_ADAPTER, "not implement");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -65,10 +66,12 @@ int32_t SoftBusRegRangeCb(SoftBusRangeModule module, const SoftBusRangeCallback 
 {
     (void)module;
     (void)callback;
+    COMM_LOGW(COMM_ADAPTER, "not implement");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void SoftBusUnregRangeCb(SoftBusRangeModule module)
 {
+    COMM_LOGW(COMM_ADAPTER, "not implement");
     (void)module;
 }

@@ -769,23 +769,29 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnDataLevelChangedInnerTest, TestSize.Leve
 }
 
 /**
- * @tc.name: OnBleRangeDoneInnerTest
- * @tc.desc: OnBleRangeDoneInnerTest, ReadInt32 faild return SOFTBUS_ERR
- * @tc.desc: OnBleRangeDoneInnerTest, ReadCString faild return SOFTBUS_ERR
- * @tc.desc: OnBleRangeDoneInnerTest, success return SOFTBUS_OK
+ * @tc.name: OnRangeResultInnerTest
+ * @tc.desc: OnRangeResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnRangeResultInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnRangeResultInnerTest, success return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftBusServerProxyFrameTest, OnBleRangeDoneInnerTest, TestSize.Level1)
+HWTEST_F(SoftBusServerProxyFrameTest, OnRangeResultInnerTest, TestSize.Level1)
 {
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnBleRangeDoneInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+    EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 
-    std::string buffer = "OnBleRangeDoneInnerTest";
-    data.WriteRawData(buffer.c_str(), sizeof(BleRangeInnerInfo));
-    EXPECT_EQ(g_stub->OnBleRangeDoneInner(data, reply), SOFTBUS_OK);
+    RangeResultInnerInfo innerIInnfo1 = { .length = 0, };
+    data.WriteRawData(&innerIInnfo1, sizeof(RangeResultInnerInfo));
+    EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_OK);
+
+    RangeResultInnerInfo temp;
+    RangeResultInnerInfo innerIInnfo2 = { .length = sizeof(temp), .addition = (uint8_t *)&temp };
+    data.WriteRawData(&innerIInnfo2, sizeof(RangeResultInnerInfo));
+    data.WriteRawData(&temp, sizeof(temp));
+    EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_OK);
 }
 
 /**

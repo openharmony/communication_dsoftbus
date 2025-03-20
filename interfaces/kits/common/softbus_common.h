@@ -138,7 +138,13 @@ extern "C" {
 #define MAX_CAPABILITYDATA_LEN 513
 
 /**
- * @brief Indicates the maximum length of the custom data in <b>IDiscoveryCallback</b>.
+ * @brief Indicates the maximum length of the addition data in <b>RangeResult</b>.
+ *
+ */
+#define MAX_ADDITION_DATA_LEN 513
+
+/**
+ * @brief Indicates the maximum length of the addition data in <b>RangeResult</b>.
  *
  */
 #define DISC_MAX_CUST_DATA_LEN 513

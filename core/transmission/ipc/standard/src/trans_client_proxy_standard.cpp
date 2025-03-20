@@ -69,7 +69,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_IPC_ERR);
-    
+
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
         WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_IPC_ERR);
@@ -92,7 +92,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
         WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Int32, channel->streamType, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Bool, channel->isUdpFile, SOFTBUS_IPC_ERR);
-        
+
         if (!channel->isServer) {
             WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_IPC_ERR);
             WRITE_PARCEL_WITH_RET(data, CString, channel->peerIp, SOFTBUS_IPC_ERR);
@@ -559,7 +559,7 @@ void TransClientProxy::OnDataLevelChanged(const char *networkId, const DataLevel
     (void)dataLevelInfo;
 }
 
-void TransClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+void TransClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
 {
     (void)rangeInfo;
 }

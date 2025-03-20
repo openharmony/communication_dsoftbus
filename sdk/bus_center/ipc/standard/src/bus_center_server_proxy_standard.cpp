@@ -588,7 +588,7 @@ int32_t BusCenterServerProxy::SetDataLevel(const DataLevel *dataLevel)
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::RegBleRangeCb(const char *pkgName)
+int32_t BusCenterServerProxy::RegisterRangeCallbackForMsdp(const char *pkgName)
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
@@ -610,7 +610,7 @@ int32_t BusCenterServerProxy::RegBleRangeCb(const char *pkgName)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t serverRet = remote->SendRequest(SERVER_REG_BLE_RANGE_CB, data, reply, option);
+    int32_t serverRet = remote->SendRequest(SERVER_REG_RANGE_CB_FOR_MSDP, data, reply, option);
     if (serverRet != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
         return serverRet;
@@ -623,7 +623,7 @@ int32_t BusCenterServerProxy::RegBleRangeCb(const char *pkgName)
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::UnregBleRangeCb(const char *pkgName)
+int32_t BusCenterServerProxy::UnregisterRangeCallbackForMsdp(const char *pkgName)
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
@@ -645,7 +645,7 @@ int32_t BusCenterServerProxy::UnregBleRangeCb(const char *pkgName)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t serverRet = remote->SendRequest(SERVER_UNREG_BLE_RANGE_CB, data, reply, option);
+    int32_t serverRet = remote->SendRequest(SERVER_UNREG_RANGE_CB_FOR_MSDP, data, reply, option);
     if (serverRet != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
         return serverRet;
@@ -1098,9 +1098,9 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t BusCenterServerProxy::TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    if (pkgName == nullptr || callerId == nullptr || mode == nullptr) {
+    if (pkgName == nullptr || config == nullptr) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1119,17 +1119,13 @@ int32_t BusCenterServerProxy::TriggerHbForMeasureDistance(const char *pkgName, c
         LNN_LOGE(LNN_EVENT, "write pkg name failed");
         return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
     }
-    if (!data.WriteCString(callerId)) {
-        LNN_LOGE(LNN_EVENT, "write callerId failed");
-        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
-    }
-    if (!data.WriteRawData(mode, sizeof(HbMode))) {
-        LNN_LOGE(LNN_EVENT, "write hbMode config failed");
+    if (!data.WriteRawData(config, sizeof(RangeConfig))) {
+        LNN_LOGE(LNN_EVENT, "write config failed");
         return SOFTBUS_NETWORK_WRITERAWDATA_FAILED;
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_TRIGGER_HB_FOR_RANGE, data, reply, option) != 0) {
+    if (remote->SendRequest(SERVER_TRIGGER_RANGE_FOR_MSDP, data, reply, option) != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
         return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }

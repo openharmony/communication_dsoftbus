@@ -29,7 +29,7 @@ namespace OHOS {
 
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size == 0 || size > MAX_MACLLOC_SIZE || size < sizeof(HbMode)) {
+        if (data == nullptr || size == 0 || size > MAX_MACLLOC_SIZE || size < sizeof(RangeConfig)) {
             return true;
         }
 
@@ -47,7 +47,7 @@ namespace OHOS {
         }
 
         SetAccessTokenPermission("busCenterTest");
-        TriggerHbForMeasureDistance(TEST_PKG_NAME1, "123", reinterpret_cast<const HbMode *>(tmp));
+        TriggerRangeForMsdp(TEST_PKG_NAME1, reinterpret_cast<const RangeConfig *>(tmp));
         free(tmp);
         return true;
     }

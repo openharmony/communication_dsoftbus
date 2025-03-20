@@ -99,11 +99,17 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t LnnTriggerSleRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     (void)pkgName;
-    (void)callerId;
-    (void)mode;
+    (void)config;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
