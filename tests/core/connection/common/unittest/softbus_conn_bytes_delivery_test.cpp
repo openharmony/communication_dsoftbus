@@ -61,8 +61,8 @@ HWTEST_F(ConnBytesDeliveryTest, CreateDestoryDeliveryTest, TestSize.Level1)
     delivery = ConnCreateBytesDelivery(&config);
     ASSERT_EQ(delivery, nullptr);
 
-    ConnBytesHandler noopHandler = [](uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag,
-                                       int32_t module, int64_t seq) {};
+    ConnBytesHandler noopHandler = [](uint32_t connectionId, uint8_t *data, uint32_t length,
+                                       struct ConnBytesAddition addition) {};
     config.handler = noopHandler;
     delivery = ConnCreateBytesDelivery(&config);
     ASSERT_NE(delivery, nullptr);
@@ -91,13 +91,8 @@ HWTEST_F(ConnBytesDeliveryTest, DeliverTest, TestSize.Level1)
 
     auto got = std::vector<std::pair<uint32_t, int64_t>>();
     EXPECT_CALL(mock, BytesHandlerHook)
-        .WillRepeatedly([&got](uint32_t id, const uint8_t *data, uint32_t len, int32_t pid, int32_t flag,
-                            int32_t module, int64_t seq) {
-            CONN_LOGI(CONN_TEST,
-                "handler got, connection id=%{public}u, "
-                "L/P/F/M/S=%{public}u/%{public}d/%{public}d/%{public}d/%{public}ld",
-                id, len, pid, flag, module, seq);
-            auto p = std::pair<uint32_t, int64_t>(id, seq);
+        .WillRepeatedly([&got](uint32_t id, const uint8_t *data, uint32_t length, struct ConnBytesAddition addition) {
+            auto p = std::pair<uint32_t, int64_t>(id, addition.seq);
             got.push_back(p);
         });
 
@@ -110,7 +105,7 @@ HWTEST_F(ConnBytesDeliveryTest, DeliverTest, TestSize.Level1)
         auto p = std::pair<uint32_t, int64_t>(i, seq);
         delivered.push_back(p);
 
-        auto ret = ConnDeliver(delivery, i, nullptr, 0, 0, 0, 0, seq);
+        auto ret = ConnDeliver(delivery, i, nullptr, 0, {0, 0, 0, seq});
         CONN_LOGI(CONN_TEST, "delivery done, connection id=%{public}u, L/P/F/M/S=0/0/0/0/%{public}ld, ret=%{public}d",
             i, seq, ret);
         EXPECT_EQ(ret, SOFTBUS_OK) << "the " << i << "th deliver failed";

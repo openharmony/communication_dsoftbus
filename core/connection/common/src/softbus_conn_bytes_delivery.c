@@ -34,20 +34,18 @@ static ConnPriority FlagToPriority(int32_t flag)
 }
 
 struct ConnBytesDeliveryItem *ConnCreateBytesDeliveryItem(
-    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq)
+    uint32_t connectionId, uint8_t *data, uint32_t length, struct ConnBytesAddition addition)
 {
     struct ConnBytesDeliveryItem *item = SoftBusCalloc(sizeof(struct ConnBytesDeliveryItem));
     CONN_CHECK_AND_RETURN_RET_LOGE(item != NULL, NULL, CONN_COMMON, "malloc failed");
 
-    ConnQueueItemConstruct((struct ConnQueueItem *)item, pid, FlagToPriority(flag));
+    ConnQueueItemConstruct((struct ConnQueueItem *)item, addition.pid, FlagToPriority(addition.flag));
 
     item->connectionId = connectionId;
     item->data = data;
-    item->len = len;
-    item->pid = pid;
-    item->flag = flag;
-    item->module = module;
-    item->seq = seq;
+    item->length = length;
+    item->addition = addition;
+
     return item;
 }
 
@@ -142,8 +140,7 @@ static void *DeliverTask(void *arg)
             continue;
         }
 
-        delivery->config.handler(
-            item->connectionId, item->data, item->len, item->pid, item->flag, item->module, item->seq);
+        delivery->config.handler(item->connectionId, item->data, item->length, item->addition);
         ConnDestroyBytesDeliveryItem(item);
     } while (true);
 
@@ -171,12 +168,12 @@ static void PullDeliverTaskIfNeed(ConnBytesDelivery *delivery)
     SoftBusMutexUnlock(&delivery->lock);
 }
 
-int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid,
-    int32_t flag, int32_t module, int64_t seq)
+int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t *data, uint32_t length,
+    const struct ConnBytesAddition addition)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(delivery != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "delivery is null");
 
-    struct ConnBytesDeliveryItem *item = ConnCreateBytesDeliveryItem(connectionId, data, len, pid, flag, module, seq);
+    struct ConnBytesDeliveryItem *item = ConnCreateBytesDeliveryItem(connectionId, data, length, addition);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         item != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON, "%{public}s, create queue item failed", delivery->config.name);
 

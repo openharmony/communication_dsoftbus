@@ -22,6 +22,8 @@
 
 #include "conn_log.h"
 
+#define FACTOR_S_MS_US 1000
+
 void ConnQueueItemConstruct(struct ConnQueueItem *item, int32_t id, ConnPriority priority)
 {
     CONN_CHECK_AND_RETURN_LOGE(item != NULL, CONN_COMMON, "item is null");
@@ -166,7 +168,8 @@ void ConnDestroyQueue(ConnFairPriorityQueue *queue)
     SoftBusCondDestroy(&queue->enqueueCondition);
     SoftBusCondDestroy(&queue->dequeueCondition);
 
-    struct PriorityQueue *it = NULL, *next = NULL;
+    struct PriorityQueue *it = NULL;
+    struct PriorityQueue *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &queue->queues, struct PriorityQueue, node) {
         ListDelete(&it->node);
         DestroyPriorityQueue(it);
@@ -202,9 +205,9 @@ static int32_t WaitCondition(SoftBusCond *condition, SoftBusMutex *mutex, int32_
     int32_t ret = SoftBusGetTime(&now);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "get time failed: error=%{public}d", ret);
 
-    int64_t us = timeoutMs * 1000 + now.usec;
-    now.sec += us / (1000 * 1000);
-    now.usec = us % (1000 * 1000);
+    int64_t us = timeoutMs * FACTOR_S_MS_US + now.usec;
+    now.sec += us / (FACTOR_S_MS_US * FACTOR_S_MS_US);
+    now.usec = us % (FACTOR_S_MS_US * FACTOR_S_MS_US);
     return SoftBusCondWait(condition, mutex, &now);
 }
 
@@ -215,6 +218,7 @@ int32_t ConnEnqueue(ConnFairPriorityQueue *queue, struct ConnQueueItem *item, in
 
     int32_t code = SoftBusMutexLock(&queue->lock);
     CONN_CHECK_AND_RETURN_RET_LOGW(code == SOFTBUS_OK, code, CONN_COMMON, "lock queue failed: error=%{public}d", code);
+    bool afterWait = false;
     do {
         struct PriorityQueue *pq = GetOrCreatePriorityQueue(queue, item->id);
         if (pq == NULL) {
@@ -233,6 +237,11 @@ int32_t ConnEnqueue(ConnFairPriorityQueue *queue, struct ConnQueueItem *item, in
                 item->priority, code);
             break;
         }
+        if (afterWait) {
+            CONN_LOGE(CONN_COMMON, "can not enqueue item after being awake up");
+            code = SOFTBUS_CONN_INTERNAL_ERR;
+            break;
+        }
         CONN_LOGE(CONN_COMMON, "queue is full, id=%{public}d, priority=%{public}d", item->id, item->priority);
         code = WaitCondition(&queue->enqueueCondition, &queue->lock, timeoutMs);
         if (code != SOFTBUS_OK) {
@@ -241,6 +250,7 @@ int32_t ConnEnqueue(ConnFairPriorityQueue *queue, struct ConnQueueItem *item, in
                 item->priority, code);
             break;
         }
+        afterWait = true;
     } while (true);
     if (code == SOFTBUS_OK) {
         SoftBusCondBroadcast(&queue->dequeueCondition);
@@ -260,7 +270,8 @@ static int32_t DequeueInner(ConnFairPriorityQueue *queue, ConnPriority least, st
 
 static int32_t DequeueFairly(ConnFairPriorityQueue *queue, struct ConnQueueItem **outMsg)
 {
-    struct PriorityQueue *it = NULL, *next = NULL;
+    struct PriorityQueue *it = NULL;
+    struct PriorityQueue *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &queue->queues, struct PriorityQueue, node) {
         ListDelete(&it->node);
         int32_t ret = Dequeue(it, CONN_PRIORITY_LOW, outMsg);
@@ -284,6 +295,7 @@ int32_t ConnDequeue(ConnFairPriorityQueue *queue, struct ConnQueueItem **outMsg,
 
     int32_t code = SoftBusMutexLock(&queue->lock);
     CONN_CHECK_AND_RETURN_RET_LOGW(code == SOFTBUS_OK, code, CONN_COMMON, "lock queue failed: error=%{public}d", code);
+    bool afterWait = false;
     do {
         code = DequeueInner(queue, CONN_PRIORITY_MIDDLE, outMsg);
         if (code != QUEUE_EMPTY) {
@@ -297,6 +309,11 @@ int32_t ConnDequeue(ConnFairPriorityQueue *queue, struct ConnQueueItem **outMsg,
         if (code != QUEUE_EMPTY) {
             break;
         }
+        if (afterWait) {
+            CONN_LOGE(CONN_COMMON, "can not dequeue item after being awake up");
+            code = SOFTBUS_CONN_INTERNAL_ERR;
+            break;
+        }
 
         code = WaitCondition(&queue->dequeueCondition, &queue->lock, timeoutMs);
         if (code == SOFTBUS_TIMOUT) {
@@ -307,6 +324,7 @@ int32_t ConnDequeue(ConnFairPriorityQueue *queue, struct ConnQueueItem **outMsg,
             CONN_LOGE(CONN_COMMON, "wait dequeue condition failed: error=%{public}d", code);
             break;
         }
+        afterWait = true;
     } while (true);
     if (code == SOFTBUS_OK) {
         SoftBusCondBroadcast(&queue->enqueueCondition);
