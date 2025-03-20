@@ -99,11 +99,6 @@ bool IsAuthPreLinkNodeExist(uint32_t requestId)
     return GetInterface()->IsAuthPreLinkNodeExist(requestId);
 }
 
-int32_t UpdateAuthPreLinkDeviceKeyIdById(uint32_t requestId, bool isRemote, int32_t deviceKeyId)
-{
-    return GetInterface()->UpdateAuthPreLinkDeviceKeyIdById(requestId, isRemote, deviceKeyId);
-}
-
 int32_t GetFd(uint64_t connId)
 {
     return GetInterface()->GetFd(connId);
@@ -222,11 +217,6 @@ int32_t DataDecompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *out
 const NodeInfo *LnnGetLocalNodeInfo(void)
 {
     return GetInterface()->LnnGetLocalNodeInfo();
-}
-
-int32_t UpdateAuthPreLinkDeviceKeyById(uint32_t requestId, uint8_t *deviceKey, uint32_t keyLen)
-{
-    return GetInterface()->UpdateAuthPreLinkDeviceKeyById(requestId, deviceKey, keyLen);
 }
 
 int32_t LnnGetProxyPort(const NodeInfo *info)
