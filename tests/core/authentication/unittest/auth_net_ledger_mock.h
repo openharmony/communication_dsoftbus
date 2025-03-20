@@ -67,6 +67,7 @@ public:
     virtual void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -103,6 +104,7 @@ public:
     MOCK_METHOD3(LnnDumpRemotePtk, void(const char *, const char *, const char *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey, uint8_t *, uint32_t));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

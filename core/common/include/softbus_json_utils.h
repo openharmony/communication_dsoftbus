@@ -31,6 +31,8 @@ int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, 
 
 bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, uint32_t targetLen);
 
+bool GetJsonObjectNumber8Item(const cJSON *json, const char * const string, uint8_t *target);
+
 bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target);
 
 bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target);
@@ -64,6 +66,12 @@ char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * co
 bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *array, int32_t arrayLen);
 
 bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *array, int32_t arrayLen);
+
+cJSON *CreateJsonObjectFromString(const char *jsonStr);
+
+int GetArrayItemNum(const cJSON *jsonObj);
+
+cJSON *GetArrayItemFromArray(const cJSON *jsonArr, int index);
 #ifdef __cplusplus
 #if __cplusplus
 }

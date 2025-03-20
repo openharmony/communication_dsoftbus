@@ -147,16 +147,24 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
 {
+    HiChainAuthParam hiChainParam;
     int64_t authSeq = 0;
     const char *udid = "testdata";
     const char *uid = "testdata";
     int32_t ret;
 
-    ret = HichainStartAuth(authSeq, nullptr, uid, DEFALUT_USERID);
+    hiChainParam.userId = DEFALUT_USERID;
+    hiChainParam.udid = NULL;
+    hiChainParam.uid = (char *)uid;
+
+    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainStartAuth(authSeq, udid, nullptr, DEFALUT_USERID);
+    hiChainParam.udid = (char *)udid;
+    hiChainParam.uid = NULL;
+    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
+    hiChainParam.uid = (char *)uid;
+    (void)HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
 }
 
 /*
@@ -172,9 +180,9 @@ HWTEST_F(AuthTest, HICHAIN_PROCESS_DATA_Test_001, TestSize.Level1)
     uint32_t len = TEST_DATA_LEN;
     int32_t ret;
 
-    ret = HichainProcessData(authSeq, nullptr, len);
+    ret = HichainProcessData(authSeq, nullptr, len, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainProcessData(authSeq, data, len);
+    ret = HichainProcessData(authSeq, data, len, HICHAIN_AUTH_DEVICE);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 

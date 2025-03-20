@@ -32,6 +32,19 @@ extern "C" {
 #define PC_PROOF_NON_CONSISTENT_ERRCODE 2046820418
 
 typedef struct {
+    char *udid;
+    char *uid;
+    char *credId;
+    int32_t userId;
+} HiChainAuthParam;
+
+typedef enum {
+    HICHAIN_AUTH_DEVICE = 0,
+    HICHAIN_AUTH_IDENTITY_SERVICE,
+    HICHAIN_AUTH_BUTT
+} HiChainAuthMode;
+
+typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceNotTrusted)(const char *udid, int32_t localUserId);
@@ -40,8 +53,8 @@ typedef struct {
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int32_t userId);
-int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
+int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode);
+int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode);
 uint32_t HichainGetJoinedGroups(int32_t groupType);
 int32_t RegHichainSaStatusListener(void);
 int32_t UnRegHichainSaStatusListener(void);

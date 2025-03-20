@@ -22,6 +22,9 @@
 #include "auth_hichain_deps_mock.h"
 #include "softbus_error_code.h"
 
+#include "auth_session_json.c"
+#include "auth_hichain_adapter.c"
+
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
@@ -56,6 +59,7 @@ void AuthHichainMockTest::TearDown() {}
 HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
+    HiChainAuthParam hiChainParam = { 0 };
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {
         return;
@@ -63,10 +67,13 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg));
     const char *udid = "123456";
     const char *uid = "123";
-    static char *ptr = GenDeviceLevelParam(udid, uid, true, DEFALUT_USERID);
+    hiChainParam.udid = (char *)udid;
+    hiChainParam.uid = (char *)uid;
+    hiChainParam.userId = DEFALUT_USERID;
+    static char *ptr = GenDeviceLevelParam(&hiChainParam);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, AddStringToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    ptr = GenDeviceLevelParam(udid, uid, true, DEFALUT_USERID);
+    ptr = GenDeviceLevelParam(&hiChainParam);
     EXPECT_EQ(ptr, nullptr);
     cJSON *msg1 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg1 == nullptr) {
@@ -76,7 +83,7 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
     EXPECT_CALL(hichainMock, AddBoolToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr));
-    ptr = GenDeviceLevelParam(udid, uid, true, DEFALUT_USERID);
+    ptr = GenDeviceLevelParam(&hiChainParam);
     EXPECT_EQ(ptr, nullptr);
 }
 
@@ -234,11 +241,29 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
         SoftBusFree(msg3);
         return;
     }
+    cJSON *msg5 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    if (msg5 == nullptr) {
+        SoftBusFree(msg3);
+        SoftBusFree(msg4);
+        return;
+    }
+
+    cJSON *msg6 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    if (msg6 == nullptr) {
+        SoftBusFree(msg3);
+        SoftBusFree(msg4);
+        SoftBusFree(msg5);
+        return;
+    }
+
     EXPECT_CALL(hichainMock, AuthSessionGetUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hichainMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(msg3)).WillOnce(Return(msg4));
+    EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(msg3)).WillOnce(Return(msg4))
+        .WillOnce(Return(msg5)).WillOnce(Return(msg6));
     EXPECT_CALL(hichainMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(hichainMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, AddStringToJsonObject).WillOnce(Return(true)).WillOnce(Return(true))
+        .WillOnce(Return(true)).WillOnce(Return(true)).WillOnce(Return(true)).WillOnce(Return(true))
+        .WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, AddBoolToJsonObject).WillRepeatedly(Return(true));
     char msgStr[10] = {0};
     const char *val = "returnStr";
@@ -246,6 +271,14 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
     EXPECT_CALL(hichainMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr)).WillRepeatedly(Return(msgStr));
     char *ptr = OnRequest(authSeq, operationCode, reqParams);
     EXPECT_EQ(ptr, nullptr);
+
+    authSeq = 0;
+    ptr = OnRequest(authSeq, operationCode, reqParams);
+    EXPECT_EQ(ptr, nullptr);
+
+    ptr = OnRequest(authSeq, operationCode, reqParams);
+    EXPECT_EQ(ptr, nullptr);
+
     ptr = OnRequest(authSeq, operationCode, reqParams);
     EXPECT_NE(ptr, nullptr);
 }
@@ -293,14 +326,19 @@ HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
 HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
+    HiChainAuthParam hiChainParam = { 0 };
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr));
     int64_t authSeq = TEST_AUTH_SEQ;
     const char *udid = "udidTest";
     const char *uid = "uidTest";
     const char *groupInfo = "groupInfoTest";
-    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, nullptr));
+
+    hiChainParam.udid = (char *)udid;
+    hiChainParam.uid = (char *)uid;
+    hiChainParam.userId = DEFALUT_USERID;
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(hiChainParam.udid, nullptr));
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(nullptr, groupInfo));
-    int32_t ret = HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
+    int32_t ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {
@@ -313,4 +351,107 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
     EXPECT_CALL(hichainMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
 }
+
+/*
+ * @tc.name: PACK_EXTERNAL_AUTH_INFO_001
+ * @tc.desc: PackExternalAuthInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainMockTest, PACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
+{
+    AuthHichainInterfaceMock hichainMock;
+    int32_t ret = SOFTBUS_OK;
+
+    JsonObj *obj = JSON_CreateObject();
+    EXPECT_NE(obj, NULL);
+
+    EXPECT_CALL(hichainMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, JSON_AddStringToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+
+    ret = PackExternalAuthInfo(obj);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+
+    ret = PackExternalAuthInfo(obj);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+
+    ret = PackExternalAuthInfo(obj);
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+
+    ret = PackExternalAuthInfo(obj);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+
+    ret = PackExternalAuthInfo(obj);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
+
+    ret = PackExternalAuthInfo(obj);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: UNPACK_EXTERNAL_AUTH_INFO_001
+ * @tc.desc: UnpackExternalAuthInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
+{
+    AuthHichainInterfaceMock hichainMock;
+    AuthSessionInfo info = { 0 };
+    const char *credID = "1234";
+
+    JsonObj *obj = JSON_CreateObject();
+    EXPECT_NE(obj, NULL);
+
+    EXPECT_CALL(hichainMock, JSON_GetStringFromOject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, LnnGetLocalNodeInfoSafe).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
+    EXPECT_CALL(hichainMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, IdServiceQueryCredential).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, IdServiceGetCredIdFromCredList).WillOnce(Return(NULL))
+        .WillRepeatedly(Return((char *)credID));
+    EXPECT_CALL(hichainMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hichainMock, IdServiceDestroyCredentialList).Times(2);
+
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_EQ(info.credId, NULL);
+
+    info.version = (SoftBusVersion)102;  // SOFTBUS_NEW_V3
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_EQ(info.credId, NULL);
+
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_EQ(info.credId, NULL);
+
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_EQ(info.credId, NULL);
+
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_EQ(info.credId, NULL);
+
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_EQ(info.credId, NULL);
+
+    UnpackExternalAuthInfo(obj, &info);
+    EXPECT_NE(info.credId, NULL);
+
+    JSON_Delete(obj);
+}
+
 } // namespace OHOS
