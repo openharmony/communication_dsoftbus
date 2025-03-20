@@ -17,7 +17,7 @@ import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-ohos_fuzztest("TriggerBleRangeFuzzTest") {
+ohos_fuzztest("BleRangeFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file =
       "$dsoftbus_root_path/tests/sdk/bus_center/fuzztest/blerange_fuzzer"
