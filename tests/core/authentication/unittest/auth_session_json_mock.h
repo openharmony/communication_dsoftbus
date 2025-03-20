@@ -130,7 +130,7 @@ public:
     MOCK_METHOD4(IsPotentialTrustedDevice, bool (TrustedRelationIdType, const char *, bool, bool));
     MOCK_METHOD1(IsAuthPreLinkNodeExist, bool (uint32_t));
     MOCK_METHOD1(GetFd, int32_t (uint64_t));
-    MOCK_METHOD5(AddToAuthPreLinkList, int32_t (uint32_t, int32_t, ConnectionAddr *));
+    MOCK_METHOD3(AddToAuthPreLinkList, int32_t (uint32_t, int32_t, ConnectionAddr *));
     MOCK_METHOD3(GetSessionKeyProfile, bool (int32_t, uint8_t *, uint32_t *));
     MOCK_METHOD1(LnnGetAuthPort, int32_t (const NodeInfo *));
     MOCK_METHOD1(LnnGetSessionPort, int32_t (const NodeInfo *));
