@@ -83,7 +83,8 @@ static bool g_isScreenOnOnce = false;
 static atomic_bool g_isCloudSyncEnd = false;
 
 static IBleRangeInnerCallback g_bleRangeCallback = {
-    .onRangeDone = NULL,
+    .onRangeResult = NULL,
+    .onRangeStateChange = NULL,
 };
 
 static void InitHbConditionState(void)
@@ -1175,13 +1176,20 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     return SOFTBUS_OK;
 }
 
-int32_t LnnTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t LnnTriggerSleRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(
-        pkgName != NULL && callerId != NULL && mode != NULL, SOFTBUS_INVALID_PARAM, LNN_INIT, "invalid param");
-    LNN_LOGI(LNN_HEART_BEAT,
-        "pkgName=%{public}s, callerId=%{public}s, connFlag=%{public}d, duration=%{public}d, replyFlag=%{public}d",
-        pkgName, callerId, mode->connFlag, mode->duration, mode->replyFlag);
+    (void)pkgName;
+    (void)config;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL && config != NULL && config->medium != SLE_CONN_HADM,
+        SOFTBUS_INVALID_PARAM, LNN_INIT, "invalid param");
+    const HbMode *mode =  &config->configInfo.heartbeat.mode;
+    LNN_LOGI(LNN_HEART_BEAT, "pkgName=%{public}s, connFlag=%{public}d, duration=%{public}d, replyFlag=%{public}d",
+        pkgName, mode->connFlag, mode->duration, mode->replyFlag);
     LnnProcessSendOnceMsgPara msgPara = {
         .hbType = HEARTBEAT_TYPE_BLE_V0,
         .strategyType = STRATEGY_HB_SEND_SINGLE,
@@ -1197,7 +1205,7 @@ int32_t LnnTriggerHbForMeasureDistance(const char *pkgName, const char *callerId
         LNN_LOGE(LNN_HEART_BEAT, "HB async set high param fail");
     }
     if (LnnAsyncCallbackDelayHelper(
-            GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL, HB_START_DELAY_LEN) != SOFTBUS_OK) {
+        GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL, HB_START_DELAY_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB async set normal param fail");
     }
     if (LnnStartHbByTypeAndStrategyEx(&msgPara) != SOFTBUS_OK) {
@@ -1322,30 +1330,30 @@ static int32_t LnnRegisterHeartbeatEvent(void)
     return SOFTBUS_OK;
 }
 
-static void HbRangeCallback(SoftBusRangeHandle handle, const SoftBusRankResult *result)
+static void HbRangeCallback(SoftBusRangeHandle handle, const RangeResult *result)
 {
     if (handle.module != MODULE_BLE_HEARTBEAT || result == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "invalid handle=%{public}d", handle.module);
         return;
     }
     char *anonyNetworkId = NULL;
-    Anonymize(result->identity, &anonyNetworkId);
-    LNN_LOGD(LNN_HEART_BEAT, "handle=%{public}d, rank=%{public}d, subrank=%{public}d, networkId=%{public}s",
-        handle.module, result->rank, result->subrank, AnonymizeWrapper(anonyNetworkId));
+    Anonymize(result->networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "module=%{public}d, networkId=%{public}s",
+        handle.module, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
 
-    BleRangeInnerInfo info = {
-        .range = result->rank,
-        .subRange = result->subrank,
-        .confidence = result->confidence,
-        .distance = result->distance
+    RangeResultInnerInfo info = {
+        .medium = BLE_ADV_HB,
+        .distance = result->distance,
+        .length = result->length,
+        .addition = result->addition,
     };
-    if (strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, result->identity, SOFTBUS_DEV_IDENTITY_LEN) != EOK) {
+    if (strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, result->networkId, NETWORK_ID_BUF_LEN) != EOK) {
         LNN_LOGW(LNN_STATE, "copy networkId fail");
         return;
     }
-    if (g_bleRangeCallback.onRangeDone != NULL) {
-        g_bleRangeCallback.onRangeDone(&info);
+    if (g_bleRangeCallback.onRangeResult != NULL) {
+        g_bleRangeCallback.onRangeResult(&info);
     }
 }
 
@@ -1368,7 +1376,7 @@ int32_t LnnInitHeartbeat(void)
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     static SoftBusRangeCallback cb = {
-        .onRangeDone = HbRangeCallback,
+        .onRangeResult = HbRangeCallback,
     };
     (void)SoftBusRegRangeCb(MODULE_BLE_HEARTBEAT, &cb);
     InitHbConditionState();
@@ -1455,10 +1463,10 @@ void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback)
         return;
     }
     LNN_LOGI(LNN_HEART_BEAT, "regist ble range cb");
-    g_bleRangeCallback.onRangeDone = callback->onRangeDone;
+    g_bleRangeCallback.onRangeResult = callback->onRangeResult;
 }
 
 void LnnUnregBleRangeCb(void)
 {
-    g_bleRangeCallback.onRangeDone = NULL;
+    g_bleRangeCallback.onRangeResult = NULL;
 }

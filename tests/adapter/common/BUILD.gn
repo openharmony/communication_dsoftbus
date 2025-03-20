@@ -44,6 +44,7 @@ ohos_unittest("LnnWifiServiceMonitorTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",

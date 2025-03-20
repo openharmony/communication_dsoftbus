@@ -131,19 +131,19 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return GetBusCenterManagerInterface()->ServerIpcSetDataLevel(dataLevel);
 }
 
-int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName)
 {
-    return GetBusCenterManagerInterface()->ServerIpcRegBleRangeCb(pkgName);
+    return GetBusCenterManagerInterface()->ServerIpcRegRangeCbForMsdp(pkgName);
 }
 
-int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName)
 {
-    return GetBusCenterManagerInterface()->ServerIpcUnregBleRangeCb(pkgName);
+    return GetBusCenterManagerInterface()->ServerIpcUnregRangeCbForMsdp(pkgName);
 }
 
-int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    return GetBusCenterManagerInterface()->ServerIpcTriggerHbForMeasureDistance(pkgName, callerId, mode);
+    return GetBusCenterManagerInterface()->ServerIpcTriggerRangeForMsdp(pkgName, config);
 }
 
 int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)

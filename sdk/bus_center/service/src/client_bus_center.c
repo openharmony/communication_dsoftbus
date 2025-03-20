@@ -353,10 +353,11 @@ int32_t SetDataLevel(const DataLevel *dataLevel)
     return SetDataLevelInner(dataLevel);
 }
 
-int32_t RegBleRangeCb(const char *pkgName, IBleRangeCb *callback)
+int32_t RegisterRangeCallbackForMsdp(const char *pkgName, IRangeCallback *callback)
 {
     LNN_LOGI(LNN_STATE, "enter");
-    if (pkgName == NULL || callback == NULL || callback->onBleRangeInfoReceived == NULL) {
+    if (pkgName == NULL || callback == NULL || callback->onRangeResult == NULL ||
+        callback->onRangeStateChange == NULL) {
         LNN_LOGE(LNN_STATE, "pkgName or callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -369,10 +370,10 @@ int32_t RegBleRangeCb(const char *pkgName, IBleRangeCb *callback)
         LNN_LOGE(LNN_STATE, "CommonInit failed");
         return ret;
     }
-    return RegBleRangeCbInner(pkgName, callback);
+    return RegRangeCbForMsdpInner(pkgName, callback);
 }
 
-int32_t UnregBleRangeCb(const char *pkgName)
+int32_t UnregisterRangeCallbackForMsdp(const char *pkgName)
 {
     if (pkgName == NULL) {
         LNN_LOGE(LNN_STATE, "pkgName is null");
@@ -382,7 +383,7 @@ int32_t UnregBleRangeCb(const char *pkgName)
         LNN_LOGE(LNN_STATE, "pkgName is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    return UnregBleRangeCbInner(pkgName);
+    return UnregRangeCbForMsdpInner(pkgName);
 }
 
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin)
@@ -644,9 +645,9 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
     return ShiftLNNGearInner(pkgName, callerId, targetNetworkId, mode);
 }
 
-int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    if (pkgName == NULL || callerId == NULL || mode == NULL) {
+    if (pkgName == NULL || config == NULL) {
         LNN_LOGE(LNN_STATE, "invalid range para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -654,12 +655,7 @@ int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, c
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
-    if (len == 0 || len >= CALLER_ID_MAX_LEN) {
-        LNN_LOGE(LNN_STATE, "invalid range callerId len=%{public}zu", len);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return TriggerHbForMeasureDistanceInner(pkgName, callerId, mode);
+    return TriggerRangeForMsdpInner(pkgName, config);
 }
 
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)

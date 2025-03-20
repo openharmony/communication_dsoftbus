@@ -156,7 +156,8 @@ typedef struct {
 } IDataLevelChangeCallback;
 
 typedef struct {
-    void (*onRangeDone)(const BleRangeInnerInfo *info);
+    void (*onRangeResult)(const RangeResultInnerInfo *info);
+    void (*onRangeStateChange)(const RangeState state);
 } IBleRangeInnerCallback;
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
