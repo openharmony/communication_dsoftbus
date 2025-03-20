@@ -180,6 +180,7 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.
  */
 HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZE_DATA_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -196,17 +197,17 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZE_DATA_TEST_001, TestSize.Level1
     AuthSessionInfo info = {0};
     AuthDeviceKeyInfo deviceKey = {0};
     const char *key = "encnormalizedkeytest";
-    int32_t ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey);
+    int32_t ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey);
+    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey);
+    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey);
+    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey);
+    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey);
+    ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -288,6 +289,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     EXPECT_CALL(mocker, IsSupportFeatureByCapaBit).WillRepeatedly(Return(false));
     EXPECT_CALL(mocker, JSON_AddBoolToObject).WillOnce(Return(false))
@@ -297,29 +299,29 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
-    int32_t ret = PackNormalizedData(&info, &obj, &nodeInfo);
+    int32_t ret = PackNormalizedData(&info, &obj, &nodeInfo, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, JSON_GetStringFromOject).WillOnce(Return(false))
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR);
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR);
+    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
+    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
     EXPECT_EQ(info.normalizedKey, nullptr);
     if (info.normalizedKey != nullptr) {
         SoftBusFree(info.normalizedKey);
     }
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR);
+    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
     EXPECT_EQ(info.normalizedKey, nullptr);
     if (info.normalizedKey != nullptr) {
         SoftBusFree(info.normalizedKey);
     }
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR);
+    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
     EXPECT_EQ(info.normalizedKey, nullptr);
     if (info.normalizedKey != nullptr) {
         SoftBusFree(info.normalizedKey);
     }
-    ret = PackNormalizedData(&info, &obj, &nodeInfo);
+    ret = PackNormalizedData(&info, &obj, &nodeInfo, authSeq);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

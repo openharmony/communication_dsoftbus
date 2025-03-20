@@ -840,6 +840,7 @@ HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level
  */
 HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     const char *encNormalizedKey = "encnormalizedkeytest";
     SessionKey sessionKey = {
         .len = SESSION_KEY_LENGTH,
@@ -853,7 +854,7 @@ HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Leve
     EXPECT_NE(SOFTBUS_OK, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
     ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     AuthDeviceKeyInfo deviceKey;
-    EXPECT_NE(SOFTBUS_OK, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey));
+    EXPECT_NE(SOFTBUS_OK, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey, authSeq));
 }
 
 /*
@@ -864,6 +865,7 @@ HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Leve
  */
 HWTEST_F(AuthSessionJsonTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, nullptr);
     SessionKey sessionKey;
@@ -881,12 +883,12 @@ HWTEST_F(AuthSessionJsonTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
     const char *encNormalizedKey = "encnormalizedkeytest";
     EXPECT_EQ(true, JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey));
-    UnpackNormalizedKey(obj, &info, NORMALIZED_NOT_SUPPORT);
-    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_NOT_SUPPORT, authSeq);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT, authSeq);
     info.isServer = true;
     info.normalizedKey = nullptr;
     EXPECT_EQ(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)), EOK);
-    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT, authSeq);
     info.isConnectServer = true;
     EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
