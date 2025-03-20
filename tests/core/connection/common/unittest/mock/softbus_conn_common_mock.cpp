@@ -52,6 +52,16 @@ ConnAsyncFreeHook ConnCommonTestMock::asyncFreeHook_ = [](void *arg) {
     mock->FreeAsyncArgHook(arg);
 };
 
+ConnBytesHandler ConnCommonTestMock::bytesHandler_ = [](uint32_t id, uint8_t *data, uint32_t length,
+                                                         struct ConnBytesAddition addition) {
+    auto mock = ConnCommonTestMock::GetMock();
+    if (mock == nullptr) {
+        ADD_FAILURE() << "mock is nullptr";
+        return;
+    }
+    mock->BytesHandlerHook(id, data, length, addition);
+};
+
 ConnCommonTestMock::ConnCommonTestMock()
 {
     mock.store(this);

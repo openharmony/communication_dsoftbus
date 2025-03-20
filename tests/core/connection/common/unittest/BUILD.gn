@@ -100,3 +100,33 @@ ohos_unittest("SoftbusConnAsyncHelperTest") {
     "hilog:libhilog",
   ]
 }
+
+ohos_unittest("SoftbusConnQueueTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock",
+  ]
+
+  sources = [
+    "$dsoftbus_root_path/core/connection/common/src/softbus_conn_bytes_delivery.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_conn_fair_priority_queue.c",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock/softbus_conn_common_mock.cpp",
+    "softbus_conn_bytes_delivery_test.cpp",
+    "softbus_conn_fair_priority_queue_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
