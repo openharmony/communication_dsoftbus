@@ -932,7 +932,7 @@ static int32_t PostBytesForSessionKey(int32_t fd, const AuthDataHead *head, cons
         }
         AuthDataHead tmpHead = *head;
         tmpHead.module = MODULE_SESSION_KEY_AUTH;
-        int32_t ret = PackAuthData(&tmpHead, data, buf, size);
+        ret = PackAuthData(&tmpHead, data, buf, size);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "PackAuthData fail");
             SoftBusFree(buf);
