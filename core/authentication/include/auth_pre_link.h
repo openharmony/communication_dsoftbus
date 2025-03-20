@@ -30,10 +30,6 @@ extern "C" {
 #endif
 
 typedef struct {
-    int32_t localDeviceKeyId;
-    int32_t remoteDeviceKeyId;
-    uint8_t localDeviceKey[SESSION_KEY_LENGTH];
-    uint32_t keyLen;
     char uuid[UUID_BUF_LEN];
     ConnectionAddr connAddr;
     int32_t fd;
@@ -51,13 +47,10 @@ typedef struct {
 
 int32_t InitAuthPreLinkList(void);
 bool IsAuthPreLinkNodeExist(uint32_t requestId);
-int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, int32_t localDeviceKeyId,
-    int32_t remoteDeviceKeyId, ConnectionAddr *connAddr);
+int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr);
 int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode);
 int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *reuseNode);
 int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, char *uuid);
-int32_t UpdateAuthPreLinkDeviceKeyById(uint32_t requestId, uint8_t *deviceKey, uint32_t keyLen);
-int32_t UpdateAuthPreLinkDeviceKeyIdById(uint32_t requestId, bool isRemote, int32_t deviceKeyId);
 void DelAuthPreLinkById(uint32_t requestId);
 void DelAuthPreLinkByUuid(char *uuid);
 void DeinitAuthPreLinkList(void);

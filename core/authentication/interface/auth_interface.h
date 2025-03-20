@@ -98,6 +98,7 @@ typedef struct {
         } sessionInfo;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
+    DeviceKeyId deviceKeyId;
 } AuthConnInfo;
 
 typedef enum {

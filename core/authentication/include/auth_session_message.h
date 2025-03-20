@@ -49,13 +49,10 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
     const AuthSessionInfo *info);
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info);
-int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len);
+int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len, int64_t authSeq);
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len);
-
-int32_t PostAuthTestInfoMessage(int64_t authSeq, const AuthSessionInfo *info);
-int32_t ProcessAuthTestDataMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len);
 
 int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data, uint32_t len);

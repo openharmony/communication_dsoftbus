@@ -1162,6 +1162,10 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         AUTH_LOGE(AUTH_CONN, "request not found, requestId=%{public}u", requestId);
         return;
     }
+    AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
+    connInfoMut->deviceKeyId.hasDeviceKeyId = request.connInfo.deviceKeyId.hasDeviceKeyId;
+    connInfoMut->deviceKeyId.localDeviceKeyId = request.connInfo.deviceKeyId.localDeviceKeyId;
+    connInfoMut->deviceKeyId.remoteDeviceKeyId = request.connInfo.deviceKeyId.remoteDeviceKeyId;
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)request.traceId);
     if (request.type == REQUEST_TYPE_RECONNECT && connInfo != NULL) {
         HandleReconnectResult(&request, connId, result, connInfo->type);
@@ -1334,13 +1338,6 @@ static int32_t AuthSetTcpKeepaliveByConnInfo(const AuthConnInfo *connInfo, ModeC
     DelDupAuthManager(auth[0]);
     DelDupAuthManager(auth[1]);
     return ret;
-}
-static void HandleAuthTestInfoData(const AuthDataHead *head, const uint8_t *data)
-{
-    if (AuthSessionProcessAuthTestData(head->seq, data, head->len) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "perform recv auth test data fail. seq=%{public}" PRId64, head->seq);
-        return;
-    }
 }
 
 static void HandleDeviceInfoData(
@@ -1581,9 +1578,6 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_AUTH:
             HandleAuthData(connInfo, head, data);
-            break;
-        case DATA_TYPE_TEST_AUTH:
-            HandleAuthTestInfoData(head, data);
             break;
         case DATA_TYPE_DEVICE_INFO:
             HandleDeviceInfoData(connId, connInfo, fromServer, head, data);

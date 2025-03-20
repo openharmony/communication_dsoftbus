@@ -1178,42 +1178,6 @@ static int32_t LnnConvertSessionAddrToAuthConnInfo(const ConnectionAddr *addr, A
     return SOFTBUS_OK;
 }
 
-static int32_t GetDeviceKeyForSessionKey(LnnConntionInfo *connInfo)
-{
-    if (connInfo == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t connId;
-    int32_t rc;
-    if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
-        &connId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "TransGetConnByChanId fail");
-        return SOFTBUS_INVALID_FD;
-    }
-    uint8_t deviceKey[SESSION_KEY_LENGTH] = { 0 };
-    uint32_t keyLen = 0;
-    rc = AddToAuthPreLinkList(connInfo->requestId, connId, connInfo->addr.info.session.localDeviceKeyId,
-        connInfo->addr.info.session.remoteDeviceKeyId, &connInfo->addr);
-    if (rc != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
-    }
-    if (!GetSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId, deviceKey, &keyLen)) {
-        LNN_LOGE(LNN_STATE, "get auth key fail");
-        keyLen = 0;
-        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    }
-    if (UpdateAuthPreLinkDeviceKeyById(connInfo->requestId, deviceKey, keyLen) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "update pre link device key fail");
-        keyLen = 0;
-        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    }
-    (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    keyLen = 0;
-    DelSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId);
-    return SOFTBUS_OK;
-}
-
 static int32_t CheckConnFsmValid(LnnConnectionFsm *connFsm, LnnConntionInfo *connInfo)
 {
     if (CheckDeadFlag(connFsm, true)) {
@@ -1234,6 +1198,27 @@ static void CheckDupOk(LnnConnectionFsm *connFsm, NodeInfo *deviceInfo, bool *du
         LNN_LOGI(LNN_BUILDER, "join dup node info ok");
     }
 }
+
+static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthConnInfo *authConn)
+{
+    int32_t connId;
+    if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
+        &connId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "TransGetConnByChanId fail");
+        return SOFTBUS_INVALID_FD;
+    }
+    rc = AddToAuthPreLinkList(connInfo->requestId, connId, &connInfo->addr);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
+    }
+    authConn->deviceKeyId.localDeviceKeyId = connInfo->addr.info.session.localDeviceKeyId;
+    authConn->deviceKeyId.remoteDeviceKeyId = connInfo->addr.info.session.remoteDeviceKeyId;
+    if (authConn->deviceKeyId.localDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID &&
+        authConn->deviceKeyId.remoteDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID) {
+        authConn->deviceKeyId.hasDeviceKeyId = true;
+    }
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -1247,6 +1232,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     LNN_LOGI(LNN_BUILDER, "begin join request, [id=%{public}u], peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
+    authConn.deviceKeyId.hasDeviceKeyId = false;
     if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
         rc = LnnConvertSessionAddrToAuthConnInfo(&connInfo->addr, &authConn);
         if (rc != SOFTBUS_OK) {
@@ -1256,9 +1242,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     } else if (connInfo->addr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
-        if (GetDeviceKeyForSessionKey(connInfo) != SOFTBUS_OK) {
-            return SOFTBUS_INVALID_FD;
-        }
+        CheckDeviceKeyByPreLinkNode(connInfo, &authConn);
     } else {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
     }
