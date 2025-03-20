@@ -32,12 +32,14 @@
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_lane_def.h"
+#include "lnn_decision_db.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
 #include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
+#include "lnn_ohos_account.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_crypto.h"
@@ -1298,6 +1300,23 @@ static void ReversionLastAuthSeq(NodeInfo *info)
     }
 }
 
+static void UpdateTrustedDb(int64_t accountId, const char *deviceId)
+{
+    int64_t localAccountId = 0;
+    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &localAccountId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local accountId fail");
+        return;
+    }
+    int32_t localUserId = GetActiveOsAccountIds();
+    if ((localAccountId == accountId && LnnIsDefaultOhosAccount()) || localAccountId != accountId) {
+        if (LnnFindDeviceUdidTrustedInfoFromDb(deviceId) == SOFTBUS_NOT_FIND &&
+            DpHasAccessControlProfile(deviceId, true, localUserId)) {
+            LnnInsertSpecificTrustedDevInfo(deviceId);
+        }
+    }
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     if (info == NULL) {
@@ -1309,7 +1328,6 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
         AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
     }
-
     NodeInfoAbility infoAbility;
     const char *udid = LnnGetDeviceUdid(info);
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
@@ -1331,6 +1349,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
     UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid, info->userId);
+    UpdateTrustedDb(info->accountId, info->deviceInfo.deviceUdid);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }

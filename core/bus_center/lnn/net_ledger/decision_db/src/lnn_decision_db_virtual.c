@@ -83,3 +83,10 @@ int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
 void LnnRemoveDb(void)
 {
 }
+
+int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
+{
+    (void)udid;
+    LNN_LOGI(LNN_INIT, "no find trusted");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
