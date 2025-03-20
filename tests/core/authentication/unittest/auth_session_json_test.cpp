@@ -264,16 +264,17 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
 {
     AuthSessionInfo info;
     NodeInfo nodeInfo;
+    int64_t authSeq = 1;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.version = SOFTBUS_OLD_V1;
     info.idType = EXCHANGE_UDID;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
-    char *deviceId = PackDeviceIdJson(nullptr);
+    char *deviceId = PackDeviceIdJson(nullptr, authSeq);
     EXPECT_EQ(deviceId, nullptr);
     AuthSessionJsonInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
-    deviceId = PackDeviceIdJson(&info);
+    deviceId = PackDeviceIdJson(&info, authSeq);
     EXPECT_EQ(deviceId, nullptr);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
@@ -284,15 +285,15 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, IsNeedUDIDAbatement).WillRepeatedly(Return(true));
-    deviceId = PackDeviceIdJson(&info);
+    deviceId = PackDeviceIdJson(&info, authSeq);
     EXPECT_NE(deviceId, nullptr);
     JSON_Free(deviceId);
     info.isServer = false;
-    deviceId = PackDeviceIdJson(&info);
+    deviceId = PackDeviceIdJson(&info, authSeq);
     EXPECT_NE(deviceId, nullptr);
     JSON_Free(deviceId);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    deviceId = PackDeviceIdJson(&info);
+    deviceId = PackDeviceIdJson(&info, authSeq);
     EXPECT_NE(deviceId, nullptr);
     JSON_Free(deviceId);
 }

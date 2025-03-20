@@ -727,13 +727,8 @@ static void CheckDeviceKeyValid(JsonObj *obj, AuthSessionInfo *info)
     info->deviceKeyId.hasDeviceKeyId = true;
 }
 
-static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupportNormalizedKey, int64_t authSeq)
+static void UnpackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, bool isSupportNormalizedKey, int64_t authSeq)
 {
-    if (isSupportNormalizedKey == NORMALIZED_NOT_SUPPORT) {
-        AUTH_LOGI(AUTH_FSM, "peer old version or not support normalizedType");
-        info->normalizedType = NORMALIZED_NOT_SUPPORT;
-        return;
-    }
     info->normalizedType = NORMALIZED_KEY_ERROR;
     char encNormalizedKey[ENCRYPTED_NORMALIZED_KEY_MAX_LEN] = { 0 };
     if (!JSON_GetStringFromOject(obj, NORMALIZED_DATA, encNormalizedKey, ENCRYPTED_NORMALIZED_KEY_MAX_LEN)) {
@@ -778,6 +773,16 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         return;
     }
     (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
+}
+
+static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupportNormalizedKey, int64_t authSeq)
+{
+    if (isSupportNormalizedKey == NORMALIZED_NOT_SUPPORT) {
+        AUTH_LOGI(AUTH_FSM, "peer old version or not support normalizedType");
+        info->normalizedType = NORMALIZED_NOT_SUPPORT;
+        return;
+    }
+    UnpackNormalizedKeyInner(obj, info, isSupportNormalizedKey, authSeq);
 }
 
 static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
