@@ -82,6 +82,7 @@ ohos_unittest("SoftbusServerStubTest") {
       "access_token:libaccesstoken_sdk",
       "access_token:libprivacy_sdk",
       "access_token:libtokenid_sdk",
+      "cJSON:cjson_static",
     ]
   }
 }
