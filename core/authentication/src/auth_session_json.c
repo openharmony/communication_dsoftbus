@@ -494,21 +494,8 @@ static void PackDeviceKeyId(JsonObj *obj, const AuthSessionInfo *info)
     }
 }
 
-static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
+static void PackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
 {
-    if (!info->isNeedFastAuth && !info->isServer) {
-        AUTH_LOGE(AUTH_FSM, "force auth.");
-        return;
-    }
-    if (info->isServer && info->normalizedType == NORMALIZED_KEY_ERROR) {
-        AUTH_LOGE(AUTH_FSM, "peer not support normalize or key error.");
-        return;
-    }
-    if (info->localState != AUTH_STATE_START && info->localState != AUTH_STATE_ACK &&
-        info->localState != AUTH_STATE_COMPATIBLE) {
-        AUTH_LOGI(AUTH_FSM, "nego state, not send normalize data.");
-        return;
-    }
     char udidHashHexStr[SHA_256_HEX_HASH_LEN] = { 0 };
     if (!GetUdidShortHash(info, udidHashHexStr, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get udid fail, bypass normalizedAuth");
@@ -554,6 +541,24 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, int64_t authS
         AUTH_LOGE(AUTH_FSM, "pack normalized key fail");
         return;
     }
+}
+
+static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
+{
+    if (!info->isNeedFastAuth && !info->isServer) {
+        AUTH_LOGE(AUTH_FSM, "force auth.");
+        return;
+    }
+    if (info->isServer && info->normalizedType == NORMALIZED_KEY_ERROR) {
+        AUTH_LOGE(AUTH_FSM, "peer not support normalize or key error.");
+        return;
+    }
+    if (info->localState != AUTH_STATE_START && info->localState != AUTH_STATE_ACK &&
+        info->localState != AUTH_STATE_COMPATIBLE) {
+        AUTH_LOGI(AUTH_FSM, "nego state, not send normalize data.");
+        return;
+    }
+    PackNormalizedKeyInner(obj, info, authSeq);
 }
 
 static void ParseFastAuthValue(AuthSessionInfo *info, const char *encryptedFastAuth, AuthDeviceKeyInfo *deviceKey)
