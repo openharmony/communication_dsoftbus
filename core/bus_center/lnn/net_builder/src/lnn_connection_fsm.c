@@ -1202,10 +1202,11 @@ static void CheckDupOk(LnnConnectionFsm *connFsm, NodeInfo *deviceInfo, bool *du
 static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthConnInfo *authConn)
 {
     int32_t connId;
+    int32_t rc = SOFTBUS_MEM_ERR;
     if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
         &connId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "TransGetConnByChanId fail");
-        return SOFTBUS_INVALID_FD;
+        return;
     }
     rc = AddToAuthPreLinkList(connInfo->requestId, connId, &connInfo->addr);
     if (rc != SOFTBUS_OK) {
