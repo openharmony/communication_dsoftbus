@@ -230,15 +230,16 @@ HWTEST_F(AuthSessionMessageTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
 {
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    int64_t authSeq = 1;
     info.version = SOFTBUS_OLD_V1;
     info.idType = EXCHANGE_UDID;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
-    EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
+    EXPECT_TRUE(PackDeviceIdJson(&info, authSeq) == nullptr);
     info.isServer = false;
-    EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
+    EXPECT_TRUE(PackDeviceIdJson(&info, authSeq) == nullptr);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
+    EXPECT_TRUE(PackDeviceIdJson(&info, authSeq) == nullptr);
 }
 
 /*

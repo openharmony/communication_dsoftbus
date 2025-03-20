@@ -333,6 +333,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     JsonObj obj;
+    int64_t authSeq = 1;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
     EXPECT_CALL(mocker, JSON_CreateObject).WillOnce(Return(nullptr))
         .WillRepeatedly(Return(&obj));
@@ -340,9 +341,9 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
     EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mocker, FindAuthPreLinkNodeById).WillRepeatedly(Return(SOFTBUS_OK));
     AuthSessionInfo info = {0};
-    char *ret = PackDeviceIdJson(&info);
+    char *ret = PackDeviceIdJson(&info, authSeq);
     EXPECT_EQ(ret, nullptr);
-    ret = PackDeviceIdJson(&info);
+    ret = PackDeviceIdJson(&info, authSeq);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -682,7 +683,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATEINFO_TEST_001, TestSize.Leve
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, IsNeedUDIDAbatement).WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    
+
     int32_t ret = UnpackCertificateInfo(nullptr, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
