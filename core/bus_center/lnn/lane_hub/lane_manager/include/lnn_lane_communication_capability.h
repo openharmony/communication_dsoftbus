@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,9 @@
 extern "C" {
 #endif
 
-typedef struct {
-    int32_t (*getStaticCommCapa)(const char *networkId);
-    int32_t (*getDynamicCommCapa)(const char *networkId);
-} LaneCommCapa;
-
-LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType);
-void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex);
+int32_t CheckStaticNetCap(const char *networkId, LaneLinkType linkType);
+int32_t CheckDynamicNetCap(const char *networkId, LaneLinkType linkType);
+void SetRemoteDynamicNetCap(const char *peerUdid, LaneLinkType linkType);
 
 #ifdef __cplusplus
 }

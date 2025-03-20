@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,12 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
+
+typedef struct {
+    int32_t (*getStaticCommCapa)(const char *networkId);
+    int32_t (*getDynamicCommCapa)(const char *networkId);
+    NetCapability netCapaIndex;
+} LaneCommCapa;
 
 static int32_t StaticNetCapaCalc(const char *networkId, uint32_t netCapaIndex, bool *localEnable, bool *remoteEnable)
 {
@@ -78,7 +84,6 @@ static int32_t DynamicNetCapaCalc(const char *networkId, uint32_t netCapaIndex, 
 
 static int32_t BrStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_BR, &localEnable, &remoteEnable);
@@ -97,7 +102,6 @@ static int32_t BrStaticCommCapa(const char *networkId)
 
 static int32_t BrDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = DynamicNetCapaCalc(networkId, BIT_BR, &localEnable, &remoteEnable);
@@ -130,7 +134,6 @@ static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onli
 
 static int32_t BleStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_BLE, &localEnable, &remoteEnable);
@@ -149,7 +152,6 @@ static int32_t BleStaticCommCapa(const char *networkId)
 
 static int32_t BleDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = DynamicNetCapaCalc(networkId, BIT_BLE, &localEnable, &remoteEnable);
@@ -168,7 +170,6 @@ static int32_t BleDynamicCommCapa(const char *networkId)
 
 static int32_t P2pStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_P2P, &localEnable, &remoteEnable);
@@ -213,7 +214,6 @@ static bool IsLocalWifiEnabled(void)
 
 static int32_t P2pDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = DynamicNetCapaCalc(networkId, BIT_WIFI_P2P, &localEnable, &remoteEnable);
@@ -232,7 +232,6 @@ static int32_t P2pDynamicCommCapa(const char *networkId)
 
 static int32_t WiFiDirectStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_ENHANCED_P2P, &localEnable, &remoteEnable);
@@ -251,7 +250,6 @@ static int32_t WiFiDirectStaticCommCapa(const char *networkId)
 
 static int32_t WiFiDirectDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = DynamicNetCapaCalc(networkId, BIT_WIFI_P2P, &localEnable, &remoteEnable);
@@ -270,7 +268,6 @@ static int32_t WiFiDirectDynamicCommCapa(const char *networkId)
 
 static int32_t WlanStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localWlanEnable = false;
     bool remoteWlanEnable = false;
     bool localEthEnable = false;
@@ -296,7 +293,6 @@ static int32_t WlanStaticCommCapa(const char *networkId)
 
 static int32_t Wlan2P4DynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     if (!IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_WIFI) &&
         !IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_LSA)) {
         LNN_LOGE(LNN_LANE, "WIFI not online");
@@ -325,7 +321,6 @@ static int32_t Wlan2P4DynamicCommCapa(const char *networkId)
 
 static int32_t Wlan5GDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     if (!IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_WIFI) &&
         !IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_LSA)) {
         LNN_LOGE(LNN_LANE, "WIFI not online");
@@ -354,7 +349,6 @@ static int32_t Wlan5GDynamicCommCapa(const char *networkId)
 
 static int32_t EthStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_ETH, &localEnable, &remoteEnable);
@@ -373,7 +367,6 @@ static int32_t EthStaticCommCapa(const char *networkId)
 
 static int32_t EthDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     if (!IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_LSA)) {
         LNN_LOGE(LNN_LANE, "LSA not online");
         return SOFTBUS_LANE_WIFI_NOT_ONLINE;
@@ -396,7 +389,6 @@ static int32_t EthDynamicCommCapa(const char *networkId)
 
 static int32_t CocStaticCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_BLE, &localEnable, &remoteEnable);
@@ -415,7 +407,6 @@ static int32_t CocStaticCommCapa(const char *networkId)
 
 static int32_t CocDynamicCommCapa(const char *networkId)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
     bool localEnable = false;
     bool remoteEnable = false;
     int32_t ret = DynamicNetCapaCalc(networkId, BIT_BLE, &localEnable, &remoteEnable);
@@ -433,21 +424,21 @@ static int32_t CocDynamicCommCapa(const char *networkId)
 }
 
 static LaneCommCapa g_linkTable[LANE_LINK_TYPE_BUTT] = {
-    [LANE_BR] = {BrStaticCommCapa, BrDynamicCommCapa},
-    [LANE_BLE] = {BleStaticCommCapa, BleDynamicCommCapa},
-    [LANE_P2P] = {P2pStaticCommCapa, P2pDynamicCommCapa},
-    [LANE_HML] = {WiFiDirectStaticCommCapa, WiFiDirectDynamicCommCapa},
-    [LANE_WLAN_2P4G] = {WlanStaticCommCapa, Wlan2P4DynamicCommCapa},
-    [LANE_WLAN_5G] = {WlanStaticCommCapa, Wlan5GDynamicCommCapa},
-    [LANE_ETH] = {EthStaticCommCapa, EthDynamicCommCapa},
-    [LANE_P2P_REUSE] = {P2pStaticCommCapa, P2pDynamicCommCapa},
-    [LANE_BLE_DIRECT] = {BleStaticCommCapa, BleDynamicCommCapa},
-    [LANE_BLE_REUSE] = {BleStaticCommCapa, BleDynamicCommCapa},
-    [LANE_COC] = {CocStaticCommCapa, CocDynamicCommCapa},
-    [LANE_COC_DIRECT] = {CocStaticCommCapa, CocDynamicCommCapa},
+    [LANE_BR] = {BrStaticCommCapa, BrDynamicCommCapa, BIT_BR },
+    [LANE_BLE] = {BleStaticCommCapa, BleDynamicCommCapa, BIT_BLE},
+    [LANE_P2P] = {P2pStaticCommCapa, P2pDynamicCommCapa, BIT_WIFI_P2P},
+    [LANE_HML] = {WiFiDirectStaticCommCapa, WiFiDirectDynamicCommCapa, BIT_WIFI_P2P},
+    [LANE_WLAN_2P4G] = {WlanStaticCommCapa, Wlan2P4DynamicCommCapa, BIT_WIFI_24G},
+    [LANE_WLAN_5G] = {WlanStaticCommCapa, Wlan5GDynamicCommCapa, BIT_WIFI_5G},
+    [LANE_ETH] = {EthStaticCommCapa, EthDynamicCommCapa, BIT_ETH},
+    [LANE_P2P_REUSE] = {P2pStaticCommCapa, P2pDynamicCommCapa, BIT_WIFI_P2P},
+    [LANE_BLE_DIRECT] = {BleStaticCommCapa, BleDynamicCommCapa, BIT_BLE},
+    [LANE_BLE_REUSE] = {BleStaticCommCapa, BleDynamicCommCapa, BIT_BLE},
+    [LANE_COC] = {CocStaticCommCapa, CocDynamicCommCapa, BIT_BLE},
+    [LANE_COC_DIRECT] = {CocStaticCommCapa, CocDynamicCommCapa, BIT_BLE},
 };
 
-LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType)
+static LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType)
 {
     if ((linkType < 0) || (linkType >= LANE_LINK_TYPE_BUTT)) {
         LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
@@ -460,17 +451,30 @@ LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType)
     return &g_linkTable[linkType];
 }
 
-void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex)
+int32_t CheckStaticNetCap(const char *networkId, LaneLinkType linkType)
 {
-    if (peerUdid == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return;
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
+    LaneCommCapa *capaManager = GetLinkCapaByLinkType(linkType);
+    if (capaManager == NULL) {
+        LNN_LOGE(LNN_LANE, "capaManager is nullptr");
+        return SOFTBUS_INVALID_PARAM;
     }
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get networkId fail");
-        return;
+    return capaManager->getStaticCommCapa(networkId);
+}
+
+int32_t CheckDynamicNetCap(const char *networkId, LaneLinkType linkType)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
+    LaneCommCapa *capaManager = GetLinkCapaByLinkType(linkType);
+    if (capaManager == NULL) {
+        LNN_LOGE(LNN_LANE, "capaManager is nullptr");
+        return SOFTBUS_INVALID_PARAM;
     }
+    return capaManager->getDynamicCommCapa(networkId);
+}
+
+static void SetRemoteDynamicNetCapByIdx(const char *networkId, NetCapability netCapaIndex)
+{
     uint32_t oldCapa = 0;
     if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &oldCapa) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote info fail");
@@ -487,4 +491,23 @@ void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex)
     LNN_LOGI(LNN_LANE, "networkId=%{public}s capability change:%{public}u->%{public}u, ret=%{public}d",
         AnonymizeWrapper(anonyNetworkId), oldCapa, newCapa, ret);
     AnonymizeFree(anonyNetworkId);
+}
+
+void SetRemoteDynamicNetCap(const char *peerUdid, LaneLinkType linkType)
+{
+    if (peerUdid == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get networkId fail");
+        return;
+    }
+    LaneCommCapa *capaManager = GetLinkCapaByLinkType(linkType);
+    if (capaManager == NULL) {
+        LNN_LOGE(LNN_LANE, "capaManager is nullptr");
+        return;
+    }
+    SetRemoteDynamicNetCapByIdx(networkId, capaManager->netCapaIndex);
 }

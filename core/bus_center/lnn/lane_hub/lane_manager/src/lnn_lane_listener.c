@@ -521,7 +521,7 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
         LNN_LOGE(LNN_STATE, "generate link info fail");
         return;
     }
-    SetRemoteDynamicNetCap(laneLinkInfo.peerUdid, BIT_WIFI_P2P);
+    SetRemoteDynamicNetCap(laneLinkInfo.peerUdid, laneLinkInfo.type);
     LnnDeleteLinkLedgerInfo(laneLinkInfo.peerUdid);
     char localUdid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
