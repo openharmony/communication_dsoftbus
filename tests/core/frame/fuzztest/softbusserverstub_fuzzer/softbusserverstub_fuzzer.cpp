@@ -1316,6 +1316,43 @@ bool EvaLuateQosInnerQosCountFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
+bool SetDisplayNameInnerFuzzTest(const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size < (INPUT_NAME_SIZE_MAX * SIZE_NUM_THREE) +
+        (sizeof(int32_t) * SIZE_NUM_FIVE) + sizeof(bool) + sizeof(bool) || size >= INT32_MAX - 1) {
+        return false;
+    }
+    MessageParcel datas;
+    uint32_t offset = 0;
+    char pkgName[INPUT_NAME_SIZE_MAX] = "";
+    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    datas.WriteCString(pkgName);
+    char nameData[INPUT_NAME_SIZE_MAX] = "";
+    if (memcpy_s(nameData, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        INPUT_NAME_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    nameData[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    datas.WriteCString(nameData);
+    uint32_t len = *reinterpret_cast<const uint32_t *>(data + offset);
+    datas.WriteUint32(len);
+
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->SetDisplayNameInner(datas, reply);
+    return true;
+}
+
 bool RunFuzzTestCase(const uint8_t *data, size_t size)
 {
     OHOS::EvaLuateQosInnerDataTypeFuzzTest(data, size);
@@ -1354,6 +1391,7 @@ bool RunFuzzTestCase(const uint8_t *data, size_t size)
     OHOS::SoftbusRegisterServiceFuzzTest(data, size);
     OHOS::CheckOpenSessionPermissionFuzzTest(data, size);
     OHOS::EvaLuateQosInnerFuzzTest(data, size);
+    OHOS::SetDisplayNameInnerFuzzTest(data, size);
     return true;
 }
 } // namespace OHOS
