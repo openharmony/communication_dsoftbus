@@ -388,14 +388,15 @@ HWTEST_F(AuthSessionJsonTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level
  */
 HWTEST_F(AuthSessionJsonTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, nullptr);
     AuthSessionInfo info;
-    int32_t ret = UnpackDeviceIdJson(nullptr, 0, &info);
+    int32_t ret = UnpackDeviceIdJson(nullptr, 0, &info, authSeq);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, EXCHANGE_FAIL);
     char *msg = JSON_PrintUnformatted(obj);
-    ret = UnpackDeviceIdJson(msg, strlen(msg), &info);
+    ret = UnpackDeviceIdJson(msg, strlen(msg), &info, authSeq);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     if (msg != nullptr) {
         JSON_Free(msg);
@@ -412,14 +413,14 @@ HWTEST_F(AuthSessionJsonTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(obj1, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
     char *msg1 = JSON_PrintUnformatted(obj1);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    ret = UnpackDeviceIdJson(msg1, strlen(msg1), &info);
+    ret = UnpackDeviceIdJson(msg1, strlen(msg1), &info, authSeq);
     EXPECT_EQ(ret, SOFTBUS_CMP_FAIL);
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = false;
-    ret = UnpackDeviceIdJson(msg1, strlen(msg1), &info);
+    ret = UnpackDeviceIdJson(msg1, strlen(msg1), &info, authSeq);
     EXPECT_EQ(ret, SOFTBUS_CMP_FAIL);
     info.isConnectServer = true;
-    ret = UnpackDeviceIdJson(msg1, strlen(msg1), &info);
+    ret = UnpackDeviceIdJson(msg1, strlen(msg1), &info, authSeq);
     EXPECT_EQ(ret, SOFTBUS_OK);
     if (msg1 != nullptr) {
         JSON_Free(msg1);
