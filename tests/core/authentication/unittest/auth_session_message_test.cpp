@@ -562,15 +562,16 @@ HWTEST_F(AuthSessionMessageTest, UpdatePeerDeviceName_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, ProcessDeviceIdMessage_TEST_001, TestSize.Level1)
 {
     AuthSessionInfo info;
+    int64_t authSeq = 1;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     uint8_t data[] = "test";
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN, authSeq) == SOFTBUS_INVALID_PARAM);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN + 1) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN + 1, authSeq) == SOFTBUS_INVALID_PARAM);
     info.isServer = false;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN, authSeq) == SOFTBUS_INVALID_PARAM);
     info.isServer = true;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN, authSeq) == SOFTBUS_OK);
 }
 
 /*

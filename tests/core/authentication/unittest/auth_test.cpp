@@ -1922,13 +1922,14 @@ HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     AuthSessionInfo *info = nullptr;
     AuthSessionInfo infoValue;
     (void)memset_s(&infoValue, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     uint8_t data[TEST_DATA_LEN] = "123";
-    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data));
+    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data), authSeq);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data));
+    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data), authSeq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 

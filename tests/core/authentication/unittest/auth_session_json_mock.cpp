@@ -109,11 +109,9 @@ int32_t GetFd(uint64_t connId)
     return GetInterface()->GetFd(connId);
 }
 
-int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, int32_t localDeviceKeyId,
-    int32_t remoteDeviceKeyId, ConnectionAddr *connAddr)
+int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr)
 {
-    return GetInterface()->AddToAuthPreLinkList(requestId, fd, localDeviceKeyId, remoteDeviceKeyId,
-        connAddr);
+    return GetInterface()->AddToAuthPreLinkList(requestId, fd, connAddr);
 }
 
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
