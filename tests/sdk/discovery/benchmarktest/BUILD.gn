@@ -33,6 +33,7 @@ ohos_benchmarktest("DiscoveryTest") {
       "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
+      "cJSON:cjson_static",
     ]
   }
 }
