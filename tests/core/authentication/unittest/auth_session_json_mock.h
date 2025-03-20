@@ -33,6 +33,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_common.h"
 #include "wifi_direct_manager.h"
+#include "auth_identity_service_adapter.h"
 
 namespace OHOS {
 class AuthSessionJsonInterface {
@@ -111,6 +112,12 @@ public:
         AuthDeviceKeyInfo *deviceKey) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual bool LnnIsDefaultOhosAccount(void) = 0;
+    virtual char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList) = 0;
+    virtual int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
+        bool isSameAccount, char **credList) = 0;
+    virtual void IdServiceDestroyCredentialList(char **returnData) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -180,6 +187,12 @@ public:
     MOCK_METHOD3(AuthFindNormalizeKeyByServerSide, int32_t (const char *, bool, AuthDeviceKeyInfo *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD2(SoftBusSocketGetPeerName, int32_t (int32_t, SoftBusSockAddr *));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey key, uint8_t *info, uint32_t len));
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
+    MOCK_METHOD2(IdServiceGetCredIdFromCredList, char * (int32_t userId, const char *credList));
+    MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t userId, const char *udidHash, const char *accountidHash,
+        bool isSameAccount, char **credList));
+    MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **returnData));
 };
 
 extern "C" {

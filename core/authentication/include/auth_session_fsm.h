@@ -93,6 +93,7 @@ typedef struct {
     int32_t idType;
     int32_t userId;
     bool isNeedPackCert;
+    bool isSameAccount;
     uint64_t sessionKeyRandomNum;
     AuthVerifyModule module;
     NormalizedType normalizedType;
@@ -102,6 +103,9 @@ typedef struct {
     bool isSavedSessionKey;
     AuthStartState localState;
     AuthStartState peerState;
+    char udidShortHash[SHA_256_HEX_HASH_LEN];
+    char accountHash[SHA_256_HEX_HASH_LEN];
+    char *credId;
 } AuthSessionInfo;
 
 typedef struct {
@@ -145,6 +149,9 @@ int32_t AuthNotifyRequestVerify(int64_t authSeq);
 AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer, bool isConnectSide);
 void AuthSessionFsmExit(void);
 AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq);
+char *AuthSessionGetCredId(int64_t authSeq);
+int32_t AuthSessionGetVersion(int64_t authSeq, int32_t *version);
+bool AuthSessionGetIsSameAccount(int64_t authSeq);
 
 #ifdef __cplusplus
 #if __cplusplus

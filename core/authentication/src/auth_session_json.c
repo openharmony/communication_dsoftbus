@@ -23,6 +23,7 @@
 #include "auth_connection.h"
 #include "auth_hichain_adapter.h"
 #include "auth_deviceprofile.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
@@ -35,6 +36,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
+#include "lnn_ohos_account.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_json.h"
@@ -202,6 +204,9 @@
 /* userId */
 #define USERID_CHECKSUM "USERID_CHECKSUM"
 #define USERID          "USERID"
+
+/* udid short hash */
+#define UDID_SHORT_HASH       "UDID_SHORT_HASH"
 
 #define NORMALIZEKEY_CHECK_TIME 10000
 
@@ -832,6 +837,89 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
 }
 
+static bool JudgeIsSameAccount(const char *accountHash)
+{
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local account hash fail");
+        return false;
+    }
+
+    uint8_t peerAccountHash[SHA_256_HASH_LEN] = { 0 };
+    if (ConvertHexStringToBytes(peerAccountHash, SHA_256_HASH_LEN, accountHash, strlen(accountHash)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert peer account hash to bytes fail");
+        return false;
+    }
+
+    return (memcpy_s(localAccountHash, SHA_256_HASH_LEN, peerAccountHash, SHA_256_HASH_LEN) == EOK) &&
+        (!LnnIsDefaultOhosAccount());
+}
+
+static int32_t GetLocalUdidShortHash(char *localUdidHash)
+{
+    char udid[UDID_BUF_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local udid fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (!GenerateUdidShortHash(udid, localUdidHash, SHA_256_HEX_HASH_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "get local udid hash fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
+{
+    if (info->version < SOFTBUS_NEW_V3) {
+        AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
+        return;
+    }
+
+    if (!JSON_GetStringFromOject(obj, UDID_SHORT_HASH, info->udidShortHash, SHA_256_HEX_HASH_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "udid short hash not found");
+        return;
+    }
+
+    if (!JSON_GetStringFromOject(obj, ACCOUNT_HASH, info->accountHash, SHA_256_HEX_HASH_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "account hash not found");
+        return;
+    }
+
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get node info fail");
+        return;
+    }
+
+    info->isSameAccount = JudgeIsSameAccount(info->accountHash);
+
+    char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local udid short hash fail");
+        return;
+    }
+
+    char *udidShortHash = info->isSameAccount ? localUdidHash : info->udidShortHash;
+    char *credList = NULL;
+    ret = IdServiceQueryCredential(nodeInfo.userId, udidShortHash, info->accountHash,
+        info->isSameAccount, &credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "query credential fail");
+        return;
+    }
+
+    info->credId = IdServiceGetCredIdFromCredList(nodeInfo.userId, credList);
+    if (info->credId == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get cred id fail");
+    }
+
+    IdServiceDestroyCredentialList(&credList);
+}
+
 static void PackCompressInfo(JsonObj *obj, const NodeInfo *info)
 {
     if (info != NULL) {
@@ -993,6 +1081,41 @@ static void PackAuthPreLinkNode(JsonObj *obj, const AuthSessionInfo *info)
     }
 }
 
+static int32_t PackExternalAuthInfo(JsonObj *json)
+{
+    char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    char accountHexHash[SHA_256_HEX_HASH_LEN] = { 0 };
+
+    if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local udid short hash fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+
+    if (!JSON_AddStringToObject(json, UDID_SHORT_HASH, localUdidHash)) {
+        AUTH_LOGE(AUTH_FSM, "pack udid hash fail");
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local account hash fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+
+    if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, localAccountHash, SHA_256_HASH_LEN) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert account hash fail");
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+
+    if (!JSON_AddStringToObject(json, ACCOUNT_HASH, accountHexHash)) {
+        AUTH_LOGE(AUTH_FSM, "pack account hash fail");
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
 char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is NULL");
@@ -1035,7 +1158,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
     PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info);
     PackUserId(obj, nodeInfo->userId);
-    if (PackNormalizedData(info, obj, nodeInfo, authSeq) != SOFTBUS_OK) {
+    if ((PackNormalizedData(info, obj, nodeInfo, authSeq) != SOFTBUS_OK) || (PackExternalAuthInfo(obj) != SOFTBUS_OK)) {
         JSON_Delete(obj);
         return NULL;
     }
@@ -1186,8 +1309,22 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
 static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 {
     int32_t maxBuffSize;
+    int32_t version = (int32_t)info->version;
     OptString(obj, DEVICE_ID_TAG, info->udid, UDID_BUF_LEN, "");
     OptInt(obj, DATA_BUF_SIZE_TAG, &maxBuffSize, PACKET_SIZE);
+
+    if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
+        AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
+    }
+    info->version = version < info->version ? (SoftBusVersion)version : info->version;
+
+    AUTH_LOGI(AUTH_FSM, "softbusVersion is %{public}d", info->version);
+    OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
+
+    if (info->version >= SOFTBUS_NEW_V3) {
+        return;
+    }
+
     if (strlen(info->udid) != 0) {
         info->version = SOFTBUS_OLD_V2;
     } else {
@@ -1196,10 +1333,6 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
             AUTH_LOGE(AUTH_FSM, "strcpy udid fail, ignore");
         }
     }
-    if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
-        AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
-    }
-    OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
 }
 
 static int32_t IsCmdMatchByDeviceId(JsonObj *obj, AuthSessionInfo *info)
@@ -1280,6 +1413,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info,
     UnpackNormalizedKey(obj, info, isSupportNormalizedKey, authSeq);
     OptBool(obj, IS_NEED_PACK_CERT, &info->isNeedPackCert, false);
     OptInt(obj, USERID, &info->userId, 0);
+    UnpackExternalAuthInfo(obj, info);
     JSON_Delete(obj);
     return SOFTBUS_OK;
 }

@@ -148,6 +148,11 @@ void LnnDeleteLinkFinderInfo(const char *peerUdid)
     return GetCommonInterface()->LnnDeleteLinkFinderInfo(peerUdid);
 }
 
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetCommonInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
+
 int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     return GetCommonInterface()->ConnGetConnectionInfo(connectionId, info);
