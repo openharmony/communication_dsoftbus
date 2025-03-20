@@ -75,6 +75,7 @@ const std::vector<SoftBusFuncId> CODE_LIST = {
     SERVER_REG_DATA_LEVEL_CHANGE_CB,
     SERVER_UNREG_DATA_LEVEL_CHANGE_CB,
     SERVER_SET_DATA_LEVEL,
+    SERVER_SET_DISPLAY_NAME,
 };
 
 class TestEnv {
