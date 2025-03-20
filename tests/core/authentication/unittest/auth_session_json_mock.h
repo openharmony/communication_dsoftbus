@@ -54,8 +54,7 @@ public:
     virtual bool IsAuthPreLinkNodeExist(uint32_t requestId) = 0;
     virtual int32_t UpdateAuthPreLinkDeviceKeyIdById(uint32_t requestId, bool isRemote, int32_t deviceKeyId) = 0;
     virtual int32_t GetFd(uint64_t connId) = 0;
-    virtual int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, int32_t localDeviceKeyId,
-    int32_t remoteDeviceKeyId, ConnectionAddr *connAddr) = 0;
+    virtual int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr) = 0;
     virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
     virtual int32_t UpdateAuthPreLinkDeviceKeyById(uint32_t requestId, uint8_t *deviceKey, uint32_t keyLen) = 0;
     virtual int32_t LnnGetAuthPort(const NodeInfo *info) = 0;
@@ -134,7 +133,7 @@ public:
     MOCK_METHOD1(IsAuthPreLinkNodeExist, bool (uint32_t));
     MOCK_METHOD3(UpdateAuthPreLinkDeviceKeyIdById, int32_t (uint32_t, bool, int32_t));
     MOCK_METHOD1(GetFd, int32_t (uint64_t));
-    MOCK_METHOD5(AddToAuthPreLinkList, int32_t (uint32_t, int32_t, int32_t, int32_t, ConnectionAddr *));
+    MOCK_METHOD5(AddToAuthPreLinkList, int32_t (uint32_t, int32_t, ConnectionAddr *));
     MOCK_METHOD3(GetSessionKeyProfile, bool (int32_t, uint8_t *, uint32_t *));
     MOCK_METHOD3(UpdateAuthPreLinkDeviceKeyById, int32_t (uint32_t, uint8_t *, uint32_t));
     MOCK_METHOD1(LnnGetAuthPort, int32_t (const NodeInfo *));
