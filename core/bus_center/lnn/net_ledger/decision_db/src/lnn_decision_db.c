@@ -890,6 +890,20 @@ static int32_t TryRecoveryTrustedDevInfoTable(void)
     return InitTrustedDevInfoTable();
 }
 
+static bool IsDeviceTrusted(char *accountHexHash, const char *udid, int32_t userId)
+{
+    if (accountHexHash == NULL || udid == NULL) {
+        return false;
+    }
+    DeviceDbInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
+        if (strcmp(accountHexHash, item->infoRecord.accountHexHash) == 0
+            && item->infoRecord.userId == userId && strcmp(udid, item->infoRecord.udid) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 bool LnnIsPotentialHomeGroup(const char *udid)
 {
     (void)udid;
@@ -932,4 +946,27 @@ int32_t LnnInitDecisionDbDelay(void)
 void LnnRemoveDb(void)
 {
     SoftBusRemoveFile(DATABASE_NAME);
+}
+
+int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *deviceUdid)
+{
+    if (deviceUdid == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char accountHexHashAndUserId[SHA_256_HEX_HASH_LEN + LNN_INT32_NUM_STR_MAX_LEN + 1] = {0};
+    int32_t userId = 0;
+    if (GenerateAccountHexHashWithUserId(accountHexHashAndUserId, &userId) != SOFTBUS_OK) {
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (DeviceDbListLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!IsDeviceTrusted(accountHexHashAndUserId, deviceUdid, userId)) {
+        LNN_LOGE(LNN_LEDGER, "not find trusted in db");
+        DeviceDbListUnlock();
+        return SOFTBUS_NOT_FIND;
+    }
+    DeviceDbListUnlock();
+    return SOFTBUS_OK;
 }

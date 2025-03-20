@@ -43,6 +43,7 @@ int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t l
 int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
 int32_t LnnGenerateCeParams(void);
 void LnnRemoveDb(void);
+int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid);
 
 #ifdef __cplusplus
 }
