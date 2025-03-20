@@ -24,25 +24,29 @@
 extern "C" {
 #endif
 
-struct ConnBytesDeliveryItem {
-    CONN_QUEUE_ITEM_BASE;
-
-    uint32_t connectionId;
-    uint8_t *data;
-    uint32_t len;
+struct ConnBytesAddition {
     int32_t module;
     int32_t pid;
     int32_t flag;
     int64_t seq;
 };
+
+struct ConnBytesDeliveryItem {
+    CONN_QUEUE_ITEM_BASE;
+
+    uint32_t connectionId;
+    uint8_t *data;
+    uint32_t length;
+    struct ConnBytesAddition addition;
+};
 struct ConnBytesDeliveryItem *ConnCreateBytesDeliveryItem(
-    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);
+    uint32_t connectionId, uint8_t *data, uint32_t length, struct ConnBytesAddition addition);
 void ConnDestroyBytesDeliveryItem(struct ConnBytesDeliveryItem *item);
 
 struct ConnBytesDelivery;
 typedef struct ConnBytesDelivery ConnBytesDelivery;
 typedef void (*ConnBytesHandler)(
-    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);
+    uint32_t connectionId, uint8_t *data, uint32_t length, struct ConnBytesAddition addition);
 
 struct ConnBytesDeliveryConfig {
     const char *name;
@@ -56,8 +60,8 @@ struct ConnBytesDeliveryConfig {
 ConnBytesDelivery *ConnCreateBytesDelivery(const struct ConnBytesDeliveryConfig *config);
 void ConnDestroyBytesDelivery(ConnBytesDelivery *delivery);
 
-int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid,
-    int32_t flag, int32_t module, int64_t seq);
+int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t *data, uint32_t length,
+    struct ConnBytesAddition addition);
 
 /* only for test */
 bool ConnIsDeliveryTaskRunning(ConnBytesDelivery *delivery);

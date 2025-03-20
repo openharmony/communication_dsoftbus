@@ -139,6 +139,22 @@ static bool RunTestCase(const std::string &name, ConnFairPriorityQueue *queue,
     return true;
 }
 
+static int32_t PickTestcase(int id, ConnPriority lastPriority, std::list<std::shared_ptr<TestAction>> &actions,
+    std::list<std::shared_ptr<TestAction>> &result)
+{
+    for (int32_t priority = CONN_PRIORITY_HIGH; priority <= lastPriority; priority++) {
+        for (auto it = actions.begin(); it != actions.end(); it++) {
+            auto action = *it;
+            if (action->item_->id == id && action->item_->priority == priority) {
+                result.push_back(action);
+                actions.erase(it);
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    return SOFTBUS_NOT_FIND;
+}
+
 static void FairPrioritySort(std::list<std::shared_ptr<TestAction>> &actions)
 {
     std::list<int> idSequence;
@@ -155,35 +171,21 @@ static void FairPrioritySort(std::list<std::shared_ptr<TestAction>> &actions)
         }
     }
 
-    auto picker = [&actions, &result](int id, ConnPriority lastPriority) {
-        for (int32_t priority = CONN_PRIORITY_HIGH; priority <= lastPriority; priority++) {
-            for (auto it = actions.begin(); it != actions.end(); it++) {
-                auto action = *it;
-                if (action->item_->id == id && action->item_->priority == priority) {
-                    result.push_back(action);
-                    actions.erase(it);
-                    return SOFTBUS_OK;
-                }
-            }
-        }
-        return SOFTBUS_NOT_FIND;
-    };
-
     int32_t ret;
     do {
-        ret = picker(0, CONN_PRIORITY_MIDDLE);
+        ret = PickTestcase(0, CONN_PRIORITY_MIDDLE, actions, result);
     } while (ret == SOFTBUS_OK);
 
     while (!idSequence.empty()) {
         auto id = idSequence.front();
         idSequence.pop_front();
-        ret = picker(id, CONN_PRIORITY_LOW);
+        ret = PickTestcase(id, CONN_PRIORITY_LOW, actions, result);
         if (ret == SOFTBUS_OK) {
             idSequence.push_back(id);
         }
     }
     do {
-        ret = picker(0, CONN_PRIORITY_LOW);
+        ret = PickTestcase(0, CONN_PRIORITY_LOW, actions, result);
     } while (ret == SOFTBUS_OK);
 
     for (auto it = result.begin(); it != result.end(); it = result.erase(it)) {

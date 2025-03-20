@@ -52,14 +52,14 @@ ConnAsyncFreeHook ConnCommonTestMock::asyncFreeHook_ = [](void *arg) {
     mock->FreeAsyncArgHook(arg);
 };
 
-ConnBytesHandler ConnCommonTestMock::bytesHandler_ = [](uint32_t id, uint8_t *data, uint32_t len, int32_t pid,
-                                                         int32_t flag, int32_t module, int64_t seq) {
+ConnBytesHandler ConnCommonTestMock::bytesHandler_ = [](uint32_t id, uint8_t *data, uint32_t length,
+                                                         struct ConnBytesAddition addition) {
     auto mock = ConnCommonTestMock::GetMock();
     if (mock == nullptr) {
         ADD_FAILURE() << "mock is nullptr";
         return;
     }
-    mock->BytesHandlerHook(id, data, len, pid, flag, module, seq);
+    mock->BytesHandlerHook(id, data, length, addition);
 };
 
 ConnCommonTestMock::ConnCommonTestMock()
