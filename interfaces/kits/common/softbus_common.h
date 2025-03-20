@@ -279,6 +279,11 @@ typedef enum  {
     BLE_PRIORITY_MAX
 } BlePriority;
 
+typedef struct {
+    bool hasDeviceKeyId;
+    int32_t localDeviceKeyId;
+    int32_t remoteDeviceKeyId;
+} DeviceKeyId;
 /**
  * @brief Defines the address of a device that is added to a LNN.
  * For details, see {@link ConnectionAddr}.
