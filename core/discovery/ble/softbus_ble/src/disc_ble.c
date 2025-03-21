@@ -2085,7 +2085,7 @@ static void DiscFreeBleScanFilter(BcScanFilter *filter, uint8_t filterSize)
         return;
     }
     for (uint8_t i = 0; i < filterSize; i++) {
-        BcScanFilter *currentFilter = filter + (i * sizeof(BcScanFilter));
+        BcScanFilter *currentFilter = filter + i;
         SoftBusFree(currentFilter->serviceData);
         SoftBusFree(currentFilter->serviceDataMask);
         SoftBusFree(currentFilter);
