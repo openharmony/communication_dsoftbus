@@ -454,5 +454,10 @@ int32_t LnnGetStaFrequency(const NodeInfo *info)
 {
     return GetInterface()->LnnGetStaFrequency(info);
 }
+
+bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
+{
+    return GetInterface()->GetSessionKeyProfile(sessionKeyId, sessionKey, length);
+}
 }
 } // namespace OHOS
