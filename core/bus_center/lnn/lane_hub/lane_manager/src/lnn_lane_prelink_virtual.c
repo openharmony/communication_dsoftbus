@@ -57,12 +57,6 @@ void LnnFreePreLink(void *para)
     return;
 }
 
-bool HaveConcurrencyBleGuideChannel(uint32_t actionId)
-{
-    (void)actionId;
-    return false;
-}
-
 int32_t InitActionBleConcurrency(void)
 {
     return SOFTBUS_OK;
