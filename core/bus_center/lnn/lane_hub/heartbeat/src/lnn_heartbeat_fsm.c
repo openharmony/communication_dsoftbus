@@ -652,6 +652,7 @@ static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+            LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_END);
         }
         ret = SOFTBUS_OK;
