@@ -676,10 +676,11 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
     }
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    // First: use latest normalizedKey
     if (info->deviceKeyId.hasDeviceKeyId) {
         return TryGetDmSessionKeyForUnpack(info, encNormalizedKey, deviceKey, authSeq);
-    } else if (AuthFindLatestNormalizeKey(hashHexStr, deviceKey, true) != SOFTBUS_OK) {
+    }
+    // First: use latest normalizedKey
+    if (AuthFindLatestNormalizeKey(hashHexStr, deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "can't find common key, parse normalize data fail");
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
