@@ -126,7 +126,7 @@ typedef struct {
 
 void AuthSessionSetReSyncDeviceName(void);
 int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo,
-    const AuthRequest *authRequest);
+    const DeviceKeyId *deviceKeyId);
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);

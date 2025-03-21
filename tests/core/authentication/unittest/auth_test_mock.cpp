@@ -149,12 +149,12 @@ static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam)
     authVerifyParam->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
 }
 
-static void SetAuthRequestParam(AuthRequest *authRequest)
+static void SetDeviceKeyIdParam(DeviceKeyId *deviceKeyId)
 {
-    (void)memset_s(authRequest, sizeof(*authRequest), 0, sizeof(*authRequest));
-    authRequest->deviceKeyId.hasDeviceKeyId = false;
-    authRequest->deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
-    authRequest->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    (void)memset_s(deviceKeyId, sizeof(*deviceKeyId), 0, sizeof(*deviceKeyId));
+    deviceKeyId->hasDeviceKeyId = false;
+    deviceKeyId->localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    deviceKeyId->remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
 }
 
 void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManager, DeviceGroupManager &groupManager)
@@ -201,9 +201,9 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
         .isServer = isServer,
         .isFastAuth = false,
     };
-    AuthRequest authRequest;
-    SetAuthRequestParam(&authRequest);
-    AuthSessionStartAuth(&authInfo, &g_connInfo, &authRequest);
+    DeviceKeyId deviceKeyId;
+    SetDeviceKeyIdParam(&deviceKeyId);
+    AuthSessionStartAuth(&authInfo, &g_connInfo, &deviceKeyId);
     SoftBusSleepMs(DELAY_TIME);
 }
 

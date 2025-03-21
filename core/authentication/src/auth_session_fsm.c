@@ -275,9 +275,7 @@ static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *co
     authFsm->info.version = SOFTBUS_NEW_V2;
     authFsm->info.idType = EXCHANGE_UDID;
     authFsm->info.isSupportDmDeviceKey = false;
-    authFsm->info.deviceKeyId.hasDeviceKeyId = authFsmParam->deviceKeyId.hasDeviceKeyId;
-    authFsm->info.deviceKeyId.localDeviceKeyId = authFsmParam->deviceKeyId.localDeviceKeyId;
-    authFsm->info.deviceKeyId.remoteDeviceKeyId = authFsmParam->deviceKeyId.remoteDeviceKeyId;
+    authFsm->info.deviceKeyId = authFsmParam->deviceKeyId;
     if (FillSessionInfoModule(authFsmParam->requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
         SoftBusFree(authFsm);
@@ -1696,7 +1694,7 @@ static int32_t GetFirstFsmState(AuthSessionInfo *info, int64_t authSeq, AuthFsmS
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo, const AuthRequest *authRequest)
+int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo, const DeviceKeyId *deviceKeyId)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "connInfo is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(authParam != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "authParam is NULL");
@@ -1709,7 +1707,7 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
     authFsmParam.requestId = authParam->requestId;
     authFsmParam.connId = authParam->connId;
     authFsmParam.isServer = authParam->isServer;
-    authFsmParam.deviceKeyId = authRequest->deviceKeyId;
+    authFsmParam.deviceKeyId = *deviceKeyId;
     AuthFsm *authFsm =
         CreateAuthFsm(&authFsmParam, connInfo);
     if (authFsm == NULL) {

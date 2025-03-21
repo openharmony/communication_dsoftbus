@@ -595,7 +595,7 @@ static int32_t StartConnVerifyDevice(uint32_t requestId, const AuthConnInfo *con
 static int32_t StartVerifyDevice(AuthVerifyParam *authVerifyParam, const AuthConnInfo *connInfo,
     const AuthVerifyCallback *verifyCb)
 {
-    if (connInfo == NULL || verifyCb == NULL) {
+    if (connInfo == NULL || verifyCb == NULL || authVerifyParam == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -738,7 +738,7 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback)
 {
-    if (connInfo == NULL || !CheckVerifyCallback(callback)) {
+    if (connInfo == NULL || authVerifyParam == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

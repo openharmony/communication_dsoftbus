@@ -1708,11 +1708,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
         .isServer = false,
         .isFastAuth = true,
     };
-    AuthRequest authRequest = {
-        .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
-        .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    DeviceKeyId deviceKeyId = {
+        .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &authRequest);
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo authConnInfo;
     authConnInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -1722,7 +1722,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     authConnInfo.info.ipInfo.port = 20;
     authConnInfo.info.ipInfo.authId = 1024;
     (void)strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = AuthSessionStartAuth(&authInfo, &authConnInfo, &authRequest);
+    ret = AuthSessionStartAuth(&authInfo, &authConnInfo, &deviceKeyId);
     EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
 }
 
