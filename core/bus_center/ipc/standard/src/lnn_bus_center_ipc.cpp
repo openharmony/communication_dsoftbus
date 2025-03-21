@@ -56,7 +56,7 @@ struct DataLevelChangeReqInfo {
     int32_t pid;
 };
 
-struct BleRangeReqInfo {
+struct MsdpRangeReqInfo {
     char pkgName[PKG_NAME_SIZE_MAX];
     int32_t pid;
 };
@@ -66,7 +66,7 @@ static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
 static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
-static std::vector<BleRangeReqInfo *> g_bleRangeRequestInfo;
+static std::vector<MsdpRangeReqInfo *> g_msdpRangeReqInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);
@@ -81,10 +81,11 @@ static IDataLevelChangeCallback g_dataLevelChangeCb = {
     .onDataLevelChanged = OnDataLevelChanged,
 };
 
-static void OnBleRangeDone(const BleRangeInnerInfo *info);
+static void onRangeResult(const RangeResultInnerInfo *info);
 
-static IBleRangeInnerCallback g_bleRangeCb = {
-    .onRangeDone = OnBleRangeDone,
+static IBleRangeInnerCallback g_msdpRangeCb = {
+    .onRangeResult = onRangeResult,
+    .onRangeStateChange = NULL,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -189,15 +190,15 @@ static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *da
     return SOFTBUS_OK;
 }
 
-static void OnBleRangeDone(const BleRangeInnerInfo *info)
+static void onRangeResult(const RangeResultInnerInfo *info)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
     const char *msdpPkgName = "ohos.msdp.spatialawareness";
-    for (const auto &iter : g_bleRangeRequestInfo) {
+    for (const auto &iter : g_msdpRangeReqInfo) {
         if (strcmp(msdpPkgName, iter->pkgName) != 0) {
             continue;
         }
-        (void)ClientOnBleRange(msdpPkgName, iter->pid, info);
+        (void)ClientOnRangeResult(msdpPkgName, iter->pid, info);
     }
 }
 
@@ -522,15 +523,26 @@ int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
-int32_t LnnIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t LnnIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    return LnnTriggerHbForMeasureDistance(pkgName, callerId, mode);
+    if (config == NULL) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (config->medium == BLE_ADV_HB) {
+        return LnnTriggerHbRangeForMsdp(pkgName, config);
+    }
+    if (config->medium == SLE_CONN_HADM) {
+        return LnnTriggerSleRangeForMsdp(pkgName, config);
+    }
+    COMM_LOGE(COMM_SVC, "invalid medium=%{public}d", config->medium);
+    return SOFTBUS_INVALID_PARAM;
 }
 
-int32_t LnnIpcRegBleRangeCb(const char *pkgName, int32_t callingPid)
+int32_t LnnIpcRegRangeCbForMsdp(const char *pkgName, int32_t callingPid)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
-    BleRangeReqInfo *info = new (std::nothrow) BleRangeReqInfo();
+    MsdpRangeReqInfo *info = new (std::nothrow) MsdpRangeReqInfo();
     if (info == nullptr) {
         COMM_LOGE(COMM_SVC, "new object is nullptr");
         return SOFTBUS_NETWORK_REG_CB_FAILED;
@@ -541,19 +553,19 @@ int32_t LnnIpcRegBleRangeCb(const char *pkgName, int32_t callingPid)
         return SOFTBUS_STRCPY_ERR;
     }
     info->pid = callingPid;
-    g_bleRangeRequestInfo.push_back(info);
-    LnnRegBleRangeCb(&g_bleRangeCb);
+    g_msdpRangeReqInfo.push_back(info);
+    LnnRegBleRangeCb(&g_msdpRangeCb);
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcUnregBleRangeCb(const char *pkgName, int32_t callingPid)
+int32_t LnnIpcUnregRangeCbForMsdp(const char *pkgName, int32_t callingPid)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
-    std::vector<BleRangeReqInfo *>::iterator iter;
-    for (iter = g_bleRangeRequestInfo.begin(); iter != g_bleRangeRequestInfo.end();) {
+    std::vector<MsdpRangeReqInfo *>::iterator iter;
+    for (iter = g_msdpRangeReqInfo.begin(); iter != g_msdpRangeReqInfo.end();) {
         if (strcmp(pkgName, (*iter)->pkgName) == 0 && callingPid == (*iter)->pid) {
             delete *iter;
-            g_bleRangeRequestInfo.erase(iter);
+            g_msdpRangeReqInfo.erase(iter);
             break;
         }
         ++iter;

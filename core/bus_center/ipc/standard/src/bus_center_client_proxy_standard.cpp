@@ -639,7 +639,7 @@ void BusCenterClientProxy::OnDataLevelChanged(const char *networkId, const DataL
     }
 }
 
-void BusCenterClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+void BusCenterClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -651,14 +651,20 @@ void BusCenterClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
         return;
     }
-    if (!data.WriteRawData(rangeInfo, sizeof(BleRangeInnerInfo))) {
-        LNN_LOGE(LNN_EVENT, "write ble range info failed");
+    if (!data.WriteRawData(rangeInfo, sizeof(RangeResultInnerInfo))) {
+        LNN_LOGE(LNN_EVENT, "write range info failed");
         return;
+    }
+    if (rangeInfo->length > 0 && rangeInfo->length < MAX_ADDITION_DATA_LEN && rangeInfo->addition != NULL) {
+        if (!data.WriteRawData(rangeInfo->addition, rangeInfo->length)) {
+            LNN_LOGE(LNN_EVENT, "write range info failed");
+            return;
+        }
     }
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
-    int ret = remote->SendRequest(CLIENT_ON_BLE_RANGE_DONE, data, reply, option);
+    int ret = remote->SendRequest(CLIENT_ON_RANGE_RESULT, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }

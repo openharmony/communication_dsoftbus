@@ -677,15 +677,15 @@ HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, Test
 */
 HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
 {
-    IBleRangeCb cb;
-    (void)memset_s(&cb, sizeof(IBleRangeCb), 0, sizeof(IBleRangeCb));
+    IRangeCallback cb;
+    (void)memset_s(&cb, sizeof(IRangeCallback), 0, sizeof(IRangeCallback));
 
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, ServerIpcRegBleRangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
-    EXPECT_EQ(RegBleRangeCbInner("pkgName", &cb), SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegRangeCbForMsdp(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(RegRangeCbForMsdpInner("pkgName", &cb), SOFTBUS_SERVER_NOT_INIT);
 
-    EXPECT_CALL(busCentManagerMock, ServerIpcRegBleRangeCb(_)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_EQ(RegBleRangeCbInner("pkgName", &cb), SOFTBUS_OK);
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegRangeCbForMsdp(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(RegRangeCbForMsdpInner("pkgName", &cb), SOFTBUS_OK);
 }
 
 /*
@@ -697,11 +697,11 @@ HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1
 HWTEST_F(ClientBusCentManagerTest, UNREG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, ServerIpcUnregBleRangeCb(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
-    EXPECT_EQ(UnregBleRangeCbInner("pkgName"), SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregRangeCbForMsdp(_)).WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_EQ(UnregRangeCbForMsdpInner("pkgName"), SOFTBUS_SERVER_NOT_INIT);
 
-    EXPECT_CALL(busCentManagerMock, ServerIpcUnregBleRangeCb(_)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_EQ(UnregBleRangeCbInner("pkgName"), SOFTBUS_OK);
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregRangeCbForMsdp(_)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(UnregRangeCbForMsdpInner("pkgName"), SOFTBUS_OK);
 }
 
 /*
@@ -712,15 +712,15 @@ HWTEST_F(ClientBusCentManagerTest, UNREG_BLE_RANGE_INNER_Test_001, TestSize.Leve
  */
 HWTEST_F(ClientBusCentManagerTest, TRIGGER_HB_FOR_RANGE_INNER_Test_001, TestSize.Level1)
 {
-    HbMode mode;
+    RangeConfig config;
 
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, ServerIpcTriggerHbForMeasureDistance(_, _, _))
+    EXPECT_CALL(busCentManagerMock, ServerIpcTriggerRangeForMsdp(_, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT));
-    EXPECT_EQ(TriggerHbForMeasureDistanceInner("pkgName", "123", &mode), SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_EQ(TriggerRangeForMsdpInner("pkgName", &config), SOFTBUS_SERVER_NOT_INIT);
 
-    EXPECT_CALL(busCentManagerMock, ServerIpcTriggerHbForMeasureDistance(_, _, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_EQ(TriggerHbForMeasureDistanceInner("pkgName", "123", &mode), SOFTBUS_OK);
+    EXPECT_CALL(busCentManagerMock, ServerIpcTriggerRangeForMsdp(_, _)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_EQ(TriggerRangeForMsdpInner("pkgName", &config), SOFTBUS_OK);
 }
 
 /*

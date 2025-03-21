@@ -218,13 +218,13 @@ int32_t SoftBusServerProxyFrame::SetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::RegBleRangeCb(const char *pkgName)
+int32_t SoftBusServerProxyFrame::RegisterRangeCallbackForMsdp(const char *pkgName)
 {
     (void)pkgName;
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::UnregBleRangeCb(const char *pkgName)
+int32_t SoftBusServerProxyFrame::UnregisterRangeCallbackForMsdp(const char *pkgName)
 {
     (void)pkgName;
     return SOFTBUS_OK;

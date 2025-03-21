@@ -167,23 +167,23 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return ret;
 }
 
-int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName)
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int32_t ret = g_serverProxy->RegBleRangeCb(pkgName);
+    int32_t ret = g_serverProxy->RegisterRangeCallbackForMsdp(pkgName);
     return ret;
 }
 
-int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName)
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int32_t ret = g_serverProxy->UnregBleRangeCb(pkgName);
+    int32_t ret = g_serverProxy->UnregisterRangeCallbackForMsdp(pkgName);
     return ret;
 }
 
@@ -323,13 +323,13 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
     return ret;
 }
 
-int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
-    int32_t ret = g_serverProxy->TriggerHbForMeasureDistance(pkgName, callerId, mode);
+    int32_t ret = g_serverProxy->TriggerRangeForMsdp(pkgName, config);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "trigger failed");
     }

@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "ble_range.h"
 #include "softbus_utils.h"
 
 #ifdef __cplusplus
@@ -33,6 +34,7 @@ extern "C" {
 #define SOFTBUS_SUB_MODEL_ID_LEN (HEXIFY_LEN(1))
 #define SOFTBUS_NEW_MODEL_ID_LEN (HEXIFY_LEN(4))
 #define SOFTBUS_MODEL_NAME_LEN (HEXIFY_LEN(8))
+#define NETWORK_ID_BUF_LEN 65
 
 typedef enum {
     MODULE_BLE_DISCOVERY = 1,
@@ -67,15 +69,7 @@ typedef struct {
 } SoftBusRangeHandle;
 
 typedef struct {
-    int32_t rank;
-    int32_t subrank;
-    float distance;
-    double confidence;
-    char identity[SOFTBUS_DEV_IDENTITY_LEN];
-} SoftBusRankResult;
-
-typedef struct {
-    void (*onRangeDone)(SoftBusRangeHandle handle, const SoftBusRankResult *result);
+    void (*onRangeResult)(SoftBusRangeHandle handle, const RangeResult *result);
 } SoftBusRangeCallback;
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);

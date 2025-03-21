@@ -55,7 +55,10 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
       include_dirs = common_include
-      include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
+      include_dirs += [
+        "//kernel/liteos_m/kal/cmsis",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      ]
       external_deps = [
         "bounds_checking_function:libsec_static",
         "init:libbegetutil",
@@ -160,6 +163,7 @@ if (defined(ohos_lite)) {
   } else {
     shared_library("softbus_adapter") {
       include_dirs = common_include
+      include_dirs += [ "$dsoftbus_root_path/interfaces/inner_kits/lnn" ]
       cflags = [
         "-Wall",
         "-Werror",
@@ -238,6 +242,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "$softbus_adapter_common/include/OS_adapter_define/linux",
       "$softbus_adapter_common/security/access_token/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     ]
   }
 
