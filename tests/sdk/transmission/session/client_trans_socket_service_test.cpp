@@ -384,7 +384,7 @@ HWTEST_F(TransClientSocketServiceTest, GetCommonSocketOpt001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 
     optType = OPT_TYPE_SUPPORT_ACK;
     ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
