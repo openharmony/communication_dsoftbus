@@ -1781,14 +1781,11 @@ static void OnForceJoinLNNInOnline(LnnConnectionFsm *connFsm)
         return;
     }
     connInfo->requestId = AuthGenRequestId();
-    AuthVerifyParam authVerifyParam;
-    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
-    authVerifyParam.isFastAuth = true;
-    authVerifyParam.module = AUTH_MODULE_LNN;
-    authVerifyParam.requestId = connInfo->requestId;
-    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
-    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
-    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    AuthVerifyParam authVerifyParam = {
+        .isFastAuth = true, .module = AUTH_MODULE_LNN, .requestId = connInfo->requestId,
+        .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
     if (AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback()) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");

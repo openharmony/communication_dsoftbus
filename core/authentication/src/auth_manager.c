@@ -1230,6 +1230,19 @@ static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, con
     SoftBusFree(udidHash);
 }
 
+static void TryAuthSessionProcessDevIdData(const AuthDataHead *head, const uint8_t *data,
+    const AuthConnInfo *connInfo)
+{
+    int32_t ret = SOFTBUS_MEM_ERR;
+    ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM,
+            "perform auth session recv devId fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
+        return;
+    }
+    DfxRecordServerRecvPassiveConnTime(connInfo, head);
+}
+
 static void HandleDeviceIdData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1276,13 +1289,7 @@ static void HandleDeviceIdData(
             return;
         }
     }
-    ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM,
-            "perform auth session recv devId fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
-        return;
-    }
-    DfxRecordServerRecvPassiveConnTime(connInfo, head);
+    TryAuthSessionProcessDevIdData(head, data, connInfo);
 }
 
 static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
