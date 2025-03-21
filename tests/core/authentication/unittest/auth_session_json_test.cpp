@@ -798,6 +798,7 @@ HWTEST_F(AuthSessionJsonTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     SessionKey sessionKey = {
         .len = SESSION_KEY_LENGTH,
     };
@@ -816,18 +817,18 @@ HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level
         .connInfo.type = AUTH_LINK_TYPE_WIFI,
         .normalizedKey = nullptr,
     };
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.isNeedFastAuth = true;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.isServer = true;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.normalizedType = NORMALIZED_NOT_SUPPORT;
     info.localState = AUTH_STATE_START;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.normalizedKey = &sessionKey;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     EXPECT_EQ(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)), EOK);
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, PackNormalizedKeyValue(obj, &sessionKey));
     JSON_Delete(obj);
 }
