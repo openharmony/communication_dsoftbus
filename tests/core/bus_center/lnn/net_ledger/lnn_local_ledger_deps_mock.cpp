@@ -882,10 +882,10 @@ void LnnDeinitBusCenterEvent(void)
     return GetLocalLedgerDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
-    return GetLocalLedgerDepsInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
+    return GetLocalLedgerDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
 
 bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type)

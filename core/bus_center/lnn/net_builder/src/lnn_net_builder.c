@@ -279,10 +279,18 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = false;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
     DfxRecordLnnAuthStart(&authConn, para, requestId);
     FreeJoinLnnMsgPara(para);
-    return AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false);
+    return AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback());
 }
 
 bool NeedPendingJoinRequest(void)

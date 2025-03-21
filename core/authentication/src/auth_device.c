@@ -592,8 +592,8 @@ static int32_t StartConnVerifyDevice(uint32_t requestId, const AuthConnInfo *con
     return VerifyDevice(&request);
 }
 
-static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
-    AuthVerifyModule module, bool isFastAuth)
+static int32_t StartVerifyDevice(AuthVerifyParam *authVerifyParam, const AuthConnInfo *connInfo,
+    const AuthVerifyCallback *verifyCb)
 {
     if (connInfo == NULL || verifyCb == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
@@ -602,12 +602,13 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.verifyCb = *verifyCb;
-    request.module = module;
-    request.requestId = requestId;
+    request.module = authVerifyParam->module;
+    request.requestId = authVerifyParam->requestId;
     request.connInfo = *connInfo;
     request.authId = AUTH_INVALID_ID;
     request.type = REQUEST_TYPE_VERIFY;
-    request.isFastAuth = isFastAuth;
+    request.isFastAuth = authVerifyParam->isFastAuth;
+    request.deviceKeyId = authVerifyParam->deviceKeyId;
     return VerifyDevice(&request);
 }
 
@@ -734,8 +735,8 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
     return;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
@@ -743,7 +744,7 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const 
     }
     AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(connInfo), SOFTBUS_INVALID_PARAM,
         AUTH_FSM, "connInfo type error");
-    return StartVerifyDevice(requestId, connInfo, callback, module, isFastAuth);
+    return StartVerifyDevice(authVerifyParam, connInfo, callback);
 }
 
 int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCallback,

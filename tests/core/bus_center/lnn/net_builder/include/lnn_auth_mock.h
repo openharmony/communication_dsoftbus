@@ -26,8 +26,8 @@ class LnnAuthInterface {
 public:
     LnnAuthInterface() {};
     virtual ~LnnAuthInterface() {};
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-        const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth) = 0;
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+        const AuthVerifyCallback *callback) = 0;
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
     virtual int32_t RegGroupChangeListener(const GroupChangeListener *listener) = 0;
 };
@@ -36,8 +36,8 @@ class LnnAuthtInterfaceMock : public LnnAuthInterface {
 public:
     LnnAuthtInterfaceMock();
     ~LnnAuthtInterfaceMock() override;
-    MOCK_METHOD5(
-        AuthStartVerify, int32_t(const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, AuthVerifyModule, bool));
+    MOCK_METHOD3(
+        AuthStartVerify, int32_t(const AuthConnInfo *, AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(AuthGetVersion, int32_t(int64_t, SoftBusVersion *));
     MOCK_METHOD1(RegGroupChangeListener, int32_t(const GroupChangeListener *));
 };

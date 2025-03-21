@@ -814,9 +814,17 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ret = AuthStartVerify(nullptr, requestId, &callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(nullptr, &authVerifyParam, &callback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthStartVerify(&connInfo, requestId, nullptr, AUTH_MODULE_LNN, true);
+    ret = AuthStartVerify(&connInfo, &authVerifyParam, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1700,7 +1708,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
         .isServer = false,
         .isFastAuth = true,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
+    AuthRequest authRequest = {
+        .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &authRequest);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo authConnInfo;
     authConnInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -1710,7 +1722,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     authConnInfo.info.ipInfo.port = 20;
     authConnInfo.info.ipInfo.authId = 1024;
     (void)strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = AuthSessionStartAuth(&authInfo, &authConnInfo);
+    ret = AuthSessionStartAuth(&authInfo, &authConnInfo, &authRequest);
     EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
 }
 

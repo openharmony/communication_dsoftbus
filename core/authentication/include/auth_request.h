@@ -42,6 +42,7 @@ typedef struct {
     ListNode node;
     uint64_t addTime;
     bool isFastAuth;
+    DeviceKeyId deviceKeyId;
 } AuthRequest;
 
 bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb);
