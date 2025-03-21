@@ -18,6 +18,7 @@
 
 #include "auth_common.h"
 #include "auth_device_common_key.h"
+#include "auth_request.h"
 #include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
 #include "legacy/softbus_hisysevt_bus_center.h"

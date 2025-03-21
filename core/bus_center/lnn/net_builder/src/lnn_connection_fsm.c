@@ -1246,7 +1246,6 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     AuthVerifyParam authVerifyParam;
     (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
     SetAuthVerifyParam(&authVerifyParam, connInfo->requestId);
-    authConn.deviceKeyId.hasDeviceKeyId = false;
     if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
         rc = LnnConvertSessionAddrToAuthConnInfo(&connInfo->addr, &authConn);
         if (rc != SOFTBUS_OK) {
@@ -1256,7 +1255,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     } else if (connInfo->addr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
-        CheckDeviceKeyByPreLinkNode(connInfo, &authConn);
+        CheckDeviceKeyByPreLinkNode(connInfo, &authVerifyParam);
     } else {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
     }

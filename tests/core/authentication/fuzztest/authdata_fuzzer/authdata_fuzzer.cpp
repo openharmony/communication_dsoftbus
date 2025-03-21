@@ -142,7 +142,7 @@ bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
     (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
     authVerifyParam.isFastAuth = isFastAuth;
     authVerifyParam.module = authVeriFyModule;
-    authVerifyParam.requestId = crequestId;
+    authVerifyParam.requestId = requestId;
     authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
     authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
     authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
