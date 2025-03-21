@@ -305,21 +305,21 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
-int32_t SoftBusServer::TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t SoftBusServer::TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    return LnnIpcTriggerHbForMeasureDistance(pkgName, callerId, mode);
+    return LnnIpcTriggerRangeForMsdp(pkgName, config);
 }
 
-int32_t SoftBusServer::RegBleRangeCb(const char *pkgName)
+int32_t SoftBusServer::RegisterRangeCallbackForMsdp(const char *pkgName)
 {
     int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
-    return LnnIpcRegBleRangeCb(pkgName, callingPid);
+    return LnnIpcRegRangeCbForMsdp(pkgName, callingPid);
 }
 
-int32_t SoftBusServer::UnregBleRangeCb(const char *pkgName)
+int32_t SoftBusServer::UnregisterRangeCallbackForMsdp(const char *pkgName)
 {
     int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
-    return LnnIpcUnregBleRangeCb(pkgName, callingPid);
+    return LnnIpcUnregRangeCbForMsdp(pkgName, callingPid);
 }
 
 int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)

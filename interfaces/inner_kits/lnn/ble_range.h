@@ -36,19 +36,25 @@
 extern "C" {
 #endif
 
-/**
- * @brief Defines a ble range infomation, see {@link BleRangeInfo}.
- *
- * @since 1.0
- * @version 1.0
- */
+typedef enum {
+    BLE_ADV_HB,
+    SLE_CONN_HADM,
+} RangeMedium;
+
 typedef struct {
-    int32_t range;                      /**< The range between two devices */
-    int32_t subRange;                   /**< The subRange between two devices */
-    float distance;                     /**< The distance between two devices */
-    double confidence;                  /**< The confidence of range result */
-    char networkId[NETWORK_ID_BUF_LEN]; /**< The networkId value */
-} BleRangeInfo;
+    RangeMedium medium;
+    float distance;
+    char networkId[NETWORK_ID_BUF_LEN];
+    uint32_t length;
+    uint8_t *addition;
+} RangeResult;
+
+typedef struct {
+    RangeMedium medium;
+    int32_t state;
+    int32_t reason;
+    char networkId[NETWORK_ID_BUF_LEN];
+} RangeState;
 
 typedef struct {
     /**
@@ -59,20 +65,21 @@ typedef struct {
      * @since 1.0
      * @version 1.0
      */
-    void (*onBleRangeInfoReceived)(const BleRangeInfo *info);
-} IBleRangeCb;
+    void (*onRangeResult)(const RangeResult *result);
+    void (*onRangeStateChange)(const RangeState state);
+} IRangeCallback;
 
 /**
  * @brief Registers a callback for ble range result.
  *
  * @param pkgName Indicates the package name of the caller.
- * @param callback Indicates the function callback to be registered. For details, see {@link IBleRangeCb}.
+ * @param callback Indicates the function callback to be registered. For details, see {@link IRangeCallback}.
  * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise.
  *
  * @since 1.0
  * @version 1.0
  */
-int32_t RegBleRangeCb(const char *pkgName, IBleRangeCb *callback);
+int32_t RegisterRangeCallbackForMsdp(const char *pkgName, IRangeCallback *callback);
 
 /**
  * @brief Unregisters a callback for ble range result.
@@ -83,7 +90,7 @@ int32_t RegBleRangeCb(const char *pkgName, IBleRangeCb *callback);
  * @since 1.0
  * @version 1.0
  */
-int32_t UnregBleRangeCb(const char *pkgName);
+int32_t UnregisterRangeCallbackForMsdp(const char *pkgName);
 
 /**
  * @brief Defines heartbeat mode parameter, see{@link HbMode}.
@@ -97,6 +104,18 @@ typedef struct {
     bool replyFlag;   /** Heartbeat need reply or not, set this parameter to true if need reply */
 } HbMode;
 
+typedef struct {
+    RangeMedium medium;
+    union {
+        struct  HbConfig {
+            HbMode mode;                            // BLE_ADV_HB
+        } heartbeat;
+        struct SleConfig {
+            char networkId[NETWORK_ID_BUF_LEN];     // SLE_CONN_HADM
+        } sle;
+    } configInfo;
+} RangeConfig;
+
 /**
  * @brief Modify heartbeat parameters and trigger a temporary heartbeat.
  *
@@ -108,7 +127,9 @@ typedef struct {
  * @since 1.0
  * @version 1.0
  */
-int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
+int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+
+int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config);
 
 #ifdef __cplusplus
 }

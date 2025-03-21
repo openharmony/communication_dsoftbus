@@ -72,23 +72,22 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName)
 {
     (void)pkgName;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName)
 {
     (void)pkgName;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     (void)pkgName;
-    (void)callerId;
-    (void)mode;
+    (void)config;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
