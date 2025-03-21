@@ -292,6 +292,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
     int64_t authSeq = 1;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     EXPECT_CALL(mocker, IsSupportFeatureByCapaBit).WillRepeatedly(Return(false));
+    EXPECT_CALL(mocker, GetSessionKeyProfile).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, JSON_AddBoolToObject).WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     AuthSessionInfo info = { .isServer = true, .connInfo.type = AUTH_LINK_TYPE_WIFI };
