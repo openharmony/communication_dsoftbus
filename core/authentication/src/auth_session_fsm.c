@@ -258,8 +258,7 @@ static int32_t FillSessionInfoModule(uint32_t requestId, AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-static AuthFsm *CreateAuthFsm(
-    int64_t authSeq, uint32_t requestId, uint64_t connId, const AuthConnInfo *connInfo, bool isServer)
+static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *connInfo)
 {
     AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
     if (authFsm == NULL) {
@@ -267,25 +266,25 @@ static AuthFsm *CreateAuthFsm(
         return NULL;
     }
     authFsm->id = GetNextAuthFsmId();
-    authFsm->authSeq = authSeq;
-    authFsm->info.requestId = requestId;
-    authFsm->info.isServer = isServer;
-    authFsm->info.isConnectServer = isServer;
-    authFsm->info.connId = connId;
+    authFsm->authSeq = authFsmParam->authSeq;
+    authFsm->info.requestId = authFsmParam->requestId;
+    authFsm->info.isServer = authFsmParam->isServer;
+    authFsm->info.isConnectServer = authFsmParam->isServer;
+    authFsm->info.connId = authFsmParam->connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
     authFsm->info.idType = EXCHANGE_UDID;
     authFsm->info.isSupportDmDeviceKey = false;
-    authFsm->info.deviceKeyId.hasDeviceKeyId = connInfo->deviceKeyId.hasDeviceKeyId;
-    authFsm->info.deviceKeyId.localDeviceKeyId = connInfo->deviceKeyId.localDeviceKeyId;
-    authFsm->info.deviceKeyId.remoteDeviceKeyId = connInfo->deviceKeyId.remoteDeviceKeyId;
-    if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
+    authFsm->info.deviceKeyId.hasDeviceKeyId = authFsmParam->deviceKeyId.hasDeviceKeyId;
+    authFsm->info.deviceKeyId.localDeviceKeyId = authFsmParam->deviceKeyId.localDeviceKeyId;
+    authFsm->info.deviceKeyId.remoteDeviceKeyId = authFsmParam->deviceKeyId.remoteDeviceKeyId;
+    if (FillSessionInfoModule(authFsmParam->requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
         SoftBusFree(authFsm);
         return NULL;
     }
-    if (!isServer) {
-        if (ProcAuthFsm(requestId, isServer, authFsm) != SOFTBUS_OK) {
+    if (!authFsmParam->isServer) {
+        if (ProcAuthFsm(authFsmParam->requestId, authFsmParam->isServer, authFsm) != SOFTBUS_OK) {
             SoftBusFree(authFsm);
             return NULL;
         }
@@ -306,7 +305,8 @@ static AuthFsm *CreateAuthFsm(
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     AUTH_LOGI(AUTH_FSM,
         "create auth fsm. authSeq=%{public}" PRId64 ", name=%{public}s, side=%{public}s, requestId=%{public}u, "
-        "" CONN_INFO, authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
+        "" CONN_INFO, authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(authFsmParam->isServer),
+        authFsmParam->requestId, CONN_DATA(authFsmParam->connId));
     return authFsm;
 }
 
@@ -1696,15 +1696,22 @@ static int32_t GetFirstFsmState(AuthSessionInfo *info, int64_t authSeq, AuthFsmS
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo)
+int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo, const AuthRequest *authRequest)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "connInfo is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(authParam != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "authParam is NULL");
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
+    AuthFsmParam authFsmParam;
+    (void)memset_s(&authFsmParam, sizeof(authFsmParam), 0, sizeof(authFsmParam));
+    authFsmParam.authSeq = authParam->authSeq;
+    authFsmParam.requestId = authParam->requestId;
+    authFsmParam.connId = authParam->connId;
+    authFsmParam.isServer = authParam->isServer;
+    authFsmParam.deviceKeyId = authRequest->deviceKeyId;
     AuthFsm *authFsm =
-        CreateAuthFsm(authParam->authSeq, authParam->requestId, authParam->connId, connInfo, authParam->isServer);
+        CreateAuthFsm(&authFsmParam, connInfo);
     if (authFsm == NULL) {
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;

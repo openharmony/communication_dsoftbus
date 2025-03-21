@@ -832,9 +832,17 @@ static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *stored
     }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = false;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
     (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
     DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback()) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
         return SOFTBUS_AUTH_START_VERIFY_FAIL;
     }

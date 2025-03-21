@@ -23,8 +23,6 @@
 #include "softbus_common.h"
 #include "auth_attest_interface.h"
 
-#define AUTH_INVALID_DEVICEKEY_ID 0x0
-
 #ifdef __cplusplus
 extern "C" {
 #endif

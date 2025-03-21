@@ -82,7 +82,16 @@ HWTEST_F(AuthSessionFsmTest, TRANSLATE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_BR;
     ASSERT_TRUE(memcpy_s(connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
-    AuthFsm *authFsm = CreateAuthFsm(AUTH_SEQ, REQUEST_ID, CONN_ID, &connInfo, true);
+    AuthFsmParam authFsmParam;
+    (void)memset_s(&authFsmParam, sizeof(authFsmParam), 0, sizeof(authFsmParam));
+    authFsmParam.authSeq = AUTH_SEQ;
+    authFsmParam.requestId = REQUEST_ID;
+    authFsmParam.connId = CONN_ID;
+    authFsmParam.isServer = true;
+    authFsmParam.deviceKeyId.hasDeviceKeyId = false;
+    authFsmParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authFsmParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    AuthFsm *authFsm = CreateAuthFsm(&authFsmParam, &connInfo);
     EXPECT_TRUE(authFsm == nullptr);
     authFsm = TranslateToAuthFsm(nullptr, FSM_MSG_AUTH_TIMEOUT, nullptr);
     EXPECT_TRUE(authFsm == nullptr);

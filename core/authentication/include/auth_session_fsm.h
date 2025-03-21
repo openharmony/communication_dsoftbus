@@ -60,6 +60,14 @@ typedef enum {
 } AuthStartState;
 
 typedef struct {
+    int64_t authSeq;
+    uint32_t requestId;
+    uint64_t connId;
+    bool isServer;
+    DeviceKeyId deviceKeyId;
+} AuthFsmParam;
+
+typedef struct {
     uint32_t requestId;
     bool isServer;
     bool isConnectServer;
@@ -116,7 +124,8 @@ typedef struct {
 } AuthParam;
 
 void AuthSessionSetReSyncDeviceName(void);
-int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo);
+int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo,
+    const AuthRequest *authRequest);
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);

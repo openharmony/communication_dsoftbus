@@ -1162,10 +1162,6 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         AUTH_LOGE(AUTH_CONN, "request not found, requestId=%{public}u", requestId);
         return;
     }
-    AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
-    connInfoMut->deviceKeyId.hasDeviceKeyId = request.connInfo.deviceKeyId.hasDeviceKeyId;
-    connInfoMut->deviceKeyId.localDeviceKeyId = request.connInfo.deviceKeyId.localDeviceKeyId;
-    connInfoMut->deviceKeyId.remoteDeviceKeyId = request.connInfo.deviceKeyId.remoteDeviceKeyId;
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)request.traceId);
     if (request.type == REQUEST_TYPE_RECONNECT && connInfo != NULL) {
         HandleReconnectResult(&request, connId, result, connInfo->type);
@@ -1184,7 +1180,7 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         .isServer = false,
         .isFastAuth = request.isFastAuth,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &request);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, requestId);
         DisconnectAuthDevice(&connId);
@@ -1269,7 +1265,11 @@ static void HandleDeviceIdData(
             .authSeq = head->seq, .requestId = AuthGenRequestId(), .connId = connId,
             .isServer = true, .isFastAuth = true,
         };
-        ret = AuthSessionStartAuth(&authInfo, connInfo);
+        AuthRequest authRequest = {
+            .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+            .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        };
+        ret = AuthSessionStartAuth(&authInfo, connInfo, &authRequest);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
                 "perform auth session start auth fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);

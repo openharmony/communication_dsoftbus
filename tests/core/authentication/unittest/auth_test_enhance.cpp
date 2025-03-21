@@ -181,7 +181,15 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     ON_CALL(connMock, ConnConnectDevice(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
-    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = g_requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(&g_connInfo, &authVerifyParam, &g_callback);
     SoftBusSleepMs(MILLIS);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AuthStartConnVerify(&g_connInfo, g_requestId, &g_connCallback, AUTH_MODULE_TRANS, true);
@@ -213,7 +221,15 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
     ON_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(2));
     ON_CALL(socketMock, ConnSetTcpKeepalive(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(socketMock, ConnShutdownSocket(_));
-    ret = AuthStartVerify(&g_connInfo2, g_requestId, &g_callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = g_requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(&g_connInfo2, &authVerifyParam, &g_callback);
     SoftBusSleepMs(MILLIS);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AuthStartConnVerify(&g_connInfo2, g_requestId, &g_connCallback, AUTH_MODULE_LNN, true);
@@ -248,7 +264,15 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     ON_CALL(connMock, ConnPostBytes(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
-    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = g_requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(&g_connInfo, &authVerifyParam, &g_callback);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
 }
@@ -282,7 +306,15 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     ON_CALL(connMock, ConnPostBytes(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
-    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = g_requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(&g_connInfo, &authVerifyParam, &g_callback);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
 }
