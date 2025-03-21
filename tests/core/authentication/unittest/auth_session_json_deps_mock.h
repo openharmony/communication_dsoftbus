@@ -153,6 +153,7 @@ public:
     virtual int32_t LnnGetStaFrequency(const NodeInfo *info) = 0;
     virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
     virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
+    virtual void DelSessionKeyProfile(int32_t sessionKeyId) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -242,6 +243,7 @@ public:
     MOCK_METHOD1(PackCipherKeySyncMsg, bool (void *));
     MOCK_METHOD1(LnnGetP2pRole, int32_t (const NodeInfo *));
     MOCK_METHOD1(LnnGetStaFrequency, int32_t (const NodeInfo *));
+    MOCK_METHOD1(DelSessionKeyProfile, void(int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H
