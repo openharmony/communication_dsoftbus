@@ -26,7 +26,6 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_ip_network_impl_mock.h"
-#include "lnn_net_ledger_mock.h"
 #include "lnn_state_machine.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -98,7 +97,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.
 HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
-    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<LnnIpNetworkImplInterfaceMock> serviceMock;
     DistributeLedgerInterfaceMock distributeNetLedgerMock;
     HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
 
@@ -132,7 +131,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSi
 {
     GearMode mode;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
-    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<LnnIpNetworkImplInterfaceMock> serviceMock;
     EXPECT_CALL(hbStrateMock, LnnSetGearModeBySpecificType)
         .WillOnce(Return(SOFTBUS_NETWORK_HB_INVALID_MGR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -158,7 +157,6 @@ HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
     NiceMock<LnnIpNetworkImplInterfaceMock> serviceMock;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
     HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
-    LnnNetLedgertInterfaceMock netLedgerMock;
     EXPECT_CALL(serviceMock, LnnRegisterEventHandler)
         .WillOnce(Return(SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR))
         .WillOnce(Return(SOFTBUS_OK))
@@ -166,7 +164,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStrateMock, LnnHbStrategyInit).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbCtrlDepsMock, IsEnableSoftBusHeartbeat).WillRepeatedly(Return(true));
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitHeartbeat();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
     ret = LnnInitHeartbeat();

@@ -72,7 +72,6 @@ void LNNIpNetworkImplMockTest::TearDown() { }
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
 
     ListenerModule ret = LnnGetIpListenerModule(LNN_LISTENER_MODE_PROXY);
     EXPECT_TRUE(ret == PROXY);
@@ -100,7 +99,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1
     EXPECT_CALL(ipMock, LnnRegisterEventHandler)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo)
+    EXPECT_CALL(ipMock, LnnSetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -127,12 +126,11 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ipMock, LnnNotifyPhysicalSubnetStatusChanged).WillRepeatedly(Return());
     EXPECT_CALL(ipMock, LnnVisitPhysicalSubnet).WillRepeatedly(Return(true));
     EXPECT_CALL(ipMock, LnnIsLinkReady).WillRepeatedly(Return(true));
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     VisitNextChoice visit = NotifyWlanAddressChanged(&netifMgr, nullptr);
     EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
     netifMgr.type = LNN_NETIF_TYPE_WLAN;
@@ -163,7 +161,6 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ipMock, GetNetworkIpByIfName)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -179,7 +176,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
         .status = LNN_SUBNET_RUNNING,
     };
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2);
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(LnnIpNetworkImplInterfaceMock::ActionOfLnnGetLocalStrInfo2);
     IpSubnetManagerEvent res = GetIpEventInRunning(&subnet);
     EXPECT_TRUE(res == IP_SUBNET_MANAGER_EVENT_IF_DOWN);
 
@@ -197,11 +194,10 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2);
-    EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo)
+        .WillRepeatedly(LnnIpNetworkImplInterfaceMock::ActionOfLnnGetLocalStrInfo2);
+    EXPECT_CALL(ipMock, LnnSetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = RequestMainPort("lo", "127.0.0.1");
@@ -217,11 +213,11 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
     ret = RequestMainPort("deviceName", "127.0.0.2");
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ipMock, AuthStartListening).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OpenAuthPort();
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = OpenAuthPort();
@@ -231,7 +227,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
     ret = OpenIpLink();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     ret = OpenIpLink();
     EXPECT_NE(ret, SOFTBUS_OK);
 
@@ -254,11 +250,10 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2);
-    EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo)
+        .WillRepeatedly(LnnIpNetworkImplInterfaceMock::ActionOfLnnGetLocalStrInfo2);
+    EXPECT_CALL(ipMock, LnnSetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = ReleaseMainPort("deviceName");
@@ -278,7 +273,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
     LeaveOldIpNetwork(nullptr);
     LeaveOldIpNetwork(nullptr);
 
-    EXPECT_CALL(ledgerMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ipMock, ConnStopLocalListening)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -299,11 +294,10 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_006, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     bool ret = IsValidLocalIp();
     EXPECT_EQ(ret, false);
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     ret = IsValidLocalIp();
     EXPECT_EQ(ret, false);
 }
@@ -357,17 +351,16 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_008, TestSize.Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1)
 {
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalNumInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     OpenProxyPort();
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     OpenProxyPort();
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ipMock, ConnStartLocalListening).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OpenProxyPort();
 
@@ -375,8 +368,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1
         .ifName = "deviceName",
         .status = LNN_SUBNET_RUNNING,
     };
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ipMock, AuthStartListening).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = OpenAuthPort();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -407,18 +400,18 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_010, TestSize.Level1
 {
     char localIpAddr[IP_LEN] = { 0 };
     char localNetifName[NET_IF_NAME_LEN] = { 0 };
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     int32_t ret = GetLocalIpInfo(localIpAddr, sizeof(localIpAddr), localNetifName, sizeof(localNetifName));
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnGetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     ret = GetLocalIpInfo(localIpAddr, sizeof(localIpAddr), localNetifName, sizeof(localNetifName));
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ipMock, LnnSetLocalStrInfo).WillRepeatedly(Return(!SOFTBUS_OK));
     ret = SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
