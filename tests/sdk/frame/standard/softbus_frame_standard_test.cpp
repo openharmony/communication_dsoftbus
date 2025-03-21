@@ -497,7 +497,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnNodeStatusChangedInnerTest, TestSize.Lev
     data.WriteInt32(0);
     data.WriteUint32(sizeof(NodeStatus));
     data.WriteRawData(buffer.c_str(), buffer.size());
-    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READINT32_FAILED);
+    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READRAWDATA_FAILED);
 }
 
 /**
