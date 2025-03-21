@@ -49,7 +49,7 @@
 #include "lnn_init_monitor.h"
 
 #define RETRY_TIMES                      5
-#define DELAY_REG_DP_TIME                10000
+#define DELAY_REG_DP_TIME                1000
 static bool g_isRestore = false;
 static bool g_isDeviceInfoSet = false;
 
@@ -262,7 +262,7 @@ void LnnLedgerInfoStatusSet(void)
     InitDepsStatus netStat = node->networkId[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
     LnnInitDeviceInfoStatusSet(LEDGER_INFO_NETWORKID, netStat);
 
-    if ((netStat == DEPS_STATUS_SUCCESS) && (udidStat == DEPS_STATUS_SUCCESS) && (netStat == DEPS_STATUS_SUCCESS)) {
+    if ((uuidStat == DEPS_STATUS_SUCCESS) && (udidStat == DEPS_STATUS_SUCCESS) && (netStat == DEPS_STATUS_SUCCESS)) {
         LNN_LOGI(LNN_TEST, "Device info all ready.");
         g_isDeviceInfoSet = true;
         LnnInitSetDeviceInfoReady();
