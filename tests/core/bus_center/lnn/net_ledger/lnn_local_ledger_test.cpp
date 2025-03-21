@@ -138,6 +138,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 {
+    SoftBusMutexInit(&g_localNetLedger.lock, NULL);
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR));
