@@ -1180,7 +1180,7 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         .isServer = false,
         .isFastAuth = request.isFastAuth,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &request);
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &request.deviceKeyId);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, requestId);
         DisconnectAuthDevice(&connId);
@@ -1278,11 +1278,11 @@ static void HandleDeviceIdData(
             .authSeq = head->seq, .requestId = AuthGenRequestId(), .connId = connId,
             .isServer = true, .isFastAuth = true,
         };
-        AuthRequest authRequest = {
-            .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
-            .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        DeviceKeyId deviceKeyId = {
+            .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+            .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
         };
-        ret = AuthSessionStartAuth(&authInfo, connInfo, &authRequest);
+        ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
                 "perform auth session start auth fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
