@@ -45,8 +45,6 @@ typedef enum {
     DATA_TYPE_META_DEVICE_INFO_ACK = 0xFFFF0008,
     /* data type for cancel auth */
     DATA_TYPE_CANCEL_AUTH = 0xFFFF0009,
-    /* data type for testing reuse dm sessionkey*/
-    DATA_TYPE_TEST_AUTH = 0xFFFF0010,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0

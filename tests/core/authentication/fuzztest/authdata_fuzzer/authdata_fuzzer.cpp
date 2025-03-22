@@ -138,8 +138,15 @@ bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
     bool isFastAuth = GetData<bool>();
     AuthVerifyModule authVeriFyModule =
         static_cast<AuthVerifyModule>(GetData<int>() % (AUTH_MODULE_BUTT - AUTH_MODULE_LNN + 1));
-
-    AuthStartVerify(&connInfo, requestId, authVerifyCallback, authVeriFyModule, isFastAuth);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = isFastAuth;
+    authVerifyParam.module = authVeriFyModule;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    AuthStartVerify(&connInfo, &authVerifyParam, authVerifyCallback);
     return true;
 }
 
@@ -177,7 +184,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AuthMetaStartVerifyFuzzTest(data, size);
 
     DataGenerator::Clear();
-    
+
     return 0;
 }
 }

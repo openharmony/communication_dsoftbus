@@ -138,6 +138,25 @@ void SendSignal()
     AUTH_LOGI(AUTH_TEST, "SendSignal end");
 }
 
+static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam)
+{
+    (void)memset_s(authVerifyParam, sizeof(*authVerifyParam), 0, sizeof(*authVerifyParam));
+    authVerifyParam->isFastAuth = true;
+    authVerifyParam->module = AUTH_MODULE_LNN;
+    authVerifyParam->requestId = REQUEST_ID;
+    authVerifyParam->deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam->deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+}
+
+static void SetDeviceKeyIdParam(DeviceKeyId *deviceKeyId)
+{
+    (void)memset_s(deviceKeyId, sizeof(*deviceKeyId), 0, sizeof(*deviceKeyId));
+    deviceKeyId->hasDeviceKeyId = false;
+    deviceKeyId->localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    deviceKeyId->remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+}
+
 void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManager, DeviceGroupManager &groupManager)
 {
     bool isServer = false;
@@ -171,8 +190,9 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->authMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     const unsigned char val = 0x01;
     SoftbusSetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, &val, sizeof(val));
-    ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, AUTH_MODULE_LNN, true);
-
+    AuthVerifyParam authVerifyParam;
+    SetAuthVerifyParam(&authVerifyParam);
+    ret = AuthStartVerify(&g_connInfo, &authVerifyParam, &callBack);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthParam authInfo = {
         .authSeq = SEQ_SERVER,
@@ -181,7 +201,9 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
         .isServer = isServer,
         .isFastAuth = false,
     };
-    AuthSessionStartAuth(&authInfo, &g_connInfo);
+    DeviceKeyId deviceKeyId;
+    SetDeviceKeyIdParam(&deviceKeyId);
+    AuthSessionStartAuth(&authInfo, &g_connInfo, &deviceKeyId);
     SoftBusSleepMs(DELAY_TIME);
 }
 

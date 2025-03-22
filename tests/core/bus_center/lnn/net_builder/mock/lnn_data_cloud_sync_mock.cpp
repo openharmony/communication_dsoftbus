@@ -628,10 +628,10 @@ void LnnDeinitBusCenterEvent(void)
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
-    return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
+    return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
 
 bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type)

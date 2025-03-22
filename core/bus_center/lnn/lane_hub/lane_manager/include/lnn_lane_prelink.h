@@ -54,7 +54,6 @@ int32_t GetConcurrencyLaneReqIdByActionId(uint32_t actionId, uint32_t *laneReqId
 int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId);
 bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId);
 int32_t GetConcurrencyLaneReqIdByConnReqId(uint32_t connReqId, uint32_t *laneReqId);
-bool HaveConcurrencyBleGuideChannel(uint32_t actionId);
 int32_t InitActionBleConcurrency(void);
 void DeinitActionBleConcurrency(void);
 int32_t LnnTriggerPreLink(const void *msg);

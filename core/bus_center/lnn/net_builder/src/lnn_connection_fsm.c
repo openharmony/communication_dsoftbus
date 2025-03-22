@@ -1178,42 +1178,6 @@ static int32_t LnnConvertSessionAddrToAuthConnInfo(const ConnectionAddr *addr, A
     return SOFTBUS_OK;
 }
 
-static int32_t GetDeviceKeyForSessionKey(LnnConntionInfo *connInfo)
-{
-    if (connInfo == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t connId;
-    int32_t rc;
-    if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
-        &connId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "TransGetConnByChanId fail");
-        return SOFTBUS_INVALID_FD;
-    }
-    uint8_t deviceKey[SESSION_KEY_LENGTH] = { 0 };
-    uint32_t keyLen = 0;
-    rc = AddToAuthPreLinkList(connInfo->requestId, connId, connInfo->addr.info.session.localDeviceKeyId,
-        connInfo->addr.info.session.remoteDeviceKeyId, &connInfo->addr);
-    if (rc != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
-    }
-    if (!GetSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId, deviceKey, &keyLen)) {
-        LNN_LOGE(LNN_STATE, "get auth key fail");
-        keyLen = 0;
-        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    }
-    if (UpdateAuthPreLinkDeviceKeyById(connInfo->requestId, deviceKey, keyLen) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "update pre link device key fail");
-        keyLen = 0;
-        (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    }
-    (void)memset_s(deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    keyLen = 0;
-    DelSessionKeyProfile(connInfo->addr.info.session.localDeviceKeyId);
-    return SOFTBUS_OK;
-}
-
 static int32_t CheckConnFsmValid(LnnConnectionFsm *connFsm, LnnConntionInfo *connInfo)
 {
     if (CheckDeadFlag(connFsm, true)) {
@@ -1234,6 +1198,38 @@ static void CheckDupOk(LnnConnectionFsm *connFsm, NodeInfo *deviceInfo, bool *du
         LNN_LOGI(LNN_BUILDER, "join dup node info ok");
     }
 }
+
+static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthVerifyParam *authVerifyParam)
+{
+    int32_t connId;
+    int32_t rc = SOFTBUS_MEM_ERR;
+    if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
+        &connId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "TransGetConnByChanId fail");
+        return;
+    }
+    rc = AddToAuthPreLinkList(connInfo->requestId, connId, &connInfo->addr);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
+    }
+    authVerifyParam->deviceKeyId.localDeviceKeyId = connInfo->addr.info.session.localDeviceKeyId;
+    authVerifyParam->deviceKeyId.remoteDeviceKeyId = connInfo->addr.info.session.remoteDeviceKeyId;
+    if (authVerifyParam->deviceKeyId.localDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID &&
+        authVerifyParam->deviceKeyId.remoteDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID) {
+        authVerifyParam->deviceKeyId.hasDeviceKeyId = true;
+    }
+}
+
+static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam, uint32_t requestId)
+{
+    authVerifyParam->isFastAuth = true;
+    authVerifyParam->module = AUTH_MODULE_LNN;
+    authVerifyParam->requestId = requestId;
+    authVerifyParam->deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam->deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -1247,6 +1243,9 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     LNN_LOGI(LNN_BUILDER, "begin join request, [id=%{public}u], peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    SetAuthVerifyParam(&authVerifyParam, connInfo->requestId);
     if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
         rc = LnnConvertSessionAddrToAuthConnInfo(&connInfo->addr, &authConn);
         if (rc != SOFTBUS_OK) {
@@ -1256,9 +1255,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     } else if (connInfo->addr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
-        if (GetDeviceKeyForSessionKey(connInfo) != SOFTBUS_OK) {
-            return SOFTBUS_INVALID_FD;
-        }
+        CheckDeviceKeyByPreLinkNode(connInfo, &authVerifyParam);
     } else {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
     }
@@ -1273,7 +1270,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     }
     DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
-    rc = AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true);
+    rc = AuthStartVerify(&authConn, &authVerifyParam, LnnGetVerifyCallback());
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
@@ -1784,9 +1781,13 @@ static void OnForceJoinLNNInOnline(LnnConnectionFsm *connFsm)
         return;
     }
     connInfo->requestId = AuthGenRequestId();
+    AuthVerifyParam authVerifyParam = {
+        .isFastAuth = true, .module = AUTH_MODULE_LNN, .requestId = connInfo->requestId,
+        .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
-    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetReAuthVerifyCallback(),
-        AUTH_MODULE_LNN, true) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback()) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
         NotifyJoinResult(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
     }
