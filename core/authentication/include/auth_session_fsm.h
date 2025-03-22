@@ -18,6 +18,7 @@
 
 #include "auth_common.h"
 #include "auth_device_common_key.h"
+#include "auth_request.h"
 #include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
@@ -60,6 +61,14 @@ typedef enum {
 } AuthStartState;
 
 typedef struct {
+    int64_t authSeq;
+    uint32_t requestId;
+    uint64_t connId;
+    bool isServer;
+    DeviceKeyId deviceKeyId;
+} AuthFsmParam;
+
+typedef struct {
     uint32_t requestId;
     bool isServer;
     bool isConnectServer;
@@ -79,6 +88,7 @@ typedef struct {
     bool isSupportFastAuth;
     bool isNeedFastAuth;
     bool isSupportDmDeviceKey;
+    DeviceKeyId deviceKeyId;
     int64_t oldIndex;
     int32_t idType;
     int32_t userId;
@@ -115,7 +125,8 @@ typedef struct {
 } AuthParam;
 
 void AuthSessionSetReSyncDeviceName(void);
-int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo);
+int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo,
+    const DeviceKeyId *deviceKeyId);
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
@@ -128,7 +139,6 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len);
-int32_t AuthSessionProcessAuthTestData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect);
 int32_t AuthNotifyRequestVerify(int64_t authSeq);

@@ -913,8 +913,7 @@ static int32_t PostBytesForSession(int32_t fd, const AuthDataHead *head, const u
 static bool IsAuthSessionKeyModule(const AuthDataHead *head)
 {
     if (head->dataType == DATA_TYPE_AUTH || head->dataType == DATA_TYPE_DEVICE_INFO ||
-        head->dataType == DATA_TYPE_DEVICE_ID || head->dataType == DATA_TYPE_CLOSE_ACK ||
-        head->dataType == DATA_TYPE_TEST_AUTH) {
+        head->dataType == DATA_TYPE_DEVICE_ID || head->dataType == DATA_TYPE_CLOSE_ACK) {
         return true;
     }
     return false;

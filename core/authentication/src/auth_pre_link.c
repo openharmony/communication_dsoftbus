@@ -76,8 +76,7 @@ static bool IsAuthGenCertParaNodeExist(int32_t requestId)
         return false;
     }
     AuthGenCertNode *item = NULL;
-    AuthGenCertNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authGenCertParallelList.list, AuthGenCertNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authGenCertParallelList.list, AuthGenCertNode, node) {
         if (item->requestId == requestId) {
             AuthGenCertParallelUnLock();
             return true;
@@ -125,8 +124,7 @@ static int32_t FindAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **
         return SOFTBUS_LOCK_ERR;
     }
     AuthGenCertNode *item = NULL;
-    AuthGenCertNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authGenCertParallelList.list, AuthGenCertNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authGenCertParallelList.list, AuthGenCertNode, node) {
         if (item->requestId == requestId) {
             *genCertParaNode = item;
             AuthGenCertParallelUnLock();
@@ -146,8 +144,7 @@ int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isParallelGen, bool is
         return SOFTBUS_LOCK_ERR;
     }
     AuthGenCertNode *item = NULL;
-    AuthGenCertNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authGenCertParallelList.list, AuthGenCertNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authGenCertParallelList.list, AuthGenCertNode, node) {
         if (item->requestId == requestId) {
             item->isValid = isValid;
             if (isParallelGen) {
@@ -271,8 +268,7 @@ bool IsAuthPreLinkNodeExist(uint32_t requestId)
         return false;
     }
     AuthPreLinkNode *item = NULL;
-    AuthPreLinkNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
             AuthPreLinkUnlock();
             return true;
@@ -282,8 +278,7 @@ bool IsAuthPreLinkNodeExist(uint32_t requestId)
     return false;
 }
 
-int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, int32_t localDeviceKeyId,
-    int32_t remoteDeviceKeyId, ConnectionAddr *connAddr)
+int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr)
 {
     if (IsAuthPreLinkNodeExist(requestId)) {
         AUTH_LOGE(AUTH_CONN, "auth pre link exists");
@@ -303,9 +298,6 @@ int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, int32_t localDevice
     item->fd = fd;
     item->requestId = requestId;
     item->connAddr.type = CONNECTION_ADDR_SESSION_WITH_KEY;
-    item->localDeviceKeyId = localDeviceKeyId;
-    item->remoteDeviceKeyId = remoteDeviceKeyId;
-    item->keyLen = 0;
     if (AuthPreLinkLock() != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth pre link lock fail");
         SoftBusFree(item);
@@ -326,8 +318,7 @@ int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode)
         return SOFTBUS_LOCK_ERR;
     }
     AuthPreLinkNode *item = NULL;
-    AuthPreLinkNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
             if (memcpy_s(reuseNode, sizeof(AuthPreLinkNode), item, sizeof(AuthPreLinkNode)) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "copy AuthPreLinkNode failed");
@@ -351,8 +342,7 @@ int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *preLinkNode
         return SOFTBUS_LOCK_ERR;
     }
     AuthPreLinkNode *item = NULL;
-    AuthPreLinkNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (memcmp(item->uuid, uuid, UUID_BUF_LEN) == 0) {
             if (memcpy_s(preLinkNode, sizeof(AuthPreLinkNode), item, sizeof(AuthPreLinkNode)) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "copy AuthPreLinkNode failed");
@@ -375,61 +365,12 @@ int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, char *uuid)
         return SOFTBUS_LOCK_ERR;
     }
     AuthPreLinkNode *item = NULL;
-    AuthPreLinkNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
             if (memcpy_s(item->uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "memcpy uuid failed");
                 AuthPreLinkUnlock();
                 return SOFTBUS_MEM_ERR;
-            }
-            AuthPreLinkUnlock();
-            return SOFTBUS_OK;
-        }
-    }
-    AuthPreLinkUnlock();
-    return SOFTBUS_NOT_FIND;
-}
-
-int32_t UpdateAuthPreLinkDeviceKeyById(uint32_t requestId, uint8_t *deviceKey, uint32_t keyLen)
-{
-    AUTH_CHECK_AND_RETURN_RET_LOGE(deviceKey != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "deviceKey is NULL");
-    if (AuthPreLinkLock() != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "auth pre link lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    AuthPreLinkNode *item = NULL;
-    AuthPreLinkNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
-        if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
-            if (memcpy_s(item->localDeviceKey, SESSION_KEY_LENGTH, deviceKey, SESSION_KEY_LENGTH) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "memcpy device key fail");
-                AuthPreLinkUnlock();
-                return SOFTBUS_MEM_ERR;
-            }
-            item->keyLen = keyLen;
-            AuthPreLinkUnlock();
-            return SOFTBUS_OK;
-        }
-    }
-    AuthPreLinkUnlock();
-    return SOFTBUS_NOT_FIND;
-}
-
-int32_t UpdateAuthPreLinkDeviceKeyIdById(uint32_t requestId, bool isRemote, int32_t deviceKeyId)
-{
-    if (AuthPreLinkLock() != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "auth pre link lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    AuthPreLinkNode *item = NULL;
-    AuthPreLinkNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authPreLinkList.list, AuthPreLinkNode, node) {
-        if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
-            if (isRemote) {
-                item->remoteDeviceKeyId = deviceKeyId;
-            } else {
-                item->localDeviceKeyId = deviceKeyId;
             }
             AuthPreLinkUnlock();
             return SOFTBUS_OK;

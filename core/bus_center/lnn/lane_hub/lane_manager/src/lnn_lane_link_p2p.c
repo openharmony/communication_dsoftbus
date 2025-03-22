@@ -2318,13 +2318,10 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
 static void TryConcurrencyToConn(const LinkRequest *request, uint32_t laneLinkReqId,
     struct WifiDirectConnectInfo *wifiDirectInfo)
 {
-    if (HaveConcurrencyBleGuideChannel(request->actionAddr)) {
+    uint32_t recordLaneReqId = 0;
+    if (GetConcurrencyLaneReqIdByActionId(request->actionAddr, &recordLaneReqId) == SOFTBUS_OK) {
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
         wifiDirectInfo->ipAddrType = IPV4;
-        uint32_t recordLaneReqId = 0;
-        if (GetConcurrencyLaneReqIdByActionId(request->actionAddr, &recordLaneReqId) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "not found pre link lane req id");
-        }
         if (recordLaneReqId != laneLinkReqId) {
             if (UpdateConcurrencyReuseLaneReqIdByActionId(request->actionAddr, laneLinkReqId,
                 wifiDirectInfo->requestId) != SOFTBUS_OK) {
