@@ -158,7 +158,7 @@ static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
 {
     size_t size = 0;
     char *accountId = (char *)ReadString(data, &size);
-    if (accountId != nullptr) {
+    if (accountId != NULL) {
         strcpy_s(info->accountId, size, accountId);
     }
     size = 0;
