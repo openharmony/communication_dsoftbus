@@ -770,9 +770,8 @@ int32_t SoftBusClientStub::OnChannelBindInner(MessageParcel &data, MessageParcel
 static int32_t MessageParcelReadCollabInfo(MessageParcel &data, CollabInfo &info)
 {
     char *accountId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(accountId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read accountId failed");
-    if (strcpy_s(info.accountId, sizeof(info.accountId), accountId) != EOK) {
-        COMM_LOGE(COMM_SDK, "strcpy_s failed to copy accountId");
+    if (accountId != nullptr) {
+        strcpy_s(info.accountId, sizeof(info.accountId), accountId);
     }
     READ_PARCEL_WITH_RET(data, Uint64, info.tokenId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, info.userId, SOFTBUS_IPC_ERR);

@@ -97,7 +97,7 @@ static void TransTdcCheckIsApp(AppInfo *appInfo)
         return;
     }
     uint32_t size = 0;
-    if (GetOsAccountUid(&appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size) != SOFTBUS_OK) {
+    if (GetOsAccountUid(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
     }
     appInfo->myData.userId = TransGetForegroundUserId();
