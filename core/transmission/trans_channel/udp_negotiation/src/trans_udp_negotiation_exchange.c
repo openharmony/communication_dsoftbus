@@ -146,7 +146,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
                 appInfo->peerData.userId = INVALID_USER_ID;
             }
             (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
-            (void)GetJsonObjectSignedNumber64Item(msg, "ACCOUNT_ID", &appInfo->peerData.accountId);
+            (void)GetJsonObjectStringItem(msg, "ACCOUNT_ID", appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
@@ -171,17 +171,18 @@ static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
     if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
-    int64_t accountId = 0;
-    if (GetCurrentAccount(&accountId) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "GetCurrentAccount failed.");
-        accountId = INVALID_ACCOUNT_ID;
+    uint32_t size = 0;
+    char *accountId = "";
+    if (GetOsAccountUid(accountId, ACCOUNT_UID_LEN_MAX-1, &size) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
+
     int32_t userId = TransGetForegroundUserId();
     if (userId == INVALID_USER_ID) {
         TRANS_LOGW(TRANS_CTRL, "GetCurrentAccount failed.");
     }
     (void)AddNumberToJsonObject(msg, "USER_ID", userId);
-    (void)AddNumber64ToJsonObject(msg, "ACCOUNT_ID", accountId);
+    (void)AddStringToJsonObject(msg, "ACCOUNT_ID", accountId);
 }
 
 int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
