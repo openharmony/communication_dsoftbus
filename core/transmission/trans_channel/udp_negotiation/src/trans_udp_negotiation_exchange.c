@@ -172,7 +172,7 @@ static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
         return;
     }
     uint32_t size = 0;
-    char *accountId = "";
+    char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     if (GetOsAccountUid(accountId, ACCOUNT_UID_LEN_MAX-1, &size) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
