@@ -435,12 +435,12 @@ static void TransProxyCheckIsApp(AppInfo *appInfo, cJSON *root)
         return;
     }
 
-    if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
-        appInfo->myData.accountId = INVALID_ACCOUNT_ID;
+    uint32_t size = 0;
+    if (GetOsAccountUid(&appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
     appInfo->myData.userId = TransGetForegroundUserId();
-    (void)AddNumber64ToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
+    (void)AddStringToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
     (void)AddNumberToJsonObject(root, JSON_KEY_USER_ID, appInfo->myData.userId);
 }
 

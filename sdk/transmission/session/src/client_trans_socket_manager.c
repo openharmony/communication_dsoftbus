@@ -1001,7 +1001,7 @@ static void PrintCollabInfo(const CollabInfo *info, char *role)
     AnonymizeFree(tmpDeviceId);
     TRANS_LOGI(TRANS_SDK, "%{public}s userId=%{public}d", role, info->userId);
     TRANS_LOGI(TRANS_SDK, "%{public}s pid=%{public}d", role, info->pid);
-    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}" PRId64, role, info->accountId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}s", role, info->accountId);
     TRANS_LOGI(TRANS_SDK, "%{public}s tokenId=%{public}" PRIu64, role, info->tokenId);
 }
 
