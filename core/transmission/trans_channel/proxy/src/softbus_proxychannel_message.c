@@ -811,7 +811,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     if (!GetJsonObjectNumber64Item(root, JSON_KEY_CALLING_TOKEN_ID, (int64_t *)&appInfo->callingTokenId)) {
         appInfo->callingTokenId = TOKENID_NOT_SET;
     }
-    (void)GetJsonObjectSignedNumber64Item(root, JSON_KEY_ACCOUNT_ID, &(appInfo->peerData.accountId));
+    (void)GetJsonObjectStringItem(root, JSON_KEY_ACCOUNT_ID, appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
     if (!GetJsonObjectNumberItem(root, JSON_KEY_USER_ID, &(appInfo->peerData.userId))) {
         appInfo->peerData.userId = INVALID_USER_ID;
     }
