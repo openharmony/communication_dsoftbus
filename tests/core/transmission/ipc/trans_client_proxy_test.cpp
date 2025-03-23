@@ -548,14 +548,14 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Lev
 {
     int32_t pid = 0;
     CollabInfo sourceInfo = {
-        .accountId = 0,
+        .accountId = "",
         .deviceId = "ABCDE",
         .pid = 0,
         .tokenId = 0,
         .userId = 0,
     };
     CollabInfo sinkInfo = {
-        .accountId = 0,
+        .accountId = "",
         .deviceId = "ABCDE",
         .pid = 0,
         .tokenId = 0,

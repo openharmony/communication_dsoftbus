@@ -324,12 +324,12 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     bool isSinkSide = (sinkInfo->pid != -1);
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteBool(&io, isSinkSide);
-    WriteInt64(&io, sourceInfo->accountId);
+    WriteString(&io, sourceInfo->accountId);
     WriteUint64(&io, sourceInfo->tokenId);
     WriteInt32(&io, sourceInfo->userId);
     WriteInt32(&io, sourceInfo->pid);
     WriteString(&io, sourceInfo->deviceId);
-    WriteInt64(&io, sinkInfo->accountId);
+    WriteString(&io, sinkInfo->accountId);
     WriteUint64(&io, sinkInfo->tokenId);
     WriteInt32(&io, sinkInfo->userId);
     WriteInt32(&io, sinkInfo->pid);
