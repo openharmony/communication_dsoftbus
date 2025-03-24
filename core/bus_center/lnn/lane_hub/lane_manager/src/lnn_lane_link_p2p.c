@@ -1297,7 +1297,7 @@ static int32_t NotifyRawLinkSucc(uint32_t p2pRequestId, const struct WifiDirectL
 
 static void TryDelPreLinkByConnReqId(uint32_t connReqId)
 {
-    if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId)) {
+    if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId, false)) {
         uint32_t *laneReqIdPtr = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
         if (laneReqIdPtr == NULL) {
             LNN_LOGE(LNN_LANE, "create lane req id fail");
@@ -1336,7 +1336,8 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
     SetRemoteDynamicNetCap(linkInfo.peerUdid, linkInfo.type);
     LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
-    if (linkInfo.type == LANE_HML_RAW && link->isReuse && !HaveConcurrencyPreLinkReqIdByReuseConnReqId(p2pRequestId)) {
+    if (linkInfo.type == LANE_HML_RAW && link->isReuse &&
+        !HaveConcurrencyPreLinkReqIdByReuseConnReqId(p2pRequestId, true)) {
         ret = NotifyRawLinkSucc(p2pRequestId, link, &linkInfo);
         if (ret != SOFTBUS_OK && ret != SOFTBUS_MALLOC_ERR) {
             goto FAIL;
@@ -2326,11 +2327,9 @@ static void TryConcurrencyToConn(const LinkRequest *request, uint32_t laneLinkRe
     if (GetConcurrencyLaneReqIdByActionId(request->actionAddr, &recordLaneReqId) == SOFTBUS_OK) {
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
         wifiDirectInfo->ipAddrType = IPV4;
-        if (recordLaneReqId != laneLinkReqId) {
-            if (UpdateConcurrencyReuseLaneReqIdByActionId(request->actionAddr, laneLinkReqId,
-                wifiDirectInfo->requestId) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LANE, "pre link update reuse link lane req id fail");
-            }
+        if (UpdateConcurrencyReuseLaneReqIdByActionId(request->actionAddr, laneLinkReqId,
+            wifiDirectInfo->requestId) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "pre link update reuse link lane req id fail");
         }
     }
 }
