@@ -1334,10 +1334,9 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
     LNN_LOGI(LNN_LANE,
         "wifidirect conn succ, requestId=%{public}u, linkType=%{public}d, linkId=%{public}d, isReuse=%{public}d",
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
-    TryDelPreLinkByConnReqId(p2pRequestId);
     SetRemoteDynamicNetCap(linkInfo.peerUdid, linkInfo.type);
     LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
-    if (linkInfo.type == LANE_HML_RAW && link->isReuse) {
+    if (linkInfo.type == LANE_HML_RAW && link->isReuse && !HaveConcurrencyPreLinkReqIdByReuseConnReqId(p2pRequestId)) {
         ret = NotifyRawLinkSucc(p2pRequestId, link, &linkInfo);
         if (ret != SOFTBUS_OK && ret != SOFTBUS_MALLOC_ERR) {
             goto FAIL;
@@ -1346,6 +1345,7 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
         if (linkInfo.type == LANE_HML_RAW) {
             (void)AddAuthSessionFlag(link->remoteIp, false);
         }
+        TryDelPreLinkByConnReqId(p2pRequestId);
         NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, &linkInfo, link->linkId);
     }
     return;
