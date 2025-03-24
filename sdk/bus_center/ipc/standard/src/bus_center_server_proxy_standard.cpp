@@ -338,9 +338,10 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+    int32_t severRet = remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option);
+    if (severRet != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", severRet);
+        return severRet;
     }
     return ReadIPCReceiveOnlineNodeInfo(info, infoTypeLen, infoNum, &reply);
 }
@@ -991,9 +992,10 @@ int32_t BusCenterServerProxy::DeactiveMetaNode(const char *metaNodeId)
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_DEACTIVE_META_NODE, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+    int32_t severRet = remote->SendRequest(SERVER_DEACTIVE_META_NODE, data, reply, option);
+    if (severRet != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, severRet=%{public}d", severRet);
+        return severRet;
     }
     return SOFTBUS_OK;
 }
@@ -1021,9 +1023,10 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_GET_ALL_META_NODE_INFO, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+    int32_t severRet = remote->SendRequest(SERVER_GET_ALL_META_NODE_INFO, data, reply, option);
+    if (severRet != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, severRet=%{public}d", severRet);
+        return severRet;
     }
     int32_t retInfoNum;
     if (!reply.ReadInt32(retInfoNum)) {

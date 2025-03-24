@@ -18,6 +18,7 @@
 #include <time.h>
 
 #include "anonymizer.h"
+#include "lnn_event.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -113,43 +114,53 @@ static CallRecord* CreateAndAddCallRecord(const char* pkgName, int interfaceId)
     return newRecord;
 }
 
-static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interfaceId)
+static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interfaceId, DdosInfo *ddosInfo)
 {
     CallRecord *next = NULL;
     CallRecord *item = NULL;
-    int32_t userCount = 1;
-    int32_t idCount = 1;
-    int32_t recordCount = 1;
+    ddosInfo->funcId = interfaceId;
+    ddosInfo->userCount = 1;
+    ddosInfo->idCount = 1;
+    ddosInfo->recordCount = 1;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_callRecord->list, CallRecord, node) {
         if (strncmp(item->pkgName, pkgName, PKG_NAME_SIZE_MAX) == 0) {
-            userCount++;
+            ddosInfo->userCount++;
         }
         if (item->interfaceId == interfaceId) {
-            idCount++;
+            ddosInfo->idCount++;
             if (strncmp(item->pkgName, pkgName, PKG_NAME_SIZE_MAX)  == 0) {
-                recordCount++;
+                ddosInfo->recordCount++;
             }
         }
     }
-    LNN_LOGE(LNN_EVENT,
-        "recordCount=%{public}d, idCount=%{public}d, userCount=%{public}d, totalCount=%{public}d, funcid=%{public}d",
-        recordCount, idCount, userCount, g_callRecord->cnt, interfaceId);
-    int column = 0;
-    if (recordCount > callTable[interfaceId][column++]) {
-        return SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT;
-    } else if (idCount > callTable[interfaceId][column++]) {
-        return SOFTBUS_DDOS_ID_SAME_COUNT_LIMIT;
-    } else if (userCount > SAME_USER_ALL_ID_TIMES) {
-        return SOFTBUS_DDOS_USER_SAME_ID_COUNT_LIMIT;
-    } else if (g_callRecord->cnt > ALL_USER_ALL_ID_TIMES) {
-        return SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT;
-    } else {
-        return SOFTBUS_OK;
+    if (strcpy_s(ddosInfo->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_EVENT, "strcpy pkgName fail");
+        return SOFTBUS_STRCPY_ERR;
     }
+    ddosInfo->totalCount = g_callRecord->cnt;
+    int32_t column = 0;
+    int32_t ret = SOFTBUS_OK;
+    LNN_LOGI(LNN_EVENT, "ddos info, recordCount=%{public}d, idCount=%{public}d, "
+        "userCount=%{public}d, totalCount=%{public}d, interfaceid=%{public}d",
+        ddosInfo->recordCount, ddosInfo->idCount, ddosInfo->userCount, ddosInfo->totalCount, interfaceId);
+    if (ddosInfo->recordCount > callTable[interfaceId][column++]) {
+        ret = SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT;
+    } else if (ddosInfo->idCount > callTable[interfaceId][column]) {
+        ret =  SOFTBUS_DDOS_ID_SAME_COUNT_LIMIT;
+    } else if (ddosInfo->userCount > SAME_USER_ALL_ID_TIMES) {
+        ret =  SOFTBUS_DDOS_USER_SAME_ID_COUNT_LIMIT;
+    } else if (ddosInfo->totalCount > ALL_USER_ALL_ID_TIMES) {
+        ret =  SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT;
+    }
+    return ret;
 }
 
 static void ClearExpiredRecords(void)
 {
+    if (CallRecordLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "CallRecord lock fail");
+        return;
+    }
     time_t currentTime = time(NULL);
     CallRecord *next = NULL;
     CallRecord *item = NULL;
@@ -160,6 +171,7 @@ static void ClearExpiredRecords(void)
             g_callRecord->cnt--;
         }
     }
+    CallRecordUnlock();
 }
 
 static int32_t IsInterfaceFuncIdValid(enum SoftBusFuncId interfaceId)
@@ -168,6 +180,20 @@ static int32_t IsInterfaceFuncIdValid(enum SoftBusFuncId interfaceId)
         return false;
     }
     return true;
+}
+
+static void DfxReportDdosInfoResult(int32_t ret, const DdosInfo* info)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.errcode = info->errorCode;
+    extra.callerPkg = info->pkgName;
+    extra.recordCnt = info->recordCount;
+    extra.funcId = info->funcId;
+    extra.idCount = info->idCount;
+    extra.userCount = info->userCount;
+    extra.totalCount = info->totalCount;
+    LNN_EVENT(EVENT_SCENE_DDOS, EVENT_STAGE_DDOS_THRESHOLD, extra);
 }
 
 int32_t IsOverThreshold(const char* pkgName, enum SoftBusFuncId interfaceId)
@@ -180,13 +206,16 @@ int32_t IsOverThreshold(const char* pkgName, enum SoftBusFuncId interfaceId)
         LNN_LOGE(LNN_EVENT, "pkgName or id  is invalid, interfaceId=%{public}d", interfaceId);
         return SOFTBUS_INVALID_PARAM;
     }
+    ClearExpiredRecords();
     if (CallRecordLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "CallRecord lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    ClearExpiredRecords();
-    int32_t ret = QueryCallRecord(pkgName, interfaceId);
+    DdosInfo info;
+    int32_t ret = QueryCallRecord(pkgName, interfaceId, &info);
     if (ret != SOFTBUS_OK) {
+        info.errorCode = ret;
+        DfxReportDdosInfoResult(ret, &info);
         char *tmpName = NULL;
         Anonymize(pkgName, &tmpName);
         LNN_LOGE(LNN_EVENT, "use over limit ret=%{public}d, pkgName=%{public}s, interfaceId=%{public}d",
