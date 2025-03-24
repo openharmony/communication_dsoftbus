@@ -123,8 +123,8 @@ HWTEST_F(LNNLaneDfxTest, CREATE_LANE_EVENT_INFO_001, TestSize.Level1)
 HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_001, TestSize.Level1)
 {
     uint32_t invalidLaneHandle = INVALID_LANE_ID;
-    int32_t ret = UpdateLaneEventInfo(invalidLaneHandle, (uint32_t)EVENT_RESULT_CODE,
-        LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
+    int32_t ret = UpdateLaneEventInfo(invalidLaneHandle, EVENT_TRANS_TYPE,
+        LANE_PROCESS_TYPE_UINT32, (void *)(&TRANS_TYPE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -140,11 +140,11 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_002, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_32_BIT_BUTT, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_32_BIT_BUTT, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_64_BIT_BUTT, LANE_PROCESS_TYPE_UINT64, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_64_BIT_BUTT, LANE_PROCESS_TYPE_UINT64, (void *)(&ERR_CODE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -160,11 +160,11 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_003, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE, LANE_PROCESS_TYPE_UINT32, NULL);
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT32, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE, LANE_PROCESS_TYPE_UINT64, NULL);
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT64, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -180,26 +180,26 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_004, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_STAGE,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_STAGE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&LNN_EVENT_LANE_STAGE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_HANDLE,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_HANDLE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&LANE_REQ_ID));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_MIN_BW, LANE_PROCESS_TYPE_UINT32, (void *)(&MIN_BW));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_MIN_BW, LANE_PROCESS_TYPE_UINT32, (void *)(&MIN_BW));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_MAX_LANE_LATENCY,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_MAX_LANE_LATENCY,
         LANE_PROCESS_TYPE_UINT32, (void *)(&MAX_LANE_LATENCY));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_MIN_LANE_LATENCY,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_MIN_LANE_LATENCY,
         LANE_PROCESS_TYPE_UINT32, (void *)(&MIN_LANE_LATENCY));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_RTT_LEVEL,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_RTT_LEVEL,
         LANE_PROCESS_TYPE_UINT32, (void *)(&NUM_ZERO));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&TRANS_TYPE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&TRANS_TYPE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -215,28 +215,28 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_005, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&TRANS_TYPE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_LINK_TYPE,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_LINK_TYPE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&LANE_LINK_TYPE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LOCAL_CAP, LANE_PROCESS_TYPE_UINT32, (void *)(&DEVICE_CAP));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LOCAL_CAP, LANE_PROCESS_TYPE_UINT32, (void *)(&DEVICE_CAP));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_REMOTE_CAP, LANE_PROCESS_TYPE_UINT32, (void *)(&DEVICE_CAP));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_REMOTE_CAP, LANE_PROCESS_TYPE_UINT32, (void *)(&DEVICE_CAP));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_ONLINE_STATE,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_ONLINE_STATE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&ONLINE_STATE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&GUIDE_TYPE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&GUIDE_TYPE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_GUIDE_RETRY, LANE_PROCESS_TYPE_UINT32, (void *)(&NUM_ONE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_GUIDE_RETRY, LANE_PROCESS_TYPE_UINT32, (void *)(&NUM_ONE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_WIFI_DETECT_STATE,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_WIFI_DETECT_STATE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&WIFI_DETECT_STATE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_DELAY_FREE, LANE_PROCESS_TYPE_UINT32, (void *)(&NUM_ONE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_DELAY_FREE, LANE_PROCESS_TYPE_UINT32, (void *)(&NUM_ONE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -252,18 +252,18 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_006, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_ID, LANE_PROCESS_TYPE_UINT64, (void *)(&LANE_ID));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_LANE_ID, LANE_PROCESS_TYPE_UINT64, (void *)(&LANE_ID));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_BUILD_LINK_TIME,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_BUILD_LINK_TIME,
         LANE_PROCESS_TYPE_UINT64, (void *)(&COMMON_DELAY));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_WIFI_DETECT_TIME,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_WIFI_DETECT_TIME,
         LANE_PROCESS_TYPE_UINT64, (void *)(&COMMON_DELAY));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_FREE_LINK_TIME,
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_FREE_LINK_TIME,
         LANE_PROCESS_TYPE_UINT64, (void *)(&COMMON_DELAY));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -276,7 +276,7 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_006, TestSize.Level1)
 HWTEST_F(LNNLaneDfxTest, REPORT_LANE_EVENT_INFO_001, TestSize.Level1)
 {
     uint32_t invalidLaneHandle = INVALID_LANE_ID;
-    int32_t ret = ReportLaneEventInfo(invalidLaneHandle);
+    int32_t ret = ReportLaneEventInfo(invalidLaneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -308,7 +308,7 @@ HWTEST_F(LNNLaneDfxTest, Get_LANE_EVENT_INFO_002, TestSize.Level1)
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
     ret = GetLaneEventInfo(laneHandle, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -325,9 +325,9 @@ HWTEST_F(LNNLaneDfxTest, LANE_EVENT_INFO_001, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&TRANS_TYPE));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -343,9 +343,9 @@ HWTEST_F(LNNLaneDfxTest, LANE_EVENT_INFO_002, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&TRANS_TYPE));
     EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
 }
 
@@ -364,7 +364,7 @@ HWTEST_F(LNNLaneDfxTest, LANE_EVENT_INFO_003, TestSize.Level1)
     LaneProcess laneProcess;
     GetLaneEventInfo(laneHandle, &laneProcess);
     EXPECT_EQ(laneHandle, laneProcess.laneProcessList32Bit[EVENT_LANE_HANDLE]);
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -380,7 +380,7 @@ HWTEST_F(LNNLaneDfxTest, LANE_EVENT_INFO_004, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = ReportLaneEventInfo(laneHandle);
+    ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     LaneProcess laneProcess;
     ret = GetLaneEventInfo(laneHandle, &laneProcess);
