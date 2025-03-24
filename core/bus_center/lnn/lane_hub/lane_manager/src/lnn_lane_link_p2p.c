@@ -872,9 +872,11 @@ static void DfxReportWdResult(const P2pLinkReqList *reqInfo, const LaneLinkInfo 
     extra.guideType = (int32_t)guideType;
     if (reqInfo->p2pInfo.reuseOnly) {
         extra.isWifiDirectReuse = true;
-        if (linkInfo != NULL && linkInfo->type == LANE_HML)
-            UpdateLaneEventInfo(reqInfo->laneRequestInfo.laneReqId, (uint32_t)EVENT_HML_REUSE,
-                LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){reqInfo->p2pInfo.reuseOnly});
+        if (linkInfo != NULL && linkInfo->type == LANE_HML) {
+            uint32_t isHmlReuse = (uint32_t)(reqInfo->p2pInfo.reuseOnly);
+            UpdateLaneEventInfo(reqInfo->laneRequestInfo.laneReqId,
+                EVENT_HML_REUSE, LANE_PROCESS_TYPE_UINT32, (void *)(&isHmlReuse));
+        }
     }
     if (linkInfo != NULL) {
         extra.bandWidth = (int32_t)linkInfo->linkInfo.p2p.bw;
@@ -896,8 +898,9 @@ static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t rea
     if (result == SOFTBUS_OK) {
         reason = UpdateReason(reqInfo.auth.authHandle.type, guideType, reason);
     }
+    uint32_t currGuideType = (uint32_t)guideType;
     UpdateLaneEventInfo(reqInfo.laneRequestInfo.laneReqId,
-        (uint32_t)EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){guideType});
+        EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&currGuideType));
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     if (reqInfo.laneRequestInfo.cb.onLaneLinkFail != NULL) {
@@ -967,8 +970,9 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
         &guideType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "not found current guide type, requestId=%{public}u", reqInfo.laneRequestInfo.laneReqId);
     }
+    uint32_t currGuideType = (uint32_t)guideType;
     UpdateLaneEventInfo(reqInfo.laneRequestInfo.laneReqId,
-        (uint32_t)EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){guideType});
+        EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&currGuideType));
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     LaneLinkType throryLinkType = reqInfo.laneRequestInfo.linkType;
@@ -1444,9 +1448,9 @@ static void HandleGuideChannelRetry(uint32_t laneReqId, LaneLinkType linkType, i
         goto FAIL;
     }
     LinkUnlock();
-    bool isGuideRetry = true;
-    UpdateLaneEventInfo(laneReqId, (uint32_t)EVENT_GUIDE_RETRY,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){isGuideRetry});
+    uint32_t isGuideRetry = (uint32_t)(true);
+    UpdateLaneEventInfo(laneReqId, EVENT_GUIDE_RETRY,
+        LANE_PROCESS_TYPE_UINT32, (void *)(&isGuideRetry));
     LNN_LOGI(LNN_LANE, "continue to build next guide channel.");
     if (PostGuideChannelTriggerMessage(laneReqId, linkType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post guide channel trigger msg fail.");

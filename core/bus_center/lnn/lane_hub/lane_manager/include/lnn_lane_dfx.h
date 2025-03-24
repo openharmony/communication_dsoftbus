@@ -27,7 +27,6 @@ extern "C" {
 
 typedef enum {
     EVENT_LANE_STAGE = 0x0,         // the lane state when report lane event info
-    EVENT_RESULT_CODE,              // err code
     EVENT_LANE_HANDLE,              // lane handle
     EVENT_LANE_LINK_TYPE,           // lane link type
     EVENT_LANE_MIN_BW,              // qos info lane min bw
@@ -76,7 +75,7 @@ typedef struct {
 int32_t CreateLaneEventInfo(const LaneProcess *processInfo);
 int32_t UpdateLaneEventInfo(uint32_t laneHandle, uint32_t eventType, LaneProcessValueType valueType, void *arg);
 int32_t GetLaneEventInfo(uint32_t laneHandle, LaneProcess *laneProcess);
-int32_t ReportLaneEventInfo(uint32_t laneHandle);
+int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result);
 int32_t InitLaneEvent(void);
 void DeinitLaneEvent(void);
 

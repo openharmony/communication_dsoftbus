@@ -152,7 +152,7 @@ int32_t GetLaneEventInfo(uint32_t laneHandle, LaneProcess *laneProcess)
     return SOFTBUS_OK;
 }
 
-int32_t ReportLaneEventInfo(uint32_t laneHandle)
+int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result)
 {
     if (laneHandle == INVALID_LANE_REQ_ID) {
         LNN_LOGE(LNN_LANE, "laneHandle is invalid parameter");
@@ -177,28 +177,28 @@ int32_t ReportLaneEventInfo(uint32_t laneHandle)
     LaneEventUnLock();
     LnnEventExtra extra = {
         .result = EVENT_STAGE_RESULT_OK,
-        .errcode = (int32_t)info.laneProcessList32Bit[EVENT_RESULT_CODE],
-        .laneStage = (int32_t)info.laneProcessList32Bit[EVENT_LANE_STAGE],
-        .laneHandle = (int32_t)info.laneProcessList32Bit[EVENT_LANE_HANDLE],
-        .laneId = (int64_t)info.laneProcessList64Bit[EVENT_LANE_ID],
-        .laneLinkType = (int32_t)info.laneProcessList32Bit[EVENT_LANE_LINK_TYPE],
-        .minBW = (int32_t)info.laneProcessList32Bit[EVENT_LANE_MIN_BW],
-        .maxLaneLatency = (int32_t)info.laneProcessList32Bit[EVENT_LANE_MAX_LANE_LATENCY],
-        .minLaneLatency = (int32_t)info.laneProcessList32Bit[EVENT_LANE_MIN_LANE_LATENCY],
-        .rttLevel = (int32_t)info.laneProcessList32Bit[EVENT_LANE_RTT_LEVEL],
+        .errcode = result,
+        .laneStage = info.laneProcessList32Bit[EVENT_LANE_STAGE],
+        .laneHandle = info.laneProcessList32Bit[EVENT_LANE_HANDLE],
+        .laneId = info.laneProcessList64Bit[EVENT_LANE_ID],
+        .laneLinkType = info.laneProcessList32Bit[EVENT_LANE_LINK_TYPE],
+        .minBW = info.laneProcessList32Bit[EVENT_LANE_MIN_BW],
+        .maxLaneLatency = info.laneProcessList32Bit[EVENT_LANE_MAX_LANE_LATENCY],
+        .minLaneLatency = info.laneProcessList32Bit[EVENT_LANE_MIN_LANE_LATENCY],
+        .rttLevel = info.laneProcessList32Bit[EVENT_LANE_RTT_LEVEL],
         .peerNetworkId = (const char *)info.peerNetWorkId,
-        .transType = (int32_t)info.laneProcessList32Bit[EVENT_TRANS_TYPE],
-        .localDynamicCap = (int32_t)info.laneProcessList32Bit[EVENT_LOCAL_CAP],
-        .remoteDynamicCap = (int32_t)info.laneProcessList32Bit[EVENT_REMOTE_CAP],
-        .onlineType = (int32_t)info.laneProcessList32Bit[EVENT_ONLINE_STATE],
-        .guideType = (int32_t)info.laneProcessList32Bit[EVENT_GUIDE_TYPE],
-        .isGuideRetry = (int32_t)info.laneProcessList32Bit[EVENT_GUIDE_RETRY],
-        .wifiDetectState = (int32_t)info.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE],
-        .wifiDetectTime = (int64_t)info.laneProcessList64Bit[EVENT_WIFI_DETECT_TIME],
-        .buildLinkTime = (int64_t)info.laneProcessList64Bit[EVENT_BUILD_LINK_TIME],
-        .isHmlReuse = (int32_t)info.laneProcessList32Bit[EVENT_HML_REUSE],
-        .isDelayFree = (int32_t)info.laneProcessList32Bit[EVENT_DELAY_FREE],
-        .freeLinkTime = (int64_t)info.laneProcessList64Bit[EVENT_FREE_LINK_TIME],
+        .transType = info.laneProcessList32Bit[EVENT_TRANS_TYPE],
+        .localDynamicCap = info.laneProcessList32Bit[EVENT_LOCAL_CAP],
+        .remoteDynamicCap = info.laneProcessList32Bit[EVENT_REMOTE_CAP],
+        .onlineType = info.laneProcessList32Bit[EVENT_ONLINE_STATE],
+        .guideType = info.laneProcessList32Bit[EVENT_GUIDE_TYPE],
+        .isGuideRetry = info.laneProcessList32Bit[EVENT_GUIDE_RETRY],
+        .wifiDetectState = info.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE],
+        .wifiDetectTime = info.laneProcessList64Bit[EVENT_WIFI_DETECT_TIME],
+        .buildLinkTime = info.laneProcessList64Bit[EVENT_BUILD_LINK_TIME],
+        .isHmlReuse = info.laneProcessList32Bit[EVENT_HML_REUSE],
+        .isDelayFree = info.laneProcessList32Bit[EVENT_DELAY_FREE],
+        .freeLinkTime = info.laneProcessList64Bit[EVENT_FREE_LINK_TIME],
     };
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
     return DeleteLaneEventInfo(laneHandle);
