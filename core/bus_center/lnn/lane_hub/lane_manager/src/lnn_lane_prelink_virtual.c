@@ -38,8 +38,9 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t re
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId)
+bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId, bool isPreLink)
 {
+    (void)isPreLink;
     (void)connReqId;
     return false;
 }
