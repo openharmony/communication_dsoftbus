@@ -31,6 +31,16 @@ typedef struct {
     ListNode node;
 } CallRecord;
 
+typedef struct {
+    int32_t funcId;
+    int32_t errorCode;
+    int32_t recordCount;
+    int32_t idCount;
+    int32_t userCount;
+    int32_t totalCount;
+    char pkgName[PKG_NAME_SIZE_MAX];
+} DdosInfo;
+
 int32_t IsOverThreshold(const char* pkgName, enum SoftBusFuncId interfaceId);
 int32_t InitDdos(void);
 void DeinitDdos(void);

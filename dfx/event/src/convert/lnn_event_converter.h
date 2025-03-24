@@ -71,6 +71,11 @@ LNN_ASSIGNER(Uint32, MinLaneLatency, minLaneLatency)
 LNN_ASSIGNER(Errcode, IsWifiDirectReuse, isWifiDirectReuse)
 LNN_ASSIGNER(Errcode, BandWidth, bandWidth)
 LNN_ASSIGNER(Errcode, GuideType, guideType)
+LNN_ASSIGNER(Int32, FuncId, funcId)
+LNN_ASSIGNER(Int32, RecordCnt, recordCnt)
+LNN_ASSIGNER(Int32, IdCount, idCount)
+LNN_ASSIGNER(Int32, UserCount, userCount)
+LNN_ASSIGNER(Int32, TotalCount, totalCount)
 LNN_ASSIGNER(Uint32, LaneStage, laneStage)
 LNN_ASSIGNER(Uint32, LaneHandle, laneHandle)
 LNN_ASSIGNER(Errcode, RttLevel, rttLevel)
@@ -99,7 +104,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 64 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 69 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -138,6 +143,11 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "IS_WIFI_DIRECT_REUSE", HISYSEVENT_INT32,  LnnAssignerIsWifiDirectReuse},
     { "BAND_WIDTH",           HISYSEVENT_INT32,  LnnAssignerBandWidth        },
     { "GUIDE_TYPE",           HISYSEVENT_UINT32, LnnAssignerGuideType        },
+    { "FUNC_ID",              HISYSEVENT_INT32,  LnnAssignerFuncId           },
+    { "RECORD_CNT",           HISYSEVENT_INT32,  LnnAssignerRecordCnt        },
+    { "ID_COUNT",             HISYSEVENT_INT32,  LnnAssignerIdCount          },
+    { "UESR_COUNT",           HISYSEVENT_INT32,  LnnAssignerUserCount        },
+    { "TOTAL_COUNT",          HISYSEVENT_INT32,  LnnAssignerTotalCount       },
     { "LANE_STAGE",           HISYSEVENT_UINT32, LnnAssignerLaneStage        },
     { "LANE_HANDLE",          HISYSEVENT_UINT32, LnnAssignerLaneHandle       },
     { "QOS_RTT_LEVEL",        HISYSEVENT_UINT32, LnnAssignerRttLevel         },
