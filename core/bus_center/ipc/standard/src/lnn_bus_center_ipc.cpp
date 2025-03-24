@@ -85,7 +85,7 @@ static void onRangeResult(const RangeResultInnerInfo *info);
 
 static IBleRangeInnerCallback g_msdpRangeCb = {
     .onRangeResult = onRangeResult,
-    .onRangeStateChange = NULL,
+    .onRangeStateChange = nullptr,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -525,7 +525,7 @@ int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char
 
 int32_t LnnIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    if (config == NULL) {
+    if (config == nullptr) {
         COMM_LOGE(COMM_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
