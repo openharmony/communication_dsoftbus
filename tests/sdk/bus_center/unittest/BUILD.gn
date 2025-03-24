@@ -430,7 +430,6 @@ if (defined(ohos_lite)) {
     if (dsoftbus_access_token_feature) {
       deps += [
         ":BusCenterMetaNodeSdkTest",
-        ":BusCenterSdkDdosTest",
         ":BusCenterSdkTest",
         ":BusCenterServerProxyStandardTest",
         ":BusCenterServerProxyTest",
