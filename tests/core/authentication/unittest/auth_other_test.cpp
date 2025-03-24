@@ -1114,12 +1114,12 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     uint8_t accountHash[SHA_256_HASH_LEN] = "accounthashtest";
     EXPECT_TRUE(LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(AuthIsPotentialTrusted(nullptr) == false);
+    EXPECT_TRUE(AuthIsPotentialTrusted(nullptr, true) == false);
     DeviceInfo device = {
         .devId = "testId",
         .accountHash = "accounthashtest",
     };
-    EXPECT_TRUE(AuthIsPotentialTrusted(&device) == true);
+    EXPECT_TRUE(AuthIsPotentialTrusted(&device, true) == true);
     EXPECT_TRUE(IsSameAccountDevice(nullptr) == false);
     EXPECT_TRUE(IsSameAccountDevice(&device) == true);
     EXPECT_TRUE(AuthHasSameAccountGroup() == false);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,7 +168,7 @@ int32_t RegGroupChangeListener(const GroupChangeListener *listener);
 void UnregGroupChangeListener(void);
 
 TrustedReturnType AuthHasTrustedRelation(void);
-bool AuthIsPotentialTrusted(const DeviceInfo *device);
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint);
 bool IsAuthHasTrustedRelation(void);
 bool IsSameAccountDevice(const DeviceInfo *device);
 bool AuthHasSameAccountGroup(void);
