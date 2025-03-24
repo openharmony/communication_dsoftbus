@@ -996,12 +996,14 @@ int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationCh
 static void PrintCollabInfo(const CollabInfo *info, char *role)
 {
     char *tmpDeviceId = NULL;
+    char *tmpAccountId = NULL;
     Anonymize(info->deviceId, &tmpDeviceId);
+    Anonymize(info->accountId, &tmpAccountId);
     TRANS_LOGI(TRANS_SDK, "%{public}s deviceId=%{public}s", role, AnonymizeWrapper(tmpDeviceId));
     AnonymizeFree(tmpDeviceId);
     TRANS_LOGI(TRANS_SDK, "%{public}s userId=%{public}d", role, info->userId);
     TRANS_LOGI(TRANS_SDK, "%{public}s pid=%{public}d", role, info->pid);
-    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}s", role, info->accountId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}s", role, AnonymizeWrapper(tmpAccountId));
     TRANS_LOGI(TRANS_SDK, "%{public}s tokenId=%{public}" PRIu64, role, info->tokenId);
 }
 

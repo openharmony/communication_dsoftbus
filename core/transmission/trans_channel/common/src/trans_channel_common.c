@@ -660,7 +660,9 @@ static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
 {
     sourceInfo->tokenId = appInfo->callingTokenId;
     sourceInfo->pid = appInfo->peerData.pid;
-    strcpy_s(sourceInfo->accountId, sizeof(sourceInfo->accountId), appInfo->peerData.accountId);
+    if (strcpy_s(sourceInfo->accountId, sizeof(sourceInfo->accountId), appInfo->peerData.accountId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "get accountId failed.");
+    }
     sourceInfo->userId = appInfo->peerData.userId;
     char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, netWorkId, NETWORK_ID_BUF_LEN);
