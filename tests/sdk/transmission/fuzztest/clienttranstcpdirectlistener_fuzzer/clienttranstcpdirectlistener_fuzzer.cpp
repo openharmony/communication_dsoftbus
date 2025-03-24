@@ -93,7 +93,7 @@ namespace OHOS {
             return;
         }
         char tmp = *(reinterpret_cast<const char *>(data));
-        TransTdcSendMessage((int32_t)size, &tmp, (uint32_t)size);
+        TransTdcSendMessage(static_cast<int32_t>(size), &tmp, static_cast<uint32_t>(size));
     }
 
     void TransAddDataBufNodeTest(const uint8_t* data, size_t size)
