@@ -158,6 +158,11 @@ BUSCENTER_BEHAVIOR:
   IS_WIFI_DIRECT_REUSE: { type: INT32, desc: lane is wifi direct reuse }
   BAND_WIDTH: { type: INT32, desc: lane band width }
   GUIDE_TYPE: { type: INT32, desc: lane guide type }
+  FUNC_ID: { type: INT32, desc: sdk function id }
+  RECORD_CNT: { type: INT32, desc: same user same id count }
+  ID_COUNT: { type: INT32, desc: same id count}
+  USER_COUNT: { type: INT32, desc: same user count}
+  TOTAL_COUNT: { type: INT32, desc: total count}
   LANE_STAGE: { type: INT32, desc: lane stage }
   LANE_HANDLE: { type: INT32, desc: lane handle }
   QOS_RTT_LEVEL: { type: INT32, desc: lane qos info rtt level }

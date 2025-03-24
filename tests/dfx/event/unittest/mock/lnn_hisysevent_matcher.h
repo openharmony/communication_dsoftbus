@@ -113,6 +113,11 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.isWifiDirectReuse);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.bandWidth);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.guideType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.funcId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.recordCnt);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.idCount);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.userCount);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.totalCount);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.laneStage);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.laneHandle);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.rttLevel);

@@ -936,9 +936,10 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner read info type length failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner get info failed");
-        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    int32_t retReply = GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum);
+    if (retReply != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner get info failed, retReply=%{public}d", retReply);
+        return retReply;
     }
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
         COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner node info is invalid");
@@ -949,15 +950,14 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
         SoftBusFree(nodeInfo);
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
-    int32_t ret = SOFTBUS_OK;
     if (infoNum > 0) {
         if (!reply.WriteRawData(nodeInfo, static_cast<int32_t>(infoTypeLen * infoNum))) {
             COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner write node info failed!");
-            ret = SOFTBUS_IPC_ERR;
+            retReply = SOFTBUS_IPC_ERR;
         }
         SoftBusFree(nodeInfo);
     }
-    return ret;
+    return retReply;
 }
 
 int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply)
@@ -1505,8 +1505,9 @@ int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessagePar
         COMM_LOGE(COMM_SVC, "DeactiveMetaNode read meta node id failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (DeactiveMetaNode(metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_DEACTIVE_META_NODE_ERR;
+    int32_t ret = DeactiveMetaNode(metaNodeId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1525,8 +1526,9 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
         COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{public}d, maxNum=%{public}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
-    if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_GET_META_NODE_INFO_ERR;
+    int32_t ret = GetAllMetaNodeInfo(infos, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (!reply.WriteInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo write infoNum failed!");
