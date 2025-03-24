@@ -19,6 +19,7 @@
 #include "softbus_ble_gatt.h"
 
 #include <cstddef>
+#include <type_traits>
 #include <securec.h>
 
 #include "softbus_adapter_mem.h"
@@ -59,16 +60,29 @@ template <class T> T GetData()
 
 template <class T> T* GetDataArray()
 {
-    size_t outSize = sizeof(T);
-    size_t outLength = g_baseFuzzSize / outSize;
-    T* array = static_cast<T*>(malloc(outLength * outSize));
+    const size_t outSize = sizeof(T);
+    const size_t outLength = g_baseFuzzSize / outSize;
+
+    size_t allocSize = outLength * outSize;
+    if constexpr (std::is_same_v<T, char>) {
+        allocSize += outSize;
+    }
+
+    T* array = static_cast<T*>(malloc(allocSize));
     if (BASE_FUZZ_DATA == nullptr || array == nullptr) {
         return nullptr;
     }
-    errno_t ret = memcpy_s(array, outLength * outSize, BASE_FUZZ_DATA, outLength * outSize);
+
+    errno_t ret = memcpy_s(array, allocSize, BASE_FUZZ_DATA, outLength * outSize);
     if (ret != EOK) {
+        free(array);
         return nullptr;
     }
+
+    if constexpr (std::is_same_v<T, char>) {
+        array[outLength] = '\0';
+    }
+
     return array;
 }
 
