@@ -642,10 +642,10 @@ static int32_t GetSinkRelation(const AppInfo *appInfo, CollabInfo *sinkInfo)
         TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed.");
         return ret;
     }
-    ret = GetCurrentAccount(&sinkInfo->accountId);
+    uint32_t size = 0;
+    ret = GetOsAccountUid(sinkInfo->accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "get current account failed.");
-        sinkInfo->accountId = INVALID_ACCOUNT_ID;
     }
     sinkInfo->pid = appInfo->myData.pid;
     sinkInfo->userId = TransGetForegroundUserId();
@@ -660,7 +660,9 @@ static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
 {
     sourceInfo->tokenId = appInfo->callingTokenId;
     sourceInfo->pid = appInfo->peerData.pid;
-    sourceInfo->accountId = appInfo->peerData.accountId;
+    if (strcpy_s(sourceInfo->accountId, sizeof(sourceInfo->accountId), appInfo->peerData.accountId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "get accountId failed.");
+    }
     sourceInfo->userId = appInfo->peerData.userId;
     char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, netWorkId, NETWORK_ID_BUF_LEN);
@@ -685,10 +687,10 @@ int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid)
         return ret;
     }
     sourceInfo.userId = TransGetForegroundUserId();
-    ret = GetCurrentAccount(&sourceInfo.accountId);
+    uint32_t size = 0;
+    ret = GetOsAccountUid(sourceInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
-        sourceInfo.accountId = INVALID_ACCOUNT_ID;
     }
     ret = TransGetCallingFullTokenId(&sourceInfo.tokenId);
     if (ret != SOFTBUS_OK) {

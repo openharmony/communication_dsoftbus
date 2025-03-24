@@ -96,8 +96,8 @@ static void TransTdcCheckIsApp(AppInfo *appInfo)
     if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
-    if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
-        appInfo->myData.accountId = INVALID_ACCOUNT_ID;
+    uint32_t size = 0;
+    if (GetOsAccountUid(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
     }
     appInfo->myData.userId = TransGetForegroundUserId();

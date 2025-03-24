@@ -129,7 +129,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
     (void)AddNumber64ToJsonObject(json, JSON_KEY_CALLING_TOKEN_ID, (int64_t)appInfo->callingTokenId);
     if (SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
-        (void)AddNumber64ToJsonObject(json, ACCOUNT_ID, appInfo->myData.accountId);
+        (void)AddStringToJsonObject(json, ACCOUNT_ID, appInfo->myData.accountId);
         (void)AddNumberToJsonObject(json, USER_ID, appInfo->myData.userId);
     }
     return SOFTBUS_OK;
@@ -233,7 +233,7 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
-    (void)GetJsonObjectSignedNumber64Item(msg, ACCOUNT_ID, &appInfo->peerData.accountId);
+    (void)GetJsonObjectStringItem(msg, ACCOUNT_ID, (appInfo->peerData.accountId), ACCOUNT_UID_LEN_MAX);
     if (!GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId)) {
         appInfo->peerData.userId = INVALID_USER_ID;
     }

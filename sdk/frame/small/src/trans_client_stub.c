@@ -157,7 +157,11 @@ int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply)
 static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
 {
     size_t size = 0;
-    ReadInt64(data, &info->accountId);
+    char *accountId = (char *)ReadString(data, &size);
+    if (accountId != NULL) {
+        strcpy_s(info->accountId, size, accountId);
+    }
+    size = 0;
     ReadUint64(data, &info->tokenId);
     ReadInt32(data, &info->userId);
     ReadInt32(data, &info->pid);
