@@ -251,7 +251,8 @@ static int32_t CheckSinkAccessControl(const AppInfo *appInfo, uint64_t myTokenId
     if (ret != SOFTBUS_OK) {
         char *tmpPeerUUId = nullptr;
         Anonymize(appInfo->peerData.deviceId, &tmpPeerUUId);
-        COMM_LOGE(COMM_PERM, "get peerNetWorkId failed, uuid=%{public}s ret=%{public}d", AnonymizeWrapper(tmpPeerUUId), ret);
+        COMM_LOGE(COMM_PERM, "get peerNetWorkId failed, uuid=%{public}s ret=%{public}d",
+            AnonymizeWrapper(tmpPeerUUId), ret);
         AnonymizeFree(tmpPeerUUId);
         return ret;
     }
@@ -324,7 +325,7 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
         char *tmpSessionName = nullptr;
         Anonymize(appInfo->myData.sessionName, &tmpSessionName);
         COMM_LOGE(COMM_PERM, "get local tokenId failed, sessionName=%{public}s, ret=%{public}d",
-        AnonymizeWrapper(tmpSessionName), ret);
+            AnonymizeWrapper(tmpSessionName), ret);
         AnonymizeFree(tmpSessionName);
         return ret;
     }
@@ -336,7 +337,7 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
         myTokenType == ACCESS_TOKEN_TYPE_NATIVE)) {
         return SOFTBUS_OK;
     }
-    if (CheckDBinder(appInfo->myData.sessionName) && CheckDBinder(appInfo->peerData.sessionName)) {
+    if (CheckDBinder(appInfo->myData.sessionName) || CheckDBinder(appInfo->peerData.sessionName)) {
         return SOFTBUS_OK;
     }
     
