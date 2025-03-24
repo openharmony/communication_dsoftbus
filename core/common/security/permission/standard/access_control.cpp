@@ -56,7 +56,7 @@ static int32_t TransCheckAccessControl(uint64_t callingTokenId, const char *devi
 {
     char *tmpName = nullptr;
     Anonymize(deviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "tokenId=%{public}" PRIu64 ", deviceId=%{public}s", callingTokenId, tmpName);
+    COMM_LOGI(COMM_PERM, "tokenId=%{public}" PRIu64 ", deviceId=%{public}s", callingTokenId, AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
 
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
@@ -87,9 +87,10 @@ static int32_t TransCheckSourceAccessControl(uint64_t myTokenId, const char *myD
     Anonymize(myDeviceId, &tmpMyDeviceId);
     Anonymize(peerDeviceId, &tmpPeerDeviceId);
     Anonymize(accountId, &tmpAccountId);
-    COMM_LOGI(COMM_PERM, "accesserDeviceId: %{public}s, accesserTokenId: %{public}d,\
-        accesserUserId: %{public}d, accesserAccountId: %{public}s, accesseeDeviceId: %{public}s",
-        tmpMyDeviceId, (int32_t)myTokenId, myUserId, tmpAccountId, tmpPeerDeviceId);
+    COMM_LOGI(COMM_PERM, "accesserDeviceId=%{public}s, accesserTokenId=%{public}d,\
+        accesserUserId=%{public}d, accesserAccountId=%{public}s, accesseeDeviceId=%{public}s",
+        AnonymizeWrapper(tmpMyDeviceId), (int32_t)myTokenId, myUserId,
+        AnonymizeWrapper(tmpAccountId), AnonymizeWrapper(tmpPeerDeviceId));
     AnonymizeFree(tmpMyDeviceId);
     AnonymizeFree(tmpPeerDeviceId);
     AnonymizeFree(tmpAccountId);
@@ -221,12 +222,13 @@ static int32_t CheckServerAccessControl(const AppInfo *appInfo, uint64_t myToken
     Anonymize(peerDeviceId, &tmpPeerDeviceId);
     Anonymize(appInfo->peerData.accountId, &tmpPeerAccountId);
     Anonymize(accountId, &tmpMyAccountId);
-    COMM_LOGI(COMM_PERM, "accesserDeviceId: %{public}s, accesserTokenId: %{public}d,\
-        accesserUserId: %{public}d, accesserAccountId: %{public}s,\
-        accesseeDeviceId: %{public}s, accesseeTokenId: %{public}d,\
-        accesseeUserId: %{public}d, accesserAccountId: %{public}s",
-        tmpPeerDeviceId, (int32_t)(appInfo->callingTokenId), appInfo->peerData.userId, tmpPeerAccountId,
-        tmpMyDeviceId, (int32_t)myTokenId, appUserId, tmpMyAccountId);
+    COMM_LOGI(COMM_PERM, "accesserDeviceId=%{public}s, accesserTokenId=%{public}d,\
+        accesserUserId=%{public}d, accesserAccountId=%{public}s,\
+        accesseeDeviceId=%{public}s, accesseeTokenId=%{public}d,\
+        accesseeUserId=%{public}d, accesserAccountId=%{public}s",
+        AnonymizeWrapper(tmpPeerDeviceId), (int32_t)(appInfo->callingTokenId),
+        appInfo->peerData.userId, AnonymizeWrapper(tmpPeerAccountId),
+        AnonymizeWrapper(tmpMyDeviceId), (int32_t)myTokenId, appUserId, AnonymizeWrapper(tmpMyAccountId));
     AnonymizeFree(tmpMyDeviceId);
     AnonymizeFree(tmpPeerDeviceId);
     AnonymizeFree(tmpPeerAccountId);
@@ -249,7 +251,7 @@ static int32_t CheckSinkAccessControl(const AppInfo *appInfo, uint64_t myTokenId
     if (ret != SOFTBUS_OK) {
         char *tmpPeerUUId = nullptr;
         Anonymize(appInfo->peerData.deviceId, &tmpPeerUUId);
-        COMM_LOGE(COMM_PERM, "get peerNetWorkId failed, uuid=%{public}s ret=%{public}d", tmpPeerUUId, ret);
+        COMM_LOGE(COMM_PERM, "get peerNetWorkId failed, uuid=%{public}s ret=%{public}d", AnonymizeWrapper(tmpPeerUUId), ret);
         AnonymizeFree(tmpPeerUUId);
         return ret;
     }
@@ -309,7 +311,7 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     Anonymize(appInfo->peerData.sessionName, &tmpPeerSessionName);
     Anonymize(appInfo->myData.sessionName, &tmpMySessionName);
     COMM_LOGI(COMM_PERM, "peerSessionName=%{public}s, mySessionName=%{public}s",
-        tmpPeerSessionName, tmpMySessionName);
+        AnonymizeWrapper(tmpPeerSessionName), AnonymizeWrapper(tmpMySessionName));
     AnonymizeFree(tmpPeerSessionName);
     AnonymizeFree(tmpMySessionName);
     uint64_t callingTokenId = appInfo->callingTokenId;
@@ -321,7 +323,8 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     if (ret != SOFTBUS_OK) {
         char *tmpSessionName = nullptr;
         Anonymize(appInfo->myData.sessionName, &tmpSessionName);
-        COMM_LOGE(COMM_PERM, "get local tokenId failed, sessionName=%{public}s, ret=%{public}d", tmpSessionName, ret);
+        COMM_LOGE(COMM_PERM, "get local tokenId failed, sessionName=%{public}s, ret=%{public}d",
+        AnonymizeWrapper(tmpSessionName), ret);
         AnonymizeFree(tmpSessionName);
         return ret;
     }
@@ -333,8 +336,7 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
         myTokenType == ACCESS_TOKEN_TYPE_NATIVE)) {
         return SOFTBUS_OK;
     }
-    if (CheckDBinder(appInfo->myData.sessionName) ||
-        CheckDBinder(appInfo->peerData.sessionName)) {
+    if (CheckDBinder(appInfo->myData.sessionName) && CheckDBinder(appInfo->peerData.sessionName)) {
         return SOFTBUS_OK;
     }
     
