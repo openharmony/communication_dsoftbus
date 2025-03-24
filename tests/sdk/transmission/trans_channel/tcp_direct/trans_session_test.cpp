@@ -91,7 +91,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
 {
     int32_t ret;
     int32_t sessionId = 1;
-    char *key = (char *)g_testData.c_str();
+    char *key = reinterpret_cast<char *>(const_cast<char *>(g_testData.c_str()));
     unsigned int len = strlen(key);
 
     ret = GetSessionKey(-1, key, len);
@@ -117,7 +117,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level0)
 {
     int32_t ret;
     int32_t sessionId = 1;
-    char *key = (char *)g_testData.c_str();
+    char *key = reinterpret_cast<char *>(const_cast<char *>(g_testData.c_str()));
     unsigned int len = strlen(key);
 
     ret = GetSessionKey(sessionId, key, len);

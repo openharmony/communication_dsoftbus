@@ -291,7 +291,7 @@ void TMessenger::OnMessageRecv(const std::string &result)
 
 void TMessenger::OnRequest()
 {
-    std::thread t([&] {
+    std::thread t([this, &onQuery_] {
         std::this_thread::sleep_for(std::chrono::seconds(WAIT_RESP_TIME));
         std::shared_ptr<Response> resp = onQuery_();
         Message msg { *resp };
