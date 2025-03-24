@@ -244,7 +244,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_001, TestSize.Level1)
         .devId = "testId",
         .accountHash = "accounthashtest",
     };
-    EXPECT_TRUE(AuthIsPotentialTrusted(&device));
+    EXPECT_TRUE(AuthIsPotentialTrusted(&device, true));
 }
 
 /*
@@ -261,7 +261,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_002, TestSize.Level1)
         .devId = "testId",
         .accountHash = "accounthashtest",
     };
-    EXPECT_FALSE(AuthIsPotentialTrusted(&device));
+    EXPECT_FALSE(AuthIsPotentialTrusted(&device, true));
 }
 
 /*
