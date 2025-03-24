@@ -123,9 +123,38 @@ ohos_unittest("SoftbusServerTest") {
   }
 }
 
+ohos_unittest("SoftbusClientInfoManagerTest") {
+  module_out_path = module_output_path
+  sources = [ "softbus_client_info_manager_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/transmission/ipc/include",
+    "$dsoftbus_root_path/core/frame/standard/client_manager/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "hilog:libhilog",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
-  deps = [ ":SoftbusServerTest" ]
+  deps = [
+    ":SoftbusClientInfoManagerTest",
+    ":SoftbusServerTest",
+  ]
   if (dsoftbus_access_token_feature) {
     deps += [ ":SoftbusServerStubTest" ]
   }
