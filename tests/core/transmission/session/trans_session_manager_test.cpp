@@ -21,6 +21,7 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_feature_config.h"
+#include "trans_session_account_adapter.h"
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
@@ -149,6 +150,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
 
     ret = TransGetCallingFullTokenId(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransGetForegroundUserId();
+    EXPECT_NE(ret, DEFAULT_USER_ID);
 }
 
 /**
