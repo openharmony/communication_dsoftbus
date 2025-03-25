@@ -36,9 +36,11 @@
 #include "lnn_extdata_config.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_listener.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
+#include "lnn_trans_lane.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -295,6 +297,10 @@ int32_t TryUpdateLaneResourceLaneId(AuthSessionInfo *info)
     uint64_t newLaneId = GenerateLaneId(localUDID, info->nodeInfo.deviceInfo.deviceUdid, LANE_HML_RAW);
     ret = UpdateLaneResourceLaneId(oldLaneId, newLaneId, info->nodeInfo.deviceInfo.deviceUdid);
     AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update lane resource laneid fail");
+    ret = UpdateLaneBusinessInfoItem(oldLaneId, newLaneId);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update lane business info fail");
+    ret = UpdateReqListLaneId(oldLaneId, newLaneId);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update req list laneid fail");
     return SOFTBUS_OK;
 }
 
