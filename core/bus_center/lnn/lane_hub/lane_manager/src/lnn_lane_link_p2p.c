@@ -1316,6 +1316,24 @@ static void TryDelPreLinkByConnReqId(uint32_t connReqId)
     }
 }
 
+static void NotifyRawLinkConnectSuccess(uint32_t p2pRequestId, const struct WifiDirectLink *link,
+    LaneLinkInfo *linkInfo)
+{
+    if (link->isReuse) {
+        if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(p2pRequestId, true)) {
+            TryDelPreLinkByConnReqId(p2pRequestId);
+            NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, linkInfo, link->linkId);
+        } else {
+            int32_t ret = NotifyRawLinkSucc(p2pRequestId, link, linkInfo);
+            if (ret != SOFTBUS_OK && ret != SOFTBUS_MALLOC_ERR) {
+                NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, ret);
+            }
+        }
+    } else {
+        (void)AddAuthSessionFlag(link->remoteIp, false);
+        NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, linkInfo, link->linkId);
+    }
+}
 
 static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiDirectLink *link)
 {
@@ -1336,19 +1354,11 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
     SetRemoteDynamicNetCap(linkInfo.peerUdid, linkInfo.type);
     LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
-    if (linkInfo.type == LANE_HML_RAW && link->isReuse &&
-        !HaveConcurrencyPreLinkReqIdByReuseConnReqId(p2pRequestId, true)) {
-        ret = NotifyRawLinkSucc(p2pRequestId, link, &linkInfo);
-        if (ret != SOFTBUS_OK && ret != SOFTBUS_MALLOC_ERR) {
-            goto FAIL;
-        }
-    } else {
-        if (linkInfo.type == LANE_HML_RAW) {
-            (void)AddAuthSessionFlag(link->remoteIp, false);
-        }
-        TryDelPreLinkByConnReqId(p2pRequestId);
-        NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, &linkInfo, link->linkId);
+    if (linkInfo.type == LANE_HML_RAW) {
+        NotifyRawLinkConnectSuccess(p2pRequestId, link, &linkInfo);
+        return;
     }
+    NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, &linkInfo, link->linkId);
     return;
 FAIL:
     NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, ret);
