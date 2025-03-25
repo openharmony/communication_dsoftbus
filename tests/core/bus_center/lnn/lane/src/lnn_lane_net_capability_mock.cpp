@@ -35,35 +35,20 @@ static LaneNetCapInterface *GetLaneNetCapIf()
     return static_cast<LaneNetCapInterface *>(g_laneNetCapIf);
 }
 
-static int32_t GetStaticCommCapa(const char *networkId)
-{
-    return SOFTBUS_OK;
-}
-
-static int32_t GetDynamicCommCapa(const char *networkId)
-{
-    return SOFTBUS_OK;
-}
-
-LaneCommCapa g_laneCommCapa = {
-    .getStaticCommCapa = GetStaticCommCapa,
-    .getDynamicCommCapa = GetDynamicCommCapa,
-};
-
-LaneCommCapa *LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType(LaneLinkType linkType)
-{
-    return &g_laneCommCapa;
-}
-
 extern "C" {
-void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex)
+int32_t CheckStaticNetCap(const char *networkId, LaneLinkType linkType)
 {
-    GetLaneNetCapIf()->SetRemoteDynamicNetCap(peerUdid, netCapaIndex);
+    return GetLaneNetCapIf()->CheckStaticNetCap(networkId, linkType);
 }
 
-LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType)
+int32_t CheckDynamicNetCap(const char *networkId, LaneLinkType linkType)
 {
-    return GetLaneNetCapIf()->GetLinkCapaByLinkType(linkType);
+    return GetLaneNetCapIf()->CheckDynamicNetCap(networkId, linkType);
+}
+
+void SetRemoteDynamicNetCap(const char *peerUdid, LaneLinkType linkType)
+{
+    return GetLaneNetCapIf()->SetRemoteDynamicNetCap(peerUdid, linkType);
 }
 }
 } // namespace OHOS

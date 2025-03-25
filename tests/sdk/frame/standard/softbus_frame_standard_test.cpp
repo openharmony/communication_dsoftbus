@@ -109,11 +109,6 @@ public:
     {
         return SOFTBUS_OK;
     }
-    int32_t OnClientChannelOnQos([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
-        [[maybe_unused]] QoSEvent event, [[maybe_unused]] const QosTV *qos, [[maybe_unused]] uint32_t count) override
-    {
-        return SOFTBUS_OK;
-    }
 };
 
 namespace {
@@ -258,6 +253,625 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnClientPermissonChangeInnerTest, TestSize
     data.WriteInt32(0);
     data.WriteCString("OnClientPermissonChangeInnerTest");
     EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnClientTransLimitChangeInnerTest
+ * @tc.desc: OnClientTransLimitChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnClientTransLimitChangeInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnClientTransLimitChangeInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnClientTransLimitChangeInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnClientTransLimitChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnClientTransLimitChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteUint8(0);
+    EXPECT_EQ(g_stub->OnClientTransLimitChangeInner(data, reply), SOFTBUS_OK);
+
+    int32_t ret = g_stub->OnClientTransLimitChange(0, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnChannelQosEventInnerTest
+ * @tc.desc: OnChannelQosEventInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnChannelQosEventInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnChannelQosEventInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnChannelQosEventInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    std::string buffer = "OnChannelQosEventInnerTest";
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1); // test value
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1); // test value
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    data.WriteInt32(0);
+    EXPECT_NE(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnChannelOnQosInnerTest
+ * @tc.desc: OnChannelOnQosInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnChannelOnQosInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnChannelOnQosInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOnQosInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(11); // test value
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_INVALID_PARAM);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(1); // test value
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    std::string buffer = "OnChannelOnQosInnerTest";
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(1); // test value
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SetChannelInfoInnerTest
+ * @tc.desc: SetChannelInfoInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: SetChannelInfoInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: SetChannelInfoInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, SetChannelInfoInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->SetChannelInfoInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("SetChannelInfoInnerTest");
+    EXPECT_EQ(g_stub->SetChannelInfoInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("SetChannelInfoInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->SetChannelInfoInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("SetChannelInfoInnerTest");
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->SetChannelInfoInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("SetChannelInfoInnerTest");
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->SetChannelInfoInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnLeaveLNNResultInnerTest
+ * @tc.desc: OnLeaveLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnLeaveLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnLeaveLNNResultInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnLeaveLNNResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnLeaveLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString("OnLeaveLNNResultInnerTest");
+    EXPECT_EQ(g_stub->OnLeaveLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteCString("OnLeaveLNNResultInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnLeaveLNNResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnNodeOnlineStateChangedInnerTest
+ * @tc.desc: OnNodeOnlineStateChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeOnlineStateChangedInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeOnlineStateChangedInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnNodeOnlineStateChangedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnNodeOnlineStateChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString("OnNodeOnlineStateChangedInnerTest");
+    EXPECT_EQ(g_stub->OnNodeOnlineStateChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READBOOL_FAILED);
+
+    data.WriteCString("OnNodeOnlineStateChangedInnerTest");
+    data.WriteBool(false);
+    EXPECT_EQ(g_stub->OnNodeOnlineStateChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
+
+    data.WriteCString("OnNodeOnlineStateChangedInnerTest");
+    data.WriteBool(false);
+    data.WriteUint32(sizeof(NodeBasicInfo));
+    EXPECT_EQ(g_stub->OnNodeOnlineStateChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    std::string buffer = "OnNodeOnlineStateChangedInnerTest";
+    data.WriteCString("OnNodeOnlineStateChangedInnerTest");
+    data.WriteBool(false);
+    data.WriteUint32(sizeof(NodeBasicInfo));
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnNodeOnlineStateChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+}
+
+/**
+ * @tc.name: OnNodeStatusChangedInnerTest
+ * @tc.desc: OnNodeStatusChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeStatusChangedInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeStatusChangedInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnNodeStatusChangedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_INVALID_PARAM);
+
+    data.WriteCString("OnNodeStatusChangedInnerTest");
+    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READINT32_FAILED);
+
+    data.WriteCString("OnNodeStatusChangedInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READINT32_FAILED);
+
+    data.WriteCString("OnNodeStatusChangedInnerTest");
+    data.WriteInt32(0);
+    data.WriteUint32(sizeof(NodeStatus));
+    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READRAWDATA_FAILED);
+
+    std::string buffer = "OnNodeStatusChangedInnerTest";
+    data.WriteCString("OnNodeStatusChangedInnerTest");
+    data.WriteInt32(0);
+    data.WriteUint32(sizeof(NodeStatus));
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READRAWDATA_FAILED);
+}
+
+/**
+ * @tc.name: OnNodeBasicInfoChangedInnerTest
+ * @tc.desc: OnNodeBasicInfoChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeBasicInfoChangedInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeBasicInfoChangedInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnNodeBasicInfoChangedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnNodeBasicInfoChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString("OnNodeBasicInfoChangedInnerTest");
+    EXPECT_EQ(g_stub->OnNodeBasicInfoChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteCString("OnNodeBasicInfoChangedInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnNodeBasicInfoChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
+
+    data.WriteCString("OnNodeBasicInfoChangedInnerTest");
+    data.WriteInt32(0);
+    data.WriteUint32(sizeof(NodeBasicInfo));
+    EXPECT_EQ(g_stub->OnNodeBasicInfoChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    std::string buffer = "OnNodeBasicInfoChangedInnerTest";
+    data.WriteCString("OnNodeBasicInfoChangedInnerTest");
+    data.WriteInt32(0);
+    data.WriteUint32(sizeof(NodeBasicInfo));
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnNodeBasicInfoChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+}
+
+/**
+ * @tc.name: OnLocalNetworkIdChangedInnerTest
+ * @tc.desc: OnLocalNetworkIdChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnLocalNetworkIdChangedInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnLocalNetworkIdChangedInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnLocalNetworkIdChangedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnLocalNetworkIdChangedInner(data, reply), SOFTBUS_INVALID_PARAM);
+
+    data.WriteCString("OnLocalNetworkIdChangedInnerTest");
+    EXPECT_EQ(g_stub->OnLocalNetworkIdChangedInner(data, reply), SOFTBUS_OK);
+
+    data.WriteCString("OnLocalNetworkIdChangedInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnLocalNetworkIdChangedInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnNodeDeviceTrustedChangeInnerTest
+ * @tc.desc: OnNodeDeviceTrustedChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeDeviceTrustedChangeInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnNodeDeviceTrustedChangeInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnNodeDeviceTrustedChangeInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_INVALID_PARAM);
+
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest");
+    EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest");
+    data.WriteInt32(0);
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest1");
+    EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest");
+    data.WriteInt32(0);
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest1");
+    data.WriteUint32(0);
+    EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_OK);
+
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest");
+    data.WriteInt32(0);
+    data.WriteCString("OnNodeDeviceTrustedChangeInnerTest1");
+    data.WriteUint32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnHichainProofExceptionInnerTest
+ * @tc.desc: OnHichainProofExceptionInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnHichainProofExceptionInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnHichainProofExceptionInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnHichainProofExceptionInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_INVALID_PARAM);
+
+    data.WriteCString("OnHichainProofExceptionInnerTest");
+    EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_NETWORK_PROXY_READINT_FAILED);
+
+    data.WriteCString("OnHichainProofExceptionInnerTest");
+    data.WriteUint32(1);
+    EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_NETWORK_READRAWDATA_FAILED);
+
+    std::string buffer = "OnHichainProofExceptionInnerTest";
+    data.WriteCString("OnHichainProofExceptionInnerTest");
+    data.WriteUint32(1);
+    data.WriteRawData(buffer.c_str(), 1);
+    EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_NETWORK_PROXY_READINT_FAILED);
+
+    buffer = "OnHichainProofExceptionInnerTest";
+    data.WriteCString("OnHichainProofExceptionInnerTest");
+    data.WriteUint32(1);
+    data.WriteRawData(buffer.c_str(), 1);
+    data.WriteUint16(0);
+    EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_NETWORK_PROXY_READINT_FAILED);
+
+    buffer = "OnHichainProofExceptionInnerTest";
+    data.WriteCString("OnHichainProofExceptionInnerTest");
+    data.WriteUint32(1);
+    data.WriteRawData(buffer.c_str(), 1);
+    data.WriteUint16(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnTimeSyncResultInnerTest
+ * @tc.desc: OnTimeSyncResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnTimeSyncResultInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnTimeSyncResultInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnTimeSyncResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnTimeSyncResultInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
+
+    data.WriteInt32(sizeof(TimeSyncResultInfo));
+    EXPECT_EQ(g_stub->OnTimeSyncResultInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    std::string buffer = "OnTimeSyncResultInnerTest";
+    data.WriteInt32(sizeof(TimeSyncResultInfo));
+    data.WriteRawData(buffer.c_str(), sizeof(TimeSyncResultInfo));
+    EXPECT_EQ(g_stub->OnTimeSyncResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    buffer = "OnTimeSyncResultInnerTest";
+    data.WriteInt32(sizeof(TimeSyncResultInfo));
+    data.WriteRawData(buffer.c_str(), sizeof(TimeSyncResultInfo));
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnTimeSyncResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnPublishLNNResultInnerTest
+ * @tc.desc: OnPublishLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnPublishLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnPublishLNNResultInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnPublishLNNResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnPublishLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnPublishLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    std::string buffer = "OnPublishLNNResultInnerTest";
+    data.WriteInt32(0);
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnPublishLNNResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnRefreshLNNResultInnerTest
+ * @tc.desc: OnRefreshLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnRefreshLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnRefreshLNNResultInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnRefreshLNNResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnRefreshLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(sizeof(DeviceInfo));
+    EXPECT_EQ(g_stub->OnRefreshLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnRefreshLNNResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnRefreshDeviceFoundInnerTest
+ * @tc.desc: OnRefreshDeviceFoundInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnRefreshDeviceFoundInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnRefreshDeviceFoundInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnRefreshDeviceFoundInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnRefreshDeviceFoundInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
+
+    data.WriteInt32(sizeof(DeviceInfo));
+    EXPECT_EQ(g_stub->OnRefreshDeviceFoundInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    std::string buffer = "OnRefreshDeviceFoundInnerTest";
+    data.WriteInt32(sizeof(DeviceInfo));
+    data.WriteRawData(buffer.c_str(), sizeof(DeviceInfo));
+    EXPECT_EQ(g_stub->OnRefreshDeviceFoundInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnDataLevelChangedInnerTest
+ * @tc.desc: OnDataLevelChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnDataLevelChangedInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnDataLevelChangedInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnDataLevelChangedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnDataLevelChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString("OnDataLevelChangedInnerTest");
+    EXPECT_EQ(g_stub->OnDataLevelChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    std::string buffer = "OnDataLevelChangedInnerTest";
+    data.WriteCString("OnDataLevelChangedInnerTest");
+    data.WriteRawData(buffer.c_str(), sizeof(DataLevelInfo));
+    EXPECT_EQ(g_stub->OnDataLevelChangedInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnRangeResultInnerTest
+ * @tc.desc: OnRangeResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnRangeResultInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnRangeResultInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnRangeResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+
+    RangeResultInnerInfo innerIInnfo1 = { .length = 0, };
+    data.WriteRawData(&innerIInnfo1, sizeof(RangeResultInnerInfo));
+    EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_OK);
+
+    RangeResultInnerInfo temp;
+    RangeResultInnerInfo innerIInnfo2 = { .length = sizeof(temp), .addition = (uint8_t *)&temp };
+    data.WriteRawData(&innerIInnfo2, sizeof(RangeResultInnerInfo));
+    data.WriteRawData(&temp, sizeof(temp));
+    EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnChannelBindInnerTest
+ * @tc.desc: OnChannelBindInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnChannelBindInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnChannelBindInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnChannelBindInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnChannelBindInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelBindInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnChannelBindInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnCheckCollabRelationTest
+ * @tc.desc: OnCheckCollabRelationTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnCheckCollabRelationTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnCheckCollabRelationTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnCheckCollabRelationTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    int32_t ret = g_stub->OnCheckCollabRelation(nullptr, true, nullptr, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    CollabInfo *sourceInfo = static_cast<CollabInfo *>(SoftBusCalloc(sizeof(CollabInfo)));
+    EXPECT_NE(nullptr, sourceInfo);
+
+    CollabInfo *sinkInfo = static_cast<CollabInfo *>(SoftBusCalloc(sizeof(CollabInfo)));
+    EXPECT_NE(nullptr, sinkInfo);
+
+    ret = g_stub->OnCheckCollabRelation(sourceInfo, true, sinkInfo, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sourceInfo);
+    SoftBusFree(sinkInfo);
+}
+
+/**
+ * @tc.name: OnClientChannelOnQosTest
+ * @tc.desc: OnClientChannelOnQosTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnClientChannelOnQosTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnClientChannelOnQosTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnClientChannelOnQosTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    int32_t ret = g_stub->OnClientChannelOnQos(0, 0, static_cast<QoSEvent>(-1), nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = g_stub->OnClientChannelOnQos(0, 0, static_cast<QoSEvent>(5), nullptr, 0); // test value
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = g_stub->OnClientChannelOnQos(0, 0, QOS_SATISFIED, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    QosTV *qos = static_cast<QosTV *>(SoftBusCalloc(sizeof(QosTV)));
+    EXPECT_NE(nullptr, qos);
+
+    ret = g_stub->OnClientChannelOnQos(0, 0, QOS_SATISFIED, qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = g_stub->OnClientChannelOnQos(0, 0, QOS_SATISFIED, qos, 1);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    SoftBusFree(qos);
 }
 
 /**
@@ -506,8 +1120,6 @@ HWTEST_F(SoftBusServerProxyFrameTest, ISoftBusClientTest001, TestSize.Level1)
     ret = g_stub->OnClientTransLimitChange(testInt, testUint);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_stub->OnChannelBind(testInt, testInt);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = g_stub->OnClientChannelOnQos(testInt, testInt, QOS_SATISFIED, nullptr, testUint);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

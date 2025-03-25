@@ -241,7 +241,7 @@ int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *n
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnBleRange(const char *pkgName, int32_t pid, const BleRangeInnerInfo *rangeInfo)
+int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo)
 {
     if (pkgName == nullptr || rangeInfo == nullptr) {
         LNN_LOGE(LNN_EVENT, "param is invalid");
@@ -253,6 +253,6 @@ int32_t ClientOnBleRange(const char *pkgName, int32_t pid, const BleRangeInnerIn
         LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
         return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
     }
-    clientProxy->OnBleRangeDone(rangeInfo);
+    clientProxy->OnMsdpRangeResult(rangeInfo);
     return SOFTBUS_OK;
 }

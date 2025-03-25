@@ -40,6 +40,7 @@ ohos_moduletest("TransSocketStreamEncryptMt") {
       "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
+      "cJSON:cjson_static",
       "c_utils:utils",
       "googletest:gtest_main",
       "hilog:libhilog",

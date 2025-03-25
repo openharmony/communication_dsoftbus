@@ -27,6 +27,7 @@
 #include <string>
 #include "data/link_manager.h"
 #include "net_conn_client.h"
+#include "wifi_device.h"
 #include "wifi_direct_anonymous.h"
 #include "wifi_direct_mock.h"
 #include "wifi_direct_utils.h"
@@ -539,6 +540,8 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
     WifiDirectDfx::GetInstance().ReportConnEventExtra(conEventExtra, conInfo);
+    std::shared_ptr<Wifi::WifiDevice> mockDevice = Wifi::WifiDevice::GetInstance(0);
+    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_SUCCESS));
     auto ret = WifiDirectAnonymizePsk(psk);
     EXPECT_EQ(ret, "");
     psk = "1234";
@@ -625,5 +628,19 @@ HWTEST_F(WifiDirectUtilsTest, GetRemoteConnSubFeatureTest, TestSize.Level1)
 
     auto ret = WifiDirectUtils::GetRemoteConnSubFeature(networkId, feature);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: GetChloadTest
+ * @tc.desc: test GetChload method with no permisson
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetChloadTest, TestSize.Level1)
+{
+    std::shared_ptr<Wifi::WifiDevice> mockDevice = Wifi::WifiDevice::GetInstance(0);
+    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_PERMISSION_DENIED));
+    auto ret = WifiDirectUtils::GetChload();
+    EXPECT_EQ(ret, Wifi::WIFI_OPT_PERMISSION_DENIED);
 }
 } // namespace OHOS::SoftBus

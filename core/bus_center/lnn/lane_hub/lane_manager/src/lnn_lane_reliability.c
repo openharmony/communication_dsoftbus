@@ -273,10 +273,10 @@ static void UpdateLaneEventWithDetectInfo(uint32_t laneReqId, uint64_t startTime
         } else {
             wifiDetectState = WIFI_DETECT_FAIL;
         }
-        UpdateLaneEventInfo(laneReqId, (uint32_t)EVENT_WIFI_DETECT_STATE,
+        UpdateLaneEventInfo(laneReqId, EVENT_WIFI_DETECT_STATE,
             LANE_PROCESS_TYPE_UINT32, (void *)(&wifiDetectState));
         uint64_t wifiDetectTime = GetDetectTime(startTime);
-        UpdateLaneEventInfo(laneReqId, (uint32_t)EVENT_WIFI_DETECT_TIME,
+        UpdateLaneEventInfo(laneReqId, EVENT_WIFI_DETECT_TIME,
             LANE_PROCESS_TYPE_UINT64, (void *)(&wifiDetectTime));
     }
 }

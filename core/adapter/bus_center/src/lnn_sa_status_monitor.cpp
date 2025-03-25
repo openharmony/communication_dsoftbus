@@ -77,6 +77,10 @@ int32_t ServiceStatusMonitorManager::SubscribeSaById(int32_t saId)
     }
     if (statusLisener_ == nullptr) {
         statusLisener_ = new (std::nothrow) SaStatusListener();
+        if (statusLisener_ == nullptr) {
+            LNN_LOGE(LNN_EVENT, "new object failed");
+            return SOFTBUS_MEM_ERR;
+        }
     }
     int32_t ret = samgrProxy->SubscribeSystemAbility(saId, statusLisener_);
     if (ret != ERR_OK) {
@@ -155,7 +159,7 @@ static void InitSaStatusMonitor(void *para)
 
 void LnnInitSaStatusMonitor(void)
 {
-    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitSaStatusMonitor, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitSaStatusMonitor, NULL, 0);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "async delay call fail, ret=%{public}d", ret);
         return;

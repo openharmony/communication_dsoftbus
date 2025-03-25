@@ -159,10 +159,10 @@ uint32_t AuthGenRequestId(void)
     return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *verifyCallback)
 {
-    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, verifyCallback, module, isFastAuth);
+    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, authVerifyParam, verifyCallback);
 }
 
 void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra)

@@ -27,9 +27,9 @@ extern "C" {
 #define INVALID_USER_ID (-1)
 #define DEFAULT_USER_ID 0
 
-int32_t TransGetForegroundUserId(void);
+int32_t TransGetUserIdFromUid(int32_t uid);
 
-int32_t TransGetForegroundLocalId(const char *sessionName);
+int32_t TransGetUserIdFromSessionName(const char *sessionName);
 
 #ifdef __cplusplus
 #if __cplusplus

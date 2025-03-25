@@ -43,6 +43,7 @@ typedef enum {
     EVENT_SCENE_TRANS_RECEIVED_DATA = 16,
     EVENT_SCENE_TRANS_SEND_DATA = 17,
     EVENT_SCENE_CHANNEL_REQUEST = 18,
+    EVENT_SCENE_TRANS_RECV_STREAM = 19,
 } TransEventScene;
 
 typedef enum {
@@ -61,6 +62,10 @@ typedef enum {
 typedef enum {
     EVENT_STAGE_TRANS_COMMON_ONE = 1,
 } TransEventCommonStage;
+
+typedef enum {
+    EVENT_STAGE_TRANS_RECV_STREAM = 1,
+} TransEventStreamStage;
 
 typedef enum {
     DEVICE_STATE_INVALID = 1,

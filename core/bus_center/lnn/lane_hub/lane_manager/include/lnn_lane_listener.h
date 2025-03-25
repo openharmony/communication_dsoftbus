@@ -17,7 +17,6 @@
 #define LNN_LANE_LISTENER_H
 
 #include "lnn_lane_link.h"
-#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {

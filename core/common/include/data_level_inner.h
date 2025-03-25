@@ -16,6 +16,7 @@
 #define DATA_LEVEL_INNER_H
 
 #include <stdint.h>
+#include "ble_range.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
@@ -32,12 +33,12 @@ typedef struct {
 } DataLevelInfo;
 
 typedef struct {
-    int32_t range;                      /**< The range between two devices */
-    int32_t subRange;                   /**< The subRange between two devices */
-    float distance;                     /**< The distance between two devices */
-    double confidence;                  /**< The confidence of range result */
-    char networkId[NETWORK_ID_BUF_LEN]; /**< The network id value */
-} BleRangeInnerInfo;
+    RangeMedium medium;
+    float distance;
+    char networkId[NETWORK_ID_BUF_LEN];
+    uint32_t length;
+    uint8_t *addition;
+} RangeResultInnerInfo;
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -703,7 +703,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest019, TestSize.Level1)
     datas.WriteInt32(qosCount);
     ret = softBusServer->EvaluateQosInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-    
+
     qosCount = 7;
     datas.WriteCString(test);
     datas.WriteInt32(dataTypeNumber);
@@ -751,7 +751,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
     datas.WriteUint32(addrTypeLen);
     datas.WriteRawData(&addr, addrTypeLen);
     ret = softBusServer->JoinLNNInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     ret = softBusServer->LeaveLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
@@ -839,7 +839,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
         Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR)
     );
     ret = softBusServer->GetLocalDeviceInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
@@ -923,7 +923,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
     datas.WriteUint32(len);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetNodeKeyInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR));
     ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
@@ -1367,7 +1367,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest036, TestSize.Level1)
     bool ranging = true;
     MessageParcel datas;
     MessageParcel reply;
-    
+
     datas.WriteCString(test);
     datas.WriteInt32(publishId);
     datas.WriteInt32(mode);
@@ -1418,7 +1418,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest037, TestSize.Level1)
     int32_t medium = -1;
     MessageParcel datas;
     MessageParcel reply;
-    
+
     int32_t ret = softBusServer->RefreshLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
@@ -1592,7 +1592,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
         Return(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR)
     );
     ret = softBusServer->ActiveMetaNodeInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteRawData(&info, sizeof(MetaNodeConfigInfo));
     EXPECT_CALL(softbusServerStubMock, LnnIpcActiveMetaNode).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1758,7 +1758,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
 
 /**
  * @tc.name: SoftbusServerStubTest046
- * @tc.desc: Verify the RegBleRangeCbInner function.
+ * @tc.desc: Verify the RegRangeCbForMsdpInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1771,21 +1771,21 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest046, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
-    int32_t ret = softBusServer->RegBleRangeCbInner(datas, reply);
+    int32_t ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test1);
-    ret = softBusServer->RegBleRangeCbInner(datas, reply);
+    ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     datas.WriteCString(test2);
-    ret = softBusServer->RegBleRangeCbInner(datas, reply);
+    ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
  * @tc.name: SoftbusServerStubTest047
- * @tc.desc: Verify the UnregBleRangeCbInner function.
+ * @tc.desc: Verify the UnregRangeCbForMsdpInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1798,21 +1798,21 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest047, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
-    int32_t ret = softBusServer->UnregBleRangeCbInner(datas, reply);
+    int32_t ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test1);
-    ret = softBusServer->UnregBleRangeCbInner(datas, reply);
+    ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     datas.WriteCString(test2);
-    ret = softBusServer->UnregBleRangeCbInner(datas, reply);
+    ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
  * @tc.name: SoftbusServerStubTest048
- * @tc.desc: Verify the TriggerHbForMeasureDistanceInner function.
+ * @tc.desc: Verify the TriggerRangeForMsdpInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1825,13 +1825,13 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
-    int32_t ret = softBusServer->TriggerHbForMeasureDistanceInner(datas, reply);
+    int32_t ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     datas.WriteRawData(&mode, sizeof(mode));
-    ret = softBusServer->TriggerHbForMeasureDistanceInner(datas, reply);
+    ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

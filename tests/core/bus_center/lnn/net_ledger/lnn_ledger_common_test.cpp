@@ -236,6 +236,93 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_003, TestSize.Level1)
 }
 
 /*
+ * @tc.name: LNN_SET_STATIC_NET_CAPA_001
+ * @tc.desc: lnn net static capability function test, LnnSetStaticNetCap, LnnHasStaticNetCap
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_001, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BR);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_WIFI);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_WIFI);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_P2P);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ENHANCED_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_ENHANCED_P2P);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ETH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_ETH);
+    EXPECT_EQ(hasCapability, true);
+}
+
+/*
+ * @tc.name: LNN_SET_STATIC_NET_CAPA_002
+ * @tc.desc: test lnn set staticNetCapa
+ * @tc.type: FUNC LnnSetStaticNetCap
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_002, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetStaticNetCap(NULL, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+}
+
+/*
+ * @tc.name: LNN_SET_STATIC_NET_CAPA_003
+ * @tc.desc: lnn net capability function test, LnnSetStaticNetCap, LnnClearStaticNetCap
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_003, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnClearStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, false);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(hasCapability, false);
+    ret = LnnClearStaticNetCap(&capability, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: LNN_NODE_INFO_Test_001
  * @tc.desc: lnn node info function test
  * @tc.type: FUNC

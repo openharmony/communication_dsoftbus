@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_TRANS_LANE_DFX_H
-#define LNN_TRANS_LANE_DFX_H
+#ifndef LNN_TRANS_FREE_LANE_H
+#define LNN_TRANS_FREE_LANE_H
 
 #include "lnn_lane_link.h"
 #include "message_handler.h"
@@ -32,4 +32,4 @@ void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo);
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_TRANS_LANE_DFX_H
+#endif // LNN_TRANS_FREE_LANE_H

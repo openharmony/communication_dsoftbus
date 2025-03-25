@@ -553,8 +553,8 @@ HWTEST_F(LNNLaneLinkExtTest, SELECT_AUTH_LANE_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(LANE_CAP_VALUE), Return(SOFTBUS_OK)));
     NiceMock<LaneNetCapInterfaceMock> capMock;
-    EXPECT_CALL(capMock, GetLinkCapaByLinkType).WillRepeatedly(LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType);
-
+    EXPECT_CALL(capMock, CheckStaticNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(capMock, CheckDynamicNetCap).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SelectAuthLane(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -590,7 +590,8 @@ HWTEST_F(LNNLaneLinkExtTest, SELECT_LANE_TEST_001, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(DEFAULT_CAP_VALUE), Return(SOFTBUS_OK)));
     NiceMock<LaneNetCapInterfaceMock> capMock;
-    EXPECT_CALL(capMock, GetLinkCapaByLinkType).WillRepeatedly(LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType);
+    EXPECT_CALL(capMock, CheckStaticNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(capMock, CheckDynamicNetCap).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -625,7 +626,8 @@ HWTEST_F(LNNLaneLinkExtTest, SELECT_LANE_TEST_002, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(CAP_VALUE), Return(SOFTBUS_OK)));
     NiceMock<LaneNetCapInterfaceMock> capMock;
-    EXPECT_CALL(capMock, GetLinkCapaByLinkType).WillRepeatedly(LaneNetCapInterfaceMock::ActionGetLinkCapaByLinkType);
+    EXPECT_CALL(capMock, CheckStaticNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(capMock, CheckDynamicNetCap).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);

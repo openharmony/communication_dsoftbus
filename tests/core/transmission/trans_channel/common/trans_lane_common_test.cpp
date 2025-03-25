@@ -932,7 +932,7 @@ HWTEST_F(TransLaneCommonTest, TransReportBadKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
 {
-    int32_t ret = CheckSourceCollabRelation(nullptr, TEST_PID);
+    int32_t ret = CheckSourceCollabRelation(nullptr, TEST_PID, TEST_UID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

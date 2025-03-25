@@ -69,7 +69,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_IPC_ERR);
-    
+
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
         WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_IPC_ERR);
@@ -92,7 +92,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
         WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Int32, channel->streamType, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Bool, channel->isUdpFile, SOFTBUS_IPC_ERR);
-        
+
         if (!channel->isServer) {
             WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_IPC_ERR);
             WRITE_PARCEL_WITH_RET(data, CString, channel->peerIp, SOFTBUS_IPC_ERR);
@@ -430,12 +430,12 @@ int32_t TransClientProxy::OnCheckCollabRelation(const CollabInfo *sourceInfo, bo
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
     WRITE_PARCEL_WITH_RET(data, Bool, isSinkSide, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
-    WRITE_PARCEL_WITH_RET(data, Int64, sourceInfo->accountId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, sourceInfo->accountId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Uint64, sourceInfo->tokenId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, sourceInfo->userId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, sourceInfo->pid, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, CString, sourceInfo->deviceId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
-    WRITE_PARCEL_WITH_RET(data, Int64, sinkInfo->accountId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, sinkInfo->accountId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Uint64, sinkInfo->tokenId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, sinkInfo->userId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, sinkInfo->pid, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
@@ -559,7 +559,7 @@ void TransClientProxy::OnDataLevelChanged(const char *networkId, const DataLevel
     (void)dataLevelInfo;
 }
 
-void TransClientProxy::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+void TransClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
 {
     (void)rangeInfo;
 }

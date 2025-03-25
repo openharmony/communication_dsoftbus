@@ -163,7 +163,7 @@ void ISoftBusClient::OnDataLevelChanged(const char *networkId, const DataLevelIn
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }
 
-void ISoftBusClient::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+void ISoftBusClient::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }

@@ -23,10 +23,38 @@ int32_t GetConcurrencyPeerUdidByActionId(uint32_t actionId, char *peerUdid)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-bool HaveConcurrencyBleGuideChannel(uint32_t actionId)
+int32_t GetConcurrencyLaneReqIdByActionId(uint32_t actionId, uint32_t *laneReqId)
 {
     (void)actionId;
+    (void)laneReqId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId)
+{
+    (void)actionId;
+    (void)reuseLaneReqId;
+    (void)connReqId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId)
+{
+    (void)connReqId;
     return false;
+}
+
+int32_t GetConcurrencyLaneReqIdByConnReqId(uint32_t connReqId, uint32_t *laneReqId)
+{
+    (void)connReqId;
+    (void)laneReqId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnFreePreLink(void *para)
+{
+    (void)para;
+    return;
 }
 
 int32_t InitActionBleConcurrency(void)

@@ -635,4 +635,125 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
     EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_OK);
     cJSON_Delete(json);
 }
+
+/*
+ * @tc.name: HandleDBAddChangeInternal_Test_002
+ * @tc.desc: HandleDBAddChangeInternal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_002, TestSize.Level1)
+{
+    NodeInfo cacheInfo = { 0 };
+    int32_t ret = HandleDBAddChangeInternal(nullptr, nullptr, &cacheInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    const char *key = "key";
+    ret = HandleDBAddChangeInternal(key, nullptr, &cacheInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: HandleDBUpdateChangeInternal_Test_001
+ * @tc.desc: HandleDBUpdateChangeInternal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateChangeInternal_Test_001, TestSize.Level1)
+{
+    const char *key = "key";
+    int32_t ret = HandleDBUpdateChangeInternal(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleDBUpdateChangeInternal(key, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleDBUpdateChangeInternal(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CheckParamValidity_Test_001
+ * @tc.desc: CheckParamValidity
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
+{
+    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    int32_t keySize = 1;
+    int32_t ret = CheckParamValidity(nullptr, nullptr, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckParamValidity(nullptr, value, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckParamValidity(key, nullptr, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    keySize = 0;
+    ret = CheckParamValidity(key, value, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    keySize = 1;
+    ret = CheckParamValidity(key, value, keySize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
+ * @tc.desc: LnnDBDataAddChangeSyncToCache
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestSize.Level1)
+{
+    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    int32_t keySize = 1;
+    EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnUpdateOldCacheInfo_Test_001
+ * @tc.desc: LnnUpdateOldCacheInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Level1)
+{
+    NodeInfo newInfo;
+    NodeInfo oldInfo;
+    UpdateDeviceNameToCache(&newInfo, &oldInfo);
+    UpdateDeviceNameToCache(&newInfo, &oldInfo);
+    UpdateDevBasicInfoToCache(&newInfo, &oldInfo);
+    int32_t ret = LnnUpdateOldCacheInfo(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnUpdateOldCacheInfo(&newInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnSaveAndUpdateDistributedNode_Test_001
+ * @tc.desc: LnnSaveAndUpdateDistributedNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, TestSize.Level1)
+{
+    NodeInfo cacheInfo;
+    NodeInfo oldCacheInfo;
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(&cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnDeleteDevInfoSyncToDB_Test_001
+ * @tc.desc: LnnDeleteDevInfoSyncToDB
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnDeleteDevInfoSyncToDB_Test_001, TestSize.Level1)
+{
+    EXPECT_EQ(LnnLedgerAllDataSyncToDB(nullptr, false, nullptr), SOFTBUS_INVALID_PARAM);
+    auto ret = LnnDeleteDevInfoSyncToDB(nullptr, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
 } // namespace OHOS

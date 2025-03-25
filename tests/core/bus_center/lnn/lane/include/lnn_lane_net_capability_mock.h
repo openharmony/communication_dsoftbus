@@ -27,8 +27,9 @@ public:
     LaneNetCapInterface() {};
     virtual ~LaneNetCapInterface() {};
 
-    virtual LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType) = 0;
-    virtual void SetRemoteDynamicNetCap(const char *peerUdid, NetCapability netCapaIndex) = 0;
+    virtual int32_t CheckStaticNetCap(const char *networkId, LaneLinkType linkType) = 0;
+    virtual int32_t CheckDynamicNetCap(const char *networkId, LaneLinkType linkType) = 0;
+    virtual void SetRemoteDynamicNetCap(const char *peerUdid, LaneLinkType linkType) = 0;
 };
 
 class LaneNetCapInterfaceMock : public LaneNetCapInterface {
@@ -36,10 +37,9 @@ public:
     LaneNetCapInterfaceMock();
     ~LaneNetCapInterfaceMock() override;
 
-    MOCK_METHOD2(SetRemoteDynamicNetCap, void (const char *peerUdid, NetCapability netCapaIndex));
-    MOCK_METHOD1(GetLinkCapaByLinkType, LaneCommCapa *(LaneLinkType linkType));
-
-    static LaneCommCapa *ActionGetLinkCapaByLinkType(LaneLinkType linkType);
+    MOCK_METHOD2(CheckStaticNetCap, int32_t (const char *networkId, LaneLinkType linkType));
+    MOCK_METHOD2(CheckDynamicNetCap, int32_t (const char *networkId, LaneLinkType linkType));
+    MOCK_METHOD2(SetRemoteDynamicNetCap, void (const char *peerUdid, LaneLinkType linkType));
 };
 } // namespace OHOS
 #endif // LNN_LANE_NET_CAPABILITY_MOCK_H

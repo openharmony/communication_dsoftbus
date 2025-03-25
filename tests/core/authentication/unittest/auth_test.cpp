@@ -814,9 +814,17 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ret = AuthStartVerify(nullptr, requestId, &callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(nullptr, &authVerifyParam, &callback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthStartVerify(&connInfo, requestId, nullptr, AUTH_MODULE_LNN, true);
+    ret = AuthStartVerify(&connInfo, &authVerifyParam, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1700,7 +1708,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
         .isServer = false,
         .isFastAuth = true,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
+    DeviceKeyId deviceKeyId = {
+        .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo authConnInfo;
     authConnInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -1710,7 +1722,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     authConnInfo.info.ipInfo.port = 20;
     authConnInfo.info.ipInfo.authId = 1024;
     (void)strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = AuthSessionStartAuth(&authInfo, &authConnInfo);
+    ret = AuthSessionStartAuth(&authInfo, &authConnInfo, &deviceKeyId);
     EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
 }
 
@@ -1922,13 +1934,14 @@ HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     AuthSessionInfo *info = nullptr;
     AuthSessionInfo infoValue;
     (void)memset_s(&infoValue, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     uint8_t data[TEST_DATA_LEN] = "123";
-    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data));
+    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data), authSeq);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data));
+    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data), authSeq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 

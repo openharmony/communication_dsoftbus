@@ -152,6 +152,8 @@ public:
     virtual int32_t LnnGetP2pRole(const NodeInfo *info) = 0;
     virtual int32_t LnnGetStaFrequency(const NodeInfo *info) = 0;
     virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
+    virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
+    virtual void DelSessionKeyProfile(int32_t sessionKeyId) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -196,6 +198,7 @@ public:
     MOCK_METHOD2(SoftBusSocketGetPeerName, int32_t (int32_t, SoftBusSockAddr *));
     MOCK_METHOD4(SoftBusInetNtoP, const char *(int32_t, const void *, char *, int32_t));
     MOCK_METHOD3(GetPeerUdidByNetworkId, int32_t (const char *, char *, uint32_t));
+    MOCK_METHOD3(GetSessionKeyProfile, bool (int32_t, uint8_t *, uint32_t *));
     MOCK_METHOD2(GetIsExchangeUdidByNetworkId, int32_t (const char *, bool *));
     MOCK_METHOD2(LnnGetUnifiedDeviceName, int32_t (char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
@@ -240,6 +243,7 @@ public:
     MOCK_METHOD1(PackCipherKeySyncMsg, bool (void *));
     MOCK_METHOD1(LnnGetP2pRole, int32_t (const NodeInfo *));
     MOCK_METHOD1(LnnGetStaFrequency, int32_t (const NodeInfo *));
+    MOCK_METHOD1(DelSessionKeyProfile, void(int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H

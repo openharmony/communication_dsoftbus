@@ -158,9 +158,9 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
-    memberFuncMap_[SERVER_TRIGGER_HB_FOR_RANGE] = &SoftBusServerStub::TriggerHbForMeasureDistanceInner;
-    memberFuncMap_[SERVER_REG_BLE_RANGE_CB] = &SoftBusServerStub::RegBleRangeCbInner;
-    memberFuncMap_[SERVER_UNREG_BLE_RANGE_CB] = &SoftBusServerStub::UnregBleRangeCbInner;
+    memberFuncMap_[SERVER_TRIGGER_RANGE_FOR_MSDP] = &SoftBusServerStub::TriggerRangeForMsdpInner;
+    memberFuncMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::RegRangeCbForMsdpInner;
+    memberFuncMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::UnregRangeCbForMsdpInner;
     memberFuncMap_[SERVER_SYNC_TRUSTED_RELATION] = &SoftBusServerStub::SyncTrustedRelationShipInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
@@ -207,9 +207,9 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_TRIGGER_HB_FOR_RANGE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_REG_BLE_RANGE_CB] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_UNREG_BLE_RANGE_CB] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_TRIGGER_RANGE_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SYNC_TRUSTED_RELATION] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_RIPPLE_STATS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -586,7 +586,8 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
     if (strncmp(param.sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         COMM_LOGI(COMM_SVC, "DMS bind request, need check collaboration relationship");
-        if (CheckSourceCollabRelation(param.peerDeviceId, OHOS::IPCSkeleton::GetCallingPid()) != SOFTBUS_OK) {
+        if (CheckSourceCollabRelation(param.peerDeviceId,
+            OHOS::IPCSkeleton::GetCallingPid(), OHOS::IPCSkeleton::GetCallingUid()) != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "DMS check collaboration relationship failed, reject binding request");
             retReply = SOFTBUS_TRANS_CHECK_RELATION_FAIL;
             goto EXIT;
@@ -936,9 +937,10 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner read info type length failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner get info failed");
-        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    int32_t retReply = GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum);
+    if (retReply != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner get info failed, retReply=%{public}d", retReply);
+        return retReply;
     }
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
         COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner node info is invalid");
@@ -949,15 +951,14 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
         SoftBusFree(nodeInfo);
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
-    int32_t ret = SOFTBUS_OK;
     if (infoNum > 0) {
         if (!reply.WriteRawData(nodeInfo, static_cast<int32_t>(infoTypeLen * infoNum))) {
             COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner write node info failed!");
-            ret = SOFTBUS_IPC_ERR;
+            retReply = SOFTBUS_IPC_ERR;
         }
         SoftBusFree(nodeInfo);
     }
-    return ret;
+    return retReply;
 }
 
 int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply)
@@ -1505,8 +1506,9 @@ int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessagePar
         COMM_LOGE(COMM_SVC, "DeactiveMetaNode read meta node id failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (DeactiveMetaNode(metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_DEACTIVE_META_NODE_ERR;
+    int32_t ret = DeactiveMetaNode(metaNodeId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1525,8 +1527,9 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
         COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{public}d, maxNum=%{public}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
-    if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_GET_META_NODE_INFO_ERR;
+    int32_t ret = GetAllMetaNodeInfo(infos, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (!reply.WriteInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo write infoNum failed!");
@@ -1577,29 +1580,24 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerStub::TriggerHbForMeasureDistanceInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusServerStub::TriggerRangeForMsdpInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
-    const HbMode *mode = nullptr;
+    const RangeConfig *config = nullptr;
 
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
-    uint32_t code = SERVER_TRIGGER_HB_FOR_RANGE;
+    uint32_t code = SERVER_TRIGGER_RANGE_FOR_MSDP;
     SoftbusRecordCalledApiInfo(pkgName, code);
-    const char *callerId = data.ReadCString();
-    if (callerId == nullptr || strnlen(callerId, CALLER_ID_MAX_LEN) >= CALLER_ID_MAX_LEN) {
-        COMM_LOGE(COMM_SVC, "read callerId failed!");
+    config = reinterpret_cast<const RangeConfig *>(data.ReadRawData(sizeof(RangeConfig)));
+    if (config == nullptr) {
+        COMM_LOGE(COMM_SVC, "read config data failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
-    mode = reinterpret_cast<const HbMode *>(data.ReadRawData(sizeof(HbMode)));
-    if (mode == nullptr) {
-        COMM_LOGE(COMM_SVC, "read mode failed!");
-        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
-    }
-    int32_t retReply = TriggerHbForMeasureDistance(pkgName, callerId, mode);
+    int32_t retReply = TriggerRangeForMsdp(pkgName, config);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
@@ -1607,7 +1605,7 @@ int32_t SoftBusServerStub::TriggerHbForMeasureDistanceInner(MessageParcel &data,
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerStub::RegBleRangeCbInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusServerStub::RegRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGI(COMM_SVC, "enter");
 #ifndef ENHANCED_FLAG
@@ -1625,7 +1623,7 @@ int32_t SoftBusServerStub::RegBleRangeCbInner(MessageParcel &data, MessageParcel
         COMM_LOGE(COMM_SVC, "read pkgName invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t retReply = RegBleRangeCb(pkgName);
+    int32_t retReply = RegisterRangeCallbackForMsdp(pkgName);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed");
         return SOFTBUS_IPC_ERR;
@@ -1634,7 +1632,7 @@ int32_t SoftBusServerStub::RegBleRangeCbInner(MessageParcel &data, MessageParcel
 #endif
 }
 
-int32_t SoftBusServerStub::UnregBleRangeCbInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusServerStub::UnregRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGI(COMM_SVC, "enter");
 #ifndef ENHANCED_FLAG
@@ -1652,7 +1650,7 @@ int32_t SoftBusServerStub::UnregBleRangeCbInner(MessageParcel &data, MessageParc
         COMM_LOGE(COMM_SVC, "read pkgName invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t retReply = UnregBleRangeCb(pkgName);
+    int32_t retReply = UnregisterRangeCallbackForMsdp(pkgName);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed");
         return SOFTBUS_IPC_ERR;
