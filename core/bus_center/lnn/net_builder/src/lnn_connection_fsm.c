@@ -1479,7 +1479,8 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         if (connInfo->nodeInfo != NULL) {
             if (connInfo->addr.type == CONNECTION_ADDR_BR) {
                 (void)ProcessBleOnline(connInfo->nodeInfo, &(connInfo->addr), BIT_SUPPORT_BR_DUP_BLE);
-            } else if (FindAuthPreLinkNodeByUuid(connInfo->nodeInfo->uuid, &tmpNode) == SOFTBUS_OK) {
+            } else if (connInfo->addr.type == CONNECTION_ADDR_SESSION_WITH_KEY &&
+                FindAuthPreLinkNodeByUuid(connInfo->nodeInfo->uuid, &tmpNode) == SOFTBUS_OK) {
                 DelAuthPreLinkByUuid(connInfo->nodeInfo->uuid);
                 LNN_LOGI(LNN_BUILDER, "delete auth pre link node by uuid");
                 ProcessBleOnlineForAuthPreLink(connFsm);
