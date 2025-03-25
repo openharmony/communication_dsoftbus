@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -740,22 +740,6 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Accept001
- * @tc.desc: Accept, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, Accept001, TestSize.Level1)
-{
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-    SoftBusStreamTestInterfaceMock streamMock;
-    EXPECT_CALL(streamMock, FtAccept).WillOnce(testing::Return(-1));
-    bool ret = vtpStreamSocket->Accept();
-    EXPECT_EQ(false, ret);
-}
-
-/**
  * @tc.name: EpollTimeout001
  * @tc.desc: EpollTimeout, use the wrong parameter.
  * @tc.type: FUNC
@@ -1214,6 +1198,22 @@ HWTEST_F(VtpStreamSocketTest, ProcessCommonDataStream001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Accept001
+ * @tc.desc: Accept, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, Accept001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    SoftBusStreamTestInterfaceMock streamMock;
+    EXPECT_CALL(streamMock, FtAccept).WillOnce(testing::Return(-1));
+    bool ret = vtpStreamSocket->Accept();
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: Accept002
  * @tc.desc: Accept
  * @tc.type: FUNC
@@ -1245,6 +1245,107 @@ HWTEST_F(VtpStreamSocketTest, Accept003, TestSize.Level1)
     EXPECT_CALL(streamMock, FtGetPeerName).WillOnce(testing::Return(0));
     bool ret = vtpStreamSocket->Accept();
     EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: Accept004
+ * @tc.desc: Accept
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, Accept004, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    SoftBusStreamTestInterfaceMock streamMock;
+    EXPECT_CALL(streamMock, FtAccept).WillOnce(testing::Return(11));
+
+    EXPECT_CALL(streamMock, FtGetPeerName(testing::_, testing::_, testing::_))
+    .WillOnce(testing::Invoke([](int fd, sockaddr *addr, socklen_t *addrLen) {
+
+        addr->sa_family = AF_INET;
+        sockaddr_in *sin = reinterpret_cast<sockaddr_in *>(addr);
+        sin->sin_port = htons(80);
+        sin->sin_addr.s_addr = inet_addr("192.168.1.1");
+
+        *addrLen = sizeof(sockaddr_in);
+
+        return ERR_OK;
+    }));
+    bool ret = vtpStreamSocket->Accept();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: Accept005
+ * @tc.desc: Accept
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, Accept005, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    SoftBusStreamTestInterfaceMock streamMock;
+    EXPECT_CALL(streamMock, FtAccept).WillOnce(testing::Return(46));
+
+    EXPECT_CALL(streamMock, FtGetPeerName(testing::_, testing::_, testing::_))
+    .WillOnce(testing::Invoke([](int fd, sockaddr *addr, socklen_t *addrLen) {
+
+        addr->sa_family = AF_INET6;
+        sockaddr_in6 *sin = reinterpret_cast<sockaddr_in6 *>(addr);
+        sin->sin6_port = htons(8080);
+
+        *addrLen = sizeof(sockaddr_in6);
+
+        return ERR_OK;
+    }));
+
+    bool ret = vtpStreamSocket->Accept();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: FillpAppStatistics002
+ * @tc.desc: FillpAppStatistics
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, FillpAppStatistics002, TestSize.Level1)
+{
+    FillpStatisticsPcb fillpPcbStats;
+    fillpPcbStats.appFcStastics.periodRecvBits = 100;
+    fillpPcbStats.appFcStastics.pktNum = 10;
+    fillpPcbStats.appFcStastics.periodRecvPkts = 5;
+    fillpPcbStats.appFcStastics.periodRecvPktLoss = 0;
+    fillpPcbStats.appFcStastics.periodRecvRate = 50;
+    fillpPcbStats.appFcStastics.periodRecvRateBps = 5000;
+    fillpPcbStats.appFcStastics.periodRtt = 10;
+    fillpPcbStats.appFcStastics.periodRecvPktLossHighPrecision = 0;
+    fillpPcbStats.appFcStastics.periodSendLostPkts = 2;
+    fillpPcbStats.appFcStastics.periodSendPkts = 7;
+    fillpPcbStats.appFcStastics.periodSendPktLossHighPrecision = 0;
+    fillpPcbStats.appFcStastics.periodSendBits = 200;
+    fillpPcbStats.appFcStastics.periodSendRateBps = 10000;
+
+    SoftBusStreamTestInterfaceMock streamMock;
+    EXPECT_CALL(streamMock, FtFillpStatsGet).WillOnce(testing::Return(0));
+
+    SoftBusSysTime fillpStatsGetTime = { 0 };
+    EXPECT_CALL(streamMock, SoftBusGetTime)
+    .WillRepeatedly(testing::DoAll(
+        testing::SetArgPointee<0>(SoftBusSysTime{12345, 67890}),
+        testing::Return(SOFTBUS_OK)
+    ));
+    streamMock.SoftBusGetTime(&fillpStatsGetTime);
+    EXPECT_EQ(fillpStatsGetTime.sec, 12345);
+    EXPECT_EQ(fillpStatsGetTime.usec, 67890);
+
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    EXPECT_NO_FATAL_FAILURE(vtpStreamSocket->FillpAppStatistics());
 }
 
 /**
@@ -1410,6 +1511,24 @@ HWTEST_F(VtpStreamSocketTest, EncryptStreamPacket001, TestSize.Level1)
     SoftBusFree(streamSocket);
 }
 
+/**
+ * @tc.name: EncryptStreamPacket002
+ * @tc.desc: EncryptStreamPacket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, EncryptStreamPacket002, TestSize.Level1)
+{
+    ssize_t len = 0;
+    std::unique_ptr<char[]> data;
+    SoftBusStreamTestInterfaceMock streamMock;
+    std::unique_ptr<IStream> stream = IStream::MakeCommonStream(streamData, frameInfo);
+
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    bool ret = vtpStreamSocket->EncryptStreamPacket(std::move(stream), data, len);
+    EXPECT_FALSE(ret);
+}
 
 /**
  * @tc.name: RecvStreamLen001

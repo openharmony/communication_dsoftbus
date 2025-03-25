@@ -872,9 +872,11 @@ static void DfxReportWdResult(const P2pLinkReqList *reqInfo, const LaneLinkInfo 
     extra.guideType = (int32_t)guideType;
     if (reqInfo->p2pInfo.reuseOnly) {
         extra.isWifiDirectReuse = true;
-        if (linkInfo != NULL && linkInfo->type == LANE_HML)
-            UpdateLaneEventInfo(reqInfo->laneRequestInfo.laneReqId, (uint32_t)EVENT_HML_REUSE,
-                LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){reqInfo->p2pInfo.reuseOnly});
+        if (linkInfo != NULL && linkInfo->type == LANE_HML) {
+            uint32_t isHmlReuse = (uint32_t)(reqInfo->p2pInfo.reuseOnly);
+            UpdateLaneEventInfo(reqInfo->laneRequestInfo.laneReqId,
+                EVENT_HML_REUSE, LANE_PROCESS_TYPE_UINT32, (void *)(&isHmlReuse));
+        }
     }
     if (linkInfo != NULL) {
         extra.bandWidth = (int32_t)linkInfo->linkInfo.p2p.bw;
@@ -896,8 +898,9 @@ static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t rea
     if (result == SOFTBUS_OK) {
         reason = UpdateReason(reqInfo.auth.authHandle.type, guideType, reason);
     }
+    uint32_t currGuideType = (uint32_t)guideType;
     UpdateLaneEventInfo(reqInfo.laneRequestInfo.laneReqId,
-        (uint32_t)EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){guideType});
+        EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&currGuideType));
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     if (reqInfo.laneRequestInfo.cb.onLaneLinkFail != NULL) {
@@ -967,8 +970,9 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
         &guideType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "not found current guide type, requestId=%{public}u", reqInfo.laneRequestInfo.laneReqId);
     }
+    uint32_t currGuideType = (uint32_t)guideType;
     UpdateLaneEventInfo(reqInfo.laneRequestInfo.laneReqId,
-        (uint32_t)EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){guideType});
+        EVENT_GUIDE_TYPE, LANE_PROCESS_TYPE_UINT32, (void *)(&currGuideType));
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     LaneLinkType throryLinkType = reqInfo.laneRequestInfo.linkType;
@@ -1291,6 +1295,28 @@ static int32_t NotifyRawLinkSucc(uint32_t p2pRequestId, const struct WifiDirectL
     return SOFTBUS_OK;
 }
 
+static void TryDelPreLinkByConnReqId(uint32_t connReqId)
+{
+    if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId)) {
+        uint32_t *laneReqIdPtr = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+        if (laneReqIdPtr == NULL) {
+            LNN_LOGE(LNN_LANE, "create lane req id fail");
+            return;
+        }
+        if (GetConcurrencyLaneReqIdByConnReqId(connReqId, laneReqIdPtr) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get lane req id fail");
+            SoftBusFree(laneReqIdPtr);
+            return;
+        }
+        if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnFreePreLink, (void *)laneReqIdPtr) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "async call LnnFreePreLink fail");
+            SoftBusFree(laneReqIdPtr);
+            laneReqIdPtr = NULL;
+        }
+    }
+}
+
+
 static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiDirectLink *link)
 {
     int ret = SOFTBUS_OK;
@@ -1308,7 +1334,8 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
     LNN_LOGI(LNN_LANE,
         "wifidirect conn succ, requestId=%{public}u, linkType=%{public}d, linkId=%{public}d, isReuse=%{public}d",
         p2pRequestId, linkInfo.type, link->linkId, link->isReuse);
-    SetRemoteDynamicNetCap(linkInfo.peerUdid, BIT_WIFI_P2P);
+    TryDelPreLinkByConnReqId(p2pRequestId);
+    SetRemoteDynamicNetCap(linkInfo.peerUdid, linkInfo.type);
     LnnDeleteLinkLedgerInfo(linkInfo.peerUdid);
     if (linkInfo.type == LANE_HML_RAW && link->isReuse) {
         ret = NotifyRawLinkSucc(p2pRequestId, link, &linkInfo);
@@ -1421,9 +1448,9 @@ static void HandleGuideChannelRetry(uint32_t laneReqId, LaneLinkType linkType, i
         goto FAIL;
     }
     LinkUnlock();
-    bool isGuideRetry = true;
-    UpdateLaneEventInfo(laneReqId, (uint32_t)EVENT_GUIDE_RETRY,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){isGuideRetry});
+    uint32_t isGuideRetry = (uint32_t)(true);
+    UpdateLaneEventInfo(laneReqId, EVENT_GUIDE_RETRY,
+        LANE_PROCESS_TYPE_UINT32, (void *)(&isGuideRetry));
     LNN_LOGI(LNN_LANE, "continue to build next guide channel.");
     if (PostGuideChannelTriggerMessage(laneReqId, linkType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post guide channel trigger msg fail.");
@@ -2292,6 +2319,22 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     return SOFTBUS_OK;
 }
 
+static void TryConcurrencyToConn(const LinkRequest *request, uint32_t laneLinkReqId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    uint32_t recordLaneReqId = 0;
+    if (GetConcurrencyLaneReqIdByActionId(request->actionAddr, &recordLaneReqId) == SOFTBUS_OK) {
+        wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+        wifiDirectInfo->ipAddrType = IPV4;
+        if (recordLaneReqId != laneLinkReqId) {
+            if (UpdateConcurrencyReuseLaneReqIdByActionId(request->actionAddr, laneLinkReqId,
+                wifiDirectInfo->requestId) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LANE, "pre link update reuse link lane req id fail");
+            }
+        }
+    }
+}
+
 static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     if (request == NULL || callback == NULL) {
@@ -2311,12 +2354,10 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     LNN_CHECK_AND_RETURN_RET_LOGE(errCode == SOFTBUS_OK, errCode, LNN_LANE, "add new connect node failed");
     wifiDirectInfo.pid = request->pid;
     wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
-    if (HaveConcurrencyBleGuideChannel(request->actionAddr)) {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
-    }
     wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
     wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    TryConcurrencyToConn(request, laneLinkReqId, &wifiDirectInfo);
     wifiDirectInfo.bandWidth = (int32_t)reqInfo.allocInfo.qosRequire.minBW;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "copy networkId failed");

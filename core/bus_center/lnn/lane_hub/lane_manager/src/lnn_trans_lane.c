@@ -478,13 +478,13 @@ static void UpdateLaneEventWithCap(uint32_t laneHandle, const char *networkId)
     uint32_t remote = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local) == SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "local cap=%{public}u", local);
-        UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LOCAL_CAP,
-            LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){local});
+        UpdateLaneEventInfo(laneHandle, EVENT_LOCAL_CAP,
+            LANE_PROCESS_TYPE_UINT32, (void *)(&local));
     }
     if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &remote) == SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "remote cap=%{public}u", remote);
-        UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_REMOTE_CAP,
-            LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){remote});
+        UpdateLaneEventInfo(laneHandle, EVENT_REMOTE_CAP,
+            LANE_PROCESS_TYPE_UINT32, (void *)(&remote));
     }
 }
 
@@ -495,9 +495,9 @@ static void UpdateLaneEventWithOnlineType(uint32_t laneHandle, const char *netwo
         LNN_LOGE(LNN_LANE, "not found nodeInfo");
         return;
     }
-    int32_t onlineType = nodeInfo->discoveryType;
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_ONLINE_STATE,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){onlineType});
+    uint32_t onlineType = nodeInfo->discoveryType;
+    UpdateLaneEventInfo(laneHandle, EVENT_ONLINE_STATE,
+        LANE_PROCESS_TYPE_UINT32, (void *)(&onlineType));
 }
 
 static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const LaneAllocInfo *allocInfo,
@@ -705,11 +705,9 @@ static void InitLaneProcess(uint32_t laneReqId, const LaneAllocInfo *allocInfo)
 
 static void ReportLaneEvent(uint32_t laneHandle, LnnEventLaneStage stage, int32_t retCode)
 {
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_RESULT_CODE,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){retCode});
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_STAGE,
-        LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){stage});
-    ReportLaneEventInfo(laneHandle);
+    UpdateLaneEventInfo(laneHandle, EVENT_LANE_STAGE,
+        LANE_PROCESS_TYPE_UINT32, (void *)(&stage));
+    ReportLaneEventInfo(laneHandle, retCode);
 }
 
 static int32_t AllocLaneByQos(uint32_t laneReqId, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
@@ -988,15 +986,15 @@ static void ReportLaneEventWithBuildLinkInfo(uint32_t laneHandle, uint64_t laneI
     }
     buildLinkTime = GetCostTime(nodeInfo->triggerLinkTime);
     Unlock();
-    UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_BUILD_LINK_TIME,
-        LANE_PROCESS_TYPE_UINT64, (void *)&(uint64_t){buildLinkTime});
+    UpdateLaneEventInfo(laneHandle, EVENT_BUILD_LINK_TIME,
+        LANE_PROCESS_TYPE_UINT64, (void *)(&buildLinkTime));
     if (laneId != INVALID_LANE_ID) {
-        UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_ID,
-            LANE_PROCESS_TYPE_UINT64, (void *)&(uint64_t){laneId});
+        UpdateLaneEventInfo(laneHandle, EVENT_LANE_ID,
+            LANE_PROCESS_TYPE_UINT64, (void *)(&laneId));
     }
     if (linkType != LANE_LINK_TYPE_BUTT) {
-        UpdateLaneEventInfo(laneHandle, (uint32_t)EVENT_LANE_LINK_TYPE,
-            LANE_PROCESS_TYPE_UINT32, (void *)&(uint32_t){linkType});
+        UpdateLaneEventInfo(laneHandle, EVENT_LANE_LINK_TYPE,
+            LANE_PROCESS_TYPE_UINT32, (void *)(&linkType));
     }
     if (reason == SOFTBUS_OK) {
         ReportLaneEvent(laneHandle, EVENT_STAGE_LANE_BUILD_SUCC, SOFTBUS_OK);

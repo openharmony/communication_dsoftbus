@@ -565,7 +565,11 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
         .isServer = false,
         .isFastAuth = false,
     };
-    if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type]) != SOFTBUS_OK) {
+    DeviceKeyId deviceKeyId = {
+        .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
+    if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type], &deviceKeyId) != SOFTBUS_OK) {
         AUTH_LOGI(
             AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64, authHandle.authId);
     }

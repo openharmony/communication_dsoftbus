@@ -34,6 +34,7 @@ extern "C" {
 #define AUTH_IDENTICAL_ACCOUNT_GROUP 1
 #define AUTH_PEER_TO_PEER_GROUP 256
 #define CUST_UDID_LEN 16
+#define AUTH_INVALID_DEVICEKEY_ID 0x0
 
 typedef enum {
     /* nearby type v1 */
@@ -100,6 +101,13 @@ typedef struct {
     char peerUid[MAX_ACCOUNT_HASH_LEN];
 } AuthConnInfo;
 
+typedef struct {
+    uint32_t requestId;
+    AuthVerifyModule module;
+    bool isFastAuth;
+    DeviceKeyId deviceKeyId;
+} AuthVerifyParam;
+
 typedef enum {
     ONLINE_HICHAIN = 0,
     ONLINE_METANODE,
@@ -131,8 +139,8 @@ typedef struct {
 } AuthKeyInfo;
 
 uint32_t AuthGenRequestId(void);
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
-    AuthVerifyModule module, bool isFastAuth);
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback);
 int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCallback,
     AuthVerifyModule module, bool isFastAuth);
 void AuthHandleLeaveLNN(AuthHandle authHandle);

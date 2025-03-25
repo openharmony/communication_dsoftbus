@@ -784,13 +784,13 @@ int32_t TransServerProxy::SetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_OK;
 }
 
-int32_t TransServerProxy::RegBleRangeCb(const char *pkgName)
+int32_t TransServerProxy::RegisterRangeCallbackForMsdp(const char *pkgName)
 {
     (void)pkgName;
     return SOFTBUS_OK;
 }
 
-int32_t TransServerProxy::UnregBleRangeCb(const char *pkgName)
+int32_t TransServerProxy::UnregisterRangeCallbackForMsdp(const char *pkgName)
 {
     (void)pkgName;
     return SOFTBUS_OK;

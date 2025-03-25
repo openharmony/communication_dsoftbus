@@ -643,7 +643,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001, Tes
 
 /*
  * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_001
- * @tc.desc: LnnTriggerHbForMeasureDistance Abnormal test
+ * @tc.desc: LnnTriggerHbRangeForMsdp Abnormal test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -654,9 +654,10 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_001, TestSize.Le
     EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategyEx).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     HbMode mode = { .connFlag = false, .duration = 5, .replyFlag = false};
-    int32_t ret = LnnTriggerHbForMeasureDistance("test", "123", &mode);
+    RangeConfig config = {.medium = BLE_ADV_HB, .configInfo.heartbeat.mode = mode };
+    int32_t ret = LnnTriggerHbRangeForMsdp("test", &config);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_START_ADV_FAILED);
-    ret = LnnTriggerHbForMeasureDistance("test", "123", &mode);
+    ret = LnnTriggerHbRangeForMsdp("test", &config);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

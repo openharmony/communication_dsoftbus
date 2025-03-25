@@ -1180,7 +1180,7 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         .isServer = false,
         .isFastAuth = request.isFastAuth,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &request.deviceKeyId);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, requestId);
         DisconnectAuthDevice(&connId);
@@ -1230,6 +1230,19 @@ static void DfxRecordServerRecvPassiveConnTime(const AuthConnInfo *connInfo, con
     SoftBusFree(udidHash);
 }
 
+static void TryAuthSessionProcessDevIdData(const AuthDataHead *head, const uint8_t *data,
+    const AuthConnInfo *connInfo)
+{
+    int32_t ret = SOFTBUS_MEM_ERR;
+    ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM,
+            "perform auth session recv devId fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
+        return;
+    }
+    DfxRecordServerRecvPassiveConnTime(connInfo, head);
+}
+
 static void HandleDeviceIdData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1265,20 +1278,18 @@ static void HandleDeviceIdData(
             .authSeq = head->seq, .requestId = AuthGenRequestId(), .connId = connId,
             .isServer = true, .isFastAuth = true,
         };
-        ret = AuthSessionStartAuth(&authInfo, connInfo);
+        DeviceKeyId deviceKeyId = {
+            .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+            .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        };
+        ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
                 "perform auth session start auth fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
             return;
         }
     }
-    ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM,
-            "perform auth session recv devId fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
-        return;
-    }
-    DfxRecordServerRecvPassiveConnTime(connInfo, head);
+    TryAuthSessionProcessDevIdData(head, data, connInfo);
 }
 
 static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
@@ -1334,13 +1345,6 @@ static int32_t AuthSetTcpKeepaliveByConnInfo(const AuthConnInfo *connInfo, ModeC
     DelDupAuthManager(auth[0]);
     DelDupAuthManager(auth[1]);
     return ret;
-}
-static void HandleAuthTestInfoData(const AuthDataHead *head, const uint8_t *data)
-{
-    if (AuthSessionProcessAuthTestData(head->seq, data, head->len) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "perform recv auth test data fail. seq=%{public}" PRId64, head->seq);
-        return;
-    }
 }
 
 static void HandleDeviceInfoData(
@@ -1414,7 +1418,7 @@ static int32_t PostDecryptFailAuthData(
     return SOFTBUS_OK;
 }
 
-static void HandleConnectionData(
+static void HandleConnectionDataInner(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     if (!RequireAuthLock()) {
@@ -1463,6 +1467,17 @@ static void HandleConnectionData(
         g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
     }
     SoftBusFree(decData);
+}
+
+static void HandleConnectionData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
+        AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
+        connInfoMut->type = AUTH_LINK_TYPE_SESSION_KEY;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+    }
+    HandleConnectionDataInner(connId, connInfo, fromServer, head, data);
 }
 
 static void HandleDecryptFailData(
@@ -1534,6 +1549,18 @@ static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, boo
     if (authIds[1] != AUTH_INVALID_ID) {
         *fromServer = false;
     }
+    if (authIds[0] == AUTH_INVALID_ID && authIds[1] == AUTH_INVALID_ID) {
+        num = 0;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+        authIds[num++] = GetAuthIdByConnId(connId, false);
+        authIds[num++] = GetAuthIdByConnId(connId, true);
+        if (authIds[0] != AUTH_INVALID_ID) {
+            *fromServer = true;
+        }
+        if (authIds[1] != AUTH_INVALID_ID) {
+            *fromServer = false;
+        }
+    }
     if (tmp != *fromServer) {
         AUTH_LOGE(AUTH_CONN, "CorrectFromServer succ.");
     }
@@ -1558,9 +1585,6 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_AUTH:
             HandleAuthData(connInfo, head, data);
-            break;
-        case DATA_TYPE_TEST_AUTH:
-            HandleAuthTestInfoData(head, data);
             break;
         case DATA_TYPE_DEVICE_INFO:
             HandleDeviceInfoData(connId, connInfo, fromServer, head, data);

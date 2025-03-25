@@ -33,14 +33,12 @@ uint32_t AuthGenRequestId(void)
     return 0;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
     (void)connInfo;
-    (void)requestId;
+    (void)authVerifyParam;
     (void)callback;
-    (void)module;
-    (void)isFastAuth;
     AUTH_LOGW(AUTH_CONN, "not implement");
     return SOFTBUS_NOT_IMPLEMENT;
 }

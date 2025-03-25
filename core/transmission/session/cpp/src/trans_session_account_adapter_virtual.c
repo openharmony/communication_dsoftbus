@@ -15,14 +15,14 @@
 
 #include "trans_session_account_adapter.h"
 
-#include "softbus_error_code.h"
-
-int32_t TransGetForegroundUserId(void)
+int32_t TransGetUserIdFromUid(int32_t uid)
 {
+    (void)uid;
     return INVALID_USER_ID;
 }
 
-int32_t TransGetForegroundLocalId(const char *sessionName)
+int32_t TransGetUserIdFromSessionName(const char *sessionName)
 {
+    (void)sessionName;
     return INVALID_USER_ID;
 }

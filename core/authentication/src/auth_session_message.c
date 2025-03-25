@@ -105,7 +105,7 @@ static int32_t PostWifiV1DevId(int64_t authSeq, const AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "client don't send wifi-v1 devId");
         return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
-    char *msg = PackDeviceIdJson(info);
+    char *msg = PackDeviceIdJson(info, authSeq);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack devId fail");
         return SOFTBUS_AUTH_PACK_DEV_ID_FAIL;
@@ -130,7 +130,7 @@ static int32_t PostDeviceIdV1(int64_t authSeq, const AuthSessionInfo *info)
 
 static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
 {
-    char *msg = PackDeviceIdJson(info);
+    char *msg = PackDeviceIdJson(info, authSeq);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack devId fail");
         return SOFTBUS_AUTH_PACK_DEV_ID_FAIL;
@@ -165,7 +165,7 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
     }
 }
 
-int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
+int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len, int64_t authSeq)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
@@ -173,7 +173,7 @@ int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint3
         info->version = SOFTBUS_OLD_V1;
         return UnPackBtDeviceIdV1(info, data, len);
     }
-    return UnpackDeviceIdJson((const char *)data, len, info);
+    return UnpackDeviceIdJson((const char *)data, len, info, authSeq);
 }
 
 static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
@@ -234,43 +234,6 @@ static void SetIndataInfo(InDataInfo *inDataInfo, uint8_t *compressData, uint32_
         inDataInfo->inData = (uint8_t *)msg;
         inDataInfo->inLen = strlen(msg) + 1;
     }
-}
-
-int32_t PostAuthTestInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
-{
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
-    char *msg = PackAuthTestInfoMessage(&(info->connInfo));
-    if (msg == NULL) {
-        AUTH_LOGE(AUTH_FSM, "pack test auth info fail");
-        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
-    }
-    InDataInfo inDataInfo = { 0 };
-    uint8_t *data = NULL;
-    uint32_t dataLen = 0;
-    SetIndataInfo(&inDataInfo, NULL, 0, msg);
-    SessionKeyList sessionKeyList;
-    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
-    if (EncryptInner(&sessionKeyList, info->connInfo.type, &inDataInfo, &data, &dataLen) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "encrypt device info fail");
-        JSON_Free(msg);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    JSON_Free(msg);
-    DestroySessionKeyList(&sessionKeyList);
-    AuthDataHead head = {
-        .dataType = DATA_TYPE_TEST_AUTH,
-        .module = MODULE_AUTH_TEST,
-        .seq = authSeq,
-        .flag = 0,
-        .len = dataLen,
-    };
-    if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "post device info fail");
-        SoftBusFree(data);
-        return SOFTBUS_AUTH_SEND_FAIL;
-    }
-    SoftBusFree(data);
-    return SOFTBUS_OK;
 }
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
@@ -636,21 +599,4 @@ int32_t PostDeviceMessage(
     }
     SoftBusFree(data);
     return SOFTBUS_OK;
-}
-
-int32_t ProcessAuthTestDataMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
-{
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
-    uint8_t *msg = NULL;
-    uint32_t msgSize = 0;
-    SessionKeyList sessionKeyList;
-    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
-    InDataInfo inDataInfo = { .inData = data, .inLen = len };
-    if (DecryptInner(&sessionKeyList, info->connInfo.type, &inDataInfo, &msg, &msgSize) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "decrypt device info fail");
-        return SOFTBUS_DECRYPT_ERR;
-    }
-    DestroySessionKeyList(&sessionKeyList);
-    return UnpackAuthTestDataJson((const char *)msg, msgSize);
 }

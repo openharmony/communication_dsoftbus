@@ -67,9 +67,9 @@ public:
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
-    virtual int32_t TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
-    virtual int32_t RegBleRangeCb(const char *pkgName) = 0;
-    virtual int32_t UnregBleRangeCb(const char *pkgName) = 0;
+    virtual int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+    virtual int32_t RegisterRangeCallbackForMsdp(const char *pkgName) = 0;
+    virtual int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) = 0;
     virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);

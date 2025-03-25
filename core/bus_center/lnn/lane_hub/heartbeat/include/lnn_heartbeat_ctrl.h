@@ -34,7 +34,8 @@ void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType a
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 int32_t LnnShiftLNNGearWithoutPkgName(
     const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType);
-int32_t LnnTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode);
+int32_t LnnTriggerSleRangeForMsdp(const char *pkgName, const RangeConfig *config);
+int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config);
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 

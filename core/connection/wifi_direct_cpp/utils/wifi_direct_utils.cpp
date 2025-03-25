@@ -30,6 +30,8 @@
 #include "bus_center_manager.h"
 #include "conn_log.h"
 #include "data/link_manager.h"
+#include "inner_api/wifi_device.h"
+#include "inner_api/wifi_msg.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_vap_info.h"
@@ -43,6 +45,8 @@
 #include "wifi_direct_defines.h"
 
 namespace OHOS::SoftBus {
+static constexpr int INVALID_CHLOAD = -1;
+
 std::vector<std::string> WifiDirectUtils::SplitString(const std::string &input, const std::string &delimiter)
 {
     std::vector<std::string> tokens;
@@ -728,11 +732,27 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
             continue;
         }
         if (remoteMac == wifiDirectAddr) {
+            auto networkId = basicInfo[i].networkId;
             SoftBusFree(basicInfo);
-            return NetworkIdToUuid(basicInfo[i].networkId);
+            return NetworkIdToUuid(networkId);
         }
     }
     SoftBusFree(basicInfo);
     return "";
+}
+
+int WifiDirectUtils::GetChload()
+{
+    auto wifiLinkedInfo = std::make_shared<Wifi::WifiLinkedInfo>();
+    auto wifiDevicePtr = Wifi::WifiDevice::GetInstance(WIFI_DEVICE_ABILITY_ID);
+    CONN_CHECK_AND_RETURN_RET_LOGE(wifiDevicePtr != nullptr, INVALID_CHLOAD, CONN_WIFI_DIRECT, "wifiDevicePtr is null");
+
+    auto ret = wifiDevicePtr->GetLinkedInfo(*wifiLinkedInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == Wifi::WIFI_OPT_SUCCESS, ret, CONN_WIFI_DIRECT, "get link info fail,err=%{public}d", ret);
+
+    auto chload = wifiLinkedInfo->chload;
+    CONN_LOGI(CONN_WIFI_DIRECT, "current sta chload=%{public}d", chload);
+    return chload;
 }
 } // namespace OHOS::SoftBus

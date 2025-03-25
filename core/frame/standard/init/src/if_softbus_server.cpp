@@ -101,11 +101,10 @@ int32_t ISoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, 
     return SOFTBUS_IPC_ERR;
 }
 
-int32_t ISoftBusServer::TriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t ISoftBusServer::TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     (void)pkgName;
-    (void)callerId;
-    (void)mode;
+    (void)config;
     COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }

@@ -22,10 +22,9 @@
 
 using namespace OHOS;
 
-int32_t TransGetForegroundUserId(void)
+int32_t TransGetUserIdFromUid(int32_t uid)
 {
     int32_t userId = INVALID_USER_ID;
-    int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
     if (ret != 0) {
         TRANS_LOGE(TRANS_CTRL, "GetOsAccountLocalIdFromUid failed ret=%{public}d.", ret);
@@ -33,17 +32,17 @@ int32_t TransGetForegroundUserId(void)
     return userId;
 }
 
-int32_t TransGetForegroundLocalId(const char *sessionName)
+int32_t TransGetUserIdFromSessionName(const char *sessionName)
 {
     int32_t uid;
     int32_t pid;
+    int32_t localId = INVALID_USER_ID;
     int32_t ret = TransGetUidAndPid(sessionName, &uid, &pid);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransGetUid failed ret=%{public}d.", ret);
-        return ret;
+        return localId;
     }
 
-    int32_t localId = INVALID_USER_ID;
     ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, localId);
     if (ret != 0) {
         TRANS_LOGE(TRANS_CTRL, "GetOsAccountLocalIdFromUid failed ret=%{public}d.", ret);

@@ -18,10 +18,12 @@
 #include <ifaddrs.h>
 #include <thread>
 
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
+#include "trans_event.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -1114,6 +1116,12 @@ bool VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffe
     return true;
 }
 
+int64_t g_diffTime = 0;
+int64_t g_startTime = 0;
+int64_t g_lastTime = 0;
+const int TIME_OUT = 50;
+const int WAIT_UPLOAD_TIME = 300000;
+
 void VtpStreamSocket::DoStreamRecv()
 {
     while (isStreamRecv_) {
@@ -1121,6 +1129,18 @@ void VtpStreamSocket::DoStreamRecv()
         std::unique_ptr<char[]> extBuffer = nullptr;
         int32_t extLen = 0;
         StreamFrameInfo info = {};
+        if (g_startTime != 0) {
+            g_diffTime = GetSoftbusRecordTimeMillis() - g_startTime;
+            if (g_diffTime > TIME_OUT && GetSoftbusRecordTimeMillis() - g_lastTime >= WAIT_UPLOAD_TIME) {
+                g_lastTime = GetSoftbusRecordTimeMillis();
+                TRANS_LOGW(TRANS_STREAM, "recv stream difftime = %{public}" PRIu64, g_diffTime);
+                TransEventExtra extra = {
+                    .costTime = (int32_t)g_diffTime,
+                };
+                TRANS_EVENT(EVENT_SCENE_TRANS_RECV_STREAM, EVENT_STAGE_TRANS_RECV_STREAM, extra);
+            }
+        }
+        g_diffTime = GetSoftbusRecordTimeMillis();
         TRANS_LOGD(TRANS_STREAM, "recv stream");
         int32_t dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {

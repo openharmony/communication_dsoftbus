@@ -53,7 +53,6 @@ public:
     SoftbusPermissionACLInterface() {};
     virtual ~SoftbusPermissionACLInterface() {};
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
-    virtual int32_t TransGetForegroundUserId(void) = 0;
     virtual int32_t SoftBusGetAccessTokenType(uint64_t tokenId) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId) = 0;
@@ -67,7 +66,6 @@ public:
     SoftbusPermissionACLInterfaceMock();
     ~SoftbusPermissionACLInterfaceMock() override;
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey key, char *info, uint32_t len));
-    MOCK_METHOD0(TransGetForegroundUserId, int32_t());
     MOCK_METHOD1(SoftBusGetAccessTokenType, int32_t(uint64_t tokenId));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t(const char *networkId, InfoKey key, char *info, uint32_t len));
     MOCK_METHOD2(TransGetTokenIdBySessionName, int32_t(const char *sessionName, uint64_t *tokenId));

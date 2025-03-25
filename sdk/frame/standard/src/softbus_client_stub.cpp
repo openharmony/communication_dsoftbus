@@ -50,7 +50,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissonChangeInner;
     memberFuncMap_[CLIENT_SET_CHANNEL_INFO] = &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
-    memberFuncMap_[CLIENT_ON_BLE_RANGE_DONE] = &SoftBusClientStub::OnBleRangeDoneInner;
+    memberFuncMap_[CLIENT_ON_RANGE_RESULT] = &SoftBusClientStub::OnMsdpRangeResultInner;
     memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] = &SoftBusClientStub::OnClientTransLimitChangeInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
     memberFuncMap_[CLIENT_CHANNEL_ON_QOS] = &SoftBusClientStub::OnChannelOnQosInner;
@@ -244,7 +244,7 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
     int32_t errCode;
     COMM_CHECK_AND_RETURN_RET_LOGE(
         data.ReadInt32(errCode), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read errCode failed");
-    
+
     int32_t ret = OnChannelOpenFailed(channelId, channelType, errCode);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SDK, "OnChannelOpenFailed fail! ret=%{public}d", ret);
 
@@ -717,20 +717,32 @@ int32_t SoftBusClientStub::OnDataLevelChangedInner(MessageParcel &data, MessageP
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnBleRangeDoneInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusClientStub::OnMsdpRangeResultInner(MessageParcel &data, MessageParcel &reply)
 {
-    BleRangeInnerInfo *info = (BleRangeInnerInfo *)data.ReadRawData(sizeof(BleRangeInnerInfo));
-    if (info == nullptr) {
+    RangeResultInnerInfo *tempInfo = (RangeResultInnerInfo *)data.ReadRawData(sizeof(RangeResultInnerInfo));
+    if (tempInfo == nullptr) {
         COMM_LOGE(COMM_SDK, "read ble range info failed");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
+    RangeResultInnerInfo info;
+    (void)memset_s(&info, sizeof(RangeResultInnerInfo), 0, sizeof(RangeResultInnerInfo));
+    if (memcpy_s(&info, sizeof(RangeResultInnerInfo), tempInfo, sizeof(RangeResultInnerInfo)) != EOK) {
+        COMM_LOGE(COMM_SDK, "memcpy_s failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (tempInfo->length > 0 && tempInfo->length < MAX_ADDITION_DATA_LEN) {
+        info.addition = (uint8_t *)data.ReadRawData(tempInfo->length);
+        if (info.addition == nullptr) {
+            COMM_LOGE(COMM_SDK, "read addition data failed");
+            return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+        }
+    }
     char *anonyNetworkId = nullptr;
-    Anonymize(info->networkId, &anonyNetworkId);
-    COMM_LOGI(COMM_SDK,
-        "range=%{public}d, subrange=%{public}d, distance=%{public}f, confidence=%{public}lf, networkId=%{public}s",
-        info->range, info->subRange, info->distance, info->confidence, AnonymizeWrapper(anonyNetworkId));
+    Anonymize(info.networkId, &anonyNetworkId);
+    COMM_LOGI(COMM_SDK, "medium=%{public}d, distance=%{public}f, networkId=%{public}s", info.medium, info.distance,
+        AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
-    OnBleRangeDone(info);
+    OnMsdpRangeResult(&info);
     return SOFTBUS_OK;
 }
 
@@ -757,7 +769,10 @@ int32_t SoftBusClientStub::OnChannelBindInner(MessageParcel &data, MessageParcel
 
 static int32_t MessageParcelReadCollabInfo(MessageParcel &data, CollabInfo &info)
 {
-    READ_PARCEL_WITH_RET(data, Int64, info.accountId, SOFTBUS_IPC_ERR);
+    char *accountId = (char *)data.ReadCString();
+    if (accountId != nullptr) {
+        strcpy_s(info.accountId, sizeof(info.accountId), accountId);
+    }
     READ_PARCEL_WITH_RET(data, Uint64, info.tokenId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, info.userId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, info.pid, SOFTBUS_IPC_ERR);
@@ -876,9 +891,9 @@ void SoftBusClientStub::OnDataLevelChanged(const char *networkId, const DataLeve
     LnnOnDataLevelChanged(networkId, dataLevelInfo);
 }
 
-void SoftBusClientStub::OnBleRangeDone(const BleRangeInnerInfo *rangeInfo)
+void SoftBusClientStub::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
 {
-    LnnOnBleRangeDone(rangeInfo);
+    LnnOnRangeResult(rangeInfo);
 }
 
 int32_t SoftBusClientStub::OnClientChannelOnQos(

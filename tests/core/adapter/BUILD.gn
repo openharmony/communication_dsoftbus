@@ -244,6 +244,46 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
   }
 }
 
+ohos_unittest("LnnSaStatusMonitorTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_sa_status_monitor.cpp",
+    "$dsoftbus_root_path/tests/core/adapter/unittest/lnn_sa_status_monitor_mock.cpp",
+    "$dsoftbus_root_path/tests/core/adapter/unittest/lnn_sa_status_monitor_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "unittest",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+
+  if (dsoftbus_ipc_feature) {
+    external_deps += [ "ipc:ipc_single" ]
+  }
+
+  if (dsoftbus_feature_deps_samgr) {
+    external_deps += [ "samgr:samgr_proxy" ]
+  }
+}
+
 group("unittest") {
   testonly = true
 
@@ -253,6 +293,7 @@ group("unittest") {
     ":LNNOhosAccountTest",
     ":LnnKSettingDataEventMonitorTest",
     ":LnnOhosAccountAdapterTest",
+    ":LnnSaStatusMonitorTest",
   ]
   if (dsoftbus_feature_lnn_cloud_sync) {
     deps += [

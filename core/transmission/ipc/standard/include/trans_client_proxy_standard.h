@@ -54,7 +54,7 @@ public:
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
     int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo,
         int32_t channelId, int32_t channeltype) override;
-    void OnBleRangeDone(const BleRangeInnerInfo *rangeInfo) override;
+    void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;

@@ -708,21 +708,21 @@ ERR_RETURN:
     return SOFTBUS_IPC_ERR;
 }
 
-int32_t ServerTriggerHbForMeasureDistance(IpcIo *req, IpcIo *reply)
+int32_t ServerTriggerRangeForMsdp(IpcIo *req, IpcIo *reply)
 {
     (void)req;
     (void)reply;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerRegBleRangeCb(IpcIo *req, IpcIo *reply)
+int32_t ServerRegRangeCbForMsdp(IpcIo *req, IpcIo *reply)
 {
     (void)req;
     (void)reply;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerUnregBleRangeCb(IpcIo *req, IpcIo *reply)
+int32_t ServerUnregRangeCbForMsdp(IpcIo *req, IpcIo *reply)
 {
     (void)req;
     (void)reply;

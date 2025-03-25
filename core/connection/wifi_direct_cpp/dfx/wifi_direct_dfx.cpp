@@ -105,6 +105,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnec
     extra.peerDevVer = remoteOsVersion.c_str();
     extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
     extra.isReuse = IsReuse(requestId);
+    extra.staChload = WifiDirectUtils::GetChload();
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 

@@ -403,7 +403,6 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_decision_center_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl.c",
     "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter/lnn_ip_network_impl_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_test.cpp",

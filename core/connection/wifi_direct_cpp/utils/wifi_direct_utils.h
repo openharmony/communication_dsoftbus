@@ -111,6 +111,7 @@ public:
     static bool IsDeviceId(const std::string &remoteId);
     static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
     static std::string RemoteMacToDeviceId(const std::string &remoteMac);
+    static int GetChload();
 
 private:
     static inline std::mutex serialParallelLock_;

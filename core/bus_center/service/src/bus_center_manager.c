@@ -247,6 +247,13 @@ static int32_t BusCenterServerInitSecondStep(void)
     if (InitActionStateAdapter() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initActionStateAdapter fail");
     }
+    if (LnnLoadLocalDeviceAccountIdInfo() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "lnnLoadLocalDeviceAccountIdInfo fail");
+    }
+    RestoreLocalDeviceInfo();
+    if (InitUdidChangedEvent() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initUdidChangedEvent fail");
+    }
     return SOFTBUS_OK;
 }
 

@@ -18,7 +18,9 @@
 
 #include <gmock/gmock.h>
 
-#include "lnn_lane_link.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
+#include "softbus_wifi_api_adapter.h"
 
 namespace OHOS {
 class LaneCommCapaDepsInterface {
@@ -26,10 +28,12 @@ public:
     LaneCommCapaDepsInterface() {};
     virtual ~LaneCommCapaDepsInterface() {};
 
-    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
-    virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
+    virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
+    virtual SoftBusWifiDetailState SoftBusGetWifiState(void) = 0;
+    virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
 };
 
 class LaneCommCapaDepsInterfaceMock : public LaneCommCapaDepsInterface {
@@ -37,10 +41,12 @@ public:
     LaneCommCapaDepsInterfaceMock();
     ~LaneCommCapaDepsInterfaceMock() override;
 
-    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
-    MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
+    MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey, uint32_t *));
+    MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *, InfoKey, uint32_t *));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
     MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
+    MOCK_METHOD0(SoftBusGetWifiState, SoftBusWifiDetailState (void));
+    MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *, char *, uint32_t));
 };
 } // namespace OHOS
 #endif // LNN_LANE_COMM_CAPA_DEPS_MOCK_H

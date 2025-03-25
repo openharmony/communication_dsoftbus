@@ -408,7 +408,7 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return g_serverProxy->Invoke(g_serverProxy, SERVER_SET_DATA_LEVEL, &request, NULL, NULL);
 }
 
-int32_t ServerIpcRegBleRangeCb(const char *pkgName)
+int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName)
 {
     if (pkgName == NULL) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
@@ -419,10 +419,10 @@ int32_t ServerIpcRegBleRangeCb(const char *pkgName)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     IpcIo request = {0};
-    return g_serverProxy->Invoke(g_serverProxy, SERVER_REG_BLE_RANGE_CB, &request, NULL, NULL);
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_REG_RANGE_CB_FOR_MSDP, &request, NULL, NULL);
 }
 
-int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
+int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName)
 {
     if (pkgName == NULL) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
@@ -433,12 +433,12 @@ int32_t ServerIpcUnregBleRangeCb(const char *pkgName)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     IpcIo request = {0};
-    return g_serverProxy->Invoke(g_serverProxy, SERVER_UNREG_BLE_RANGE_CB, &request, NULL, NULL);
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_UNREG_RANGE_CB_FOR_MSDP, &request, NULL, NULL);
 }
 
-int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *callerId, const HbMode *mode)
+int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
-    if (pkgName == NULL) {
+    if (pkgName == NULL || config == NULL) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -447,7 +447,7 @@ int32_t ServerIpcTriggerHbForMeasureDistance(const char *pkgName, const char *ca
         return SOFTBUS_SERVER_NOT_INIT;
     }
     IpcIo request = {0};
-    return g_serverProxy->Invoke(g_serverProxy, SERVER_TRIGGER_HB_FOR_RANGE, &request, NULL, NULL);
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_TRIGGER_RANGE_FOR_MSDP, &request, NULL, NULL);
 }
 
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)

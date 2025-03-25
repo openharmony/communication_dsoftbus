@@ -46,10 +46,10 @@ uint32_t AuthGenRequestId(void)
     return GetAuthInterface()->AuthGenRequestId();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
-    return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
+    return GetAuthInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
 
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
@@ -219,5 +219,92 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
 {
     return GetAuthInterface()->AuthGetIdByUuid(uuid, type, isServer, isMeta);
 }
+
+uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen)
+{
+    return GetAuthInterface()->AuthGetEncryptSize(authId, inLen);
+}
+
+uint32_t AuthGetDecryptSize(uint32_t inLen)
+{
+    return GetAuthInterface()->AuthGetDecryptSize(inLen);
+}
+
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+{
+    return GetAuthInterface()->AuthEncrypt(authHandle, inData, inLen, inLen, outLen);
+}
+
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+{
+    return GetAuthInterface()->AuthDecrypt(authHandle, inData, inLen, outData, outLen);
+}
+
+int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
+{
+    return GetAuthInterface()->AuthSetP2pMac(authId, p2pMac);
+}
+
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
+{
+    return GetAuthInterface()->AuthGetConnInfo(authHandle, connInfo);
+}
+
+int32_t AuthGetServerSide(int64_t authId, bool *isServer)
+{
+    return GetAuthInterface()->AuthGetServerSide(authId, isServer);
+}
+
+int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+{
+    return GetAuthInterface()->AuthGetMetaType(authId, isMetaAuth);
+}
+
+uint32_t AuthGetGroupType(const char *udid, const char *uuid)
+{
+    return GetAuthInterface()->AuthGetGroupType(udid, uuid);
+}
+
+bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
+{
+    return GetAuthInterface()->IsSupportFeatureByCapaBit(feature, capaBit);
+}
+
+void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
+{
+    return GetAuthInterface()->AuthRemoveAuthManagerByAuthHandle(authHandle);
+}
+
+int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConnInfo *connInfo)
+{
+    return GetAuthInterface()->AuthCheckSessionKeyValidByConnInfo(networkId, connInfo);
+}
+
+int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
+{
+    return GetAuthInterface()->AuthCheckSessionKeyValidByAuthHandle(authHandle);
+}
+
+int32_t AuthInit(void)
+{
+    return GetAuthInterface()->AuthInit();
+}
+
+void AuthDeinit(void)
+{
+    GetAuthInterface()->AuthDeinit();
+}
+
+int32_t AuthRestoreAuthManager(const char *udidHash,
+    const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
+{
+    return GetAuthInterface()->AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
+}
+
+int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    return GetAuthInterface()->AuthCheckMetaExist(connInfo, isExist);
+}
+
 }
 }

@@ -78,7 +78,7 @@
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 #define NOT_TRUSTED_DEVICE_MSG_DELAY     5000
-#define DELAY_REG_DP_TIME                10000
+#define DELAY_REG_DP_TIME                1000
 #define RETRY_TIMES                      5
 
 void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)

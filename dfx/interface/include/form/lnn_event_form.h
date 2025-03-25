@@ -37,6 +37,7 @@ typedef enum {
     EVENT_SCENE_JOIN_LNN = 2,
     EVENT_SCENE_LEAVE_LNN = 3,
     EVENT_SCENE_LANE = 4,
+    EVENT_SCENE_DDOS = 5,
 } LnnEventScene;
 
 typedef enum {
@@ -85,6 +86,10 @@ typedef enum {
     EVENT_STAGE_LANE_FREE_SUCC,
     EVENT_STAGE_LANE_FREE_FAIL,
 } LnnEventLaneStage;
+
+typedef enum {
+    EVENT_STAGE_DDOS_THRESHOLD = 1,
+} LnnEventDdosStage;
 
 typedef enum {
     DB_TRIGGER = 0,
@@ -156,10 +161,10 @@ typedef struct {
     int32_t lnnType;            // LNN_TYPE
     int32_t onlineNum;          // ONLINE_NUM
     int32_t peerDeviceAbility;  // PEER_DEV_ABILITY
-    int32_t onlineType;         // ONLINE_TYPE
+    uint32_t onlineType;         // ONLINE_TYPE
     int32_t osType;             // OS_TYPE
     uint32_t connOnlineReason;  // CONN_ONLINE_REASON
-    int64_t laneId;             // LANE_ID
+    uint64_t laneId;             // LANE_ID
     int32_t chanReqId;          // CHAN_REQ_ID
     int32_t connReqId;          // CONN_REQ_ID
     int32_t strategy;           // STRATEGY_FOR_LNN_BLE
@@ -168,31 +173,36 @@ typedef struct {
     int64_t authSeq;            // AUTH_SEQ
     int32_t onlineDevCnt;       // ONLINE_DEV_CNT_FOR_LNN_TIME_LATENCY
     int32_t interval;           // BROADCAST_INTERVAL
-    int32_t laneLinkType;       // LANE_LINK_TYPE
+    uint32_t laneLinkType;       // LANE_LINK_TYPE
     int32_t hmlChannelId;       // HML_CHANNEL_ID
     int32_t p2pChannelId;       // P2P_CHANNEL_ID
     int32_t staChannelId;       // STA_CHANNEL_ID
     int32_t apChannelId;        // AP_CHANNEL_ID
     int32_t laneReqId;          // LANE_REQ_ID
-    int32_t minBW;              // MIN_BW
-    int32_t maxLaneLatency;     // MAX_LANE_LATENCY
-    int32_t minLaneLatency;     // MIN_LANE_LATENCY
+    uint32_t minBW;              // MIN_BW
+    uint32_t maxLaneLatency;     // MAX_LANE_LATENCY
+    uint32_t minLaneLatency;     // MIN_LANE_LATENCY
     int32_t isWifiDirectReuse;  // IS_WIFI_DIRECT_REUSE
     int32_t bandWidth;          // BAND_WIDTH
-    int32_t guideType;          // GUIDE_TYPE
-    int32_t laneStage;          // LANE_STAGE
-    int32_t laneHandle;         // LANE_HANDLE
-    int32_t rttLevel;           // RTT_LEVEL
-    int32_t transType;          // TRANS_TYPE
-    int32_t localDynamicCap;    // LOCAL_DYNAMIC_CAP
-    int32_t remoteDynamicCap;   // REMOTE_DYNAMIC_CAP
-    int32_t isGuideRetry;       // IS_GUIDE_RETRY
-    int32_t wifiDetectState;    // WIFI_DETECT_STATE
-    int64_t wifiDetectTime;     // WIFI_DETECT_TIME
-    int64_t buildLinkTime;      // BUILD_LINK_TIME
-    int32_t isHmlReuse;         // IS_HML_REUSE
-    int32_t isDelayFree;        // IS_DELAY_FREE
-    int64_t freeLinkTime;       // FREE_LINK_TIME
+    uint32_t guideType;          // GUIDE_TYPE
+    int32_t funcId;             // FUNC_ID
+    int32_t recordCnt;          // RECORD_CNT
+    int32_t idCount;            // ID_COUNT
+    int32_t userCount;          // UESR_COUNT
+    int32_t totalCount;         // TOTAL_COUNT
+    uint32_t laneStage;          // LANE_STAGE
+    uint32_t laneHandle;         // LANE_HANDLE
+    uint32_t rttLevel;           // RTT_LEVEL
+    uint32_t transType;          // TRANS_TYPE
+    uint32_t localDynamicCap;    // LOCAL_DYNAMIC_CAP
+    uint32_t remoteDynamicCap;   // REMOTE_DYNAMIC_CAP
+    uint32_t isGuideRetry;       // IS_GUIDE_RETRY
+    uint32_t wifiDetectState;    // WIFI_DETECT_STATE
+    uint64_t wifiDetectTime;     // WIFI_DETECT_TIME
+    uint64_t buildLinkTime;      // BUILD_LINK_TIME
+    uint32_t isHmlReuse;         // IS_HML_REUSE
+    uint32_t isDelayFree;        // IS_DELAY_FREE
+    uint64_t freeLinkTime;       // FREE_LINK_TIME
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

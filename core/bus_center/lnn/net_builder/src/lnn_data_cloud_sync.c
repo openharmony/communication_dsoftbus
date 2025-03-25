@@ -1026,10 +1026,14 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     NodeInfo oldCacheInfo = { 0 };
-    if (LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo) == SOFTBUS_OK &&
-        IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp, cacheInfo.stateVersion,
-            cacheInfo.updateTimestamp)) {
+    ret = LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo);
+    if (ret == SOFTBUS_OK && IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp,
+        cacheInfo.stateVersion, cacheInfo.updateTimestamp)) {
         return SOFTBUS_KV_IGNORE_OLD_DEVICE_INFO;
+    }
+    if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
+        LNN_LOGW(LNN_BUILDER, "not found device");
+        oldCacheInfo.isAuthExchangeUdid = true;
     }
     ret = LnnSaveAndUpdateDistributedNode(&cacheInfo, &oldCacheInfo);
     if (ret != SOFTBUS_OK) {

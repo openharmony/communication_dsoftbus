@@ -255,7 +255,10 @@ ohos_unittest("TransClientSessionTest") {
 ohos_unittest("TransClientSocketServiceTest") {
   module_out_path = module_output_path
   sources = [ "client_trans_socket_service_test.cpp" ]
-
+  include_dirs = [
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   if (is_standard_system) {
@@ -287,6 +290,7 @@ ohos_unittest("TransClientSocketTest") {
         "access_token:libaccesstoken_sdk",
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
+        "cJSON:cjson_static",
       ]
     }
   } else {
