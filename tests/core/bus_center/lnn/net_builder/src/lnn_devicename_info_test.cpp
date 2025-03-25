@@ -361,7 +361,10 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.L
     ASSERT_NE(nodeInfo, nullptr);
     const char *devName = "deviceNickname";
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
-    ASSERT_NE(data, nullptr);
+    if (data == nullptr) {
+        SoftBusFree(nodeInfo);
+        ASSERT_NE(data, nullptr);
+    }
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillRepeatedly(Return(devName));
@@ -373,7 +376,6 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.L
     int32_t ret = LnnAsyncDeviceNameDelay(NETWORKID);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED);
     SoftBusFree(nodeInfo);
-    // data 内存已经在LnnAsyncCallbackDelayHelper的异常分支中释放，这里不用释放
 }
 
 /*
@@ -388,7 +390,10 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.L
     ASSERT_NE(nodeInfo, nullptr);
     const char *devName = "deviceNickname";
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
-    ASSERT_NE(data, nullptr);
+    if (data == nullptr) {
+        SoftBusFree(nodeInfo);
+        ASSERT_NE(data, nullptr);
+    }
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillRepeatedly(Return(devName));
