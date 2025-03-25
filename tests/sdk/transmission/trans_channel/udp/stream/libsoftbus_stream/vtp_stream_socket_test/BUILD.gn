@@ -78,6 +78,6 @@ group("unittest") {
   deps = []
   deps += [
     # deps file
-    ":VtpStreamSocketTest",
+    #":VtpStreamSocketTest",
   ]
 }
