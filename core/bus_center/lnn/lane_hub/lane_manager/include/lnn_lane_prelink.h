@@ -53,7 +53,7 @@ typedef struct {
 int32_t GetConcurrencyPeerUdidByActionId(uint32_t actionId, char *peerUdid);
 int32_t GetConcurrencyLaneReqIdByActionId(uint32_t actionId, uint32_t *laneReqId);
 int32_t UpdateConcurrencyReuseLaneReqIdByActionId(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId);
-bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId, bool isPreLink);
+bool HaveConcurrencyPreLinkReqIdByReuseConnReqId(uint32_t connReqId, bool isCheckPreLink);
 int32_t GetConcurrencyLaneReqIdByConnReqId(uint32_t connReqId, uint32_t *laneReqId);
 int32_t InitActionBleConcurrency(void);
 void DeinitActionBleConcurrency(void);
