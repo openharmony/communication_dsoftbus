@@ -501,7 +501,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
                 continue;
             }
             SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
-            data->payloadLen = len - ID_LEN - 1;
+            data->payloadLen = (len < (ID_LEN + 1)) ? 0 : len - ID_LEN - 1;
             DISC_CHECK_AND_RETURN_RET_LOGE(data->payloadLen >= 0 && index + ID_LEN < advLen,
                 SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse payload failed");
             isRsp = !isRsp;
