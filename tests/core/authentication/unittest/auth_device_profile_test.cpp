@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,5 +108,23 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
     deviceIdHash = "dev/ice%Id()Hash()";
     ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_TRUE(!ret);
+}
+
+/*
+ * @tc.name: IS_POTENTIAL_TRUSTED_DEVCIE_TEST_004
+ * @tc.desc:add ut for DelNotTrustDevice and UpdateDpSameAccount
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
+{
+    const char *deviceIdHash = nullptr;
+    deviceIdHash = "dev/ice%Id()Hash()";
+    int32_t peerUserId = -1;
+    int64_t accountId = 100;
+    DelNotTrustDevice(nullptr);
+    UpdateDpSameAccount(accountId, nullptr, peerUserId);
+    bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS
