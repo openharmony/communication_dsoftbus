@@ -986,16 +986,6 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         TRANS_LOGE(TRANS_CTRL, "UnpackHandshakeMsg fail.");
         return ret;
     }
-    if ((chan->appInfo.appType == APP_TYPE_AUTH) &&
-        (!CheckSessionNameValidOnAuthChannel(chan->appInfo.myData.sessionName))) {
-        TRANS_LOGE(TRANS_CTRL, "proxy auth check sessionname valid.");
-        return SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED;
-    }
-
-    if (CheckAppTypeAndMsgHead(&msg->msgHead, &chan->appInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "only auth channel surpport plain text data");
-        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
-    }
 
     ConnectionInfo info;
     (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
@@ -1013,6 +1003,22 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
+    ret = TransProxyGetLocalInfo(chan);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+
+    if ((chan->appInfo.appType == APP_TYPE_AUTH) &&
+        (!CheckSessionNameValidOnAuthChannel(chan->appInfo.myData.sessionName))) {
+        TRANS_LOGE(TRANS_CTRL, "proxy auth check sessionname valid.");
+        return SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED;
+    }
+
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &chan->appInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "only auth channel surpport plain text data");
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    }
+
     if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET &&
         TransCheckServerAccessControl(&chan->appInfo) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
@@ -1020,10 +1026,6 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
 
     if (CheckSecLevelPublic(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) != SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_SERVER_DENIED;
-    }
-    ret = TransProxyGetLocalInfo(chan);
-    if (ret != SOFTBUS_OK) {
-        return ret;
     }
 
     ret = TransProxyFillDataConfig(&chan->appInfo);
