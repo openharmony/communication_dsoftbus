@@ -39,11 +39,11 @@
 #include "softbus_def.h"
 #include "wifi_direct_manager.h"
 
-#define MSG_LEN 10
-#define BITS 8
-#define BITLEN 4
+#define MSG_LEN                     10
+#define BITS                        8
+#define BITLEN                      4
 #define STRING_INTERFACE_BUFFER_LEN 16
-#define DP_INACTIVE_DEFAULT_USERID (-1)
+#define DP_INACTIVE_DEFAULT_USERID  (-1)
 
 static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
@@ -756,6 +756,7 @@ void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
     }
     uint8_t *msg = ConvertUserIdToMsg(userId);
     if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "convert userId to msg is null");
         return;
     }
     DoSendUserId(udid, msg);
