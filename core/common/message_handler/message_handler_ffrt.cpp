@@ -598,17 +598,20 @@ SoftBusLooper *CreateNewLooper(const char *name)
 
 SoftBusLooper *GetLooper(int type)
 {
+    COMM_LOGI(COMM_UTILS, "start to get looper");
     uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
     for (uint32_t i = 0; i < len; i++) {
         if (g_loopConfig[i].type == type) {
             return g_loopConfig[i].looper;
         }
     }
+    COMM_LOGE(COMM_UTILS, "get looper fail");
     return nullptr;
 }
 
 void SetLooper(int type, SoftBusLooper *looper)
 {
+    COMM_LOGI(COMM_UTILS, "start to set looper");
     uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
     for (uint32_t i = 0; i < len; i++) {
         if (g_loopConfig[i].type == type) {
