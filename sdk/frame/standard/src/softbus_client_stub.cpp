@@ -769,14 +769,18 @@ int32_t SoftBusClientStub::OnChannelBindInner(MessageParcel &data, MessageParcel
 
 static int32_t MessageParcelReadCollabInfo(MessageParcel &data, CollabInfo &info)
 {
-    char *accountId = (char *)data.ReadCString();
-    if (accountId != nullptr) {
-        strcpy_s(info.accountId, sizeof(info.accountId), accountId);
+    const char *accountId = data.ReadCString();
+    if (accountId == nullptr) {
+        COMM_LOGE(COMM_SDK, "read accountId failed");
+    } else {
+        if (strcpy_s(info.accountId, sizeof(info.accountId), accountId) != EOK) {
+            COMM_LOGE(COMM_SDK, "strcpy_s failed to copy accountId");
+        }
     }
     READ_PARCEL_WITH_RET(data, Uint64, info.tokenId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, info.userId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, info.pid, SOFTBUS_IPC_ERR);
-    char *deviceId = (char *)data.ReadCString();
+    const char *deviceId = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(deviceId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read deviceId failed");
     if (strcpy_s(info.deviceId, sizeof(info.deviceId), deviceId) != EOK) {
         COMM_LOGE(COMM_SDK, "strcpy_s failed to copy deviceId");
