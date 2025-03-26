@@ -121,8 +121,12 @@ static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc ca
 static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback,
     uint64_t delayMillis)
 {
-    if ((looper == NULL) || (callback == NULL)) {
-        COMM_LOGE(COMM_EVENT, "invalid param");
+    if (looper == NULL) {
+        COMM_LOGE(COMM_EVENT, "invalid param looper");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (callback == NULL) {
+        COMM_LOGE(COMM_EVENT, "invalid param callback");
         return SOFTBUS_INVALID_PARAM;
     }
 
