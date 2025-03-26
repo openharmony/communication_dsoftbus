@@ -1245,6 +1245,43 @@ ohos_unittest("AuthSessionJsonMockTest") {
   ]
 }
 
+ohos_unittest("AuthPreLinkTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
+    "$dsoftbus_root_path/core/authentication/src/virtual/auth_attest_virtual.c",
+    "unittest/auth_pre_link_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -1257,6 +1294,7 @@ group("unittest") {
     ":AuthNormalizeRequestTest",
     ":AuthOtherMockTest",
     ":AuthOtherTest",
+    ":AuthPreLinkTest",
     ":AuthSessionFsmTest",
     ":AuthSessionJsonMockTest",
     ":AuthSessionJsonTest",
