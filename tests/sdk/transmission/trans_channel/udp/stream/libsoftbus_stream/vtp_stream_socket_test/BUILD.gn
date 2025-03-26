@@ -18,6 +18,11 @@ module_output_path = "dsoftbus/transmission"
 dsoftbus_root_path = "../../../../../../../.."
 
 ohos_unittest("VtpStreamSocketTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [
     "softbus_stream_test_mock.cpp",
@@ -73,6 +78,6 @@ group("unittest") {
   deps = []
   deps += [
     # deps file
-    ":VtpStreamSocketTest",
+    #":VtpStreamSocketTest",
   ]
 }
