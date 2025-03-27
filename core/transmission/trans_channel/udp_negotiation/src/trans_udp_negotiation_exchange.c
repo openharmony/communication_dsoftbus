@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,10 +176,10 @@ static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
     if (GetOsAccountUid(accountId, ACCOUNT_UID_LEN_MAX-1, &size) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
-
-    int32_t userId = TransGetForegroundUserId();
+    int32_t userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
     if (userId == INVALID_USER_ID) {
-        TRANS_LOGW(TRANS_CTRL, "GetCurrentAccount failed.");
+        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
+        return;
     }
     (void)AddNumberToJsonObject(msg, "USER_ID", userId);
     (void)AddStringToJsonObject(msg, "ACCOUNT_ID", accountId);

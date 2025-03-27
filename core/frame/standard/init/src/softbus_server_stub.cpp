@@ -586,7 +586,8 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
     if (strncmp(param.sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         COMM_LOGI(COMM_SVC, "DMS bind request, need check collaboration relationship");
-        if (CheckSourceCollabRelation(param.peerDeviceId, OHOS::IPCSkeleton::GetCallingPid()) != SOFTBUS_OK) {
+        if (CheckSourceCollabRelation(param.peerDeviceId,
+            OHOS::IPCSkeleton::GetCallingPid(), OHOS::IPCSkeleton::GetCallingUid()) != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "DMS check collaboration relationship failed, reject binding request");
             retReply = SOFTBUS_TRANS_CHECK_RELATION_FAIL;
             goto EXIT;

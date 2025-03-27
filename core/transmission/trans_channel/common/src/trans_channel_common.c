@@ -648,7 +648,7 @@ static int32_t GetSinkRelation(const AppInfo *appInfo, CollabInfo *sinkInfo)
         TRANS_LOGW(TRANS_CTRL, "get current account failed.");
     }
     sinkInfo->pid = appInfo->myData.pid;
-    sinkInfo->userId = TransGetForegroundUserId();
+    sinkInfo->userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
     if (sinkInfo->userId == INVALID_USER_ID) {
         TRANS_LOGE(TRANS_CTRL, "get userId failed.");
         return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
@@ -669,7 +669,7 @@ static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
     (void)LnnGetRemoteStrInfo(netWorkId, STRING_KEY_DEV_UDID, sourceInfo->deviceId, UDID_BUF_LEN);
 }
 
-int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid)
+int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid, int32_t sourceUid)
 {
     if (sinkNetworkId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param, sinkNetworkId is nullptr");
@@ -686,7 +686,11 @@ int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid)
         COMM_LOGE(COMM_SVC, "get sourceInfo udid failed. ret=%{public}d", ret);
         return ret;
     }
-    sourceInfo.userId = TransGetForegroundUserId();
+    sourceInfo.userId = TransGetUserIdFromUid(sourceUid);
+    if (sourceInfo.userId == INVALID_USER_ID) {
+        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
+        return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
+    }
     uint32_t size = 0;
     ret = GetOsAccountUid(sourceInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
     if (ret != SOFTBUS_OK) {

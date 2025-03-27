@@ -82,11 +82,6 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return SoftbusPermissionACLInterfaceMock::GetMock()->LnnGetLocalStrInfo(key, info, len);
 }
 
-int32_t TransGetForegroundUserId()
-{
-    return SoftbusPermissionACLInterfaceMock::GetMock()->TransGetForegroundUserId();
-}
-
 int32_t SoftBusGetAccessTokenType(uint64_t tokenId)
 {
     return SoftbusPermissionACLInterfaceMock::GetMock()->SoftBusGetAccessTokenType(tokenId);

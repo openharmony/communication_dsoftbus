@@ -76,7 +76,7 @@ TransDeviceState TransGetDeviceState(const char *networkId);
 
 int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType);
 
-int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid);
+int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid, int32_t sourceUid);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
