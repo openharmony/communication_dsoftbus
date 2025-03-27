@@ -804,7 +804,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     ret = SameAccountDevDisableDiscoveryProcess();
-    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*

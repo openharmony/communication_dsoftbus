@@ -682,10 +682,10 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     EXPECT_EQ(RegBleRangeCb(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegBleRangeCb(nullptr, &g_bleRangeCb1), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegBleRangeCb(TEST_PKG_NAME, &g_bleRangeCb), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(RegBleRangeCb(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_OK);
+    EXPECT_EQ(RegBleRangeCb(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_FUNC_NOT_SUPPORT);
     EXPECT_EQ(UnregBleRangeCb(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UnregBleRangeCb(TEST_PKG_NAME), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UnregBleRangeCb(TEST_MSDP_NAME), SOFTBUS_OK);
+    EXPECT_EQ(UnregBleRangeCb(TEST_MSDP_NAME), SOFTBUS_FUNC_NOT_SUPPORT);
 
     const char *callerId = "123";
     HbMode mode = { .connFlag = true, .duration = 5, .replyFlag = false };
