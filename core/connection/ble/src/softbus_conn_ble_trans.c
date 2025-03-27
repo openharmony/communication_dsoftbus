@@ -262,6 +262,7 @@ static void FreeSendNode(SendQueueNode *node)
 {
     if (node->data != NULL) {
         SoftBusFree(node->data);
+        node->data = NULL;
     }
     SoftBusFree(node);
 }
