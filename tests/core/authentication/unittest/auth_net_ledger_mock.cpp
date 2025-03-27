@@ -199,6 +199,11 @@ int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNodeInfoSafe(info);
 }
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetNetLedgerInterface()->LnnGetLocalByteInfo(key, info, len);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)
@@ -291,4 +296,5 @@ void AuthNetLedgertInterfaceMock::OnDeviceDisconnect(AuthHandle authHandle)
     SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
 }
+
 } // namespace OHOS

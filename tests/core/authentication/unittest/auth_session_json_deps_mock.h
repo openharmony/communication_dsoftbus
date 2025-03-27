@@ -154,6 +154,8 @@ public:
     virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
     virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
     virtual void DelSessionKeyProfile(int32_t sessionKeyId) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual bool AuthSessionGetIsSameAccount(int64_t authSeq) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -244,6 +246,8 @@ public:
     MOCK_METHOD1(LnnGetP2pRole, int32_t (const NodeInfo *));
     MOCK_METHOD1(LnnGetStaFrequency, int32_t (const NodeInfo *));
     MOCK_METHOD1(DelSessionKeyProfile, void(int32_t));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey key, uint8_t *info, uint32_t len));
+    MOCK_METHOD1(AuthSessionGetIsSameAccount, bool (int64_t authSeq));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H

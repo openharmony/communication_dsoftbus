@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_hichain_adapter.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
@@ -36,7 +37,6 @@
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
-#define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
 #define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 #define PC_AUTH_ERRCODE                36870
 
@@ -65,43 +65,18 @@ typedef struct {
     uint8_t data[0];
 } ProofInfo;
 
+typedef struct {
+    char *(*generateAuthParam)(HiChainAuthParam *hiChainParam);
+    int32_t (*authenticate)(int32_t userId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb);
+    int32_t (*processAuthData)(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb);
+} HiChainAuthInterfaceAdapter;
+
 static TrustDataChangeListener g_dataChangeListener;
 
-static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClient, int32_t userId)
-{
-    cJSON *msg = cJSON_CreateObject();
-    if (msg == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "create json fail");
-        return NULL;
-    }
-    if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
-        !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
-        !AddBoolToJsonObject(msg, FIELD_IS_DEVICE_LEVEL, true) ||
-        !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient) ||
-        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
-        !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, KEY_LENGTH)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
-        cJSON_Delete(msg);
-        return NULL;
-    }
-    if (userId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", userId)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add json userId fail");
-    }
-#ifdef AUTH_ACCOUNT
-    AUTH_LOGI(AUTH_HICHAIN, "in account auth mode");
-    if (!AddStringToJsonObject(msg, FIELD_UID_HASH, uid)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add uid into json fail");
-        cJSON_Delete(msg);
-        return NULL;
-    }
-#endif
-    char *data = cJSON_PrintUnformatted(msg);
-    if (data == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "cJSON_PrintUnformatted fail");
-    }
-    cJSON_Delete(msg);
-    return data;
-}
+static HiChainAuthInterfaceAdapter g_hiChainAuthInterface[HICHAIN_AUTH_BUTT] = {
+    { GenDeviceLevelParam, AuthDevice, ProcessAuthData },
+    { IdServiceGenerateAuthParam, IdServiceAuthCredential, IdServiceProcessCredData }
+};
 
 static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
@@ -331,6 +306,24 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         cJSON_Delete(msg);
         return NULL;
     }
+
+    int32_t version = 0;
+    if (AuthSessionGetVersion(authSeq, &version) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get softbus version fail");
+        cJSON_Delete(msg);
+        return NULL;
+    }
+
+    AUTH_LOGD(AUTH_HICHAIN, "get softbus version=%{public}d", version);
+
+    char* credId = AuthSessionGetCredId(authSeq);
+    if ((version >= SOFTBUS_NEW_V3) && AuthSessionGetIsSameAccount(authSeq) &&
+        !AddStringToJsonObject(msg, FIELD_CRED_ID, credId)) {
+        AUTH_LOGE(AUTH_HICHAIN, "pack cred id fail");
+        cJSON_Delete(msg);
+        return NULL;
+    }
+
     char *msgStr = cJSON_PrintUnformatted(msg);
     if (msgStr == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "cJSON_PrintUnformatted fail");
@@ -528,18 +521,20 @@ void UnregTrustDataChangeListener(void)
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int32_t userId)
+int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode)
 {
-    if (udid == NULL || uid == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
+    if ((hiChainParam == NULL) || (hiChainParam->udid == NULL) || (hiChainParam->uid == NULL) ||
+        (authMode >= HICHAIN_AUTH_BUTT)) {
+        AUTH_LOGE(AUTH_HICHAIN, "hichain auth parameter invalid, mode=%{public}d", authMode);
         return SOFTBUS_INVALID_PARAM;
     }
-    char *authParams = GenDeviceLevelParam(udid, uid, true, userId);
+    char *authParams = g_hiChainAuthInterface[authMode].generateAuthParam(hiChainParam);
     if (authParams == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    int32_t ret = AuthDevice(authSeq, authParams, &g_hichainCallback);
+    int32_t ret = g_hiChainAuthInterface[authMode].authenticate(hiChainParam->userId, authSeq, authParams,
+        &g_hichainCallback);
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");
         cJSON_free(authParams);
@@ -550,13 +545,19 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int
     return ret;
 }
 
-int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode)
 {
     if (data == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = ProcessAuthData(authSeq, data, len, &g_hichainCallback);
+
+    if (authMode >= HICHAIN_AUTH_BUTT) {
+        AUTH_LOGE(AUTH_HICHAIN, "hichain auth mode invalid, mode=%{public}d", authMode);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = g_hiChainAuthInterface[authMode].processAuthData(authSeq, data, len, &g_hichainCallback);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%{public}d", ret);
         return ret;

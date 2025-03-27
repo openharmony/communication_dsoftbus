@@ -187,7 +187,9 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->ledgerMock, LnnGetSupportedProtocols).WillByDefault(Return(TEST_SUP_PROTOCOLS));
     ON_CALL(*mockInterface->ledgerMock, LnnGetLocalNodeInfo).WillByDefault(Return(&g_localInfo));
     ON_CALL(*mockInterface->ledgerMock, LnnGetBtMac).WillByDefault(Return(TEST_MAC));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*mockInterface->authMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
+    ON_CALL(*mockInterface->authMock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_OK));
     const unsigned char val = 0x01;
     SoftbusSetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, &val, sizeof(val));
     AuthVerifyParam authVerifyParam;
@@ -315,7 +317,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);
     AuthCommonInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
     authManager.processData = LnnHichainInterfaceMock::ActionOfProcessData;
-    HichainProcessData(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
+    HichainProcessData(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN, HICHAIN_AUTH_DEVICE);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
     LnnHichainInterfaceMock::g_devAuthCb.onTransmit(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
     EXPECT_TRUE(AuthNetLedgertInterfaceMock::isRuned == true);

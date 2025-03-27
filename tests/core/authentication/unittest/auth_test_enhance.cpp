@@ -126,16 +126,21 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_START_LISTENING_Test_001, TestSize.Level0)
  */
 HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
 {
+    HiChainAuthParam hiChainParam = { 0 };
     const char *udid = "1111222233334444";
     const char *uid = "8888";
     int64_t authSeq = 5678;
+
+    hiChainParam.udid = (char *)udid;
+    hiChainParam.uid = (char *)uid;
+    hiChainParam.userId = DEFALUT_USERID;
     NiceMock<AuthCommonInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     ON_CALL(hichainMock, GetLnnTriggerInfo(_)).WillByDefault(Return());
-    int32_t ret = HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
+    int32_t ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

@@ -589,6 +589,7 @@ ohos_unittest("AuthHichainMockTest") {
     "$dsoftbus_root_path/tests/core/authentication/unittest",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
     "unittest/common/",
   ]
 
@@ -622,7 +623,6 @@ ohos_unittest("AuthHichainMockTest") {
 ohos_unittest("AuthHichainTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "unittest/auth_hichain_test.cpp",
     "unittest/auth_net_ledger_mock.cpp",
@@ -1229,6 +1229,7 @@ ohos_unittest("AuthSessionJsonMockTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
   ]
 
   deps = [
@@ -1282,12 +1283,44 @@ ohos_unittest("AuthPreLinkTest") {
   ]
 }
 
+ohos_unittest("AuthHichainIdServiceTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_hichain_id_service_mock.cpp",
+    "unittest/auth_hichain_id_service_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+  ]
+
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":AuthDeviceProfileListenerTest",
     ":AuthDeviceProfileTest",
     ":AuthEnhanceMockTest",
+    ":AuthHichainIdServiceTest",
     ":AuthHichainMockTest",
     ":AuthHichainTest",
     ":AuthManagerTest",

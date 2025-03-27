@@ -464,5 +464,15 @@ void DelSessionKeyProfile(int32_t sessionKeyId)
 {
     return GetInterface()->DelSessionKeyProfile(sessionKeyId);
 }
+
+bool AuthSessionGetIsSameAccount(int64_t authSeq)
+{
+    return GetInterface()->AuthSessionGetIsSameAccount(authSeq);
+}
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
+}
 }
 } // namespace OHOS
