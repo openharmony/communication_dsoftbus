@@ -57,7 +57,7 @@ public:
     virtual int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type) = 0;
     virtual int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm) = 0;
     virtual void LnnRemoveSendEndMsg(
-        LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved) = 0;
+        LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msg, bool wakeupFlag, bool *isRemoved) = 0;
     virtual int32_t LnnPostNextSendOnceMsgToHbFsm(
         LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para, uint64_t delayMillis) = 0;
     virtual void LnnRemoveProcessSendOnceMsg(
@@ -100,7 +100,7 @@ public:
     MOCK_METHOD2(LnnRemoveCheckDevStatusMsg, void(LnnHeartbeatFsm *, LnnCheckDevStatusMsgPara *));
     MOCK_METHOD2(LnnPostStopMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatType));
     MOCK_METHOD1(LnnStopHeartbeatFsm, int32_t(LnnHeartbeatFsm *));
-    MOCK_METHOD5(LnnRemoveSendEndMsg, void(LnnHeartbeatFsm *, LnnHeartbeatType, bool, bool, bool *));
+    MOCK_METHOD4(LnnRemoveSendEndMsg, void(LnnHeartbeatFsm *, LnnProcessSendOnceMsgPara *, bool, bool *));
     MOCK_METHOD3(
         LnnPostNextSendOnceMsgToHbFsm, int32_t(LnnHeartbeatFsm *, const LnnProcessSendOnceMsgPara *, uint64_t));
     MOCK_METHOD3(LnnRemoveProcessSendOnceMsg, void(LnnHeartbeatFsm *, LnnHeartbeatType, LnnHeartbeatStrategyType));

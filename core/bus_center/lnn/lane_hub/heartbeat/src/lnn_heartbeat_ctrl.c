@@ -895,6 +895,7 @@ static void RefreshBleBroadcastByUserSwitched(void)
         .isRelay = false,
         .isSyncData = false,
         .isDirectBoardcast = false,
+        .isMsdpRange = false,
         .callerId = HB_USER_SWITCH_CALLER_ID,
     };
     if (LnnStartHbByTypeAndStrategyEx(&msgPara) != SOFTBUS_OK) {
@@ -1195,7 +1196,8 @@ int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
         .strategyType = STRATEGY_HB_SEND_SINGLE,
         .isRelay = !mode->replyFlag,
         .isSyncData = false,
-        .isDirectBoardcast = true,
+        .isDirectBoardcast = false,
+        .isMsdpRange = true,
         .hasScanRsp = mode->connFlag,
         .isFast = true,
         .duration = mode->duration * HB_TIME_FACTOR,
