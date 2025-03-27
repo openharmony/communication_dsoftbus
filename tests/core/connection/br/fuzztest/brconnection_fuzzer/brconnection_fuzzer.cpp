@@ -20,9 +20,11 @@
 #include <pthread.h>
 #include <cstddef>
 #include <string>
+
+#include "comm_log.h"
+#include "softbus_conn_br_connection.h"
 #include "softbus_json_utils.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_br_connection.h"
 #include "foundation/communication/dsoftbus/tests/common/include/fuzz_data_generator.h"
 #include "foundation/communication/dsoftbus/tests/common/include/fuzz_environment.h"
 

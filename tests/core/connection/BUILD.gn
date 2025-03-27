@@ -57,8 +57,16 @@ group("fuzztest") {
     "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest",
     "fuzztest:fuzztest",
   ]
+  if (support_bluetooth) {
+    if (dsoftbus_feature_conn_br) {
+      deps += [ "br/fuzztest/brconnection_fuzzer:BrConnectionFuzzTest" ]
+    }
+    if (dsoftbus_feature_conn_ble) {
+      deps += [ "ble/fuzztest/bleconnection_fuzzer:BleConnectionFuzzTest" ]
+    }
+  }
   if (dsoftbus_feature_ex_kits == true) {
     deps +=
-        [ "dsoftbus_root_path/dsoftbus_enhance/test/core/connection:fuzztest" ]
+        [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/connection:fuzztest" ]
   }
 }
