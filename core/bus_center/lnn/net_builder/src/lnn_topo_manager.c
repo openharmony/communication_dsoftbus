@@ -37,7 +37,6 @@
 #define JSON_KEY_SEQ "seq"
 #define JSON_KEY_COMPLETE "complete"
 #define JSON_KEY_INFO "info"
-#define JSON_KEY_TYPE "type"
 #define JSON_KEY_UDID "udid"
 #define JSON_KEY_PEER_UDID "peerUdid"
 #define JSON_KEY_WLAN_RELATION "wlanRelation"
