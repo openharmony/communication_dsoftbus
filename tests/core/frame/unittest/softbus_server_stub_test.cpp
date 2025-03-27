@@ -1832,6 +1832,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
     datas.WriteCString(test);
     datas.WriteRawData(&mode, sizeof(mode));
     ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

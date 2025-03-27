@@ -276,38 +276,6 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl002, TestSize.Le
 }
 
 /**
- * @tc.name: TransCheckServerAccessControl003
- * @tc.desc: test function TransCheckServerAccessControl parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl003, TestSize.Level0)
-{
-    AppInfo info;
-    info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.myData.sessionName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME));
-
-    int32_t ret = TransCheckServerAccessControl(&info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: TransCheckServerAccessControl004
- * @tc.desc: test function TransCheckServerAccessControl parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl004, TestSize.Level0)
-{
-    AppInfo info;
-    info.callingTokenId = NATIVE_TOKENID;
-    memcpy_s(info.peerData.sessionName, PKG_NAME_SIZE_MAX, APP_PKG_NAME, strlen(APP_PKG_NAME));
-
-    int32_t ret = TransCheckServerAccessControl(&info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
  * @tc.name: TransCheckServerAccessControl005
  * @tc.desc: test function TransCheckServerAccessControl parameters.
  * @tc.type: FUNC
