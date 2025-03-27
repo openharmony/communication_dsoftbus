@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #define TRANS_TEST_INVALID_UID (-1)
 
 #define MAX_SESSION_SERVER_NUM 100
+#define TEST_UID 488
 
 using namespace testing::ext;
 
@@ -151,8 +152,8 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
     ret = TransGetCallingFullTokenId(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransGetForegroundUserId();
-    EXPECT_NE(ret, DEFAULT_USER_ID);
+    ret = TransGetUserIdFromUid(TEST_UID);
+    EXPECT_NE(ret, INVALID_USER_ID);
 }
 
 /**
