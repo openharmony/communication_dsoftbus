@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "softbus_adapter_json.h"
 #include "auth_common.h"
 #include "auth_hichain_adapter.h"
 #include "auth_session_fsm.h"
@@ -67,11 +68,23 @@ public:
         const cJSON *json, const char * const string, char *target, uint32_t targetLen) = 0;
     virtual bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target) = 0;
     virtual int32_t RegChangeListener(const char *appId, DataChangeListener *listener) = 0;
-    virtual int32_t UnregChangeListener(const char *appId) = 0;
-    virtual int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb) = 0;
-    virtual int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb) = 0;
-    virtual void DestroyDeviceAuth(void) = 0;
     virtual bool RequireAuthLock(void) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value) = 0;
+    virtual bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
+    virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
+    virtual bool LnnIsDefaultOhosAccount(void) = 0;
+    virtual int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
+        bool isSameAccount, char **credList) = 0;
+    virtual char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList) = 0;
+
+    virtual char *AuthSessionGetCredId(int64_t authSeq) = 0;
+    virtual char *IdServiceGenerateAuthParam(HiChainAuthParam *hiChainParam) = 0;
+    virtual int32_t IdServiceAuthCredential(int32_t userId, int64_t authReqId, const char *authParams,
+        const DeviceAuthCallback *cb) = 0;
+    virtual int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t len,
+        DeviceAuthCallback *cb) = 0;
+    virtual void IdServiceDestroyCredentialList(char **returnData) = 0;
 };
 
 class AuthHichainInterfaceMock : public AuthHichainInterface {
@@ -105,11 +118,20 @@ public:
     MOCK_METHOD4(GetJsonObjectStringItem, bool (const cJSON *, const char * const, char *, uint32_t));
     MOCK_METHOD3(GetJsonObjectNumberItem, bool (const cJSON *, const char * const, int32_t *));
     MOCK_METHOD2(RegChangeListener, int32_t (const char *, DataChangeListener *));
-    MOCK_METHOD1(UnregChangeListener, int32_t (const char *));
-    MOCK_METHOD3(AuthDevice, int32_t (int64_t, const char *, const DeviceAuthCallback *));
-    MOCK_METHOD4(ProcessAuthData, int32_t (int64_t, const uint8_t *, uint32_t, DeviceAuthCallback *));
-    MOCK_METHOD0(DestroyDeviceAuth, void (void));
     MOCK_METHOD0(RequireAuthLock, bool (void));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey, uint8_t *, uint32_t));
+    MOCK_METHOD3(JSON_AddStringToObject, bool (JsonObj *, const char *, const char *));
+    MOCK_METHOD4(JSON_GetStringFromOject, bool (const JsonObj *, const char *, char *, uint32_t));
+    MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *info));
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
+    MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t, const char *, const char *, bool, char **));
+    MOCK_METHOD2(IdServiceGetCredIdFromCredList, char * (int32_t, const char *));
+
+    MOCK_METHOD1(AuthSessionGetCredId, char * (int64_t));
+    MOCK_METHOD1(IdServiceGenerateAuthParam, char * (HiChainAuthParam *));
+    MOCK_METHOD4(IdServiceAuthCredential, int32_t (int32_t, int64_t, const char *, const DeviceAuthCallback *));
+    MOCK_METHOD4(IdServiceProcessCredData, int32_t (int64_t, const uint8_t *, uint32_t, DeviceAuthCallback *));
+    MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

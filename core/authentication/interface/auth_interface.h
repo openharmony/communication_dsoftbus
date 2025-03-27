@@ -45,6 +45,8 @@ typedef enum {
     SOFTBUS_NEW_V1 = 100,
     /* softbus type v2 */
     SOFTBUS_NEW_V2 = 101,
+    /* softbus type v3 */
+    SOFTBUS_NEW_V3 = 102,
 } SoftBusVersion;
 
 typedef enum {

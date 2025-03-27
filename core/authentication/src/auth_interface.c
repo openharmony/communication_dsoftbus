@@ -433,7 +433,7 @@ static int32_t FillAuthSessionInfo(
     }
     info->isServer = keyInfo->isServerSide;
     info->connId = (uint64_t)keyInfo->keyIndex;
-    info->version = SOFTBUS_NEW_V2;
+    info->version = SOFTBUS_NEW_V3;
     info->normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
     info->normalizedIndex = keyInfo->keyIndex;
     if (strcpy_s(info->uuid, sizeof(info->uuid), nodeInfo->uuid) != EOK ||

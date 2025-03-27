@@ -406,5 +406,31 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr)
 {
     return GetInterface()->SoftBusSocketGetPeerName(socketFd, addr);
 }
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+
+bool LnnIsDefaultOhosAccount(void)
+{
+    return GetInterface()->LnnIsDefaultOhosAccount();
+}
+
+int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
+    bool isSameAccount, char **credList)
+{
+    return GetInterface()->IdServiceQueryCredential(userId, udidHash, accountidHash, isSameAccount, credList);
+}
+
+char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
+{
+    return GetInterface()->IdServiceGetCredIdFromCredList(userId, credList);
+}
+
+void IdServiceDestroyCredentialList(char **returnData)
+{
+    return GetInterface()->IdServiceDestroyCredentialList(returnData);
+}
 }
 }
