@@ -136,7 +136,11 @@ HWTEST_F(HeartBeatFSMTest, LnnRemoveSendEndMsgTest_01, TestSize.Level1)
 {
     bool isRemoved = true;
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    LnnRemoveSendEndMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, true, true, &isRemoved);
+    LnnProcessSendOnceMsgPara msgPara;
+    (void)memset_s(&msgPara, sizeof(LnnProcessSendOnceMsgPara), 0, sizeof(LnnProcessSendOnceMsgPara));
+    msgPara.hbType = HEARTBEAT_TYPE_BLE_V1;
+    msgPara.isRelay = true;
+    LnnRemoveSendEndMsg(nullptr, &msgPara, true, &isRemoved);
     LnnRemoveCheckDevStatusMsg(nullptr, nullptr);
     LnnRemoveProcessSendOnceMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     HbMasterNodeStateEnter(nullptr);

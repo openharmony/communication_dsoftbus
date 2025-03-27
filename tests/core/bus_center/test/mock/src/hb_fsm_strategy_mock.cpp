@@ -132,9 +132,9 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return HeartBeatFSMStrategyInterfaceInstance()->LnnStopHeartbeatFsm(hbFsm);
 }
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved)
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara, bool wakeupFlag, bool *isRemoved)
 {
-    return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveSendEndMsg(hbFsm, type, wakeupFlag, isRelay, isRemoved);
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveSendEndMsg(hbFsm, msgPara, wakeupFlag, isRemoved);
 }
 
 int32_t LnnPostNextSendOnceMsgToHbFsm(

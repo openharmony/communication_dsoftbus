@@ -259,11 +259,18 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
     return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
-static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
+static int32_t RemoveSendOneEndMsgStepOne(LnnHeartbeatSendEndData *msgPara, LnnRemoveSendEndMsgPara *delMsgPara)
 {
-    LnnHeartbeatSendEndData *msgPara = (LnnHeartbeatSendEndData *)ctrlMsgObj->obj;
-    LnnRemoveSendEndMsgPara *delMsgPara = (LnnRemoveSendEndMsgPara *)delMsg->obj;
-
+    if (msgPara->isMsdpRange && delMsgPara != NULL) {
+        *delMsgPara->isRemoved = true;
+        SoftBusFree(msgPara);
+        msgPara = NULL;
+        return SOFTBUS_OK;
+    }
+    if (!msgPara->isMsdpRange && delMsgPara->isMsdpRange) {
+        *delMsgPara->isRemoved = false;
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+    }
     if (!msgPara->wakeupFlag && delMsgPara->wakeupFlag) {
         *delMsgPara->isRemoved = true;
         SoftBusFree(msgPara);
@@ -280,6 +287,11 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
         msgPara = NULL;
         return SOFTBUS_OK;
     }
+    return SOFTBUS_NETWORK_HB_INVALID_MGR;
+}
+
+static int32_t RemoveSendOneEndMsgStepTwo(LnnHeartbeatSendEndData *msgPara, LnnRemoveSendEndMsgPara *delMsgPara)
+{
     if (delMsgPara->isRelay && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
         *delMsgPara->isRemoved = false;
         return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
@@ -306,6 +318,17 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
     }
     *delMsgPara->isRemoved = false;
     return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+}
+
+static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
+{
+    LnnHeartbeatSendEndData *msgPara = (LnnHeartbeatSendEndData *)ctrlMsgObj->obj;
+    LnnRemoveSendEndMsgPara *delMsgPara = (LnnRemoveSendEndMsgPara *)delMsg->obj;
+    int32_t ret = RemoveSendOneEndMsgStepOne(msgPara, delMsgPara);
+    if (ret == SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL || ret == SOFTBUS_OK) {
+        return ret;
+    }
+    return RemoveSendOneEndMsgStepTwo(msgPara, delMsgPara);
 }
 
 static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -371,8 +394,7 @@ static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType e
     }
 }
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
-    bool isRelay, bool *isRemoved)
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msg, bool wakeupFlag, bool *isRemoved)
 {
     if (hbFsm == NULL || isRemoved == NULL) {
         LNN_LOGW(LNN_HEART_BEAT, "remove send end msg get invalid param");
@@ -381,10 +403,11 @@ void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wak
 
     *isRemoved = true;
     LnnRemoveSendEndMsgPara msgPara = {
-        .hbType = type & (LnnIsLocalSupportBurstFeature() ? HEARTBEAT_TYPE_INVALID : ~HEARTBEAT_TYPE_BLE_V3),
+        .hbType = msg->hbType & (LnnIsLocalSupportBurstFeature() ? HEARTBEAT_TYPE_INVALID : ~HEARTBEAT_TYPE_BLE_V3),
         .wakeupFlag = wakeupFlag,
-        .isRelay = isRelay,
+        .isRelay = msg->isRelay,
         .isRemoved = isRemoved,
+        .isMsdpRange = msg->isMsdpRange,
     };
     RemoveHbMsgByCustObj(hbFsm, EVENT_HB_SEND_ONE_END, (void *)&msgPara);
     msgPara.isRemoved = NULL;
@@ -440,6 +463,7 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
     msgPara->isRelay = false;
     msgPara->isSyncData = false;
     msgPara->isDirectBoardcast = false;
+    msgPara->isMsdpRange = false;
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, hbFsm->strategyType);
     if (LnnFsmPostMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE, (void *)msgPara) != SOFTBUS_OK) {
         SoftBusFree(msgPara);
@@ -1177,6 +1201,7 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->isFirstBegin = msgPara->isFirstBegin;
     custData->isFast = msgPara->isFast;
     custData->isDirectBoardcast = msgPara->isDirectBoardcast;
+    custData->isMsdpRange = msgPara->isMsdpRange;
     if (strcpy_s(custData->networkId, NETWORK_ID_BUF_LEN, msgPara->networkId) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "cpy networkId fail");
         SoftBusFree(custData);
