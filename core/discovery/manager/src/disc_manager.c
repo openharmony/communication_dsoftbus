@@ -755,7 +755,10 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
         }
 
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
-            if (infoNode->id != id && infoNode->pid != callingPid) {
+            if (infoNode->pid != callingPid) {
+                continue;
+            }
+            if (infoNode->id != id) {
                 continue;
             }
             isIdExist = true;
