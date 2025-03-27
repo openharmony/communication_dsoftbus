@@ -32,6 +32,7 @@
 #include "softbus_ddos.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
+#include "sle_ranging_manager.h"
 
 struct JoinLnnRequestInfo {
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -534,6 +535,16 @@ int32_t LnnIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config
     }
     if (config->medium == SLE_CONN_HADM) {
         return LnnTriggerSleRangeForMsdp(pkgName, config);
+    }
+    COMM_LOGE(COMM_SVC, "invalid medium=%{public}d", config->medium);
+    return SOFTBUS_INVALID_PARAM;
+}
+
+int32_t LnnIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (config == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
     COMM_LOGE(COMM_SVC, "invalid medium=%{public}d", config->medium);
     return SOFTBUS_INVALID_PARAM;

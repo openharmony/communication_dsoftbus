@@ -658,6 +658,15 @@ int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
     return TriggerRangeForMsdpInner(pkgName, config);
 }
 
+int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (pkgName == NULL || config == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid range para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return StopRangeForMsdpInner(pkgName, config);
+}
+
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     if (pkgName == NULL || msg == NULL) {

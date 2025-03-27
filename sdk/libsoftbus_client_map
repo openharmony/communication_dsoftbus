@@ -26,6 +26,7 @@
         "SetFileSendListener";
         "ShiftLNNGear";
         "TriggerRangeForMsdp";
+        "StopRangeForMsdp";
         "RegisterRangeCallbackForMsdp";
         "UnregisterRangeCallbackForMsdp";
         "SyncTrustedRelationShip";
