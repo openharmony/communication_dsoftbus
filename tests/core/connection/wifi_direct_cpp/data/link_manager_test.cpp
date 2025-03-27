@@ -123,7 +123,7 @@ HWTEST_F(LinkManagerTest, AllocateLinkIdTest, TestSize.Level1)
 {
     LinkManager linkManager;
     linkManager.currentLinkId_ = -1;
-    int32_t newId = linkManager.AllocateLinkId();
+    int newId = linkManager.AllocateLinkId();
     EXPECT_EQ(newId, 0);
     linkManager.currentLinkId_ = 1;
     newId = linkManager.AllocateLinkId();

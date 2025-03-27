@@ -14,11 +14,12 @@
  */
 
 #include "wifi_direct_mock.h"
+#include <thread>
 #include "conn_log.h"
 #include "softbus_adapter_socket.h"
-#include <thread>
-// implement dependencies and redirect request to mock object here
+
 extern "C" {
+// implement dependencies and redirect request to mock object here
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetDeviceUuid(authId, uuid, size);
@@ -97,11 +98,6 @@ int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *inf
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNumU64Info(id, key, info);
 }
 
-bool LnnGetOnlineStateById(const char *id, IdCategory type)
-{
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOnlineStateById(id, type);
-}
-
 int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthStartListeningForWifiDirect(type, ip, port, moduleId);
@@ -138,7 +134,8 @@ uint32_t AuthGenRequestId(void)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGenRequestId();
 }
 
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
+int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
+                     const AuthConnCallback *callback, bool isMeta)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthOpenConn(info, requestId, callback, isMeta);
 }
@@ -226,8 +223,8 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const
 
 WifiErrorCode Hid2dSetPeerWifiCfgInfo(PeerCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int32_t setDataValidLen)
 {
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dSetPeerWifiCfgInfo(
-        cfgType, cfgData, setDataValidLen);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dSetPeerWifiCfgInfo(cfgType,
+                                                                                      cfgData, setDataValidLen);
 }
 
 WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo *groupInfo)
@@ -282,8 +279,8 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
 
 int32_t TransProxyPipelineGetUuidByChannelId(int32_t channelId, char *uuid, uint32_t uuidLen)
 {
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineGetUuidByChannelId(
-        channelId, uuid, uuidLen);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineGetUuidByChannelId(channelId,
+                                                                                                   uuid, uuidLen);
 }
 
 int32_t TransProxyPipelineSendMessage(
@@ -314,6 +311,16 @@ int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLe
 }
 
 int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t port)
+{
+    return SOFTBUS_OK;
+}
+
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    return true;
+}
+
+int32_t GenerateRandomStr(char *str, uint32_t len)
 {
     return SOFTBUS_OK;
 }

@@ -48,7 +48,7 @@ int Ipv4Info::Unmarshalling(const uint8_t *input, size_t size)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    auto p = (uint8_t *)(&ip_);
+    auto p = reinterpret_cast<uint8_t *>(&ip_);
     std::copy(input, input + sizeof(ip_), p);
     prefixLength_ = input[Ipv4InfoSize() - 1];
     ip_ = htonl(ip_);

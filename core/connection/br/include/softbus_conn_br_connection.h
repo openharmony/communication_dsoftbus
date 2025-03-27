@@ -92,7 +92,6 @@ int32_t ConnBrStartServer(void);
 int32_t ConnBrStopServer(void);
 
 void ConnBrOccupy(ConnBrConnection *connection);
-
 int32_t ConnBrConnectionMuduleInit(SoftBusLooper *looper, SppSocketDriver *sppDriver, ConnBrEventListener *listener);
 
 #ifdef __cplusplus
