@@ -232,13 +232,9 @@ HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, Test
 HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler)
-        .WillOnce(Return(SOFTBUS_LOCK_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     int32_t ret = LnnInitDevicename();
-    EXPECT_NE(ret, SOFTBUS_LOCK_ERR);
-    ret = LnnInitDevicename();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 

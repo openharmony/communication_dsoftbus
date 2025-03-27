@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "auth_common.h"
 #include "auth_interface.h"
 #include "auth_request.h"
 #include "bus_center_event.h"
@@ -180,6 +181,8 @@ public:
     virtual bool LnnSubcribeKvStoreService(void);
     virtual int32_t LnnPutDBData(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen);
     virtual int32_t LnnCloudSync(int32_t dbId);
+    virtual int32_t InitLaneListener(void);
+    virtual int32_t LnnInitLocalLedger(void);
 };
 class AuthLaneInterfaceMock : public AuthLaneInterface {
 public:
@@ -302,6 +305,8 @@ public:
     MOCK_METHOD5(
         LnnPutDBData, int32_t(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen));
     MOCK_METHOD1(LnnCloudSync, int32_t(int32_t dbId));
+    MOCK_METHOD0(InitLaneListener, int32_t());
+    MOCK_METHOD0(LnnInitLocalLedger, int32_t());
 };
 } // namespace OHOS
 #endif // AUTH_LANE_H

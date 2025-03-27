@@ -18,6 +18,7 @@
 #include <string>
 
 #include "lnn_kv_adapter_wrapper.h"
+#include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "gtest/gtest.h"
@@ -189,8 +190,11 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
 {
     int32_t dbId = g_dbId;
     int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_ERR);
-
+    if (!IsCloudSyncEnabled()) {
+        EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
+    } else {
+        EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_SYNC_FAIL);
+    }
     lnnCloudRet = LnnCloudSync(dbId + 1);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
 }

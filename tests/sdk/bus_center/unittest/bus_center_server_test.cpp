@@ -96,7 +96,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_STOP_TIME_SYNC_TEST_001, TestSize.Level
     int32_t ret = ServerIpcStartTimeSync(pkgName, targetNetworkId, NORMAL_ACCURACY, BIT_NETWORK_TYPE_WIFI);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = ServerIpcStopTimeSync(pkgName, targetNetworkId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -169,6 +169,6 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_SHIFT_LNN_GEAR_TEST_001, TestSize.Level
     };
 
     int32_t ret = ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, &mode);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

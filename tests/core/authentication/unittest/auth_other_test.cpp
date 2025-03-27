@@ -613,6 +613,10 @@ HWTEST_F(AuthOtherTest, FSM_MSG_TYPE_TO_STR_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
 {
+    AuthCommonInterfaceMock connMock;
+    uint64_t localFeatureCap = (1 << BIT_BLE_DIRECT_ONLINE);
+    EXPECT_CALL(connMock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
     int64_t authSeq = 0;
     AuthSessionInfo *info = (AuthSessionInfo *)SoftBusCalloc(sizeof(AuthSessionInfo));
     if (info == nullptr) {
@@ -707,6 +711,8 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CHECK_CONN_INFO_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, TestSize.Level1)
 {
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, LnnGetAllOnlineNodeNum).WillRepeatedly(Return(SOFTBUS_OK));
     AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
     ASSERT_TRUE(authFsm != nullptr);
     authFsm->info.connInfo.type = (AuthLinkType)(AUTH_LINK_TYPE_WIFI - 1);
