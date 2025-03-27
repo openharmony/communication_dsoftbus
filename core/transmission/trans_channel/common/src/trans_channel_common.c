@@ -642,16 +642,16 @@ static int32_t GetSinkRelation(const AppInfo *appInfo, CollabInfo *sinkInfo)
         TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed.");
         return ret;
     }
-    uint32_t size = 0;
-    ret = GetOsAccountUid(sinkInfo->accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "get current account failed.");
-    }
     sinkInfo->pid = appInfo->myData.pid;
     sinkInfo->userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
     if (sinkInfo->userId == INVALID_USER_ID) {
         TRANS_LOGE(TRANS_CTRL, "get userId failed.");
         return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
+    }
+    uint32_t size = 0;
+    ret = GetOsAccountUidByUserId(sinkInfo->accountId, ACCOUNT_UID_LEN_MAX - 1, &size, sinkInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get current account failed.");
     }
     return SOFTBUS_OK;
 }
@@ -692,7 +692,7 @@ int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid, 
         return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
     }
     uint32_t size = 0;
-    ret = GetOsAccountUid(sourceInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
+    ret = GetOsAccountUidByUserId(sourceInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, &size, sourceInfo.userId);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
     }
