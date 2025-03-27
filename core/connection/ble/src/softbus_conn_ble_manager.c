@@ -172,10 +172,7 @@ static void BleExitConnectingState(void)
 static void DfxRecordBleConnectFail(
     uint32_t reqId, uint32_t pId, ConnBleDevice *device, const ConnectStatistics *statistics, int32_t reason)
 {
-    if (statistics == NULL) {
-        CONN_LOGW(CONN_BLE, "statistics is null");
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGW(statistics != NULL, CONN_BLE, "statistics is null");
 
     SoftBusConnType connType =
         device->protocol == BLE_GATT ? SOFTBUS_HISYSEVT_CONN_TYPE_BLE : SOFTBUS_HISYSEVT_CONN_TYPE_COC;
@@ -204,10 +201,7 @@ static void DfxRecordBleConnectFail(
 
 static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connection, ConnectStatistics *statistics)
 {
-    if (statistics == NULL) {
-        CONN_LOGW(CONN_BLE, "statistics is null");
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGW(statistics != NULL, CONN_BLE, "statistics is null");
 
     CONN_LOGD(CONN_BLE, "record ble conn succ, connectTraceId=%{public}u", statistics->connectTraceId);
     SoftBusConnType connType =
@@ -231,10 +225,7 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
 static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectRequestContext *ctx)
 {
     ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
-    if (request == NULL) {
-        CONN_LOGE(CONN_BLE, "request calloc faild");
-        return SOFTBUS_MALLOC_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(request != NULL, SOFTBUS_MALLOC_ERR, CONN_BLE, "request calloc faild");
     ListInit(&request->node);
     request->requestId = ctx->requestId;
     request->challengeCode = ctx->challengeCode;
@@ -249,10 +240,8 @@ static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectReque
 static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestContext *ctx)
 {
     ConnBleDevice *device = (ConnBleDevice *)SoftBusCalloc(sizeof(ConnBleDevice));
-    if (device == NULL) {
-        CONN_LOGE(CONN_BLE, "device calloc faild");
-        return SOFTBUS_MALLOC_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_MALLOC_ERR, CONN_BLE, "device calloc faild");
+
     ListInit(&device->node);
     if (strcpy_s(device->addr, BT_MAC_LEN, ctx->addr) != EOK ||
         strcpy_s(device->udid, UDID_BUF_LEN, ctx->udid) != EOK) {
@@ -290,10 +279,9 @@ static int32_t ConvertCtxToDevice(ConnBleDevice **outDevice, const ConnBleConnec
 {
     ConnBleRequest *request = NULL;
     int32_t status = NewRequest(&request, ctx);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "newrequest is failed, err=%{public}d", status);
-        return status;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_BLE,
+        "newrequest is failed, err=%{public}d", status);
+
     ConnBleDevice *device = NULL;
     status = NewDevice(&device, ctx);
     if (status != SOFTBUS_OK) {
@@ -330,12 +318,9 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
     }
     status = SoftBusGenerateStrHash(
         (unsigned char *)connection->udid, strlen(connection->udid), (unsigned char *)info->bleInfo.deviceIdHash);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE,
-            "convert ble connection info failed: generate udid hash failed, connId=%{public}u, err=%{public}d",
-            connection->connectionId, status);
-        return status;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_BLE,
+        "convert ble connection info failed: generate udid hash failed, connId=%{public}u, err=%{public}d",
+        connection->connectionId, status);
     return SOFTBUS_OK;
 }
 
@@ -665,10 +650,8 @@ static void BleClientConnectTimeoutOnConnectingState(uint32_t connectionId, cons
 static void BleClientConnected(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "can not get ble connection, is it removed? connectionId=%{public}u", connectionId);
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE,
+        "can not get ble connection, is it removed? connectionId=%{public}u", connectionId);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
@@ -726,11 +709,8 @@ static int32_t BleTryReuseServerOrRetryConnect(ConnBleConnection *connection, Co
 static void BleClientConnectFailed(uint32_t connectionId, int32_t error)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "can not get ble connection, is it removed? connId=%{public}u, err=%{public}d",
-            connectionId, error);
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE,
+        "can not get ble connection, is it removed? connId=%{public}u, err=%{public}d", connectionId, error);
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
@@ -815,10 +795,8 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
 static void BleServerAccepted(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "can not get ble connection, is it removed? connectionId=%{public}u", connectionId);
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE,
+        "can not get ble connection, is it removed? connId=%{public}u", connectionId);
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
