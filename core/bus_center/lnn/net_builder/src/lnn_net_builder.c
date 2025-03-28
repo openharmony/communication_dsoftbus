@@ -1692,7 +1692,7 @@ void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool 
     }
     char *msg = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    if(msg == NULL) {
+    if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "msg is null!");
         return;
     }
