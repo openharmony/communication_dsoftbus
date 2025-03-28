@@ -519,7 +519,8 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "checkSum is null no need update");
         return SOFTBUS_OK;
     }
-    int32_t ret = memcpy_s(deviceInfo->userIdCheckSum, USERID_CHECKSUM_LEN, hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
+    int32_t ret = memcpy_s(deviceInfo->userIdCheckSum, USERID_CHECKSUM_LEN,
+        hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "memcpy failed");
     }
