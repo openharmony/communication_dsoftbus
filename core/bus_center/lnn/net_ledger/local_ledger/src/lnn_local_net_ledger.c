@@ -57,6 +57,7 @@
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
+#define LONG_TO_STRING_MAX_LEN 21
 
 typedef struct {
     LocalLedgerStatus status;
@@ -329,6 +330,30 @@ static int32_t UpdateNodeDataChangeFlag(const void *buf)
     return LnnSetDataChangeFlag(info, *(int16_t *)buf);
 }
 
+static void DumpChangedAccountId(int64_t oldAccountId, int64_t newAccountId)
+{
+    char oldAccountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(oldAccountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, oldAccountId) == -1) {
+        LNN_LOGE(LNN_LEDGER, "long to string fail");
+        return;
+    }
+
+    char newAccountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(newAccountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, newAccountId) == -1) {
+        LNN_LOGE(LNN_LEDGER, "long to string fail");
+        return;
+    }
+
+    char *anonyOldAccountId = NULL;
+    char *anonyNewAccountId = NULL;
+    Anonymize(oldAccountString, &anonyOldAccountId);
+    Anonymize(newAccountString, &anonyNewAccountId);
+    LNN_LOGI(LNN_LEDGER, "accountId changed, accountId=%{public}s->%{public}s",
+        AnonymizeWrapper(anonyOldAccountId), AnonymizeWrapper(anonyNewAccountId));
+    AnonymizeFree(anonyOldAccountId);
+    AnonymizeFree(anonyNewAccountId);
+}
+
 static int32_t LocalUpdateNodeAccountId(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -361,9 +386,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         LnnSaveLocalDeviceInfo(info);
         return SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_LEDGER, "accountId changed, accountId=%{public}" PRId64 "->%{public}" PRId64, info->accountId,
-        *((int64_t *)buf));
-    info->accountId = *((int64_t *)buf);
+    DumpChangedAccountId(info->accountId, *((int64_t *)buf));
     UpdateStateVersionAndStore(UPDATE_ACCOUNT_LONG);
     return SOFTBUS_OK;
 }
