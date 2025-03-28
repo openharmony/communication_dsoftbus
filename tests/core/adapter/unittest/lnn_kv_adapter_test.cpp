@@ -365,7 +365,7 @@ HWTEST_F(KVAdapterTest, CloudSyncCallback001, TestSize.Level1)
     DistributedKv::ProgressDetail detail;
     detail.code = DistributedKv::Status::SUCCESS;
     detail.progress = DistributedKv::Progress::SYNC_FINISH;
-    kvStore->CloudSyncCallback(std::move(detail));
+    EXPECT_NO_FATAL_FAILURE(kvStore->CloudSyncCallback(std::move(detail)));
 }
 
 /**
@@ -379,6 +379,6 @@ HWTEST_F(KVAdapterTest, CloudSyncCallback002, TestSize.Level1)
     DistributedKv::ProgressDetail detail;
     detail.code = DistributedKv::Status::ERROR;
     detail.progress = DistributedKv::Progress::SYNC_FINISH;
-    kvStore->CloudSyncCallback(std::move(detail));
+    EXPECT_NO_FATAL_FAILURE(kvStore->CloudSyncCallback(std::move(detail)));
 }
 } // namespace OHOS
