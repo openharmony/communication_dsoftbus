@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,8 +60,13 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_001, TestSize.Level1)
 {
     SessionKeyList clientList = { 0 };
     SessionKey sessionKey = { { 0 }, SESSIONKEY_LEN };
+    int32_t type = 0;
     ListInit(&clientList);
-    int32_t ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_WIFI, false);
+    int32_t ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_MAX, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AuthLinkType(type), false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = SetSessionKeyAvailable(&clientList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -94,6 +99,11 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int32_t index = -1;
+    int32_t type = 0;
+    ret = GetLatestSessionKey(&clientList, AUTH_LINK_TYPE_MAX, &index, &sessionKey);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetLatestSessionKey(&clientList, AuthLinkType(type), &index, &sessionKey);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetLatestSessionKey(&clientList, AUTH_LINK_TYPE_BR, &index, &sessionKey);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = GetLatestSessionKey(&clientList, AUTH_LINK_TYPE_WIFI, &index, &sessionKey);
@@ -128,6 +138,12 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_003, TestSize.Level1)
     ret = SetSessionKeyAvailable(&serverList, SESSIONKEY_INDEX);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(100);
+
+    int32_t type = 0;
+    ret = SetSessionKeyAuthLinkType(&clientList, SESSIONKEY_INDEX, AUTH_LINK_TYPE_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSessionKeyAuthLinkType(&clientList, SESSIONKEY_INDEX, AuthLinkType(type));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SetSessionKeyAuthLinkType(&clientList, SESSIONKEY_INDEX, AUTH_LINK_TYPE_BR);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
