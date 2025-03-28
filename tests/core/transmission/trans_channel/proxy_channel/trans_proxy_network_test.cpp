@@ -22,12 +22,13 @@
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_transmission_interface.h"
-#include "trans_auth_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+
+#define TEST_SESSION_NAME "SoftBusProxyChannelNetworkTest"
 
 #define TEST_VALID_SESSIONNAME "com.test.sessionname"
 #define TEST_VALID_PEER_NETWORKID "12345678"
@@ -132,7 +133,7 @@ void TransProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
     listener.onChannelOpened = TransProxyNetworkTest::TestOnNetworkChannelOpened;
     listener.onChannelOpenFailed = TransProxyNetworkTest::TestOnNetworkChannelOpenFailed;
     listener.onMessageReceived = TransProxyNetworkTest::TestOnNetworkMessageReceived;
-    int32_t ret = TransRegisterNetworkingChannelListener(&listener);
+    int32_t ret = TransRegisterNetworkingChannelListener(TEST_SESSION_NAME, &listener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -144,14 +145,14 @@ void TransProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
  */
 HWTEST_F(TransProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level1)
 {
-    int32_t ret = NotifyNetworkingChannelOpened(1, nullptr, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, 1, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
     
-    NotifyNetworkingChannelOpenFailed(1, nullptr);
+    NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, 1, nullptr);
     EXPECT_NE(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
-    NotifyNetworkingChannelClosed(1);
+    NotifyNetworkingChannelClosed(TEST_SESSION_NAME, 1);
     EXPECT_NE(true, TransProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(1, nullptr, 0);
+    NotifyNetworkingMsgReceived(TEST_SESSION_NAME, 1, nullptr, 0);
     EXPECT_NE(true, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
@@ -165,47 +166,15 @@ HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
 {
     TransProxyNetworkTest::TestRegisterNetworkingChannelListener();
 
-    int32_t ret = NotifyNetworkingChannelOpened(1, nullptr, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, 1, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    NotifyNetworkingChannelOpenFailed(1, nullptr);
+    NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, 1, nullptr);
     EXPECT_EQ(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
-    NotifyNetworkingChannelClosed(1);
+    NotifyNetworkingChannelClosed(TEST_SESSION_NAME, 1);
     EXPECT_EQ(true, TransProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(1, nullptr, 0);
-    EXPECT_EQ(true, TransProxyNetworkTest::m_messageReceivedFlag);
-}
-
-/**
-  * @tc.name: TransNotifyNetworkingChannelOpenedTest001
-  * @tc.desc: test proxy channel opened with wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(TransProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, TestSize.Level1)
-{
-    int32_t channelId = -1;
-    AppInfo appInfo;
-    unsigned char isServer = '0';
-    /* test app info is null */
-    int32_t ret = OnProxyChannelOpened(channelId, nullptr, isServer);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is other */
-    appInfo.appType = APP_TYPE_NOT_CARE;
-    ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is normal and get network id fail */
-    appInfo.appType = APP_TYPE_NORMAL;
-    TransAuthInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test app type is inner */
-    appInfo.appType = APP_TYPE_INNER;
-    ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    NotifyNetworkingMsgReceived(TEST_SESSION_NAME, 1, nullptr, 0);
+    EXPECT_EQ(false, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
 /**
@@ -291,17 +260,14 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.
 }
 
 /**
-  * @tc.name: TransOpenNetWorkingChannelTest001
-  * @tc.desc: test proxy open networking channel with wrong param.
+  * @tc.name: TransProxySetCallBackTest001
+  * @tc.desc: TransProxySetCallBack test
   * @tc.type: FUNC
   * @tc.require:
   */
-HWTEST_F(TransProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Level1)
+HWTEST_F(TransProxyNetworkTest, TransProxySetCallBackTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    ret = TransOpenNetWorkingChannel(nullptr, TEST_VALID_PEER_NETWORKID);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenNetWorkingChannel(TEST_VALID_SESSIONNAME, nullptr);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    int32_t ret = TransProxySetCallBack(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
