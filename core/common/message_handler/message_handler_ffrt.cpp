@@ -368,6 +368,10 @@ static void DestroyLooperWithFfrt(SoftBusLooper *looper)
             SoftBusFree(itemNode);
             context->msgSize--;
         }
+        if (context->handlingMsg.handler != nullptr) {
+            SoftBusFree(context->handlingMsg.handler);
+            context->handlingMsg.handler = nullptr;
+        }
         delete (context->mtx);
         context->mtx = nullptr;
         SoftBusFree(context);
@@ -375,10 +379,6 @@ static void DestroyLooperWithFfrt(SoftBusLooper *looper)
     } else {
         delete (looper->queue->msgQueue);
         looper->queue->msgQueue = nullptr;
-    }
-    if (looper->context->handlingMsg.handler != nullptr) {
-        SoftBusFree(looper->context->handlingMsg.handler);
-        looper->context->handlingMsg.handler = nullptr;
     }
     SoftBusFree(looper->queue);
     looper->queue = nullptr;
