@@ -441,8 +441,8 @@ static void TransProxyCheckIsApp(AppInfo *appInfo, cJSON *root)
         return;
     }
     uint32_t size = 0;
-    if (GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1,
-            &size, appInfo->myData.userId) != SOFTBUS_OK) {
+    if (GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size,
+        appInfo->myData.userId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
     (void)AddStringToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
