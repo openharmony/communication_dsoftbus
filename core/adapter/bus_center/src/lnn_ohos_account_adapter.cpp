@@ -223,7 +223,7 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
     OHOS::AccountSA::OhosAccountInfo accountInfo;
     int32_t ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOsAccountDistributedInfo(userId, accountInfo);
     if (ret != OHOS::ERR_OK) {
-        LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed ret=%{public}d", ret);
+        LNN_LOGE(LNN_STATE, "get accountInfo failed ret=%{public}d", ret);
         return ret;
     }
     if (accountInfo.uid_ == "") {
@@ -234,7 +234,7 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
     *len = accountInfo.uid_.length();
     char *anonyUid = nullptr;
     Anonymize(accountInfo.uid_.c_str(), &anonyUid);
-    LNN_LOGI(LNN_STATE, "uid=%{public}s, len=%{public}d", AnonymizeWrapper(anonyUid), *len);
+    LNN_LOGI(LNN_STATE, "accountUid=%{public}s, len=%{public}u", AnonymizeWrapper(anonyUid), *len);
     AnonymizeFree(anonyUid);
 
     if (memcmp(DEFAULT_ACCOUNT_UID, accountInfo.uid_.c_str(), *len) == 0) {
@@ -242,7 +242,7 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
         return SOFTBUS_NOT_LOGIN;
     }
     if (memcpy_s(id, idLen, accountInfo.uid_.c_str(), *len) != EOK) {
-        LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%{public}d, len=%{public}d", idLen, *len);
+        LNN_LOGE(LNN_STATE, "memcpy_s accountUid failed, idLen=%{public}u, len=%{public}u", idLen, *len);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
