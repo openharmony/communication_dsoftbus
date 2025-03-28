@@ -63,8 +63,5 @@ ohos_unittest("DeviceManagerTest") {
 
 group("integration_test") {
   testonly = true
-  deps = [
-    ":DeviceManagerTest",
-    ":softbus_test_server",
-  ]
+  deps = [ ":softbus_test_server" ]
 }
