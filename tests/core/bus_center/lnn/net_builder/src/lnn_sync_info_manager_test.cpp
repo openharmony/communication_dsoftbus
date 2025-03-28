@@ -693,13 +693,10 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_003, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == nullptr) {
-        LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
-        return;
-    }
+    ASSERT_NE(info, nullptr);
     info->serverChannelId = INVALID_CHANNEL_ID;
 
-    OnChannelCloseCommon(info, channelId);
+    EXPECT_NO_FATAL_FAILURE(OnChannelCloseCommon(info, channelId));
 }
 
 /*
@@ -809,7 +806,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_001, TestSize.Level1)
     int32_t channelId = 10;
     ClearSyncChannelInfo();
 
-    OnChannelClosed(channelId);
+    EXPECT_NO_FATAL_FAILURE(OnChannelClosed(channelId));
 }
 
 /*
@@ -824,14 +821,11 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
 
     ClearSyncChannelInfo();
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == nullptr) {
-        LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
-        return;
-    }
+    ASSERT_NE(info, nullptr);
     info->clientChannelId = 10;
     ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
 
-    OnChannelClosed(channelId);
+    EXPECT_NO_FATAL_FAILURE(OnChannelClosed(channelId));
 }
 
 /*
@@ -844,14 +838,14 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_001, TestSize.Level1)
 {
     int32_t channelId = 10;
     uint32_t len = 10;
-    OnMessageReceived(channelId, nullptr, len);
+    EXPECT_NO_FATAL_FAILURE(OnMessageReceived(channelId, nullptr, len));
 
     len = 1;
-    OnMessageReceived(channelId, MSG_DATA, len);
+    EXPECT_NO_FATAL_FAILURE(OnMessageReceived(channelId, MSG_DATA, len));
 
     len = 10;
     ListDelete(&g_syncInfoManager.channelInfoList);
-    OnMessageReceived(channelId, MSG_DATA, len);
+    EXPECT_NO_FATAL_FAILURE(OnMessageReceived(channelId, MSG_DATA, len));
 }
 
 /*
@@ -867,14 +861,11 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
 
     ListDelete(&g_syncInfoManager.channelInfoList);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == nullptr) {
-        LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
-        return;
-    }
+    ASSERT_NE(info, nullptr);
     info->clientChannelId = 10;
     ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
 
-    OnMessageReceived(channelId, MSG_DATA1, len);
+    EXPECT_NO_FATAL_FAILURE(OnMessageReceived(channelId, MSG_DATA1, len));
     SoftBusFree(info);
 }
 
@@ -891,15 +882,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
 
     ListDelete(&g_syncInfoManager.channelInfoList);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == nullptr) {
-        LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
-        return;
-    }
+    ASSERT_NE(info, nullptr);
     info->clientChannelId = 10;
     ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
     g_syncInfoManager.handlers[1] = nullptr;
 
-    OnMessageReceived(channelId, MSG_DATA2, len);
+    EXPECT_NO_FATAL_FAILURE(OnMessageReceived(channelId, MSG_DATA2, len));
     SoftBusFree(info);
 }
 
@@ -1490,7 +1478,8 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_001, TestSize.Level1)
     data.len = 0;
     AuthHandle authHandle;
 
-    OnP2pNetworkingDataRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnP2pNetworkingDataRecv(authHandle, &data));
+    delete (data.data);
 }
 
 /*
@@ -1507,7 +1496,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_002, TestSize.Level1)
     data.module = ConnModule::MODULE_TRUST_ENGINE;
     AuthHandle authHandle;
 
-    OnP2pNetworkingDataRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnP2pNetworkingDataRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1621,7 +1610,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_001, TestSize.Level
 {
     ListDelete(&g_syncInfoManager.channelInfoList);
 
-    LnnSyncManagerHandleOffline(NETWORKID);
+    EXPECT_NO_FATAL_FAILURE(LnnSyncManagerHandleOffline(NETWORKID));
 }
 
 /*
@@ -1658,10 +1647,10 @@ HWTEST_F(LNNSyncInfoManagerTest, OnLnnOnlineStateChange_001, TestSize.Level1)
     LnnEventBasicInfo info;
     info.event = LNN_EVENT_IP_ADDR_CHANGED;
 
-    OnLnnOnlineStateChange(&info);
+    EXPECT_NO_FATAL_FAILURE(OnLnnOnlineStateChange(&info));
 
     info.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
-    OnLnnOnlineStateChange(&info);
+    EXPECT_NO_FATAL_FAILURE(OnLnnOnlineStateChange(&info));
 }
 
 /*
@@ -1674,7 +1663,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_001, TestSize.Level1)
 {
     AuthTransData *data = nullptr;
     AuthHandle authHandle;
-    OnWifiDirectSyncMsgRecv(authHandle, data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, data));
 }
 
 /*
@@ -1690,7 +1679,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_002, TestSize.Level1)
     data.data = new uint8_t(0);
     AuthHandle authHandle;
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1850,7 +1839,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_008, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncAuthClose_001, TestSize.Level1)
 {
     AuthHandle authHandle;
-    OnWifiDirectSyncAuthClose(authHandle);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncAuthClose(authHandle));
 }
 
 /*
