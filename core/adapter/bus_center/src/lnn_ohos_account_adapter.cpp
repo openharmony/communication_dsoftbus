@@ -226,7 +226,7 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
         LNN_LOGE(LNN_STATE, "get accountInfo failed ret=%{public}d", ret);
         return ret;
     }
-    if (accountInfo.uid_ == "") {
+    if (accountInfo.uid_.empty()) {
         LNN_LOGE(LNN_STATE, "accountInfo uid is empty");
         return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
     }
