@@ -790,6 +790,28 @@ static int32_t DlGetStaticNetCap(const char *networkId, bool checkOnline, void *
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetSleRangeCapacity(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((int32_t *)buf) = info->sleRangeCapacity;
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetSleAddr(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    errno_t rc = memcpy_s(buf, len, info->connectInfo.sleMacAddr, MAC_LEN);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail, ret %d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -808,6 +830,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_BLE_MAC, DlGetNodeBleMac},
     {STRING_KEY_WIFIDIRECT_ADDR, DlGetWifiDirectAddr},
     {STRING_KEY_P2P_IP, DlGetNodeP2pIp},
+    {STRING_KEY_SLE_ADDR, DlGetSleAddr},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
@@ -825,6 +848,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DEVICE_SECURITY_LEVEL, DlGetDeviceSecurityLevel},
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, DlGetConnSubFeatureCap},
     {NUM_KEY_STATIC_NET_CAP, DlGetStaticNetCap},
+    {NUM_KEY_SLE_RANGE_CAP, DlGetSleRangeCapacity},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BOOL_KEY_SCREEN_STATUS, DlGetNodeScreenOnFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},

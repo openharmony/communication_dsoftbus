@@ -32,6 +32,7 @@ conn_manager_inc += [
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/connection/coap/include",
+  "$dsoftbus_root_path/core/connection/sle/include",
 ]
 if (dsoftbus_feature_conn_tcp_comm) {
   CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_TCP_COMM" ]
@@ -74,9 +75,16 @@ if (dsoftbus_feature_ex_kits) {
   if (dsoftbus_feature_conn_legacy_im) {
     CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_LEGACY_IM" ]
   }
+  import(
+    "$dsoftbus_root_path/dsoftbus_enhance/core/connection/sle/conn_sle.gni")
+  conn_manager_inc += conn_sle_inc
+  conn_manager_src += conn_sle_src
+  conn_manager_common_deps += conn_sle_common_deps
+  conn_manager_external_deps += conn_sle_external_deps
 } else {
   conn_manager_src += [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
     "$dsoftbus_root_path/core/connection/coap/src/conn_coap_manager_virtual.c",
+    "$dsoftbus_root_path/core/connection/sle/src/conn_sle_manager_virtual.c",
   ]
 }

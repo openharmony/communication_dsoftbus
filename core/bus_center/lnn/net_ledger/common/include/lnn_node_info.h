@@ -202,6 +202,7 @@ typedef struct {
     uint64_t updateTimestamp;
     int64_t lastAuthSeq;
     ConnectInfo connectInfo;
+    int32_t sleRangeCapacity;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

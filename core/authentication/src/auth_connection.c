@@ -106,6 +106,8 @@ const char *GetConnTypeStr(uint64_t connId)
         case AUTH_LINK_TYPE_SESSION:
         case AUTH_LINK_TYPE_SESSION_KEY:
             return "session";
+        case AUTH_LINK_TYPE_SLE:
+            return "sle";
         default:
             break;
     }
@@ -285,6 +287,8 @@ static int32_t GetAuthTimeoutErrCode(AuthLinkType type)
             return SOFTBUS_AUTH_ENHANCEP2P_CONN_TIMEOUT;
         case AUTH_LINK_TYPE_SESSION_KEY:
             return SOFTBUS_AUTH_SESSION_KEY_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_SLE:
+            return SOFTBUS_AUTH_SLE_CONN_TIMEOUT;
         default:
             AUTH_LOGE(AUTH_CONN, "auth conn timeout type=%{public}d", type);
     }
@@ -795,11 +799,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
     int32_t ret = 0;
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI: {
-            ConnCmdInfo info = {
-                .requestId = requestId,
-                .connInfo = *connInfo,
-                .retryTimes = 0,
-            };
+            ConnCmdInfo info = { requestId, *connInfo, 0 };
             ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
             break;
         }
@@ -811,6 +811,8 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
                 break;
             }
             __attribute__((fallthrough));
+        case AUTH_LINK_TYPE_SLE:
+            __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
@@ -819,11 +821,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
             SessionConnectSucc(requestId, connInfo);
             break;
         case AUTH_LINK_TYPE_SESSION_KEY: {
-            ConnCmdInfo info = {
-                .requestId = requestId,
-                .connInfo = *connInfo,
-                .retryTimes = 0,
-            };
+            ConnCmdInfo info = { requestId, *connInfo, 0 };
             ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleTcpSessionConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
             break;
         }
@@ -873,6 +871,8 @@ void DisconnectAuthDevice(uint64_t *connId)
         case AUTH_LINK_TYPE_BLE:
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_BR:
+            __attribute__((fallthrough));
+        case AUTH_LINK_TYPE_SLE:
             ConnDisconnectDevice(GetConnId(*connId));
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
@@ -963,6 +963,7 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
             return SocketPostBytes(GetFd(connId), head, data);
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
+        case AUTH_LINK_TYPE_SLE:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return PostCommData(GetConnId(connId), toServer, head, data);

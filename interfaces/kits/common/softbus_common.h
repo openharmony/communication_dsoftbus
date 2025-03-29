@@ -259,6 +259,7 @@ typedef enum {
     CONNECTION_ADDR_SESSION,  /**< SESSION */
     CONNECTION_ADDR_USB,      /**< USB */
     CONNECTION_ADDR_SESSION_WITH_KEY, /**< Session with key */
+    CONNECTION_ADDR_SLE,      /**< SLE */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
@@ -284,6 +285,16 @@ typedef enum  {
     BLE_PRIORITY_LOW_POWER,
     BLE_PRIORITY_MAX
 } BlePriority;
+
+/**
+ * @brief Enumerates {@link BleProtocolType} types of ble connection type
+ *
+ */
+typedef enum  {
+    SLE_PROTOCOL_ANY = -1,
+    SLE_SSAP = 0,
+    SLE_PROTOCOL_MAX
+} SleProtocolType;
 
 typedef struct {
     bool hasDeviceKeyId;

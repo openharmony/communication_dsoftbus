@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,37 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef LNN_CONNECT_INFO_H
-#define LNN_CONNECT_INFO_H
+#ifndef LNN_SLE_CAPABILITY_H
+#define LNN_SLE_CAPABILITY_H
 
 #include <stdint.h>
-
-#include "bus_center_info_key.h"
+#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define LOCAL_IP "127.0.0.1"
-#define DEFAULT_IP ""
-#define DEFAULT_MAC ""
-#define DEFAULT_IFNAME ""
-#define MAX_ADDR_LEN 46
+int32_t SetSleRangeCapToLocalLedger();
+int32_t SetSleAddrToLocalLedger();
 
-typedef struct {
-    char netIfName[NET_IF_NAME_LEN];
-    char deviceIp[MAX_ADDR_LEN];
-    char macAddr[MAC_LEN];
-    char bleMacAddr[MAC_LEN];
-    char sleMacAddr[MAC_LEN];
-    int authPort;
-    int proxyPort;
-    int sessionPort;
-    uint64_t latestTime;
-} ConnectInfo;
+int32_t LocalLedgerInitSleCapacity(NodeInfo *nodeInfo);
+void LocalLedgerDeinitSleCapacity();
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // LNN_CONNECT_INFO_H
+#endif // LNN_SLE_CAPABILITY_H

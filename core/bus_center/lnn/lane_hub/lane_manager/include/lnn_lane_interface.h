@@ -33,6 +33,7 @@ extern "C" {
 typedef enum {
     LANE_BR = 0x0,
     LANE_BLE,
+    LANE_SLE,
     LANE_P2P,
     LANE_WLAN_2P4G,
     LANE_WLAN_5G,
