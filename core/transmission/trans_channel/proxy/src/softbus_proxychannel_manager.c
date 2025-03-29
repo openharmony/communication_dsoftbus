@@ -48,6 +48,7 @@
 #include "trans_channel_limit.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
+#include "trans_inner.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
 
@@ -651,7 +652,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     }
 }
 
-static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
+int32_t TransProxyGetAppInfoById(int16_t channelId, AppInfo *appInfo)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -661,7 +662,7 @@ static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->myId == myId) {
+        if (item->myId == channelId) {
             if (memcpy_s(appInfo, sizeof(AppInfo), &(item->appInfo), sizeof(item->appInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
@@ -832,7 +833,7 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
         .peerId = msg->msgHead.peerId
     };
 
-    if (TransProxyGetAppInfo(info.myId, &(info.appInfo)) != SOFTBUS_OK) {
+    if (TransProxyGetAppInfoById(info.myId, &(info.appInfo)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "failed to get peer data info");
         return;
     }
@@ -1414,7 +1415,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     info->peerId = msg->msgHead.peerId;
     info->myId = msg->msgHead.myId;
 
-    if (TransProxyGetAppInfo(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
+    if (TransProxyGetAppInfoById(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fail to get peer data info");
         SoftBusFree(info);
         return;

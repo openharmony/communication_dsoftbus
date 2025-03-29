@@ -130,6 +130,10 @@ ohos_unittest("TransTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/transmission/common/include",
+    "$dsoftbus_root_path/sdk/transmission/common/src",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
   ]
 
   deps = [
@@ -177,6 +181,8 @@ ohos_unittest("TransTcpDirectMockTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
   ]
 
   deps = [

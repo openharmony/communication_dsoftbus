@@ -18,9 +18,9 @@
 
 #include <gmock/gmock.h>
 
-#include "client_trans_assemble_tlv.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_manager.h"
+#include "trans_assemble_tlv.h"
 
 namespace OHOS {
 class TransTcpDirectInterface {

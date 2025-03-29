@@ -68,11 +68,6 @@ typedef struct {
 
 #define FAST_TDC_EXT_DATA_SIZE (OVERHEAD_LEN + sizeof(TcpFastDataPacketHead))
 
-enum {
-    FLAG_BYTES = 0,
-    FLAG_MESSAGE = 2,
-};
-
 char *PackRequest(const AppInfo *appInfo);
 
 int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo);
