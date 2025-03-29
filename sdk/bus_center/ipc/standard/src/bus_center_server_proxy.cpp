@@ -344,7 +344,7 @@ int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config
     }
     int32_t ret = g_serverProxy->StopRangeForMsdp(pkgName, config);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "stop failed");
+        LNN_LOGE(LNN_EVENT, "stop failed, error = %{public}d", ret);
     }
     return ret;
 }
