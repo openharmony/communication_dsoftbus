@@ -17,7 +17,7 @@
 #include "softbus_conn_ble_direct.h"
 #include "softbus_error_code.h"
 
-int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
+int32_t ConnDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
 {
     CONN_LOGW(CONN_BLE, "do not support ble direct connection");
     return SOFTBUS_NOT_IMPLEMENT;
