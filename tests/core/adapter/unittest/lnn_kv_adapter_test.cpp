@@ -19,6 +19,7 @@
 #include "lnn_kv_data_change_listener.h"
 #include "softbus_error_code.h"
 #include "gtest/gtest.h"
+#include "lnn_parameter_utils.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -351,7 +352,11 @@ HWTEST_F(KVAdapterTest, DeRegisterDataChangeListener001, TestSize.Level1)
  */
 HWTEST_F(KVAdapterTest, CloudSync001, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_OK, kvStore->CloudSync());
+    if (!IsCloudSyncEnabled()) {
+        EXPECT_EQ(SOFTBUS_KV_CLOUD_DISABLED, kvStore->CloudSync());
+    } else {
+        EXPECT_EQ(SOFTBUS_KV_CLOUD_SYNC_FAIL, kvStore->CloudSync());
+    }
 }
 
 /**

@@ -210,7 +210,8 @@ HWTEST_F(LNNTopoManagerTest, CREATE_TOPO_ITEM_TEST_001, TestSize.Level1)
     EXPECT_EQ(item, nullptr);
     TopoInfo *topo = CreateTopoInfo(INVALID_UUID, OLD_RELATION, RELATION_LEN);
     EXPECT_EQ(topo, nullptr);
-    topo = CreateTopoInfo(UDID, OLD_RELATION, INVALID_RELATION_LEN);
+    uint32_t len = INVALID_RELATION_LEN + 1;
+    topo = CreateTopoInfo(UDID, OLD_RELATION, len);
     EXPECT_EQ(topo, nullptr);
     item = FindTopoItem(UDID);
     EXPECT_EQ(topo, nullptr);
@@ -265,7 +266,8 @@ HWTEST_F(LNNTopoManagerTest, PACK_TOPO_INFO_TEST_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(cJSON), 0, sizeof(cJSON));
     int32_t ret = PackTopoInfo(&info, UDID, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = PackTopoInfo(&info, UDID, PEER_UDID, OLD_RELATION, INVALID_RELATION_LEN);
+    uint32_t len = INVALID_RELATION_LEN + 1;
+    ret = PackTopoInfo(&info, UDID, PEER_UDID, OLD_RELATION, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = PackTopoInfo(&info, nullptr, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
     EXPECT_EQ(ret, SOFTBUS_ADD_INFO_TO_JSON_FAIL);

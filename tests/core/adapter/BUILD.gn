@@ -23,6 +23,7 @@ ohos_unittest("LnnKVAdapterTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/kv_store/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/common/include",
   ]
   deps = [
@@ -39,6 +40,7 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
     "$dsoftbus_root_path/core/adapter/kv_store/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",

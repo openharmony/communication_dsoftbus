@@ -600,5 +600,15 @@ int32_t LnnCloudSync(int32_t dbId)
 {
     return GetAuthLaneMockInterface()->LnnCloudSync(dbId);
 }
+
+int32_t InitLaneListener(void)
+{
+    return GetAuthLaneMockInterface()->InitLaneListener();
+}
+
+int32_t LnnInitLocalLedger(void)
+{
+    return GetAuthLaneMockInterface()->LnnInitLocalLedger();
+}
 }
 } // namespace OHOS
