@@ -77,6 +77,7 @@ if (dsoftbus_feature_ex_kits) {
   }
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/connection/sle/conn_sle.gni")
+
   conn_manager_inc += conn_sle_inc
   conn_manager_src += conn_sle_src
   conn_manager_common_deps += conn_sle_common_deps
