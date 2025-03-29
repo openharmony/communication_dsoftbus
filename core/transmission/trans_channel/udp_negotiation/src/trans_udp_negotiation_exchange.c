@@ -171,15 +171,15 @@ static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
     if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
-    uint32_t size = 0;
-    char accountId[ACCOUNT_UID_LEN_MAX] = {0};
-    if (GetOsAccountUid(accountId, ACCOUNT_UID_LEN_MAX-1, &size) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get current account failed.");
-    }
     int32_t userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
     if (userId == INVALID_USER_ID) {
         TRANS_LOGE(TRANS_CTRL, "get userId failed.");
         return;
+    }
+    uint32_t size = 0;
+    char accountId[ACCOUNT_UID_LEN_MAX] = {0};
+    if (GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get current account failed.");
     }
     (void)AddNumberToJsonObject(msg, "USER_ID", userId);
     (void)AddStringToJsonObject(msg, "ACCOUNT_ID", accountId);
