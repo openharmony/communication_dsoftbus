@@ -30,6 +30,7 @@
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
+#include "trans_inner.h"
 #include "trans_log.h"
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
@@ -61,6 +62,11 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
         return ret;
     }
+    ret = InnerListInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InnerListInit Failed");
+        return ret;
+    }
     ret = ScenarioManagerGetInstance();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
@@ -80,6 +86,7 @@ void TransServerDeinit(void)
 
     TransSessionMgrDeinit();
     TransChannelDeinit();
+    InnerListDeinit();
     TransPermissionDeinit();
     ScenarioManagerdestroyInstance();
     atomic_store_explicit(&g_transSessionInitFlag, false, memory_order_release);

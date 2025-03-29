@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "client_trans_assemble_tlv.h"
+#include "trans_assemble_tlv.h"
 
 #include <securec.h>
 

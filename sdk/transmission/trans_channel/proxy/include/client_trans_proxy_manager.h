@@ -17,6 +17,7 @@
 #define CLIENT_TRANS_PROXY_CHANNEL_H
 
 #include "client_trans_session_callback.h"
+#include "trans_proxy_process_data.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,29 +36,6 @@ typedef struct {
     int32_t channelId;
     ProxyChannelInfoDetail detail;
 }ClientProxyChannelInfo;
-
-typedef struct {
-    int32_t active;
-    int32_t timeout;
-    int32_t sliceNumber;
-    int32_t expectedSeq;
-    int32_t dataLen;
-    int32_t bufLen;
-    char *data;
-}SliceProcessor;
-
-typedef enum {
-    PROXY_CHANNEL_PRORITY_MESSAGE = 0,
-    PROXY_CHANNEL_PRORITY_BYTES = 1,
-    PROXY_CHANNEL_PRORITY_FILE = 2,
-    PROXY_CHANNEL_PRORITY_BUTT = 3,
-} ProxyChannelPriority;
-
-typedef struct {
-    ListNode head;
-    int32_t channelId;
-    SliceProcessor processor[PROXY_CHANNEL_PRORITY_BUTT];
-}ChannelSliceProcessor;
 
 int32_t ClientTransProxyInit(const IClientSessionCallBack *cb);
 
@@ -84,7 +62,7 @@ int32_t ClientTransProxyOnDataReceived(int32_t channelId,
 
 void ClientTransProxyCloseChannel(int32_t channelId);
 
-int32_t TransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t len,
+int32_t ClientTransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t len,
     ProxyChannelInfoDetail* info, SessionPktType pktType);
 
 int32_t TransProxyAsyncPackAndSendData(int32_t channelId, const void *data, uint32_t len, uint32_t dataSeq,

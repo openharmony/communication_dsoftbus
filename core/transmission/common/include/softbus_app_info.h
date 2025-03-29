@@ -139,6 +139,19 @@ typedef struct {
     AppInfoData peerData;
 } AppInfo;
 
+enum {
+    FLAG_BYTES = 0,
+    FLAG_ACK = 1,
+    FLAG_MESSAGE = 2,
+    FILE_FIRST_FRAME = 3,
+    FILE_ONGOINE_FRAME = 4,
+    FILE_LAST_FRAME = 5,
+    FILE_ONLYONE_FRAME = 6,
+    FILE_ALLFILE_SENT = 7,
+    FLAG_ASYNC_MESSAGE = 8,
+    FLAG_SET_LOW_LATENCY = 9
+};
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

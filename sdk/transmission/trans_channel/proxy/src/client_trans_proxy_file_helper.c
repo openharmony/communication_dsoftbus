@@ -44,7 +44,7 @@ int32_t ProxyChannelSendFileStream(int32_t channelId, const char *data, uint32_t
     int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_FILE, "client trans proxy get info by ChannelId fail");
-    return TransProxyPackAndSendData(channelId, data, len, &info, (SessionPktType)type);
+    return ClientTransProxyPackAndSendData(channelId, data, len, &info, (SessionPktType)type);
 }
 
 int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t result, uint32_t side)
