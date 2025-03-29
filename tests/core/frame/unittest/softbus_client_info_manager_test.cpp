@@ -104,7 +104,7 @@ HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest004, TestSize
         pkgName, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ISessionListener object;
+    ISessionListenerInner object;
     const char *sessionName = "ohos.distributedschedule.dms.test";
     ret = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(
         sessionName, &object);

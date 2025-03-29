@@ -138,6 +138,8 @@ int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount);
 int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
 
 int32_t TransTdcResetReplyCnt(int32_t channelId);
+
+int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName);
 #ifdef __cplusplus
 #if __cplusplus
 }

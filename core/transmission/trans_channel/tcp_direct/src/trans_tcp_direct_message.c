@@ -46,6 +46,7 @@
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
+#include "trans_tcp_process_data.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
@@ -57,15 +58,6 @@
 #define MIN_META_LEN 6
 #define META_SESSION "IShare"
 #define MAX_ERRDESC_LEN 128
-
-typedef struct {
-    ListNode node;
-    int32_t channelId;
-    int32_t fd;
-    uint32_t size;
-    char *data;
-    char *w;
-} ServerDataBuf;
 
 typedef struct {
     int32_t channelType;
@@ -117,13 +109,13 @@ static void TransSrvDestroyDataBuf(void)
         return;
     }
 
-    ServerDataBuf *item = NULL;
-    ServerDataBuf *next = NULL;
+    DataBuf *item = NULL;
+    DataBuf *next = NULL;
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "mutex lock failed");
         return;
     }
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, DataBuf, node) {
         ListDelete(&item->node);
         SoftBusFree(item->data);
         SoftBusFree(item);
@@ -146,7 +138,7 @@ void TransSrvDataListDeinit(void)
 int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
 {
 #define MAX_DATA_BUF 4096
-    ServerDataBuf *node = (ServerDataBuf *)SoftBusCalloc(sizeof(ServerDataBuf));
+    DataBuf *node = (DataBuf *)SoftBusCalloc(sizeof(DataBuf));
     if (node == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create server data buf node fail.");
         return SOFTBUS_MALLOC_ERR;
@@ -182,12 +174,12 @@ void TransSrvDelDataBufNode(int32_t channelId)
         return;
     }
 
-    ServerDataBuf *item = NULL;
-    ServerDataBuf *next = NULL;
+    DataBuf *item = NULL;
+    DataBuf *next = NULL;
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         return;
     }
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, DataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_BYTES, "delete channelId=%{public}d", item->channelId);
@@ -1034,15 +1026,15 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
     return ret;
 }
 
-static ServerDataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
+static DataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
 {
     if (g_tcpSrvDataList ==  NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is null");
         return NULL;
     }
 
-    ServerDataBuf *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
+    DataBuf *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), DataBuf, node) {
         if (item->channelId == channelId) {
             return item;
         }
@@ -1144,7 +1136,7 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL || node->data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "node is null.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
@@ -1190,7 +1182,7 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int
     int32_t ret = SoftBusMutexLock(&g_tcpSrvDataList->lock);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed.");
 
-    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         TRANS_LOGE(TRANS_CTRL,
@@ -1254,8 +1246,8 @@ static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd,
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    ServerDataBuf *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
+    DataBuf *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), DataBuf, node) {
         if (item->channelId == channelId) {
             *fd = item->fd;
             *len = item->size - (item->w - item->data);
@@ -1282,9 +1274,9 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    ServerDataBuf *item = NULL;
-    ServerDataBuf *nextItem = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
+    DataBuf *item = NULL;
+    DataBuf *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_tcpSrvDataList->list), DataBuf, node) {
         if (item->channelId != channelId) {
             continue;
         }
@@ -1359,7 +1351,7 @@ static int32_t TransReadDataLen(int32_t channelId, int32_t *pktDataLen, int32_t 
         return SOFTBUS_LOCK_ERR;
     }
 
-    ServerDataBuf *dataBuf = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *dataBuf = TransSrvGetDataBufNodeById(channelId);
     if (dataBuf == NULL) {
         (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_TRANS_TCP_DATABUF_NOT_FOUND;
@@ -1428,7 +1420,7 @@ static int32_t TransSrvGetSeqAndFlagsByChannelId(uint64_t *seq, uint32_t *flags,
 
     int32_t ret = SoftBusMutexLock(&g_tcpSrvDataList->lock);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
-    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL || node->data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "node is null.");
         (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);

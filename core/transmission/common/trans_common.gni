@@ -18,6 +18,9 @@ trans_common_inc = [
 ]
 trans_common_src = [
   "$dsoftbus_root_path/core/transmission/common/src/softbus_message_open_channel.c",
+  "$dsoftbus_root_path/core/transmission/common/src/trans_assemble_tlv.c",
   "$dsoftbus_root_path/core/transmission/common/src/trans_pending_pkt.c",
+  "$dsoftbus_root_path/core/transmission/common/src/trans_proxy_process_data.c",
+  "$dsoftbus_root_path/core/transmission/common/src/trans_tcp_process_data.c",
 ]
 trans_common_deps = []

@@ -33,6 +33,8 @@
 #include "softbus_conn_interface.h"
 #include "softbus_socket.h"
 #include "trans_tcp_direct_mock.h"
+#include "trans_tcp_process_data.h"
+#include "trans_tcp_process_data.c"
 
 #define MAX_LEN 2048
 #define TEST_FD 10
@@ -657,7 +659,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest001, TestSize.Level0)
     uint32_t len = BUF_LEN;
     int32_t flags = FLAG_ACK;
     int32_t ret = TransTdcProcessPostData(channel, data, len, flags);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SoftBusFree(channel);
 }
 
@@ -673,7 +675,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcDecryptTest001, TestSize.Level0)
     uint32_t outLen = 0;
     uint32_t inLen = 0;
     int32_t ret = TransTdcDecrypt(nullptr, nullptr, inLen, out, &outLen);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -689,14 +691,17 @@ HWTEST_F(TransTcpDirectTest, TransTdcEncryptWithSeqTest001, TestSize.Level0)
     uint32_t outLen = 0;
     uint32_t inLen = (uint32_t)strlen(in);
     int32_t seqNum = BUF_LEN;
-    int32_t ret = TransTdcEncryptWithSeq(nullptr, seqNum, in, inLen, out, &outLen);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EncrptyInfo enInfo = {
+        .in = in,
+        .inLen = inLen,
+        .out = out,
+        .outLen = &outLen,
+    };
+    int32_t ret = TransTdcEncryptWithSeq(nullptr, seqNum, &enInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcEncryptWithSeq(g_sessionkey, seqNum, nullptr, inLen, out, &outLen);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
-
-    ret = TransTdcEncryptWithSeq(g_sessionkey, seqNum, in, inLen, out, &outLen);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    ret = TransTdcEncryptWithSeq(g_sessionkey, seqNum, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -754,7 +759,7 @@ HWTEST_F(TransTcpDirectTest, TransGetDataBufSizeTest001, TestSize.Level0)
     uint32_t ret = TransGetDataBufSize();
     EXPECT_EQ(ret, MIN_BUF_LEN);
 
-    int32_t res = TransGetDataBufMaxSize();
+    int32_t res = TransGetTdcDataBufMaxSize();
     EXPECT_EQ(res, SOFTBUS_OK);
 }
 
@@ -792,7 +797,7 @@ HWTEST_F(TransTcpDirectTest, TransGetDataBufNodeByIdTest001, TestSize.Level0)
 {
     int32_t channelId = 1;
     int32_t fd = TEST_FD;
-    ClientDataBuf *data = TransGetDataBufNodeById(channelId);
+    DataBuf *data = TransGetDataBufNodeById(channelId);
     EXPECT_TRUE(data == nullptr);
 
     int32_t ret = TransDataListInit();
@@ -873,9 +878,9 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
  */
 HWTEST_F(TransTcpDirectTest, TransResizeDataBufferTest001, TestSize.Level0)
 {
-    ClientDataBuf *oldBuf = (ClientDataBuf *)SoftBusCalloc(sizeof(ClientDataBuf));
+    DataBuf *oldBuf = (DataBuf *)SoftBusCalloc(sizeof(DataBuf));
     ASSERT_TRUE(oldBuf != nullptr);
-    (void)memset_s(oldBuf, sizeof(ClientDataBuf), 0, sizeof(ClientDataBuf));
+    (void)memset_s(oldBuf, sizeof(DataBuf), 0, sizeof(DataBuf));
     int32_t ret = TransResizeDataBuffer(oldBuf, PKG_LEN);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
@@ -898,9 +903,9 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest001, TestSize.Level0)
 {
     int32_t channelId = 1;
     int32_t fd = TEST_FD;
-    ClientDataBuf *oldBuf = (ClientDataBuf *)SoftBusCalloc(sizeof(ClientDataBuf));
+    DataBuf *oldBuf = (DataBuf *)SoftBusCalloc(sizeof(DataBuf));
     ASSERT_TRUE(oldBuf != nullptr);
-    (void)memset_s(oldBuf, sizeof(ClientDataBuf), 0, sizeof(ClientDataBuf));
+    (void)memset_s(oldBuf, sizeof(DataBuf), 0, sizeof(DataBuf));
 
     int32_t ret = TransTdcProcAllData(channelId);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
@@ -1147,16 +1152,16 @@ HWTEST_F(TransTcpDirectTest, TransTdcCloseFdTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: UnpackTcpDataPacketHeadTest001
- * @tc.desc: UnpackTcpDataPacketHead, use the wrong or normal parameter.
+ * @tc.name: UnPackTcpDataPacketHeadTest001
+ * @tc.desc: UnPackTcpDataPacketHead, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, UnpackTcpDataPacketHeadTest001, TestSize.Level0)
+HWTEST_F(TransTcpDirectTest, UnPackTcpDataPacketHeadTest001, TestSize.Level0)
 {
     TcpDataPacketHead data;
     data.seq = 1;
-    UnpackTcpDataPacketHead(&data);
+    UnPackTcpDataPacketHead(&data);
     EXPECT_TRUE(data.seq);
 }
 
@@ -1214,7 +1219,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest002, TestSize.Level0)
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
     int32_t ret = TransTdcProcessPostData(channel, data, len, flags);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SoftBusFree(channel);
     SoftBusFree(info);
     SoftBusFree(serverNode);
@@ -1249,7 +1254,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level0)
 
     info->detail.needRelease = false;
     ret = TransTdcSendBytes(channelId, data, len, false);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -1282,7 +1287,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendMessageTest001, TestSize.Level0)
 
     info->detail.needRelease = false;
     ret = TransTdcSendMessage(channelId, data, len);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -1312,7 +1317,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level0)
     ret = TransTdcProcessData(channelId);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
-    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
+    DataBuf *buf = reinterpret_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
     ASSERT_NE(buf, nullptr);
     g_tcpDataList = CreateSoftBusList();
     ASSERT_NE(g_tcpDataList, nullptr);
@@ -1359,7 +1364,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
     int32_t ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);;
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
-    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
+    DataBuf *buf = reinterpret_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
     ASSERT_NE(buf, nullptr);
     g_tcpDataList = CreateSoftBusList();
     ASSERT_NE(g_tcpDataList, nullptr);
@@ -1392,7 +1397,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level0)
 HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level0)
 {
     int32_t channelId = TRANS_TEST_CHANNEL_ID;
-    ClientDataBuf *buf = reinterpret_cast<ClientDataBuf *>(SoftBusCalloc(sizeof(ClientDataBuf)));
+    DataBuf *buf = reinterpret_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
     ASSERT_NE(buf, nullptr);
     g_tcpDataList = CreateSoftBusList();
     ASSERT_NE(g_tcpDataList, nullptr);

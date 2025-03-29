@@ -25,6 +25,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "trans_proxy_process_data.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -722,29 +723,29 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTes
 }
 
 /**
- * @tc.name: ClientTransProxySessionDataLenCheckTest001
+ * @tc.name: TransProxySessionDataLenCheckTest001
  * @tc.desc: client send file crc check sum, use normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxySessionDataLenCheckTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, TransProxySessionDataLenCheckTest001, TestSize.Level0)
 {
     uint32_t len = TEST_DATA_LEN;
     SessionPktType type = TRANS_SESSION_MESSAGE;
-    int32_t ret = ClientTransProxySessionDataLenCheck(len, type);
+    int32_t ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     type = TRANS_SESSION_BYTES;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     type = TRANS_SESSION_FILE_LAST_FRAME;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     len = 0;
     type = TRANS_SESSION_ASYNC_MESSAGE;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     type = TRANS_SESSION_BYTES;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -758,11 +759,11 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataT
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t seq = TEST_SEQ;
-    ClientProxyDataInfo dataInfo;
+    ProxyDataInfo dataInfo;
     int32_t ret = ClientTransProxyDecryptPacketData(channelId, seq, &dataInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
-    ret = ClientTransProxyCheckSliceHead(nullptr);
+    ret = TransProxyCheckSliceHead(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

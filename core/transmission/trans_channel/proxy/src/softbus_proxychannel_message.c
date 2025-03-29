@@ -33,6 +33,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_proxy_process_data.h"
 #include "trans_session_account_adapter.h"
 
 
