@@ -78,11 +78,16 @@ public:
 
 void AuthLaneTest::SetUpTestCase()
 {
+    AuthLaneInterfaceMock mock;
+    EXPECT_CALL(mock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, InitLaneListener).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnInitLocalLedger).WillRepeatedly(Return(SOFTBUS_OK));
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LooperInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitDistributedLedger();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLnnLooper();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -141,14 +146,21 @@ HWTEST_F(AuthLaneTest, ADD_AUTH_REQUEST_NODE_TEST_001, TestSize.Level1)
 {
     uint32_t laneReqId = 1;
     uint32_t authRequestId = 1;
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
+    ASSERT_NE(nodeInfo, nullptr);
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetNodeInfoById).WillRepeatedly(Return(nodeInfo));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     int32_t ret = AddAuthReqNode(nullptr, laneReqId, authRequestId, &authConnCb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
@@ -234,6 +246,11 @@ HWTEST_F(AuthLaneTest, GET_AUTH_LINK_TYPE_LIST_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
@@ -246,9 +263,6 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
     ret = AuthAllocLane(nullptr, authRequestId, &authConnCb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     ret = AuthAllocLane(NETWORK_ID, authRequestId, &authConnCb);
     EXPECT_NE(ret, SOFTBUS_OK);
     DestroyAuthManagerList();
@@ -264,13 +278,15 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
@@ -310,13 +326,15 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
@@ -354,13 +372,15 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
@@ -394,13 +414,17 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, SoftBusGetTime).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_BLE);
@@ -440,13 +464,16 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, SoftBusGetTime).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_BR);
@@ -486,13 +513,15 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_P2P);
@@ -529,13 +558,15 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
 {
+    AuthLaneInterfaceMock mock;
+    SoftBusLooper loop;
+    EXPECT_CALL(mock, GetLooper).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
     InitAuthReqInfo();
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     AuthCommonInit();
-    AuthLaneInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
-        .WillRepeatedly(DoAll(SetArrayArgument<2>(UUID_TEST, UUID_TEST + UUID_BUF_LEN), Return(SOFTBUS_OK)));
 
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_ENHANCED_P2P);

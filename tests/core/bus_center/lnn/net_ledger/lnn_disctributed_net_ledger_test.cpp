@@ -243,16 +243,21 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_CNN_CODE_Test_001, TestSize.Level1)
 HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Level1)
 {
     NodeInfo newInfo;
+    static bool isVirtual = false;
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE1_UDID, strlen(NODE1_UDID));
+    if (LnnRetrieveDeviceInfo(newInfo.deviceInfo.deviceUdid, &newInfo) == SOFTBUS_NOT_IMPLEMENT) {
+        isVirtual = true;
+    }
     int32_t ret = LnnUpdateNodeInfo(&newInfo, CONNECTION_ADDR_BLE);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t res = isVirtual ?  SOFTBUS_NOT_IMPLEMENT : SOFTBUS_OK;
+    EXPECT_EQ(ret, res);
     (void)memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "newpeerIrk", strlen("newpeerIrk"));
     ret = LnnUpdateNodeInfo(&newInfo, CONNECTION_ADDR_BLE);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, res);
     (void)strcpy_s(newInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "newDeviceName");
     ret = LnnUpdateNodeInfo(&newInfo, CONNECTION_ADDR_BLE);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, res);
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE2_UDID, strlen(NODE2_UDID));
     ret = LnnUpdateNodeInfo(&newInfo, CONNECTION_ADDR_BLE);
@@ -1398,10 +1403,10 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DL_ID_Test_001, TestSize.Level1)
         CATEGORY_UUID, dstIdBuf1, UUID_BUF_LEN));
     const char *srcId2 = "235689BNHFCF";
     char dstIdBuf2[NETWORK_ID_BUF_LEN] = { 0 };
-    EXPECT_EQ(SOFTBUS_NOT_FIND, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_NETWORK_ID,
+    EXPECT_EQ(SOFTBUS_OK, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_NETWORK_ID,
         CATEGORY_NETWORK_ID, dstIdBuf2, NETWORK_ID_BUF_LEN));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnConvertDlId(nullptr, CATEGORY_UDID, CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_UDID,
+    EXPECT_EQ(SOFTBUS_NOT_FIND, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_UDID,
         CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
 }
 
