@@ -114,7 +114,7 @@ int32_t ISoftBusServer::StopRangeForMsdp(const char *pkgName, const RangeConfig 
     (void)pkgName;
     (void)config;
     COMM_LOGE(COMM_SVC, "ipc default impl");
-    return SOFTBUS_IPC_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
