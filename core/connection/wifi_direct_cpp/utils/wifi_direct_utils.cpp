@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include <charconv>
+#include <cstdio>
 #include <endian.h>
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -43,6 +44,8 @@
 #include "syspara/parameters.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_defines.h"
+
+#define CONN_WIFI_DIRECT_FD_TAG fdsan_create_owner_tag(FDSAN_OWNER_TYPE_FILE, 0xd005764)
 
 namespace OHOS::SoftBus {
 static constexpr int INVALID_CHLOAD = -1;
@@ -310,9 +313,9 @@ std::vector<uint8_t> WifiDirectUtils::GetInterfaceMacAddr(const std::string &int
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     CONN_CHECK_AND_RETURN_RET_LOGW(fd > 0, macArray, CONN_WIFI_DIRECT,
         "open socket failed, fd=%{public}d, errno=%{public}d(%{public}s)", fd, errno, strerror(errno));
+    fdsan_exchange_owner_tag(fd, 0, CONN_WIFI_DIRECT_FD_TAG);
     ret = ioctl(fd, SIOCGIFHWADDR, &ifr);
-    close(fd);
-
+    fdsan_close_with_tag(fd, CONN_WIFI_DIRECT_FD_TAG);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == 0, macArray, CONN_WIFI_DIRECT,
         "get hw addr failed ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno, strerror(errno));
     macArray.insert(macArray.end(), ifr.ifr_hwaddr.sa_data, ifr.ifr_hwaddr.sa_data + MAC_ADDR_ARRAY_SIZE);
@@ -398,6 +401,7 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
     int32_t socketFd = socket(AF_INET, SOCK_DGRAM, 0);
     CONN_CHECK_AND_RETURN_RET_LOGW(socketFd >= 0, SOFTBUS_CONN_OPEN_SOCKET_FAILED, CONN_WIFI_DIRECT,
         "open socket failed, socketFd=%{public}d, errno=%{public}d(%{public}s)", socketFd, errno, strerror(errno));
+    fdsan_exchange_owner_tag(socketFd, 0, CONN_WIFI_DIRECT_FD_TAG);
 
     struct ifreq request { };
     (void)memset_s(&request, sizeof(request), 0, sizeof(request));
@@ -405,12 +409,12 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
         strcpy_s(request.ifr_name, sizeof(request.ifr_name), reinterpret_cast<const char *>(interface.c_str()));
     if (ret != EOK) {
         CONN_LOGW(CONN_WIFI_DIRECT, "copy interface name failed");
-        close(socketFd);
+        fdsan_close_with_tag(socketFd, CONN_WIFI_DIRECT_FD_TAG);
         return SOFTBUS_CONN_COPY_INTERFACE_NAME_FAILED;
     }
 
     ret = ioctl(socketFd, SIOCGIFADDR, &request);
-    close(socketFd);
+    fdsan_close_with_tag(socketFd, CONN_WIFI_DIRECT_FD_TAG);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret >= 0, SOFTBUS_CONN_GET_IFR_CONF_FAILED, CONN_WIFI_DIRECT,
         "get ifr conf failed ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno, strerror(errno));
 
