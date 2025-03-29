@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef CLIENT_TRANS_ASSEMBLE_TLV_H
-#define CLIENT_TRANS_ASSEMBLE_TLV_H
+#ifndef TRANS_ASSEMBLE_TLV_H
+#define TRANS_ASSEMBLE_TLV_H
 
 #include "softbus_def.h"
 
@@ -49,4 +49,4 @@ void ReleaseTlvValueBuffer(DataHead *pktHead);
 #ifdef __cplusplus
 }
 #endif
-#endif // CLIENT_TRANS_ASSEMBLE_TLV_H
+#endif // TRANS_ASSEMBLE_TLV_H

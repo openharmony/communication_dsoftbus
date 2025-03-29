@@ -25,6 +25,8 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "trans_tcp_direct_tlv_mock.h"
+#include "trans_tcp_process_data.h"
+#include "trans_tcp_process_data.c"
 
 #define TDC_TLV_ELEMENT 5
 #define DATA_SIZE 4
@@ -163,7 +165,7 @@ HWTEST_F(TransTcpDirectMockTest, BuildDataHead001, TestSize.Level0)
 
 /**
  * @tc.name: TransTdcParseTlv001
- * @tc.desc: TransTdcParseTlv and PackTcpDataPacketHead
+ * @tc.desc: TransTdcParseTlv and TcpDataPacketHead
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -466,8 +468,8 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcProcessTlvData001, TestSize.Level0)
     TcpDataTlvPacketHead *head = reinterpret_cast<TcpDataTlvPacketHead *>(SoftBusCalloc(sizeof(TcpDataTlvPacketHead)));
     ASSERT_NE(head, nullptr);
     head->flags = FLAG_BYTES;
-    int32_t ret = TransTdcProcessTlvData(channel, head, PKG_HEAD_SIZE);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    int32_t ret = TransTdcProcessTlvData(channel.channelId, head, PKG_HEAD_SIZE);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
     SoftBusFree(head);
     TransDataListDeinit();
 }

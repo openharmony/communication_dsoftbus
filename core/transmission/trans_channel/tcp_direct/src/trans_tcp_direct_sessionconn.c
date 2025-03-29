@@ -680,6 +680,36 @@ int32_t TransGetPidByChanId(int32_t channelId, int32_t channelType, int32_t *pid
     return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
 }
 
+int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName)
+{
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp channel info list hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(g_tcpChannelInfoList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    TcpChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &(g_tcpChannelInfoList->list), TcpChannelInfo, node) {
+        if (info->channelId == channelId) {
+            (void)memcpy_s(pkgName, PKG_NAME_SIZE_MAX, info->pkgName, PKG_NAME_SIZE_MAX);
+            (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find pkgName by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t TransTdcUpdateReplyCnt(int32_t channelId)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {

@@ -349,7 +349,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfig0009, TestSize.L
 HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetDataBufNodeById0010, TestSize.Level1)
 {
     int32_t channelId = 1;
-    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *node = TransSrvGetDataBufNodeById(channelId);
     EXPECT_TRUE(node == nullptr || node->data == nullptr);
 }
 

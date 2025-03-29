@@ -51,7 +51,7 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusClientInfoManager::SoftbusAddServiceInner(const std::string &pkgName, ISessionListener *listener,
+int32_t SoftbusClientInfoManager::SoftbusAddServiceInner(const std::string &pkgName, ISessionListenerInner *listener,
     int32_t pid)
 {
     if (pkgName.empty() || listener == nullptr) {
@@ -100,7 +100,7 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName, ISessionListener *listener)
+int32_t SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName, ISessionListenerInner *listener)
 {
     if (listener == nullptr) {
         COMM_LOGE(COMM_SVC, "listener is nullptr\n");

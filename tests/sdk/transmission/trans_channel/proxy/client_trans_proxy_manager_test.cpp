@@ -26,6 +26,8 @@
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_proxy_manager.c"
 #include "client_trans_tcp_direct_message.h"
+#include "trans_proxy_process_data.h"
+#include "trans_proxy_process_data.c"
 
 #define TEST_CHANNEL_ID (-10)
 #define TEST_ERR_CODE (-1)
@@ -314,7 +316,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = memcpy_s(buf, TEST_DATA_LENGTH_2, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     sliceHead.priority = PROXY_CHANNEL_PRORITY_BYTES;
     int32_t dataLen = sizeof(SliceHead) + sizeof(PacketHead) + 1;
@@ -504,11 +506,11 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
     ProxyChannelInfoDetail info;
     memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
     SessionPktType pktType = TRANS_SESSION_MESSAGE;
-    int32_t ret = TransProxyPackAndSendData(channelId, nullptr, len, &info, pktType);
+    int32_t ret = ClientTransProxyPackAndSendData(channelId, nullptr, len, &info, pktType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransProxyPackAndSendData(channelId, data, len, nullptr, pktType);
+    ret = ClientTransProxyPackAndSendData(channelId, data, len, nullptr, pktType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransProxyPackAndSendData(channelId,
+    ret = ClientTransProxyPackAndSendData(channelId,
         static_cast<const void *>(data), len, &info, pktType);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
@@ -531,12 +533,12 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest
 }
 
 /**
- * @tc.name: ClientGetActualDataLen
- * @tc.desc: ClientGetActualDataLen test.
+ * @tc.name: TransGetActualDataLen
+ * @tc.desc: TransGetActualDataLen test.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientGetActualDataLenTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransGetActualDataLenTest, TestSize.Level0)
 {
     SliceHead head = {};
     uint32_t actualDataLen = 0;
@@ -546,24 +548,24 @@ HWTEST_F(ClientTransProxyManagerTest, ClientGetActualDataLenTest, TestSize.Level
     // Test case 1: Valid sliceNum, priority message
     head.sliceNum = 1;
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
-    EXPECT_EQ(SOFTBUS_OK, ClientGetActualDataLen(&head, &actualDataLen));
+    EXPECT_EQ(SOFTBUS_OK, TransGetActualDataLen(&head, &actualDataLen));
     EXPECT_EQ(head.sliceNum * SLICE_LEN, actualDataLen);
 
     // Test case 2: Valid sliceNum, priority bytes
     head.sliceNum = 10;
     head.priority = PROXY_CHANNEL_PRORITY_BYTES;
-    EXPECT_EQ(SOFTBUS_OK, ClientGetActualDataLen(&head, &actualDataLen));
+    EXPECT_EQ(SOFTBUS_OK, TransGetActualDataLen(&head, &actualDataLen));
     EXPECT_EQ(head.sliceNum * SLICE_LEN, actualDataLen);
 
     // Test case 3: Invalid sliceNum (exceeds MAX_MALLOC_SIZE / SLICE_LEN)
     head.sliceNum = (MAX_MALLOC_SIZE / SLICE_LEN) + 1;
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
-    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ClientGetActualDataLen(&head, &actualDataLen));
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, TransGetActualDataLen(&head, &actualDataLen));
 
     // Test case 4: Invalid sliceNum (actualLen exceeds maxDataLen)
     head.sliceNum = (g_proxyMaxMessageBufSize / SLICE_LEN) + 2;
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
-    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ClientGetActualDataLen(&head, &actualDataLen));
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, TransGetActualDataLen(&head, &actualDataLen));
 }
 
 /**
@@ -866,12 +868,12 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
 }
 
 /**
- * @tc.name: ClientTransProxySliceProcessChkPkgIsValid001
- * @tc.desc: ClientTransProxySliceProcessChkPkgIsValid
+ * @tc.name: TransProxySliceProcessChkPkgIsValid001
+ * @tc.desc: TransProxySliceProcessChkPkgIsValid
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySliceProcessChkPkgIsValid001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxySliceProcessChkPkgIsValid001, TestSize.Level0)
 {
     // head->sliceNum != processor->sliceNumber || head->sliceSeq != processor->expectedSeq
     SliceProcessor processor;
@@ -885,22 +887,22 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySliceProcessChkPkgIsValid0
     head.sliceSeq = 1;
     char data[16] = "test";
     uint32_t len = 20;
-    int32_t ret = ClientTransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
+    int32_t ret = TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_EXCEED_LENGTH, ret);
 
     processor.bufLen = 20;
-    ret = ClientTransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
+    ret = TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_EXCEED_LENGTH, ret);
 
     processor.bufLen = 50;
     processor.data = nullptr;
-    ret = ClientTransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
+    ret = TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL, ret);
 
     if (strcpy_s(processor.data, processor.bufLen, "test") != EOK) {
         return;
     }
-    ret = ClientTransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
+    ret = TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL, ret);
 }
 
@@ -918,25 +920,25 @@ HWTEST_F(ClientTransProxyManagerTest, IsValidCheckoutProcess001, TestSize.Level0
 }
 
 /**
- * @tc.name: ClientTransProxyPackTlvBytes001
+ * @tc.name: TransProxyPackTlvBytes
  * @tc.desc: ClientTransProxyPackTlvBytes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyPackTlvBytes001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyPackTlvBytes, TestSize.Level0)
 {
     int32_t channelId = 1;
     SessionPktType flag = TRANS_SESSION_ACK;
-    int32_t ret = ClientTransProxyPackTlvBytes(channelId, nullptr, nullptr, TEST_SEQ, flag);
+    int32_t ret = ClientTransProxyPackTlvBytes(channelId, nullptr, nullptr, flag, TEST_SEQ);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ClientProxyDataInfo dataInfo;
-    ret = ClientTransProxyPackTlvBytes(channelId, &dataInfo, nullptr, TEST_SEQ, flag);
+    ProxyDataInfo dataInfo;
+    ret = ClientTransProxyPackTlvBytes(channelId, &dataInfo, nullptr, flag, TEST_SEQ);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ProxyChannelInfoDetail info;
     (void)memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
-    ret = ClientTransProxyPackTlvBytes(channelId, &dataInfo, &info, TEST_SEQ, flag);
+    ret = ClientTransProxyPackTlvBytes(channelId, &dataInfo, &info, flag, TEST_SEQ);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
 

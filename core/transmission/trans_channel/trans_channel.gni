@@ -36,13 +36,20 @@ trans_channel_src += [
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_link_listener.c",
-  "$dsoftbus_root_path//core/transmission/trans_channel/manager/src/trans_bind_request_manager.c",
+  "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_bind_request_manager.c",
+  "$dsoftbus_root_path/core/transmission/trans_channel/inner_session/src/trans_inner_session.c",
 ]
+if (defined(ohos_lite)) {
+  trans_channel_src += [ "$dsoftbus_root_path/core/transmission/trans_channel/inner_session/src/trans_inner_self_adaptive_virtual.c" ]
+} else {
+  trans_channel_src += [ "$dsoftbus_root_path/core/transmission/trans_channel/inner_session/src/trans_inner_self_adaptive.cpp" ]
+}
 trans_channel_inc += [
   "$dsoftbus_root_path/core/adapter/transmission/include",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+  "$dsoftbus_root_path/core/transmission/trans_channel/inner_session/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
 ]

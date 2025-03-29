@@ -17,6 +17,7 @@
 #define SOFTBUS_PROXYCHANNEL_MESSAGE_H
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
+#include "trans_proxy_process_data.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -132,13 +133,6 @@ typedef struct {
     AuthHandle authHandle; /* for cipher */
     AppInfo appInfo;
 } ProxyChannelInfo;
-
-typedef struct {
-    uint8_t *inData;
-    uint32_t inLen;
-    uint8_t *outData;
-    uint32_t outLen;
-} ProxyDataInfo;
 
 typedef struct  {
     int32_t magicNumber;

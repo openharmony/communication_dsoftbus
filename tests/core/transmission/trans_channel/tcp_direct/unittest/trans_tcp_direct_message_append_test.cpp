@@ -227,7 +227,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvDataListInitTest002, TestSize.
 HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvGetDataBufNodeById001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
-    ServerDataBuf *ret = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *ret = TransSrvGetDataBufNodeById(channelId);
     EXPECT_EQ(nullptr, ret);
 }
 
@@ -694,7 +694,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest006, TestSize.L
 
     int32_t ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ServerDataBuf *buf = TransSrvGetDataBufNodeById(channelId);
+    DataBuf *buf = TransSrvGetDataBufNodeById(channelId);
     EXPECT_NE(nullptr, buf);
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
