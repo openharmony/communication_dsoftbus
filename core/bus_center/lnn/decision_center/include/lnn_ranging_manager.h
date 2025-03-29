@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DECISION_CENTER_SLE_RANGING_MANAGER_H
-#define DECISION_CENTER_SLE_RANGING_MANAGER_H
+#ifndef LNN_RANGING_MANAGER_H
+#define LNN_RANGING_MANAGER_H
 
 #include <stdint.h>
 
@@ -26,13 +26,13 @@ extern "C" {
 #endif
 
 #define SLE_ADDR_LEN 65
-#define MSG_FLAG_REQUEST 0
-#define MES_FLAG_REPLY 1
+#define MSG_FLAG_REQUEST 1
+#define MES_FLAG_REPLY 2
 #define DISTRIBUTED_CONFLICT 1
 #define DISTRIBUTED_NOT_CONFLICT 2
 
-#define LOCAL_START 0
-#define REMOTE_START 1
+#define LOCAL_START 1
+#define REMOTE_START 2
 
 typedef enum {
     SLE_NOT_SUPPORT,
@@ -60,9 +60,9 @@ typedef struct {
 
 int32_t LnnStartRange(const RangeConfig *config);
 int32_t LnnStopRange(const RangeConfig *config);
-int32_t RegistAuthTransListener();
-int32_t UnregistAuthTransListener();
-int32_t SendAuthResult(AuthHandle authHandle, int32_t module, int32_t flag, int64_t seq, const char *data);
+int32_t RegistAuthTransListener(void);
+int32_t UnregistAuthTransListener(void);
+int32_t SendAuthResult(AuthHandle authHandle, int64_t seq, const uint8_t *data, uint32_t len);
 
 #ifdef __cplusplus
 }
