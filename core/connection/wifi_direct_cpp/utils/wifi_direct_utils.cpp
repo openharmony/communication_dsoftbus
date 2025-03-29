@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include <charconv>
+#include <cstdio>
 #include <endian.h>
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -26,7 +27,6 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <cstdio>
 
 #include "bus_center_manager.h"
 #include "conn_log.h"
