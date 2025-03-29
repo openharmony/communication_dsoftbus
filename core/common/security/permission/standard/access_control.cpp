@@ -180,7 +180,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
 
     char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
-    (void)GetOsAccountUid(accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
+    (void)GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
     return TransCheckSourceAccessControl(callingTokenId, myDeviceId, appUserId, accountId, peerDeviceId);
 }
 
@@ -213,7 +213,7 @@ static int32_t CheckServerAccessControl(const AppInfo *appInfo, uint64_t myToken
 {
     char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
-    (void)GetOsAccountUid(accountId, ACCOUNT_UID_LEN_MAX - 1, &size);
+    (void)GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
     char *tmpMyDeviceId = nullptr;
     char *tmpPeerDeviceId = nullptr;
     char *tmpPeerAccountId = nullptr;
