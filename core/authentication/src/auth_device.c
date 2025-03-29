@@ -357,8 +357,9 @@ void AuthNotifyDeviceVerifyPassed(AuthHandle authHandle, const NodeInfo *nodeInf
         AUTH_LOGE(AUTH_FSM, "get auth manager failed");
         return;
     }
-    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P) {
-        /* P2P auth no need notify to LNN. */
+    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P ||
+        auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_SLE) {
+        /* P2P auth and sle auth no need notify to LNN. */
         DelDupAuthManager(auth);
         return;
     }
@@ -681,6 +682,8 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             }
             callback->onConnOpened(requestId, authHandle);
             break;
+        case AUTH_LINK_TYPE_SLE:
+            /* fall-through */
         case AUTH_LINK_TYPE_BR:
             /* fall-through */
         case AUTH_LINK_TYPE_BLE:
@@ -726,6 +729,7 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
             break;
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
+        case AUTH_LINK_TYPE_SLE:
             DisconnectAuthDevice(&auth->connId[authHandle.type]);
             break;
         default:

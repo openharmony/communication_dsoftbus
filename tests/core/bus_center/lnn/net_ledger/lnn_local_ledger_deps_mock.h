@@ -43,6 +43,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_sle_common.h"
 #include "softbus_config_type.h"
 #include "sqlite3_utils.h"
 
@@ -66,6 +67,11 @@ public:
     virtual int32_t GetDeviceSecurityLevel(int32_t *level);
     virtual int32_t SoftBusGetBtState(void) = 0;
     virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
+    virtual bool IsSleEnabled(void);
+    virtual int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId);
+    virtual void SoftBusRemoveSleStateListener(int listenerId);
+    virtual int32_t GetSleRangeCapacity();
+    virtual int32_t GetLocalSleAddr(char *sleAddr, uint32_t sleAddrLen);
     virtual int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias);
     virtual int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias);
     virtual int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
@@ -283,6 +289,11 @@ public:
     MOCK_METHOD1(GetDeviceSecurityLevel, int32_t(int32_t *));
     MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
     MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t(SoftBusBtAddr *));
+    MOCK_METHOD0(IsSleEnabled, bool(void));
+    MOCK_METHOD2(SoftBusAddSleStateListener, int(const SoftBusSleStateListener *, int *));
+    MOCK_METHOD1(SoftBusRemoveSleStateListener, void(int));
+    MOCK_METHOD0(GetSleRangeCapacity, int32_t(void));
+    MOCK_METHOD2(GetLocalSleAddr, int32_t(char *, uint32_t));
     MOCK_METHOD1(LnnGenerateKeyByHuks, int32_t(struct HksBlob *));
     MOCK_METHOD1(LnnDeleteKeyByHuks, int32_t(struct HksBlob *));
     MOCK_METHOD3(LnnEncryptDataByHuks, int32_t(const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
@@ -474,6 +485,7 @@ public:
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
+    static int32_t MockGetLocalSleAddrFunc(char *sleAddr, uint32_t sleAddrLen);
 };
 } // namespace OHOS
 #endif // LNN_LOCAL_LEDGER_DEPS_MOCK_H

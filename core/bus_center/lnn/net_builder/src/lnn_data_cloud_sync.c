@@ -179,6 +179,9 @@ static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const 
     } else if (strcmp(fieldName, DEVICE_INFO_HB_CAP) == 0) {
         cacheInfo->heartbeatCapacity = (uint32_t)atoi(value);
         LNN_LOGI(LNN_BUILDER, "success. heartbeatCapacity=%{public}u", cacheInfo->heartbeatCapacity);
+    } else if (strcmp(fieldName, DEVICE_INFO_SLE_RANGE_CAP) == 0) {
+        cacheInfo->sleRangeCapacity = (uint32_t)atoi(value);
+        LNN_LOGI(LNN_BUILDER, "success. sleRangeCapacity=%{public}u", cacheInfo->sleRangeCapacity);
     }
     LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
@@ -207,6 +210,11 @@ static int32_t DBConnectMacInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             valueLength) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "convert publicAddress to bytes fail. rpa info sync to cache fail");
             return SOFTBUS_KV_CONVERT_BYTES_FAILED;
+        }
+    } else if (strcmp(fieldName, DEVICE_INFO_SLE_ADDR) == 0 && valueLength < LFINDER_MAC_ADDR_STR_LEN) {
+        if (strcpy_s(cacheInfo->connectInfo.sleMacAddr, MAC_LEN, value) != EOK) {
+            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s sleMacAddr fail");
+            return SOFTBUS_STRCPY_ERR;
         }
     } else {
         LNN_LOGE(LNN_BUILDER, "fail:connect info %{public}s valuelength over range", fieldName);
@@ -270,7 +278,8 @@ static bool JudgeFieldNameIsNumInfo(char *fieldName)
     if (strcmp(fieldName, DEVICE_INFO_STATE_VERSION) == 0 || strcmp(fieldName, DEVICE_INFO_TRANSPORT_PROTOCOL) == 0 ||
         strcmp(fieldName, DEVICE_INFO_WIFI_VERSION) == 0 || strcmp(fieldName, DEVICE_INFO_BLE_VERSION) == 0 ||
         strcmp(fieldName, DEVICE_INFO_ACCOUNT_ID) == 0 || strcmp(fieldName, DEVICE_INFO_FEATURE) == 0 ||
-        strcmp(fieldName, DEVICE_INFO_CONN_SUB_FEATURE) == 0 || strcmp(fieldName, DEVICE_INFO_AUTH_CAP) == 0) {
+        strcmp(fieldName, DEVICE_INFO_CONN_SUB_FEATURE) == 0 || strcmp(fieldName, DEVICE_INFO_AUTH_CAP) == 0 ||
+        strcmp(fieldName, DEVICE_INFO_SLE_RANGE_CAP) == 0) {
         return true;
     }
     return false;
@@ -285,7 +294,8 @@ static bool JudgeFieldNameIsConnectInfo(char *fieldName)
     if (strcmp(fieldName, DEVICE_INFO_NETWORK_ID) == 0 || strcmp(fieldName, DEVICE_INFO_PKG_VERSION) == 0 ||
         strcmp(fieldName, DEVICE_INFO_BT_MAC) == 0 || strcmp(fieldName, DEVICE_INFO_P2P_MAC_ADDR) == 0 ||
         strcmp(fieldName, DEVICE_INFO_DEVICE_IRK) == 0 || strcmp(fieldName, DEVICE_INFO_DEVICE_PUB_MAC) == 0 ||
-        strcmp(fieldName, DEVICE_INFO_PTK) == 0 || strcmp(fieldName, DEVICE_INFO_SW_VERSION) == 0) {
+        strcmp(fieldName, DEVICE_INFO_PTK) == 0 || strcmp(fieldName, DEVICE_INFO_SW_VERSION) == 0 ||
+        strcmp(fieldName, DEVICE_INFO_SLE_ADDR) == 0) {
         return true;
     }
     return false;
@@ -809,7 +819,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         "BLE_P2P=%{public}d, BT_MAC=%{public}s, DEVICE_TYPE=%{public}d, SW_VERSION=%{public}s, DEVICE_UDID=%{public}s, "
         "DEVICE_UUID=%{public}s, STATE_VERSION=%{public}d, NETWORK_ID=%{public}s, BROADCAST_CIPHER_KEY=%{public}02x, "
         "BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x, PUB_MAC=%{public}02x, PTK=%{public}02x, "
-        "DEVICE_VERSION=%{public}s, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s",
+        "DEVICE_VERSION=%{public}s, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, SLE_CAP=%{public}d",
         cacheInfo->wifiVersion, cacheInfo->bleVersion, AnonymizeWrapper(anonyAccountId), cacheInfo->supportedProtocols,
         cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, AnonymizeWrapper(anonyP2pMac),
         cacheInfo->pkgVersion, AnonymizeWrapper(anonyDeviceName), cacheInfo->staticNetCap, cacheInfo->authCapacity,
@@ -818,7 +828,8 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         cacheInfo->softBusVersion, AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyUuid), cacheInfo->stateVersion,
         AnonymizeWrapper(anonyNetworkId), *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv,
         *cacheInfo->rpaInfo.peerIrk, *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk,
-        AnonymizeWrapper(anonyDeviceVersion), cacheInfo->deviceInfo.productId, cacheInfo->deviceInfo.modelName);
+        AnonymizeWrapper(anonyDeviceVersion), cacheInfo->deviceInfo.productId, cacheInfo->deviceInfo.modelName,
+        cacheInfo->sleRangeCapacity);
     AnonymizeFree(anonyAccountId);
     AnonymizeFree(anonyP2pMac);
     AnonymizeFree(anonyMacAddr);

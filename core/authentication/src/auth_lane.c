@@ -58,6 +58,9 @@ int32_t GetAuthConn(const char *uuid, LaneLinkType laneType, AuthConnInfo *connI
         case LANE_BLE:
             authType = AUTH_LINK_TYPE_BLE;
             break;
+        case LANE_SLE:
+            authType = AUTH_LINK_TYPE_SLE;
+            break;
         case LANE_P2P:
             authType = AUTH_LINK_TYPE_P2P;
             break;
@@ -87,7 +90,7 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     AuthLinkType linkList[] = {AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_LINK_TYPE_WIFI,
-        AUTH_LINK_TYPE_P2P, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE};
+        AUTH_LINK_TYPE_P2P, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_SLE};
     AuthConnInfo connInfo;
     if (memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo)) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memset_s AuthConnInfo fail");

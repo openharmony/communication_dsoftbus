@@ -195,6 +195,11 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         LNN_LOGW(LNN_LEDGER, "deviceSecurityLevel=%{public}d->%{public}d", info->deviceSecurityLevel, level);
         return true;
     }
+    int32_t sleRangeCap = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &sleRangeCap) == SOFTBUS_OK) {
+        LNN_LOGW(LNN_LEDGER, "sleRangeCap=%{public}d->%{public}d", info->sleRangeCapacity, sleRangeCap);
+        return true;
+    }
     if (IsLocalIrkInfoChange(info)) {
         return true;
     }
