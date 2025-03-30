@@ -16,7 +16,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
 
-int32_t ConnBleDirectPipelineOpen(const ConnBleDirectPipelineOption *option, const ConnectResult *result)
+int32_t ConnDirectPipelineOpen(const ConnBleDirectPipelineOption *option, const ConnectResult *result)
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }

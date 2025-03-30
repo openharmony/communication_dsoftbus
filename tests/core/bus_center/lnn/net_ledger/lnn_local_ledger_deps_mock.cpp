@@ -81,6 +81,18 @@ int32_t LocalLedgerDepsInterfaceMock::LedgerSoftBusRegBusCenterVarDump(char *dum
     return ret;
 }
 
+int32_t LocalLedgerDepsInterfaceMock::MockGetLocalSleAddrFunc(char *sleAddr, uint32_t sleAddrLen)
+{
+    if (sleAddr == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    static char mockSleAddr[MAC_LEN] = "11:11:11:11:11:11";
+    if (memcpy_s(sleAddr, sleAddrLen, mockSleAddr, MAC_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 extern "C" {
 uint32_t LnnGetNetCapabilty(void)
 {
@@ -150,6 +162,31 @@ int32_t SoftBusGetBtState(void)
 int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return GetLocalLedgerDepsInterface()->SoftBusGetBtMacAddr(mac);
+}
+
+bool IsSleEnabled(void)
+{
+    return GetLocalLedgerDepsInterface()->IsSleEnabled();
+}
+
+int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusAddSleStateListener(listener, listenerId);
+}
+
+void SoftBusRemoveSleStateListener(int listenerId)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusRemoveSleStateListener(listenerId);
+}
+
+int32_t GetSleRangeCapacity()
+{
+    return GetLocalLedgerDepsInterface()->GetSleRangeCapacity();
+}
+
+int32_t GetLocalSleAddr(char *sleAddr, uint32_t sleAddrLen)
+{
+    return GetLocalLedgerDepsInterface()->GetLocalSleAddr(sleAddr, sleAddrLen);
 }
 
 int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)

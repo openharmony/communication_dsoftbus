@@ -915,4 +915,30 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
     EXPECT_EQ(L1GetUserId(reinterpret_cast<void *>(&userId), len), SOFTBUS_OK);
     LnnDeinitLocalLedger();
 }
+
+/*
+ * @tc.name: LL_SLE_CAP_Test_001
+ * @tc.desc: LL_SLE_CAP_Test_001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+ HWTEST_F(LNNLedgerMockTest, LL_SLE_CAP_Test_001, TestSize.Level1)
+{
+    int32_t mockSleRangeCap = 1;
+    int32_t sleRangeCapRet = -1;
+    char mockSleAddr[MAC_LEN] = "11:11:11:11:11:11";
+    char sleAddrRet[MAC_LEN] = { 0 };
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, IsSleEnabled()).WillRepeatedly(Return(true));
+    EXPECT_CALL(localLedgerMock, SoftBusAddSleStateListener(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetSleRangeCapacity()).WillRepeatedly(Return(mockSleRangeCap));
+    EXPECT_CALL(localLedgerMock, GetLocalSleAddr(_, _)).WillRepeatedly(localLedgerMock.MockGetLocalSleAddrFunc);
+
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &sleRangeCapRet) == SOFTBUS_OK);
+    EXPECT_EQ(sleRangeCapRet, mockSleRangeCap);
+    EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_SLE_ADDR, sleAddrRet, MAC_LEN) == SOFTBUS_OK);
+    EXPECT_STREQ(sleAddrRet, mockSleAddr);
+    LnnDeinitLocalLedger();
+}
 } // namespace OHOS

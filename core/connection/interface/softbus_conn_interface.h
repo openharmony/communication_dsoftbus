@@ -51,6 +51,7 @@ typedef enum {
     MODULE_PTK_VERIFY = 24,
     MODULE_SESSION_AUTH = 25,
     MODULE_SESSION_KEY_AUTH = 26,
+    MODULE_SLE_AUTH_CMD = 27,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_NIP_BR_CHANNEL = 201,
@@ -66,6 +67,8 @@ typedef enum {
     CONNECT_BLE_DIRECT,
     CONNECT_HML,
     CONNECT_TRIGGER_HML,
+    CONNECT_SLE,
+    CONNECT_SLE_DIRECT,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -110,6 +113,14 @@ struct BleInfo {
     uint32_t psm;
     uint16_t challengeCode;
 };
+
+struct SleInfo {
+    char address[BT_MAC_LEN];
+    uint16_t challengeCode;
+    SleProtocolType protocol;
+    char networkId[NETWORK_ID_BUF_LEN];
+};
+
 struct ConnSocketInfo {
     char addr[IP_LEN];
     ProtocolType protocol;
@@ -125,6 +136,7 @@ typedef struct {
     union {
         struct BrInfo brInfo;
         struct BleInfo bleInfo;
+        struct SleInfo sleInfo;
         struct ConnSocketInfo socketInfo;
     };
 } ConnectionInfo;
@@ -184,6 +196,11 @@ struct BleDirectOption {
     BleProtocolType protoType;
 };
 
+struct SleDirectOption {
+    char networkId[NETWORK_ID_BUF_LEN];
+    SleProtocolType protoType;
+};
+
 struct SocketOption {
     char ifName[NETIF_NAME_LEN];
     char addr[IP_LEN]; /* ipv6 addr format: ip%ifname */
@@ -193,6 +210,13 @@ struct SocketOption {
     int32_t keepAlive;
 };
 
+struct SleOption {
+    char networkId[NETWORK_ID_BUF_LEN];
+    char address[BT_MAC_LEN];
+    uint16_t challengeCode;
+    SleProtocolType protocol;
+};
+
 typedef struct {
     ConnectType type;
     union {
@@ -200,6 +224,8 @@ typedef struct {
         struct BleOption bleOption;
         struct SocketOption socketOption;
         struct BleDirectOption bleDirectOption;
+        struct SleOption sleOption;
+        struct SleDirectOption sleDirectOption;
     };
 } ConnectOption;
 
@@ -385,14 +411,14 @@ int32_t ConnStartLocalListening(const LocalListenerInfo *info);
 
 /**
  * @ingroup Softbus_conn_manager
- * @brief call this interface to initiate a ble direct connection to the remote end.
+ * @brief call this interface to initiate a ble direct connection or sle direct connection to the remote end.
  * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnectOption}.
  * @param[in] requestId Request ID.
  * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
  * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully
  * returns an error code less than zero otherwise.
  */
-int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+int32_t ConnDirectConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 
 /**
  * @ingroup Softbus_conn_manager.

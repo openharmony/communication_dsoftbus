@@ -19,8 +19,14 @@ conn_common_inc = [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
 ]
-conn_common_src =
-    [ "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c" ]
+conn_common_src = [
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_async_helper.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_bytes_delivery.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_fair_priority_queue.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object.c",
+]
 
 if (dsoftbus_feature_conn_tcp_comm) {
   conn_common_src += [

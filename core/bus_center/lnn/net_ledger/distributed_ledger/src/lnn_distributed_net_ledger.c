@@ -1736,6 +1736,7 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
     oldInfo->staticNetCap = newInfo->staticNetCap;
+    oldInfo->sleRangeCapacity = newInfo->sleRangeCapacity;
 }
 
 static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
@@ -1752,6 +1753,9 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     }
     if (strcpy_s(oldInfo->connectInfo.macAddr, MAC_LEN, newInfo->connectInfo.macAddr) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s macAddr to distributed ledger fail");
+    }
+    if (strcpy_s(oldInfo->connectInfo.sleMacAddr, MAC_LEN, newInfo->connectInfo.sleMacAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s sleAddr to distributed ledger fail");
     }
     if (strcpy_s(oldInfo->deviceInfo.osVersion, OS_VERSION_BUF_LEN, newInfo->deviceInfo.osVersion) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s osVersion to distributed ledger fail");

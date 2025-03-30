@@ -39,12 +39,14 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_range.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_init_monitor.h"
 #include "lnn_net_ledger.h"
+#include "lnn_sle_capability.h"
 
 #define SOFTBUS_VERSION "hm.1.0.0"
 #define VERSION_TYPE_LITE "LITE"
@@ -1922,6 +1924,54 @@ static int32_t UpdateStaticNetCap(const void *capability)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetLocalSleRangeCapacity(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int32_t)) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = g_localNetLedger.localInfo.sleRangeCapacity;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlSetLocalSleRangeCapacity(const void *sleRangeCapacity)
+{
+    if (sleRangeCapacity == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input Null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.sleRangeCapacity = *((int32_t *)sleRangeCapacity);
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetLocalSleAddr(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != MAC_LEN) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = memcpy_s(buf, len, g_localNetLedger.localInfo.connectInfo.sleMacAddr, MAC_LEN);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail, ret %{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlSetLocalSleAddr(const void *addr)
+{
+    if (addr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = memcpy_s(g_localNetLedger.localInfo.connectInfo.sleMacAddr, MAC_LEN, addr, MAC_LEN);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail, ret %{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -1947,6 +1997,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_BLE_MAC, MAC_LEN, LlGetBleMac, UpdateLocalBleMac},
     {STRING_KEY_WIFIDIRECT_ADDR, MAC_LEN, LlGetWifiDirectAddr, UpdateWifiDirectAddr},
     {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
+    {STRING_KEY_SLE_ADDR, MAC_LEN, LlGetLocalSleAddr, LlSetLocalSleAddr},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
@@ -1972,6 +2023,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, -1, L1GetConnSubFeatureCapa, UpdateLocalConnSubFeatureCapability},
     {NUM_KEY_USERID, sizeof(int32_t), L1GetUserId, UpdateLocalUserId},
     {NUM_KEY_STATIC_NET_CAP, -1, LlGetStaticNetCap, UpdateStaticNetCap},
+    {NUM_KEY_SLE_RANGE_CAP, sizeof(int32_t), LlGetLocalSleRangeCapacity, LlSetLocalSleRangeCapacity},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
@@ -2417,6 +2469,11 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         return ret;
     }
     InitUserIdCheckSum(nodeInfo);
+    ret = LocalLedgerInitSleCapacity(nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init sle info error");
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
@@ -2533,6 +2590,7 @@ int32_t LnnInitLocalLedgerDelay(void)
 
 void LnnDeinitLocalLedger(void)
 {
+    LocalLedgerDeinitSleCapacity();
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
         SoftBusMutexDestroy(&g_localNetLedger.lock);
     }

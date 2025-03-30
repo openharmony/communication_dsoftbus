@@ -76,6 +76,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_SESSION_KEY_AUTH,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_SLE_AUTH_CMD,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -388,14 +392,8 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
             }
             break;
         case AUTH_LINK_TYPE_BLE:
-            if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId,
-                sizeof(networkId), true) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_CONN, "get networkId fail");
-                return SOFTBUS_NOT_FIND;
-            }
-            ret = LnnGetRemoteNodeInfoByKey(networkId, &info);
+            ret = AuthGetAuthHandleByIndexForBle(connInfo, networkId, &info);
             if (ret != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by networkId failed, ret=%{public}d", ret);
                 return ret;
             }
             break;
@@ -403,6 +401,13 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
             ret = LnnGetRemoteNodeInfoByKey(connInfo->info.brInfo.brMac, &info);
             if (ret != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by brMac failed, ret=%{public}d", ret);
+                return ret;
+            }
+            break;
+        case AUTH_LINK_TYPE_SLE:
+            ret = LnnGetRemoteNodeInfoByKey(connInfo->info.sleInfo.networkId, &info);
+            if (ret != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by sle networkId failed, ret = %{public}d", ret);
                 return ret;
             }
             break;
@@ -415,6 +420,21 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
         return SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE;
     }
     return AuthDeviceGetAuthHandleByIndex(info.deviceInfo.deviceUdid, isServer, index, authHandle);
+}
+
+int32_t AuthGetAuthHandleByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info)
+{
+    if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId, NETWORK_ID_BUF_LEN,
+        true) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get networkId fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    int32_t ret = LnnGetRemoteNodeInfoByKey(networkId, info);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by networkId failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 static int32_t FillAuthSessionInfo(

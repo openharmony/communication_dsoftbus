@@ -93,6 +93,7 @@ typedef struct {
     const char *peerBrMac;      // PEER_BR_MAC
     const char *peerBleMac;     // PEER_BLE_MAC
     const char *peerWifiMac;    // PEER_WIFI_MAC
+    const char *peerSleMac;     // PEER_SLE_MAC
     const char *peerPort;       // PEER_PORT
     const char *peerNetworkId;  // PEER_NET_ID
     const char *peerUdid;       // PEER_UDID

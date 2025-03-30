@@ -197,6 +197,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_SESSION:
+        case AUTH_LINK_TYPE_SLE:
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_SESSION_KEY:
@@ -378,6 +379,8 @@ static SoftBusLinkType ConvertAuthLinkTypeToHisysEvtLinkType(AuthLinkType type)
             return SOFTBUS_HISYSEVT_LINK_TYPE_BLE;
         case AUTH_LINK_TYPE_P2P:
             return SOFTBUS_HISYSEVT_LINK_TYPE_P2P;
+        case AUTH_LINK_TYPE_SLE:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_SLE;
         default:
             return SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
     }
@@ -774,6 +777,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
     }
     char *anonyBrMac = NULL;
     char *anonyBleMac = NULL;
+    char *anonySleMac = NULL;
     char *anonyIp = NULL;
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_BR:
@@ -789,6 +793,13 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
                 AUTH_LOGE(AUTH_FSM, "BLE MAC COPY ERROR");
             }
             AnonymizeFree(anonyBleMac);
+            break;
+        case AUTH_LINK_TYPE_SLE:
+            Anonymize(info->connInfo.info.sleInfo.sleMac, &anonySleMac);
+            if (strcpy_s((char *)lnnAuditExtra->peerSleMac, BT_MAC_LEN, AnonymizeWrapper(anonySleMac)) != EOK) {
+                AUTH_LOGE(AUTH_FSM, "SLE MAC COPY ERROR");
+            }
+            AnonymizeFree(anonySleMac);
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
@@ -1128,6 +1139,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
             return SOFTBUS_OK;
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
+        case AUTH_LINK_TYPE_SLE:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
         case AUTH_LINK_TYPE_SESSION:
