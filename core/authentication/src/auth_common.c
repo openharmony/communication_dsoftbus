@@ -330,6 +330,14 @@ static bool CompareSessionConnInfo(const AuthConnInfo *info1, const AuthConnInfo
     return false;
 }
 
+static bool CompareSleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    bool isLinkble = (info2->type == AUTH_LINK_TYPE_SLE &&
+                        (StrCmpIgnoreCase(info1->info.sleInfo.networkId, info2->info.sleInfo.networkId) == 0 ||
+                        StrCmpIgnoreCase(info1->info.sleInfo.sleMac, info2->info.sleInfo.sleMac) == 0));
+    return isLinkble;
+}
+
 static CompareByType g_compareByType[] = {
     {AUTH_LINK_TYPE_WIFI,         CompareWifiConnInfo},
     {AUTH_LINK_TYPE_BR,           CompareBrConnInfo},
@@ -338,6 +346,7 @@ static CompareByType g_compareByType[] = {
     {AUTH_LINK_TYPE_ENHANCED_P2P, CompareEnhancedP2pConnInfo},
     {AUTH_LINK_TYPE_SESSION,      CompareSessionConnInfo},
     {AUTH_LINK_TYPE_SESSION_KEY,  CompareSessionKeyConnInfo},
+    {AUTH_LINK_TYPE_SLE,          CompareSleConnInfo},
 };
 
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
@@ -406,6 +415,15 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
                 return SOFTBUS_MEM_ERR;
             }
             break;
+        case AUTH_LINK_TYPE_SLE:
+            option->type = CONNECT_SLE;
+            if (strcpy_s(option->sleOption.address, BT_MAC_LEN, connInfo->info.sleInfo.sleMac) != EOK ||
+                strcpy_s(option->sleOption.networkId, NETWORK_ID_BUF_LEN, connInfo->info.sleInfo.networkId) != EOK) {
+                AUTH_LOGE(AUTH_CONN, "copy sleMac fail");
+                return SOFTBUS_MEM_ERR;
+            }
+            option->sleOption.protocol = connInfo->info.sleInfo.protocol;
+            break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", connInfo->type);
             return SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE;
@@ -461,10 +479,24 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
             connInfo->info.bleInfo.protocol = info->bleInfo.protocol;
             connInfo->info.bleInfo.psm = info->bleInfo.psm;
             break;
+        case CONNECT_SLE:
+            return ConvertToAuthInfoForSle(info, connInfo);
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info->type);
             return SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertToAuthInfoForSle(const ConnectionInfo *info, AuthConnInfo *connInfo)
+{
+    connInfo->type = AUTH_LINK_TYPE_SLE;
+    if (strcpy_s(connInfo->info.sleInfo.sleMac, BT_MAC_LEN, info->sleInfo.address) != EOK ||
+        strcpy_s(connInfo->info.sleInfo.networkId, NETWORK_ID_BUF_LEN, info->sleInfo.networkId) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy sleMac fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    connInfo->info.sleInfo.protocol = info->sleInfo.protocol;
     return SOFTBUS_OK;
 }
 
@@ -584,7 +616,9 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
     char *anonyUdidHash = NULL;
     char *anonyMac = NULL;
     char *anonyIp = NULL;
+    char *anonyNetworkId = NULL;
     char udidHash[UDID_BUF_LEN] = { 0 };
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI:
             Anonymize(connInfo->info.ipInfo.ip, &anonyIp);
@@ -609,6 +643,18 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
             AnonymizeFree(anonyMac);
             AnonymizeFree(anonyUdidHash);
             break;
+        case AUTH_LINK_TYPE_SLE:
+            if (ConvertBytesToHexString(networkId, UDID_BUF_LEN,
+                (const unsigned char *)connInfo->info.sleInfo.networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "gen networkId hex str err");
+                return;
+            }
+            Anonymize(networkId, &anonyNetworkId);
+            Anonymize(connInfo->info.sleInfo.sleMac, &anonyMac);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo sleMac=**:**:**:**:%{public}s, networkId=%{public}s",
+                AnonymizeWrapper(anonyMac), AnonymizeWrapper(anonyNetworkId));
+            AnonymizeFree(anonyMac);
+            AnonymizeFree(anonyNetworkId);
         default:
             break;
     }

@@ -838,7 +838,7 @@ static void ReportAuthRequestPassed(uint32_t requestId, AuthHandle authHandle, c
                 continue;
             }
             DelAuthRequest(request.requestId);
-            /* For open auth br/ble connection, reconnect to keep long-connection. */
+            /* For open auth br/ble/sle connection, reconnect to keep long-connection. */
             if (AuthStartReconnectDevice(authHandle, &request.connInfo, request.requestId,
                 &request.connCb) != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "open auth reconnect fail");
@@ -1081,7 +1081,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "SERVER: wait client close connection");
         return;
     }
-    /* br and ble NOT long-connection, close connection after auth pass. */
+    /* br and ble, sle NOT long-connection, close connection after auth pass. */
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE) {
         uint64_t localFeature;
         int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
@@ -1113,8 +1113,8 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
         }
         AuthDeleteLimitMap(udidHash);
     }
-    if (info->connInfo.type == AUTH_LINK_TYPE_BR) {
-        AUTH_LOGI(AUTH_FSM, "br disconn now");
+    if (info->connInfo.type == AUTH_LINK_TYPE_BR || info->connInfo.type == AUTH_LINK_TYPE_SLE) {
+        AUTH_LOGI(AUTH_FSM, "br/sle disconn now");
         DisconnectAuthDevice((uint64_t *)&info->connId);
     }
 }
@@ -1645,6 +1645,9 @@ static void HandleDisconnectedEvent(const void *para)
             (void)UpdateAuthManagerByAuthId(authIds[i], SetAuthConnId, &inAuth, (AuthLinkType)GetConnType(connId));
             RemoveAuthManagerByAuthId(authHandle);
         }
+        if (GetConnType(connId) == AUTH_LINK_TYPE_SLE) {
+            RemoveAuthManagerByAuthId(authHandle);
+        }
     }
     /* Try to terminate authing session. */
     (void)AuthSessionHandleDeviceDisconnected(connId, GetFd(dupConnId) != AUTH_INVALID_FD);
@@ -1807,7 +1810,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
-        AUTH_LINK_TYPE_SESSION_KEY };
+        AUTH_LINK_TYPE_SESSION_KEY, AUTH_LINK_TYPE_SLE};
     uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
     for (uint32_t i = 0; i < linkTypeNum; i++) {
         if (GetAuthConnInfoByUuid(uuid, linkList[i], connInfo) != SOFTBUS_OK) {
@@ -1943,7 +1946,7 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t nu
     AuthManager *authClient = NULL;
     AuthManager *authServer = NULL;
     AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_BR,
-        AUTH_LINK_TYPE_SESSION_KEY };
+        AUTH_LINK_TYPE_SESSION_KEY, AUTH_LINK_TYPE_SLE};
     for (size_t i = 0; i < sizeof(linkList) / sizeof(AuthLinkType); i++) {
         authClient = FindAuthManagerByUdid(udid, linkList[i], false);
         authServer = FindAuthManagerByUdid(udid, linkList[i], true);

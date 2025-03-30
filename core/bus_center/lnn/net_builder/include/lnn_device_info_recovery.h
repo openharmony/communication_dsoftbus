@@ -97,6 +97,8 @@ extern "C" {
 #define IS_AUTH_EXCHANGE_UDID "IS_AUTH_EXCHANGE_UDID"
 #define IS_ACK_SEQ "IS_ACK_SEQ"
 #define DEVICE_INFO_PEER_UDID "DEVICE_INFO_PEER_UDID"
+#define DEVICE_INFO_SLE_ADDR "SLE_ADDR"
+#define DEVICE_INFO_SLE_RANGE_CAP "SLE_RANGE_CAPABILITY"
 
 int32_t LnnLoadLocalDeviceInfo(void);
 int32_t LnnLoadRemoteDeviceInfo(void);

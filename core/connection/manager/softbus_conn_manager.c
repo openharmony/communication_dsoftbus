@@ -34,6 +34,7 @@
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
+#include "conn_sle.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
@@ -362,6 +363,9 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     if (info->type == CONNECT_TCP) {
         extra.peerWifiMac = info->socketOption.addr;
     }
+    if (info->type == CONNECT_SLE) {
+        extra.peerSleMac = info->sleOption.address;
+    }
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
@@ -543,6 +547,12 @@ int32_t ConnServerInit(void)
     if (connectObj != NULL) {
         g_connManager[CONNECT_BLE] = connectObj;
         CONN_LOGD(CONN_COMMON, "init ble ok");
+    }
+
+    connectObj = ConnSleInit(&g_connManagerCb);
+    if (connectObj != NULL) {
+        g_connManager[CONNECT_SLE] = connectObj;
+        CONN_LOGD(CONN_COMMON, "init sle ok");
     }
 
     if (g_listenerList == NULL) {

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("../../adapter/common/bus_center/bus_center_adapter.gni")
+import("../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../adapter/common/net/hdi/net_hdi.gni")
 import("../../adapter/common/net/wifi/net_wifi.gni")
 import("../../core/adapter/core_adapter.gni")

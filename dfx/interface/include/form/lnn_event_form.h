@@ -303,6 +303,7 @@ typedef struct {
     const char peerIp[IP_STR_MAX_LEN];             // PEER_IP
     const char peerBrMac[BT_MAC_LEN];              // PEER_BR_MAC
     const char peerBleMac[BT_MAC_LEN];             // PEER_BLE_MAC
+    const char peerSleMac[BT_MAC_LEN];             // PEER_SLE_MAC
     const char peerUdid[UDID_BUF_LEN];             // PEER_UDID
     const char peerNetworkId[NETWORK_ID_BUF_LEN];  // PEER_NETWORK_ID
     const char peerDevName[DEVICE_NAME_BUF_LEN];   // PEER_DEV_NAME

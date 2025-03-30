@@ -54,6 +54,7 @@ typedef enum {
     STRING_KEY_WIFIDIRECT_ADDR,
     STRING_KEY_P2P_IP,
     STRING_KEY_OS_VERSION,
+    STRING_KEY_SLE_ADDR,
     STRING_KEY_END,
     NUM_KEY_BEGIN = 100,
     NUM_KEY_SESSION_PORT = NUM_KEY_BEGIN,
@@ -85,6 +86,7 @@ typedef enum {
     NUM_KEY_HB_CAP,
     NUM_KEY_USERID,
     NUM_KEY_STATIC_NET_CAP, /* static network capabilities, depends on the chip */
+    NUM_KEY_SLE_RANGE_CAP,
     NUM_KEY_END,
     BOOL_KEY_BEGIN,
     BOOL_KEY_TLV_NEGOTIATION = BOOL_KEY_BEGIN,

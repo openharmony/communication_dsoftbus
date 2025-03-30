@@ -156,6 +156,9 @@
 #define PUB_MAC                     "PUB_MAC"
 #define DEVICE_SECURITY_LEVEL       "DEVICE_SECURITY_LEVEL"
 #define AUTH_START_STATE            "AUTH_START_STATE"
+#define SLE_RANGE_CAP               "SLE_RANGE_CAP"
+#define SLE_MAC                     "SLE_MAC"
+
 
 #define HAS_CTRL_CHANNEL                 (0x1L)
 #define HAS_CHANNEL_AUTH                 (0x2L)
@@ -342,6 +345,8 @@ bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLe
         case AUTH_LINK_TYPE_BLE:
             return (ConvertBytesToHexString(udidBuf, bufLen, info->connInfo.info.bleInfo.deviceIdHash,
                 UDID_SHORT_HASH_LEN_TEMP) == SOFTBUS_OK);
+        case AUTH_LINK_TYPE_SLE:
+            break;
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             if (!info->isServer) {
@@ -1740,7 +1745,9 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
         !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
         !JSON_AddInt64ToObject(json, CONN_SUB_FEATURE, info->connSubFeature) ||
-        !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity));
+        !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity) ||
+        !JSON_AddInt32ToObject(json, SLE_RANGE_CAP, info->sleRangeCapacity) ||
+        !JSON_AddStringToObject(json, SLE_MAC, info->connectInfo.sleMacAddr));
     if (isFalse) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
@@ -1889,6 +1896,9 @@ static void ParseCommonJsonOptInfo(const JsonObj *json, NodeInfo *info)
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
     OptInt64(json, CONN_SUB_FEATURE, (int64_t *)&info->connSubFeature, 0);
     OptInt(json, STATE_VERSION_CHANGE_REASON, (int32_t *)&info->stateVersionReason, 0);
+
+    OptInt(json, SLE_RANGE_CAP, &info->sleRangeCapacity, 0);
+    OptString(json, SLE_MAC, info->connectInfo.sleMacAddr, MAC_LEN, "");
 }
 
 static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
