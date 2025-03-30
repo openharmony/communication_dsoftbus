@@ -27,6 +27,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
 #include "lnn_net_builder.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -46,6 +47,7 @@
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 #include "trans_tcp_process_data.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_callback.h"
@@ -332,6 +334,11 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->linkType = conn->appInfo.linkType;
     info->connectType = conn->appInfo.connectType;
     info->osType = conn->appInfo.osType;
+    info->tokenType = conn->appInfo.myData.tokenType;
+    if (conn->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP && conn->serverSide) {
+        info->peerUserId = conn->appInfo.peerData.userId;
+        info->peerAccountId = conn->appInfo.peerData.accountId;
+    }
 }
 
 static int32_t GetServerSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t len)
@@ -895,13 +902,16 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
-
     if (TransTdcGetUidAndPid(appInfo->myData.sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         ret = (char *)"Peer Device Session Not Create";
         goto ERR_EXIT;
     }
-
+    errCode = GetTokenTypeBySessionName(appInfo->myData.sessionName, &appInfo->myData.tokenType);
+    if (errCode != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenType failed.");
+        goto ERR_EXIT;
+    }
     errCode = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Auth: Get Uuid By ChanId failed.");
@@ -925,7 +935,6 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
         ret = (char *)"Set App Info By Id Failed";
         goto ERR_EXIT;
     }
-
     errCode = TransTdcCheckCollabRelation(appInfo, channelId, ret);
     if (errCode != SOFTBUS_OK) {
         goto ERR_EXIT;

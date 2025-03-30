@@ -19,6 +19,7 @@
 #include <stdatomic.h>
 
 #include "anonymizer.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -32,6 +33,7 @@
 #include "trans_event.h"
 #include "trans_inner.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 
@@ -98,6 +100,27 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
     TransDelItemByPackageName(pkgName, pid);
 }
 
+static void TransGetAccessInfoIsApp(CallerType callerType, SessionServer *newNode)
+{
+    if (callerType == CALLER_TYPE_FEATURE_ABILITY) {
+        newNode->accessInfo.userId = TransGetUserIdFromUid(newNode->uid);
+        if (newNode->accessInfo.userId == INVALID_USER_ID) {
+            TRANS_LOGE(TRANS_CTRL, "TransGetUserIdFromUid failed");
+            return;
+        }
+
+        uint32_t size = 0;
+        int32_t ret = GetOsAccountUidByUserId(newNode->accessInfo.accountId, ACCOUNT_UID_LEN_MAX - 1,
+            &size, newNode->accessInfo.userId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get current account failed, ret=%{public}d", ret);
+            return;
+        }
+    } else {
+        newNode->accessInfo.userId = INVALID_USER_ID;
+    }
+}
+
 int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
@@ -127,6 +150,8 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     int32_t tokenType = SoftBusGetAccessTokenType(newNode->tokenId);
     newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
         CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
+    newNode->accessInfo.tokenType = tokenType;
+    TransGetAccessInfoIsApp(newNode->callerType, newNode);
     ret = TransSessionServerAddItem(newNode);
     TransEventExtra extra = {
         .socketName = sessionName,

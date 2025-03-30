@@ -57,6 +57,9 @@ typedef struct {
     OnRenameFileCallback onRenameFile;
     bool isEnable;
     bool isTosSet;
+    int32_t peerUserId;
+    char peerAccountId[ACCOUNT_UID_LEN_MAX];
+    int32_t tokenType;
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);

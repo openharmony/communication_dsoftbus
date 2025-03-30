@@ -1083,6 +1083,40 @@ int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t GetIsAsyncAndTokenTypeBySessionId(int32_t sessionId, bool *isAsync, int32_t *tokenType)
+{
+    if ((sessionId < 0) || (isAsync == NULL) || (tokenType == NULL)) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                *isAsync = sessionNode->isAsync;
+                *tokenType = sessionNode->tokenType;
+                UnlockClientSessionServerList();
+                return SOFTBUS_OK;
+            }
+        }
+    }
+
+    UnlockClientSessionServerList();
+    TRANS_LOGE(TRANS_SDK, "not found session with sessionId=%{public}d", sessionId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType)
 {
     if ((channelId < 0) || (routeType == NULL)) {
@@ -2001,6 +2035,37 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
     return SOFTBUS_OK;
 }
 
+int32_t ClientGetPeerSocketAccessInfoById(int32_t sessionId, PeerSocketAccessInfo *peerAccessInfo)
+{
+    if (sessionId < 0 || peerAccessInfo == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    peerAccessInfo->name = sessionNode->info.peerSessionName;
+    peerAccessInfo->networkId = sessionNode->info.peerDeviceId;
+    peerAccessInfo->pkgName = serverNode->pkgName;
+    peerAccessInfo->userId = sessionNode->peerUserId;
+    peerAccessInfo->accountId = sessionNode->peerAccountId;
+    peerAccessInfo->dataType = (TransDataType)sessionNode->info.flag;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
 bool IsSessionExceedLimit(void)
 {
     if (LockClientSessionServerList() != SOFTBUS_OK) {
@@ -2783,4 +2848,41 @@ bool IsRawAuthSession(const char *sessionName)
         }
     }
     return false;
+}
+
+int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName)
+{
+    if (sessionId < 0 || sessionName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId != sessionId) {
+                continue;
+            }
+            if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, serverNode->sessionName) != EOK) {
+                TRANS_LOGE(TRANS_SDK, "copy sessionName failed");
+                UnlockClientSessionServerList();
+                return SOFTBUS_STRCPY_ERR;
+            }
+            UnlockClientSessionServerList();
+            return SOFTBUS_OK;
+        }
+    }
+    UnlockClientSessionServerList();
+    TRANS_LOGE(TRANS_SDK, "not found session with sessionId=%{public}d", sessionId);
+    return SOFTBUS_NOT_FIND;
 }
