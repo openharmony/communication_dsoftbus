@@ -159,6 +159,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
     memberFuncMap_[SERVER_TRIGGER_RANGE_FOR_MSDP] = &SoftBusServerStub::TriggerRangeForMsdpInner;
+    memberFuncMap_[SERVER_STOP_RANGE_FOR_MSDP] = &SoftBusServerStub::StopRangeForMsdpInner;
     memberFuncMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::RegRangeCbForMsdpInner;
     memberFuncMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::UnregRangeCbForMsdpInner;
     memberFuncMap_[SERVER_SYNC_TRUSTED_RELATION] = &SoftBusServerStub::SyncTrustedRelationShipInner;
@@ -208,6 +209,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_TRIGGER_RANGE_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_STOP_RANGE_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SYNC_TRUSTED_RELATION] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -1598,6 +1600,31 @@ int32_t SoftBusServerStub::TriggerRangeForMsdpInner(MessageParcel &data, Message
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
     int32_t retReply = TriggerRangeForMsdp(pkgName, config);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopRangeForMsdpInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    const RangeConfig *config = nullptr;
+
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
+    }
+    uint32_t code = SERVER_STOP_RANGE_FOR_MSDP;
+    SoftbusRecordCalledApiInfo(pkgName, code);
+    config = reinterpret_cast<const RangeConfig *>(data.ReadRawData(sizeof(RangeConfig)));
+    if (config == nullptr) {
+        COMM_LOGE(COMM_SVC, "read config data failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    int32_t retReply = StopRangeForMsdp(pkgName, config);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;

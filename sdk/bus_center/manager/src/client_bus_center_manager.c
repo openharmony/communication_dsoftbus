@@ -1064,6 +1064,11 @@ int32_t TriggerRangeForMsdpInner(const char *pkgName, const RangeConfig *config)
     return ServerIpcTriggerRangeForMsdp(pkgName, config);
 }
 
+int32_t StopRangeForMsdpInner(const char *pkgName, const RangeConfig *config)
+{
+    return ServerIpcStopRangeForMsdp(pkgName, config);
+}
+
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
