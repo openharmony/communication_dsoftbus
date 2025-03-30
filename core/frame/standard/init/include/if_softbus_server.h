@@ -68,6 +68,7 @@ public:
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
     virtual int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+    virtual int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config);
     virtual int32_t RegisterRangeCallbackForMsdp(const char *pkgName) = 0;
     virtual int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) = 0;
     virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);

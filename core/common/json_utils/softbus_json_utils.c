@@ -289,6 +289,25 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return true;
 }
 
+bool AdddDoubleToJsonObject(cJSON *json, const char * const string, double num)
+{
+    if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return false;
+    }
+    cJSON *item = cJSON_CreateNumber(num);
+    if (item == NULL) {
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object. string=%{public}s", string);
+        return false;
+    }
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        COMM_LOGE(COMM_UTILS, "Cannot add double object to json. string=%{public}s", string);
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
 bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
 {
     if (json == NULL || string == NULL) {

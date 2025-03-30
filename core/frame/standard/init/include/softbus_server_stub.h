@@ -72,6 +72,7 @@ private:
     int32_t GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply);
     int32_t TriggerRangeForMsdpInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopRangeForMsdpInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply);
     int32_t SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply);

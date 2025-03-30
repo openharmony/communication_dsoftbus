@@ -533,6 +533,7 @@ ohos_unittest("ClientProxyTest") {
 ohos_unittest("BusCenterIpcTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c",
     "$dsoftbus_root_path/core/frame/common/src/softbus_ddos.c",
     "$dsoftbus_root_path/tests/core/bus_center/test/ipc/bus_center_ipc_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/bus_center_ipc_mock.cpp",
@@ -560,6 +561,7 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
@@ -684,6 +686,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
 ohos_unittest("BusCenterDecisionCenterTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_node_info.c",
