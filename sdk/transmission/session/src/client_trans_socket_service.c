@@ -312,3 +312,45 @@ int32_t RegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker)
     }
     return ClientRegisterRelationChecker(relationChecker);
 }
+
+int32_t SetAccessInfo(int32_t socket, SocketAccessInfo accessInfo)
+{
+    #define WRITE_BUF_PARAM_NUM 3
+    TRANS_LOGI(TRANS_SDK, "SetAccessInfo: socket=%{public}d", socket);
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = ClientGetSessionNameBySessionId(socket, sessionName);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "get sessionName by socket=%{public}d failed, ret=%{public}d", socket, ret);
+
+    uint32_t bufLen = sizeof(int32_t) * WRITE_BUF_PARAM_NUM + strlen(accessInfo.accountId) + strlen(sessionName) + 2;
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_SDK, "malloc buf failed, socket=%{public}d.", socket);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t offSet = 0;
+    ret = WriteInt32ToBuf(buf, bufLen, &offSet, accessInfo.userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write userId=%{public}d to buf failed! ret=%{public}d", accessInfo.userId, ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteStringToBuf(buf, bufLen, &offSet, accessInfo.accountId, strlen(accessInfo.accountId) + 1);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write accountId to buf failed! ret=%{public}d", ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = WriteStringToBuf(buf, bufLen, &offSet, sessionName, strlen(sessionName) + 1);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write sessionName to buf failed! ret=%{public}d", ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_SET_ACCESS_INFO, buf, bufLen);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "ServerIpcProcessInnerEvent failed! ret=%{public}d", ret);
+    }
+    SoftBusFree(buf);
+    return ret;
+}

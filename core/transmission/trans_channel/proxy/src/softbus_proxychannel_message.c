@@ -430,26 +430,6 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
     return SOFTBUS_OK;
 }
 
-static void TransProxyCheckIsApp(AppInfo *appInfo, cJSON *root)
-{
-    if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
-        return;
-    }
-
-    appInfo->myData.userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
-    if (appInfo->myData.userId == INVALID_USER_ID) {
-        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
-        return;
-    }
-    uint32_t size = 0;
-    if (GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size,
-        appInfo->myData.userId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get current account failed.");
-    }
-    (void)AddStringToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
-    (void)AddNumberToJsonObject(root, JSON_KEY_USER_ID, appInfo->myData.userId);
-}
-
 static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInfo *appInfo, cJSON *root)
 {
     int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64->sessionKeyBase64,
@@ -476,7 +456,8 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
         TRANS_LOGE(TRANS_CTRL, "proxy channel pack fast data failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    TransProxyCheckIsApp(appInfo, root);
+    (void)AddNumberToJsonObject(root, JSON_KEY_USER_ID, appInfo->myData.userId);
+    (void)AddStringToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
     (void)AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);

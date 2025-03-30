@@ -15,9 +15,11 @@
 
 #include "trans_client_proxy_standard.h"
 
+#include "softbus_access_token_adapter.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 
 #define WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                              \
     do {                                                                               \
@@ -106,6 +108,11 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH && channel->isServer) {
+        WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, CString, channel->peerAccountId, SOFTBUS_IPC_ERR);
+    }
     return SOFTBUS_OK;
 }
 

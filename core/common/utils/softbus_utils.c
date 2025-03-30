@@ -684,6 +684,31 @@ int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t
     return SOFTBUS_OK;
 }
 
+int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
+{
+    if (data == NULL || dataLen == 0) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = checkParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+
+    if (bufLen < *offSet + dataLen + sizeof(dataLen)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *((int32_t *)(buf + *offSet)) = dataLen;
+    *offSet += sizeof(dataLen);
+    if (memcpy_s(buf + *offSet, bufLen - *offSet, data, dataLen) != EOK) {
+        COMM_LOGE(COMM_UTILS, "data copy failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    *offSet += dataLen;
+    return SOFTBUS_OK;
+}
 
 int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t *data)
 {
@@ -720,6 +745,36 @@ int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_
     }
     *data = *(buf + *offSet);
     *offSet += sizeof(*data);
+    return SOFTBUS_OK;
+}
+
+int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
+{
+    int32_t ret = checkParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (bufLen < *offSet + sizeof(dataLen)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+
+    dataLen = *((int32_t *)(buf + *offSet));
+    *offSet += sizeof(dataLen);
+
+    if (bufLen < *offSet + dataLen) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    if (memcpy_s(data, dataLen, buf + *offSet, dataLen) != EOK) {
+        COMM_LOGE(COMM_UTILS, "data copy failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    *offSet += dataLen;
     return SOFTBUS_OK;
 }
 

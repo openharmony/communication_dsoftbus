@@ -210,6 +210,18 @@ typedef struct {
      * @version 2.0
      */
     void (*OnBytesSent)(int32_t socket, uint32_t dataSeq, int32_t errCode);
+
+    /**
+     * @brief Called when a socket needs to check the access.
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param info Indicates the information of peer socket access.
+     * @return If true is returned, it indicates that the access is successful.
+     * if false is returned, the access fails and the app cannot establish a link.
+     * @since 2.0
+     * @version 2.0
+     */
+    bool (*OnCheckAccess)(int32_t socket, PeerSocketAccessInfo info);
 } ISocketListener;
 
 /**
@@ -403,6 +415,18 @@ void Shutdown(int32_t socket);
  * @version 2.0
  */
 int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount);
+
+/**
+ * @brief Set socket access information of service.
+ *
+ * @param socket Indicates the unique socket fd.
+ * @param accessInfo Indicates the socket access information.
+ *
+ * @return Returns no value.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t SetAccessInfo(int32_t socket, SocketAccessInfo accessInfo);
 #ifdef __cplusplus
 }
 #endif

@@ -94,6 +94,7 @@ typedef struct {
     uint32_t dataConfig;
     int32_t userId;
     int64_t channelId;
+    int32_t tokenType;
 } AppInfoData;
 
 typedef struct {
