@@ -249,5 +249,9 @@ void IdServiceDestroyCredentialList(char **returnData)
     return GetAuthHichainMockInterface()->IdServiceDestroyCredentialList(returnData);
 }
 
+bool GetSecEnhanceFlag(void)
+{
+    return GetAuthHichainMockInterface()->GetSecEnhanceFlag();
+}
 } // extern "C"
 } // namespace OHOS

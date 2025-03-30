@@ -181,7 +181,7 @@ HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level
  */
 HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
 {
-    int64_t authSeq = TEST_AUTH_SEQ;
+    int64_t authSeq = TEST_AUTH_SEQ - 1;
     const char *reqParams = "reqParams";
     int operationCode = 100;
     AuthHichainInterfaceMock hichainMock;
@@ -207,6 +207,8 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg))
         .WillOnce(Return(msg1)).WillOnce(Return(msg2));
+    EXPECT_CALL(hichainMock, GetSecEnhanceFlag).WillRepeatedly(Return(false));
+
     ptr = OnRequest(authSeq, operationCode, reqParams);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, AddNumberToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -262,9 +264,10 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
         .WillOnce(Return(msg5)).WillOnce(Return(msg6));
     EXPECT_CALL(hichainMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, AddStringToJsonObject).WillOnce(Return(true)).WillOnce(Return(true))
-        .WillOnce(Return(true)).WillOnce(Return(true)).WillOnce(Return(true)).WillOnce(Return(true))
-        .WillOnce(Return(false)).WillRepeatedly(Return(true));
+        .WillOnce(Return(true)).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, AddBoolToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, GetSecEnhanceFlag).WillRepeatedly(Return(true));
+
     char msgStr[10] = {0};
     const char *val = "returnStr";
     EXPECT_EQ(strcpy_s(msgStr, sizeof(msgStr), val), EOK);

@@ -23,6 +23,7 @@
 #include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
+#include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "lnn_async_callback_utils.h"
@@ -295,17 +296,6 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
     if (msg == NULL) {
         return NULL;
     }
-    char localUdid[UDID_BUF_LEN] = {0};
-    LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
-    if (!AddNumberToJsonObject(msg, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
-        !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
-        !AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
-        !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid) ||
-        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
-        AUTH_LOGE(AUTH_HICHAIN, "pack request msg fail");
-        cJSON_Delete(msg);
-        return NULL;
-    }
 
     int32_t version = 0;
     if (AuthSessionGetVersion(authSeq, &version) != SOFTBUS_OK) {
@@ -314,11 +304,21 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         return NULL;
     }
 
-    AUTH_LOGD(AUTH_HICHAIN, "get softbus version=%{public}d", version);
+    bool bFlag = (version < SOFTBUS_NEW_V3) || (!AuthSessionGetIsSameAccount(authSeq) && !GetSecEnhanceFlag());
+    char localUdid[UDID_BUF_LEN] = {0};
+    LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
+    if (!AddNumberToJsonObject(msg, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
+        !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
+        (bFlag && !AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid)) ||
+        (bFlag && !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid)) ||
+        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
+        AUTH_LOGE(AUTH_HICHAIN, "pack request msg fail");
+        cJSON_Delete(msg);
+        return NULL;
+    }
 
     char* credId = AuthSessionGetCredId(authSeq);
-    if ((version >= SOFTBUS_NEW_V3) && AuthSessionGetIsSameAccount(authSeq) &&
-        !AddStringToJsonObject(msg, FIELD_CRED_ID, credId)) {
+    if (!bFlag && !AddStringToJsonObject(msg, FIELD_CRED_ID, credId)) {
         AUTH_LOGE(AUTH_HICHAIN, "pack cred id fail");
         cJSON_Delete(msg);
         return NULL;
