@@ -46,6 +46,8 @@
 #include "app_mgr_proxy.h"
 #endif
 
+#define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
+
 const std::string DMS_SESSIONNAME = "ohos.distributedschedule.dms";
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
@@ -180,7 +182,12 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
 
     char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
-    (void)GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
+    ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
+    if (ret == SOFTBUS_NOT_LOGIN) {
+        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
+            COMM_LOGE(COMM_PERM, "strcpy_s default uid failed");
+        }
+    }
     return TransCheckSourceAccessControl(callingTokenId, myDeviceId, appUserId, accountId, peerDeviceId);
 }
 
@@ -213,7 +220,12 @@ static int32_t CheckServerAccessControl(const AppInfo *appInfo, uint64_t myToken
 {
     char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
-    (void)GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
+    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
+    if (ret == SOFTBUS_NOT_LOGIN) {
+        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
+            COMM_LOGE(COMM_PERM, "strcpy_s default account uid failed");
+        }
+    }
     char *tmpMyDeviceId = nullptr;
     char *tmpPeerDeviceId = nullptr;
     char *tmpPeerAccountId = nullptr;
