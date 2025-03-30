@@ -122,8 +122,10 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
     deviceIdHash = "dev/ice%Id()Hash()";
     int32_t peerUserId = -1;
     int64_t accountId = 100;
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     DelNotTrustDevice(nullptr);
-    UpdateDpSameAccount(accountId, nullptr, peerUserId);
+    UpdateDpSameAccount(accountId, nullptr, peerUserId, sessionKey, true);
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_FALSE(ret);
 }

@@ -38,6 +38,7 @@
 #include "trans_session_account_adapter.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "trans_uk_manager.h"
 
 #define ID_OFFSET (1)
 #define OHOS_TYPE_UNKNOWN (-1)
@@ -91,7 +92,7 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
-static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)
+static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag, const UkIdInfo *ukIdInfo)
 {
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
@@ -107,7 +108,7 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
     }
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
-        .module = MODULE_SESSION,
+        .module = IsVaildUkInfo(ukIdInfo) ? MODULE_UK_ENCYSESSION : MODULE_SESSION,
         .seq = seq,
         .flags = (FLAG_REQUEST | cipherFlag),
         .dataLen = strlen(bytes), /* reset after encrypt */
@@ -115,7 +116,7 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
     if (conn->isMeta) {
         packetHead.flags |= FLAG_AUTH_META;
     }
-    int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
+    int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes, ukIdInfo);
     cJSON_free(bytes);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
@@ -126,8 +127,52 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
     return SOFTBUS_OK;
 }
 
-static int32_t StartVerifySession(SessionConn *conn)
+static int32_t StartNegotiateUk(SessionConn *conn)
 {
+    TRANS_LOGI(
+        TRANS_CTRL, "negotiate uk start. channelId=%{public}d, fd=%{public}d", conn->channelId, conn->appInfo.fd);
+    uint64_t seq = TransTdcGetNewSeqId();
+    char *buf = PackUkRequest(&(conn->appInfo));
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL,
+            "pack uk negotiate request failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
+        return SOFTBUS_TRANS_PACK_REQUEST_FAILED;
+    }
+    bool isAuthServer = false;
+    uint32_t cipherFlag = FLAG_WIFI;
+    bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
+    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
+        TRANS_LOGE(TRANS_CTRL,
+            "get cipher flag failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
+        cJSON_free(buf);
+        return SOFTBUS_TRANS_GET_CIPHER_FAILED;
+    }
+    if (isAuthServer) {
+        seq |= AUTH_CONN_SERVER_SIDE;
+    }
+    TdcPacketHead packetHead = {
+        .magicNumber = MAGIC_NUMBER,
+        .module = MODULE_UK_NEGOSESSION,
+        .seq = seq,
+        .flags = (FLAG_REQUEST | cipherFlag),
+        .dataLen = strlen(buf), /* reset after encrypt */
+    };
+    int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, buf, NULL);
+    cJSON_free(buf);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL,
+            "Trans tdc post uk negotiate request failed, channelId=%{public}d, fd=%{public}d, ret=%{public}d",
+            conn->channelId, conn->appInfo.fd, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t StartVerifySession(SessionConn *conn, const UkIdInfo *ukIdInfo)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
     TRANS_LOGI(TRANS_CTRL, "verify enter. channelId=%{public}d, fd=%{public}d", conn->channelId, conn->appInfo.fd);
     if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
@@ -145,7 +190,7 @@ static int32_t StartVerifySession(SessionConn *conn)
             conn->channelId, conn->appInfo.fd);
         return SOFTBUS_TRANS_GET_CIPHER_FAILED;
     }
-    int32_t ret = TransPostBytes(conn, isAuthServer, cipherFlag);
+    int32_t ret = TransPostBytes(conn, isAuthServer, cipherFlag, ukIdInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
             "TransTdc post bytes failed channelId=%{public}d, fd=%{public}d, ret=%{public}d",
@@ -290,7 +335,7 @@ void CloseTcpDirectFd(ListenerModule module, int32_t fd)
 #endif
 }
 
-static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t channelId, int32_t fd)
+static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t channelId, int32_t fd, int32_t pktModule)
 {
     SessionConn conn;
     int32_t ret = GetSessionConnById(channelId, &conn);
@@ -315,6 +360,9 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
         DelTrigger(module, fd, READ_TRIGGER);
         TransTdcSocketReleaseFd(module, fd);
         (void)NotifyChannelOpenFailed(channelId, errCode);
+    } else if (pktModule == MODULE_UK_NEGOSESSION) {
+        AddTrigger(module, fd, READ_TRIGGER);
+        return;
     } else {
         if (ret != SOFTBUS_OK || conn.serverSide) {
             return;
@@ -328,14 +376,15 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
 
 static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
 {
-    int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId, conn->authHandle.type);
+    int32_t pktModule = 0;
+    int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId, conn->authHandle.type, &pktModule);
     if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
         return SOFTBUS_OK;
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data, ret=%{public}d.", ret);
     }
-    TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
+    TransProcDataRes(conn->listenMod, ret, conn->channelId, fd, pktModule);
     return ret;
 }
 
@@ -350,8 +399,14 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         TRANS_LOGE(TRANS_CTRL, "add trigger fail, module=%{public}d, fd=%{public}d", conn->listenMod, fd);
         return SOFTBUS_TRANS_ADD_TRIGGER_FAILED;
     }
-
-    ret = StartVerifySession(conn);
+    int32_t ukPolicy = GetUkPolicy(&(conn->appInfo));
+    TRANS_LOGI(TRANS_CTRL, "uk policy=%{public}d", ukPolicy);
+    if (ukPolicy == USE_NEGO_UK) {
+        TRANS_LOGI(TRANS_CTRL, "negotiate uk, channelId=%{public}d", conn->channelId);
+        ret = StartNegotiateUk(conn);
+    } else {
+        ret = StartVerifySession(conn, NULL);
+    }
     TransEventExtra extra = {
         .socketName = NULL,
         .peerNetworkId = NULL,

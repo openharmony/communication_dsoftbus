@@ -236,5 +236,9 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
 {
     return GetTransTcpDirectMessageInterface()->CheckCollabRelation(appInfo, channelId, channelType);
 }
+int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
+{
+    return GetTransTcpDirectMessageInterface()->GetTokenTypeBySessionName(sessionName, tokenType);
+}
 }
 }

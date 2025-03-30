@@ -21,7 +21,9 @@
 
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "auth_request.h"
+#include "auth_user_common_key.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_ble_lpdevice.h"
@@ -72,7 +74,8 @@ public:
         const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
-    virtual void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId) = 0;
+    virtual void UpdateDpSameAccount(
+        int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type) = 0;
     virtual bool LnnConvertAuthConnInfoToAddr(
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType) = 0;
@@ -81,6 +84,11 @@ public:
     virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort) = 0;
     virtual void DelSessionKeyProfile(int32_t sessionKeyId) = 0;
     virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
+    virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
+    virtual int32_t GetLatestSessionKey(
+        const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key) = 0;
+    virtual void DelDupAuthManager(AuthManager *auth) = 0;
+    virtual void DelUserKeyByUdid(char *networkId) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -115,7 +123,7 @@ public:
     MOCK_METHOD2(LnnNotifyStateForSession, void(char *, int32_t));
     MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD2(GetAuthRequest, int32_t(uint32_t, AuthRequest *));
-    MOCK_METHOD3(UpdateDpSameAccount, void(int64_t, const char *, int32_t));
+    MOCK_METHOD5(UpdateDpSameAccount, void(int64_t, const char *, int32_t, SessionKey, bool));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t(const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnConvertAuthConnInfoToAddr, bool(ConnectionAddr *, const AuthConnInfo *, ConnectionAddrType));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
@@ -123,6 +131,10 @@ public:
     MOCK_METHOD3(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *, bool));
     MOCK_METHOD1(DelSessionKeyProfile, void(int32_t));
     MOCK_METHOD3(GetSessionKeyProfile, bool(int32_t, uint8_t *, uint32_t *));
+    MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
+    MOCK_METHOD4(GetLatestSessionKey, int32_t(const SessionKeyList *, AuthLinkType, int32_t *, SessionKey *));
+    MOCK_METHOD1(DelDupAuthManager, void(AuthManager *));
+    MOCK_METHOD1(DelUserKeyByUdid, void(char *));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

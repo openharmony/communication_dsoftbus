@@ -82,6 +82,7 @@ public:
     virtual int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId) = 0;
     virtual int32_t GetErrCodeBySocketErr(int32_t transErrCode) = 0;
     virtual int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -134,6 +135,7 @@ public:
     MOCK_METHOD3(TransTdcOnChannelClosed, int32_t (const char *pkgName, int32_t pid, int32_t channelId));
     MOCK_METHOD1(GetErrCodeBySocketErr, int32_t (int32_t transErrCode));
     MOCK_METHOD3(CheckCollabRelation, int32_t (const AppInfo *appInfo, int32_t channelId, int32_t channelType));
+    MOCK_METHOD2(GetTokenTypeBySessionName, int32_t (const char *sessionName, int32_t *tokenType));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

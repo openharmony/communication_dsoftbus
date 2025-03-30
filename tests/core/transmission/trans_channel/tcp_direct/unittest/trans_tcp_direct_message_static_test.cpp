@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -363,9 +363,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
+    int32_t pktModule;
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ProcessReceivedData(channelId, 0);
+    ret = ProcessReceivedData(channelId, 0, &pktModule);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     TransSrvDataListDeinit();
 }
@@ -380,10 +381,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
-
+    int32_t pktModule;
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
+    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0, &pktModule);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
     TransSrvDataListDeinit();
 }
@@ -599,7 +600,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.
     uint32_t seq = 1;
     uint32_t flags = 1;
 
-    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, nullptr);
+    int32_t ret = TransTdcPostReplyMsg(channelId, MODULE_SESSION, seq, flags, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

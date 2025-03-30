@@ -1241,6 +1241,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     authParam.uid = authFsm->info.connInfo.peerUid;
     authParam.userId = authFsm->info.userId;
     authParam.credId = authFsm->info.credId;
+    authParam.cb = NULL;
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
 }
 

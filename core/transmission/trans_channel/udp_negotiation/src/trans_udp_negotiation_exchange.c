@@ -111,7 +111,24 @@ static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int32_t *)&(appInfo->udpConnType));
 }
 
-int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
+static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInfo, UkIdInfo *ukIdInfo)
+{
+    (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
+    (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
+    if (!GetJsonObjectNumber64Item(msg, "CALLING_TOKEN_ID", (int64_t *)&appInfo->callingTokenId)) {
+        appInfo->callingTokenId = TOKENID_NOT_SET;
+    }
+    (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
+    if (!GetJsonObjectNumberItem(msg, "USER_ID", &appInfo->peerData.userId)) {
+        appInfo->peerData.userId = INVALID_USER_ID;
+    }
+    (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
+    (void)GetJsonObjectStringItem(msg, "ACCOUNT_ID", appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
+    (void)GetJsonObjectNumberItem(msg, "SOURCE_UK_ID", &ukIdInfo->peerId);
+    (void)GetJsonObjectNumberItem(msg, "SINK_UK_ID", &ukIdInfo->myId);
+}
+
+int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo, UkIdInfo *ukIdInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
@@ -136,17 +153,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
-            (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
-            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
-            if (!GetJsonObjectNumber64Item(msg, "CALLING_TOKEN_ID", (int64_t *)&appInfo->callingTokenId)) {
-                appInfo->callingTokenId = TOKENID_NOT_SET;
-            }
-            (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
-            if (!GetJsonObjectNumberItem(msg, "USER_ID", &appInfo->peerData.userId)) {
-                appInfo->peerData.userId = INVALID_USER_ID;
-            }
-            (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
-            (void)GetJsonObjectStringItem(msg, "ACCOUNT_ID", appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
+            TransGetUdpChannelOpenInfoFromJson(msg, appInfo, ukIdInfo);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
@@ -166,7 +173,20 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
+static void TransAddInfoToUdpChannelOpenMsg(cJSON *msg, const AppInfo *appInfo, const UkIdInfo *ukIdInfo)
+{
+    (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
+    (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
+    (void)AddNumber64ToJsonObject(msg, "CALLING_TOKEN_ID", (int64_t)appInfo->callingTokenId);
+    (void)AddNumberToJsonObject(msg, "LINK_TYPE", appInfo->linkType);
+    (void)AddStringToJsonObject(msg, "DEVICE_ID", appInfo->myData.deviceId);
+    (void)AddNumberToJsonObject(msg, "USER_ID", appInfo->myData.userId);
+    (void)AddStringToJsonObject(msg, "ACCOUNT_ID", appInfo->myData.accountId);
+    (void)AddNumberToJsonObject(msg, "SOURCE_UK_ID", ukIdInfo->myId);
+    (void)AddNumberToJsonObject(msg, "SINK_UK_ID", ukIdInfo->peerId);
+}
+
+int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo, const UkIdInfo *ukIdInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "pack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
@@ -176,13 +196,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
-            (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
-            (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
-            (void)AddNumber64ToJsonObject(msg, "CALLING_TOKEN_ID", (int64_t)appInfo->callingTokenId);
-            (void)AddNumberToJsonObject(msg, "LINK_TYPE", appInfo->linkType);
-            (void)AddStringToJsonObject(msg, "DEVICE_ID", appInfo->myData.deviceId);
-            (void)AddNumberToJsonObject(msg, "USER_ID", appInfo->myData.userId);
-            (void)AddStringToJsonObject(msg, "ACCOUNT_ID", appInfo->myData.accountId);
+            TransAddInfoToUdpChannelOpenMsg(msg, appInfo, ukIdInfo);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);
