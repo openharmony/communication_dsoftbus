@@ -30,6 +30,7 @@
 #include "auth_session_json.h"
 #include "auth_session_message.h"
 #include "auth_tcp_connection.h"
+#include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_distributed_net_ledger.h"
@@ -1081,8 +1082,8 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
 static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
-    HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount)) ?
-        HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
+    HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount &&
+        !GetSecEnhanceFlag())) ? HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len, authMode);
     if (ret != SOFTBUS_OK) {
         LnnAuditExtra lnnAuditExtra = { 0 };
@@ -1225,8 +1226,8 @@ static int32_t TryRecoveryKey(AuthFsm *authFsm)
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
     HiChainAuthParam authParam = { 0 };
-    HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount)) ?
-        HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
+    HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount &&
+        !GetSecEnhanceFlag())) ? HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
     /* just client need start authDevice */
     if (ClientSetExchangeIdType(authFsm) != SOFTBUS_OK) {

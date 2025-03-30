@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_BUS_CENTER_ADAPTER_H
 #define SOFTBUS_BUS_CENTER_ADAPTER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -60,6 +61,7 @@ int32_t GetCommonDeviceProductId(char *value, uint32_t len);
 int32_t GetCommonDeviceModelName(char *value, uint32_t len);
 int32_t GetWlanIpv4Addr(char *ip, uint32_t size);
 int32_t GetDeviceSecurityLevel(int32_t *level);
+bool GetSecEnhanceFlag(void);
 
 #ifdef __cplusplus
 }

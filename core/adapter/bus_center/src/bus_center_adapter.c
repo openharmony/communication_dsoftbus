@@ -42,6 +42,7 @@
 #define VERSION_SDK                "ro.build.version.sdk"
 #define UNDEFINED_VALUE            "undefined"
 #define OHOS_DEVICE_SECURITY_LEVEL "const.security.device_security_level"
+#define SEC_ENHANCE_FLAG           "sec_enhance_flag"
 #define OHOS_TYPE_UNKNOWN          (-1)
 #define API_VERSION_LEN            10
 #define VERSION_SDK_LEN            10
@@ -334,4 +335,11 @@ int32_t GetDeviceSecurityLevel(int32_t *level)
         return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     return SOFTBUS_OK;
+}
+
+bool GetSecEnhanceFlag(void)
+{
+    int32_t val = GetIntParameter(SEC_ENHANCE_FLAG, 0);
+    LNN_LOGI(LNN_STATE, "sec enhance flag=%{public}d", val);
+    return (val != 0) ? true : false;
 }
