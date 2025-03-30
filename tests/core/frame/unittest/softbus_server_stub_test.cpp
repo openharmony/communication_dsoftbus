@@ -1821,7 +1821,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     char test[10] = "test";
-    HbMode mode;
+    RangeConfig config;
     MessageParcel datas;
     MessageParcel reply;
 
@@ -1829,8 +1829,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, ret);
 
     datas.WriteCString(test);
-    datas.WriteCString(test);
-    datas.WriteRawData(&mode, sizeof(mode));
+    datas.WriteRawData(&config, sizeof(RangeConfig));
     ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
     EXPECT_NE(SOFTBUS_OK, ret);
 }

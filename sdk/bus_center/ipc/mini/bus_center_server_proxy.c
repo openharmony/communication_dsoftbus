@@ -91,6 +91,13 @@ int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *con
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen, isForceJoin);
