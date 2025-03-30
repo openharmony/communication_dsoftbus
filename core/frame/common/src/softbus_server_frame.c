@@ -16,6 +16,7 @@
 #include "softbus_server_frame.h"
 
 #include "auth_interface.h"
+#include "auth_uk_manager.h"
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
 #include "softbus_ddos.h"
@@ -150,6 +151,7 @@ void InitSoftBusServer(void)
     }
     LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_SUCCESS);
     LnnModuleInitMonitorCheckStart();
+    UkNegotiateSessionInit();
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

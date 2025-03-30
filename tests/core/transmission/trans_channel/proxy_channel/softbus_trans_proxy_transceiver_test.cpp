@@ -697,7 +697,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessage001, TestSize.L
     memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     const char *identity = TEST_STRING_IDENTITY;
     msg.data = TransProxyPackIdentity(identity);
-    msg.dateLen = 9;
+    msg.dataLen = 9;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t ret = TransProxySendBadKeyMessage(&msg, &authHandle);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);

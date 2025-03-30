@@ -178,7 +178,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackErrMsg001
     info.myId = 1;
     info.peerId = 2;
     msg.data = const_cast<char *>("Test-Data");
-    msg.dateLen = strlen(msg.data);
+    msg.dataLen = strlen(msg.data);
     int32_t result = TransProxyHandshakeUnpackErrMsg(&info, &msg, nullptr);
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
@@ -197,7 +197,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackErrMsg002
     info.myId = 1;
     info.peerId = 2;
     msg.data = const_cast<char *>("Test-Data");
-    msg.dateLen = strlen(msg.data);
+    msg.dataLen = strlen(msg.data);
 
     SoftbusTransProxyChannelManagerMock mock;
     EXPECT_CALL(mock, TransProxyUnPackHandshakeErrMsg).WillOnce(Return(SOFTBUS_OK));

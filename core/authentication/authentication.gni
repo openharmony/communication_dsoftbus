@@ -38,6 +38,7 @@ auth_server_inc = [
   "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/core/bus_center/utils/include/",
   "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
+  "$dsoftbus_root_path/interfaces/kits/transport",
 ]
 if (dsoftbus_feature_lnn_frame) {
   auth_server_src = [
@@ -56,6 +57,8 @@ if (dsoftbus_feature_lnn_frame) {
     "$authentication_path/src/auth_interface.c",
     "$authentication_path/src/auth_pre_link.c",
     "$authentication_path/src/auth_identity_service_adapter.c",
+    "$authentication_path/userkey/auth_uk_manager.c",
+    "$authentication_path/userkey/auth_user_common_key.c",
   ]
   if (enhanced) {
     auth_server_src += [

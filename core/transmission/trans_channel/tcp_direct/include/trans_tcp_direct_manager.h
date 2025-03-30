@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@ extern "C" {
 
 #define MAGIC_NUMBER 0xBABEFACE
 #define MODULE_SESSION 6
+#define MODULE_UK_NEGOSESSION 7
+#define MODULE_UK_ENCYSESSION 8
 #define FLAG_REQUEST 0
 #define FLAG_REPLY 1
 #define FLAG_WIFI 0

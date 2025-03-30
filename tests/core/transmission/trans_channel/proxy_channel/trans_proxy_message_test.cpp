@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -338,30 +338,30 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
     ProxyMessageHead msg;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     ProxyDataInfo dataInfo;
-    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo);
+    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyPackMessage(&msg, authHandle, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, nullptr, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = nullptr;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = 0;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = (uint8_t *)"1";
     dataInfo.inLen = strlen((const char*)dataInfo.inData);
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -392,17 +392,17 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest002, TestSize.Level1)
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    int32_t ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    int32_t ret = TransProxyPackMessage(&msg, authId, &dataInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authId, &dataInfo, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     authId = 1;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authId, &dataInfo, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authId, &dataInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -608,10 +608,10 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
     TransCommInterfaceMock commMock;
 
     /* test info is null */
-    ret = TransProxyHandshake(nullptr);
+    ret = TransProxyHandshake(nullptr, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test appType no auth and invalid channel */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     AuthConnInfo wifiInfo, bleInfo;
@@ -626,27 +626,27 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<1>(true), Return(SOFTBUS_OK)));
     info.channelId = TEST_PARSE_MESSAGE_CHANNEL;
     /* test auth mock get auth conn info fail */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test auth mock get auth server side fail */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack handshake msg failed after pass set cipher */
     EXPECT_CALL(commMock, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message failed after pass packhandshakemsg */
     EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
     EXPECT_CALL(authMock, AuthGetEncryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
     EXPECT_CALL(authMock, AuthEncrypt).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message success and send msg fail */
     EXPECT_CALL(connMock, ConnPostBytes).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test send msg success */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
