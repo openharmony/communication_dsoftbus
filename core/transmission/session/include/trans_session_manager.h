@@ -17,6 +17,7 @@
 #define TRANS_SESSION_MANAGER_H
 
 #include "softbus_def.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +33,12 @@ typedef enum {
 } CallerType;
 
 typedef struct {
+    int32_t userId;
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t tokenType;
+} AccessInfo;
+
+typedef struct {
     ListNode node;
     SoftBusSecType type;
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -40,6 +47,7 @@ typedef struct {
     int32_t pid;
     uint64_t tokenId;
     CallerType callerType;
+    AccessInfo accessInfo;
 } SessionServer;
 
 int32_t TransSessionMgrInit(void);
@@ -66,6 +74,12 @@ bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid)
 int32_t TransGetPidAndPkgName(const char *sessionName, const int32_t uid, int32_t *pid, char *pkgName, uint32_t len);
 
 int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId);
+
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo);
+
+int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId, char *accountId, uint32_t accountIdLen);
+
+int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType);
 
 #ifdef __cplusplus
 }

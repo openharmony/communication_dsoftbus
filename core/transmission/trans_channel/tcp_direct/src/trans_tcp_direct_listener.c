@@ -91,30 +91,12 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
-static void TransTdcCheckIsApp(AppInfo *appInfo)
-{
-    if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
-        return;
-    }
-    appInfo->myData.userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
-    if (appInfo->myData.userId == INVALID_USER_ID) {
-        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
-        return;
-    }
-    uint32_t size = 0;
-    if (GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size,
-        appInfo->myData.userId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
-    }
-}
-
 static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)
 {
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-    TransTdcCheckIsApp(&conn->appInfo);
 
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {

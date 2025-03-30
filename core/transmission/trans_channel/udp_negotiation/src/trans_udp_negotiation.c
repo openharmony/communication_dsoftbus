@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "securec.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -39,6 +40,8 @@
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
+#include "trans_session_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 #include "wifi_direct_manager.h"
@@ -136,6 +139,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.keyLen = SESSION_KEY_LENGTH;
     info.groupId = (char*)appInfo->groupId;
     info.isEncrypt = true;
+    info.tokenType = appInfo->myData.tokenType;
     int32_t ret = LnnGetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get network id by uuid failed.");
@@ -149,6 +153,11 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.peerIp = (char*)appInfo->peerData.addr;
     if (!isServerSide) {
         info.peerPort = appInfo->peerData.port;
+    } else {
+        if (appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            info.peerUserId = appInfo->peerData.userId;
+            info.peerAccountId = (char*)appInfo->peerData.accountId;
+        }
     }
     info.autoCloseTime = appInfo->autoCloseTime;
     info.timeStart = appInfo->timeStart;
@@ -702,7 +711,12 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         errDesc = (char *)"peer device session name not create";
         goto ERR_EXIT;
     }
-
+    ret = GetTokenTypeBySessionName(info.myData.sessionName, &info.myData.tokenType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenType failed. ret=%{public}d", ret);
+        errDesc = (char *)"peer device session name not create";
+        goto ERR_EXIT;
+    }
     ReportUdpRequestHandShakeStartEvent(&info, &nodeInfo, &extra, authHandle.authId);
     ret = ProcessUdpChannelState(&info, true, &authHandle, seq);
     if (ret != SOFTBUS_OK) {

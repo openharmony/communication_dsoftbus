@@ -1102,6 +1102,37 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
     return ret;
 }
 
+static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
+{
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t offset = 0;
+    AccessInfo accessInfo;
+    (void)memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    int32_t ret = ReadInt32FromBuf(buf, len, &offset, &accessInfo.userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get userId from buf failed.");
+        return ret;
+    }
+
+    ret = ReadStringFromBuf(buf, len, &offset, accessInfo.accountId, ACCOUNT_UID_LEN_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get accountId from buf failed.");
+        return ret;
+    }
+
+    ret = ReadStringFromBuf(buf, len, &offset, sessionName, SESSION_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get sessionName from buf failed.");
+        return ret;
+    }
+
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "add accessInfo by sessionName failed.");
+    }
+    return ret;
+}
+
 int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
 {
     if (buf == NULL) {
@@ -1118,6 +1149,9 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
             break;
         case EVENT_TYPE_COLLAB_CHECK:
             ret = TransReportCheckCollabInfo(buf, len);
+            break;
+        case EVENT_TYPE_SET_ACCESS_INFO:
+            ret = TransSetAccessInfo(buf, len);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);

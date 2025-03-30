@@ -185,6 +185,9 @@ typedef struct {
     char *myIp;
     char *peerIp;
     char *reqId;
+    int32_t tokenType;
+    int32_t peerUserId;
+    char *peerAccountId;
 } ChannelInfo;
 
 #ifdef __cplusplus

@@ -48,6 +48,7 @@
 #define TRANS_TEST_TV_COUNT 1
 #define TRANS_TEST_AUTH_DATA "test auth message data"
 #define DFX_TIMERS_S 15
+#define TEST_TOKEN_TYPE 0
 
 #define TRANS_TEST_INVALID_CHANNEL_ID (-1)
 
@@ -898,7 +899,8 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest19, TestS
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnNegotiate(socketId, &g_socketlistener);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
-    ret = HandleServerOnNegotiate(socketId, &g_socketlistener);
+    int32_t tokenType = TEST_TOKEN_TYPE;
+    ret = HandleServerOnNegotiate(socketId, tokenType, &g_socketlistener);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);

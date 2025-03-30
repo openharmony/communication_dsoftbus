@@ -23,6 +23,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
@@ -103,6 +104,11 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         info.peerDeviceId = buf;
         if (LnnGetOsTypeByNetworkId(buf, &(info.osType)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "get remote osType fail, channelId=%{public}d", channelId);
+        }
+        info.tokenType = appInfo->myData.tokenType;
+        if (isServer && appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            info.peerUserId = appInfo->peerData.userId;
+            info.peerAccountId = (char *)appInfo->peerData.accountId;
         }
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;

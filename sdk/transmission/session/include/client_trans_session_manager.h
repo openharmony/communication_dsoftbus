@@ -107,6 +107,9 @@ typedef struct {
     CachedQosEvent cachedQosEvent;
     bool isSupportTlv;
     bool needAck;
+    int32_t peerUserId;
+    char peerAccountId[ACCOUNT_UID_LEN_MAX];
+    int32_t tokenType;
 } SessionInfo;
 
 typedef struct {
@@ -320,6 +323,12 @@ int32_t TransGetSupportTlvBySocket(int32_t socket, bool *supportTlv, int32_t *op
 int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck);
 
 bool IsRawAuthSession(const char *sessionName);
+
+int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName);
+
+int32_t GetIsAsyncAndTokenTypeBySessionId(int32_t sessionId, bool *isAsync, int32_t *tokenType);
+
+int32_t ClientGetPeerSocketAccessInfoById(int32_t sessionId, PeerSocketAccessInfo *peerAccessInfo);
 #ifdef __cplusplus
 }
 #endif

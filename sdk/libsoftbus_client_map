@@ -187,6 +187,7 @@
         "SetPreLinkParam";
         "GetPreLinkParam";
         "RegPreLinkParamListener";
+        "SetAccessInfo";
     local:
         *;
 };

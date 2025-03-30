@@ -48,6 +48,7 @@ typedef enum {
     EVENT_TYPE_CHANNEL_OPENED,
     EVENT_TYPE_TRANS_LIMIT_CHANGE,
     EVENT_TYPE_COLLAB_CHECK,
+    EVENT_TYPE_SET_ACCESS_INFO,
     EVENT_TYPE_BUTT,
 } TransEventType;
 
@@ -66,6 +67,17 @@ typedef struct {
 } SocketInfo;
 
 /**
+ * @brief Defines the socket access information.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    int32_t userId;        /**< User ID of the application that initiates link setup */
+    char *accountId;       /**< Account ID of the application that initiates link setup */
+} SocketAccessInfo;
+
+/**
  * @brief Defines the description of the socket.
  *
  * @since 2.0
@@ -77,6 +89,21 @@ typedef struct {
     char *pkgName;           /**< Peer package name, maximum length 64 bytes */
     TransDataType dataType; /**< Data type of peer socket*/
 } PeerSocketInfo;
+
+/**
+ * @brief Defines the socket access information.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    char *name;              /**< Peer socket name, maximum length 255 bytes */
+    char *networkId;         /**< Peer network ID, maximum length 64 bytes */
+    char *pkgName;           /**< Peer package name, maximum length 64 bytes */
+    int32_t userId;          /**< Peer user ID of the application that initiates link setup */
+    char *accountId;         /**< Peer account ID of the application that initiates link setup */
+    TransDataType dataType; /**< Data type of peer socket*/
+} PeerSocketAccessInfo;
 
 /**
  * @brief Enumerates the reason of the shutdown event.
