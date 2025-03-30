@@ -1140,6 +1140,45 @@ int32_t BusCenterServerProxy::TriggerRangeForMsdp(const char *pkgName, const Ran
     return serverRet;
 }
 
+int32_t BusCenterServerProxy::StopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (pkgName == nullptr || config == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_NETWORK_WRITETOKEN_FAILED;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkg name failed");
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
+    }
+    if (!data.WriteRawData(config, sizeof(RangeConfig))) {
+        LNN_LOGE(LNN_EVENT, "write config failed");
+        return SOFTBUS_NETWORK_WRITERAWDATA_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_STOP_RANGE_FOR_MSDP, data, reply, option) != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed");
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    return serverRet;
+}
+
 int32_t BusCenterServerProxy::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     if (pkgName == nullptr || msg == nullptr || msgLen == 0) {

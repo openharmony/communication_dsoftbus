@@ -66,6 +66,7 @@ public:
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
     int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config) override;
+    int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config) override;
     int32_t RegisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;

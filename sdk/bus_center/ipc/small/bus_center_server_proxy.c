@@ -450,6 +450,20 @@ int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *con
     return g_serverProxy->Invoke(g_serverProxy, SERVER_TRIGGER_RANGE_FOR_MSDP, &request, NULL, NULL);
 }
 
+int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (pkgName == NULL || config == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_RANGE_FOR_MSDP, &request, NULL, NULL);
+}
+
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     LNN_LOGD(LNN_EVENT, "join Lnn ipc client push");

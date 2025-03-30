@@ -65,6 +65,7 @@ int32_t LnnIpcNotifyTimeSyncResult(
 int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
 int32_t LnnIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+int32_t LnnIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config);
 int32_t LnnIpcRegRangeCbForMsdp(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcUnregRangeCbForMsdp(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);

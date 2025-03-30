@@ -336,6 +336,19 @@ int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *con
     return ret;
 }
 
+int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int32_t ret = g_serverProxy->StopRangeForMsdp(pkgName, config);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "stop failed, error = %{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     if (g_serverProxy == nullptr) {

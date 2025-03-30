@@ -310,6 +310,11 @@ int32_t SoftBusServer::TriggerRangeForMsdp(const char *pkgName, const RangeConfi
     return LnnIpcTriggerRangeForMsdp(pkgName, config);
 }
 
+int32_t SoftBusServer::StopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    return LnnIpcStopRangeForMsdp(pkgName, config);
+}
+
 int32_t SoftBusServer::RegisterRangeCallbackForMsdp(const char *pkgName)
 {
     int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
