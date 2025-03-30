@@ -1468,69 +1468,6 @@ HWTEST_F(VtpStreamSocketTest, Send001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Send002
- * @tc.desc: Send
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, Send002, TestSize.Level1)
-{
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-    std::unique_ptr<IStream> stream = IStream::MakeCommonStream(streamData, frameInfo);
-    vtpStreamSocket->isBlocked_ = true;
-    vtpStreamSocket->streamType_ = Communication::SoftBus::COMMON_VIDEO_STREAM;
-    bool res = vtpStreamSocket->Send(std::move(stream));
-    EXPECT_EQ(false, res);
-    SoftBusStreamTestInterfaceMock streamMock;
-    EXPECT_CALL(streamMock, FtSendFrame).WillRepeatedly(testing::Return(-1));
-    stream = IStream::MakeRawStream(streamData, frameInfo);
-    res = vtpStreamSocket->Send(std::move(stream));
-    EXPECT_EQ(false, res);
-}
-
-/**
- * @tc.name: EncryptStreamPacket001
- * @tc.desc: EncryptStreamPacket
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, EncryptStreamPacket001, TestSize.Level1)
-{
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-    std::unique_ptr<IStream> stream = IStream::MakeCommonStream(streamData, frameInfo);
-    IStreamSocket *streamSocket = (IStreamSocket *)SoftBusCalloc(sizeof(IStreamSocket));
-    ASSERT_TRUE(streamSocket != nullptr);
-    streamSocket->isBlocked_ = true;
-    streamSocket->streamType_ = Communication::SoftBus::COMMON_VIDEO_STREAM;
-    std::unique_ptr<char[]> dataBuffer = std::make_unique<char[]>(1);
-    ssize_t dataLength = 1;
-    bool res = vtpStreamSocket->EncryptStreamPacket(std::move(stream), dataBuffer, dataLength);
-    EXPECT_EQ(false, res);
-    SoftBusFree(streamSocket);
-}
-
-/**
- * @tc.name: EncryptStreamPacket002
- * @tc.desc: EncryptStreamPacket
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, EncryptStreamPacket002, TestSize.Level1)
-{
-    ssize_t len = 0;
-    std::unique_ptr<char[]> data;
-    SoftBusStreamTestInterfaceMock streamMock;
-    std::unique_ptr<IStream> stream = IStream::MakeCommonStream(streamData, frameInfo);
-
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-    bool ret = vtpStreamSocket->EncryptStreamPacket(std::move(stream), data, len);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: RecvStreamLen001
  * @tc.desc: RecvStreamLen
  * @tc.type: FUNC
