@@ -856,7 +856,7 @@ static bool JudgeIsSameAccount(const char *accountHash)
         return false;
     }
 
-    return (memcpy_s(localAccountHash, SHA_256_HASH_LEN, peerAccountHash, SHA_256_HASH_LEN) == EOK) &&
+    return (memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == 0) &&
         (!LnnIsDefaultOhosAccount());
 }
 
@@ -910,8 +910,7 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
 
     char *udidShortHash = info->isSameAccount ? localUdidHash : info->udidShortHash;
     char *credList = NULL;
-    ret = IdServiceQueryCredential(nodeInfo.userId, udidShortHash, info->accountHash,
-        info->isSameAccount, &credList);
+    ret = IdServiceQueryCredential(nodeInfo.userId, udidShortHash, info->accountHash, info->isSameAccount, &credList);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "query credential fail");
         return;

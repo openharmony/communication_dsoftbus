@@ -22,15 +22,19 @@
 #include "device_auth_defines.h"
 #include "softbus_adapter_mem.h"
 
+#define FIELD_AUTHORIZED_SCOPE "authorizedScope"
+#define SCOPE_USER 2
+
 enum SoftbusCredType {
     ACCOUNT_RELATED = 1,
     ACCOUNT_UNRELATED = 2,
     ACCOUNT_SHARE = 3,
+    ACCOUNT_BUTT
 };
 
 static char *IdServiceGenerateQueryParam(const char *udidHash, const char *accountHash, bool isSameAccount)
 {
-    int32_t credType = isSameAccount ? ACCOUNT_RELATED : ACCOUNT_SHARE;
+    int32_t credType = isSameAccount ? ACCOUNT_RELATED : ACCOUNT_BUTT;
 
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
@@ -39,17 +43,13 @@ static char *IdServiceGenerateQueryParam(const char *udidHash, const char *accou
     }
 
     if (!AddStringToJsonObject(msg, FIELD_DEVICE_ID_HASH, udidHash) ||
-        !AddNumberToJsonObject(msg, FIELD_CRED_TYPE, credType)) {
+        (isSameAccount && !AddNumberToJsonObject(msg, FIELD_CRED_TYPE, credType))) {
         AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
         cJSON_Delete(msg);
         return NULL;
     }
 
-    if (!isSameAccount && !AddStringToJsonObject(msg, FIELD_USER_ID_HASH, accountHash)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add userid hash json object fail");
-        cJSON_Delete(msg);
-        return NULL;
-    }
+    AUTH_LOGD(AUTH_HICHAIN, "hichain identity service cred type=%{public}d", credType);
 
     char *data = cJSON_PrintUnformatted(msg);
     if (data == NULL) {
@@ -145,6 +145,51 @@ static char *IdServiceCopyCredId(char *credId)
     return credIdMem;
 }
 
+static int32_t IdServiceGetCredTypeByCredId(int32_t userId, char *credId, int32_t *credType)
+{
+    const CredManager *credManger = IdServiceGetCredMgrInstance();
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+        AUTH_HICHAIN, "hichain identity service not initialized");
+    
+    char *credInfo = NULL;
+    int32_t ret = credManger->queryCredInfoByCredId(userId, credId, &credInfo);
+    if (ret != HC_SUCCESS) {
+        uint32_t authErrCode = 0;
+        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+        AUTH_LOGE(AUTH_HICHAIN,
+            "hichain identity service quere credential info failed, err=%{public}d, authErrCode=%{public}d",
+            ret, authErrCode);
+        return authErrCode;
+    }
+
+    cJSON *credInfoJson = CreateJsonObjectFromString(credInfo);
+    IdServiceDestroyCredentialList(&credInfo);
+    if (credInfoJson == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "create json fail");
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+
+    if (!GetJsonObjectInt32Item(credInfoJson, FIELD_CRED_TYPE, credType)) {
+        AUTH_LOGE(AUTH_HICHAIN, "cred type not found");
+        cJSON_Delete(credInfoJson);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    if (*credType == ACCOUNT_UNRELATED) {
+        int32_t scope = 0;
+        if (!GetJsonObjectInt32Item(credInfoJson, FIELD_AUTHORIZED_SCOPE, &scope)) {
+            AUTH_LOGE(AUTH_HICHAIN, "scope not found");
+            cJSON_Delete(credInfoJson);
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+
+        *credType = (scope == SCOPE_USER) ? *credType : ACCOUNT_BUTT;
+    }
+    cJSON_Delete(credInfoJson);
+
+    return SOFTBUS_OK;
+}
+
 char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
 {
     if (credList == NULL) {
@@ -169,8 +214,8 @@ char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
 
     char *credId = NULL;
     char *credIdMem = NULL;
-    /* the item num of credIdList is expect to be 1, here just chose the first one */
-    for (int32_t i = 0; i < 1; i++) {
+    int32_t credType = ACCOUNT_BUTT;
+    for (int32_t i = 0; i < arraySize; i++) {
         cJSON *item = GetArrayItemFromArray(credIdJson, i);
         if (item == NULL) {
             AUTH_LOGE(AUTH_HICHAIN, "get array item is null");
@@ -182,10 +227,18 @@ char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
             break;
         }
 
-        credId = credIdTmp;
+        int32_t credTypeTmp = ACCOUNT_BUTT;
+        int32_t ret = IdServiceGetCredTypeByCredId(userId, credIdTmp, &credTypeTmp);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_HICHAIN, "get cred type fail");
+            break;
+        }
+
+        credId = (credTypeTmp < credType) ? credIdTmp : credId;
+        credType = (credTypeTmp < credType) ? credTypeTmp : credType;
     }
 
-    if (credId != NULL) {
+    if ((credId != NULL) && (credType != ACCOUNT_BUTT)) {
         credIdMem = IdServiceCopyCredId(credId);
         if (credIdMem == NULL) {
             AUTH_LOGE(AUTH_HICHAIN, "copy credId fail");
