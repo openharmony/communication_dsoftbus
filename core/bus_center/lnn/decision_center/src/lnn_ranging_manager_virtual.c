@@ -35,13 +35,13 @@ int32_t LnnStopRange(const RangeConfig *config)
 int32_t RegistAuthTransListener()
 {
     LNN_LOGI(LNN_BUILDER, "regist auth listner success");
-    return SOFTBUS_NOT_IMPLEMENT;
+    return SOFTBUS_OK;
 }
 
 int32_t UnregistAuthTransListener()
 {
     LNN_LOGI(LNN_BUILDER, "unregist auth listner success");
-    return SOFTBUS_NOT_IMPLEMENT;
+    return SOFTBUS_OK;
 }
 
 int32_t SendAuthResult(AuthHandle authHandle, int64_t seq, const uint8_t *data, uint32_t len)
