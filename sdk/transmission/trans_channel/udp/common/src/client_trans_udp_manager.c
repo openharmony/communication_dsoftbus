@@ -22,6 +22,7 @@
 #include "client_trans_stream.h"
 #include "nstackx_dfile.h"
 #include "securec.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
@@ -191,6 +192,11 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
     info.peerSessionName = channel.info.peerSessionName;
     info.routeType = channel.routeType;
     info.businessType = channel.businessType;
+    info.tokenType = channel.tokenType;
+    if (channel.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+        info.peerUserId = channel.peerUserId;
+        info.peerAccountId = channel.peerAccountId;
+    }
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
         return g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
     }
@@ -212,6 +218,7 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
     newChannel->info.peerPid = channel->peerPid;
     newChannel->info.peerUid = channel->peerUid;
     newChannel->routeType = channel->routeType;
+    newChannel->tokenType = channel->tokenType;
     if (strcpy_s(newChannel->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(newChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(newChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
@@ -221,7 +228,14 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
         SoftBusFree(newChannel);
         return NULL;
     }
-
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->isServer && channel->peerAccountId != NULL) {
+        newChannel->peerUserId = channel->peerUserId;
+        if (strcpy_s(newChannel->peerAccountId, ACCOUNT_UID_LEN_MAX, channel->peerAccountId) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy peerAccountId failed");
+            SoftBusFree(newChannel);
+            return NULL;
+        }
+    }
     return newChannel;
 }
 

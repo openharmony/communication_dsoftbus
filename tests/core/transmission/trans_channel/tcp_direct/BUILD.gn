@@ -478,6 +478,7 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$dsoftbus_root_path/core/discovery/event_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
   ]
 
   deps = [

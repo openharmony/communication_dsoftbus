@@ -899,6 +899,10 @@ static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     int32_t ret = LnnGetLocalStrInfo(key, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_CTRL, "channelId=%{public}d Handshake get local info fail", chan->channelId);
+
+    ret = GetTokenTypeBySessionName(chan->appInfo.myData.sessionName, &chan->appInfo.myData.tokenType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "get tokenType info fail, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 

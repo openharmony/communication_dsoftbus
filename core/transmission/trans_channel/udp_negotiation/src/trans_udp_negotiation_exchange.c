@@ -166,25 +166,6 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static void TransAddJsonUserIdAndAccountId(const AppInfo *appInfo, cJSON *msg)
-{
-    if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
-        return;
-    }
-    int32_t userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
-    if (userId == INVALID_USER_ID) {
-        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
-        return;
-    }
-    uint32_t size = 0;
-    char accountId[ACCOUNT_UID_LEN_MAX] = {0};
-    if (GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get current account failed.");
-    }
-    (void)AddNumberToJsonObject(msg, "USER_ID", userId);
-    (void)AddStringToJsonObject(msg, "ACCOUNT_ID", accountId);
-}
-
 int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "pack request udp info in negotiation.");
@@ -200,7 +181,8 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             (void)AddNumber64ToJsonObject(msg, "CALLING_TOKEN_ID", (int64_t)appInfo->callingTokenId);
             (void)AddNumberToJsonObject(msg, "LINK_TYPE", appInfo->linkType);
             (void)AddStringToJsonObject(msg, "DEVICE_ID", appInfo->myData.deviceId);
-            (void)TransAddJsonUserIdAndAccountId(appInfo, msg);
+            (void)AddNumberToJsonObject(msg, "USER_ID", appInfo->myData.userId);
+            (void)AddStringToJsonObject(msg, "ACCOUNT_ID", appInfo->myData.accountId);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);

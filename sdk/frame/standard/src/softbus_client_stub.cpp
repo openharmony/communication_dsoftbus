@@ -21,6 +21,7 @@
 #include "client_trans_socket_manager.h"
 #include "securec.h"
 #include "session_set_timer.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "client_trans_udp_manager.h"
 
@@ -210,6 +211,13 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
     READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH && channel->isServer) {
+        READ_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
+        channel->peerAccountId = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(
+            channel->peerAccountId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerAccountId failed");
+    }
     return SOFTBUS_OK;
 }
 

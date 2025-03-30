@@ -23,6 +23,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -41,7 +42,6 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
         TRANS_LOGE(TRANS_SDK, "malloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
-
     session->channelId = channel->channelId;
     session->channelType = (ChannelType)channel->channelType;
     session->peerPid = channel->peerPid;
@@ -60,6 +60,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->osType = channel->osType;
     session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
     session->isSupportTlv = channel->isSupportTlv;
+    session->tokenType = channel->tokenType;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -67,7 +68,14 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
         SoftBusFree(session);
         return SOFTBUS_STRCPY_ERR;
     }
-
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->peerAccountId != NULL) {
+        session->peerUserId = channel->peerUserId;
+        if (strcpy_s(session->peerAccountId, ACCOUNT_UID_LEN_MAX, channel->peerAccountId) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy accountId failed");
+            SoftBusFree(session);
+            return SOFTBUS_STRCPY_ERR;
+        }
+    }
     int32_t ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "client add session failed, ret=%{public}d", ret);
@@ -244,13 +252,49 @@ NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocket
     return SOFTBUS_OK;
 }
 
-static int32_t HandleServerOnNegotiate(int32_t socket, const ISocketListener *socketServer)
+NO_SANITIZE("cfi") static int32_t TransOnCheckAccess(int32_t socket, const ISocketListener *socketCallback)
+{
+    if (socketCallback == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid socketCallback socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (socketCallback->OnCheckAccess == NULL) {
+        TRANS_LOGW(TRANS_SDK, "no OnCheckAccess callback function socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
+
+    PeerSocketAccessInfo peerAccessInfo = {0};
+    int32_t ret = ClientGetPeerSocketAccessInfoById(socket, &peerAccessInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get peer access info failed, ret=%{public}d, socket=%{public}d", ret, socket);
+        return ret;
+    }
+
+    if (!socketCallback->OnCheckAccess(socket, peerAccessInfo)) {
+        TRANS_LOGW(TRANS_SDK, "The OnCheckAccess rejected the socket=%{public}d", socket);
+        return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const ISocketListener *socketServer)
 {
     int32_t ret = TransOnNegotiate(socket, socketServer);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "OnBind failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "TransOnNegotiate failed, ret=%{public}d", ret);
         (void)ClientDeleteSocketSession(socket);
         return ret;
+    }
+
+    if (tokenType > ACCESS_TOKEN_TYPE_HAP) {
+        ret = TransOnCheckAccess(socket, socketServer);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "TransOnCheckAccess failed, ret=%{public}d", ret);
+            (void)ClientDeleteSocketSession(socket);
+            return ret;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -300,7 +344,8 @@ static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
 {
     // async bind call back client and server， sync bind only call back server.
     bool isAsync = true;
-    int32_t ret = ClientGetSessionIsAsyncBySessionId(sessionId, &isAsync);
+    int32_t tokenType = -1;
+    int32_t ret = GetIsAsyncAndTokenTypeBySessionId(sessionId, &isAsync, &tokenType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Get is async type failed");
         return ret;
@@ -315,7 +360,7 @@ static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
     }
 
     if (isServer) {
-        return HandleServerOnNegotiate(sessionId, &sessionCallback.socketServer);
+        return HandleServerOnNegotiate(sessionId, tokenType, &sessionCallback.socketServer);
     } else if (isAsync) {
         ret = HandleAsyncBindSuccess(sessionId, &sessionCallback.socketClient, &lifecycle);
         (void)HandleCacheQosEvent(sessionId, sessionCallback, isServer);

@@ -167,6 +167,7 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
         TRANS_LOGE(TRANS_CTRL, "Invalid param");
         return;
     }
+    int32_t ret;
     transInfo->channelType = TransGetChannelType(param, connInfo->type);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
@@ -178,11 +179,18 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
     } else if (connInfo->type == LANE_P2P_REUSE) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
+            ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+                return;
             }
         }
+    }
+
+    ret = GetAccessInfoBySessionName(param->sessionName, &appInfo->myData.userId, appInfo->myData.accountId,
+        ACCOUNT_UID_LEN_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get userId or accountId fail, ret = %{public}d", ret);
     }
 }
 
