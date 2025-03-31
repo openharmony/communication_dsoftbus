@@ -819,6 +819,50 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
     return ret;
 }
 
+int32_t GetAllLinkWithDevId(const char* peerUdid, LaneLinkType **linkList, uint8_t *linkCnt)
+{
+    if (peerUdid == NULL || linkList == NULL || linkCnt == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid parem");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint8_t tmpCnt = 0;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(peerUdid, item->link.peerUdid) == 0) {
+            ++tmpCnt;
+        }
+    }
+    if (tmpCnt == 0) {
+        LaneUnlock();
+        char *anonyPeerUdid = NULL;
+        Anonymize(peerUdid, &anonyPeerUdid);
+        LNN_LOGE(LNN_LANE, "no find lane resource with peerUdid=%{public}s", AnonymizeWrapper(anonyPeerUdid));
+        AnonymizeFree(anonyPeerUdid);
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
+    }
+    LaneLinkType *tmpLinkList = (LaneLinkType *)SoftBusCalloc(tmpCnt * sizeof(LaneLinkType));
+    if (tmpLinkList == NULL) {
+        LaneUnlock();
+        LNN_LOGE(LNN_LANE, "link list calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    uint8_t tmpIndex = 0;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(peerUdid, item->link.peerUdid) == 0 && tmpIndex < tmpCnt) {
+            *(tmpLinkList + tmpIndex) = item->link.type;
+            ++tmpIndex;
+        }
+    }
+    LaneUnlock();
+    *linkList = tmpLinkList;
+    *linkCnt = tmpCnt;
+    return SOFTBUS_OK;
+}
+
 static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint32_t hashStrLen)
 {
     if (peerUdid == NULL || udidHashStr == NULL) {

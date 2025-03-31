@@ -46,6 +46,7 @@
 
 #define LOW_BW                  (384 * 1024)
 #define MID_BW                  (30 * 1024 * 1024)
+#define MID_HIGH_BW             (90 * 1024 * 1024)
 #define HIGH_BW                 (160 * 1024 * 1024)
 #define TRY_BUILD_INTERVAL_TIME (60 * 1000)
 
@@ -390,7 +391,7 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
     return &g_linkAttr[linkType];
 }
 
-static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
+static uint32_t g_firstPriorityLane[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [HIGH_BAND_WIDTH] = {LANE_HML, LANE_P2P, LANE_LINK_TYPE_BUTT},
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_HML, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
@@ -529,12 +530,12 @@ static void DecideOptimalLinks(const LaneSelectParam *request, LaneLinkType *lin
     LNN_LOGI(LNN_LANE,
         "decide optimal link, bandWidthType=%{public}d, minLaneLatency=%{public}d", bandWidthType, minLaneLatency);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
-        if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
+        if (g_firstPriorityLane[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if ((CheckLinkParam(g_laneBandWidth[bandWidthType][i], request->transType) == SOFTBUS_OK)) {
-            linkList[(*linksNum)++] = g_laneBandWidth[bandWidthType][i];
-            LNN_LOGI(LNN_LANE, "decide optimal linkType=%{public}d", g_laneBandWidth[bandWidthType][i]);
+        if ((CheckLinkParam(g_firstPriorityLane[bandWidthType][i], request->transType) == SOFTBUS_OK)) {
+            linkList[(*linksNum)++] = g_firstPriorityLane[bandWidthType][i];
+            LNN_LOGI(LNN_LANE, "decide optimal linkType=%{public}d", g_firstPriorityLane[bandWidthType][i]);
             continue;
         }
     }
@@ -774,7 +775,7 @@ static int32_t GetErrCodeOfRequest(const char *networkId, const LaneSelectParam 
         return SOFTBUS_LANE_WIFI_OFF;
     }
     int32_t bandWidthType = GetBwType(request->qosRequire.minBW);
-    return LaneCheckLinkValid(networkId, g_laneBandWidth[bandWidthType][0], request->transType);
+    return LaneCheckLinkValid(networkId, g_firstPriorityLane[bandWidthType][0], request->transType);
 }
 
 static void GetDefaultLinkByDataType(LaneDataType dataType, LaneLinkType *linkList, uint32_t *listNum)
@@ -1243,4 +1244,117 @@ void DeinitLaneSelectRule(void)
     }
     WifiDirectExtCapUnlock();
     (void)SoftBusMutexDestroy(&g_wifiDirectExtCapList.lock);
+}
+
+static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
+    [HIGH_BAND_WIDTH] = {LANE_HML, LANE_P2P, LANE_LINK_TYPE_BUTT},
+    [MIDDLE_HIGH_BAND_WIDTH] = {LANE_WLAN_5G, LANE_LINK_TYPE_BUTT},
+    [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [LOW_BAND_WIDTH] = {LANE_BR, LANE_LINK_TYPE_BUTT},
+};
+
+static uint32_t GetBwValue(BandWidthType BWType)
+{
+    uint32_t bandWidth = 0;
+    if (BWType == HIGH_BAND_WIDTH) {
+        bandWidth = HIGH_BW;
+    } else if (BWType == MIDDLE_HIGH_BAND_WIDTH) {
+        bandWidth = MID_HIGH_BW;
+    } else if (BWType == MIDDLE_LOW_BAND_WIDTH) {
+        bandWidth = MID_BW;
+    } else {
+        bandWidth = LOW_BW;
+    }
+    return bandWidth;
+}
+
+int32_t GetSupportBandWidth(const char *peerNetworkId, LaneTransType transType, uint32_t *supportBw)
+{
+    if (peerNetworkId == NULL || supportBw == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    for (uint32_t i = 0; i < BW_TYPE_BUTT; i++) {
+        for (uint32_t j = 0; j < (LANE_LINK_TYPE_BUTT + 1); j++) {
+            if (g_laneBandWidth[i][j] == LANE_LINK_TYPE_BUTT) {
+                break;
+            }
+            if (LaneCheckLinkValid(peerNetworkId, g_laneBandWidth[i][j], transType) == SOFTBUS_OK) {
+                *supportBw = GetBwValue(i);
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    return SOFTBUS_LANE_NO_AVAILABLE_LINK;
+}
+
+static bool IsBwExist(uint32_t *bwList, uint8_t bWNum, uint32_t bWValue)
+{
+    for (uint32_t i = 0; i < bWNum; i++) {
+        if (bwList[i] == bWValue) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int32_t BuildSupportReuseQosList(LaneLinkType *linkList, uint8_t linkNum,
+    uint32_t **supportBw, uint8_t *bwCnt, LaneTransType transType)
+{
+    uint32_t validBwList[BW_TYPE_BUTT];
+    (void)memset_s(validBwList, sizeof(validBwList), 0, sizeof(validBwList));
+    uint8_t tmpCnt = 0;
+    for (uint32_t i = 0; i < BW_TYPE_BUTT; i++) {
+        for (uint32_t j = 0; j < (LANE_LINK_TYPE_BUTT + 1); j++) {
+            if (g_laneBandWidth[i][j] == LANE_LINK_TYPE_BUTT) {
+                break;
+            }
+            if (CheckLinkWithTransType(transType, g_laneBandWidth[i][j]) == SOFTBUS_OK &&
+                IsLaneExist(linkList, linkNum, g_laneBandWidth[i][j]) &&
+                !(IsBwExist(validBwList, tmpCnt, GetBwValue(i)))) {
+                validBwList[tmpCnt++] = GetBwValue(i);
+            }
+        }
+    }
+    if (tmpCnt == 0) {
+        LNN_LOGE(LNN_LANE, "no support reuse qos");
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
+    }
+    uint32_t *tmpList = (uint32_t *)SoftBusCalloc(tmpCnt * sizeof(uint32_t));
+    if (tmpList == NULL) {
+        LNN_LOGE(LNN_LANE, "calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    for (uint32_t i = 0; i < tmpCnt; i++) {
+        *(tmpList + i) = validBwList[i];
+    }
+    *supportBw = tmpList;
+    *bwCnt = tmpCnt;
+    return SOFTBUS_OK;
+}
+
+int32_t GetAllSupportReuseBandWidth(const char *peerNetworkId, LaneTransType transType,
+    uint32_t **supportBw, uint8_t *bwCnt)
+{
+    if (peerNetworkId == NULL || supportBw == NULL || bwCnt == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LaneLinkType *linkList = NULL;
+    uint8_t linkNum = 0;
+    int32_t ret = GetAllLinkWithDevId(peerUdid, &linkList, &linkNum);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = BuildSupportReuseQosList(linkList, linkNum, supportBw, bwCnt, transType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "build reuse qos list fail, ret=%{public}d", ret);
+    }
+    SoftBusFree(linkList);
+    return ret;
 }

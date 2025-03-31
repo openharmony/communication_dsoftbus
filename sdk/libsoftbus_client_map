@@ -188,6 +188,7 @@
         "GetPreLinkParam";
         "RegPreLinkParamListener";
         "SetAccessInfo";
+        "SoftBusQueryValidQos";
     local:
         *;
 };
