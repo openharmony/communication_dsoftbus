@@ -1216,7 +1216,7 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
             RetainOfflineCode(oldInfo, info);
             LNN_LOGE(LNN_LEDGER, "flag error, oldBleFlag=%{public}d, oldBrFlag=%{public}d, oldWifiFlag=%{public}d,"
                 "newWifiFlag=%{public}d, newBleBrFlag=%{public}d", infoAbility->oldBleFlag, infoAbility->oldBrFlag,
-                infoAbility->oldWifiFlag, infoAbility->newBleBrFlag, infoAbility->newBleBrFlag);
+                infoAbility->oldWifiFlag, infoAbility->newWifiFlag, infoAbility->newBleBrFlag);
         }
         if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && !infoAbility->oldWifiFlag &&
             infoAbility->newWifiFlag) {
