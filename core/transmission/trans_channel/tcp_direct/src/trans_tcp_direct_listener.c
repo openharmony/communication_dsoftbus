@@ -94,11 +94,12 @@ static void TransTdcCheckIsApp(AppInfo *appInfo)
     if (!SoftBusCheckIsCollabApp(appInfo->callingTokenId, appInfo->myData.sessionName)) {
         return;
     }
-    if (GetCurrentAccount(&appInfo->myData.accountId) != SOFTBUS_OK) {
-        appInfo->myData.accountId = INVALID_ACCOUNT_ID;
+    appInfo->myData.userId = TransGetForegroundUserId();
+    uint32_t size = 0;
+    if (GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size,
+        appInfo->myData.userId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current accountId failed.");
     }
-    appInfo->myData.userId = TransGetForegroundUserId();
 }
 
 static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)

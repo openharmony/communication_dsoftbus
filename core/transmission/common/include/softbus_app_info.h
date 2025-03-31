@@ -38,6 +38,7 @@ extern "C" {
 #define MAX_FAST_DATA_LEN (4 * 1024)
 #define BASE64_FAST_DATA_LEN 5558
 #define TOKENID_NOT_SET 0
+#define ACCOUNT_UID_LEN_MAX 65
 
 typedef enum {
     API_UNKNOWN = 0,
@@ -85,6 +86,7 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     char authState[AUTH_STATE_SIZE_MAX];
     char addr[IP_LEN];
+    char accountId[ACCOUNT_UID_LEN_MAX];
     int uid;
     int pid;
     int port;
@@ -92,7 +94,6 @@ typedef struct {
     uint32_t dataConfig;
     int32_t userId;
     int64_t channelId;
-    int64_t accountId;
 } AppInfoData;
 
 typedef struct {
