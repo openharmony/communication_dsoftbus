@@ -306,12 +306,14 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
 
     bool bFlag = (version < SOFTBUS_NEW_V3) || (!AuthSessionGetIsSameAccount(authSeq) && !GetSecEnhanceFlag());
     char localUdid[UDID_BUF_LEN] = {0};
+    int32_t peerUserId = AuthSessionGetUserId(authSeq);
     LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
     if (!AddNumberToJsonObject(msg, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         (bFlag && !AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid)) ||
         (bFlag && !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid)) ||
-        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
+        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
+        (peerUserId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", peerUserId))) {
         AUTH_LOGE(AUTH_HICHAIN, "pack request msg fail");
         cJSON_Delete(msg);
         return NULL;
