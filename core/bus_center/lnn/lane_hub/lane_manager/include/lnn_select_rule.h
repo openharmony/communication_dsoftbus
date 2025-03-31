@@ -62,6 +62,9 @@ int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
 bool IsSupportWifiDirectEnhance(const char *networkId);
 int32_t InitLaneSelectRule(void);
 void DeinitLaneSelectRule(void);
+int32_t GetAllSupportReuseBandWidth(const char *peerNetworkId, LaneTransType transType,
+    uint32_t **supportBw, uint8_t *bwCnt);
+int32_t GetSupportBandWidth(const char *peerNetworkId, LaneTransType transType, uint32_t *supportBw);
 
 #ifdef __cplusplus
 }
