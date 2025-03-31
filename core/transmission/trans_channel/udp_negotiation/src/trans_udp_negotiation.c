@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -544,13 +544,6 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "unpack request udp info failed.");
 
-    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
-    }
-    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
-        return SOFTBUS_PERMISSION_SERVER_DENIED;
-    }
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
@@ -562,6 +555,13 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         &appInfo->myData.pid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
+    
+    if (appInfo->callingTokenId != TOKENID_NOT_SET && TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    }
+    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
 
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
         return SOFTBUS_OK;
