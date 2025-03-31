@@ -118,6 +118,7 @@ public:
     virtual int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
         bool isSameAccount, char **credList) = 0;
     virtual void IdServiceDestroyCredentialList(char **returnData) = 0;
+    virtual int32_t GetActiveOsAccountIds(void) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -193,6 +194,7 @@ public:
     MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t userId, const char *udidHash, const char *accountidHash,
         bool isSameAccount, char **credList));
     MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **returnData));
+    MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
 };
 
 extern "C" {
