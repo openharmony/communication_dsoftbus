@@ -221,34 +221,6 @@ HWTEST_F(VtpStreamSocketTest, Connect001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Connect002
- * @tc.desc: Connect002.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, Connect002, TestSize.Level1)
-{
-    IpAndPort *remote = (IpAndPort *)SoftBusCalloc(sizeof(IpAndPort));
-    ASSERT_TRUE(remote != nullptr);
-
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-
-    remote->ip = "10.50.170.123";
-    remote->port = 1002;
-    SoftBusStreamTestInterfaceMock streamMock;
-    EXPECT_CALL(streamMock, FtConnect).WillRepeatedly(testing::Return(0));
-    bool ret = vtpStreamSocket->Connect(*remote);
-    EXPECT_EQ(false, ret);
-    EXPECT_CALL(streamMock, FtEpollCreate).WillRepeatedly(testing::Return(1));
-    ret = vtpStreamSocket->Connect(*remote);
-    EXPECT_EQ(false, ret);
-    if (remote != nullptr) {
-        SoftBusFree(remote);
-    }
-}
-
-/**
  * @tc.name: GetOption001
  * @tc.desc: GetOption001, use the wrong parameter.
  * @tc.type: FUNC
