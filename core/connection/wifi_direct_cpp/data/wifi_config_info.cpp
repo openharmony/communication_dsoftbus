@@ -27,7 +27,7 @@ InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>:
 WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> &config)
 {
     CONN_CHECK_AND_RETURN_LOGE(config.size() >= HEADER_LEN, CONN_WIFI_DIRECT,
-        "config size is %{public}zu", config.size());
+        "invalid parameter, config size is %{public}zu", config.size());
     auto pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
     if (pro == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "create tlv protocol failed");
