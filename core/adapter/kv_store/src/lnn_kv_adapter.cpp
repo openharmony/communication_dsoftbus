@@ -265,10 +265,6 @@ int32_t KVAdapter::DeleteByPrefix(const std::string &keyPrefix)
 
 int32_t KVAdapter::Get(const std::string &key, std::string &value)
 {
-    char *anonyKey = nullptr;
-    Anonymize(key.c_str(), &anonyKey);
-    LNN_LOGI(LNN_LEDGER, "Get data by key: %{public}s", AnonymizeWrapper(anonyKey));
-    AnonymizeFree(anonyKey);
     DistributedKv::Key kvKey(key);
     DistributedKv::Value kvValue;
     DistributedKv::Status status;
@@ -281,10 +277,6 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
         status = kvStorePtr_->Get(kvKey, kvValue);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        anonyKey = nullptr;
-        Anonymize(key.c_str(), &anonyKey);
-        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key=%{public}s", AnonymizeWrapper(anonyKey));
-        AnonymizeFree(anonyKey);
         return SOFTBUS_KV_GET_DB_FAIL;
     }
     value = kvValue.ToString();
