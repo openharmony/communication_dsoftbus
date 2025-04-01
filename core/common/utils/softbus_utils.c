@@ -103,12 +103,22 @@ int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
     if (callback == NULL || timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM ||
         timerFunId < SOFTBUS_CONN_TIMER_FUN) {
         COMM_LOGE(COMM_UTILS, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_timerFunList[timerFunId] != NULL) {
         return SOFTBUS_OK;
     }
     g_timerFunList[timerFunId] = callback;
+    return SOFTBUS_OK;
+}
+
+int32_t UnRegisterTimeoutCallback(int32_t timerFunId)
+{
+    if (timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM || timerFunId < SOFTBUS_CONN_TIMER_FUN) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_timerFunList[timerFunId] = NULL;
     return SOFTBUS_OK;
 }
 

@@ -131,7 +131,9 @@ int32_t TransUdpChannelMgrInit(void)
 
 void TransUdpChannelMgrDeinit(void)
 {
-    (void)RegisterTimeoutCallback(SOFTBUS_UDP_CHANNEL_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_UDP_CHANNEL_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unregister udp channel timer callback failed");
+    }
     if (g_udpChannelMgr == NULL) {
         return;
     }

@@ -2021,7 +2021,9 @@ static void TransProxyManagerDeinitInner(void)
 
 void TransProxyManagerDeinit(void)
 {
-    (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unregister timeout callback failed");
+    }
     TransProxyManagerDeinitInner();
 }
 

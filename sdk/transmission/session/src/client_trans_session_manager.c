@@ -288,8 +288,12 @@ void TransClientDeinit(void)
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
-    (void)RegisterTimeoutCallback(SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN, NULL);
-    (void)RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unregister trans async sendbytes timer callback failed");
+    }
+    if (UnRegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unregister trans idle timeout timer callback failed");
+    }
     ClientSessionServer *serverNode = NULL;
     ClientSessionServer *serverNodeNext = NULL;
     ListNode destroyList;

@@ -58,16 +58,16 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_001, TestSiz
     int32_t timerFunId = SOFTBUS_CONN_TIMER_FUN;
     TimerFunCallback callbac = nullptr;
     int32_t ret = RegisterTimeoutCallback(timerFunId, callbac);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     callbac = MockSoftBusTimer;
     timerFunId = SOFTBUS_CONN_TIMER_FUN - 1;
     ret = RegisterTimeoutCallback(timerFunId, callbac);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     timerFunId = SOFTBUS_MAX_TIMER_FUN_NUM;
     ret = RegisterTimeoutCallback(timerFunId, callbac);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -88,6 +88,27 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_002, TestSiz
 
     timerFunId = SOFTBUS_CONN_TIMER_FUN + 1;
     ret = RegisterTimeoutCallback(timerFunId, callbac);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_UnRegisterTimeoutCallback
+ * @tc.desc: Normal unregister timeout callback test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_UnRegisterTimeoutCallback, TestSize.Level1)
+{
+    int32_t timerFunId = SOFTBUS_CONN_TIMER_FUN - 1;
+    int32_t ret = UnRegisterTimeoutCallback(timerFunId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    timerFunId = SOFTBUS_MAX_TIMER_FUN_NUM;
+    ret = UnRegisterTimeoutCallback(timerFunId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    timerFunId = SOFTBUS_CONN_TIMER_FUN;
+    ret = UnRegisterTimeoutCallback(timerFunId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
