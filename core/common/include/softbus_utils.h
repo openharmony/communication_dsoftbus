@@ -66,6 +66,8 @@ typedef enum {
 
 int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback);
 
+int32_t UnRegisterTimeoutCallback(int32_t timerFunId);
+
 int32_t SoftBusTimerInit(void);
 
 void SoftBusTimerDeInit(void);
