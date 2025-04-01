@@ -214,7 +214,9 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 
 void TransTcpDirectDeinit(void)
 {
-    (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unregister tcp directchannel timer callback failed");
+    }
     TransSrvDataListDeinit();
 }
 

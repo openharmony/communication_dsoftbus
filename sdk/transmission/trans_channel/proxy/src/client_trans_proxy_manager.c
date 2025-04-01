@@ -69,7 +69,9 @@ static int32_t ClientTransProxyListInit()
 
 static void ClientTransProxyListDeinit(void)
 {
-    (void)RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "unregister proxyslice timer failed");
+    }
     if (g_proxyChannelInfoList != NULL) {
         DestroySoftBusList(g_proxyChannelInfoList);
         g_proxyChannelInfoList = NULL;
