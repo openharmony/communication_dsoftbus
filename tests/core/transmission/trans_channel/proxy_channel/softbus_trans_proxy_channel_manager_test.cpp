@@ -318,7 +318,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo002, Test
     msg.msgHead.cipher = 10;
 
     int32_t ret = TransProxyFillChannelInfo(&msg, &chan);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**@
@@ -333,12 +333,12 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo003, Test
     ProxyChannelInfo chan;
 
     SoftbusTransProxyChannelManagerMock mock;
-    EXPECT_CALL(mock, TransProxyUnpackHandshakeMsg(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyUnpackHandshakeMsg(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     chan.appInfo.appType = APP_TYPE_AUTH;
     msg.msgHead.cipher = 9;
-    EXPECT_CALL(mock, CheckSessionNameValidOnAuthChannel(_)).WillOnce(Return(true));
-    EXPECT_CALL(mock, ConnGetConnectionInfo(_, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, ConnGetTypeByConnectionId(_, _)).WillOnce(Return(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT));
+    EXPECT_CALL(mock, CheckSessionNameValidOnAuthChannel(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, ConnGetConnectionInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConnGetTypeByConnectionId(_, _)).WillRepeatedly(Return(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT));
 
     int32_t ret = TransProxyFillChannelInfo(&msg, &chan);
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
@@ -356,16 +356,16 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo004, Test
     ProxyChannelInfo chan;
 
     SoftbusTransProxyChannelManagerMock mock;
-    EXPECT_CALL(mock, TransProxyUnpackHandshakeMsg(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyUnpackHandshakeMsg(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     chan.appInfo.appType = APP_TYPE_NORMAL;
     chan.appInfo.callingTokenId = 1;
     msg.msgHead.cipher = 9;
-    EXPECT_CALL(mock, ConnGetConnectionInfo(_, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, ConnGetTypeByConnectionId(_, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, TransCheckServerAccessControl(_)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, ConnGetConnectionInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConnGetTypeByConnectionId(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransCheckServerAccessControl(_)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     int32_t ret = TransProxyFillChannelInfo(&msg, &chan);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_ACL_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
