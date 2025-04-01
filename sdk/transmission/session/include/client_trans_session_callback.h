@@ -37,7 +37,7 @@ typedef struct {
         int32_t tvCount, const QosTv *tvList);
     int32_t (*OnIdleTimeoutReset)(int32_t sessionId);
     int32_t (*OnRawStreamEncryptDefOptGet)(const char *sessionName, bool *isEncrypt);
-    int32_t (*OnRawStreamEncryptOptGet)(int32_t channelId, int32_t channelType, bool *isEncrypt);
+    int32_t (*OnRawStreamEncryptOptGet)(int32_t sessionId, int32_t channelId, int32_t channelType, bool *isEncrypt);
     int32_t (*OnChannelBind)(int32_t channelId, int32_t channelType);
     int32_t (*IfChannelForSocket)(const char *sessionName, bool *isSocket);
     int32_t (*OnQos)(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);

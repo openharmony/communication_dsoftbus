@@ -264,7 +264,7 @@ int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, 
 
 int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt);
 
-int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, bool *isEncrypt);
+int32_t ClientRawStreamEncryptOptGet(int32_t sessionId, int32_t channelId, int32_t channelType, bool *isEncrypt);
 
 int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync);
 
