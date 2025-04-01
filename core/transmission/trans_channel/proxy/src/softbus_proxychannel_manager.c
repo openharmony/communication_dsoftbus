@@ -27,6 +27,7 @@
 #include "common_list.h"
 #include "data_bus_native.h"
 #include "lnn_distributed_net_ledger.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_timer.h"
 #include "legacy/softbus_adapter_hitrace.h"
@@ -899,10 +900,12 @@ static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     int32_t ret = LnnGetLocalStrInfo(key, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_CTRL, "channelId=%{public}d Handshake get local info fail", chan->channelId);
-
-    ret = GetTokenTypeBySessionName(chan->appInfo.myData.sessionName, &chan->appInfo.myData.tokenType);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "get tokenType info fail, ret=%{public}d", ret);
+    chan->appInfo.myData.tokenType = ACEESS_TOKEN_TYPE_INVALID;
+    if (chan->appInfo.appType != APP_TYPE_INNER) {
+        ret = GetTokenTypeBySessionName(chan->appInfo.myData.sessionName, &chan->appInfo.myData.tokenType);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, ret, TRANS_CTRL, "get tokenType info fail, ret=%{public}d", ret);
+    }
     return SOFTBUS_OK;
 }
 
