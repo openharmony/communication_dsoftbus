@@ -142,7 +142,9 @@ int32_t ClinetTransProxyFileManagerInit(void)
 
 void ClinetTransProxyFileManagerDeinit(void)
 {
-    (void)RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "unregister proxy sendfile timer failed");
+    }
     if (SoftBusMutexDestroy(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "destroy send file lock fail");
     }
