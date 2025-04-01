@@ -337,11 +337,10 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
         myTokenType == ACCESS_TOKEN_TYPE_NATIVE)) {
         return SOFTBUS_OK;
     }
-    if (CheckDBinder(appInfo->myData.sessionName) || CheckDBinder(appInfo->peerData.sessionName)) {
-        return SOFTBUS_OK;
-    }
-    
     if (peerTokenType != myTokenType) {
+        if (CheckDBinder(appInfo->myData.sessionName) && CheckDBinder(appInfo->peerData.sessionName)) {
+            return SOFTBUS_OK;
+        }
         COMM_LOGE(COMM_PERM, "peerTokenType=%{public}d, myTokenType=%{public}d, not support",
             peerTokenType, myTokenType);
         return SOFTBUS_TRANS_CROSS_LAYER_DENIED;
