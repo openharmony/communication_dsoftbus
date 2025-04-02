@@ -56,3 +56,12 @@ int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len)
     (void)len;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId)
+{
+    (void)id;
+    (void)idLen;
+    (void)len;
+    (void)userId;
+    return SOFTBUS_OK;
+}

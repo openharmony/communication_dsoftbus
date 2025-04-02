@@ -24,6 +24,7 @@ extern "C" {
 #define MAX_IP_LEN  46
 #define MAX_PATH_LEN 4096
 #define DEVICE_ID_LEN_MAX 65
+#define ACCOUNT_UID_LEN_MAX 65
 
 /**
  * @brief Enumerates the data types.
@@ -323,8 +324,8 @@ typedef int (*OnFrameEvt)(int fd, const FrameEvtCbInfo *info);
  */
 typedef struct {
     char deviceId[DEVICE_ID_LEN_MAX];
+    char accountId[ACCOUNT_UID_LEN_MAX];
     int32_t userId;
-    int64_t accountId;
     uint64_t tokenId;
     int32_t pid;
 } CollabInfo;
