@@ -517,6 +517,9 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
         if (authFsm->info.normalizedType == NORMALIZED_KEY_ERROR) {
             AUTH_LOGI(AUTH_FSM, "only hichain verify, save the device key");
             SaveDeviceKey(authFsm, AUTH_LINK_TYPE_NORMALIZED, authFsm->info.connInfo.type);
+        } else if (authFsm->info.normalizedType == NORMALIZED_SUPPORT && authFsm->info.deviceKeyId.hasDeviceKeyId) {
+            AUTH_LOGI(AUTH_FSM, "use dm devicekey, save the device key");
+            SaveDeviceKey(authFsm, AUTH_LINK_TYPE_NORMALIZED, authFsm->info.connInfo.type);
         } else if ((authFsm->info.normalizedType == NORMALIZED_NOT_SUPPORT) &&
             (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) && !authFsm->info.isSupportFastAuth) {
             AUTH_LOGI(AUTH_FSM, "save device key for fast auth");
