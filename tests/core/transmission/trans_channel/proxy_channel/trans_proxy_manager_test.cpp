@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -660,7 +660,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest001, TestSize.Lev
     (void)strcpy_s(info.appInfo.peerData.sessionName, 256, "IShareAuthSession");
     msg.data = TransProxyPackHandshakeMsg(&info);
     ASSERT_TRUE(msg.data != nullptr);
-    msg.dateLen = strlen(msg.data) + 1;
+    msg.dataLen = strlen(msg.data) + 1;
     msg.connId = 11;
     msg.msgHead.myId = 11;
     msg.msgHead.peerId = 11;
@@ -684,6 +684,8 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest002, TestSize.Lev
     msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_MEM_ERR);
     ASSERT_TRUE(msg.data != nullpt);
     msg.dateLen = strlen(msg.data) + 1;
+    ASSERT_TRUE(NULL != msg.data);
+    msg.dataLen = strlen(msg.data) + 1;
 
     /* test receive errcode msg */
     TransProxyOnMessageReceived(&msg);
@@ -698,7 +700,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest002, TestSize.Lev
     msg.data = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg.data != nullpt);
 
-    msg.dateLen = strlen(msg.data) + 1;
+    msg.dataLen = strlen(msg.data) + 1;
     msg.msgHead.myId = 10;
     TransProxyOnMessageReceived(&msg);
     EXPECT_TRUE(g_testProxyChannelOpenSuccessFlag);
@@ -718,6 +720,8 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest003, TestSize.Lev
     msg.data = TransProxyPackIdentity(identity);
     ASSERT_TRUE(msg.data != nullpt);
     msg.dateLen = strlen(msg.data) + 1;
+    ASSERT_TRUE(NULL != msg.data);
+    msg.dataLen = strlen(msg.data) + 1;
     msg.connId = -1;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_RESET;
     /* test no compare channel */
@@ -756,7 +760,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest004, TestSize.Lev
     const char *identity = "15";
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_KEEPLIVEING);
     msg.data = TransProxyPackIdentity(identity);
-    msg.dateLen = strlen(msg.data) + 1;
+    msg.dataLen = strlen(msg.data) + 1;
 
     TransAuthInterfaceMock authMock;
     TransConnInterfaceMock connMock;

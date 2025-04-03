@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -593,6 +593,49 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *tokenType = pos->accessInfo.tokenType;
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
+int32_t TransGetAclInfoBySessionName(
+    const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId, char *accountId)
+{
+    if (sessionName == NULL || tokenId == NULL || accountId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            *tokenId = pos->tokenId;
+            if (pid != NULL) {
+                *pid = pos->pid;
+            }
+            if (userId != NULL) {
+                *userId = pos->accessInfo.userId;
+            }
+            if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX, pos->accessInfo.accountId) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "account id copy failed.");
+                return SOFTBUS_STRCPY_ERR;
+            }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }

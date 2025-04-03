@@ -193,7 +193,7 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
     info.routeType = channel.routeType;
     info.businessType = channel.businessType;
     info.tokenType = channel.tokenType;
-    if (channel.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+    if (channel.tokenType > ACCESS_TOKEN_TYPE_HAP && channel.info.isServer) {
         info.peerUserId = channel.peerUserId;
         info.peerAccountId = channel.peerAccountId;
     }

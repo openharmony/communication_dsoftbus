@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
-
+#include "trans_uk_manager.h"
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -48,6 +48,7 @@ typedef struct {
     int64_t req;
     ListNode node;
     AuthHandle authHandle;
+    UkIdInfo ukIdInfo;
     AppInfo appInfo;
 } SessionConn;
 
@@ -140,6 +141,10 @@ int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
 int32_t TransTdcResetReplyCnt(int32_t channelId);
 
 int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName);
+
+int32_t SetSessionConnUkIdById(int32_t channelId, const UkIdInfo *ukIdInfo);
+
+int32_t GetSessionConnUkIdById(int32_t channelId, UkIdInfo *ukIdInfo);
 #ifdef __cplusplus
 #if __cplusplus
 }

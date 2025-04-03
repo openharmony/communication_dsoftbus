@@ -223,6 +223,20 @@ static int32_t L1GetNodeScreenOnFlag(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t L1GetSupportUkNego(void *buf, uint32_t len)
+{
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "buf is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len != NODE_SCREEN_STATUS_LEN) {
+        LNN_LOGE(LNN_LEDGER, "buf len=%{public}d is invalid", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((bool *)buf) = g_localNetLedger.localInfo.isSupportUkNego;
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalDeviceUdid(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -2059,6 +2073,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_USERID_CHECKSUM, USERID_CHECKSUM_LEN, LlGetUserIdCheckSum, LlUpdateUserIdCheckSum},
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
+    {BOOL_KEY_SUPPORT_UK_NEGO, NODE_SCREEN_STATUS_LEN, L1GetSupportUkNego, NULL},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -2529,6 +2544,7 @@ int32_t LnnInitLocalLedger(void)
     }
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
+    nodeInfo->isSupportUkNego = true;
     nodeInfo->heartbeatCapacity = DEFAULT_SUPPORT_HBCAPACITY;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     nodeInfo->authCapacity = GetAuthCapacity();

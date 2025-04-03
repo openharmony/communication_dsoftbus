@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ void ReleaseUdpChannelId(int32_t channelId);
 
 void TransUdpDeathCallback(const char *pkgName, int32_t pid);
 int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort);
-int32_t SendReplyErrInfo(int32_t errCode, char* errDesc, AuthHandle authHandle, int64_t seq);
+int32_t SendReplyErrInfo(int32_t errCode, char* errDesc, AuthHandle authHandle, int64_t seq, bool isNegoUk);
 
 int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult);
 

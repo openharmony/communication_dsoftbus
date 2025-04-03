@@ -21,6 +21,10 @@ trans_channel_common_src = [
   "$dsoftbus_trans_channel_common_path/src/trans_channel_limit.c",
   "$dsoftbus_trans_channel_common_path/src/trans_channel_common.c",
   "$dsoftbus_trans_channel_common_path/src/trans_inner.c",
+  "$dsoftbus_trans_channel_common_path/src/trans_uk_manager.c",
 ]
-trans_channel_common_inc = [ "$dsoftbus_trans_channel_common_path/include" ]
+trans_channel_common_inc = [
+  "$dsoftbus_root_path/core/authentication/include",
+  "$dsoftbus_trans_channel_common_path/include",
+]
 trans_channel_common_deps = []
