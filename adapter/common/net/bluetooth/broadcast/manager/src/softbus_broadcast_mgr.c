@@ -1401,6 +1401,8 @@ static int32_t DeleteFilterByIndex(int32_t listenerId, SoftBusBcScanFilter **ada
     uint8_t size = g_scanManager[listenerId].deleteSize;
     DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "size is 0");
     *adapterFilter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter) * size);
+    DISC_CHECK_AND_RETURN_RET_LOGE(*adapterFilter != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST,
+        "memory allocation failed");
     for (int i = 0; i < size; i++) {
         int filterIndex = g_scanManager[listenerId].deleted[i];
         DISC_CHECK_AND_RETURN_RET_LOGE(filterIndex != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid index!");
