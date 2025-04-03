@@ -34,6 +34,13 @@ typedef enum {
     BW_TYPE_BUTT,
 } BandWidthType;
 
+typedef enum {
+    CUSTOM_QOS_MESH = 0,
+    CUSTOM_QOS_DB,
+    CUSTOM_QOS_RTT,
+    CUSTOM_QOS_BUTT,
+} CustomQos;
+
 typedef struct {
     bool available;
     int32_t (*linkCapCheck)(const char *networkId);
@@ -41,14 +48,16 @@ typedef struct {
 } LinkAttribute;
 
 int32_t GetWlanLinkedFrequency(void);
-
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
-
 int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
-
+int32_t DecideDefaultLink(const char *networkId, LaneTransType transType, LaneLinkType *resList, uint32_t *resNum);
+int32_t DecideCustomLink(const char *networkId, CustomQos customQos, LaneLinkType *resList, uint32_t *resNum);
 int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
     uint32_t listNum, LanePreferredLinkList *recommendList);
+int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTransType transType);
+int32_t DecideRueseLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList);
 
 #ifdef __cplusplus
 }
