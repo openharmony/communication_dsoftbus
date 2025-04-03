@@ -280,7 +280,7 @@ int SoftBusSetBtName(const char *name)
 {
     if (name == NULL) {
         COMM_LOGE(COMM_ADAPTER, "invalid parameter");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SetLocalName((unsigned char *)name, strlen(name))) {
         return SOFTBUS_OK;
