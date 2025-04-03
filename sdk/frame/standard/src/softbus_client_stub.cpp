@@ -166,6 +166,7 @@ static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
 
 static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
 {
+    READ_PARCEL_WITH_RET(data, Int32, channel->sessionId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);

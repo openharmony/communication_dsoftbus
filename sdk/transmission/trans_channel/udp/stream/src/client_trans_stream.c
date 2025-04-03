@@ -121,7 +121,7 @@ static IStreamListener g_streamCallcb = {
     .OnRippleStats = OnRippleStats,
 };
 
-static int32_t GetRawStreamEncryptOptByChannelId(int32_t channelId, bool *isEncryptRawStream)
+static int32_t GetRawStreamEncryptOptByChannelId(int32_t sessionId, int32_t channelId, bool *isEncryptRawStream)
 {
     if (g_udpChannelMgrCb == NULL) {
         TRANS_LOGE(TRANS_STREAM, "udp channel callback is null.");
@@ -131,7 +131,7 @@ static int32_t GetRawStreamEncryptOptByChannelId(int32_t channelId, bool *isEncr
         TRANS_LOGE(TRANS_STREAM, "OnRawStreamEncryptOptGet of udp channel callback is null.");
         return SOFTBUS_TRANS_UDP_CHANNEL_CALLBACK_NULL;
     }
-    return g_udpChannelMgrCb->OnRawStreamEncryptOptGet(channelId, isEncryptRawStream);
+    return g_udpChannelMgrCb->OnRawStreamEncryptOptGet(sessionId, channelId, isEncryptRawStream);
 }
 
 static int32_t OnStreamUdpChannelOpened(int32_t channelId)
@@ -163,7 +163,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         return SOFTBUS_INVALID_PARAM;
     }
     bool isEncryptedRawStream = false;
-    int32_t ret = GetRawStreamEncryptOptByChannelId(channel->channelId, &isEncryptedRawStream);
+    int32_t ret = GetRawStreamEncryptOptByChannelId(channel->sessionId, channel->channelId, &isEncryptedRawStream);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "failed to get encryption option by channelId=%{public}d", channel->channelId);
         return ret;

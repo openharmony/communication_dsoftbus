@@ -2216,7 +2216,7 @@ int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt
     return SOFTBUS_TRANS_SESSION_SERVER_NOT_FOUND;
 }
 
-int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, bool *isEncrypt)
+int32_t ClientRawStreamEncryptOptGet(int32_t sessionId, int32_t channelId, int32_t channelType, bool *isEncrypt)
 {
     if (channelId < 0 || isEncrypt == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
@@ -2237,7 +2237,8 @@ int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, boo
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
+            if ((sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) ||
+                sessionNode->sessionId == sessionId) {
                 *isEncrypt = sessionNode->isEncyptedRawStream;
                 UnlockClientSessionServerList();
                 return SOFTBUS_OK;

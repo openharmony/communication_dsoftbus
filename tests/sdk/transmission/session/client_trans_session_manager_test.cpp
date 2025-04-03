@@ -1464,13 +1464,14 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest43, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest44, TestSize.Level1)
 {
     bool isEncrypt = false;
-    int32_t ret = ClientRawStreamEncryptOptGet(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
+    int32_t ret = ClientRawStreamEncryptOptGet(TRANS_TEST_SESSION_ID,
+        TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ClientRawStreamEncryptOptGet(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, nullptr);
+    ret = ClientRawStreamEncryptOptGet(TRANS_TEST_SESSION_ID, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ClientRawStreamEncryptOptGet(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
+    ret = ClientRawStreamEncryptOptGet(TRANS_TEST_SESSION_ID, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
     ASSERT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 

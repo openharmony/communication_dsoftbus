@@ -29,6 +29,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 #define TEST_CHANNELID 1030
+#define TEST_SESSIONID 1
 #define ERR_CHANNELID (-1)
 #define TEST_COUNT 2
 #define STREAM_DATA_LENGTH 10
@@ -78,8 +79,9 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize
 HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest001, TestSize.Level0)
 {
     int32_t channelId = TEST_CHANNELID;
+    int32_t sessionId = TEST_SESSIONID;
     bool encrypt = true;
-    int32_t ret = OnRawStreamEncryptOptGet(channelId, &encrypt);
+    int32_t ret = OnRawStreamEncryptOptGet(sessionId, channelId, &encrypt);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
@@ -381,8 +383,9 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnIdleTimeoutResetTest001, TestSize.Le
 HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest002, TestSize.Level0)
 {
     int32_t channelId = TEST_CHANNELID;
+    int32_t sessionId = TEST_SESSIONID;
     bool encrypt = true;
-    int32_t ret = OnRawStreamEncryptOptGet(channelId, &encrypt);
+    int32_t ret = OnRawStreamEncryptOptGet(sessionId, channelId, &encrypt);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 }
 
@@ -395,12 +398,13 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest002, TestS
 HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest003, TestSize.Level0)
 {
     int32_t channelId = TEST_CHANNELID;
+    int32_t sessionId = TEST_SESSIONID;
     bool encrypt = true;
-    int32_t ret = OnRawStreamEncryptOptGet(channelId, nullptr);
+    int32_t ret = OnRawStreamEncryptOptGet(sessionId, channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = ERR_CHANNELID;
-    ret = OnRawStreamEncryptOptGet(channelId, &encrypt);
+    ret = OnRawStreamEncryptOptGet(sessionId, channelId, &encrypt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -420,15 +424,16 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest004, TestS
     int32_t ret = ClientTransAddUdpChannel(&udpChannel);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
     int32_t channelId = TEST_CHANNELID;
+    int32_t sessionId = TEST_SESSIONID;
     bool encrypt = true;
-    ret = OnRawStreamEncryptOptGet(channelId, &encrypt);
+    ret = OnRawStreamEncryptOptGet(sessionId, channelId, &encrypt);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     udpChannel.channelId = TEST_CLOSEID;
     udpChannel.info.isServer = false;
     ret = ClientTransAddUdpChannel(&udpChannel);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
-    ret = OnRawStreamEncryptOptGet(channelId, &encrypt);
+    ret = OnRawStreamEncryptOptGet(sessionId, channelId, &encrypt);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 }
 
