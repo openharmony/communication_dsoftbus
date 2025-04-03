@@ -64,7 +64,7 @@ static void InitAuthHandle(const uint8_t *data, size_t size, AuthHandle *authHan
 static void InitProxyMessage(const uint8_t *data, size_t size, ProxyMessage *proxyMessage)
 {
     InitProxyMessageHead(data, size, &proxyMessage->msgHead);
-    proxyMessage->dateLen = size;
+    proxyMessage->dataLen = size;
     proxyMessage->data = const_cast<char *>(reinterpret_cast<const char *>(data));
     DataGenerator::Write(data, size);
     GenerateUint32(proxyMessage->connId);

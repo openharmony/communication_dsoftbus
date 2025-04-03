@@ -177,9 +177,10 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetLnnConnInterface()->GetAuthRequest(requestId, request);
 }
 
-void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId)
+void UpdateDpSameAccount(
+    int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk)
 {
-    return GetLnnConnInterface()->UpdateDpSameAccount(accountId, deviceId, peerUserId);
+    return GetLnnConnInterface()->UpdateDpSameAccount(accountId, deviceId, peerUserId, sessionKey, isNeedUpdateDk);
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
@@ -215,6 +216,26 @@ void DelSessionKeyProfile(int32_t sessionKeyId)
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
 {
     return GetLnnConnInterface()->GetSessionKeyProfile(sessionKeyId, sessionKey, length);
+}
+
+AuthManager *GetAuthManagerByAuthId(int64_t authId)
+{
+    return GetLnnConnInterface()->GetAuthManagerByAuthId(authId);
+}
+
+int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key)
+{
+    return GetLnnConnInterface()->GetLatestSessionKey(list, type, index, key);
+}
+
+void DelDupAuthManager(AuthManager *auth)
+{
+    return GetLnnConnInterface()->DelDupAuthManager(auth);
+}
+
+void DelUserKeyByUdid(char *networkId)
+{
+    return GetLnnConnInterface()->DelUserKeyByUdid(networkId);
 }
 }
 } // namespace OHOS

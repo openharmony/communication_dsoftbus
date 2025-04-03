@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
+#include "trans_uk_manager.h"
 
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
@@ -281,6 +282,9 @@ int32_t TransChannelInit(void)
     ret = TransAsyncReqLanePendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans async req lane pending init failed.");
 
+    ret = TransUkRequestMgrInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans uk request manager init failed.");
+
     ret = TransReqAuthPendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans auth request pending init failed.");
     ret = TransAuthWithParaReqLanePendingInit();
@@ -314,6 +318,7 @@ void TransChannelDeinit(void)
     TransAuthWithParaReqLanePendingDeinit();
     TransFreeLanePendingDeinit();
     TransBindRequestManagerDeinit();
+    TransUkRequestMgrDeInit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 

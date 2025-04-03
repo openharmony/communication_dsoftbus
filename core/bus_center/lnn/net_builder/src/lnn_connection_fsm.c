@@ -18,8 +18,10 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "auth_pre_link.h"
 #include "auth_deviceprofile.h"
 #include "bus_center_event.h"
@@ -424,6 +426,17 @@ static void NotifyUserChange(bool isChange, NodeInfo *oldInfo, NodeInfo *newInfo
     NotifyForegroundUseridChange(newInfo->networkId, newInfo->discoveryType, isChange);
 }
 
+static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "info is null");
+        return;
+    }
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid, info->userId, sessionKey, false);
+}
+
 static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
@@ -437,7 +450,9 @@ static void SetLnnConnNodeInfo(
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         connInfo->nodeInfo->isSupportSv = true;
     }
+    connInfo->nodeInfo->isSupportUkNego = true;
     report = LnnAddOnlineNode(connInfo->nodeInfo);
+    SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
@@ -1877,6 +1892,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
     }
+    DelUserKeyByUdid(connFsm->connInfo.peerNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
         "peer%{public}s",

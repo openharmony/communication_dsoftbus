@@ -513,12 +513,12 @@ void *SendHandlerLoop(void *arg)
             WaitAck(connection);
         }
 
-        status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
-        ConnBrReturnConnection(&connection);
-        CONN_LOGD(CONN_BR, "br send data, connId=%{public}u, status=%{public}d, socketHandle=%{public}d",
+        CONN_LOGI(CONN_BR, "br send data, connId=%{public}u, status=%{public}d, socketHandle=%{public}d",
             sendNode->connectionId, status, socketHandle);
+        status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
         g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
             sendNode->module, sendNode->seq, status);
+        ConnBrReturnConnection(&connection);
         FreeSendNode(sendNode);
         sendNode = NULL;
     }

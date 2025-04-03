@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_proxy_process_data.h"
+#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -33,7 +34,10 @@ typedef enum {
     PROXYCHANNEL_MSG_TYPE_KEEPALIVE,
     PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK,
     PROXYCHANNEL_MSG_TYPE_HANDSHAKE_AUTH,
-
+    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK,
+    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK_ACK,
+    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY,
+    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY_ACK,
     PROXYCHANNEL_MSG_TYPE_MAX
 } MsgType;
 
@@ -76,12 +80,13 @@ typedef struct {
 } ProxyMessageHead;
 
 typedef struct {
-    int32_t dateLen;
+    int32_t dataLen;
     char *data;
     uint32_t connId;
     int32_t keyIndex;
     ProxyMessageHead msgHead;
     AuthHandle authHandle; /* for cipher */
+    UkIdInfo ukIdInfo;
 } ProxyMessage;
 
 #define VERSION 1
@@ -129,6 +134,7 @@ typedef struct {
     int32_t channelId;
     int32_t reqId;
     int32_t seq;
+    UkIdInfo ukIdInfo;
     ListNode node;
     AuthHandle authHandle; /* for cipher */
     AppInfo appInfo;
@@ -161,7 +167,8 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth);
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
+int32_t TransProxyPackMessage(
+    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo, bool isAddUk, const UkIdInfo *ukIdInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);

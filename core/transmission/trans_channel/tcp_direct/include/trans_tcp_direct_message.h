@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,9 +30,10 @@ int32_t TransSrvDataListInit(void);
 void TransSrvDataListDeinit(void);
 int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd);
 void TransSrvDelDataBufNode(int channelId);
-int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data);
+int32_t TransTdcPostBytes(
+    int32_t channelId, TdcPacketHead *packetHead, const char *data, const UkIdInfo *ukIdInfo);
 int32_t TransTdcProcessPacket(int32_t channelId);
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type);
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type, int32_t *pktModule);
 
 int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t errCode);
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);

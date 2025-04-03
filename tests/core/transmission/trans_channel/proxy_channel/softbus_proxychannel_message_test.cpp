@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -399,30 +399,30 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
     ProxyMessageHead msg;
     ProxyDataInfo dataInfo;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
-    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo);
+    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyPackMessage(&msg, authHandle, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, nullptr, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = nullptr;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = 0;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = (uint8_t *)"1";
     dataInfo.inLen = strlen((const char*)dataInfo.inData);
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -443,17 +443,17 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
-    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     authHandle.authId = 1;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
@@ -601,30 +601,30 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Le
     info.appInfo.appType = APP_TYPE_INNER;
 
     /* test info is null */
-    ret = TransProxyHandshake(nullptr);
+    ret = TransProxyHandshake(nullptr, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test appType no auth and invalid channel */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     AuthConnInfo wifiInfo, bleInfo;
     wifiInfo.type = AUTH_LINK_TYPE_WIFI;
     bleInfo.type = AUTH_LINK_TYPE_BLE;
     info.channelId = TEST_PARSE_MESSAGE_CHANNEL;
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message failed after pass packhandshakemsg */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message success and send msg fail */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test send msg success */
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
