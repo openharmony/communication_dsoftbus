@@ -153,6 +153,11 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return GetCommonInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 
+bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
+{
+    return GetCommonInterface()->IdServiceIsPotentialTrustedDevice(udidHash, accountIdHash, isSameAccount);
+}
+
 int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     return GetCommonInterface()->ConnGetConnectionInfo(connectionId, info);
