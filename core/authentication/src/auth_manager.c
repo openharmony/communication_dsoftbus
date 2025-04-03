@@ -21,6 +21,7 @@
 #include "auth_common.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
+#include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
 #include "auth_log.h"
@@ -29,6 +30,7 @@
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "auth_tcp_connection.h"
+#include "auth_uk_manager.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
@@ -779,10 +781,10 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         auth->hasAuthPassed[info->connInfo.type] = true;
     }
     info->isSavedSessionKey = true;
-    AUTH_LOGI(AUTH_FSM,
-        "authId=%{public}" PRId64 ", authSeq=%{public}" PRId64 ", index=%{public}d, lastVerifyTime=%{public}" PRId64,
-        auth->authId, authSeq, TO_INT32(sessionKeyIndex), auth->lastVerifyTime);
+    AUTH_LOGI(AUTH_FSM, "authId=%{public}" PRId64 ", authSeq=%{public}" PRId64 ", index=%{public}d, "
+        "lastVerifyTime=%{public}" PRId64, auth->authId, authSeq, TO_INT32(sessionKeyIndex), auth->lastVerifyTime);
     ReleaseAuthLock();
+    UpdateDpSameAccount(0, info->udid, info->userId, *sessionKey, info->isSameAccount);
     return ret;
 }
 
@@ -1418,6 +1420,47 @@ static int32_t PostDecryptFailAuthData(
     return SOFTBUS_OK;
 }
 
+static void HandleUkConnectionData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    if (AuthGetUkDecryptSize(head->len) < UK_ENCRYPT_INDEX_LEN) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return;
+    }
+    int32_t ukId = (int32_t)SoftBusLtoHl(*(uint32_t *)(data + ENCRYPT_INDEX_LEN));
+    uint32_t decDataLen = AuthGetUkDecryptSize(head->len) - UK_ENCRYPT_INDEX_LEN;
+    uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
+    if (decData == NULL) {
+        AUTH_LOGE(AUTH_CONN, "auth process recv data: malloc fail.");
+        return;
+    }
+    if (AuthDecryptByUkId(ukId, data + UK_ENCRYPT_INDEX_LEN, head->len - UK_ENCRYPT_INDEX_LEN, decData, &decDataLen) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "decrypt uk connection data fail.");
+        SoftBusFree(decData);
+        return;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "require lock fail");
+        SoftBusFree(decData);
+        return;
+    }
+    AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
+    if (auth == NULL) {
+        PrintAuthConnInfo(connInfo);
+        AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
+        SoftBusFree(decData);
+        ReleaseAuthLock();
+        return;
+    }
+    AuthHandle authHandle = { .authId = auth->authId, .type = GetConnType(connId) };
+    ReleaseAuthLock();
+    if (g_transCallback.onDataReceived != NULL) {
+        g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
+    }
+    SoftBusFree(decData);
+}
+
 static void HandleConnectionDataInner(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1600,6 +1643,9 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_CANCEL_AUTH:
             HandleCancelAuthData(connId, connInfo, fromServer, head, data);
+            break;
+        case DATA_TYPE_UK_CONNECTION:
+            HandleUkConnectionData(connId, connInfo, fromServer, head, data);
             break;
         default:
             break;

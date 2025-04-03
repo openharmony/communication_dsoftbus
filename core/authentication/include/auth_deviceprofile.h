@@ -18,6 +18,10 @@
 
 #include <stdint.h>
 
+#include "auth_session_key.h"
+#include "auth_uk_manager.h"
+#include "auth_user_common_key.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -33,10 +37,16 @@ typedef enum {
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
 bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId);
-void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId);
+void UpdateDpSameAccount(
+    int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk);
 void DelNotTrustDevice(const char *udid);
 void DelSessionKeyProfile(int32_t sessionKeyId);
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length);
+int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
+int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
+int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen);
+void UpdateAssetSessionKeyByAcl(
+    AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -37,6 +37,8 @@
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 
+#define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
+
 static _Atomic bool g_transSessionInitFlag = false;
 
 int32_t TransServerInit(void)
@@ -113,6 +115,11 @@ static void TransGetAccessInfoIsApp(CallerType callerType, SessionServer *newNod
         int32_t ret = GetOsAccountUidByUserId(newNode->accessInfo.accountId, ACCOUNT_UID_LEN_MAX - 1,
             &size, newNode->accessInfo.userId);
         if (ret != SOFTBUS_OK) {
+            if (ret == SOFTBUS_NOT_LOGIN) {
+                if (strcpy_s(newNode->accessInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
+                    COMM_LOGE(COMM_PERM, "strcpy_s default uid failed");
+                }
+            }
             TRANS_LOGE(TRANS_CTRL, "get current account failed, ret=%{public}d", ret);
             return;
         }

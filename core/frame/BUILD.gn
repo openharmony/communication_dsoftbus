@@ -41,6 +41,14 @@ if (defined(ohos_lite)) {
     sources = [ "$dsoftbus_core_path/common/security/permission/softbus_trans_permission.json" ]
     outputs = [ "$root_out_dir/etc/softbus_trans_permission.json" ]
   }
+  if (enhanced) {
+    if (dsoftbus_feature_lnn_ccmp) {
+      copy("bus_center_permission_json") {
+        sources = [ "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/permission/softbus_bus_center_permission.json" ]
+        outputs = [ "$root_out_dir/etc/softbus_bus_center_permission.json" ]
+      }
+    }
+  }
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
@@ -168,6 +176,11 @@ if (defined(ohos_lite)) {
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
       ]
+      if (enhanced) {
+        if (dsoftbus_feature_lnn_ccmp) {
+          deps += [ ":bus_center_permission_json" ]
+        }
+      }
       external_deps = [
         "bounds_checking_function:libsec_shared",
         "device_auth:deviceauth_sdk",
@@ -228,6 +241,17 @@ if (defined(ohos_lite)) {
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
+  if (enhanced) {
+    if (dsoftbus_feature_lnn_ccmp) {
+      ohos_prebuilt_etc("softbus_bus_center_permission_json") {
+        source = "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/permission/softbus_bus_center_permission.json"
+        install_enable = true
+        relative_install_dir = "communication/softbus"
+        part_name = "dsoftbus"
+        subsystem_name = "communication"
+      }
+    }
+  }
   ohos_shared_library("softbus_server") {
     sanitize = {
       cfi = true
@@ -274,6 +298,11 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     ]
+    if (enhanced) {
+      if (dsoftbus_feature_lnn_ccmp) {
+        deps += [ ":softbus_bus_center_permission_json" ]
+      }
+    }
     external_deps = [ "cJSON:cjson" ]
     external_deps += auth_server_ex_deps
     public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]

@@ -533,8 +533,14 @@ int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChai
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    int32_t ret = g_hiChainAuthInterface[authMode].authenticate(hiChainParam->userId, authSeq, authParams,
-        &g_hichainCallback);
+    int32_t ret = SOFTBUS_OK;
+    if (hiChainParam->cb == NULL) {
+        ret = g_hiChainAuthInterface[authMode].authenticate(
+            hiChainParam->userId, authSeq, authParams, &g_hichainCallback);
+    } else {
+        ret =
+            g_hiChainAuthInterface[authMode].authenticate(hiChainParam->userId, authSeq, authParams, hiChainParam->cb);
+    }
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");
         cJSON_free(authParams);
@@ -558,6 +564,22 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, H
     }
 
     int32_t ret = g_hiChainAuthInterface[authMode].processAuthData(authSeq, data, len, &g_hichainCallback);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t HichainProcessUkNegoData(
+    int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode, DeviceAuthCallback *cb)
+{
+    if (data == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "data is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = g_hiChainAuthInterface[authMode].processAuthData(authSeq, data, len, cb);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%{public}d", ret);
         return ret;

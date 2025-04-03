@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -484,30 +484,30 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
     ProxyMessageHead msg;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     ProxyDataInfo dataInfo;
-    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo);
+    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyPackMessage(&msg, authHandle, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, nullptr, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     dataInfo.inData = nullptr;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     dataInfo.inData = 0;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     dataInfo.inData = reinterpret_cast<uint8_t *>(const_cast<char *>("1"));
     dataInfo.inLen = strlen((const char *)dataInfo.inData);
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -534,16 +534,16 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest002, TestSize.Level1)
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

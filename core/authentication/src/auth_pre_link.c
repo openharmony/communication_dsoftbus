@@ -20,7 +20,6 @@
 #include "auth_attest_interface.h"
 #include "auth_connection.h"
 #include "auth_deviceprofile.h"
-#include "auth_hichain.h"
 #include "auth_log.h"
 #include "auth_request.h"
 #include "auth_session_message.h"

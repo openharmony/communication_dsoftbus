@@ -480,4 +480,22 @@ HWTEST_F(TransClientSocketServiceTest, PrivilegeShutdown001, TestSize.Level1)
     ret = PrivilegeShutdown(tokenId, pid, const_cast<char *>(g_networkId.c_str()));
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
+
+/**
+ * @tc.name: SetAccessInfo001
+ * @tc.desc: call SetAccessInfo function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, SetAccessInfo001, TestSize.Level1)
+{
+    int32_t socket = 1;
+    SocketAccessInfo accessInfo = {
+        .userId = 1,
+        .accountId = (char *)"accountId",
+    };
+
+    int32_t ret = SetAccessInfo(socket, accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
 } // namespace OHOS

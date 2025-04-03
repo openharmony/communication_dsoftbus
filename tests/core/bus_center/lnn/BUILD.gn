@@ -819,7 +819,6 @@ ohos_unittest("LNNSyncInfoManagerTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
     "net_builder/mock/lnn_sync_info_manager_mock.cpp",
     "net_builder/src/lnn_auth_mock.cpp",
-    "net_builder/src/lnn_connection_fsm_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_service_mock.cpp",
     "net_builder/src/lnn_sync_info_manager_test.cpp",

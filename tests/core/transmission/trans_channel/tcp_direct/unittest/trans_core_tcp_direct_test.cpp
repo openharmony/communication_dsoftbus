@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -488,10 +488,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
     packetHead.flags = FLAG_REQUEST;
     packetHead.dataLen = strlen(bytes);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, nullptr);
+    ret = TransTdcPostBytes(channelId, &packetHead, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, bytes);
+    ret = TransTdcPostBytes(channelId, &packetHead, bytes, nullptr);
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
@@ -505,14 +505,14 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t fd = 1;
-
+    int32_t pktModule = 0;
     int32_t ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0);
+    ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0, &pktModule);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
 
     TransSrvDataListDeinit();

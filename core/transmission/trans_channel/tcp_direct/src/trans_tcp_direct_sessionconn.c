@@ -792,3 +792,49 @@ int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
     return SOFTBUS_OK;
 }
+
+int32_t SetSessionConnUkIdById(int32_t channelId, const UkIdInfo *ukIdInfo)
+{
+    if (ukIdInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ukId info is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            connInfo->ukIdInfo.myId = ukIdInfo->myId;
+            connInfo->ukIdInfo.peerId = ukIdInfo->peerId;
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_SVC, "can not find by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t GetSessionConnUkIdById(int32_t channelId, UkIdInfo *ukIdInfo)
+{
+    if (ukIdInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ukId info is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            ukIdInfo->myId = connInfo->ukIdInfo.myId;
+            ukIdInfo->peerId = connInfo->ukIdInfo.peerId;
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_SVC, "can not find by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}

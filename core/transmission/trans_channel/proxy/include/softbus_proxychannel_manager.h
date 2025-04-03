@@ -78,8 +78,10 @@ int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
 int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannelInfo *chan);
 
 int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult);
-
 int32_t TransProxyGetAppInfoById(int16_t channelId, AppInfo *appInfo);
+
+int32_t TransProxySetUkInfoByChanId(int32_t chanId, const UkIdInfo *ukIdInfo);
+int32_t TransProxyGetUkInfoByChanId(int32_t chanId, UkIdInfo *ukIdInfo);
 #ifdef __cplusplus
 }
 #endif

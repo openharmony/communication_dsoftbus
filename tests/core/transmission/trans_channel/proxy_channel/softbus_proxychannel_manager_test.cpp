@@ -692,7 +692,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest001, Tes
     (void)strcpy_s(info.appInfo.peerData.sessionName, SESSIONKEYSIZE, TEST_AUTHSESSION);
     msg.data = TransProxyPackHandshakeMsg(&info);
     ASSERT_TRUE(msg.data != nullptr);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.connId = TEST_NUMBER_ELEVEN;
     msg.msgHead.myId = TEST_NUMBER_ELEVEN;
     msg.msgHead.peerId = TEST_NUMBER_ELEVEN;
@@ -715,7 +715,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
     msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_INVALID_PARAM);
     ASSERT_TRUE(msg.data != nullptr);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
     /* test receive errcode msg */
     TransProxyOnMessageReceived(&msg);
@@ -730,7 +730,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
     msg.data = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg.data != nullptr);
 
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.msgHead.myId = TEST_NUMBER_TEN;
     TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
@@ -749,7 +749,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest003, Tes
     const char *identity = TEST_STRING_ELEVEN;
     msg.data = TransProxyPackIdentity(identity);
     ASSERT_TRUE(msg.data != nullptr);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.connId = TEST_NUMBER_VALID;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_RESET;
     /* test no compare channel */
@@ -784,7 +784,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest004, Tes
     const char *identity = TEST_STRING_ELEVEN;
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_KEEPLIVEING);
     msg.data = TransProxyPackIdentity(identity);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE;
     TransProxyOnMessageReceived(&msg);
@@ -2020,7 +2020,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillChannelInfoTest001, TestS
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->appInfo.callingTokenId = TOKENID_NOT_SET;
     msg->data = TransProxyPackHandshakeMsg(chan);
-    msg->dateLen = strlen(msg->data) + 1;
+    msg->dataLen = strlen(msg->data) + 1;
 
     int32_t ret = TransProxyFillChannelInfo(msg, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -2089,7 +2089,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackErrMsg001, Tes
     chan->channelId = TEST_VALID_CHANNEL_ID;
     chan->myId = TEST_NUMBER_THREE;
     chan->peerId = TEST_NUMBER_TEN;
-    msg->dateLen = TEST_NUMBER_TWENTY;
+    msg->dataLen = TEST_NUMBER_TWENTY;
     int32_t code = SOFTBUS_OK;
     ret = TransProxyHandshakeUnpackErrMsg(chan, msg, &code);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
@@ -2118,7 +2118,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackRightMsg001, T
     chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chan->myId = TEST_NUMBER_THREE;
     chan->peerId = TEST_NUMBER_TEN;
-    msg->dateLen = TEST_NUMBER_TWENTY;
+    msg->dataLen = TEST_NUMBER_TWENTY;
     ret = TransProxyHandshakeUnpackRightMsg(chan, msg, SOFTBUS_OK, fastDataSize);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ReleaseChannelInfo(chan);

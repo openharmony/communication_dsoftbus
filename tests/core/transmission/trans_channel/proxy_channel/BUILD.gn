@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,7 +57,7 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
-    "$dsoftbus_core_path/core/transmission/session/cpp/include",
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
@@ -491,6 +491,7 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
@@ -676,6 +677,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
 
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/common/include",
     "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
