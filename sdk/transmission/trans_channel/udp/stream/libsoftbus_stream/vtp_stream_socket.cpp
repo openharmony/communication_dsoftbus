@@ -1140,7 +1140,7 @@ void VtpStreamSocket::DoStreamRecv()
                 TRANS_EVENT(EVENT_SCENE_TRANS_RECV_STREAM, EVENT_STAGE_TRANS_RECV_STREAM, extra);
             }
         }
-        g_diffTime = GetSoftbusRecordTimeMillis();
+        g_startTime = GetSoftbusRecordTimeMillis();
         TRANS_LOGD(TRANS_STREAM, "recv stream");
         int32_t dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
