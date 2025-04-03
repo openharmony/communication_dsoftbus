@@ -1069,8 +1069,8 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
 static int32_t PostAuthMsg(AuthChannelInfo *channel, TransEventExtra *extra, const LaneConnInfo *connInfo,
     const int32_t *channelId)
 {
-    int32_t authId = AuthOpenChannelWithAllIp(connInfo->connInfo.rawWifiDirect.localIp,
-        connInfo->connInfo.rawWifiDirect.peerIp, connInfo->connInfo.rawWifiDirect.port);
+    int32_t authId = AuthOpenChannelWithAllIp(connInfo->connInfo.rawWifiDirect.localIpv6,
+        connInfo->connInfo.rawWifiDirect.peerIpv6, connInfo->connInfo.rawWifiDirect.port);
     if (authId < 0) {
         TRANS_LOGE(TRANS_SVC, "AuthOpenChannelWithAllIp failed");
         SoftBusFree(channel);

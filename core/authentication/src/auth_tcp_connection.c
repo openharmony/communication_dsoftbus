@@ -466,7 +466,7 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
     int32_t port = StartBaseListener(info, &listener);
     if (port <= 0) {
         AUTH_LOGE(AUTH_CONN, "StartBaseListener fail. port=%{public}d", port);
-        return SOFTBUS_INVALID_PORT;
+        return port;
     }
     return port;
 }
