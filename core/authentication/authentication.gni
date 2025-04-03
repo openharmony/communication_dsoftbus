@@ -114,6 +114,7 @@ if (enhanced) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message_hml.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_permission.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_utils.c",
     ]
   } else {
