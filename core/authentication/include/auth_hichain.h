@@ -19,6 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "device_auth.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -36,6 +38,7 @@ typedef struct {
     char *uid;
     char *credId;
     int32_t userId;
+    DeviceAuthCallback *cb;
 } HiChainAuthParam;
 
 typedef enum {
@@ -55,6 +58,8 @@ void UnregTrustDataChangeListener(void);
 
 int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode);
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode);
+int32_t HichainProcessUkNegoData(
+    int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode, DeviceAuthCallback *cb);
 uint32_t HichainGetJoinedGroups(int32_t groupType);
 int32_t RegHichainSaStatusListener(void);
 int32_t UnRegHichainSaStatusListener(void);

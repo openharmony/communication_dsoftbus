@@ -92,3 +92,9 @@ bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
     (void)sessionName;
     return false;
 }
+
+bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
+{
+    (void)tokenId;
+    return false;
+}

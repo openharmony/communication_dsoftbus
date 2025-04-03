@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ HWTEST_F(TransTcpDirectListenerTest, StartVerifySessionTest001, TestSize.Level1)
     SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
 
-    int32_t ret = StartVerifySession(conn);
+    int32_t ret = StartVerifySession(conn, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CIPHER_FAILED, ret);
 }
 

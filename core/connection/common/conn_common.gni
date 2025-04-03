@@ -14,9 +14,12 @@
 import("../../../dsoftbus.gni")
 
 conn_common_inc = [
+  "$dsoftbus_root_path/core/authentication/include",
+  "$dsoftbus_root_path/core/authentication/interface",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/connection/common/include",
   "$dsoftbus_root_path/core/connection/manager",
+  "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
 ]
 conn_common_src = [

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
-    int32_t ret = TransProxyHandshake(nullptr);
+    int32_t ret = TransProxyHandshake(nullptr, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ProxyChannelInfo info;
@@ -211,11 +211,11 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
     
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
     info.authHandle.authId = AUTH_INVALID_ID;
-    ret = TransProxyHandshake(&info);
+    ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
     TestDelTestProxyChannel();
@@ -483,7 +483,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
 
     ProxyMessage msg;
     msg.data = TransProxyPackHandshakeMsg(&info);
-    msg.dateLen = strlen(msg.data) + 1;
+    msg.dataLen = strlen(msg.data) + 1;
     TransProxyProcessHandshakeMsg(&msg);
 
     TestDelTestProxyChannel();

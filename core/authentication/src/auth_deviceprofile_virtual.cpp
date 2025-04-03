@@ -30,11 +30,13 @@ bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t loca
     return false;
 }
 
-void UpdateDpSameAccount(int64_t accountId, const char *deviceId, int32_t peerUserId)
+void UpdateDpSameAccount(
+    int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk)
 {
     (void)accountId;
     (void)deviceId;
     (void)peerUserId;
+    (void)sessionKey;
 }
 
 void DelNotTrustDevice(const char *udid)
@@ -53,4 +55,37 @@ bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *l
     (void)sessionKey;
     (void)length;
     return false;
+}
+
+int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
+{
+    (void)acl;
+    (void)ukId;
+    (void)time;
+    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+}
+
+int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
+{
+    (void)acl;
+    (void)ukId;
+    (void)time;
+    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+}
+
+int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
+{
+    (void)sessionKeyId;
+    (void)uk;
+    (void)ukLen;
+    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+}
+
+void UpdateAssetSessionKeyByAcl(
+    AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
+{
+    (void)info;
+    (void)sessionKey;
+    (void)sessionKeyLen;
+    (void)sessionKeyId;
 }

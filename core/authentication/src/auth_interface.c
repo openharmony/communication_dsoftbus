@@ -80,6 +80,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_SLE_AUTH_CMD,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_UK_CONNECTION,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -775,6 +779,7 @@ int32_t AuthInit(void)
         AUTH_LOGI(AUTH_INIT, "customized protocol init failed, ret=%{public}d", ret);
         return ret;
     }
+    ret = UkNegotiateInit();
     AuthLoadDeviceKey();
     return AuthMetaInit(&callBack);
 }
@@ -783,6 +788,7 @@ void AuthDeinit(void)
 {
     AuthDeviceDeinit();
     CustomizedSecurityProtocolDeinit();
+    UkNegotiateDeinit();
     AuthMetaDeinit();
 }
 

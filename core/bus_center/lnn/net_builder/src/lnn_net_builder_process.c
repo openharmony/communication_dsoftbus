@@ -23,6 +23,7 @@
 #include "auth_common.h"
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_request.h"
 #include "auth_hichain_adapter.h"
@@ -369,6 +370,14 @@ static int32_t ProcessEnhancedP2pDupBle(const DeviceVerifyPassMsgPara *msgPara)
     return ret;
 }
 
+static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, AuthHandle authHandle)
+{
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    UpdateDpSameAccount(msgPara->nodeInfo->accountId, msgPara->nodeInfo->deviceInfo.deviceUdid,
+        msgPara->nodeInfo->userId, sessionKey, false);
+}
+
 static int32_t ProcessDeviceVerifyPass(const void *para)
 {
     int32_t rc;
@@ -384,7 +393,6 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         SoftBusFree((void *)msgPara);
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P ||
             msgPara->authHandle.type == AUTH_LINK_TYPE_SESSION) {
         LNN_LOGI(LNN_BUILDER, "auth type is %{public}d, start dup ble.", msgPara->authHandle.type);
@@ -410,11 +418,11 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         if (LnnUpdateNodeInfo(msgPara->nodeInfo, msgPara->addr.type) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LnnUpdateNodeInfo failed");
         }
+        GetSessionKeyByAuthHandle(msgPara, msgPara->authHandle);
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm exist, ignore VerifyPass authId=%{public}" PRId64,
             connFsm->id, msgPara->authHandle.authId);
         rc = SOFTBUS_ALREADY_EXISTED;
     } while (false);
-
     if (rc != SOFTBUS_OK && msgPara->nodeInfo != NULL) {
         SoftBusFree((void *)msgPara->nodeInfo);
     }

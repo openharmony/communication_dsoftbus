@@ -23,6 +23,7 @@
 #include "auth_common.h"
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_request.h"
 #include "auth_hichain_adapter.h"
@@ -120,6 +121,16 @@ static void DfxRecordDeviceInfoExchangeEndTime(const NodeInfo *info)
     SoftBusFree(udidHash);
 }
 
+static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
+{
+    NodeInfo nodeInfo;
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
+    UpdateDpSameAccount(nodeInfo.accountId, nodeInfo.deviceInfo.deviceUdid, nodeInfo.userId, sessionKey, false);
+}
+
 static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
     LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, authId=%{public}" PRId64,
@@ -147,10 +158,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
             UpdateProfile(info);
             LnnUpdateRemoteDeviceName(info);
-            NodeInfo nodeInfo;
-            (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-            (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
-            UpdateDpSameAccount(nodeInfo.accountId, nodeInfo.deviceInfo.deviceUdid, nodeInfo.userId);
+            GetSessionKeyByNodeInfo(info, authHandle);
         }
     } else {
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);

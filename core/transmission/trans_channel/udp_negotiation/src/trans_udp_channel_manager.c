@@ -462,6 +462,36 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isReply
     TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%{public}" PRId64, seq);
 }
 
+void TransUdpGetUkIdInfoBySeq(int64_t seq, UkIdInfo *ukIdInfo, bool isReply)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        return;
+    }
+
+    if (ukIdInfo == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
+            ukIdInfo->myId = udpChannelNode->ukIdInfo.myId;
+            ukIdInfo->peerId = udpChannelNode->ukIdInfo.peerId;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%{public}" PRId64, seq);
+}
+
 void TransSetUdpChannelMsgType(uint32_t requestId)
 {
     if (g_udpChannelMgr == NULL) {
@@ -836,8 +866,8 @@ void TransAsyncUdpChannelTask(int32_t channelId)
     if (curCount >= LOOPER_REPLY_CNT_MAX) {
         char *errDesc = (char *)"open udp channel timeout";
         TRANS_LOGE(TRANS_CTRL, "Open udp channel timeout, channelId=%{public}d", channelId);
-        if (SendReplyErrInfo(
-            SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, errDesc, channel.authHandle, channel.seq) != SOFTBUS_OK) {
+        if (SendReplyErrInfo(SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, errDesc, channel.authHandle, channel.seq,
+            false) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
         }
         (void)NotifyUdpChannelOpenFailed(&channel.info, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
