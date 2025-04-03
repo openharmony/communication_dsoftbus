@@ -67,6 +67,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
     WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->sessionId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);

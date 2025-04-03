@@ -128,6 +128,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     TRANS_LOGI(TRANS_CTRL, "enter.");
     ChannelInfo info = {0};
     char networkId[NETWORK_ID_BUF_LEN] = {0};
+    info.sessionId = appInfo->myData.sessionId;
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
     info.channelId = appInfo->myData.channelId;

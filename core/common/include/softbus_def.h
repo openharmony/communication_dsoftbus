@@ -155,6 +155,7 @@ typedef struct {
     bool isUdpFile;
     bool isFastData;
     bool isSupportTlv;
+    int32_t sessionId;
     int32_t channelId;
     int32_t channelType;
     int32_t businessType;

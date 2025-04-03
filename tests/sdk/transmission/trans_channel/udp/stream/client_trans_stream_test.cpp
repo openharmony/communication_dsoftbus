@@ -90,8 +90,9 @@ static int32_t TestOnIdleTimeoutReset(int32_t sessionId)
     return SOFTBUS_OK;
 }
 
-static int32_t TestOnRawStreamEncryptOptGet(int32_t channelId, bool *isEncrypt)
+static int32_t TestOnRawStreamEncryptOptGet(int32_t sessionId, int32_t channelId, bool *isEncrypt)
 {
+    (void)sessionId;
     (void)channelId;
     (void)isEncrypt;
     return SOFTBUS_OK;

@@ -580,7 +580,7 @@ static int32_t OnIdleTimeoutReset(int32_t sessionId)
     return g_sessionCb->OnIdleTimeoutReset(sessionId);
 }
 
-static int32_t OnRawStreamEncryptOptGet(int32_t channelId, bool *isEncrypt)
+static int32_t OnRawStreamEncryptOptGet(int32_t sessionId, int32_t channelId, bool *isEncrypt)
 {
     if (channelId < 0 || isEncrypt == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -611,7 +611,7 @@ static int32_t OnRawStreamEncryptOptGet(int32_t channelId, bool *isEncrypt)
     if (channel.info.isServer) {
         return g_sessionCb->OnRawStreamEncryptDefOptGet(channel.info.mySessionName, isEncrypt);
     } else {
-        return g_sessionCb->OnRawStreamEncryptOptGet(channel.channelId, CHANNEL_TYPE_UDP, isEncrypt);
+        return g_sessionCb->OnRawStreamEncryptOptGet(sessionId, channel.channelId, CHANNEL_TYPE_UDP, isEncrypt);
     }
 }
 
