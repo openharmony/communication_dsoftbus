@@ -204,5 +204,10 @@ void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool 
 {
     return HeartBeatStrategyInterface()->NotifyForegroundUseridChange(networkId, discoveryType, isChange);
 }
+
+bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
+{
+    return HeartBeatStrategyInterface()->IdServiceIsPotentialTrustedDevice(udidHash, accountIdHash, isSameAccount);
+}
 }
 } // namespace OHOS

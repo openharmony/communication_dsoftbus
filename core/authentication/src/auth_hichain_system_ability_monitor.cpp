@@ -15,12 +15,15 @@
 
 #include "auth_hichain.h"
 
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "iservice_registry.h"
 #include "lnn_async_callback_utils.h"
 #include "system_ability_definition.h"
 #include "system_ability_status_change_stub.h"
+
+#define DELAY_REG_HICHAIN_TIME 5000
 
 namespace OHOS {
 namespace SaEventFwk {
@@ -59,16 +62,30 @@ static void RetryRegTrustListener(void *para)
     }
 }
 
+static void RetryRegCredMgr(void *para)
+{
+    (void)para;
+    if (IdServiceRegCredMgr() != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_INIT, "retry reg credential manager failed after 5s");
+    }
+}
+
 void SystemAbilityListener::OnAddSystemAbility(int32_t saId, const std::string &deviceId)
 {
     AUTH_LOGI(AUTH_INIT, "onSaStart saId=%{public}d", saId);
+    const int32_t delayRegHichainTime = DELAY_REG_HICHAIN_TIME;
     if (saId == DEVICE_AUTH_SERVICE_ID) {
         int32_t ret = RegTrustListenerOnHichainSaStart();
         if (ret != SOFTBUS_OK) {
-            const int delayRegHichainTime = 5000;
             ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryRegTrustListener, nullptr,
                 delayRegHichainTime);
-            AUTH_LOGI(AUTH_INIT, "LnnAsyncCallbackDelayHelper ret=%{public}d", ret);
+            AUTH_LOGI(AUTH_INIT, "RetryRegTrustListener AsyncCallbackDelay ret=%{public}d", ret);
+        }
+        ret = IdServiceRegCredMgr();
+        if (ret != SOFTBUS_OK) {
+            ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryRegCredMgr, nullptr,
+                delayRegHichainTime);
+            AUTH_LOGI(AUTH_INIT, "RetryRegCredMgr AsyncCallbackDelay ret=%{public}d", ret);
         }
     }
 }

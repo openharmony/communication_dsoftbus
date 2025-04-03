@@ -19,10 +19,17 @@
 #include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
+#include "bus_center_manager.h"
+#include "device_auth.h"
 #include "device_auth_defines.h"
+#include "lnn_decision_db.h"
+#include "lnn_heartbeat_ctrl.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 
 #define FIELD_AUTHORIZED_SCOPE "authorizedScope"
+#define AUTH_APPID "softbus_auth"
 #define SCOPE_USER 2
 
 enum SoftbusCredType {
@@ -34,6 +41,7 @@ enum SoftbusCredType {
 
 static char *IdServiceGenerateQueryParam(const char *udidHash, const char *accountHash, bool isSameAccount)
 {
+    (void)accountHash;
     int32_t credType = isSameAccount ? ACCOUNT_RELATED : ACCOUNT_BUTT;
 
     cJSON *msg = cJSON_CreateObject();
@@ -320,4 +328,147 @@ int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t 
     }
 
     return SOFTBUS_OK;
+}
+
+bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
+{
+    char *credList = NULL;
+    int32_t userId = GetActiveOsAccountIds();
+    AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
+    int32_t ret = IdServiceQueryCredential(userId, udidHash, accountIdHash, isSameAccount, &credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
+        return false;
+    }
+    char *credId = IdServiceGetCredIdFromCredList(userId, credList);
+    if (credId == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "get cred id fail");
+        IdServiceDestroyCredentialList(&credList);
+        return true;
+    }
+    IdServiceDestroyCredentialList(&credList);
+    SoftBusFree(credId);
+    return true;
+}
+
+static int32_t GetCredInfoFromJson(const char *credInfo, SoftBusCredInfo *info)
+{
+    JsonObj *json = JSON_Parse(credInfo, strlen(credInfo));
+    if (json == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (!JSON_GetInt32FromOject(json, FIELD_CRED_TYPE, &(info->credIdType)) ||
+        !JSON_GetInt32FromOject(json, FIELD_SUBJECT, &(info->subject)) ||
+        !JSON_GetStringFromOject(json, FIELD_DEVICE_ID, info->udid, UDID_BUF_LEN) ||
+        !JSON_GetStringFromOject(json, FIELD_USER_ID, info->userId, MAX_ACCOUNT_HASH_LEN)) {
+        AUTH_LOGD(AUTH_HICHAIN, "parse credential info json fail");
+        JSON_Delete(json);
+        return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
+    }
+    JSON_Delete(json);
+    return SOFTBUS_OK;
+}
+
+static bool IsLocalCredInfo(const char *udid)
+{
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get local udid fail");
+        return true;
+    }
+    return (strcmp(udid, localUdid) == 0);
+}
+
+static void IdServiceHandleCredAdd(const char *credInfo)
+{
+    AUTH_LOGI(AUTH_HICHAIN, "credInfo=%{public}s", credInfo);
+    SoftBusCredInfo info = { 0 };
+    int32_t localDevTypeId = 0;
+    if (GetCredInfoFromJson(credInfo, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get credential info from json fail");
+        return;
+    }
+    if (IsLocalCredInfo(info.udid)) {
+        AUTH_LOGI(AUTH_HICHAIN, "id service no need handle");
+        return;
+    }
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK && localDevTypeId == TYPE_TV_ID &&
+        (info.credIdType == ACCOUNT_SHARE || info.credIdType == ACCOUNT_UNRELATED)) {
+        AUTH_LOGI(AUTH_HICHAIN, "id service not start heartbeat");
+        return;
+    }
+    if (LnnInsertSpecificTrustedDevInfo(info.udid) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service insert trust info fail");
+        return;
+    }
+    LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
+}
+
+static void OnCredAdd(const char *credId, const char *credInfo)
+{
+    AUTH_LOGI(AUTH_HICHAIN, "OnCredAdd enter");
+    if (credId == NULL || credInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
+        return;
+    }
+    IdServiceHandleCredAdd(credInfo);
+}
+
+static void OnCredDelete(const char *credId, const char *credInfo)
+{
+    if (credId == NULL || credInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
+        return;
+    }
+    SoftBusCredInfo info = { 0 };
+    if (GetCredInfoFromJson(credInfo, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service parse json fail");
+        return;
+    }
+    LnnDeleteSpecificTrustedDevInfo(info.udid, GetActiveOsAccountIds());
+    LnnHbOnTrustedRelationReduced();
+}
+
+static void OnCredUpdate(const char *credId, const char *credInfo)
+{
+    if (credId == NULL || credInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
+        return;
+    }
+    IdServiceHandleCredAdd(credInfo);
+}
+
+static CredChangeListener g_regCredChangeListener = {
+    .onCredAdd = OnCredAdd,
+    .onCredDelete = OnCredDelete,
+    .onCredUpdate = OnCredUpdate,
+};
+
+int32_t IdServiceRegCredMgr(void)
+{
+    AUTH_LOGI(AUTH_HICHAIN, "id service init reg");
+    const CredManager *credManager = IdServiceGetCredMgrInstance();
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI, AUTH_HICHAIN,
+        "hichain identity service not initialized");
+
+    if ((credManager->registerChangeListener != NULL) &&
+        credManager->registerChangeListener(AUTH_APPID, &g_regCredChangeListener) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service reg cred change fail");
+        return SOFTBUS_AUTH_REG_CRED_CHANGE_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+void IdServiceUnRegCredMgr(void)
+{
+    const CredManager *credManager = IdServiceGetCredMgrInstance();
+    if (credManager == NULL) {
+        AUTH_LOGI(AUTH_HICHAIN, "hichain identity service get cred manager fail");
+        return;
+    }
+    if ((credManager->unregisterChangeListener != NULL) &&
+        credManager->unregisterChangeListener(AUTH_APPID) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service reg cred change fail");
+    }
 }
