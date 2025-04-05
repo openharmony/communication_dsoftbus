@@ -88,7 +88,7 @@ public:
     virtual int32_t GetLatestSessionKey(
         const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key) = 0;
     virtual void DelDupAuthManager(AuthManager *auth) = 0;
-    virtual void DelUserKeyByUdid(char *networkId) = 0;
+    virtual void DelUserKeyByNetworkId(char *networkId) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -134,7 +134,7 @@ public:
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
     MOCK_METHOD4(GetLatestSessionKey, int32_t(const SessionKeyList *, AuthLinkType, int32_t *, SessionKey *));
     MOCK_METHOD1(DelDupAuthManager, void(AuthManager *));
-    MOCK_METHOD1(DelUserKeyByUdid, void(char *));
+    MOCK_METHOD1(DelUserKeyByNetworkId, void(char *));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H
