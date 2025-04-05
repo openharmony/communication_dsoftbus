@@ -1892,7 +1892,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
     }
-    DelUserKeyByUdid(connFsm->connInfo.peerNetworkId);
+    DelUserKeyByNetworkId(connFsm->connInfo.peerNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
         "peer%{public}s",
