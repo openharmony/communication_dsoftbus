@@ -113,7 +113,7 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
     return SOFTBUS_OK;
 }
 
-void DelUserKeyByUdid(char *networkId)
+void DelUserKeyByNetworkId(char *networkId)
 {
     if (g_userKeyList == NULL) {
         AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
