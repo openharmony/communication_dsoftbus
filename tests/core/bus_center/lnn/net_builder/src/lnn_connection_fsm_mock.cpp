@@ -233,9 +233,9 @@ void DelDupAuthManager(AuthManager *auth)
     return GetLnnConnInterface()->DelDupAuthManager(auth);
 }
 
-void DelUserKeyByUdid(char *networkId)
+void DelUserKeyByNetworkId(char *networkId)
 {
-    return GetLnnConnInterface()->DelUserKeyByUdid(networkId);
+    return GetLnnConnInterface()->DelUserKeyByNetworkId(networkId);
 }
 }
 } // namespace OHOS

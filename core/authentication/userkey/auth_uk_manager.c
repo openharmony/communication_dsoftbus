@@ -311,6 +311,7 @@ static int32_t CreateUkNegotiateInstance(
     instance->state = GENUK_STATE_UNKNOW;
     if (memcpy_s(&instance->genCb, sizeof(AuthGenUkCallback), (uint8_t *)genCb, sizeof(AuthGenUkCallback)) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memcpy_s uknego callback data fail");
+        ReleaseUkNegotiateListLock();
         return SOFTBUS_AUTH_ACL_SET_CHANNEL_FAIL;
     }
     instance->negoInfo.isRecvSessionKeyEvent = false;
