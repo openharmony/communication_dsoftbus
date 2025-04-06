@@ -51,11 +51,19 @@ char *PackUkRequest(const AppInfo *appInfo)
         return NULL;
     }
     int32_t userId = appInfo->myData.userId;
+    uint32_t size = 0;
+    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
+    if (ret == SOFTBUS_NOT_LOGIN) {
+        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "strcpy_s default accountId failed");
+        }
+    }
     if (!AddStringToJsonObject(json, "SESSION_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(json, "SOURCE_UDID", sourceUdid) ||
         !AddNumberToJsonObject(json, "SOURCE_USER_ID", userId) ||
         !AddNumber64ToJsonObject(json, "SOURCE_TOKEN_ID", (int64_t)appInfo->callingTokenId) ||
-        !AddStringToJsonObject(json, "SOURCE_ACCOUNT_ID", appInfo->myData.accountId)) {
+        !AddStringToJsonObject(json, "SOURCE_ACCOUNT_ID", accountId)) {
         TRANS_LOGE(TRANS_CTRL, "add data to json failed");
         cJSON_Delete(json);
         return NULL;
@@ -398,8 +406,7 @@ int32_t FillSinkAclInfo(char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         sessionName != NULL && aclInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
     int32_t userId = INVALID_USER_ID;
-    int32_t ret = TransGetAclInfoBySessionName(
-        sessionName, (uint64_t *)&aclInfo->sinkTokenId, pid, &userId, aclInfo->sinkAccountId);
+    int32_t ret = TransGetAclInfoBySessionName(sessionName, (uint64_t *)&aclInfo->sinkTokenId, pid, &userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get tokenId and pid failed, ret=%{public}d", ret);
         return ret;
@@ -408,7 +415,7 @@ int32_t FillSinkAclInfo(char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
     ret = GetOsAccountUidByUserId(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
     if (ret == SOFTBUS_NOT_LOGIN) {
         if (strcpy_s(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-            COMM_LOGE(COMM_PERM, "strcpy_s default uid failed");
+            TRANS_LOGE(TRANS_CTRL, "strcpy_s default accountId failed");
         }
     }
     aclInfo->sinkUserId = userId;

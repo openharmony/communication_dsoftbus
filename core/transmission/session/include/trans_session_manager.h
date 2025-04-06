@@ -77,12 +77,11 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
 
 int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo);
 
-int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId, char *accountId, uint32_t accountIdLen);
+int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId);
 
 int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType);
 
-int32_t TransGetAclInfoBySessionName(
-    const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId, char *accountId);
+int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId);
 #ifdef __cplusplus
 }
 #endif
