@@ -182,7 +182,14 @@ int32_t AuthSessionGetVersion(int64_t authSeq, int32_t *version)
 
 bool AuthSessionGetIsSameAccount(int64_t authSeq)
 {
+    (void)authSeq;
     return true;
+}
+
+int32_t AuthSessionGetUserId(int64_t authSeq)
+{
+    (void)authSeq;
+    return 0;
 }
 
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)

@@ -432,5 +432,10 @@ void IdServiceDestroyCredentialList(char **returnData)
 {
     return GetInterface()->IdServiceDestroyCredentialList(returnData);
 }
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return GetInterface()->GetActiveOsAccountIds();
+}
 }
 }
