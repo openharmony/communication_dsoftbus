@@ -731,7 +731,7 @@ static UpdateDpAclResult UpdateDpAclByAuthAcl(
             LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile set accessee ret=%{public}d", ret);
             updateResult = UPDATE_ACL_SUCC;
         }
-        InsertUserKeyToUKCache(info, sessionKetId, currentTime);
+        InsertUserKeyToUKCache(info, sessionKeyId, currentTime);
         LNN_LOGI(LNN_STATE, "find acl");
     }
     return updateResult;
