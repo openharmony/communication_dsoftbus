@@ -1119,12 +1119,6 @@ static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
         return ret;
     }
 
-    ret = ReadStringFromBuf(buf, len, &offset, accessInfo.accountId, ACCOUNT_UID_LEN_MAX);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get accountId from buf failed.");
-        return ret;
-    }
-
     ret = ReadStringFromBuf(buf, len, &offset, sessionName, SESSION_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get sessionName from buf failed.");
