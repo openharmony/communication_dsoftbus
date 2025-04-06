@@ -519,11 +519,29 @@ static bool CompareAssetAllAcl(OHOS::DistributedDeviceProfile::AccessControlProf
 static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_t time)
 {
     AuthUserKeyInfo userKeyInfo = {};
+    (void)memset_s(&userKeyInfo, sizeof(AuthUserKeyInfo), 0, sizeof(AuthUserKeyInfo));
+    AuthACLInfo info = {};
+    (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    if (!acl->isServer) {
+        info.isServer = !acl->isServer;
+        if (strcpy_s(info.sourceUdid, UDID_BUF_LEN, acl->sinkUdid) != EOK ||
+            strcpy_s(info.sinkUdid, UDID_BUF_LEN, acl->sourceUdid) != EOK ||
+            strcpy_s(info.sourceAccountId, ACCOUNTID_BUF_LEN, acl->sinkAccountId) != EOK ||
+            strcpy_s(info.sinkAccountId, ACCOUNTID_BUF_LEN, acl->sourceAccountId) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy info fail");
+            return;
+        }
+        info.sourceUserId = !acl->sinkUserId;
+        info.sinkUserId = !acl->sourceUserId;
+        info.sourceTokenId = !acl->sinkTokenId;
+        info.sinkTokenId = !acl->sourceTokenId;
+    } else {
+        info = *acl;
+    }
     userKeyInfo.time = time;
     userKeyInfo.keyIndex = ukId;
     std::vector<uint8_t> sessionKey;
-    if (DpClient::GetInstance().GetSessionKey(
-        !acl->isServer ? acl->sinkUserId : acl->sourceUserId, ukId, sessionKey) != OHOS::ERR_OK) {
+    if (DpClient::GetInstance().GetSessionKey(info.sinkUserId, ukId, sessionKey) != OHOS::ERR_OK) {
         LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
         return;
     }
@@ -536,7 +554,7 @@ static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_
         userKeyInfo.deviceKey[i] = sessionKey[i];
     }
     userKeyInfo.keyLen = sessionKey.size();
-    (void)AuthInsertUserKey(acl, &userKeyInfo);
+    (void)AuthInsertUserKey(&info, &userKeyInfo);
     (void)memset_s(userKeyInfo.deviceKey, sizeof(userKeyInfo.deviceKey), 0, sizeof(userKeyInfo.deviceKey));
     sessionKey.clear();
 }
@@ -560,6 +578,8 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     *ukId = DEFAULT_UKID;
 
     for (auto &aclProfile : aclProfiles) {
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
         std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
         std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
         if (!CompareAssetAclSameAccount(aclProfile, acl, true) && !CompareAssetAclSameAccount(aclProfile, acl, false)) {
@@ -567,14 +587,15 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
         }
         *ukId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
         *time = aclProfile.GetAccesser().GetAccesserSKTimeStamp();
-        int32_t defaultUkId = DEFAULT_UKID;
-        InsertUserKeyToUKCache(acl, *ukId, *time);
         if (!AuthIsUkExpired(*time)) {
             OHOS::DistributedDeviceProfile::Accesser accesser(aclProfile.GetAccesser());
-            accesser.SetAccesserSessionKeyId(defaultUkId);
+            *ukId = DEFAULT_UKID;
+            accesser.SetAccesserSessionKeyId(*ukId);
             aclProfile.SetAccesser(accesser);
             ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
             LNN_LOGE(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
+        } else {
+            InsertUserKeyToUKCache(acl, *ukId, *time);
         }
         LNN_LOGE(LNN_STATE, "user key find");
         return SOFTBUS_OK;
@@ -602,6 +623,8 @@ int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     *ukId = DEFAULT_UKID;
     
     for (auto &aclProfile : aclProfiles) {
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
         std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
         std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
         if (!CompareAssetAclDiffAccount(aclProfile, acl, true) || !CompareAssetAclDiffAccount(aclProfile, acl, false)) {
@@ -609,14 +632,15 @@ int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
         }
         *ukId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
         *time = aclProfile.GetAccesser().GetAccesserSKTimeStamp();
-        InsertUserKeyToUKCache(acl, *ukId, *time);
         if (!AuthIsUkExpired(*time)) {
-            int32_t defaultUkId = DEFAULT_UKID;
             OHOS::DistributedDeviceProfile::Accesser accesser(aclProfile.GetAccesser());
-            accesser.SetAccesserSessionKeyId(defaultUkId);
+            *ukId = DEFAULT_UKID;
+            accesser.SetAccesserSessionKeyId(*ukId);
             aclProfile.SetAccesser(accesser);
             ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
             LNN_LOGE(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
+        } else {
+            InsertUserKeyToUKCache(acl, *ukId, *time);
         }
         LNN_LOGE(LNN_STATE, "user key find");
         return SOFTBUS_OK;
@@ -644,6 +668,8 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
     std::vector<uint8_t> sessionKey;
     int32_t aclSessionKeyId = 0;
     for (auto &aclProfile : aclProfiles) {
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
         aclSessionKeyId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
         if (aclSessionKeyId != sessionKeyId) {
             continue;
@@ -684,18 +710,29 @@ static UpdateDpAclResult UpdateDpAclByAuthAcl(
     }
     UpdateDpAclResult updateResult = UPDATE_ACL_NOT_MATCH;
     for (auto &aclProfile : aclProfiles) {
-        if (!CompareAssetAllAcl(aclProfile, info, true, isSameAccount) ||
-            !CompareAssetAllAcl(aclProfile, info, false, isSameAccount)) {
-            continue;
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s", aclProfile.GetAccesser().dump().c_str(),
+            aclProfile.GetAccessee().dump().c_str());
+        if ((CompareAssetAllAcl(aclProfile, info, true, isSameAccount) && info->isServer) ||
+            (CompareAssetAllAcl(aclProfile, info, false, isSameAccount) && !info->isServer)) {
+            OHOS::DistributedDeviceProfile::Accesser accesser(aclProfile.GetAccesser());
+            accesser.SetAccesserSessionKeyId(sessionKeyId);
+            accesser.SetAccesserSKTimeStamp(currentTime);
+            aclProfile.SetAccesser(accesser);
+            int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile set accesser ret=%{public}d", ret);
+            updateResult = UPDATE_ACL_SUCC;
+        } else if ((CompareAssetAllAcl(aclProfile, info, true, isSameAccount) && !info->isServer) ||
+            (CompareAssetAllAcl(aclProfile, info, false, isSameAccount) && info->isServer)) {
+            OHOS::DistributedDeviceProfile::Accessee accessee(aclProfile.GetAccessee());
+            accessee.SetAccesseeSessionKeyId(sessionKeyId);
+            accessee.SetAccesseeSKTimeStamp(currentTime);
+            aclProfile.SetAccessee(accessee);
+            int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile set accessee ret=%{public}d", ret);
+            updateResult = UPDATE_ACL_SUCC;
         }
-        OHOS::DistributedDeviceProfile::Accesser accesser(aclProfile.GetAccesser());
-        accesser.SetAccesserSessionKeyId(sessionKeyId);
-        accesser.SetAccesserSKTimeStamp(currentTime);
-        aclProfile.SetAccesser(accesser);
-        ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
-        updateResult = UPDATE_ACL_SUCC;
+        InsertUserKeyToUKCache(info, sessionKetId, currentTime);
         LNN_LOGI(LNN_STATE, "find acl");
-        break;
     }
     return updateResult;
 }

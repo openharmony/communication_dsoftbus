@@ -52,6 +52,7 @@
 #define IS_SUPPORT_UK_NEGO      "is_support_uk"
 #define PEER_ACCOUNT_ID         "peer_account_id"
 #define LOCAL_ACCOUNT_ID        "local_account_id"
+#define DEFAULT_ACCOUNT_UID     "ohosAnonymousUid"
 #define DEFAULT_CHANNEL_ID      0
 #define UK_MAX_INSTANCE_CNT     0x2000000
 #define UK_NEGO_PROCESS_TIMEOUT (10 * 1000LL)
@@ -262,8 +263,13 @@ static void AuthGenUkStartTimeout(uint32_t requestId)
         GetLooper(LOOP_TYPE_DEFAULT), GenUkTimeoutProcess, (void *)(uintptr_t)requestId, UK_NEGO_PROCESS_TIMEOUT);
 }
 
-static void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const AuthACLInfo *info)
+void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const AuthACLInfo *info)
 {
+    if (info == NULL) {
+        AUTH_LOGE(AUTH_CONN, "AuthACLInfo is null");
+        return;
+    }
+
     char *anonySourceUdid = NULL;
     char *anonySinkUdid = NULL;
     char *anonySourceAccountId = NULL;
@@ -273,10 +279,10 @@ static void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const Auth
     Anonymize(info->sourceAccountId, &anonySourceAccountId);
     Anonymize(info->sinkAccountId, &anonySinkAccountId);
     AUTH_LOGI(AUTH_CONN,
-        "create uknego requestId=%{public}u, channelId=%{public}d, isServer=%{public}d, "
+        "uknego requestId=%{public}u, channelId=%{public}d, isServer=%{public}d, "
         "sourceUdid=%{public}s, sinkUdid=%{public}s, sourceAccountId=%{public}s, sinkAccountId=%{public}s, "
         "sourceUserId=%{public}d, sinkUserId=%{public}d, "
-        "sourceTokenId=%{public}" PRIu64", sinkTokenId=%{public}" PRIu64,
+        "sourceTokenId=%{public}" PRIu64 ", sinkTokenId=%{public}" PRIu64,
         requestId, channelId, info->isServer, anonySourceUdid, anonySinkUdid, anonySourceAccountId, anonySinkAccountId,
         info->sourceUserId, info->sinkUserId, info->sourceTokenId, info->sinkTokenId);
     AnonymizeFree(anonySourceUdid);
@@ -311,6 +317,7 @@ static int32_t CreateUkNegotiateInstance(
     instance->state = GENUK_STATE_UNKNOW;
     if (memcpy_s(&instance->genCb, sizeof(AuthGenUkCallback), (uint8_t *)genCb, sizeof(AuthGenUkCallback)) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memcpy_s uknego callback data fail");
+        SoftBusFree(instance);
         ReleaseUkNegotiateListLock();
         return SOFTBUS_AUTH_ACL_SET_CHANNEL_FAIL;
     }
@@ -461,6 +468,11 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
         return false;
     }
 
+    if (strcmp(DEFAULT_ACCOUNT_UID, newAcl->sourceAccountId) == 0 ||
+        strcmp(DEFAULT_ACCOUNT_UID, newAcl->sinkAccountId) == 0) {
+        AUTH_LOGE(AUTH_CONN, "acl accountId is default");
+        return false;
+    }
     bool isCompared = false;
     if (isSameSide) {
         if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
@@ -657,13 +669,19 @@ static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *inf
 static bool JudgeIsSameAccount(const char *accountHash)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    uint8_t peerAccountHash[SHA_256_HASH_LEN] = { 0 };
 
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local account hash fail");
         return false;
     }
-    return ((memcmp(localAccountHash, (uint8_t *)accountHash, SHA_256_HASH_LEN) == EOK) &&
-        (!LnnIsDefaultOhosAccount()));
+    if (ConvertHexStringToBytes(peerAccountHash, SHA_256_HASH_LEN, accountHash, strlen(accountHash)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "convert peer account hash to bytes fail");
+        return false;
+    }
+    AUTH_LOGI(AUTH_CONN, "local account=%{public}02X%{public}02X, peer account=%{public}02X%{public}02X",
+        localAccountHash[0], localAccountHash[1], peerAccountHash[0], peerAccountHash[1]);
+    return ((memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == EOK) && (!LnnIsDefaultOhosAccount()));
 }
 
 static int32_t GetShortUdidHash(char *udid, char *udidHash, uint32_t len)
@@ -687,8 +705,6 @@ static int32_t GetShortUdidHash(char *udid, char *udidHash, uint32_t len)
 
 static char *GetCredIdByIdService(char *localUdidHash, char *remoteUdidHash, char *accountHash, int32_t userId)
 {
-    bool isSameAccount = JudgeIsSameAccount(accountHash);
-    char *udidShortHash = isSameAccount ? localUdidHash : remoteUdidHash;
     char *credList = NULL;
     char *credId = NULL;
     char accountHashStr[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -698,6 +714,8 @@ static char *GetCredIdByIdService(char *localUdidHash, char *remoteUdidHash, cha
         AUTH_LOGE(AUTH_CONN, "convert account to string fail");
         return credId;
     }
+    bool isSameAccount = JudgeIsSameAccount(accountHashStr);
+    char *udidShortHash = isSameAccount ? localUdidHash : remoteUdidHash;
     if (IdServiceQueryCredential(userId, udidShortHash, accountHashStr, isSameAccount, &credList) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "query credential fail");
         return credId;
@@ -814,8 +832,8 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    bool isSameAccount = (!LnnIsDefaultOhosAccount() &&
-        JudgeIsSameAccount(!instance.info.isServer ? instance.info.sourceAccountId : instance.info.sinkAccountId));
+    bool isSameAccount =
+        JudgeIsSameAccount(!instance.info.isServer ? instance.info.sourceAccountId : instance.info.sinkAccountId);
     PrintfAuthAclInfo(instance.requestId, instance.channelId, &instance.info);
     UpdateAssetSessionKeyByAcl(&instance.info, sessionKey, sessionKeyLen, &sessionKeyId, isSameAccount);
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -963,8 +981,7 @@ static HiChainAuthMode GetHichainAuthMode(bool isPeerSupportUkNego, const AuthAC
     }
     authMode = (isSupportUkNego & isPeerSupportUkNego) ? HICHAIN_AUTH_IDENTITY_SERVICE : HICHAIN_AUTH_DEVICE;
     AUTH_LOGI(AUTH_CONN, "get authMode=%{public}d", authMode);
-    if (LnnIsDefaultOhosAccount() ||
-        !JudgeIsSameAccount(!info->isServer ? info->sourceAccountId : info->sinkAccountId)) {
+    if (!JudgeIsSameAccount(!info->isServer ? info->sourceAccountId : info->sinkAccountId)) {
         AUTH_LOGW(AUTH_CONN, "no same account not support auth identity");
         authMode = HICHAIN_AUTH_DEVICE;
     }
@@ -1217,13 +1234,16 @@ int32_t AuthFindUkIdByACLInfo(const AuthACLInfo *acl, int32_t *ukId)
     uint64_t time = 0;
     *ukId = -1;
     AuthUserKeyInfo userKeyInfo = { 0 };
+    AuthACLInfo aclInfo = { 0 };
 
-    PrintfAuthAclInfo(0, 0, acl);
-    if (GetUserKeyInfoSameAccount(acl, &userKeyInfo) != SOFTBUS_OK &&
-        GetUserKeyInfoDiffAccount(acl, &userKeyInfo) != SOFTBUS_OK) {
+    aclInfo = *acl;
+    aclInfo.isServer = !acl->isServer;
+    PrintfAuthAclInfo(0, 0, &aclInfo);
+    if (GetUserKeyInfoSameAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
+        GetUserKeyInfoDiffAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get uk by ukcachelist fail");
-        if (GetAccessUkIdSameAccount(acl, ukId, &time) != SOFTBUS_OK &&
-            GetAccessUkIdDiffAccount(acl, ukId, &time) != SOFTBUS_OK) {
+        if (GetAccessUkIdSameAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
+            GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get uk by asset fail");
             return SOFTBUS_AUTH_ACL_NOT_FOUND;
         }
