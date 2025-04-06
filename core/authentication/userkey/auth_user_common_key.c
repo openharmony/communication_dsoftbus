@@ -102,7 +102,8 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
         if (!CompareByAllAcl(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
             continue;
         }
-        if (memcpy_s(&item->aclInfo, sizeof(AuthUserKeyInfo), userKeyInfo, sizeof(AuthUserKeyInfo)) != EOK) {
+        if (memcpy_s(&item->aclInfo, sizeof(AuthUserKeyInfo), (AuthUserKeyInfo *)userKeyInfo,
+            sizeof(AuthUserKeyInfo)) != EOK) {
             (void)SoftBusMutexUnlock(&g_userKeyList->lock);
             AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
             return SOFTBUS_MEM_ERR;
