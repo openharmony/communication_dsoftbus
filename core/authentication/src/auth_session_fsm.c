@@ -48,6 +48,7 @@
 #define SHORT_UDID_HASH_LEN        8
 #define HICHAIN_RETURN_NOT_TRUSTED (-425919748)
 #define PTK_32_BIT_LEN 16
+#define DEFAULT_USERID 0
 
 typedef enum {
     FSM_MSG_RECV_DEVICE_ID,
@@ -1848,6 +1849,15 @@ bool AuthSessionGetIsSameAccount(int64_t authSeq)
     return info.isSameAccount;
 }
 
+int32_t AuthSessionGetUserId(int64_t authSeq)
+{
+    AuthSessionInfo info = { 0 };
+    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
+        return DEFAULT_USERID;
+    }
+    return info.userId;
+}
 
 int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
 {

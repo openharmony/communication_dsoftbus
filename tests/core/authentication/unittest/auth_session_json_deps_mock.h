@@ -156,6 +156,8 @@ public:
     virtual void DelSessionKeyProfile(int32_t sessionKeyId) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool AuthSessionGetIsSameAccount(int64_t authSeq) = 0;
+    virtual int32_t AuthSessionGetUserId(int64_t authSeq) = 0;
+    virtual int32_t GetActiveOsAccountIds(void) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -248,6 +250,8 @@ public:
     MOCK_METHOD1(DelSessionKeyProfile, void(int32_t));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD1(AuthSessionGetIsSameAccount, bool (int64_t authSeq));
+    MOCK_METHOD1(AuthSessionGetUserId, int32_t (int64_t authSeq));
+    MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H
