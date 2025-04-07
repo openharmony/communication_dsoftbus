@@ -903,13 +903,15 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
 
 static int32_t JsonObjectPackAuthBaseInfo(const UkNegotiateInstance *instance, cJSON *json)
 {
+    int32_t peerUserId = instance->info.isServer ? instance->info.sinkUserId : instance->info.sourceUserId;
     if (!AddNumberToJsonObject(json, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
         !AddStringToJsonObject(json, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         !AddStringToJsonObject(json, FIELD_PEER_CONN_DEVICE_ID,
             instance->info.isServer ? instance->info.sinkUdid : instance->info.sourceUdid) ||
         !AddStringToJsonObject(
             json, FIELD_DEVICE_ID, instance->info.isServer ? instance->info.sourceUdid : instance->info.sinkUdid) ||
-        !AddBoolToJsonObject(json, FIELD_IS_UDID_HASH, false)) {
+        !AddBoolToJsonObject(json, FIELD_IS_UDID_HASH, false) ||
+        (peerUserId != 0 && !AddNumberToJsonObject(json, "peerOsAccountId", peerUserId))) {
         AUTH_LOGE(AUTH_CONN, "pack request json fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
