@@ -1249,4 +1249,44 @@ HWTEST_F(TransUdpManagerTest, CompareSessionNameTest001, TestSize.Level0)
     ret = CompareSessionName(dstSessionName, nullptr);
     EXPECT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: TransUdpGetUkIdInfoBySeqTest001
+ * @tc.desc: TransUdpGetUkIdInfoBySeq Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpGetUkIdInfoBySeqTest001, TestSize.Level1)
+{
+    uint64_t tokenId = 1;
+    int32_t ukId = 1;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    channel->info.callingTokenId = tokenId;
+    channel->info.myData.pid = 0;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UkIdInfo ukIdInfo = {
+        .myId = ukId,
+        .peerId = ukId,
+    };
+    TransUdpGetUkIdInfoBySeq(channel->seq, nullptr, true);
+    EXPECT_EQ(ukId, ukIdInfo.myId);
+
+    TransUdpGetUkIdInfoBySeq(channel->seq, &ukIdInfo, true);
+    EXPECT_EQ(ukId, ukIdInfo.myId);
+
+    TransUdpGetUkIdInfoBySeq(channel->seq, &ukIdInfo, false);
+    EXPECT_EQ(0, ukIdInfo.myId);
+
+    ret = TransDelUdpChannel(TEST_CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransUdpChannelMgrDeinit();
+}
 }

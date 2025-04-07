@@ -318,7 +318,7 @@ void TransChannelDeinit(void)
     TransAuthWithParaReqLanePendingDeinit();
     TransFreeLanePendingDeinit();
     TransBindRequestManagerDeinit();
-    TransUkRequestMgrDeInit();
+    TransUkRequestMgrDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
