@@ -62,8 +62,8 @@ InnerLink::~InnerLink()
             }
         }
     }
-    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed &&
-        !GetLegacyReused()) {
+    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() &&
+        GetLinkType() == LinkType::HML) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
         WifiDirectIpManager::GetInstance().ReleaseIpv4(
             GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
