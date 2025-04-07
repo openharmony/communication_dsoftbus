@@ -150,6 +150,10 @@ static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interface
 
 static void ClearExpiredRecords(void)
 {
+    if (CallRecordLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "CallRecord lock fail");
+        return;
+    }
     time_t currentTime = time(NULL);
     CallRecord *next = NULL;
     CallRecord *item = NULL;
@@ -160,6 +164,7 @@ static void ClearExpiredRecords(void)
             g_callRecord->cnt--;
         }
     }
+    CallRecordUnlock();
 }
 
 static int32_t IsInterfaceFuncIdValid(enum SoftBusFuncId interfaceId)
