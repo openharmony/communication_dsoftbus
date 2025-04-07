@@ -744,7 +744,7 @@ static int32_t GetUkNegoAuthParamInfo(char *remoteUdid, HiChainAuthParam *authPa
     }
     authParam->udid = remoteUdid;
     authParam->uid = remoteNodeInfo->accountHash;
-    authParam->userId = remoteNodeInfo->userId;
+    authParam->userId = GetActiveOsAccountIds();
     if (authMode == HICHAIN_AUTH_IDENTITY_SERVICE) {
         authParam->credId =
             GetCredIdByIdService(localUdidHash, remoteUdidHash, remoteNodeInfo->accountHash, nodeInfo.userId);
