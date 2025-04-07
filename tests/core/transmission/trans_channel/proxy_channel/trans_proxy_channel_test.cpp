@@ -218,6 +218,22 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
     ret = TransProxyHandshake(&info, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
+    ret = TransProxyHandshake(&info, true, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
+
+    UkIdInfo ukIdInfo;
+    ukIdInfo.myId = 0;
+    ukIdInfo.peerId = 0;
+    ret = TransProxyHandshake(&info, false, &ukIdInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
+
+    info.appInfo.appType = APP_TYPE_AUTH;
+    ret = TransProxyHandshake(&info, true, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR);
+
+    ret = TransProxyHandshake(&info, false, &ukIdInfo);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
+
     TestDelTestProxyChannel();
 }
 
@@ -686,5 +702,27 @@ HWTEST_F(TransProxyChannelTest, ConvertConnectType2AuthLinkTypeTest001, TestSize
     type = CONNECT_P2P;
     ret = ConvertConnectType2AuthLinkType(type);
     EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+}
+
+/**
+ * @tc.name: TransProxyAckHandshakeUkTest001
+ * @tc.desc: TransProxyAckHandshakeUkTest, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeUkTest001, TestSize.Level1)
+{
+    UkRequestNode ukRequestNode;
+    (void)memset_s(&ukRequestNode, sizeof(UkRequestNode), 0, sizeof(UkRequestNode));
+    int32_t ukId = 0;
+
+    int32_t ret = TransProxyAckHandshakeUk(nullptr, ukId, SOFTBUS_NO_INIT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransProxyAckHandshakeUk(&ukRequestNode, ukId, SOFTBUS_NO_INIT);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
+
+    ret = TransProxyAckHandshakeUk(&ukRequestNode, ukId, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 } // namespace OHOS

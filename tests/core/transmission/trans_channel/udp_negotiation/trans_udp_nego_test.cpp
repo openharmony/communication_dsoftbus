@@ -232,6 +232,8 @@ HWTEST_F(TransUdpNegoTest, SendUdpInfo001, TestSize.Level1)
     authHandle.authId = 0;
     ret = SendUdpInfo(replyMsg, authHandle, 0, false);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    ret = SendUdpInfo(replyMsg, authHandle, 0, true);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_Delete(replyMsg);
 }
 
@@ -387,6 +389,65 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransOnExchangeUdpInfoUkRequest001
+ * @tc.desc: TransOnExchangeUdpInfoUkRequest, Trans udp Exchange UdpInfo uk requset.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoUkRequest001, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int64_t invalidSeq = 0;
+    string msgStr = "normal msgStr";
+    cJSON *msg = cJSON_Parse(msgStr.c_str());
+    UdpChannelInfo *channel = CreateUdpChannelPackTest();
+    ASSERT_TRUE(channel != nullptr);
+    int32_t ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkRequest(authHandle, channel->seq, nullptr));
+
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkRequest(authHandle, invalidSeq, msg));
+
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkRequest(authHandle, channel->seq, msg));
+
+    ret = TransDelUdpChannel(channel->info.myData.channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    cJSON_Delete(msg);
+}
+
+/**
+ * @tc.name: TransOnExchangeUdpInfoUkReply001
+ * @tc.desc: TransOnExchangeUdpInfoUkReply, Trans udp Exchange UdpInfo uk reply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoUkReply001, TestSize.Level1)
+{
+    int64_t invalidSeq = 0;
+    string msgStr = "normal msgStr";
+    cJSON *msg = cJSON_Parse(msgStr.c_str());
+    UdpChannelInfo *channel = CreateUdpChannelPackTest();
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+    channel->info.myData.channelId = 1;
+    int32_t ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
+
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkReply(authHandle, invalidSeq, msg));
+
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkReply(authHandle, channel->seq, msg));
+
+    ret = TransDelUdpChannel(channel->info.myData.channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    cJSON_Delete(msg);
+}
+
+/**
  * @tc.name: StartExchangeUdpInfo001
  * @tc.desc: StartExchangeUdpInfo, extern module active publish, stop session whitout start.
  * @tc.type: FUNC
@@ -406,7 +467,17 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
 
     (void)AuthCommonInit();
     ret = StartExchangeUdpInfo(&channel, authHandle, seq, false, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(SOFTBUS_AUTH_NOT_FOUND, ret);
+
+    ret = StartExchangeUdpInfo(&channel, authHandle, seq, true, nullptr);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    UkIdInfo ukIdInfo = {
+        .myId = 1,
+        .peerId = 1,
+    };
+    ret = StartExchangeUdpInfo(&channel, authHandle, seq, false, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_AUTH_ACL_NOT_FOUND, ret);
 }
 
 /**
@@ -788,8 +859,12 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    UkIdInfo ukIdInfo = { .myId = 1, .peerId = 1 };
     int64_t seq = 1;
     int32_t ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ProcessUdpChannelState(appInfo, isServerSide, &authHandle, seq, &ukIdInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     isServerSide = false;

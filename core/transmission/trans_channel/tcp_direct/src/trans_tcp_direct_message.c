@@ -366,7 +366,7 @@ int32_t TransTdcPostBytes(
         TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
     }
-    uint32_t bufferLen = (IsVaildUkInfo(ukIdInfo) ? AuthGetUkEncryptSize(packetHead->dataLen) + sizeof(UkIdInfo) :
+    uint32_t bufferLen = (IsValidUkInfo(ukIdInfo) ? AuthGetUkEncryptSize(packetHead->dataLen) + sizeof(UkIdInfo) :
                                                     AuthGetEncryptSize(authHandle.authId, packetHead->dataLen)) +
         DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = (char *)SoftBusCalloc(bufferLen);
@@ -374,7 +374,7 @@ int32_t TransTdcPostBytes(
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (IsVaildUkInfo(ukIdInfo)) {
+    if (IsValidUkInfo(ukIdInfo)) {
         if (PackBytesWithUk(data, packetHead, buffer, bufferLen, ukIdInfo) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_BYTES, "Pack Bytes with uk add error.");
             SoftBusFree(buffer);

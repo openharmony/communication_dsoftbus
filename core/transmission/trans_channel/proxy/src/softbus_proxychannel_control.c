@@ -166,7 +166,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info, bool isNegoUk, const UkIdInf
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
     uint8_t type =
-        IsVaildUkInfo(ukIdInfo) ? PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY : PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
+        IsValidUkInfo(ukIdInfo) ? PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY : PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
     type = isNegoUk ? PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK : type;
     (void)TransProxySetUkInfoByChanId(info->myId, ukIdInfo);
     msgHead.type = (type & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);

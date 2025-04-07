@@ -77,7 +77,7 @@ int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionNam
 
     if (!GetJsonObjectStringItem(msg, "SESSION_NAME", sessionName, SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, "SOURCE_UDID", aclInfo->sourceUdid, UDID_BUF_LEN) ||
-        !GetJsonObjectNumberItem(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
+        !GetJsonObjectInt32Item(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
         !GetJsonObjectNumber64Item(msg, "SOURCE_TOKEN_ID", (int64_t *)&(aclInfo->sourceTokenId)) ||
         !GetJsonObjectStringItem(msg, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "parse json data failed");
@@ -128,11 +128,11 @@ int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId)
 
     if (!GetJsonObjectStringItem(msg, "SOURCE_UDID", aclInfo->sourceUdid, UDID_BUF_LEN)  ||
         !GetJsonObjectStringItem(msg, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX) ||
-        !GetJsonObjectNumberItem(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
+        !GetJsonObjectInt32Item(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
         !GetJsonObjectNumber64Item(msg, "SOURCE_TOKEN_ID", (int64_t *)&(aclInfo->sourceTokenId)) ||
         !GetJsonObjectStringItem(msg, "SINK_UDID", aclInfo->sinkUdid, UDID_BUF_LEN) ||
         !GetJsonObjectStringItem(msg, "SINK_ACCOUNT_ID", aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX) ||
-        !GetJsonObjectNumberItem(msg, "SINK_USER_ID", &(aclInfo->sinkUserId)) ||
+        !GetJsonObjectInt32Item(msg, "SINK_USER_ID", &(aclInfo->sinkUserId)) ||
         !GetJsonObjectNumber64Item(msg, "SINK_TOKEN_ID", (int64_t *)&(aclInfo->sinkTokenId)) ||
         !GetJsonObjectNumberItem(msg, "SINK_UK_ID", ukId)) {
         TRANS_LOGE(TRANS_CTRL, "parse json data failed");
@@ -155,7 +155,7 @@ int32_t TransUkRequestMgrInit(void)
     return SOFTBUS_OK;
 }
 
-void TransUkRequestMgrDeInit(void)
+void TransUkRequestMgrDeinit(void)
 {
     if (g_ukRequestManagerList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans uk manager list not init.");
@@ -393,7 +393,7 @@ int32_t GetSourceAndSinkUdid(const char *peerNetWorkId, char *sourceUdid, char *
     return ret;
 }
 
-int32_t FillSinkAclInfo(char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
+int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         sessionName != NULL && aclInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
@@ -426,7 +426,7 @@ bool SpecialSaCanUseDeviceKey(uint64_t tokenId)
     return SoftBusSaCanUseDeviceKey(tokenId);
 }
 
-bool IsVaildUkInfo(const UkIdInfo *ukIdInfo)
+bool IsValidUkInfo(const UkIdInfo *ukIdInfo)
 {
     return (ukIdInfo != NULL && ukIdInfo->myId != 0 && ukIdInfo->peerId != 0);
 }
