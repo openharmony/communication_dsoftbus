@@ -469,8 +469,9 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
     }
 
     if (strcmp(DEFAULT_ACCOUNT_UID, newAcl->sourceAccountId) == 0 ||
-        strcmp(DEFAULT_ACCOUNT_UID, newAcl->sinkAccountId) == 0) {
-        AUTH_LOGE(AUTH_CONN, "acl accountId is default");
+        strcmp(DEFAULT_ACCOUNT_UID, newAcl->sinkAccountId) == 0 ||
+        strcmp(newAcl->sourceAccountId, newAcl->sinkAccountId) == 0) {
+        AUTH_LOGE(AUTH_CONN, "acl is not same account");
         return false;
     }
     bool isCompared = false;
