@@ -531,19 +531,20 @@ static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_
             LNN_LOGE(LNN_STATE, "copy info fail");
             return;
         }
-        info.sourceUserId = !acl->sinkUserId;
-        info.sinkUserId = !acl->sourceUserId;
-        info.sourceTokenId = !acl->sinkTokenId;
-        info.sinkTokenId = !acl->sourceTokenId;
+        info.sourceUserId = acl->sinkUserId;
+        info.sinkUserId = acl->sourceUserId;
+        info.sourceTokenId = acl->sinkTokenId;
+        info.sinkTokenId = acl->sourceTokenId;
     } else {
         info = *acl;
     }
     userKeyInfo.time = time;
     userKeyInfo.keyIndex = ukId;
     std::vector<uint8_t> sessionKey;
-    if (DpClient::GetInstance().GetSessionKey(info.sinkUserId, ukId, sessionKey) != OHOS::ERR_OK) {
+    if (DpClient::GetInstance().GetSessionKey(info.sourceUserId, ukId, sessionKey) != OHOS::ERR_OK) {
         LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
         return;
+
     }
     if (SESSION_KEY_LENGTH < sessionKey.size()) {
         LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}zu", (uint32_t)sessionKey.size());
@@ -582,7 +583,7 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
             aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
         std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
         std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
-        if (!CompareAssetAclSameAccount(aclProfile, acl, true) && !CompareAssetAclSameAccount(aclProfile, acl, false)) {
+        if (!CompareAssetAclSameAccount(aclProfile, acl, acl->isServer)) {
             continue;
         }
         *ukId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
@@ -593,11 +594,11 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
             accesser.SetAccesserSessionKeyId(*ukId);
             aclProfile.SetAccesser(accesser);
             ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
-            LNN_LOGE(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
+            LNN_LOGI(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
         } else {
             InsertUserKeyToUKCache(acl, *ukId, *time);
         }
-        LNN_LOGE(LNN_STATE, "user key find");
+        LNN_LOGI(LNN_STATE, "user key find");
         return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_STATE, "not find uk");
@@ -638,11 +639,11 @@ int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
             accesser.SetAccesserSessionKeyId(*ukId);
             aclProfile.SetAccesser(accesser);
             ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
-            LNN_LOGE(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
+            LNN_LOGI(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
         } else {
             InsertUserKeyToUKCache(acl, *ukId, *time);
         }
-        LNN_LOGE(LNN_STATE, "user key find");
+        LNN_LOGI(LNN_STATE, "user key find");
         return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_STATE, "not find uk");
@@ -674,10 +675,8 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
         if (aclSessionKeyId != sessionKeyId) {
             continue;
         }
-        uint32_t sourceUserId = aclProfile.GetAccesser().GetAccesserUserId();
-        uint32_t sinkUserId = aclProfile.GetAccessee().GetAccesseeUserId();
-        if (DpClient::GetInstance().GetSessionKey(sourceUserId, sessionKeyId, sessionKey) != OHOS::ERR_OK &&
-            DpClient::GetInstance().GetSessionKey(sinkUserId, sessionKeyId, sessionKey) != OHOS::ERR_OK) {
+        uint32_t localUserId = aclProfile.GetAccesser().GetAccesserUserId();
+        if (DpClient::+().GetSessionKey(localUserId, sessionKeyId, sessionKey) != OHOS::ERR_OK) {
             LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
             return SOFTBUS_AUTH_ACL_NOT_FOUND;
         }
