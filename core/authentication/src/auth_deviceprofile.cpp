@@ -519,8 +519,8 @@ static bool CompareAssetAllAcl(OHOS::DistributedDeviceProfile::AccessControlProf
 static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_t time)
 {
     AuthUserKeyInfo userKeyInfo = {};
-    (void)memset_s(&userKeyInfo, sizeof(AuthUserKeyInfo), 0, sizeof(AuthUserKeyInfo));
     AuthACLInfo info = {};
+    (void)memset_s(&userKeyInfo, sizeof(AuthUserKeyInfo), 0, sizeof(AuthUserKeyInfo));
     (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
     if (!acl->isServer) {
         info.isServer = !acl->isServer;
@@ -544,7 +544,6 @@ static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_
     if (DpClient::GetInstance().GetSessionKey(info.sourceUserId, ukId, sessionKey) != OHOS::ERR_OK) {
         LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
         return;
-
     }
     if (SESSION_KEY_LENGTH < sessionKey.size()) {
         LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}zu", (uint32_t)sessionKey.size());
@@ -717,7 +716,7 @@ static UpdateDpAclResult UpdateDpAclByAuthAcl(
             accesser.SetAccesserSessionKeyId(sessionKeyId);
             accesser.SetAccesserSKTimeStamp(currentTime);
             aclProfile.SetAccesser(accesser);
-            int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
             LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile set accesser ret=%{public}d", ret);
             updateResult = UPDATE_ACL_SUCC;
         } else if ((CompareAssetAllAcl(aclProfile, info, true, isSameAccount) && !info->isServer) ||
@@ -726,7 +725,7 @@ static UpdateDpAclResult UpdateDpAclByAuthAcl(
             accessee.SetAccesseeSessionKeyId(sessionKeyId);
             accessee.SetAccesseeSKTimeStamp(currentTime);
             aclProfile.SetAccessee(accessee);
-            int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
             LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile set accessee ret=%{public}d", ret);
             updateResult = UPDATE_ACL_SUCC;
         }

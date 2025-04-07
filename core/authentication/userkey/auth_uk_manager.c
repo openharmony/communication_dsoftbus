@@ -279,12 +279,12 @@ void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const AuthACLInfo
     Anonymize(info->sourceAccountId, &anonySourceAccountId);
     Anonymize(info->sinkAccountId, &anonySinkAccountId);
     AUTH_LOGI(AUTH_CONN,
-        "uknego requestId=%{public}u, channelId=%{public}d, isServer=%{public}d, "
-        "sourceUdid=%{public}s, sinkUdid=%{public}s, sourceAccountId=%{public}s, sinkAccountId=%{public}s, "
-        "sourceUserId=%{public}d, sinkUserId=%{public}d, "
-        "sourceTokenId=%{public}" PRIu64 ", sinkTokenId=%{public}" PRIu64,
-        requestId, channelId, info->isServer, anonySourceUdid, anonySinkUdid, anonySourceAccountId, anonySinkAccountId,
-        info->sourceUserId, info->sinkUserId, info->sourceTokenId, info->sinkTokenId);
+        "uknego requestId=%{public}u, channelId=%{public}d, isServer=%{public}d, sourceUdid=%{public}s, "
+        "sinkUdid=%{public}s, sourceAccountId=%{public}s, sinkAccountId=%{public}s, sourceUserId=%{public}d, "
+        "sinkUserId=%{public}d, sourceTokenId=%{public}" PRIu64 ", sinkTokenId=%{public}" PRIu64,
+        requestId, channelId, info->isServer, AnonymizeWrapper(anonySourceUdid), AnonymizeWrapper(anonySinkUdid),
+        AnonymizeWrapper(anonySourceAccountId), AnonymizeWrapper(anonySinkAccountId), info->sourceUserId,
+        info->sinkUserId, info->sourceTokenId, info->sinkTokenId);
     AnonymizeFree(anonySourceUdid);
     AnonymizeFree(anonySinkUdid);
     AnonymizeFree(anonySourceAccountId);
@@ -470,7 +470,7 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
 
     if (strcmp(DEFAULT_ACCOUNT_UID, newAcl->sourceAccountId) == 0 ||
         strcmp(DEFAULT_ACCOUNT_UID, newAcl->sinkAccountId) == 0 ||
-        strcmp(newAcl->sourceAccountId, newAcl->sinkAccountId) == 0) {
+        strcmp(newAcl->sourceAccountId, newAcl->sinkAccountId) != 0) {
         AUTH_LOGE(AUTH_CONN, "acl is not same account");
         return false;
     }
