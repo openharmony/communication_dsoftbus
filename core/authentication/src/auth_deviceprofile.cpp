@@ -676,7 +676,7 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
             continue;
         }
         uint32_t localUserId = aclProfile.GetAccesser().GetAccesserUserId();
-        if (DpClient::+().GetSessionKey(localUserId, sessionKeyId, sessionKey) != OHOS::ERR_OK) {
+        if (DpClient::GetInstance().GetSessionKey(localUserId, sessionKeyId, sessionKey) != OHOS::ERR_OK) {
             LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
             return SOFTBUS_AUTH_ACL_NOT_FOUND;
         }
