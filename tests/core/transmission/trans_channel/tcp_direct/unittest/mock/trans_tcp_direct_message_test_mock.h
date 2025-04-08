@@ -29,6 +29,7 @@
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "trans_uk_manager.h"
 #include "wifi_direct_manager.h"
 
 namespace OHOS {
@@ -83,6 +84,12 @@ public:
     virtual int32_t GetErrCodeBySocketErr(int32_t transErrCode) = 0;
     virtual int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType) = 0;
     virtual int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType) = 0;
+    virtual char *PackUkRequest(const AppInfo *appInfo) = 0;
+    virtual int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName) = 0;
+    virtual int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid) = 0;
+    virtual int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId) = 0;
+    virtual int32_t AuthDecryptByUkId(
+        int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -136,6 +143,12 @@ public:
     MOCK_METHOD1(GetErrCodeBySocketErr, int32_t (int32_t transErrCode));
     MOCK_METHOD3(CheckCollabRelation, int32_t (const AppInfo *appInfo, int32_t channelId, int32_t channelType));
     MOCK_METHOD2(GetTokenTypeBySessionName, int32_t (const char *sessionName, int32_t *tokenType));
+    MOCK_METHOD1(PackUkRequest, char *(const AppInfo *appInfo));
+    MOCK_METHOD3(UnPackUkRequest, int32_t (const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName));
+    MOCK_METHOD3(FillSinkAclInfo, int32_t (const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid));
+    MOCK_METHOD3(UnPackUkReply, int32_t (const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId));
+    MOCK_METHOD5(AuthDecryptByUkId, int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+        uint32_t *outLen));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

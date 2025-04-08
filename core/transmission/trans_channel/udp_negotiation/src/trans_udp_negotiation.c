@@ -349,7 +349,7 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
     }
     newChannel->seq = seq;
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
-    if (IsVaildUkInfo(ukIdInfo)) {
+    if (IsValidUkInfo(ukIdInfo)) {
         newChannel->ukIdInfo.myId = ukIdInfo->myId;
         newChannel->ukIdInfo.peerId = ukIdInfo->peerId;
     }
@@ -459,7 +459,7 @@ static int32_t SendUdpInfo(cJSON *replyMsg, AuthHandle authHandle, int64_t seq, 
     TransUdpGetUkIdInfoBySeq(seq, &ukIdInfo, false);
     AuthTransData dataInfo = {
         .module = MODULE_UDP_INFO,
-        .flag = IsVaildUkInfo(&ukIdInfo) ? FLAG_ENCYUK_REPLY : FLAG_REPLY,
+        .flag = IsValidUkInfo(&ukIdInfo) ? FLAG_ENCYUK_REPLY : FLAG_REPLY,
         .seq = seq,
         .len = strlen(msgStr) + 1,
         .data = (const uint8_t *)msgStr,
@@ -822,7 +822,7 @@ static int32_t StartExchangeUdpInfo(
         .data = (const uint8_t *)msgStr,
     };
     int32_t ret = SOFTBUS_AUTH_REG_DATA_FAIL;
-    if (IsVaildUkInfo(ukIdInfo)) {
+    if (IsValidUkInfo(ukIdInfo)) {
         dataInfo.flag = FLAG_ENCYUK_REQUEST;
         dataInfo.module = MODULE_UK_CONNECTION;
         ret = AuthPostTransDataByUk(authHandle, ukIdInfo->myId, ukIdInfo->peerId, &dataInfo);

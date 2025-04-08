@@ -1326,6 +1326,36 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest005_2, TestSize.Le
 }
 
 /**
+ * @tc.name: OpenDataBusUkReplyTest001
+ * @tc.desc: Test uk reply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkReplyTest001, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint64_t seq = TEST_SEQ;
+    cJSON *reply = cJSON_CreateObject();
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkReply(channelId, seq, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_MEM_ERR));
+    EXPECT_CALL(TcpMessageMock, UnPackUkReply).WillOnce(Return(SOFTBUS_PARSE_JSON_ERR));
+    ret = OpenDataBusUkReply(channelId, seq, reply);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    TransDelSessionConnById(channelId);
+    cJSON_Delete(reply);
+}
+
+/**
  * @tc.name: OpenDataBusReplyTest006
  * @tc.desc: Should return SOFTBUS_MEM_ERR when SetAppInfoById return SOFTBUS_MEM_ERR.
  * @tc.type: FUNC
@@ -1701,6 +1731,32 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest004, TestSize.Level1
 }
 
 /**
+ * @tc.name: DecryptMessageTest005
+ * @tc.desc: Test Decrypt userkey msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest005, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    TdcPacketHead pktHead = { 0 };
+    pktHead.dataLen = 10;
+    uint8_t *pktData = static_cast<uint8_t *>(SoftBusCalloc(pktHead.dataLen));
+    uint8_t *outData = nullptr;
+    uint32_t outDataLen = 10;
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = TEST_AUTHID, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, SetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthDecryptByUkId).WillOnce(Return(SOFTBUS_NOT_FIND));
+    pktHead.module = MODULE_UK_ENCYSESSION;
+    int64_t ret = DecryptMessage(channelId, &pktHead, pktData, &outData, &outDataLen);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    SoftBusFree(pktData);
+}
+
+/**
  * @tc.name: NotifyChannelOpenedTest001
  * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED
  *     when TransTdcGetPkgName return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED.
@@ -2002,6 +2058,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
+    ret = ProcessUkNegoMessage(channelId, flags, seq, msg, dataLen);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
     TransDelSessionConnById(channelId);
 }
 
@@ -2020,6 +2079,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
     uint32_t dataLen = 0;
 
     int32_t ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    ret = ProcessUkNegoMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -2092,6 +2154,42 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest003, TestSize.Le
     ReleaseSessionConn(conn);
 }
 
+/**
+ * @tc.name: StartNegotiateUkTest001
+ * @tc.desc: StartNegotiateUkTest001.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, StartNegotiateUkTest001, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, PackUkRequest).WillOnce(Return(NULL));
+    int32_t ret = StartNegotiateUk(conn);
+    EXPECT_EQ(SOFTBUS_TRANS_PACK_REQUEST_FAILED, ret);
+
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_TRUE(json != nullptr);
+    char *data = cJSON_PrintUnformatted(json);
+    ASSERT_TRUE(data != nullptr);
+    EXPECT_CALL(TcpMessageMock, PackUkRequest).WillOnce(Return(data));
+    EXPECT_CALL(TcpMessageMock, AuthGetServerSide).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
+    // data will free in StartNegotiateUk
+    ret = StartNegotiateUk(conn);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CIPHER_FAILED, ret);
+
+    data = cJSON_PrintUnformatted(json);
+    ASSERT_TRUE(data != nullptr);
+    EXPECT_CALL(TcpMessageMock, PackUkRequest).WillOnce(Return(data));
+    EXPECT_CALL(TcpMessageMock, AuthGetServerSide).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = StartNegotiateUk(conn);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, ret);
+
+    cJSON_Delete(json);
+    ReleaseSessionConn(conn);
+}
 /**
  * @tc.name: CreateSessionConnNode001
  * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
@@ -2330,6 +2428,40 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     cJSON_Delete(reply);
 }
 
+/**
+ * @tc.name: OpenDataBusUkRequestTest001
+ * @tc.desc: Test uk request.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkRequestTest001, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint32_t flags = 0;
+    uint64_t seq = TEST_SEQ;
+    cJSON *request = cJSON_CreateObject();
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnPackUkRequest).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    EXPECT_CALL(TcpMessageMock, UnPackUkRequest).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_EQ(SOFTBUS_AUTH_ACL_NOT_FOUND, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    TransDelSessionConnById(TEST_CHANNELID);
+    cJSON_Delete(request);
+}
 /**
  * @tc.name: GetCipherFlagByAuthIdTest0011
  * @tc.desc: GetCipherFlagByAuthId, use correct parameters.

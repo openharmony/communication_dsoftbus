@@ -112,6 +112,13 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest002, TestSize.Level1)
     int64_t seq = 1;
     ret = ProcessUdpChannelState(appInfo, true, &authHandle, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    UkIdInfo ukIdInfo = {
+        .myId = 1,
+        .peerId = 1,
+    };
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    ret = ProcessUdpChannelState(appInfo, true, &authHandle, seq, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     TransUdpChannelDeinit();
 }
 

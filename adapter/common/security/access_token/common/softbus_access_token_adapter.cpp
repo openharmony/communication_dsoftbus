@@ -26,10 +26,11 @@
 #include "tokenid_kit.h"
 
 constexpr int32_t JUDG_CNT = 1;
-constexpr int32_t DK_SA_CNT = 3;
+constexpr int32_t DEVICE_KEY_SA_CNT = 3;
 const char *SAMGR_PROCESS_NAME = "samgr";
 const char *DMS_PROCESS_NAME = "distributedsched";
-const std::string DK_SA_PROCESS_NAME[DK_SA_CNT] = {"distributedsched", "distributedfiledaemon", "distributeddata"};
+const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributedsched", "distributedfiledaemon",
+    "distributeddata" };
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
 static PermissionChangeCb g_permissionChangeCb = nullptr;
 
@@ -268,7 +269,7 @@ bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
 
 bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
 {
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag(static_cast<AccessTokenID>(tokenId));
     if (tokenType != ATokenTypeEnum::TOKEN_NATIVE) {
         COMM_LOGE(COMM_PERM, "not native call");
         return false;
@@ -276,14 +277,14 @@ bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
     NativeTokenInfo nativeTokenInfo;
     int32_t result = AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
     if (result == SOFTBUS_OK) {
-        for (int32_t i = 0; i < DK_SA_CNT; i++) {
-            if (nativeTokenInfo.processName.compare(DK_SA_PROCESS_NAME[i]) == 0) {
+        for (int32_t i = 0; i < DEVICE_KEY_SA_CNT; i++) {
+            if (nativeTokenInfo.processName.compare(DEVICE_KEY_SA_PROCESS_NAME[i]) == 0) {
                 return true;
             }
         }
+        COMM_LOGE(COMM_PERM, "check dk server permission failed, processName=%{private}s",
+            nativeTokenInfo.processName.c_str());
     }
-    COMM_LOGE(
-        COMM_PERM, "check dk server permission failed, processName=%{private}s", nativeTokenInfo.processName.c_str());
     return false;
 }
 }
