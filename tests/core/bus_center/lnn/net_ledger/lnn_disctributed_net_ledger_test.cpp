@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -525,6 +525,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DL_DEVICE_INFO_NAME_Test_001, TestSi
     EXPECT_FALSE(ret);
 }
 
+/*
+ * @tc.name: GET_NODEINFO_FORMMAP_Test_001
+ * @tc.desc: get node info from map test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, GET_NODEINFO_FORMMAP_Test_001, TestSize.Level1)
 {
     (void)GetCurrentTime();
@@ -532,6 +538,12 @@ HWTEST_F(LNNDisctributedLedgerTest, GET_NODEINFO_FORMMAP_Test_001, TestSize.Leve
     EXPECT_TRUE(res == nullptr);
 }
 
+/*
+ * @tc.name: INIT_DISTRIBUTED_INFO_Test_001
+ * @tc.desc: init distributed info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, INIT_DISTRIBUTED_INFO_Test_001, TestSize.Level1)
 {
     int32_t ret = InitDistributedInfo(nullptr);
@@ -541,10 +553,18 @@ HWTEST_F(LNNDisctributedLedgerTest, INIT_DISTRIBUTED_INFO_Test_001, TestSize.Lev
     (void)DeinitConnectionCode(nullptr);
 }
 
+/*
+ * @tc.name: NEW_BRBLE_DISCOVERED_Test_001
+ * @tc.desc: new br ble discovered test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, NEW_BRBLE_DISCOVERED_Test_001, TestSize.Level1)
 {
     NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo newInfo;
+    (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)NewWifiDiscovered(nullptr, nullptr);
     (void)NewWifiDiscovered(&oldInfo, &newInfo);
     (void)NewBrBleDiscovered(nullptr, nullptr);
@@ -557,9 +577,16 @@ HWTEST_F(LNNDisctributedLedgerTest, NEW_BRBLE_DISCOVERED_Test_001, TestSize.Leve
     EXPECT_FALSE(ret);
 }
 
+/*
+ * @tc.name: IS_META_NODE_Test_001
+ * @tc.desc: is meta node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, IS_META_NODE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info.metaInfo.isMetaNode = true;
     bool ret = IsMetaNode(nullptr);
     EXPECT_FALSE(ret);
@@ -567,6 +594,12 @@ HWTEST_F(LNNDisctributedLedgerTest, IS_META_NODE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
+/*
+ * @tc.name: LNN_GET_NODEINFO_BYID_Test_001
+ * @tc.desc: lnn get node info by id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NODEINFO_BYID_Test_001, TestSize.Level1)
 {
     INodeStateCb callBack;
@@ -579,16 +612,29 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NODEINFO_BYID_Test_001, TestSize.Lev
     (void)PostOnlineNodesToCb(&callBack);
 }
 
+/*
+ * @tc.name: LNN_GET_REMOTE_NODE_Test_001
+ * @tc.desc: lnn get remote node info by key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NODE_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnGetRemoteNodeInfoByKey(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *key = "dsoftBus";
     NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ret = LnnGetRemoteNodeInfoByKey(key, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: DLGET_DEVICE_TYPEID_Test_001
+ * @tc.desc: dl get node ble mac test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_DEVICE_TYPEID_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
@@ -602,6 +648,12 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_DEVICE_TYPEID_Test_001, TestSize.Level
     (void)LnnUpdateNodeBleMac(networkId, &bleMac, len);
 }
 
+/*
+ * @tc.name: DL_GET_WIFICFG_Test_001
+ * @tc.desc: dl get node ble mac test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DL_GET_WIFICFG_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
@@ -637,6 +689,12 @@ HWTEST_F(LNNDisctributedLedgerTest, DL_GET_WIFICFG_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: DLGET_NODETTLV_NEGOFLAG_Test_001
+ * @tc.desc: dl get node tlv nego flag test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_NODETTLV_NEGOFLAG_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
@@ -654,6 +712,12 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_NODETTLV_NEGOFLAG_Test_001, TestSize.L
     (void)DeinitDistributedInfo(nullptr);
 }
 
+/*
+ * @tc.name: ADD_CNN_CODE_Test_001
+ * @tc.desc: add cnn code test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, ADD_CNN_CODE_Test_001, TestSize.Level1)
 {
     Map cnnCode;
@@ -677,6 +741,12 @@ HWTEST_F(LNNDisctributedLedgerTest, ADD_CNN_CODE_Test_001, TestSize.Level1)
     EXPECT_EQ(code, nullptr);
 }
 
+/*
+ * @tc.name: NOTIFY_MIGRATE_UPGRADE_Test_001
+ * @tc.desc: notify migrate upgrade test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, NOTIFY_MIGRATE_UPGRADE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
@@ -686,9 +756,16 @@ HWTEST_F(LNNDisctributedLedgerTest, NOTIFY_MIGRATE_UPGRADE_Test_001, TestSize.Le
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_UPDATE_GROUPTYPE_Test_001
+ * @tc.desc: lnn update group type test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_GROUPTYPE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnUpdateGroupType(nullptr);
     EXPECT_NE(ret, SOFTBUS_OK);
     char str[] = "softBus";
@@ -700,6 +777,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_GROUPTYPE_Test_001, TestSize.Leve
     (void)NotifyMigrateDegrade(udid);
 }
 
+/*
+ * @tc.name: LNN_GET_REMOTE_BYTEINFO_Test_001
+ * @tc.desc: lnn get remote byte info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
@@ -717,6 +800,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_001, TestSize.L
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_ISLSA_NODE_Test_001
+ * @tc.desc: lnn is LSA node test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_ISLSA_NODE_Test_001, TestSize.Level1)
 {
     NodeBasicInfo info;
@@ -731,6 +820,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ISLSA_NODE_Test_001, TestSize.Level1)
     EXPECT_TRUE(res == SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GETNETWORKID_BYUDIDHASH_Test_001
+ * @tc.desc: lnn get network id by udid hash test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETNETWORKID_BYUDIDHASH_Test_001, TestSize.Level1)
 {
     uint8_t udidHash[UDID_HASH_LEN] = {0};
@@ -742,6 +837,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETNETWORKID_BYUDIDHASH_Test_001, TestSi
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GETDL_ONLINETIMESTAMP_Test_001
+ * @tc.desc: lnn get DL online timestamp test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETDL_ONLINETIMESTAMP_Test_001, TestSize.Level1)
 {
     uint64_t timestamp = 0;
@@ -749,26 +850,46 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETDL_ONLINETIMESTAMP_Test_001, TestSize
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_SETDL_BATTERYINFO_Test_001
+ * @tc.desc: lnn set DL battery info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BATTERYINFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
     BatteryInfo info;
+    (void)memset_s(&info, sizeof(BatteryInfo), 0, sizeof(BatteryInfo));
     int32_t ret = LnnSetDLBatteryInfo(nullptr, &info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLBatteryInfo(networkId, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_SETDL_BSSTRANSINFO_Test_001
+ * @tc.desc: lnn set DL bss trans info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BSSTRANSINFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
     BssTransInfo info;
+    (void)memset_s(&info, sizeof(BssTransInfo), 0, sizeof(BssTransInfo));
     int32_t ret = LnnSetDLBssTransInfo(nullptr, &info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLBssTransInfo(networkId, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_SETDL_PROXYPORT_Test_001
+ * @tc.desc: lnn set DL proxy port test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_PROXYPORT_Test_001, TestSize.Level1)
 {
     IdCategory type = CATEGORY_NETWORK_ID;
@@ -777,6 +898,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_PROXYPORT_Test_001, TestSize.Level
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_SETDL_SESSIONPORT_Test_001
+ * @tc.desc: lnn set DL session port test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_SESSIONPORT_Test_001, TestSize.Level1)
 {
     IdCategory type = CATEGORY_NETWORK_ID;
@@ -785,6 +912,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_SESSIONPORT_Test_001, TestSize.Lev
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_SETDL_AUTHPORT_Test_001
+ * @tc.desc: lnn set DL auth port test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_AUTHPORT_Test_001, TestSize.Level1)
 {
     const char *id = "softBus";
@@ -796,6 +929,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_AUTHPORT_Test_001, TestSize.Level1
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: SOFTBUS_DUMPBUSCENTER_Test_001
+ * @tc.desc: softbus dump buscenter remote device info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
@@ -803,6 +942,12 @@ HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GETREMOTE_BOOLINFO_Test_001
+ * @tc.desc: lnn get remote bool info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_BOOLINFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
@@ -819,6 +964,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_BOOLINFO_Test_001, TestSize.Le
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GETREMOTE_NUMU64INFO_Test_001
+ * @tc.desc: lnn get remote bool info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NUMU64INFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
@@ -835,19 +986,34 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NUMU64INFO_Test_001, TestSize.
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GETREMOTE_NODEINFO_Test_001
+ * @tc.desc: lnn get remote node info by id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NODEINFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
     IdCategory type = CATEGORY_NETWORK_ID;
     NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(networkId, type, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001
+ * @tc.desc: lnn refresh device online state and devid info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001, TestSize.Level1)
 {
     DeviceInfo device;
+    (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     InnerDeviceInfoAddtions additions;
+    (void)memset_s(&additions, sizeof(InnerDeviceInfoAddtions), 0, sizeof(InnerDeviceInfoAddtions));
     (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &additions);
 
     (void)memset_s(device.devId, sizeof(device.devId), '\0', sizeof(device.devId));
@@ -862,6 +1028,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001, T
     EXPECT_TRUE(device.isOnline == false);
 }
 
+/*
+ * @tc.name: DLGET_FEATURE_CAP_Test_001
+ * @tc.desc: dl get feature cap test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
@@ -900,6 +1072,12 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLWIFIDIRECT_ADDR_Test_001, TestSize
     EXPECT_FALSE(ret);
 }
 
+/*
+ * @tc.name: DLGET_STATIC_CAP_Test_001
+ * @tc.desc: dl get static cap test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
@@ -913,6 +1091,12 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: DLGET_STATIC_CAP_LEN_Test_001
+ * @tc.desc: dl get static cap len test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_LEN_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
@@ -926,6 +1110,12 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_LEN_Test_001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: DLGET_REMOTE_PTK_Test_001
+ * @tc.desc: dl get remote ptk test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_REMOTE_PTK_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
