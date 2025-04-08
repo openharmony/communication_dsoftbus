@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,6 +120,12 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1
     LnnDeinitMetaNodeLedger();
 }
 
+/*
+ * @tc.name: LNN_GET_META_NODE_UID_TEST_001
+ * @tc.desc: lnn get meta node udid by network id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
 {
     const char *networkId = nullptr;
@@ -128,6 +134,12 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GET_META_NODE_UID_TEST_002
+ * @tc.desc: lnn get meta node udid by network id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
 {
     const char *networkId = nullptr;
@@ -146,6 +158,12 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_FOUND);
 }
 
+/*
+ * @tc.name: LNN_GET_META_NODE_INFO_TEST_001
+ * @tc.desc: lnn get meta node info by network id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1)
 {
     const char *networkId = nullptr;
@@ -154,6 +172,12 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: LNN_GET_META_NODE_INFO_TEST_002
+ * @tc.desc: lnn get meta node info by network id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_002, TestSize.Level1)
 {
     const char *networkId = nullptr;
