@@ -409,6 +409,10 @@ static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandl
 static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
+    if (uuid == NULL) {
+        CONN_LOGE(CONN_BLE, "invalid param");
+        return;
+    }
     CONN_LOGI(CONN_BLE, "srvcHandle=%{public}d, charHandle=%{public}d\n", srvcHandle, characteristicHandle);
     if (serverId != g_halServerId) {
         CONN_LOGE(CONN_BLE, "bad server id");
