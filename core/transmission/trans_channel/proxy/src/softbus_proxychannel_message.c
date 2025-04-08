@@ -277,7 +277,7 @@ static int32_t DecryptProxyMessage(ProxyMessage *msg, AuthHandle *auth, uint32_t
     } else {
         UkIdInfo ukIdInfo = { 0 };
         (void)TransProxyGetUkInfoByChanId(msg->msgHead.myId, &ukIdInfo);
-        if (IsVaildUkInfo(&ukIdInfo)) {
+        if (IsValidUkInfo(&ukIdInfo)) {
             if (AuthDecryptByUkId(ukIdInfo.myId, (uint8_t *)msg->data, (uint32_t)msg->dataLen, decData, decDataLen) !=
                 SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "parse msg decrypt by ukId fail, ukId=%{public}d", msg->ukIdInfo.myId);
@@ -395,10 +395,10 @@ static int32_t PackEncryptedMessage(
         TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size = (IsVaildUkInfo(ukIdInfo) ? AuthGetUkEncryptSize(dataInfo->inLen) :
+    uint32_t size = (IsValidUkInfo(ukIdInfo) ? AuthGetUkEncryptSize(dataInfo->inLen) :
                                                AuthGetEncryptSize(authHandle.authId, dataInfo->inLen)) +
         ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
-    if (isAddUk && IsVaildUkInfo(ukIdInfo)) {
+    if (isAddUk && IsValidUkInfo(ukIdInfo)) {
         size += sizeof(UkIdInfo);
     }
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
@@ -409,7 +409,7 @@ static int32_t PackEncryptedMessage(
     TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
     uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
     uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
-    if (IsVaildUkInfo(ukIdInfo)) {
+    if (IsValidUkInfo(ukIdInfo)) {
         if (isAddUk) {
             if (EncryptedMessageAddUk(encData, &encDataLen, ukIdInfo) != SOFTBUS_OK) {
                 SoftBusFree(buf);

@@ -501,6 +501,18 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    msg.msgHead.cipher = 0;
+    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
+    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    msg.msgHead.cipher = 0;
+    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
+    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
     SoftBusFree(buf);
 }
 
@@ -1222,4 +1234,43 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
     cJSON_Delete(msg);
 }
 
+/**
+ * @tc.name: PackEncryptedMessageTest001
+ * @tc.desc: PackEncryptedMessageTest001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, PackEncryptedMessageTest001, TestSize.Level1)
+{
+    ProxyMessageHead msg;
+    (void)memset_s(&msg, sizeof(ProxyMessageHead), 0, sizeof(ProxyMessageHead));
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    dataInfo.inLen = FAST_TRANS_DATASIZE;
+    dataInfo.inData = (uint8_t *)TEST_FAST_TRANS_DATA;
+    AuthHandle authHandle = {
+        .authId = -1,
+        .type = 0,
+    };
+
+    UkIdInfo ukIdInfo;
+    (void)memset_s(&ukIdInfo, sizeof(UkIdInfo), 0, sizeof(UkIdInfo));
+    int32_t ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, true, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    authHandle.authId = 0;
+    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+
+    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+
+    ukIdInfo.myId = 1;
+    ukIdInfo.peerId = 1;
+    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, true, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+
+    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+}
 } // namespace OHOS

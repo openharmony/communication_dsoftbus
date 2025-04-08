@@ -50,7 +50,7 @@ char *PackUkReply(const AuthACLInfo *aclInfo, int32_t ukId);
 int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *sinkUkId);
 
 int32_t TransUkRequestMgrInit(void);
-void TransUkRequestMgrDeInit(void);
+void TransUkRequestMgrDeinit(void);
 int32_t TransUkRequestAddItem(
     uint32_t requestId, int32_t channelId, int32_t connId, int32_t pid, const AuthACLInfo *aclInfo);
 int32_t TransUkRequestSetAuthHandleAndSeq(uint32_t requestId, const AuthHandle *authHandle, uint64_t seq);
@@ -60,9 +60,9 @@ int32_t TransUkRequestDeleteItem(uint32_t requestId);
 
 int32_t GetUkPolicy(const AppInfo *appInfo);
 int32_t GetSourceAndSinkUdid(const char *peerNetWorkId, char *sourceUdid, char *sinkUdid);
-int32_t FillSinkAclInfo(char *sessionName, AuthACLInfo *aclInfo, int32_t *pid);
+int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid);
 bool SpecialSaCanUseDeviceKey(uint64_t tokenId);
-bool IsVaildUkInfo(const UkIdInfo *ukIdInfo);
+bool IsValidUkInfo(const UkIdInfo *ukIdInfo);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
