@@ -2112,7 +2112,7 @@ int32_t StopBroadcasting(int32_t bcId)
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
 
-    DISC_LOGI(DISC_BROADCAST, "stop service srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
+    DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
         GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
     BroadcastCallback callback = *(g_bcManager[bcId].bcCallback);
     SoftBusMutexUnlock(&g_bcLock);
