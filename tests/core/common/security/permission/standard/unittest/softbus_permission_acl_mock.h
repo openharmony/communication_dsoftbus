@@ -60,6 +60,9 @@ public:
     virtual int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid);
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len);
     virtual int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForegroundUser);
+    virtual int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId);
+    virtual bool StrStartWith(const char *string, const char *target);
+    virtual bool CheckDBinder(const char *sessionName);
 };
 class SoftbusPermissionACLInterfaceMock : public SoftbusPermissionACLInterface {
 public:
@@ -73,7 +76,10 @@ public:
     MOCK_METHOD3(TransProxyGetUidAndPidBySessionName, int32_t(const char *sessionName, int32_t *uid, int32_t *pid));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t(const char *uuid, char *buf, uint32_t len));
     MOCK_METHOD2(IsOsAccountForegroundAdapter, int32_t(const int32_t appUserId, bool &isForegroundUser));
-
+    MOCK_METHOD4(GetOsAccountUidByUserId, int32_t(char *id, uint32_t idLen, uint32_t *len, int32_t userId));
+    MOCK_METHOD2(StrStartWith, bool(const char *string, const char *target));
+    MOCK_METHOD1(CheckDBinder, bool(const char *sessionName));
+    
     static SoftbusPermissionACLInterfaceMock *GetMock()
     {
         return mock.load();
