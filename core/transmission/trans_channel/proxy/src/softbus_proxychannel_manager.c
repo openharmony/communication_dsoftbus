@@ -693,7 +693,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     TRANS_CHECK_AND_RETURN_LOGE(
         TransProxyGetChanByChanId(info->myId, info) == SOFTBUS_OK, TRANS_CTRL, "TransProxyGetChanByChanId fail");
     if ((info->appInfo.appType == APP_TYPE_NORMAL) || (info->appInfo.appType == APP_TYPE_AUTH)) {
-        TransProxyDelChanByChanId(info->channelId);
+        TransProxyCloseProxyChannel(info->channelId);
         (void)TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     }
 }
