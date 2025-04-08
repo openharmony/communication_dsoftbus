@@ -2023,9 +2023,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillChannelInfoTest001, TestS
     msg->dataLen = strlen(msg->data) + 1;
 
     int32_t ret = TransProxyFillChannelInfo(msg, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
     ret = TransProxyFillChannelInfo(msg, chan);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
     msg->msgHead.type = ENCRYPTED;
     ret = TransProxyFillChannelInfo(msg, chan);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
