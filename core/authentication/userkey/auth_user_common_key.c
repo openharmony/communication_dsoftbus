@@ -92,21 +92,36 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
         return SOFTBUS_NO_INIT;
     }
 
+    PrintfAuthAclInfo(0, 0, aclInfo);
+    if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "ccmp add key lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    UserKeyInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
+        if (!CompareByAllAcl(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
+            continue;
+        }
+        if (memcpy_s(&item->ukInfo, sizeof(AuthUserKeyInfo), (AuthUserKeyInfo *)userKeyInfo, sizeof(AuthUserKeyInfo)) !=
+            EOK) {
+            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
+            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+            return SOFTBUS_MEM_ERR;
+        }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
+        (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+        return SOFTBUS_OK;
+    }
     UserKeyInfo *keyInfo = NULL;
     keyInfo = (UserKeyInfo *)SoftBusCalloc(sizeof(UserKeyInfo));
     if (keyInfo == NULL) {
-        AUTH_LOGE(AUTH_KEY, "user calloc key info err");
+        AUTH_LOGE(AUTH_KEY, "user key info calloc err");
+        (void)SoftBusMutexUnlock(&g_userKeyList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
     keyInfo->aclInfo = *aclInfo;
     keyInfo->ukInfo = *userKeyInfo;
     ListInit(&keyInfo->node);
-    if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "ccmp add key lock fail");
-        (void)memset_s(keyInfo, sizeof(UserKeyInfo), 0, sizeof(UserKeyInfo));
-        SoftBusFree(keyInfo);
-        return SOFTBUS_LOCK_ERR;
-    }
     ListAdd(&g_userKeyList->list, &keyInfo->node);
     g_userKeyList->cnt++;
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
@@ -180,8 +195,8 @@ int32_t GetUserKeyInfoDiffAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *u
             AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
             return SOFTBUS_MEM_ERR;
         }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
         (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-        AUTH_LOGD(AUTH_KEY, "get user key succ");
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
@@ -214,8 +229,8 @@ int32_t GetUserKeyInfoSameAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *u
             AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
             return SOFTBUS_MEM_ERR;
         }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
         (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-        AUTH_LOGD(AUTH_KEY, "get user key succ");
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
@@ -225,9 +240,9 @@ int32_t GetUserKeyInfoSameAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *u
 
 int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
 {
-    if (g_userKeyList == NULL) {
-        AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
-        return SOFTBUS_NO_INIT;
+    if (uk == NULL || g_userKeyList == NULL) {
+        AUTH_LOGE(AUTH_KEY, "param error");
+        return SOFTBUS_INVALID_PARAM;
     }
     const UserKeyInfo *item = NULL;
 
@@ -244,8 +259,8 @@ int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
             AUTH_LOGE(AUTH_KEY, "memcpy_s user key fail.");
             return SOFTBUS_MEM_ERR;
         }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
         (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-        AUTH_LOGD(AUTH_KEY, "get user key succ");
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
