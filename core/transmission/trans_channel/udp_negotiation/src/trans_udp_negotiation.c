@@ -1425,7 +1425,7 @@ static void UdpModuleCb(AuthHandle authHandle, const AuthTransData *data)
     TransOnExchangeUdpInfo(authHandle, data->flag, data->seq, json);
     cJSON_Delete(json);
 
-    if (data->flag) {
+    if (data->flag == FLAG_REPLY || data->flag == FLAG_ENCYUK_REPLY) {
         AuthCloseConn(authHandle);
     }
 }
