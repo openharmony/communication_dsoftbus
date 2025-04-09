@@ -37,8 +37,6 @@
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 
-#define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
-
 static _Atomic bool g_transSessionInitFlag = false;
 
 int32_t TransServerInit(void)
@@ -102,25 +100,12 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
     TransDelItemByPackageName(pkgName, pid);
 }
 
-static void TransGetAccessInfoIsApp(CallerType callerType, SessionServer *newNode)
+static void TransSetUserId(CallerType callerType, SessionServer *newNode)
 {
     if (callerType == CALLER_TYPE_FEATURE_ABILITY) {
         newNode->accessInfo.userId = TransGetUserIdFromUid(newNode->uid);
         if (newNode->accessInfo.userId == INVALID_USER_ID) {
             TRANS_LOGE(TRANS_CTRL, "TransGetUserIdFromUid failed");
-            return;
-        }
-
-        uint32_t size = 0;
-        int32_t ret = GetOsAccountUidByUserId(newNode->accessInfo.accountId, ACCOUNT_UID_LEN_MAX - 1,
-            &size, newNode->accessInfo.userId);
-        if (ret != SOFTBUS_OK) {
-            if (ret == SOFTBUS_NOT_LOGIN) {
-                if (strcpy_s(newNode->accessInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-                    COMM_LOGE(COMM_PERM, "strcpy_s default uid failed");
-                }
-            }
-            TRANS_LOGE(TRANS_CTRL, "get current account failed, ret=%{public}d", ret);
             return;
         }
     } else {
@@ -158,7 +143,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
         CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
     newNode->accessInfo.tokenType = tokenType;
-    TransGetAccessInfoIsApp(newNode->callerType, newNode);
+    TransSetUserId(newNode->callerType, newNode);
     ret = TransSessionServerAddItem(newNode);
     TransEventExtra extra = {
         .socketName = sessionName,
