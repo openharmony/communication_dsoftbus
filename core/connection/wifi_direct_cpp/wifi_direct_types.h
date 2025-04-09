@@ -95,11 +95,14 @@ struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];
     char remoteIp[IP_STR_MAX_LEN];
-    int32_t remotePort;
     enum WifiDirectLinkType linkType;
     enum WifiDirectBandWidth bandWidth;
     bool isReuse;
     int channelId;
+    // localIpv6 and remoteIpv6 is only used with remotePort
+    char localIpv6[IP_STR_MAX_LEN];
+    char remoteIpv6[IP_STR_MAX_LEN];
+    int32_t remotePort;
 };
 
 struct WifiDirectSinkLink {
