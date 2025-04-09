@@ -911,6 +911,35 @@ static void NotifyJoinExtResultProcess(LnnConnectionFsm *connFsm, int32_t retCod
     NotifyStateForSession(&connFsm->connInfo.addr);
 }
 
+static bool IsRepeatDeviceId(NodeInfo *info)
+{
+    if (info == NULL || (strlen(info->deviceInfo.deviceUdid) != UDID_BUF_LEN - 1) ||
+        (strlen(info->networkId) != NETWORK_ID_BUF_LEN - 1)) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo err");
+        return false;
+    }
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "device not found");
+        return false;
+    }
+    if (strcmp(info->deviceInfo.deviceUdid, oldInfo.deviceInfo.deviceUdid) == 0) {
+        LNN_LOGE(LNN_BUILDER, "same device");
+        return false;
+    }
+    if (!LnnIsNodeOnline(&oldInfo)) {
+        LnnRemoveNode(oldInfo.deviceInfo.deviceUdid);
+        LNN_LOGE(LNN_BUILDER, "delete old info");
+        return false;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(oldInfo.deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "repeat networkId. old udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
+    return true;
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -1768,7 +1797,8 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
+    int32_t ret = IsRepeatDeviceId(connFsm->connInfo.nodeInfo) ? SOFTBUS_NETWORK_REPEATED_DEVICEID : SOFTBUS_OK;
+    CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, ret);
 }
 
 static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)
