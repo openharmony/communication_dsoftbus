@@ -57,7 +57,7 @@ void ClientTransUdpManagerStaticTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransUdpMgrInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -76,7 +76,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t sessionId = TEST_SESSIONID;
@@ -91,7 +91,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransSetUdpChannelEnableTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSetUdpChannelEnableTest001, TestSize.Level1)
 {
     int32_t ret = TransSetUdpChannelEnable(TEST_CHANNELID, false);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
@@ -103,7 +103,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSetUdpChannelEnableTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, TestSize.Level1)
 {
     char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
     StreamData tmpData = {
@@ -150,7 +150,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, TestSize.Level1)
 {
     int32_t sessionId = 0;
     char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
@@ -188,7 +188,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
@@ -224,7 +224,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, TestSize.Level1)
 {
     UdpChannel channel;
     channel.businessType = BUSINESS_TYPE_STREAM;
@@ -253,7 +253,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
@@ -275,7 +275,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
@@ -298,7 +298,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, NotifyCallbackTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, NotifyCallbackTest001, TestSize.Level1)
 {
     UdpChannel *testChannel = nullptr;
     NotifyCallback(testChannel, TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
@@ -323,7 +323,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, NotifyCallbackTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
 */
-HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelProc001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelProc001, TestSize.Level1)
 {
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -350,7 +350,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelProc001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransChannelInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -368,7 +368,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, OnIdleTimeoutResetTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, OnIdleTimeoutResetTest001, TestSize.Level1)
 {
     int32_t ret = OnIdleTimeoutReset(TEST_CHANNELID);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
@@ -380,7 +380,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnIdleTimeoutResetTest001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t sessionId = TEST_SESSIONID;
@@ -395,7 +395,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest002, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest003, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest003, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t sessionId = TEST_SESSIONID;
@@ -414,7 +414,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest003, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest004, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest004, TestSize.Level1)
 {
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -443,7 +443,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest004, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, TestSize.Level1)
 {
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -465,7 +465,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerStaticTest, TransSendLimitChangeDataToCoreTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSendLimitChangeDataToCoreTest001, TestSize.Level1)
 {
     int32_t ret = TransSendLimitChangeDataToCore(TEST_CHANNELID, FILE_PRIORITY_BK, NSTACKX_EOK);
     EXPECT_EQ(SOFTBUS_OK, ret);

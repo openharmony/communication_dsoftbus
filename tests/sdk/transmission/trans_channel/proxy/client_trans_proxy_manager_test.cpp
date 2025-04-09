@@ -185,7 +185,7 @@ void ClientTransProxyManagerTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level1)
 {
     int32_t ret = ClientTransProxyInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -197,7 +197,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestSize.Level1)
 {
     int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -213,7 +213,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = ClientTransProxyOnDataReceived(channelId, nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
@@ -229,7 +229,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo channelInfo;
@@ -291,7 +291,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, TestSize.Level1)
 {
     g_proxyMaxByteBufSize = DEFAULT_NEW_BYTES_LEN;
     g_proxyMaxMessageBufSize = DEFAULT_NEW_MESSAGE_LEN;
@@ -349,7 +349,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo channelInfo;
@@ -379,7 +379,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo channelInfo;
@@ -409,7 +409,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo channelInfo;
@@ -440,7 +440,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize.Level1)
 {
     int32_t ret = ClientTransProxyInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -456,7 +456,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = TransProxyChannelSendFile(channelId, nullptr, g_proxyFileSet, TEST_FILE_CNT);
@@ -479,7 +479,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     ProxyChannelInfoDetail info;
@@ -498,7 +498,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "test";
@@ -522,7 +522,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest, TestSize.Level1)
 {
     int32_t channelId = -1;
     int32_t ret = ClientTransProxyGetLinkTypeByChannelId(channelId, nullptr);
@@ -538,7 +538,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransGetActualDataLenTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransGetActualDataLenTest, TestSize.Level1)
 {
     SliceHead head = {};
     uint32_t actualDataLen = 0;
@@ -574,7 +574,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransGetActualDataLenTest, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData001, TestSize.Level1)
 {
     int32_t bufferSize = 0;
     int32_t ret = ProxyBuildNeedAckTlvData(nullptr, true, 1, &bufferSize);
@@ -587,7 +587,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead001, TestSize.Level1)
 {
     int32_t bufferSize = 0;
     DataHead data;
@@ -601,7 +601,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcSendMsgAck001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcSendMsgAck001, TestSize.Level1)
 {
     const char *data = "test";
     int32_t ret = ClientTransProxyProcSendMsgAck(1, nullptr, PROXY_ACK_SIZE, 1, 1);
@@ -623,7 +623,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcSendMsgAck001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession001, TestSize.Level1)
 {
     const char *data = "test";
     DataHeadTlvPacketHead dataHead;
@@ -648,7 +648,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcData001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcData001, TestSize.Level1)
 {
     int32_t channelId = 1;
     DataHeadTlvPacketHead dataHead;
@@ -668,7 +668,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcData001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Level1)
 {
     DataHead pktHead;
     bool needAck = true;
@@ -682,7 +682,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead002, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead002, TestSize.Level1)
 {
     DataHead pktHead;
     int32_t flag = 0;
@@ -696,7 +696,7 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxyParseTlv001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyParseTlv001, TestSize.Level1)
 {
     uint32_t newDataHeadSize = 0;
     int32_t ret = TransProxyParseTlv(TEST_DATA_LENGTH, nullptr, nullptr, &newDataHeadSize);
@@ -717,7 +717,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyParseTlv001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, nullptr);
@@ -730,7 +730,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo channelInfo;
@@ -753,7 +753,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySendBytesAck001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySendBytesAck001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "test";
@@ -772,7 +772,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySendBytesAck001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession002, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession002, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "test";
@@ -795,7 +795,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession002, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize.Level1)
 {
     int32_t channelId = 1;
     SessionPktType flag = TRANS_SESSION_MESSAGE;
@@ -823,7 +823,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcessSessionData001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcessSessionData001, TestSize.Level1)
 {
     int32_t channelId = 1;
     PacketHead dataHead;
@@ -844,7 +844,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcessSessionData001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = ClientTransProxyNoSubPacketTlvProc(channelId, nullptr, TEST_DATA_LENGTH);
@@ -873,7 +873,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxySliceProcessChkPkgIsValid001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxySliceProcessChkPkgIsValid001, TestSize.Level1)
 {
     // head->sliceNum != processor->sliceNumber || head->sliceSeq != processor->expectedSeq
     SliceProcessor processor;
@@ -912,7 +912,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxySliceProcessChkPkgIsValid001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, IsValidCheckoutProcess001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, IsValidCheckoutProcess001, TestSize.Level1)
 {
     int32_t channelId = 1;
     bool ret = IsValidCheckoutProcess(channelId);
@@ -925,7 +925,7 @@ HWTEST_F(ClientTransProxyManagerTest, IsValidCheckoutProcess001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, TransProxyPackTlvBytes, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, TransProxyPackTlvBytes, TestSize.Level1)
 {
     int32_t channelId = 1;
     SessionPktType flag = TRANS_SESSION_ACK;
@@ -948,7 +948,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackTlvBytes, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, SessionPktTypeToProxyIndex001, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, SessionPktTypeToProxyIndex001, TestSize.Level1)
 {
     SessionPktType packetType = TRANS_SESSION_ACK;
     int32_t ret = SessionPktTypeToProxyIndex(packetType);

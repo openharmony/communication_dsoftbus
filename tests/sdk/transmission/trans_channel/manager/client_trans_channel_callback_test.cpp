@@ -116,7 +116,7 @@ void ClientTransChannelCallbackTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Level1)
 {
     ChannelInfo info = {0};
     int32_t ret = TransOnChannelOpened(nullptr, &info);
@@ -158,7 +158,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_AUTH, SOFTBUS_MEM_ERR);
@@ -186,7 +186,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize.Level1)
 {
 #define PRIVILEGE_CLOSE_CHANNEL 11
     int32_t ret = TransOnChannelLinkDown(nullptr, 0);
@@ -205,7 +205,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t messageType = MESSAGE_TYPE_NOMAL;
@@ -247,7 +247,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const void *data = (const void *)"test";
@@ -275,7 +275,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t eventId = 0;
@@ -300,7 +300,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Level1)
 {
     const int32_t channelId = 1;
     int32_t ret = TransOnChannelBind(channelId, CHANNEL_TYPE_UDP);
@@ -328,7 +328,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest001, TestSize.Level1)
 {
     CollabInfo sourceInfo;
     (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
@@ -347,7 +347,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest002, TestSize.Level0)
+HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest002, TestSize.Level1)
 {
     CollabInfo sourceInfo;
     (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));

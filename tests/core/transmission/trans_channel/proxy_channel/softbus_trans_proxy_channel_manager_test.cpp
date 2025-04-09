@@ -374,7 +374,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo004, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusTransProxyChannelManagerTest, TransNotifyUserSwitchTest001, TestSize.Level0)
+HWTEST_F(SoftbusTransProxyChannelManagerTest, TransNotifyUserSwitchTest001, TestSize.Level1)
 {
     LnnMonitorHbStateChangedEvent *info = (LnnMonitorHbStateChangedEvent *)SoftBusCalloc(
         sizeof(LnnMonitorHbStateChangedEvent));

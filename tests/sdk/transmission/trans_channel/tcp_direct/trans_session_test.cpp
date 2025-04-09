@@ -87,7 +87,7 @@ static ISessionListener g_sessionlistener = {
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level1)
 {
     int32_t ret;
     int32_t sessionId = 1;
@@ -113,7 +113,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level0)
+HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level1)
 {
     int32_t ret;
     int32_t sessionId = 1;
@@ -130,7 +130,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level1)
 {
     int32_t ret;
     int32_t sessionId = 1;
@@ -149,7 +149,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level0)
+HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level1)
 {
     int32_t ret;
     int32_t sessionId = 1;
@@ -165,7 +165,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -179,7 +179,7 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level0)
+HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level1)
 {
     int32_t ret;
     int32_t sessionId = 1;
@@ -194,7 +194,7 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -214,7 +214,7 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level0)
+HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level1)
 {
     int32_t ret;
 
@@ -228,7 +228,7 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level1)
 {
     int32_t ret = TransClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -242,7 +242,7 @@ HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSessionTest, SendFileTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, SendFileTest001, TestSize.Level1)
 {
     int32_t sessionId = 1;
     int32_t ret = SendFile(sessionId, nullptr, nullptr, 1);
@@ -262,7 +262,7 @@ HWTEST_F(TransSessionTest, SendFileTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level0)
+HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level1)
 {
     char pkgName[TEST_PKG_NAME_LEN] = "com.test.trans.session";
     char mySessionName[TEST_SESSION_NAME_LEN] = "com.test.trans.session.sendfile";
@@ -296,7 +296,7 @@ HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level1)
 {
     int32_t sessionId = 1;
     int32_t appType = 1;
@@ -316,7 +316,7 @@ HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize.Level0)
+HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize.Level1)
 {
     ListNode sessionServerList;
     ListInit(&sessionServerList);
