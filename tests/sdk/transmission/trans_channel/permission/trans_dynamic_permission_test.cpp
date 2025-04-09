@@ -61,7 +61,7 @@ void TransDynamicPermissionTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest001, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest001, TestSize.Level1)
 {
     int32_t ret = AddDynamicPermission(g_permUid, g_permPid, g_permSessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -73,7 +73,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level1)
 {
     int32_t ret = DeleteDynamicPermission(g_permSessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -85,7 +85,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level1)
 {
     int32_t testPid = 10000;
     int32_t ret = 0;
@@ -135,7 +135,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level1)
 {
     int32_t testPid = 10000;
     int32_t ret = 0;
@@ -174,7 +174,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level1)
 {
     int32_t testPid = 17258;
     int32_t ret = 0;

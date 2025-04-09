@@ -72,7 +72,7 @@ void TransIpcStandardTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level1)
 {
     SubscribeInfo* subInfo = (SubscribeInfo*)SoftBusCalloc(sizeof(SubscribeInfo));
     ASSERT_TRUE(subInfo != nullptr);
@@ -94,7 +94,7 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level1)
 {
     uint32_t addrTypeLen = 1;
     void *info = nullptr;
@@ -138,7 +138,7 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.CreateSessionServer(nullptr, g_sessionName);
@@ -157,7 +157,7 @@ HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.RemoveSessionServer(nullptr, g_sessionName);
@@ -176,7 +176,7 @@ HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     SessionParam *param = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
@@ -225,7 +225,7 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, OpenAuthSessionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, OpenAuthSessionTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     ConnectionAddr *addrInfo = (ConnectionAddr*)SoftBusCalloc(sizeof(ConnectionAddr));
@@ -251,7 +251,7 @@ HWTEST_F(TransIpcStandardTest, OpenAuthSessionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, NotifyAuthSuccessTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, NotifyAuthSuccessTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = 0;
@@ -270,7 +270,7 @@ HWTEST_F(TransIpcStandardTest, NotifyAuthSuccessTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = -1;
@@ -285,7 +285,7 @@ HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, SendMessageTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, SendMessageTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = 0;
@@ -306,7 +306,7 @@ HWTEST_F(TransIpcStandardTest, SendMessageTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = 1;
@@ -327,7 +327,7 @@ HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = INVALID_VALUE;
@@ -351,7 +351,7 @@ HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = INVALID_VALUE;
@@ -375,7 +375,7 @@ HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.GrantPermission(UUID, PID, nullptr);
@@ -391,7 +391,7 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.RemovePermission(g_sessionName);
@@ -407,7 +407,7 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Level1)
 {
     int32_t ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
@@ -433,7 +433,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Level1)
 {
     int32_t ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
@@ -459,7 +459,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level1)
 {
     TransInfo* info = (TransInfo*)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(info != nullptr);
@@ -520,7 +520,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcOpenAuthSessionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcOpenAuthSessionTest001, TestSize.Level1)
 {
     ConnectionAddr* addrInfo = (ConnectionAddr*)SoftBusCalloc(sizeof(ConnectionAddr));
     ASSERT_TRUE(addrInfo != nullptr);
@@ -551,7 +551,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenAuthSessionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcNotifyAuthSuccessTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcNotifyAuthSuccessTest001, TestSize.Level1)
 {
     int32_t ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -569,7 +569,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcNotifyAuthSuccessTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
@@ -594,7 +594,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestSize.Level1)
 {
     int32_t channelId = -1;
     int32_t channelType = 0;
@@ -612,7 +612,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestS
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcSendMessageTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcSendMessageTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
@@ -634,7 +634,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcSendMessageTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
@@ -658,7 +658,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcStreamStatsTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcStreamStatsTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
@@ -680,7 +680,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcStreamStatsTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
@@ -702,7 +702,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level1)
 {
     int32_t uid = 1;
     int32_t pid = 1;
@@ -727,7 +727,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level1)
 {
     int32_t ret = ServerIpcRemovePermission(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -750,7 +750,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level1)
 {
     TransDataType type = DATA_TYPE_MESSAGE;
     uint32_t qosCount = QOS_TYPE_BUTT;
@@ -779,7 +779,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransIpcStandardTest, ServerIpcPrivilegeCloseChannel001, TestSize.Level0)
+HWTEST_F(TransIpcStandardTest, ServerIpcPrivilegeCloseChannel001, TestSize.Level1)
 {
     uint64_t tokenId = 0;
     int32_t pid = 0;

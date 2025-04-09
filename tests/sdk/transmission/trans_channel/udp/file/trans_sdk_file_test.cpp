@@ -342,7 +342,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level1)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
@@ -361,7 +361,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level1)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
@@ -406,7 +406,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level1)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     (void)ClientTransUdpMgrInit(cb);
@@ -441,7 +441,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level1)
 {
     int32_t ret = TransFileInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -498,7 +498,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level1)
 {
     int32_t ret = TransFileInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -548,7 +548,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level1)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
@@ -594,7 +594,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level1)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     (void)ClientTransUdpMgrInit(cb);
@@ -632,7 +632,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level1)
 {
     int32_t sessionId = 0;
     const char *sFileList = nullptr;
@@ -652,7 +652,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level1)
 {
     int32_t fd = socket(AF_INET, SOCK_STREAM, 0);
     int32_t on = 65536;
@@ -674,7 +674,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level1)
 {
     int32_t fd = socket(AF_INET, SOCK_STREAM, 0);
     int32_t on = 65536;
@@ -693,7 +693,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
 {
     int32_t port = 5683;
     int32_t ret = CreateServerSocketByIpv4("127.0.0.1", port);
@@ -712,7 +712,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level1)
 {
     uint8_t key = 215;
     uint32_t keyLen = 8;
@@ -735,7 +735,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level1)
 {
     uint8_t key = 215;
     uint32_t keyLen = 8;
@@ -751,7 +751,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level1)
 {
     int32_t ret = TransSetSocketFileListener(nullptr, nullptr, false);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -775,7 +775,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level1)
 {
     int32_t ret = TransFileInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -799,7 +799,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level1)
 {
     int32_t port = 5683;
     int32_t ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port);
@@ -818,7 +818,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level1)
 {
     int32_t port = 5683;
     int32_t fd = 1;
@@ -844,7 +844,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest018, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest018, TestSize.Level1)
 {
     struct sockaddr_in localAddr = { 0 };
     int32_t port = 5683;
@@ -866,7 +866,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest018, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest019, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest019, TestSize.Level1)
 {
     struct sockaddr_in6 localAddr = { 0 };
     int32_t port = 5683;
@@ -888,7 +888,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest019, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FreeFileStatusListTest001, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FreeFileStatusListTest001, TestSize.Level1)
 {
     FileEvent event;
     event.statusList.completedList.fileCnt = 1;
@@ -920,7 +920,7 @@ HWTEST_F(TransSdkFileTest, FreeFileStatusListTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FreeFileStatusListTest002, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FreeFileStatusListTest002, TestSize.Level1)
 {
     FileEvent event;
     event.statusList.completedList.files = nullptr;
@@ -939,7 +939,7 @@ HWTEST_F(TransSdkFileTest, FreeFileStatusListTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level1)
 {
     DFileMsg msgData;
     FileEvent event;
@@ -972,7 +972,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileStatusListTest002, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest002, TestSize.Level1)
 {
     DFileMsg msgData;
     FileEvent event;
@@ -995,7 +995,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileStatusListTest003, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest003, TestSize.Level1)
 {
     DFileMsg msgData;
     FileEvent event;
@@ -1054,7 +1054,7 @@ void InitDFileMsg(DFileMsg *msgData)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level1)
 {
     DFileMsg msgData;
     msgData.clearPolicyFileList.fileNum = 3; // test value
@@ -1102,7 +1102,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level1)
 {
     DFileMsg msgData;
     msgData.clearPolicyFileList.fileNum = 3; // test value
@@ -1151,7 +1151,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileStatusListTest006, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest006, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     uint8_t tos = 1;
@@ -1166,7 +1166,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level1)
 {
     int32_t socket = 1;
     DFileMsg msgData;
@@ -1195,7 +1195,7 @@ HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level1)
 {
     DFileMsg msgData;
     FileEvent event;
