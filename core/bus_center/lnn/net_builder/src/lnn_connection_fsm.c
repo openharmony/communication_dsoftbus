@@ -450,7 +450,6 @@ static void SetLnnConnNodeInfo(
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         connInfo->nodeInfo->isSupportSv = true;
     }
-    connInfo->nodeInfo->isSupportUkNego = true;
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);

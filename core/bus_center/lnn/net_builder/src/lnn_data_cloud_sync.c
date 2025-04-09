@@ -818,7 +818,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         "STATIC_NET_CAP=%{public}u, AUTH_CAP=%{public}u, HB_CAP=%{public}u, OS_TYPE=%{public}d, OS_VERSION=%{public}s, "
         "BLE_P2P=%{public}d, BT_MAC=%{public}s, DEVICE_TYPE=%{public}d, SW_VERSION=%{public}s, DEVICE_UDID=%{public}s, "
         "DEVICE_UUID=%{public}s, STATE_VERSION=%{public}d, NETWORK_ID=%{public}s, BROADCAST_CIPHER_KEY=%{public}02x, "
-        "BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x, PUB_MAC=%{public}02x, PTK=%{public}02x, "
+        "BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x, PUB_MAC=%{public}02x, PTK=%{public}02x, SPUk=%{public}d, "
         "DEVICE_VERSION=%{public}s, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, SLE_CAP=%{public}d",
         cacheInfo->wifiVersion, cacheInfo->bleVersion, AnonymizeWrapper(anonyAccountId), cacheInfo->supportedProtocols,
         cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, AnonymizeWrapper(anonyP2pMac),
@@ -828,8 +828,8 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         cacheInfo->softBusVersion, AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyUuid), cacheInfo->stateVersion,
         AnonymizeWrapper(anonyNetworkId), *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv,
         *cacheInfo->rpaInfo.peerIrk, *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk,
-        AnonymizeWrapper(anonyDeviceVersion), cacheInfo->deviceInfo.productId, cacheInfo->deviceInfo.modelName,
-        cacheInfo->sleRangeCapacity);
+        cacheInfo->isSupportUkNego, AnonymizeWrapper(anonyDeviceVersion), cacheInfo->deviceInfo.productId,
+        cacheInfo->deviceInfo.modelName, cacheInfo->sleRangeCapacity);
     AnonymizeFree(anonyAccountId);
     AnonymizeFree(anonyP2pMac);
     AnonymizeFree(anonyMacAddr);
@@ -903,6 +903,7 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->localStateVersion = newInfo->localStateVersion;
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
     oldInfo->staticNetCap = newInfo->staticNetCap;
+    oldInfo->isSupportUkNego = newInfo->isSupportUkNego;
 }
 
 static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
