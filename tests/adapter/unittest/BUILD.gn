@@ -18,8 +18,6 @@ if (defined(ohos_lite)) {
 
   dsoftbus_root_path = "../../.."
 
-  defines += [ "HAVE_PRO = 0" ]
-
   if (ohos_build_type == "debug") {
     unittest("AdapterTest") {
       output_extension = "bin"
@@ -45,12 +43,13 @@ if (defined(ohos_lite)) {
       ]
 
       external_deps = [ "bounds_checking_function:libsec_static" ]
+
+      defines += [ "HAVE_PRO = 0" ]
     }
   }
 } else {
   import("//build/test.gni")
   import("../../../dsoftbus.gni")
-  defines += [ "HAVE_PRO = 0" ]
   module_output_path = "dsoftbus/adapter"
 
   ohos_unittest("AdaptorDsoftbusCryptTest") {
@@ -150,6 +149,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    defines += [ "HAVE_PRO = 1" ]
   }
 
   ohos_unittest("SoftbusThreadTest") {
@@ -166,6 +166,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    defines += [ "HAVE_PRO = 1" ]
   }
 
   ohos_unittest("SoftbusTimeTest") {
