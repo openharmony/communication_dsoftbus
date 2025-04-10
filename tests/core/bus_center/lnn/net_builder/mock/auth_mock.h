@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ public:
     virtual void AuthServerDeathCallback(const char *pkgName, int32_t pid) = 0;
     virtual int32_t RegGroupChangeListener(const GroupChangeListener *listener) = 0;
     virtual void UnregGroupChangeListener(void) = 0;
-    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device) = 0;
+    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint) = 0;
     virtual bool IsAuthHasTrustedRelation(void) = 0;
     virtual bool IsSameAccountDevice(const DeviceInfo *device) = 0;
     virtual bool AuthHasSameAccountGroup(void) = 0;
@@ -121,7 +121,7 @@ public:
     MOCK_METHOD2(AuthServerDeathCallback, void(const char *, int32_t));
     MOCK_METHOD1(RegGroupChangeListener, int32_t(const GroupChangeListener *));
     MOCK_METHOD0(UnregGroupChangeListener, void());
-    MOCK_METHOD1(AuthIsPotentialTrusted, bool(const DeviceInfo *));
+    MOCK_METHOD2(AuthIsPotentialTrusted, bool(const DeviceInfo *, bool));
     MOCK_METHOD0(IsAuthHasTrustedRelation, bool());
     MOCK_METHOD1(IsSameAccountDevice, bool(const DeviceInfo *));
     MOCK_METHOD0(AuthHasSameAccountGroup, bool());
