@@ -344,7 +344,7 @@ bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *account
     if (credId == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "get cred id fail");
         IdServiceDestroyCredentialList(&credList);
-        return true;
+        return false;
     }
     IdServiceDestroyCredentialList(&credList);
     SoftBusFree(credId);
