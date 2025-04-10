@@ -1077,6 +1077,32 @@ static int32_t DelRawLinkInfoByReqId(uint32_t p2pRequestId)
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
+static int32_t CreateRawWifiDirectInfo(
+    const struct WifiDirectLink *link, LaneLinkInfo *linkInfo, P2pLinkReqList reqInfo)
+{
+    linkInfo->type = LANE_HML_RAW;
+    if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.peerIp, IP_LEN, link->remoteIp) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerIp fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIp, IP_LEN, link->localIp) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy localIp fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.peerIpv6, IP_LEN, link->remoteIpv6) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerIp fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIpv6, IP_LEN, link->localIpv6) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy localIp fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    linkInfo->linkInfo.rawWifiDirect.port = link->remotePort;
+    linkInfo->linkInfo.rawWifiDirect.isReuse = link->isReuse;
+    linkInfo->linkInfo.rawWifiDirect.pid = reqInfo.laneRequestInfo.pid;
+    return SOFTBUS_OK;
+}
+
 static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLink *link, LaneLinkInfo *linkInfo)
 {
     if (link == NULL || linkInfo == NULL) {
@@ -1102,18 +1128,7 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
     }
 
     if (isRaw) {
-        linkInfo->type = LANE_HML_RAW;
-        if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.peerIp, IP_LEN, link->remoteIp) != EOK) {
-            LNN_LOGE(LNN_LANE, "strcpy peerIp fail");
-            return SOFTBUS_STRCPY_ERR;
-        }
-        if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIp, IP_LEN, link->localIp) != EOK) {
-            LNN_LOGE(LNN_LANE, "strcpy localIp fail");
-            return SOFTBUS_STRCPY_ERR;
-        }
-        linkInfo->linkInfo.rawWifiDirect.port = link->remotePort;
-        linkInfo->linkInfo.rawWifiDirect.isReuse = link->isReuse;
-        linkInfo->linkInfo.rawWifiDirect.pid = reqInfo.laneRequestInfo.pid;
+        return CreateRawWifiDirectInfo(link, linkInfo, reqInfo);
     } else {
         LNN_LOGI(LNN_LANE, "bandWidth=%{public}d", link->bandWidth);
         linkInfo->linkInfo.p2p.bw = (LaneBandwidth)link->bandWidth;

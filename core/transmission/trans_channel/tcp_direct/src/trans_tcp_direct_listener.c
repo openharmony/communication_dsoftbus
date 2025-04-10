@@ -108,7 +108,7 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
     }
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
-        .module = IsVaildUkInfo(ukIdInfo) ? MODULE_UK_ENCYSESSION : MODULE_SESSION,
+        .module = IsValidUkInfo(ukIdInfo) ? MODULE_UK_ENCYSESSION : MODULE_SESSION,
         .seq = seq,
         .flags = (FLAG_REQUEST | cipherFlag),
         .dataLen = strlen(bytes), /* reset after encrypt */
@@ -142,7 +142,7 @@ static int32_t StartNegotiateUk(SessionConn *conn)
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
     bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
-    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
+    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
             "get cipher flag failed channelId=%{public}d, fd=%{public}d",
             conn->channelId, conn->appInfo.fd);

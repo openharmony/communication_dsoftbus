@@ -563,7 +563,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
-    SoftBusFree(conn);
+    TransDelSessionConnById(conn->channelId);
 }
 
 /**
@@ -686,6 +686,42 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpGetPrivilegeCloseList001, TestSize.Leve
     ret = TransTcpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransDelTcpChannelInfoByChannelId(info->channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransSessionConnUkTest001
+ * @tc.desc: test TransSessionConnUkTest001.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransSessionConnUkTest001, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UkIdInfo ukIdInfo = {
+        .myId = 0,
+        .peerId = 0,
+    };
+
+    ret = SetSessionConnUkIdById(0, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = GetSessionConnUkIdById(0, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SetSessionConnUkIdById(0, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ret = SetSessionConnUkIdById(1, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = GetSessionConnUkIdById(0, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ret = GetSessionConnUkIdById(1, &ukIdInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

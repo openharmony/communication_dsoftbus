@@ -59,7 +59,7 @@ void ClientTransPendingTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level0)
+HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level1)
 {
     uint32_t id = 1;
     uint64_t seq = 0;

@@ -521,11 +521,6 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             pos->accessInfo.userId = accessInfo->userId;
-            if (strcpy_s(pos->accessInfo.accountId, ACCOUNT_UID_LEN_MAX, accessInfo->accountId) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy accountId failed.");
-                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-                return SOFTBUS_STRCPY_ERR;
-            }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
@@ -538,9 +533,9 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
-int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId, char *accountId, uint32_t accountIdLen)
+int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId)
 {
-    if (sessionName == NULL || userId == NULL || accountId == NULL) {
+    if (sessionName == NULL || userId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -557,11 +552,6 @@ int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId, cha
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *userId = pos->accessInfo.userId;
-            if (strcpy_s(accountId, accountIdLen, pos->accessInfo.accountId) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy accountId failed.");
-                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-                return SOFTBUS_STRCPY_ERR;
-            }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
@@ -605,10 +595,9 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
     return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
-int32_t TransGetAclInfoBySessionName(
-    const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId, char *accountId)
+int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId)
 {
-    if (sessionName == NULL || tokenId == NULL || accountId == NULL) {
+    if (sessionName == NULL || tokenId == NULL || userId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -631,10 +620,6 @@ int32_t TransGetAclInfoBySessionName(
             }
             if (userId != NULL) {
                 *userId = pos->accessInfo.userId;
-            }
-            if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX, pos->accessInfo.accountId) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "account id copy failed.");
-                return SOFTBUS_STRCPY_ERR;
             }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;

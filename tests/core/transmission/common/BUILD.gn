@@ -20,5 +20,6 @@ group("unittest") {
   deps = [
     "softbus_message_open_channel_test:unittest",
     "trans_pending_pkt_test:unittest",
+    "trans_uk_manager_test:unittest",
   ]
 }

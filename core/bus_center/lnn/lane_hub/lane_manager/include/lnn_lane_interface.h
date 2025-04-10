@@ -112,11 +112,16 @@ typedef struct {
 
 typedef struct {
     bool isReuse;
+    int32_t pid;
+
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
     uint16_t protocol;
+
+    // localIpv6 and remoteIpv6 is only used with port
+    char localIpv6[IP_LEN];
+    char peerIpv6[IP_LEN];
     int32_t port;
-    int32_t pid;
 } RawWifiDirectConnInfo;
 
 typedef struct {

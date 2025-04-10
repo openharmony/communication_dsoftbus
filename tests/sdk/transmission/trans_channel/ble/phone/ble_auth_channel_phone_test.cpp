@@ -185,7 +185,7 @@ static int32_t TestRemoveSessionServer()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BleAuthChannelPhoneTest, ProcessPhoneActive001, TestSize.Level0)
+HWTEST_F(BleAuthChannelPhoneTest, ProcessPhoneActive001, TestSize.Level1)
 {
     int32_t ret;
     g_testCount = TEST_BEGIN;

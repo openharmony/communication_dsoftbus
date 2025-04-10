@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "wifi_direct_executor_manager.h"
+
+#include "data/link_manager.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 
@@ -25,13 +27,15 @@ std::shared_ptr<WifiDirectExecutor> WifiDirectExecutorManager::Find(const std::s
     if (WifiDirectUtils::IsDeviceId(remoteId)) {
         remoteDeviceId = remoteId;
         remoteMac = WifiDirectUtils::RemoteDeviceIdToMac(remoteId);
+        remoteMac = remoteMac.empty() ?
+            LinkManager::GetInstance().GetRemoteMacByRemoteDeviceId(remoteDeviceId) : remoteMac;
     } else {
         remoteDeviceId = WifiDirectUtils::RemoteMacToDeviceId(remoteId);
         remoteMac = remoteId;
     }
     for (auto &node : executors_) {
-        if ((!remoteDeviceId.empty() && remoteDeviceId == node.remoteDeviceId_)
-            || (!remoteMac.empty() && remoteMac == node.remoteMac_)) {
+        if ((!remoteDeviceId.empty() && remoteDeviceId == node.remoteDeviceId_) ||
+            (!remoteMac.empty() && remoteMac == node.remoteMac_)) {
             node.remoteDeviceId_ = node.remoteDeviceId_.empty() ? remoteDeviceId : node.remoteDeviceId_;
             node.remoteMac_ = node.remoteMac_.empty() ? remoteMac : node.remoteMac_;
             CONN_LOGI(CONN_WIFI_DIRECT, "find remoteId=%{public}s, remoteDeviceId=%{public}s, remoteMac=%{public}s",
@@ -52,6 +56,8 @@ void WifiDirectExecutorManager::Insert(const std::string &remoteId, const std::s
     if (WifiDirectUtils::IsDeviceId(remoteId)) {
         remoteDeviceId = remoteId;
         remoteMac = WifiDirectUtils::RemoteDeviceIdToMac(remoteId);
+        remoteMac = remoteMac.empty() ?
+            LinkManager::GetInstance().GetRemoteMacByRemoteDeviceId(remoteDeviceId) : remoteMac;
     } else {
         remoteDeviceId = WifiDirectUtils::RemoteMacToDeviceId(remoteId);
         remoteMac = remoteId;

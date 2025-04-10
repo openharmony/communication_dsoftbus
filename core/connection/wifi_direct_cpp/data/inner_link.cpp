@@ -62,8 +62,8 @@ InnerLink::~InnerLink()
             }
         }
     }
-    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed &&
-        !GetLegacyReused()) {
+    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() &&
+        GetLinkType() == LinkType::HML) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
         WifiDirectIpManager::GetInstance().ReleaseIpv4(
             GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
@@ -360,7 +360,20 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
         CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
         // fall-through
     }
+    
     link.remotePort = GetRemoteCustomPort();
+    CONN_CHECK_AND_RETURN_LOGI(link.remotePort > 0, CONN_WIFI_DIRECT, "remote custom port is zero");
+    // localIpv6 and remoteIpv6 is only used with remotePort
+    std::string localIpv6 = GetLocalIpv6();
+    std::string remoteIpv6 = GetRemoteIpv6();
+    if (strcpy_s(link.localIpv6, IP_STR_MAX_LEN, localIpv6.c_str()) != EOK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "local custom ip cpy failed, link id=%{public}d", link.linkId);
+        // fall-through
+    }
+    if (strcpy_s(link.remoteIpv6, IP_STR_MAX_LEN, remoteIpv6.c_str()) != EOK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote custom ip cpy failed, link id=%{public}d", link.linkId);
+        // fall-through
+    }
 }
 
 void InnerLink::AddId(int linkId, uint32_t requestId, int pid)
