@@ -907,6 +907,7 @@ HWTEST_F(LNNLedgerMockTest, LL_UPDATE_LOCAL_P2P_IP_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
 {
+    LocalLedgerDepsInterfaceMock localLedgerMock;
     int32_t userId = 0;
     uint32_t len = sizeof(int32_t) - 1;
     EXPECT_EQ(L1GetUserId(nullptr, len), SOFTBUS_INVALID_PARAM);
