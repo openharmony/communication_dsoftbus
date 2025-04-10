@@ -182,12 +182,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
 
     char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
-    ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
-    if (ret == SOFTBUS_NOT_LOGIN) {
-        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-            COMM_LOGE(COMM_PERM, "strcpy_s default uid failed");
-        }
-    }
+    (void)GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
     return TransCheckSourceAccessControl(callingTokenId, myDeviceId, appUserId, accountId, peerDeviceId);
 }
 
@@ -220,12 +215,7 @@ static int32_t CheckServerAccessControl(const AppInfo *appInfo, uint64_t myToken
 {
     char accountId[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
-    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
-    if (ret == SOFTBUS_NOT_LOGIN) {
-        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-            COMM_LOGE(COMM_PERM, "strcpy_s default account uid failed");
-        }
-    }
+    (void)GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appUserId);
     char *tmpMyDeviceId = nullptr;
     char *tmpPeerDeviceId = nullptr;
     char *tmpPeerAccountId = nullptr;
@@ -349,11 +339,11 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
         myTokenType == ACCESS_TOKEN_TYPE_NATIVE)) {
         return SOFTBUS_OK;
     }
-    if (CheckDBinder(appInfo->myData.sessionName) || CheckDBinder(appInfo->peerData.sessionName)) {
-        return SOFTBUS_OK;
-    }
     
     if (peerTokenType != myTokenType) {
+        if (CheckDBinder(appInfo->myData.sessionName) && CheckDBinder(appInfo->peerData.sessionName)) {
+            return SOFTBUS_OK;
+        }
         COMM_LOGE(COMM_PERM, "peerTokenType=%{public}d, myTokenType=%{public}d, not support",
             peerTokenType, myTokenType);
         return SOFTBUS_TRANS_CROSS_LAYER_DENIED;

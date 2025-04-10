@@ -116,6 +116,21 @@ int32_t IsOsAccountForegroundAdapter(const int32_t appUserId, bool &isForeground
 {
     return SoftbusPermissionACLInterfaceMock::GetMock()->IsOsAccountForegroundAdapter(appUserId, isForegroundUser);
 }
+
+int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId)
+{
+    return SoftbusPermissionACLInterfaceMock::GetMock()->GetOsAccountUidByUserId(id, idLen, len, userId);
+}
+
+bool StrStartWith(const char *string, const char *target)
+{
+    return SoftbusPermissionACLInterfaceMock::GetMock()->StrStartWith(string, target);
+}
+
+bool CheckDBinder(const char *sessionName)
+{
+    return SoftbusPermissionACLInterfaceMock::GetMock()->CheckDBinder(sessionName);
+}
 }
 } // namespace OHOS
 
