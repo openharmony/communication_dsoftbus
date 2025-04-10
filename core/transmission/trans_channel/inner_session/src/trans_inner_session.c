@@ -50,7 +50,8 @@ static int32_t InnerMessageHandler(int32_t sessionId, const void *data, uint32_t
 
 static int32_t GetIsClientInfoById(int32_t channelId, int32_t channelType, bool *isClient)
 {
-    AppInfo appInfo = { 0 };
+    AppInfo appInfo = {};
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = SOFTBUS_OK;
     if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
         ret = GetAppInfoById(channelId, &appInfo);

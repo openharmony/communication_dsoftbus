@@ -318,7 +318,7 @@ void TransChannelDeinit(void)
     TransAuthWithParaReqLanePendingDeinit();
     TransFreeLanePendingDeinit();
     TransBindRequestManagerDeinit();
-    TransUkRequestMgrDeInit();
+    TransUkRequestMgrDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -1116,12 +1116,6 @@ static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
     int32_t ret = ReadInt32FromBuf(buf, len, &offset, &accessInfo.userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get userId from buf failed.");
-        return ret;
-    }
-
-    ret = ReadStringFromBuf(buf, len, &offset, accessInfo.accountId, ACCOUNT_UID_LEN_MAX);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get accountId from buf failed.");
         return ret;
     }
 

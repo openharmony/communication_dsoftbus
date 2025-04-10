@@ -166,7 +166,7 @@ void TransSdkTcpDirectTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Level1)
 {
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
@@ -188,7 +188,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest002, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo *channel = TestGetChannelInfo();
@@ -215,7 +215,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetSessionKeyTest003, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetSessionKeyTest003, TestSize.Level1)
 {
     int32_t channelId = 1;
     unsigned int len = 32;
@@ -244,7 +244,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetSessionKeyTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetHandleTest004, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetHandleTest004, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t handle = 0;
@@ -274,7 +274,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetHandleTest004, TestSize.Level0)
  * @tc.require:I5HQGA
  */
  
-HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest005, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest005, TestSize.Level1)
 {
     int32_t channelId = 1;
 
@@ -310,7 +310,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest005, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest006, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest006, TestSize.Level1)
 {
     int32_t channelId = 1;
     TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusMalloc(sizeof(TcpDirectChannelInfo));
@@ -342,7 +342,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level1)
 {
     int32_t fd = g_fd;
     TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusMalloc(sizeof(TcpDirectChannelInfo));
@@ -374,7 +374,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.Level1)
 {
     int32_t channelId = 1;
     TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusMalloc(sizeof(TcpDirectChannelInfo));
@@ -406,7 +406,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.L
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcSetCallBackTest009, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcSetCallBackTest009, TestSize.Level1)
 {
     const IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransTdcSetCallBack(nullptr);
@@ -421,7 +421,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcSetCallBackTest009, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.Level1)
 {
     ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(info != nullptr);
@@ -452,7 +452,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionClosedTest0011, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionClosedTest0011, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
@@ -475,7 +475,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionClosedTest0011, TestSize.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerTest0012, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerTest0012, TestSize.Level1)
 {
     int32_t fd = INVALID_VALUE;
     int32_t ret = TransTdcCreateListener(fd);
@@ -491,7 +491,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerTest0012, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcReleaseFdTest0013, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcReleaseFdTest0013, TestSize.Level1)
 {
     int32_t fd = INVALID_VALUE;
     TransTdcReleaseFd(fd);
@@ -507,7 +507,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcReleaseFdTest0013, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcStopReadTest0014, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcStopReadTest0014, TestSize.Level1)
 {
     int32_t fd = INVALID_VALUE;
     int32_t ret = TransTdcStopRead(fd);
@@ -527,7 +527,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcStopReadTest0014, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenFailedTest0015, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenFailedTest0015, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
@@ -545,7 +545,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenFailedTest0015, TestS
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransDataListInitTest0016, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransDataListInitTest0016, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t fd = 1;
@@ -574,7 +574,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransDataListInitTest0016, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "data";
@@ -605,7 +605,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcSendMessageTest0018, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcSendMessageTest0018, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "data";
@@ -636,7 +636,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendMessageTest0018, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t fd = 1;
@@ -663,7 +663,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020, TestSize.Level1)
 {
     int32_t fd = g_fd;
     int32_t ret = TransTdcCreateListenerWithoutAddTrigger(fd);
@@ -676,7 +676,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020,
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, ClientTransCheckTdcChannelExist001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, ClientTransCheckTdcChannelExist001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = ClientTransCheckTdcChannelExist(1);
@@ -707,7 +707,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransCheckTdcChannelExist001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level1)
 {
     int32_t channelId1 = 1;
     int32_t channelId2 = 2;
@@ -738,7 +738,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t errCode = 1;
@@ -764,7 +764,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransUpdateFdState001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransUpdateFdState001, TestSize.Level1)
 {
     int32_t channelId1 = 1;
     int32_t channelId2 = 2;
@@ -805,7 +805,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransUpdateFdState001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level1)
 {
     int32_t channelId = 1;
     ChannelInfo *channel = TestGetChannelInfo();
@@ -840,7 +840,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest006, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest006, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t errFd = -1;
@@ -872,7 +872,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest006, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest007, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest007, TestSize.Level1)
 {
     int32_t channelId = 1;
     g_tcpDirectChannelInfoList = CreateSoftBusList();
@@ -899,7 +899,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest007, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level1)
 {
     int32_t channelId = 1;
     TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
@@ -927,7 +927,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcSetListenerStateById001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcSetListenerStateById001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t invalidChannelId = 2;
@@ -966,7 +966,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSetListenerStateById001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level1)
 {
     int32_t testFd = 123;
     TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
@@ -998,7 +998,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
-HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.Level0)
+HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));

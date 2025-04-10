@@ -66,6 +66,7 @@ bool AuthIsUkExpired(uint64_t time);
 int32_t UkNegotiateInit(void);
 void UkNegotiateDeinit(void);
 void UkNegotiateSessionInit(void);
+void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const AuthACLInfo *info);
 
 #ifdef __cplusplus
 }

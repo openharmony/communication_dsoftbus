@@ -110,7 +110,7 @@ ChannelInfo *TestGetRightChannelInfo(void)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level1)
 {
     EXPECT_NO_THROW(AddSocketResource(g_sessionName, nullptr));
 
@@ -135,7 +135,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransStatisticsInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -157,7 +157,7 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level1)
 {
     SocketResource *item = nullptr;
     const char *sessionName = "sessionName";
@@ -182,7 +182,7 @@ HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level1)
 {
     int32_t ret = ClientTransStatisticsInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -210,7 +210,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Level1)
 {
     int32_t socketId = TRANS_TEST_ID;
     int64_t len = TRANS_TEST_ID;
@@ -238,7 +238,7 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, PackStatisticsTest001, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, PackStatisticsTest001, TestSize.Level1)
 {
     int32_t ret = PackStatistics(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -256,7 +256,7 @@ HWTEST_F(ClientTransStatisticsTest, PackStatisticsTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSize.Level1)
 {
     CloseChannelAndSendStatistics(nullptr);
     SocketResource *resource = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
@@ -271,7 +271,7 @@ HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSi
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, TestSize.Level1)
 {
     int32_t channelId = INVALID_VALUE;
     int32_t channelType = CHANNEL_TYPE_UDP;
@@ -306,7 +306,7 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
-HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize.Level0)
+HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize.Level1)
 {
     g_channelStatisticsList = nullptr;
     ClientTransStatisticsDeinit();

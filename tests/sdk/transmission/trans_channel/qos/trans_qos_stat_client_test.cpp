@@ -92,7 +92,7 @@ static uint64_t CalSendBits(const std::vector<uint64_t> &rateList)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosStatClientTest, QosStatClientTest001, TestSize.Level0)
+HWTEST_F(TransQosStatClientTest, QosStatClientTest001, TestSize.Level1)
 {
     int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -104,7 +104,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
+HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level1)
 {
     int32_t sendTimes = 10;
     ISessionListener *g_noQosCb = nullptr;
@@ -199,7 +199,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
+HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level1)
 {
     int32_t sendTimes = 10;
     int32_t numChannels = 5;
@@ -252,7 +252,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
+HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level1)
 {
     int32_t sendTimes = 10;
     uint64_t bigSpeed = 0;
@@ -313,7 +313,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
+HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level1)
 {
     int32_t sendTimes = 10;
     uint64_t bigSpeed = 0;

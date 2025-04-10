@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
@@ -48,6 +49,7 @@
 #define SHORT_UDID_HASH_LEN        8
 #define HICHAIN_RETURN_NOT_TRUSTED (-425919748)
 #define PTK_32_BIT_LEN 16
+#define DEFAULT_USERID 0
 
 typedef enum {
     FSM_MSG_RECV_DEVICE_ID,
@@ -1243,7 +1245,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     AnonymizeFree(anonyUdid);
     authParam.udid = authFsm->info.udid;
     authParam.uid = authFsm->info.connInfo.peerUid;
-    authParam.userId = authFsm->info.userId;
+    authParam.userId = GetActiveOsAccountIds();
     authParam.credId = authFsm->info.credId;
     authParam.cb = NULL;
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
@@ -1848,6 +1850,15 @@ bool AuthSessionGetIsSameAccount(int64_t authSeq)
     return info.isSameAccount;
 }
 
+int32_t AuthSessionGetUserId(int64_t authSeq)
+{
+    AuthSessionInfo info = { 0 };
+    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
+        return DEFAULT_USERID;
+    }
+    return info.userId;
+}
 
 int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
 {

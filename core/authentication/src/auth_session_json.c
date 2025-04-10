@@ -1161,7 +1161,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
     }
     PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info);
-    PackUserId(obj, nodeInfo->userId);
+    PackUserId(obj, GetActiveOsAccountIds());
     if ((PackNormalizedData(info, obj, nodeInfo, authSeq) != SOFTBUS_OK) || (PackExternalAuthInfo(obj) != SOFTBUS_OK)) {
         JSON_Delete(obj);
         return NULL;
@@ -2353,7 +2353,7 @@ static void UpdateLocalNetBrMac(void)
 #define USERID_CHECKSUM_HEXSTRING_LEN 9
 static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
 {
-    if (!JSON_AddInt32ToObject(json, USERID, nodeInfo->userId)) {
+    if (!JSON_AddInt32ToObject(json, USERID, GetActiveOsAccountIds())) {
         AUTH_LOGW(AUTH_FSM, "pack userId fail");
     }
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = { 0 };
@@ -2514,6 +2514,10 @@ int32_t UnpackDeviceInfoMessage(
     }
     UnpackUserIdCheckSum(json, nodeInfo);
     JSON_Delete(json);
+    if ((info != NULL) && (nodeInfo->userId != 0) && (nodeInfo->userId != info->userId)) {
+        AUTH_LOGE(AUTH_FSM, "deviceIdUserId=%{public}d, deviceInfoUserId=%{public}d", info->userId, nodeInfo->userId);
+        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+    }
     int32_t stateVersion;
     if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK) {
         nodeInfo->localStateVersion = stateVersion;

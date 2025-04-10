@@ -45,6 +45,8 @@
 #include "trans_udp_negotiation.h"
 #include "wifi_direct_manager.h"
 
+#define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
+
 typedef struct {
     int32_t channelType;
     int32_t businessType;
@@ -161,6 +163,28 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
     return CHANNEL_TYPE_TCP_DIRECT;
 }
 
+static void TransGetAccessInfo(AppInfo *appInfo)
+{
+    int32_t ret = GetAccessInfoBySessionName(appInfo->myData.sessionName, &appInfo->myData.userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get userId fail, ret = %{public}d", ret);
+        return;
+    }
+    uint32_t size = 0;
+    ret = GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appInfo->myData.userId);
+    if (ret != SOFTBUS_OK) {
+        if (ret == SOFTBUS_NOT_LOGIN) {
+            if (strcpy_s(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "strcpy accountId failed");
+            }
+            return;
+        }
+        TRANS_LOGE(TRANS_CTRL, "get current accountId by userId=%{public}d failed, ret=%{public}d",
+            appInfo->myData.userId, ret);
+        return;
+    }
+}
+
 void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, const LaneConnInfo *connInfo)
 {
     if (appInfo == NULL || param == NULL || transInfo == NULL || connInfo == NULL) {
@@ -186,12 +210,7 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
             }
         }
     }
-
-    ret = GetAccessInfoBySessionName(param->sessionName, &appInfo->myData.userId, appInfo->myData.accountId,
-        ACCOUNT_UID_LEN_MAX);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get userId or accountId fail, ret = %{public}d", ret);
-    }
+    TransGetAccessInfo(appInfo);
 }
 
 void GetOsTypeByNetworkId(const char *networkId, int32_t *osType)

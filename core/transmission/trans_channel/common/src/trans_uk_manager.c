@@ -51,11 +51,19 @@ char *PackUkRequest(const AppInfo *appInfo)
         return NULL;
     }
     int32_t userId = appInfo->myData.userId;
+    uint32_t size = 0;
+    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
+    if (ret == SOFTBUS_NOT_LOGIN) {
+        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "strcpy_s default accountId failed");
+        }
+    }
     if (!AddStringToJsonObject(json, "SESSION_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(json, "SOURCE_UDID", sourceUdid) ||
         !AddNumberToJsonObject(json, "SOURCE_USER_ID", userId) ||
         !AddNumber64ToJsonObject(json, "SOURCE_TOKEN_ID", (int64_t)appInfo->callingTokenId) ||
-        !AddStringToJsonObject(json, "SOURCE_ACCOUNT_ID", appInfo->myData.accountId)) {
+        !AddStringToJsonObject(json, "SOURCE_ACCOUNT_ID", accountId)) {
         TRANS_LOGE(TRANS_CTRL, "add data to json failed");
         cJSON_Delete(json);
         return NULL;
@@ -77,7 +85,7 @@ int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionNam
 
     if (!GetJsonObjectStringItem(msg, "SESSION_NAME", sessionName, SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, "SOURCE_UDID", aclInfo->sourceUdid, UDID_BUF_LEN) ||
-        !GetJsonObjectNumberItem(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
+        !GetJsonObjectInt32Item(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
         !GetJsonObjectNumber64Item(msg, "SOURCE_TOKEN_ID", (int64_t *)&(aclInfo->sourceTokenId)) ||
         !GetJsonObjectStringItem(msg, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "parse json data failed");
@@ -128,11 +136,11 @@ int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId)
 
     if (!GetJsonObjectStringItem(msg, "SOURCE_UDID", aclInfo->sourceUdid, UDID_BUF_LEN)  ||
         !GetJsonObjectStringItem(msg, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX) ||
-        !GetJsonObjectNumberItem(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
+        !GetJsonObjectInt32Item(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
         !GetJsonObjectNumber64Item(msg, "SOURCE_TOKEN_ID", (int64_t *)&(aclInfo->sourceTokenId)) ||
         !GetJsonObjectStringItem(msg, "SINK_UDID", aclInfo->sinkUdid, UDID_BUF_LEN) ||
         !GetJsonObjectStringItem(msg, "SINK_ACCOUNT_ID", aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX) ||
-        !GetJsonObjectNumberItem(msg, "SINK_USER_ID", &(aclInfo->sinkUserId)) ||
+        !GetJsonObjectInt32Item(msg, "SINK_USER_ID", &(aclInfo->sinkUserId)) ||
         !GetJsonObjectNumber64Item(msg, "SINK_TOKEN_ID", (int64_t *)&(aclInfo->sinkTokenId)) ||
         !GetJsonObjectNumberItem(msg, "SINK_UK_ID", ukId)) {
         TRANS_LOGE(TRANS_CTRL, "parse json data failed");
@@ -155,7 +163,7 @@ int32_t TransUkRequestMgrInit(void)
     return SOFTBUS_OK;
 }
 
-void TransUkRequestMgrDeInit(void)
+void TransUkRequestMgrDeinit(void)
 {
     if (g_ukRequestManagerList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans uk manager list not init.");
@@ -393,13 +401,12 @@ int32_t GetSourceAndSinkUdid(const char *peerNetWorkId, char *sourceUdid, char *
     return ret;
 }
 
-int32_t FillSinkAclInfo(char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
+int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         sessionName != NULL && aclInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
     int32_t userId = INVALID_USER_ID;
-    int32_t ret = TransGetAclInfoBySessionName(
-        sessionName, (uint64_t *)&aclInfo->sinkTokenId, pid, &userId, aclInfo->sinkAccountId);
+    int32_t ret = TransGetAclInfoBySessionName(sessionName, (uint64_t *)&aclInfo->sinkTokenId, pid, &userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get tokenId and pid failed, ret=%{public}d", ret);
         return ret;
@@ -408,7 +415,7 @@ int32_t FillSinkAclInfo(char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
     ret = GetOsAccountUidByUserId(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
     if (ret == SOFTBUS_NOT_LOGIN) {
         if (strcpy_s(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-            COMM_LOGE(COMM_PERM, "strcpy_s default uid failed");
+            TRANS_LOGE(TRANS_CTRL, "strcpy_s default accountId failed");
         }
     }
     aclInfo->sinkUserId = userId;
@@ -426,7 +433,7 @@ bool SpecialSaCanUseDeviceKey(uint64_t tokenId)
     return SoftBusSaCanUseDeviceKey(tokenId);
 }
 
-bool IsVaildUkInfo(const UkIdInfo *ukIdInfo)
+bool IsValidUkInfo(const UkIdInfo *ukIdInfo)
 {
     return (ukIdInfo != NULL && ukIdInfo->myId != 0 && ukIdInfo->peerId != 0);
 }

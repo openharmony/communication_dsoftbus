@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -662,7 +662,7 @@ uint32_t AuthGetGroupType(const char *udid, const char *uuid)
     return type;
 }
 
-bool AuthIsPotentialTrusted(const DeviceInfo *device)
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     DeviceInfo defaultInfo;
@@ -690,8 +690,8 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return true;
     }
     if (IdServiceIsPotentialTrustedDevice(device->devId, device->accountHash, false) ||
-        IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, true) ||
-        IsPotentialTrustedDeviceDp(device->devId, true)) {
+        IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, isOnlyPointToPoint) ||
+        IsPotentialTrustedDeviceDp(device->devId, isOnlyPointToPoint)) {
         AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }

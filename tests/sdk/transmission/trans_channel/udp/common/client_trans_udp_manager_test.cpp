@@ -134,7 +134,7 @@ static ChannelInfo InitChannelInfo()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
@@ -156,7 +156,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
@@ -189,7 +189,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
@@ -213,7 +213,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenFailedTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenFailedTest001, TestSize.Level1)
 {
     int32_t ret;
     ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
@@ -229,7 +229,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenFailedTest001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest001, TestSize.Level1)
 {
     int32_t ret;
     ret = TransOnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
@@ -242,7 +242,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest002, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
@@ -277,7 +277,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelQosEventTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelQosEventTest001, TestSize.Level1)
 {
     int32_t ret;
     QosTv tvList;
@@ -291,7 +291,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelQosEventTest001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.Level1)
 {
     int32_t ret;
     ret = ClientTransCloseUdpChannel(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
@@ -304,7 +304,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
@@ -341,7 +341,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest001, TestSize.Level1)
 {
     int32_t ret;
     const char *sFileList[] = {
@@ -366,7 +366,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.Level1)
 {
     int32_t ret;
     UdpChannel udpChannel;
@@ -385,7 +385,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
@@ -408,7 +408,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -423,7 +423,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     int32_t ret = ClientEmitFileEvent(channelId);
@@ -436,7 +436,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t ret = ClientEmitFileEvent(channelId);
@@ -455,7 +455,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level1)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     int32_t ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
@@ -475,7 +475,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level1)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     int32_t ret = TransSetUdpChannelTos(channelId);
@@ -488,7 +488,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_ERR_CHANNELID;
     bool isTosSet = false;
@@ -505,7 +505,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
 
@@ -547,7 +547,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     const char *sFileList[] = {
@@ -602,7 +602,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
 
@@ -644,7 +644,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
 
@@ -690,7 +690,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
 
@@ -719,7 +719,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t sessionId = TEST_SESSIONID;
@@ -757,7 +757,7 @@ static void OnRenameFileCb(RenameParam *renameParam)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
@@ -794,7 +794,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
@@ -827,7 +827,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     bool isTosSet = false;

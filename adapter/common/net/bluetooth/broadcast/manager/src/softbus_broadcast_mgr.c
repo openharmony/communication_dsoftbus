@@ -2112,7 +2112,7 @@ int32_t StopBroadcasting(int32_t bcId)
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
 
-    DISC_LOGI(DISC_BROADCAST, "stop service srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
+    DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
         GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
     BroadcastCallback callback = *(g_bcManager[bcId].bcCallback);
     SoftBusMutexUnlock(&g_bcLock);
@@ -2247,7 +2247,8 @@ static int32_t CheckChannelScan(int32_t listenerId, SoftBusBcScanParams *adapter
                 adapterParam->scanWindow);
         } else {
             DISC_LOGI(DISC_BROADCAST, "channel is scanning, add filter");
-            GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
+            ret = GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
+            DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "get bc scan filters failed");
             ret = g_interface[g_interfaceId]->SetScanParams(g_scanManager[listenerId].adapterScanId, adapterParam,
                 adapterFilter, filterSize, SOFTBUS_SCAN_FILTER_CMD_ADD);
             ReleaseSoftBusBcScanFilter(adapterFilter, filterSize);

@@ -948,4 +948,89 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
 }
+
+/**
+ * @tc.name: TransPackBytesWithUkTest001
+ * @tc.desc: TransPackBytesWithUkTest001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransPackBytesWithUkTest001, TestSize.Level1)
+{
+    TdcPacketHead dataHead;
+    const char *data = "test";
+    int32_t bufferLen = DC_MSG_PACKET_HEAD_SIZE + sizeof(UkIdInfo);
+    char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
+    ASSERT_TRUE(buffer != nullptr);
+
+    UkIdInfo ukIdInfo = {
+        .myId = 0,
+        .peerId = 0,
+    };
+
+    int32_t ret = PackBytesWithUk(data, &dataHead, buffer, bufferLen, &ukIdInfo);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+
+    SoftBusFree(buffer);
+}
+
+/**
+ * @tc.name: TransTcpGenUkTest001
+ * @tc.desc: TransTcpGenUkTest001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTcpGenUkTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    AuthACLInfo aclInfo;
+    ret = TransTcpGenUk(channelId, &aclInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_NO_FATAL_FAILURE(OnGenUkSuccess(0, 0));
+
+    EXPECT_NO_FATAL_FAILURE(OnGenUkFailed(0, 0));
+
+    TransDelSessionConnById(channelId);
+}
+/**
+ * @tc.name: TransOpenDataBusUkRequest001
+ * @tc.desc: TransOpenDataBusUkRequest001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransOpenDataBusUkRequest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t flags = 0;
+    uint64_t seq = 0;
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_TRUE(json != nullptr);
+
+    int32_t ret = OpenDataBusUkRequest(channelId, flags, seq, json);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    ret = OpenDataBusUkReply(0, seq, json);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, ret);
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = OpenDataBusUkReply(channelId, seq, json);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    const char *data = "test\0";
+    ret = ProcessUkNegoMessage(channelId, flags, seq, data, strlen(data));
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    TransDelSessionConnById(channelId);
+    cJSON_Delete(json);
+}
 }

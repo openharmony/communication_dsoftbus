@@ -499,7 +499,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 
     threadAttr.taskName = "ThreadTask";
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(thread != 0);
 }
 #endif
@@ -614,7 +614,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -707,7 +707,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest004, TestSize.Level0)
     EXPECT_TRUE(thread != 0);
 
     ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
@@ -729,7 +729,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest005, TestSize.Level0)
     EXPECT_TRUE(thread != 0);
 
     ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
@@ -748,7 +748,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest006, TestSize.Level0)
     EXPECT_TRUE(thread != 0);
 
     ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 #endif
 

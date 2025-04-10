@@ -75,7 +75,7 @@ void TransTcpDirectMockTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData001, TestSize.Level1)
 {
     int32_t bufferSize = 0;
     DataHead *data = reinterpret_cast<DataHead *>(SoftBusCalloc(sizeof(DataHead)));
@@ -95,7 +95,7 @@ HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData002, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData002, TestSize.Level1)
 {
     int32_t bufferSize = 0;
     DataHead *data = reinterpret_cast<DataHead *>(SoftBusCalloc(sizeof(DataHead)));
@@ -115,7 +115,7 @@ HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData003, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData003, TestSize.Level1)
 {
     int32_t bufferSize = 0;
     DataHead *data = reinterpret_cast<DataHead *>(SoftBusCalloc(sizeof(DataHead)));
@@ -135,7 +135,7 @@ HWTEST_F(TransTcpDirectMockTest, BuildNeedAckTlvData003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, BuildDataHead001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, BuildDataHead001, TestSize.Level1)
 {
     int32_t bufferSize = 0;
     DataHead *data = reinterpret_cast<DataHead *>(SoftBusCalloc(sizeof(DataHead)));
@@ -169,7 +169,7 @@ HWTEST_F(TransTcpDirectMockTest, BuildDataHead001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcParseTlv001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcParseTlv001, TestSize.Level1)
 {
     TcpDataPacketHead data;
     data.magicNumber = MAGIC_NUMBER;
@@ -188,7 +188,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcParseTlv001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket001, TestSize.Level1)
 {
     const char *data = "test";
     NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
@@ -203,7 +203,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket002, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket002, TestSize.Level1)
 {
     const char *data = "test";
     NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
@@ -220,7 +220,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket003, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket003, TestSize.Level1)
 {
     const char *data = "test";
     NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
@@ -237,7 +237,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level1)
 {
     TcpDirectChannelInfo channel;
     channel.channelId = 1;
@@ -266,7 +266,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData001, TestSize.Level1)
 {
     int32_t newPkgHeadSize = PKG_HEAD_SIZE;
     const char *buf = "test";
@@ -281,7 +281,7 @@ HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "data";
@@ -314,7 +314,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes002, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes002, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "data";
@@ -343,7 +343,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcAsyncSendBytes001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcAsyncSendBytes001, TestSize.Level1)
 {
     int32_t ret = TransTdcAsyncSendBytes(1, nullptr, 1, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -377,7 +377,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcAsyncSendBytes001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcSendAck001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcSendAck001, TestSize.Level1)
 {
     int32_t channelId = 1;
     TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
@@ -401,7 +401,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSendAck001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcNeedSendAck001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcNeedSendAck001, TestSize.Level1)
 {
     int32_t channelId = 1;
     TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
@@ -424,7 +424,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcNeedSendAck001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcProcessBytesDataByFlag001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcProcessBytesDataByFlag001, TestSize.Level1)
 {
     TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     ASSERT_NE(info, nullptr);
@@ -460,7 +460,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcProcessBytesDataByFlag001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMockTest, TransTdcProcessTlvData001, TestSize.Level0)
+HWTEST_F(TransTcpDirectMockTest, TransTdcProcessTlvData001, TestSize.Level1)
 {
     TransDataListInit();
     TcpDirectChannelInfo channel;
