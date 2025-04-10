@@ -18,6 +18,13 @@
 
 #include "trans_inner_session.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 void TransClientSetInnerListener(const char *pkgName, const char *sessionName, ISessionListenerInner *listener);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // TRANS_INNER_SELF_ADAPTIVE_H
