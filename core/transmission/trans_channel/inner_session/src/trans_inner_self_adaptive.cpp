@@ -15,9 +15,10 @@
 
 #include "ipc_skeleton.h"
 #include "softbus_client_info_manager.h"
+#include "trans_inner_self_adaptive.h"
 #include "trans_inner_session.h"
 
-extern "C" void TransClientSetInnerListener(
+void TransClientSetInnerListener(
     const char *pkgName, const char *sessionName, ISessionListenerInner *listener)
 {
     (void)sessionName;
