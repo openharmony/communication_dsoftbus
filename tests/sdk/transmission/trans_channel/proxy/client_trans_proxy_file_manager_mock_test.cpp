@@ -97,7 +97,7 @@ ClientProxyChannelInfo *TestCreatInfo(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, AddSendListenerInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, AddSendListenerInfoTest001, TestSize.Level1)
 {
     // will free in DelSendListenerInfo
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
@@ -122,7 +122,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, AddSendListenerInfoTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, PackFileTransStartInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, PackFileTransStartInfoTest001, TestSize.Level1)
 {
     uint8_t data[TEST_DATA_LENGTH] = {0};
     FileFrame fileFrame = {
@@ -166,7 +166,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, PackFileTransStartInfoTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, TestSize.Level1)
 {
     uint32_t packetSize = TEST_PACKET_SIZE;
 
@@ -224,7 +224,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, GetAndCheckFileSizeTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, GetAndCheckFileSizeTest001, TestSize.Level1)
 {
     uint64_t fileSize = MAX_FILE_SIZE + 1;
     uint64_t frameNum = 1;
@@ -258,7 +258,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, GetAndCheckFileSizeTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameMiddleTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameMiddleTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -280,7 +280,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameMiddleTest001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameRearTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameRearTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -334,7 +334,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameRearTest001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, SendFileCrcCheckSumTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, SendFileCrcCheckSumTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -363,7 +363,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, SendFileCrcCheckSumTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileCrcCheckSumTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileCrcCheckSumTest001, TestSize.Level1)
 {
     SendListenerInfo fileInfo = {
         .checkSumCRC = TEST_FILE_DATA_SIZE,
@@ -419,7 +419,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileCrcCheckSumTest001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameTest001, TestSize.Level1)
 {
     SendListenerInfo sendInfo = {
         .crc = APP_INFO_FILE_FEATURES_SUPPORT,
@@ -457,7 +457,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameAndSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameAndSendFileTest001, TestSize.Level1)
 {
     SendListenerInfo sendInfo = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -495,7 +495,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameAndSendFileTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClearSendInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClearSendInfoTest001, TestSize.Level1)
 {
     SendListenerInfo testSendInfo = {
         .fd = -1,
@@ -511,7 +511,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClearSendInfoTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, GetFileSizeTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, GetFileSizeTest001, TestSize.Level1)
 {
     uint64_t fileSize = TEST_PACKET_SIZE;
     NiceMock<ClientTransProxyFileManagerInterfaceMock> ClientProxyFileManagerMock;
@@ -531,7 +531,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, GetFileSizeTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ProxyStartSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ProxyStartSendFileTest001, TestSize.Level1)
 {
     SendListenerInfo testSendInfo = {
         .fd = -1,
@@ -560,7 +560,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ProxyStartSendFileTest001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, GetSendListenerInfoByChannelIdTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, GetSendListenerInfoByChannelIdTest001, TestSize.Level1)
 {
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
     EXPECT_TRUE(info != nullptr);
@@ -612,7 +612,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, GetSendListenerInfoByChannelIdTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, CreateSendListenerInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, CreateSendListenerInfoTest001, TestSize.Level1)
 {
     // will free in DelSendListenerInfo
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
@@ -645,7 +645,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, CreateSendListenerInfoTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, HandleFileSendingProcessTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, HandleFileSendingProcessTest001, TestSize.Level1)
 {
     int channelId = TEST_CHANNEL_ID;
     uint32_t fileCnt = 1;
@@ -680,7 +680,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, HandleFileSendingProcessTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyAddChannelInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyAddChannelInfoTest001, TestSize.Level1)
 {
     // will free in ClientTransProxyDelChannelInfo
     ClientProxyChannelInfo *channelInfo = TestCreatInfo();
@@ -702,7 +702,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyAddChannelInfoTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTest001, TestSize.Level1)
 {
     ChannelInfo channel = {
         .channelId = TEST_CHANNEL_ID,
@@ -728,7 +728,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, TransProxySessionDataLenCheckTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, TransProxySessionDataLenCheckTest001, TestSize.Level1)
 {
     uint32_t len = TEST_DATA_LEN;
     SessionPktType type = TRANS_SESSION_MESSAGE;
@@ -755,7 +755,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, TransProxySessionDataLenCheckTest0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t seq = TEST_SEQ;
@@ -773,7 +773,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataT
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyProcSendMsgAckTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyProcSendMsgAckTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t len = TEST_DATA_LEN;

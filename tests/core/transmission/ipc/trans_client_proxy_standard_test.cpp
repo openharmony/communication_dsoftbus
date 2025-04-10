@@ -45,7 +45,7 @@ void TransClientProxyStandardTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize.Level1)
 {
     #define TEST_INVALID 0
     int32_t ret;
@@ -99,7 +99,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize.Level1)
 {
     int32_t ret;
     const char *pkgName = "dms";

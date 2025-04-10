@@ -104,7 +104,7 @@ void ClientTransChannelManagerTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_PROXY);
@@ -127,7 +127,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "test";
@@ -157,7 +157,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "test";
@@ -187,7 +187,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const StreamData data = {0};
@@ -216,7 +216,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendFileTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t fileCnt = 1;
