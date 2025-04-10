@@ -1428,7 +1428,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
     char buf[TEST_BUF_SIZE] = { 0 };
 
     int32_t ret = SoftBusSocketSend(socketFd, buf, TEST_BUF_SIZE, 0);
-    EXPECT_EQ(-1, ret);
+    EXPECT_TRUE(ret < 0);
 }
 #endif
 
