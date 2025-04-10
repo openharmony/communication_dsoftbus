@@ -20,3 +20,17 @@ declare_args() {
     dsoftbus_feature_lnn_wifiservice_dependence = true
   }
 }
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.ability_ability_runtime)) {
+  dsoftbus_get_devicename = false
+} else {
+  dsoftbus_get_devicename = true
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.resourceschedule_device_standby_ext)) {
+  softbus_lnn_lp_feature = false
+} else {
+  softbus_lnn_lp_feature = true
+}
