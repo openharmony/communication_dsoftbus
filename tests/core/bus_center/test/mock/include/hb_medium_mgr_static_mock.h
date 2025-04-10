@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ public:
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual int32_t ConvertBytesToHexString(
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
-    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device) = 0;
+    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint) = 0;
     virtual int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len) = 0;
 };
 class HbMediumMgrInterfaceMock : public HbMediumMgrInterface {
@@ -71,7 +71,7 @@ public:
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD4(ConvertBytesToUpperCaseHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
     MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD1(AuthIsPotentialTrusted, bool (const DeviceInfo *));
+    MOCK_METHOD2(AuthIsPotentialTrusted, bool (const DeviceInfo *, bool));
     MOCK_METHOD3(DecryptUserId, int32_t (NodeInfo *, uint8_t *, uint32_t));
 };
 } // namespace OHOS
