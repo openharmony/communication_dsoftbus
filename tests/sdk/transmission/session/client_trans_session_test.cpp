@@ -355,7 +355,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest02, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level1)
+HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level0)
 {
     const char *pkgName = "package.test";
     int32_t ret = CreateSessionServer(pkgName, g_sessionName, &g_sessionlistener);
@@ -374,7 +374,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level1)
+HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level0)
 {
     int32_t ret = RemoveSessionServer(g_pkgName, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
@@ -390,7 +390,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
+HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level0)
 {
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
@@ -485,7 +485,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest07, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
+HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level0)
 {
     ConnectionAddr addrInfoArr[TRANS_TEST_ADDR_INFO_NUM] = {
         {.type = CONNECTION_ADDR_MAX},

@@ -70,7 +70,7 @@ static VtpStreamOpenParam g_param = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(StreamAdaptorTest, InitAdaptorTest001, TestSize.Level0)
+HWTEST_F(StreamAdaptorTest, InitAdaptorTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
@@ -87,7 +87,7 @@ HWTEST_F(StreamAdaptorTest, InitAdaptorTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(StreamAdaptorTest, EncryptTest001, TestSize.Level0)
+HWTEST_F(StreamAdaptorTest, EncryptTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     StreamData streamData = {
@@ -111,7 +111,7 @@ HWTEST_F(StreamAdaptorTest, EncryptTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(StreamAdaptorTest, EncryptTest002, TestSize.Level0)
+HWTEST_F(StreamAdaptorTest, EncryptTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     StreamData streamData = {

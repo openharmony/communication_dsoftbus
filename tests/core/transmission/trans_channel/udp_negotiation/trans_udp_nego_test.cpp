@@ -1033,7 +1033,7 @@ HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level1)
 {
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
@@ -1056,7 +1056,7 @@ HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level1)
 {
     AppInfo appInfo;
     bool isServerSide = false;
@@ -1070,7 +1070,7 @@ HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     TransUdpChannelMgrDeinit();
@@ -1084,7 +1084,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t openResult = SOFTBUS_NO_INIT;
@@ -1110,7 +1110,7 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t openResult = SOFTBUS_OK;

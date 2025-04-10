@@ -117,7 +117,7 @@ static UdpChannelMgrCb g_testUdpChannelCb = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level1)
 {
     RegisterStreamCb(nullptr);
     UnregisterStreamCb();
@@ -170,7 +170,7 @@ HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level1)
 {
     QosTv *tvList = (QosTv*)SoftBusMalloc(sizeof(QosTv));
     ASSERT_TRUE(tvList != nullptr);
@@ -199,7 +199,7 @@ HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level1)
 {
     StreamSendStats *dataStreamSendStats = (StreamSendStats*)SoftBusMalloc(sizeof(StreamSendStats));
     ASSERT_TRUE(dataStreamSendStats != nullptr);
@@ -242,7 +242,7 @@ HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level1)
 {
     StreamData *dataStreamData = (StreamData*)SoftBusMalloc(sizeof(StreamData));
     ASSERT_TRUE(dataStreamData != nullptr);
@@ -279,7 +279,7 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level1)
 {
     int32_t ret = TransClientInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -328,7 +328,7 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level1)
 {
     int32_t channelId = -1;
     int32_t ret = TransCloseStreamChannel(channelId);
@@ -365,7 +365,7 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level0)
+HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level1)
 {
     RegisterStreamCb(&g_testUdpChannelCb);
     OnQosEvent(TEST_CHANNELID, TEST_CHANNELID, TEST_CHANNELID, nullptr);

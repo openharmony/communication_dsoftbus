@@ -54,7 +54,7 @@ void TransQosTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosTest, QosReportTest001, TestSize.Level0)
+HWTEST_F(TransQosTest, QosReportTest001, TestSize.Level1)
 {
     int32_t ret;
     ret = QosReport(G_INVALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
