@@ -22,7 +22,7 @@ dsoftbus.gni    liufeihu@huawei.com
 Kconfig         liufeihu@huawei.com
 
 [Misc]
-CODEOWNERS      zhangchunxin@huawei.com
+CODEOWNERS      zhangshaojie3@huawei.com
 
 [Conn]
 adapter/common/net/bluetooth/   wangjingen1@huawei.com
@@ -32,7 +32,6 @@ core/connection/ble/            wangjingen1@huawei.com
 core/connection/br/             wangjingen1@huawei.com
 core/connection/wifi_direct/                songzhengteng@huawei.com
 core/connection/wifi_direct_cpp/            songzhengteng@huawei.com
-interfaces/kits/common/softbus_error_code.h         songzhengteng@huawei.com
 tests/adapter/bluetooth/        wangjingen1@huawei.com
 tests/adapter/fuzztest/softbussocketrecv_fuzzer/    songzhengteng@huawei.com
 tests/adapter/unittest/softbus_wifi_api_test.cpp    songzhengteng@huawei.com
@@ -141,7 +140,7 @@ tests/dfx       zhusiyuan2@huawei.com
 
 [DFXInterface]
 hisysevent.yaml             litongxin3@huawei.com
-interfaces/kits/common/softbus_error_code.h     litongxin3@huawei.com
+interfaces/kits/common/softbus_error_code.h     litongxin3@huawei.com songzhengteng@huawei.com
 
 [Framework]
 core/frame/                 zhangfengxi@huawei.com
