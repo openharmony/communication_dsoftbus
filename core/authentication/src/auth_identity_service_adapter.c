@@ -31,6 +31,7 @@
 #define FIELD_AUTHORIZED_SCOPE "authorizedScope"
 #define AUTH_APPID "softbus_auth"
 #define SCOPE_USER 2
+SHORT_UDID_HASH_LEN 8
 
 enum SoftbusCredType {
     ACCOUNT_RELATED = 1,
