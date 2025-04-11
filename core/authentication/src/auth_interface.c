@@ -22,6 +22,7 @@
 #include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
@@ -688,7 +689,8 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
             device->accountHash[0], device->accountHash[1]);
         return true;
     }
-    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, isOnlyPointToPoint) ||
+    if (IdServiceIsPotentialTrustedDevice(device->devId, device->accountHash, false) ||
+        IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, isOnlyPointToPoint) ||
         IsPotentialTrustedDeviceDp(device->devId, isOnlyPointToPoint)) {
         AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
