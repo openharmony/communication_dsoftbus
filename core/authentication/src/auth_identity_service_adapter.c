@@ -406,8 +406,6 @@ static void IdServiceHandleCredAdd(const char *credInfo)
 
 static bool IsExitPotentialTrusted(const char *udid)
 {
-    int32_t userId = GetActiveOsAccountIds();
-    AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
     uint8_t udidHashResult[SHA_256_HASH_LEN] = { 0 };
     uint8_t udidShortHash[SHORT_UDID_HASH_LEN + 1] = { 0 };
     char udidShortHashStr[DISC_MAX_DEVICE_ID_LEN] = { 0 };
@@ -434,23 +432,8 @@ static bool IsExitPotentialTrusted(const char *udid)
     (void)ConvertBytesToHexString(
         udidShortHashStr, HB_SHORT_UDID_HASH_HEX_LEN + 1, (const unsigned char *)udidShortHash, HB_SHORT_UDID_HASH_LEN);
     udidShortHashStr[HB_SHORT_UDID_HASH_HEX_LEN + 1] = '\0';
-    char *credList = NULL;
-    int32_t ret = IdServiceQueryCredential(
-        userId, (const char *)udidShortHashStr, (const char *)accountHexHash, false, &credList);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
-        return false;
-    }
-    char *credId = IdServiceGetCredIdFromCredList(userId, credList);
-    if (credId != NULL) {
-        AUTH_LOGI(AUTH_HICHAIN, "has potential trusted relation");
-        IdServiceDestroyCredentialList(&credList);
-        SoftBusFree(credId);
-        return true;
-    }
-    IdServiceDestroyCredentialList(&credList);
-    SoftBusFree(credId);
-    return false;
+
+    return IdServiceIsPotentialTrustedDevice(udidShortHashStr, accountHexHash, false);
 }
 
 static void OnCredAdd(const char *credId, const char *credInfo)
