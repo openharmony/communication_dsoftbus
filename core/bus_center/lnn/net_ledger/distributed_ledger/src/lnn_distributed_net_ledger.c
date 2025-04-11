@@ -698,7 +698,10 @@ static void UpdateNewNodeAccountHash(NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "long to string fail");
         return;
     }
-    LNN_LOGD(LNN_LEDGER, "accountString=%{public}s", accountString);
+    char *anonyAccountId = NULL;
+    Anonymize(accountString, &anonyAccountId);
+    LNN_LOGI(LNN_LEDGER, "accountString=%{public}s", AnonymizeWrapper(anonyAccountId));
+    AnonymizeFree(anonyAccountId);
     int ret = SoftBusGenerateStrHash((uint8_t *)accountString,
         strlen(accountString), (unsigned char *)info->accountHash);
     if (ret != SOFTBUS_OK) {
