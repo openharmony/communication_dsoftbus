@@ -351,6 +351,8 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
     }
     if (scanChannel->scanCallback == NULL || scanChannel->scanCallback->OnReportScanDataCallback == NULL) {
         DISC_LOGE(DISC_BLE_ADAPTER, "scanner callback is null");
+        SoftBusFree(scanResult.data.bcData.payload);
+        SoftBusFree(scanResult.data.rspData.payload);
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
