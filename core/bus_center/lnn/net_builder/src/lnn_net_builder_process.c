@@ -378,12 +378,8 @@ static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, Au
         msgPara->nodeInfo->userId, sessionKey, false);
 }
 
-static int32_t ProcessDeviceVerifyPass(const void *para)
+static int32_t CheckParamValid(const DeviceVerifyPassMsgPara *msgPara)
 {
-    int32_t rc;
-    LnnConnectionFsm *connFsm = NULL;
-    const DeviceVerifyPassMsgPara *msgPara = (const DeviceVerifyPassMsgPara *)para;
-
     if (msgPara == NULL) {
         LNN_LOGW(LNN_BUILDER, "para is null");
         return SOFTBUS_INVALID_PARAM;
@@ -393,8 +389,34 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         SoftBusFree((void *)msgPara);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P ||
-            msgPara->authHandle.type == AUTH_LINK_TYPE_SESSION) {
+    return SOFTBUS_OK;
+}
+
+static int32_t GetPeerDeviceUdid(char *peerNetworkId, char *peerUdid, uint32_t udidLen)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(peerNetworkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote node info fail");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (strcpy_s(peerUdid, udidLen, info.deviceInfo.deviceUdid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy udid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ProcessDeviceVerifyPass(const void *para)
+{
+    int32_t rc;
+    LnnConnectionFsm *connFsm = NULL;
+    const DeviceVerifyPassMsgPara *msgPara = (const DeviceVerifyPassMsgPara *)para;
+
+    if (CheckParamValid(msgPara) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (msgPara->authHandle.type == AUTH_LINK_TYPE_ENHANCED_P2P || msgPara->authHandle.type == AUTH_LINK_TYPE_SESSION) {
         LNN_LOGI(LNN_BUILDER, "auth type is %{public}d, start dup ble.", msgPara->authHandle.type);
         rc = ProcessEnhancedP2pDupBle(msgPara);
         if (msgPara->nodeInfo != NULL) {
@@ -411,6 +433,13 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
             break;
         }
         if (LnnIsNeedCleanConnectionFsm(msgPara->nodeInfo, msgPara->addr.type)) {
+            rc = CreatePassiveConnectionFsm(msgPara);
+            break;
+        }
+        char peerUdid[UDID_BUF_LEN] = { 0 };
+        if (GetPeerDeviceUdid(connFsm->connInfo.peerNetworkId, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK &&
+            strcmp(peerUdid, msgPara->nodeInfo->deviceInfo.deviceUdid) != 0) {
+            LnnSendLeaveRequestToConnFsm(connFsm);
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
