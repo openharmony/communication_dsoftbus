@@ -66,7 +66,7 @@ static void RetryRegCredMgr(void *para)
 {
     (void)para;
     if (IdServiceRegCredMgr() != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_INIT, "retry reg credential manager failed after 5s");
+        AUTH_LOGE(AUTH_INIT, "retry reg credential manager failed after 5s");
     }
 }
 
