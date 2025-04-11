@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -976,8 +976,8 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
     if (LnnGetOsTypeByNetworkId(info->networkId, &osType)) {
         LNN_LOGE(LNN_LEDGER, "get remote osType fail");
     }
-    if (osType != HO_OS_TYPE) {
-        LNN_LOGD(LNN_LEDGER, "not pend br connection");
+    if (osType == OH_OS_TYPE) {
+        LNN_LOGI(LNN_LEDGER, "not pend br connection");
         return;
     }
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
