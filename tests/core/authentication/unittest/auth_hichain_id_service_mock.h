@@ -43,6 +43,7 @@ public:
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
     virtual void LnnHbOnTrustedRelationIncreased(int32_t groupType) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
 };
 
 class AuthHichainIdServiceInterfaceMock : public AuthHichainIdServiceInterface {
@@ -65,6 +66,7 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
     MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t(const char *));
     MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void(int32_t));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
 };
 
 } // namespace OHOS
