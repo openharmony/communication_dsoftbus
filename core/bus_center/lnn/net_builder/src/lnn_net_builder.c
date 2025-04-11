@@ -245,6 +245,31 @@ static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam, uint32_t reques
     authVerifyParam->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
 }
 
+static int32_t UpdateConnFsmBleMac(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para,
+    bool needReportFailure)
+{
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE && para->isForceJoin) {
+        if (strcpy_s(connFsm->connInfo.addr.info.ble.bleMac, BT_MAC_LEN, para->addr.info.ble.bleMac) != EOK) {
+            LNN_LOGE(LNN_BUILDER, "force join update bleMac failed");
+            if (needReportFailure) {
+                LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+            }
+            return SOFTBUS_STRCPY_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void FlushDeviceInfo(const LnnConnectionFsm *connFsm)
+{
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN && connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH) {
+        return;
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    (void)AuthFlushDevice(uuid);
+}
+
 int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     int32_t ret = SOFTBUS_OK;
@@ -266,12 +291,9 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     connFsm->connInfo.infoReport = para->infoReport;
     connFsm->isSession = para->isSession ? true : connFsm->isSession;
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
-        if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN || connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH) {
-            char uuid[UUID_BUF_LEN] = {0};
-            (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID,
-                uuid, UUID_BUF_LEN);
-            (void)AuthFlushDevice(uuid);
-        }
+        FlushDeviceInfo(connFsm);
+        ret = UpdateConnFsmBleMac(connFsm, para, needReportFailure);
+        LNN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, LNN_BUILDER, "update bleMac failed");
         if ((LnnSendJoinRequestToConnFsm(connFsm, para->isForceJoin) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
