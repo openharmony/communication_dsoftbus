@@ -260,5 +260,10 @@ bool GetSecEnhanceFlag(void)
 {
     return GetAuthHichainMockInterface()->GetSecEnhanceFlag();
 }
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return GetAuthHichainMockInterface()->GetActiveOsAccountIds();
+}
 } // extern "C"
 } // namespace OHOS

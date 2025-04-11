@@ -36,7 +36,6 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
-#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
@@ -1245,7 +1244,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     AnonymizeFree(anonyUdid);
     authParam.udid = authFsm->info.udid;
     authParam.uid = authFsm->info.connInfo.peerUid;
-    authParam.userId = GetActiveOsAccountIds();
+    authParam.userId = authFsm->info.userId;
     authParam.credId = authFsm->info.credId;
     authParam.cb = NULL;
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
