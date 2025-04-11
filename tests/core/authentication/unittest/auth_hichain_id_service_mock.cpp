@@ -113,5 +113,10 @@ void LnnHbOnTrustedRelationIncreased(int32_t groupType)
     return GetAuthHichainIdServiceInterfaceMock()->LnnHbOnTrustedRelationIncreased(groupType);
 }
 
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnGetLocalByteInfo(key, info, len);
+}
+
 } // extern "C"
 } // namespace OHOS
