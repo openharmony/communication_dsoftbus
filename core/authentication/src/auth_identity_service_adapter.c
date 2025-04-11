@@ -31,7 +31,6 @@
 #define FIELD_AUTHORIZED_SCOPE "authorizedScope"
 #define AUTH_APPID "softbus_auth"
 #define SCOPE_USER 2
-#define SHORT_UDID_HASH_LEN 8
 
 enum SoftbusCredType {
     ACCOUNT_RELATED = 1,
@@ -408,7 +407,6 @@ static void IdServiceHandleCredAdd(const char *credInfo)
 static bool IsExitPotentialTrusted(const char *udid)
 {
     uint8_t udidHashResult[SHA_256_HASH_LEN] = { 0 };
-    uint8_t udidShortHash[SHORT_UDID_HASH_LEN + 1] = { 0 };
     char udidShortHashStr[DISC_MAX_DEVICE_ID_LEN] = { 0 };
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     char accountHexHash[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -426,12 +424,8 @@ static bool IsExitPotentialTrusted(const char *udid)
         AUTH_LOGE(AUTH_HICHAIN, "gen udid hash err");
         return false;
     }
-    if (memcpy_s(udidShortHash, SHORT_UDID_HASH_LEN, udidHashResult, SHORT_UDID_HASH_LEN) != EOK) {
-        AUTH_LOGE(AUTH_HICHAIN, "memcpy_s fail");
-        return false;
-    }
-    (void)ConvertBytesToHexString(
-        udidShortHashStr, HB_SHORT_UDID_HASH_HEX_LEN + 1, (const unsigned char *)udidShortHash, HB_SHORT_UDID_HASH_LEN);
+    (void)ConvertBytesToHexString(udidShortHashStr, HB_SHORT_UDID_HASH_HEX_LEN + 1,
+        (const unsigned char *)udidHashResult, HB_SHORT_UDID_HASH_LEN);
     udidShortHashStr[HB_SHORT_UDID_HASH_HEX_LEN + 1] = '\0';
 
     return IdServiceIsPotentialTrustedDevice(udidShortHashStr, accountHexHash, false);
@@ -458,7 +452,7 @@ static void OnCredDelete(const char *credId, const char *credInfo)
         AUTH_LOGE(AUTH_HICHAIN, "id service parse json fail");
         return;
     }
-    if (IsExitPotentialTrusted(udid)) {
+    if (IsExitPotentialTrusted(info.udid)) {
         AUTH_LOGI(AUTH_HICHAIN, "id service no need delete");
         return;
     }
