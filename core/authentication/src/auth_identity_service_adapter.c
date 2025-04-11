@@ -375,14 +375,13 @@ static bool IsLocalCredInfo(const char *udid)
     char localUdid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get local udid fail");
-        return true;
+        return false;
     }
-    return (strcmp(udid, localUdid) == 0);
+    return strcmp(udid, localUdid) == 0;
 }
 
 static void IdServiceHandleCredAdd(const char *credInfo)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "credInfo=%{public}s", credInfo);
     SoftBusCredInfo info = { 0 };
     int32_t localDevTypeId = 0;
     if (GetCredInfoFromJson(credInfo, &info) != SOFTBUS_OK) {
@@ -405,6 +404,55 @@ static void IdServiceHandleCredAdd(const char *credInfo)
     LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
 }
 
+static bool IsExitPotentialTrusted(const char *udid)
+{
+    int32_t userId = GetActiveOsAccountIds();
+    AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
+    uint8_t udidHashResult[SHA_256_HASH_LEN] = { 0 };
+    uint8_t udidShortHash[SHORT_UDID_HASH_LEN + 1] = { 0 };
+    char udidShortHashStr[DISC_MAX_DEVICE_ID_LEN] = { 0 };
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    char accountHexHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get local account hash fail");
+        return false;
+    }
+    if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, localAccountHash, SHA_256_HASH_LEN) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "convert account hash fail");
+        return false;
+    }
+    if (SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), (unsigned char *)udidHashResult) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "gen udid hash err");
+        return false;
+    }
+    if (memcpy_s(udidShortHash, SHORT_UDID_HASH_LEN, udidHashResult, SHORT_UDID_HASH_LEN) != EOK) {
+        AUTH_LOGE(AUTH_HICHAIN, "memcpy_s fail");
+        return false;
+    }
+    (void)ConvertBytesToHexString(
+        udidShortHashStr, HB_SHORT_UDID_HASH_HEX_LEN + 1, (const unsigned char *)udidShortHash, HB_SHORT_UDID_HASH_LEN);
+    udidShortHashStr[HB_SHORT_UDID_HASH_HEX_LEN + 1] = '\0';
+    char *credList = NULL;
+    int32_t ret = IdServiceQueryCredential(
+        userId, (const char *)udidShortHashStr, (const char *)accountHexHash, false, &credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
+        return false;
+    }
+    char *credId = IdServiceGetCredIdFromCredList(userId, credList);
+    if (credId != NULL) {
+        AUTH_LOGI(AUTH_HICHAIN, "has potential trusted relation");
+        IdServiceDestroyCredentialList(&credList);
+        SoftBusFree(credId);
+        return true;
+    }
+    IdServiceDestroyCredentialList(&credList);
+    SoftBusFree(credId);
+    return false;
+}
+
 static void OnCredAdd(const char *credId, const char *credInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "OnCredAdd enter");
@@ -424,6 +472,10 @@ static void OnCredDelete(const char *credId, const char *credInfo)
     SoftBusCredInfo info = { 0 };
     if (GetCredInfoFromJson(credInfo, &info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "id service parse json fail");
+        return;
+    }
+    if (IsExitPotentialTrusted(udid)) {
+        AUTH_LOGI(AUTH_HICHAIN, "id service no need delete");
         return;
     }
     LnnDeleteSpecificTrustedDevInfo(info.udid, GetActiveOsAccountIds());
@@ -451,9 +503,12 @@ int32_t IdServiceRegCredMgr(void)
     const CredManager *credManager = IdServiceGetCredMgrInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI, AUTH_HICHAIN,
         "hichain identity service not initialized");
-
-    if ((credManager->registerChangeListener != NULL) &&
-        credManager->registerChangeListener(AUTH_APPID, &g_regCredChangeListener) != SOFTBUS_OK) {
+    
+    if (credManager->registerChangeListener == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service register listener is NULL");
+        return SOFTBUS_AUTH_REG_CRED_CHANGE_FAIL;
+    }
+    if (credManager->registerChangeListener(AUTH_APPID, &g_regCredChangeListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "id service reg cred change fail");
         return SOFTBUS_AUTH_REG_CRED_CHANGE_FAIL;
     }
