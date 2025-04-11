@@ -59,6 +59,7 @@ enum {
     NSTACKX_INIT_STATE_START = 0,
     NSTACKX_INIT_STATE_ONGOING,
     NSTACKX_INIT_STATE_DONE,
+    NSTACKX_INIT_STATE_DESTROYING,
 };
 
 #ifdef DFINDER_USE_MINI_NSTACKX
@@ -77,11 +78,13 @@ static pthread_mutex_t g_threadInitLock = PTHREAD_MUTEX_INITIALIZER;
 static NSTACKX_Parameter g_parameter;
 static atomic_uint_fast8_t g_nstackInitState = NSTACKX_INIT_STATE_START;
 static atomic_uint_fast8_t g_nstackThreadInitState = NSTACKX_INIT_STATE_START;
+volatile int g_usingCount = 0;
 static bool g_isNotifyPerDevice;
 
 #define EVENT_COUNT_RATE_INTERVAL 2000 /* 2 SECONDS */
 #define MAX_EVENT_PROCESS_NUM_PER_INTERVAL 700
 #define MAX_CONTINUOUS_BUSY_INTERVAL_NUM 20
+#define USING_SLEEP_TIME 100000 /* 100 ms */
 
 typedef struct {
     uint32_t epollWaitTimeoutCount;
@@ -356,6 +359,21 @@ static int32_t InternalInit(EpollDesc epollfd, uint32_t maxDeviceNum)
     return ret;
 }
 
+static bool IsThreadInitDone(void)
+{
+    if (PthreadMutexLock(&g_threadInitLock) != 0) {
+        DFINDER_LOGE(TAG, "Failed to lock");
+        return false;
+    }
+    if (g_nstackThreadInitState < NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        (void)PthreadMutexUnlock(&g_threadInitLock);
+        return false;
+    }
+    (void)PthreadMutexUnlock(&g_threadInitLock);
+    return true;
+}
+
 #ifdef DFINDER_USE_MINI_NSTACKX
 static void ReportMainLoopStopInner(void *argument)
 {
@@ -365,8 +383,7 @@ static void ReportMainLoopStopInner(void *argument)
 
 static void ReportMainLoopStop(void)
 {
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, ReportMainLoopStopInner, NULL) != NSTACKX_EOK) {
@@ -423,14 +440,25 @@ int32_t NSTACKX_ThreadInit(void)
 
 void NSTACKX_ThreadDeinit(void)
 {
-    if (g_nstackThreadInitState == NSTACKX_INIT_STATE_START) {
-        return;
-    }
-    DFINDER_LOGI(TAG, "nstack begin deinit thread");
     if (PthreadMutexLock(&g_threadInitLock) != 0) {
         DFINDER_LOGE(TAG, "Failed to lock");
         return;
     }
+    if (g_nstackThreadInitState == NSTACKX_INIT_STATE_START) {
+        (void)PthreadMutexUnlock(&g_threadInitLock);
+        return;
+    }
+    DFINDER_LOGI(TAG, "nstack begin deinit thread");
+    g_nstackThreadInitState = NSTACKX_INIT_STATE_DESTROYING;
+    while (g_usingCount != 0) {
+        (void)PthreadMutexUnlock(&g_threadInitLock);
+        usleep(USING_SLEEP_TIME);
+        if (PthreadMutexLock(&g_threadInitLock) != 0) {
+            DFINDER_LOGE(TAG, "Failed to lock");
+            return;
+        }
+    }
+
     if (g_validTidFlag) {
         g_terminateFlag = NSTACKX_TRUE;
 #ifndef DFINDER_USE_MINI_NSTACKX
@@ -445,6 +473,7 @@ void NSTACKX_ThreadDeinit(void)
     }
     g_nstackThreadInitState = NSTACKX_INIT_STATE_START;
     (void)PthreadMutexUnlock(&g_threadInitLock);
+    DFINDER_LOGI(TAG, "nstack deinit thread end");
 }
 
 #if !defined(DFINDER_USE_MINI_NSTACKX) && !defined(DFINDER_ENABLE_COAP_LOG)
@@ -633,8 +662,7 @@ static void DeviceDiscoverStopInner(void *argument)
 
 int32_t NSTACKX_StartDeviceFind(void)
 {
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, DeviceDiscoverInner, NULL) != NSTACKX_EOK) {
@@ -647,7 +675,7 @@ int32_t NSTACKX_StartDeviceFind(void)
 int32_t NSTACKX_StartDeviceFindAn(uint8_t mode)
 {
     Coverity_Tainted_Set((void *)&mode);
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
     }
@@ -661,8 +689,7 @@ int32_t NSTACKX_StartDeviceFindAn(uint8_t mode)
 
 int32_t NSTACKX_StopDeviceFind(void)
 {
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, DeviceDiscoverStopInner, NULL) != NSTACKX_EOK) {
@@ -720,8 +747,7 @@ static int32_t CheckDiscoverySettings(const NSTACKX_DiscoverySettings *discovery
 int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySettings *discoverySettings)
 {
     DFINDER_LOGI(TAG, "begin to NSTACKX_StartDeviceDiscovery!");
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (CheckDiscoverySettings(discoverySettings) != NSTACKX_EOK) {
@@ -816,8 +842,7 @@ static int32_t CheckDiscConfig(const DFinderDiscConfig *discConfig)
 int32_t NSTACKX_StartDeviceDiscoveryWithConfig(const DFinderDiscConfig *discConfig)
 {
     DFINDER_LOGI(TAG, "dfinder start disc with config");
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "nstackx ctrl is not initialed yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (CheckDiscConfig(discConfig) != NSTACKX_EOK) {
@@ -1054,20 +1079,8 @@ static void RegisterDeviceV2(void *arg)
 
 #define NSTACKX_MAX_LOCAL_IFACE_NUM 10
 
-static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
+static int32_t RegDeviceInfoWithTypeInner(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
 {
-    if (localDeviceInfo == NULL || localDeviceInfo->name == NULL ||
-        localDeviceInfo->deviceId == NULL || localDeviceInfo->ifNums > NSTACKX_MAX_LOCAL_IFACE_NUM ||
-        (localDeviceInfo->ifNums != 0 && localDeviceInfo->localIfInfo == NULL) ||
-        CheckInterfaceInfo(localDeviceInfo->localIfInfo, localDeviceInfo->ifNums) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "invalid args");
-        return NSTACKX_EINVAL;
-    }
-
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        return (int32_t)RegisterLocalDeviceV2(localDeviceInfo, registerType);
-    }
-
     struct RegDeviceInfo regInfo;
     if (SemInit(&regInfo.wait, 0, 0)) {
         DFINDER_LOGE(TAG, "sem init fail");
@@ -1087,6 +1100,45 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
     SemWait(&regInfo.wait);
     SemDestroy(&regInfo.wait);
     return regInfo.err;
+}
+
+static inline void SubUsingCount(void)
+{
+    if (PthreadMutexLock(&g_threadInitLock) != 0) {
+        DFINDER_LOGE(TAG, "Failed to lock");
+        return;
+    }
+    if (g_usingCount != 0) {
+        g_usingCount--;
+    }
+    (void)PthreadMutexUnlock(&g_threadInitLock);
+}
+
+static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
+{
+    if (localDeviceInfo == NULL || localDeviceInfo->name == NULL ||
+        localDeviceInfo->deviceId == NULL || localDeviceInfo->ifNums > NSTACKX_MAX_LOCAL_IFACE_NUM ||
+        (localDeviceInfo->ifNums != 0 && localDeviceInfo->localIfInfo == NULL) ||
+        CheckInterfaceInfo(localDeviceInfo->localIfInfo, localDeviceInfo->ifNums) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "invalid args");
+        return NSTACKX_EINVAL;
+    }
+
+    int32_t ret;
+    if (PthreadMutexLock(&g_threadInitLock) != 0) {
+        DFINDER_LOGE(TAG, "Failed to lock");
+        return NSTACKX_EFAILED;
+    }
+    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+        ret = (int32_t)RegisterLocalDeviceV2(localDeviceInfo, registerType);
+        (void)PthreadMutexUnlock(&g_threadInitLock);
+        return ret;
+    }
+    g_usingCount++;
+    (void)PthreadMutexUnlock(&g_threadInitLock);
+    ret = RegDeviceInfoWithTypeInner(localDeviceInfo, registerType);
+    SubUsingCount();
+    return ret;
 }
 
 int32_t NSTACKX_RegisterDeviceV2(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo)
@@ -1144,7 +1196,7 @@ static int32_t NSTACKX_CapabilityHandle(uint32_t capabilityBitmapNum, uint32_t c
         return NSTACKX_EINVAL;
     }
 
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         if (handle == RegisterCapabilityInner) {
             return (int32_t)SetLocalDeviceCapability(capabilityBitmapNum, capabilityBitmap);
         }
@@ -1196,19 +1248,12 @@ static void SetMaxDeviceNumInner(void *argument)
     SemPost(&msg->wait);
 }
 
-int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
+int32_t NSTACKX_SetMaxDeviceNumInner(uint32_t maxDeviceNum)
 {
     SetMaxDeviceNumMsg msg = {
         .maxDeviceNum = maxDeviceNum,
     };
-    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
-        return NSTACKX_EFAILED;
-    }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        SetMaxDeviceNum(maxDeviceNum);
-        return NSTACKX_EOK;
-    }
+
     if (SemInit(&msg.wait, 0, 0)) {
         DFINDER_LOGE(TAG, "Failed to init sem!");
         return NSTACKX_EFAILED;
@@ -1221,6 +1266,30 @@ int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
     SemWait(&msg.wait);
     SemDestroy(&msg.wait);
     return NSTACKX_EOK;
+}
+
+int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
+{
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+
+    if (PthreadMutexLock(&g_threadInitLock) != 0) {
+        DFINDER_LOGE(TAG, "Failed to lock");
+        return NSTACKX_EFAILED;
+    }
+    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+        SetMaxDeviceNum(maxDeviceNum);
+        (void)PthreadMutexUnlock(&g_threadInitLock);
+        return NSTACKX_EOK;
+    }
+    g_usingCount++;
+    (void)PthreadMutexUnlock(&g_threadInitLock);
+
+    int32_t ret = NSTACKX_SetMaxDeviceNumInner(maxDeviceNum);
+    SubUsingCount();
+    return ret;
 }
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
@@ -1281,7 +1350,7 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
         DFINDER_LOGE(TAG, "serviceData (%u) exceed max number", strlen(serviceData));
         return NSTACKX_EINVAL;
     }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         return SetLocalDeviceServiceData(serviceData);
     }
 
@@ -1330,7 +1399,7 @@ int32_t NSTACKX_RegisterBusinessData(const char *businessData)
         DFINDER_LOGE(TAG, "businessData (%u) exceed max data len", strlen(businessData));
         return NSTACKX_EINVAL;
     }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         return (int32_t)SetLocalDeviceBusinessData(businessData, NSTACKX_TRUE);
     }
 
@@ -1382,7 +1451,7 @@ int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
         DFINDER_LOGE(TAG, "extendServiceData (%u) exceed max number", strlen(extendServiceData));
         return NSTACKX_EINVAL;
     }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         return SetLocalDeviceExtendServiceData(extendServiceData);
     }
 
@@ -1467,8 +1536,7 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
 #ifndef DFINDER_USE_MINI_NSTACKX
     int32_t ret = NSTACKX_EOK;
     DFINDER_LOGD(TAG, "NSTACKX_SendMsgDirect");
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (ipaddr == NULL) {
@@ -1547,8 +1615,7 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
     Coverity_Tainted_Set((void *)&len);
 #if defined(DFINDER_SAVE_DEVICE_LIST) && !defined(DFINDER_USE_MINI_NSTACKX)
     int32_t ret = NSTACKX_EOK;
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (NSTACKX_SendMsgParamCheck(moduleName, deviceId, data, len) != NSTACKX_EOK) {
@@ -1634,8 +1701,7 @@ static int32_t CheckResponseSettings(const NSTACKX_ResponseSettings *responseSet
 int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
 {
     DFINDER_LOGI(TAG, "begin to NSTACKX_SendDiscoveryRsp!");
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (CheckResponseSettings(responseSettings) != NSTACKX_EOK) {
@@ -1679,28 +1745,15 @@ static void GetDeviceListInner(void *argument)
     GetDeviceList(message->deviceList, message->deviceCountPtr, true);
     SemPost(&message->wait);
 }
-#endif
 
-int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr)
+int32_t NSTACKX_GetDeviceListInner(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr)
 {
-#ifdef DFINDER_SAVE_DEVICE_LIST
     GetDeviceListMessage message = {
         .deviceList = deviceList,
         .deviceCountPtr = deviceCountPtr,
     };
-    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
-        return NSTACKX_EFAILED;
-    }
-    if (deviceList == NULL || deviceCountPtr == NULL) {
-        DFINDER_LOGE(TAG, "Device list or count pointer is NULL");
-        return NSTACKX_EINVAL;
-    }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        GetDeviceList(deviceList, deviceCountPtr, true);
-        return NSTACKX_EOK;
-    }
     if (SemInit(&message.wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
         return NSTACKX_EFAILED;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, GetDeviceListInner, &message) != NSTACKX_EOK) {
@@ -1711,14 +1764,41 @@ int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCo
     SemWait(&message.wait);
     SemDestroy(&message.wait);
     return NSTACKX_EOK;
+}
+#endif
+
+int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr)
+{
+#ifdef DFINDER_SAVE_DEVICE_LIST
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+    if (deviceList == NULL || deviceCountPtr == NULL) {
+        DFINDER_LOGE(TAG, "Device list or count pointer is NULL");
+        return NSTACKX_EINVAL;
+    }
+    if (PthreadMutexLock(&g_threadInitLock) != 0) {
+        DFINDER_LOGE(TAG, "Failed to lock");
+        return NSTACKX_EFAILED;
+    }
+    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        (void)PthreadMutexLock(&g_threadInitLock);
+        return NSTACKX_EFAILED;
+    }
+    g_usingCount++;
+    (void)PthreadMutexUnlock(&g_threadInitLock);
+
+    int32_t ret = NSTACKX_GetDeviceListInner(deviceList, deviceCountPtr);
+    SubUsingCount();
+    return ret;
 #else
     (void)deviceList;
     (void)deviceCountPtr;
-
     DFINDER_LOGE(TAG, "device list not supported");
-
     return NSTACKX_EFAILED;
-#endif /* END OF DFINDER_SAVE_DEVICE_LIST */
+#endif
 }
 
 void NotifyDeviceListChanged(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
@@ -1795,8 +1875,7 @@ static void DeviceDiscoverInnerRestart(void *argument)
 
 void NSTACKX_StartDeviceFindRestart(void)
 {
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+    if (!IsThreadInitDone()) {
         return;
     }
     DFINDER_LOGI(TAG, "start device find for restart");
@@ -1872,7 +1951,7 @@ int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func)
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
     }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         return SetEventFuncDirectly(softobj, func);
     }
 
@@ -1958,7 +2037,7 @@ int32_t NSTACKX_SendNotification(const NSTACKX_NotificationConfig *config)
 {
     DFINDER_LOGI(TAG, "begin to call NSTACKX_SendNotification");
 
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+    if (!IsThreadInitDone()) {
         DFINDER_LOGE(TAG, "dfinder not inited");
         return NSTACKX_EFAILED;
     }
@@ -2009,8 +2088,7 @@ int32_t NSTACKX_StopSendNotification(uint8_t businessType)
 {
     DFINDER_LOGI(TAG, "begin to call NSTACKX_StopSendNotification, business type: %hhu", businessType);
 
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "dfinder not inited");
+    if (!IsThreadInitDone()) {
         return NSTACKX_EFAILED;
     }
     if (businessType >= NSTACKX_BUSINESS_TYPE_MAX) {
