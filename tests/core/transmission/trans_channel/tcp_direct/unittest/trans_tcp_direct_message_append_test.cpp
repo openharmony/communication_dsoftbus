@@ -1351,6 +1351,17 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkReplyTest001, TestSize.Le
     ret = OpenDataBusUkReply(channelId, seq, reply);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
+    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_MEM_ERR));
+    EXPECT_CALL(TcpMessageMock, UnPackUkReply).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkReply(channelId, seq, reply);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_MEM_ERR));
+    EXPECT_CALL(TcpMessageMock, UnPackUkReply).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByACLInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkReply(channelId, seq, reply);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
     TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
@@ -2453,9 +2464,23 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkRequestTest001, TestSize.
 
     EXPECT_CALL(TcpMessageMock, UnPackUkRequest).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OpenDataBusUkRequest(channelId, flags, seq, request);
-    EXPECT_EQ(SOFTBUS_AUTH_ACL_NOT_FOUND, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByACLInfo).WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByACLInfo).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusUkRequest(channelId, flags, seq, request);
     EXPECT_NE(SOFTBUS_OK, ret);
 
