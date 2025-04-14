@@ -85,4 +85,33 @@ HWTEST_F(SoftbusTimeTest, SoftBusTimerTest002, TestSize.Level1)
     const char *formated2 = SoftBusFormatTimestamp(timestamp2);
     EXPECT_STREQ(formated2, "2024-01-23 12:34:56.789");
 }
+
+#ifdef SOFTBUS_STANDARD_OS
+/*
+ * @tc.name: SoftBusStartTimerWithFfrt001
+ * @tc.desc: SoftBusStartTimerWithFfrt will return SOFTBUS_INVALID_PARAM when timerHandle=nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTimeTest, SoftBusStartTimerWithFfrt001, TestSize.Level1)
+{
+    uint64_t timeout = 1;
+    int32_t timerHandle = -1;
+    int32_t ret = SoftBusStartTimerWithFfrt(nullptr, timeout, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    SoftBusStopTimerWithFfrt(timerHandle);
+}
+#endif
+
+/*
+ * @tc.name: SoftBusGetRealTime001
+ * @tc.desc: SoftBusGetRealTime will return SOFTBUS_INVALID_PARAM when sysTime=nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTimeTest, SoftBusGetRealTime001, TestSize.Level1)
+{
+    int32_t ret = SoftBusGetRealTime(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
 } // namespace OHOS
