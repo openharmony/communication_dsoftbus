@@ -190,6 +190,8 @@ typedef struct {
     uint32_t maxLaneLatency;
     uint32_t minLaneLatency;
     LaneRttLevel rttLevel;
+    bool continuousTask;
+    bool reuseBestEffort;
 } QosInfo;
 
 typedef struct {

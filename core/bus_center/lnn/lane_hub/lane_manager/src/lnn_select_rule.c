@@ -45,6 +45,14 @@
 #define MID_BW                  (30 * 1024 * 1024)
 #define HIGH_BW                 (160 * 1024 * 1024)
 
+typedef enum {
+    LANE_DATA_MSG = 0,
+    LANE_DATA_BYTES,
+    LANE_DATA_FILE,
+    LANE_DATA_STREAM,
+    LANE_DATA_BUTT,
+} LaneDataType;
+
 int32_t GetWlanLinkedFrequency(void)
 {
     LnnWlanLinkedInfo info;
@@ -437,6 +445,19 @@ static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
         LANE_COC_DIRECT, LANE_BLE, LANE_LINK_TYPE_BUTT},
 };
 
+static uint32_t g_defaultLinkList[LANE_DATA_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
+    [LANE_DATA_MSG] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_BLE, LANE_BR, LANE_COC_DIRECT, LANE_LINK_TYPE_BUTT},
+    [LANE_DATA_BYTES] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_BLE, LANE_BR, LANE_COC_DIRECT, LANE_LINK_TYPE_BUTT},
+    [LANE_DATA_FILE] = {LANE_WLAN_5G, LANE_HML, LANE_P2P, LANE_WLAN_2P4G, LANE_BR, LANE_LINK_TYPE_BUTT},
+    [LANE_DATA_STREAM] = {LANE_WLAN_5G, LANE_HML, LANE_P2P, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+};
+
+static uint32_t g_customLinkList[CUSTOM_QOS_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
+    [CUSTOM_QOS_MESH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_BR, LANE_COC_DIRECT, LANE_LINK_TYPE_BUTT},
+    [CUSTOM_QOS_DB] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_P2P, LANE_BR, LANE_COC_DIRECT, LANE_LINK_TYPE_BUTT},
+    [CUSTOM_QOS_RTT] = {LANE_HML, LANE_P2P, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+};
+
 static bool IsLinkTypeValid(LaneLinkType type)
 {
     if ((type < 0) || (type >= LANE_LINK_TYPE_BUTT)) {
@@ -445,11 +466,8 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-static int32_t CheckLaneValid(const char *networkId, LaneLinkType linkType, LaneTransType transType)
+static int32_t CheckLaneCap(const char *networkId, LaneLinkType linkType)
 {
-    if (!IsLinkTypeValid(linkType)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
     if ((linkAttr == NULL) || (!linkAttr->available)) {
         return SOFTBUS_INVALID_PARAM;
@@ -459,13 +477,49 @@ static int32_t CheckLaneValid(const char *networkId, LaneLinkType linkType, Lane
         LNN_LOGE(LNN_LANE, "link capacity is not support. linkType=%{public}d", linkType);
         return ret;
     }
+    return SOFTBUS_OK;
+}
+
+static bool IsTransTypeValid(LaneTransType type)
+{
+    if ((type < 0) || (type >= LANE_T_BUTT)) {
+        return false;
+    }
+    return true;
+}
+
+static int32_t CheckLinkWithTransType(LaneTransType transType, LaneLinkType linkType)
+{
     bool isStream = (transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VIDEO ||
                     transType == LANE_T_COMMON_VOICE);
     bool isBt = (linkType == LANE_BR || linkType == LANE_BLE || linkType == LANE_BLE_DIRECT ||
                 linkType == LANE_BLE_REUSE || linkType == LANE_COC || linkType == LANE_COC_DIRECT);
     if (isStream && isBt) {
-        LNN_LOGE(LNN_LANE, "Bt not support stream datatype, link=%{public}d", linkType);
+        LNN_LOGE(LNN_LANE, "Bt not support stream datatype, transType=%{public}d, link=%{public}d",
+            transType, linkType);
         return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTransType transType)
+{
+    if (networkId == NULL || !IsLinkTypeValid(linkType)) {
+        LNN_LOGE(LNN_LANE, "invalid param, linkType=%{public}d", linkType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    if (IsTransTypeValid(transType)) {
+        ret = CheckLinkWithTransType(transType, linkType);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "check link with transType err, ret=%{public}d", ret);
+            return ret;
+        }
+    }
+    ret = CheckLaneCap(networkId, linkType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "checkLaneCap err, ret=%{public}d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -501,7 +555,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if ((CheckLaneValid(networkId, g_laneBandWidth[bandWidthType][i], request->transType) == SOFTBUS_OK)) {
+        if ((LaneCheckLinkValid(networkId, g_laneBandWidth[bandWidthType][i], request->transType) == SOFTBUS_OK)) {
             linkList[(*linksNum)++] = g_laneBandWidth[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide optimal linkType=%{public}d", g_laneBandWidth[bandWidthType][i]);
             continue;
@@ -529,7 +583,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
         if (g_retryLaneList[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if ((CheckLaneValid(networkId, g_retryLaneList[bandWidthType][i], request->transType) == SOFTBUS_OK) &&
+        if ((LaneCheckLinkValid(networkId, g_retryLaneList[bandWidthType][i], request->transType) == SOFTBUS_OK) &&
             !IsLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
             linkList[(*linksNum)++] = g_retryLaneList[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
@@ -537,8 +591,28 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
     }
 }
 
+static bool IsExistWatchDevice(const char *networkId)
+{
+    int32_t localDevTypeId = TYPE_UNKNOW_ID;
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
+    if (ret == SOFTBUS_OK && localDevTypeId == TYPE_WATCH_ID) {
+        LNN_LOGI(LNN_LANE, "local is watch");
+        return true;
+    }
+    int32_t remoteDevTypeId = TYPE_UNKNOW_ID;
+    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
+    if (ret == SOFTBUS_OK && remoteDevTypeId == TYPE_WATCH_ID) {
+        LNN_LOGI(LNN_LANE, "remote is watch");
+        return true;
+    }
+    return false;
+}
+
 static bool IsSupportWifiDirect(const char *networkId)
 {
+    if (IsExistWatchDevice(networkId)) {
+        return false;
+    }
     uint64_t localFeature = 0;
     uint64_t remoteFeature = 0;
     bool isFound = GetFeatureCap(networkId, &localFeature, &remoteFeature);
@@ -601,7 +675,7 @@ static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK ||
-        (CheckLaneValid(peerNetWorkId, LANE_HML, request->transType) != SOFTBUS_OK)) {
+        (LaneCheckLinkValid(peerNetWorkId, LANE_HML, request->transType) != SOFTBUS_OK)) {
         LNN_LOGE(LNN_LANE, "hml not support reuse");
         return;
     }
@@ -677,6 +751,35 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
     return SOFTBUS_OK;
 }
 
+static bool IsSupportP2pReuse(const char *networkId)
+{
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(networkId, &osType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote osType fail");
+        return false;
+    }
+    if (osType == OH_OS_TYPE) {
+        LNN_LOGI(LNN_LANE, "valid os type, no need reuse p2p");
+        return false;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return false;
+    }
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    if (FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
+        LNN_LOGD(LNN_LANE, "p2p not support reuse");
+        return false;
+    }
+    return true;
+}
+
 static int32_t GetErrCodeOfRequest(const char *networkId, const LaneSelectParam *request)
 {
     SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
@@ -684,10 +787,176 @@ static int32_t GetErrCodeOfRequest(const char *networkId, const LaneSelectParam 
         return SOFTBUS_LANE_WIFI_OFF;
     }
     int32_t bandWidthType = GetBwType(request->qosRequire.minBW);
-    return CheckLaneValid(networkId, g_laneBandWidth[bandWidthType][0], request->transType);
+    return LaneCheckLinkValid(networkId, g_laneBandWidth[bandWidthType][0], request->transType);
 }
 
-int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request, LanePreferredLinkList *recommendList)
+static void GetDefaultLinkByDataType(LaneDataType dataType, LaneLinkType *linkList, uint32_t *listNum)
+{
+    for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
+        if (g_defaultLinkList[dataType][i] == LANE_LINK_TYPE_BUTT) {
+            break;
+        }
+        linkList[(*listNum)++] = g_defaultLinkList[dataType][i];
+    }
+}
+
+static void GetCustomLinkByType(CustomQos customQos, LaneLinkType *linkList, uint32_t *listNum)
+{
+    for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
+        if (g_customLinkList[customQos][i] == LANE_LINK_TYPE_BUTT) {
+            break;
+        }
+        linkList[(*listNum)++] = g_customLinkList[customQos][i];
+    }
+}
+
+static void SelectDbLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), -1, sizeof(optionalLink));
+    uint32_t optLinkNum = 0;
+    GetCustomLinkByType(CUSTOM_QOS_DB, optionalLink, &optLinkNum);
+    *resNum = 0;
+    for (uint32_t i = 0; i < optLinkNum; i++) {
+        if (optionalLink[i] == LANE_P2P && !IsSupportP2pReuse(networkId)) {
+            continue;
+        }
+        resList[(*resNum)++] = optionalLink[i];
+    }
+}
+
+static void SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
+    uint32_t optLinkNum = 0;
+    GetCustomLinkByType(CUSTOM_QOS_RTT, optionalLink, &optLinkNum);
+    LanePreferredLinkList recommendList = {0};
+    int32_t ret = FinalDecideLinkType(networkId, optionalLink, optLinkNum, &recommendList);
+    if (recommendList.linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used, reason=%{public}d", ret);
+        return;
+    }
+    *resNum = 0;
+    for (uint32_t i = 0; i < recommendList.linkTypeNum; i++) {
+        resList[(*resNum)++] = recommendList.linkType[i];
+    }
+}
+
+int32_t DecideDefaultLink(const char *networkId, LaneTransType transType, LaneLinkType *resList, uint32_t *resNum)
+{
+    if (networkId == NULL || !IsTransTypeValid(transType) || resList == NULL || resNum == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param, transType=%{public}d", transType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneLinkType defaultLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(defaultLink, sizeof(defaultLink), -1, sizeof(defaultLink));
+    uint32_t index = 0;
+    switch (transType) {
+        case LANE_T_MSG:
+            GetDefaultLinkByDataType(LANE_DATA_MSG, defaultLink, &index);
+            break;
+        case LANE_T_BYTE:
+            GetDefaultLinkByDataType(LANE_DATA_BYTES, defaultLink, &index);
+            break;
+        case LANE_T_FILE:
+            GetDefaultLinkByDataType(LANE_DATA_FILE, defaultLink, &index);
+            break;
+        case LANE_T_RAW_STREAM:
+        case LANE_T_COMMON_VIDEO:
+        case LANE_T_COMMON_VOICE:
+            GetDefaultLinkByDataType(LANE_DATA_STREAM, defaultLink, &index);
+            break;
+        default:
+            LNN_LOGE(LNN_LANE, "lane type is not supported. type=%{public}d", transType);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    *resNum = 0;
+    for (uint32_t i = 0; i < index; i++) {
+        if (LaneCheckLinkValid(networkId, defaultLink[i], LANE_T_BUTT) != SOFTBUS_OK) {
+            continue;
+        }
+        resList[(*resNum)++] = defaultLink[i];
+    }
+    if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none default linkResource can be used");
+        return GetErrCodeOfLink(networkId, defaultLink[0]);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t DecideCustomLink(const char *networkId, CustomQos customQos, LaneLinkType *resList, uint32_t *resNum)
+{
+    if (networkId == NULL || resList == NULL || resNum == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneLinkType customLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(customLink, sizeof(customLink), -1, sizeof(customLink));
+    uint32_t index = 0;
+    switch (customQos) {
+        case CUSTOM_QOS_MESH:
+            GetCustomLinkByType(CUSTOM_QOS_MESH, customLink, &index);
+            break;
+        case CUSTOM_QOS_DB:
+            SelectDbLinks(networkId, customLink, &index);
+            break;
+        case CUSTOM_QOS_RTT:
+            SelectRttLinks(networkId, customLink, &index);
+            break;
+        default:
+            LNN_LOGE(LNN_LANE, "custom type is not supported. type=%{public}d", customQos);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    *resNum = 0;
+    for (uint32_t i = 0; i < index; i++) {
+        if (LaneCheckLinkValid(networkId, customLink[i], LANE_T_BUTT) != SOFTBUS_OK) {
+            continue;
+        }
+        resList[(*resNum)++] = customLink[i];
+    }
+    if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none custom linkResource can be used");
+        return GetErrCodeOfLink(networkId, customLink[0]);
+    }
+    return SOFTBUS_OK;
+}
+
+static void DecideLinksWithDevice(const char *networkId, const LaneSelectParam *request,
+    LaneLinkType *linkList, uint32_t *linksNum)
+{
+    if (*linksNum <= 0 || *linksNum > LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "link num exceed lisk list");
+        return;
+    }
+    if (!IsExistWatchDevice(networkId)) {
+        return;
+    }
+    uint32_t num = 0;
+    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
+    bool needFilter = false;
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        if (linkList[i] == LANE_HML ||
+            (request->qosRequire.continuousTask && (linkList[i] == LANE_P2P || linkList[i] == LANE_COC_DIRECT))) {
+            needFilter = true;
+            LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
+            continue;
+        }
+        tmpList[num++] = linkList[i];
+    }
+    if (!needFilter) {
+        return;
+    }
+    uint32_t size = sizeof(LaneLinkType) * LANE_LINK_TYPE_BUTT;
+    (void)memset_s(linkList, size, -1, size);
+    *linksNum = num;
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        linkList[i] = tmpList[i];
+    }
+}
+
+int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList)
 {
     if (request == NULL || recommendList == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -697,6 +966,7 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     uint32_t linksNum = 0;
     DecideOptimalLinks(networkId, request, linkList, &linksNum);
     DecideRetryLinks(networkId, request, linkList, &linksNum);
+    DecideLinksWithDevice(networkId, request, linkList, &linksNum);
     UpdateHmlPriority(networkId, request, linkList, &linksNum);
     if (request->allocedLaneId != INVALID_LANE_ID) {
         DelHasAllocedLink(request->allocedLaneId, linkList, &linksNum);
@@ -707,4 +977,40 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
         return GetErrCodeOfRequest(networkId, request);
     }
     return ret;
+}
+
+int32_t DecideRueseLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList)
+{
+    if (networkId == NULL || request == NULL || recommendList == NULL ||
+        recommendList->linkTypeNum != 0) {
+        LNN_LOGE(LNN_LANE, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsExistWatchDevice(networkId)) {
+        LNN_LOGE(LNN_LANE, "reuse best effort only support watch");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneLinkType reuseLink = LANE_BR;
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    int32_t ret = FindLaneResourceByLinkType(peerUdid, reuseLink, &resourceItem);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkType=%{public}d not support reuse", reuseLink);
+        return ret;
+    }
+    ret = LaneCheckLinkValid(networkId, reuseLink, request->transType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "linkType=%{public}d no capability", reuseLink);
+        return ret;
+    }
+    LNN_LOGI(LNN_LANE, "linkType=%{public}d exist reuse laneId=%{public}" PRIu64 "",
+        reuseLink, resourceItem.laneId);
+    recommendList->linkType[(recommendList->linkTypeNum)++] = reuseLink;
+    return SOFTBUS_OK;
 }
