@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #define UDID_BUF_LEN 65
-#define ACCOUNTID_BUF_LEN 65
+#define ACCOUNT_ID_BUF_LEN 65
 #define UK_ENCRYPT_INDEX_LEN (ENCRYPT_INDEX_LEN * 2)
 #define UK_ENCRYPT_OVER_HEAD_LEN (OVERHEAD_LEN + UK_ENCRYPT_INDEX_LEN)
 
@@ -37,8 +37,8 @@ typedef struct {
     int64_t sinkTokenId;
     char sourceUdid[UDID_BUF_LEN];
     char sinkUdid[UDID_BUF_LEN];
-    char sourceAccountId[ACCOUNTID_BUF_LEN];
-    char sinkAccountId[ACCOUNTID_BUF_LEN];
+    char sourceAccountId[ACCOUNT_ID_BUF_LEN];
+    char sinkAccountId[ACCOUNT_ID_BUF_LEN];
 } AuthACLInfo;
 
 typedef struct {
@@ -61,6 +61,7 @@ int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
 uint32_t GenUkSeq(void);
 bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
+bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
 bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
 bool AuthIsUkExpired(uint64_t time);
 int32_t UkNegotiateInit(void);

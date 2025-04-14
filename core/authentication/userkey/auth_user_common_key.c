@@ -37,6 +37,7 @@
 #define USER_KEY_INFO_MAX        100
 
 typedef struct {
+    bool isUserBindLevel;
     ListNode node;
     AuthACLInfo aclInfo;
     AuthUserKeyInfo ukInfo;
@@ -81,7 +82,7 @@ void DeinitUserKeyList(void)
     g_userKeyList = NULL;
 }
 
-int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo)
+int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel)
 {
     if (aclInfo == NULL || userKeyInfo == NULL) {
         AUTH_LOGE(AUTH_KEY, "param error");
@@ -119,11 +120,14 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
         (void)SoftBusMutexUnlock(&g_userKeyList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
+    keyInfo->isUserBindLevel = isUserBindLevel;
     keyInfo->aclInfo = *aclInfo;
     keyInfo->ukInfo = *userKeyInfo;
     ListInit(&keyInfo->node);
     ListAdd(&g_userKeyList->list, &keyInfo->node);
     g_userKeyList->cnt++;
+    AUTH_LOGI(AUTH_KEY, "add userkey succ, index=%{public}d, bindlevel=%{public}d", keyInfo->ukInfo.keyIndex,
+        keyInfo->isUserBindLevel);
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
     return SOFTBUS_OK;
 }
@@ -159,15 +163,51 @@ void DelUserKeyByNetworkId(char *networkId)
             (!item->aclInfo.isServer && strcmp(item->aclInfo.sinkUdid, peerUdid) != 0)) {
             continue;
         }
+        AUTH_LOGI(AUTH_KEY, "del user key succ, index=%{public}d, anonyUdid=%{public}s", item->ukInfo.keyIndex,
+            AnonymizeWrapper(anonyUdid));
         ListDelete(&item->node);
         (void)memset_s(item->ukInfo.deviceKey, sizeof(item->ukInfo.deviceKey), 0, sizeof(item->ukInfo.deviceKey));
         SoftBusFree(item);
         g_userKeyList->cnt--;
-        AUTH_LOGI(AUTH_KEY, "del user key succ, index=%{public}d, anonyUdid=%{public}s", item->ukInfo.keyIndex,
-            AnonymizeWrapper(anonyUdid));
     }
     AnonymizeFree(anonyUdid);
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+}
+
+int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)
+{
+    if (aclInfo == NULL || userKeyInfo == NULL) {
+        AUTH_LOGE(AUTH_KEY, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_userKeyList == NULL) {
+        AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
+        return SOFTBUS_NO_INIT;
+    }
+    const UserKeyInfo *item = NULL;
+
+    if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "get user key lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
+        if (!item->isUserBindLevel ||
+            !CompareByAclDiffAccountWithUserLevel(
+                aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
+            continue;
+        }
+        if (memcpy_s(userKeyInfo, sizeof(AuthUserKeyInfo), &item->ukInfo, sizeof(AuthUserKeyInfo)) != EOK) {
+            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
+        (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+    AUTH_LOGE(AUTH_KEY, "user key not found.");
+    return SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND;
 }
 
 int32_t GetUserKeyInfoDiffAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)

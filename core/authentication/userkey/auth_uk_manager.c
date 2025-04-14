@@ -433,6 +433,30 @@ bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool 
     return isCompared;
 }
 
+bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
+{
+    if (oldAcl == NULL || newAcl == NULL) {
+        AUTH_LOGE(AUTH_CONN, "acl invalid param");
+        return false;
+    }
+
+    if (isSameSide) {
+        if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
+            oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId) {
+            AUTH_LOGE(AUTH_CONN, "same side compare fail");
+            return false;
+        }
+        return true;
+    } else {
+        if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
+            oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId) {
+            AUTH_LOGE(AUTH_CONN, "diff side compare fail");
+            return false;
+        }
+        return true;
+    }
+}
+
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
 {
     if (oldAcl == NULL || newAcl == NULL) {
@@ -654,8 +678,8 @@ static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *inf
         !GetJsonObjectNumberItem(msg, FIELD_USER_ID, &info->sinkUserId) ||
         !GetJsonObjectNumber64Item(msg, FIELD_PEER_CONN_DEVICE_ID, &info->sourceTokenId) ||
         !GetJsonObjectNumber64Item(msg, FIELD_DEVICE_ID, &info->sinkTokenId) ||
-        !GetJsonObjectStringItem(msg, PEER_ACCOUNT_ID, info->sourceAccountId, ACCOUNTID_BUF_LEN) ||
-        !GetJsonObjectStringItem(msg, LOCAL_ACCOUNT_ID, info->sinkAccountId, ACCOUNTID_BUF_LEN) ||
+        !GetJsonObjectStringItem(msg, PEER_ACCOUNT_ID, info->sourceAccountId, ACCOUNT_ID_BUF_LEN) ||
+        !GetJsonObjectStringItem(msg, LOCAL_ACCOUNT_ID, info->sinkAccountId, ACCOUNT_ID_BUF_LEN) ||
         !GetJsonObjectBoolItem(msg, FIELD_IS_CLIENT, &isClient) ||
         !GetJsonObjectBoolItem(msg, IS_SUPPORT_UK_NEGO, isSupportUkNego)) {
         AUTH_LOGE(AUTH_CONN, "get json object fail");
@@ -1243,9 +1267,11 @@ int32_t AuthFindUkIdByACLInfo(const AuthACLInfo *acl, int32_t *ukId)
     aclInfo.isServer = !acl->isServer;
     PrintfAuthAclInfo(0, 0, &aclInfo);
     if (GetUserKeyInfoSameAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
+        GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
         GetUserKeyInfoDiffAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get uk by ukcachelist fail");
         if (GetAccessUkIdSameAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
+            GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get uk by asset fail");
             return SOFTBUS_AUTH_ACL_NOT_FOUND;
