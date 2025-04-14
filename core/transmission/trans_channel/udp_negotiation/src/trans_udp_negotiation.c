@@ -1081,6 +1081,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
         ukPolicy = NO_NEED_UK;
     }
+    TRANS_LOGI(TRANS_CTRL, "uk policy=%{public}d", ukPolicy);
     if (ukPolicy == USE_NEGO_UK) {
         ret =  StartExchangeUdpInfo(channel, authHandle, channel->seq, true, NULL);
     } else {

@@ -1273,4 +1273,31 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackEncryptedMessageTest001, TestSize.L
     ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, &ukIdInfo);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
+
+/**
+ * @tc.name: DecryptProxyMessageTest001
+ * @tc.desc: DecryptProxyMessageTest001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, DecryptProxyMessageTest001, TestSize.Level1)
+{
+    ProxyMessage msg;
+    (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    msg.data = reinterpret_cast<char *>(SoftBusCalloc(sizeof(int32_t)));
+    ASSERT_NE(msg.data, nullptr);
+    AuthHandle authHandle = {
+        .authId = -1,
+        .type = 0,
+    };
+    msg.ukIdInfo.myId = 1;
+    int32_t ret = DecryptProxyMessage(&msg, &authHandle, &dataInfo.outLen, dataInfo.outData);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    msg.ukIdInfo.myId = 0;
+    ret = DecryptProxyMessage(&msg, &authHandle, &dataInfo.outLen, nullptr);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    SoftBusFree(msg.data);
+}
 } // namespace OHOS

@@ -16,13 +16,18 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "softbus_adapter_mem.h"
+#include "trans_lane_common_test_mock.h"
+#include "trans_session_manager.h"
 #include "trans_uk_manager.h"
 
+using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 
 constexpr char UDID_TEST[UDID_BUF_LEN] = "testudid";
-
+constexpr int32_t USER_ID = 100;
+constexpr int32_t INVALID_USER_ID = 100;
 class TransUkManagerTest : public testing::Test {
 public:
     TransUkManagerTest() { }
@@ -136,7 +141,9 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
 
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    char sessionName[SESSION_NAME_SIZE_MAX] = "test";
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    char sessionName[SESSION_NAME_SIZE_MAX] = "testSessionName";
     int32_t ret = GetUkPolicy(&appInfo);
     EXPECT_EQ(NO_NEED_UK, ret);
 
@@ -146,13 +153,36 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = GetSourceAndSinkUdid(UDID_TEST, sourceUdid, sindUdid);
-    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = FillSinkAclInfo(nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = FillSinkAclInfo(sessionName, &aclInfo, nullptr);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    EXPECT_TRUE(sessionServer != nullptr);
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), sessionName);
+    if (ret != EOK) {
+        SoftBusFree(sessionServer);
+        return;
+    }
+    sessionServer->pid = 0;
+    sessionServer->accessInfo.userId = USER_ID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = FillSinkAclInfo(sessionName, &aclInfo, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransSessionMgrDeinit();
 
     bool isSepicalSa = SpecialSaCanUseDeviceKey(0);
     EXPECT_EQ(false, isSepicalSa);
@@ -179,30 +209,47 @@ HWTEST_F(TransUkManagerTest, UkPackRequestTest001, TestSize.Level1)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     char *requestStr = PackUkRequest(nullptr);
     EXPECT_EQ(nullptr, requestStr);
 
+    appInfo.myData.userId = INVALID_USER_ID;
     requestStr = PackUkRequest(&appInfo);
-    EXPECT_TRUE(requestStr == nullptr);
+    EXPECT_TRUE(requestStr != nullptr);
 
-    if (requestStr != nullptr) {
-        cJSON_free(requestStr);
-    }
+    appInfo.myData.userId = USER_ID;
+    requestStr = PackUkRequest(&appInfo);
+    EXPECT_TRUE(requestStr != nullptr);
 
-    cJSON *json = cJSON_CreateObject();
-    ASSERT_NE(json, nullptr);
+    cJSON *validJson = cJSON_Parse(requestStr);
+    ASSERT_NE(validJson, nullptr);
+
+    cJSON *errJson = cJSON_CreateObject();
+    ASSERT_NE(errJson, nullptr);
 
     AuthACLInfo aclInfo;
     (void)memset_s(&aclInfo, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
 
     char sessionName[SESSION_NAME_SIZE_MAX];
-    int32_t ret = UnPackUkRequest(json, &aclInfo, nullptr);
+    int32_t ret = UnPackUkRequest(errJson, &aclInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = UnPackUkRequest(json, &aclInfo, sessionName);
+    ret = UnPackUkRequest(errJson, &aclInfo, sessionName);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
-    cJSON_Delete(json);
+    ret = UnPackUkRequest(validJson, &aclInfo, sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (requestStr != nullptr) {
+        cJSON_free(requestStr);
+    }
+    if (validJson != nullptr) {
+        cJSON_Delete(validJson);
+    }
+    if (errJson != nullptr) {
+        cJSON_Delete(errJson);
+    }
 }
 
 /**
@@ -220,24 +267,32 @@ HWTEST_F(TransUkManagerTest, UkPackReplytTest001, TestSize.Level1)
     EXPECT_EQ(nullptr, replyStr);
 
     replyStr = PackUkReply(&aclInfo, 0);
-
     EXPECT_TRUE(replyStr != nullptr);
+
+    int32_t ukId = 0;
+    cJSON *validJson = cJSON_Parse(replyStr);
+    ASSERT_NE(validJson, nullptr);
+
+    cJSON *errJson = cJSON_CreateObject();
+    ASSERT_NE(errJson, nullptr);
+
+    int32_t ret = UnPackUkReply(errJson, &aclInfo, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = UnPackUkReply(errJson, &aclInfo, &ukId);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    ret = UnPackUkReply(validJson, &aclInfo, &ukId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     if (replyStr != nullptr) {
         cJSON_free(replyStr);
     }
-
-    int32_t ukId = 0;
-
-    cJSON *json = cJSON_CreateObject();
-    ASSERT_NE(json, nullptr);
-
-    int32_t ret = UnPackUkReply(json, &aclInfo, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = UnPackUkReply(json, &aclInfo, &ukId);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
-    cJSON_Delete(json);
+    if (validJson != nullptr) {
+        cJSON_Delete(validJson);
+    }
+    if (errJson != nullptr) {
+        cJSON_Delete(errJson);
+    }
 }
 } // namespace OHOS
