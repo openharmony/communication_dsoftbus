@@ -221,12 +221,12 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_007, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_008
+ * @tc.name: COMPARE_BY_ALL_ACL_Test_001
  * @tc.desc: CompareByAllAcl test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_008, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ALL_ACL_Test_001, TestSize.Level1)
 {
     AuthACLInfo oldAcl = {
         .isServer = false,
@@ -237,8 +237,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_008, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -248,8 +248,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_008, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAllAcl(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAllAcl(&oldAcl, &newAcl, true);
@@ -257,12 +257,12 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_008, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_009
- * @tc.desc: CompareByAclDiffAccount test
+ * @tc.name: COMPARE_BY_ACL_DIFF_ACCOUNT_WITH_USERKEY_Test_001
+ * @tc.desc: CompareByAclDiffAccountWithUserLevel test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_009, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_DIFF_ACCOUNT_WITH_USERKEY_Test_001, TestSize.Level1)
 {
     AuthACLInfo oldAcl = {
         .isServer = false,
@@ -273,8 +273,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_009, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -284,8 +284,44 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_009, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    bool ret = CompareByAclDiffAccountWithUserLevel(&oldAcl, &newAcl, false);
+    EXPECT_EQ(ret, false);
+    ret = CompareByAclDiffAccountWithUserLevel(&oldAcl, &newAcl, true);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: COMPARE_BY_ACL_DIFF_ACCOUNT_Test_001
+ * @tc.desc: CompareByAclDiffAccount test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_DIFF_ACCOUNT_Test_001, TestSize.Level1)
+{
+    AuthACLInfo oldAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthACLInfo newAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAclDiffAccount(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAclDiffAccount(&oldAcl, &newAcl, true);
@@ -293,12 +329,12 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_009, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_010
+ * @tc.name: COMPARE_BY_ACL_SAME_ACCOUNT_Test_001
  * @tc.desc: CompareByAclSameAccount test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_010, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_SAME_ACCOUNT_Test_001, TestSize.Level1)
 {
     AuthACLInfo oldAcl = {
         .isServer = false,
@@ -309,8 +345,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_010, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -320,8 +356,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_010, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAclSameAccount(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAclSameAccount(&oldAcl, &newAcl, true);
@@ -329,48 +365,12 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_010, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_011
- * @tc.desc: CompareByAllAcl test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_011, TestSize.Level1)
-{
-    AuthACLInfo oldAcl = {
-        .isServer = false,
-        .sinkUserId = 1,
-        .sourceUserId = 2,
-        .sourceTokenId = 3,
-        .sinkTokenId = 4,
-    };
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
-    AuthACLInfo newAcl = {
-        .isServer = false,
-        .sinkUserId = 1,
-        .sourceUserId = 2,
-        .sourceTokenId = 3,
-        .sinkTokenId = 4,
-    };
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
-    bool ret = CompareByAllAcl(&oldAcl, &newAcl, false);
-    EXPECT_EQ(ret, false);
-    ret = CompareByAllAcl(&oldAcl, &newAcl, true);
-    EXPECT_EQ(ret, true);
-}
-
-/*
- * @tc.name: AUTH_UK_MANAGER_Test_012
+ * @tc.name: AUTH_IS_UK_EXPIRED_Test_001
  * @tc.desc: AuthIsUkExpired test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_012, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, AUTH_IS_UK_EXPIRED_Test_001, TestSize.Level1)
 {
     bool ret = AuthIsUkExpired(0);
     EXPECT_EQ(ret, false);
@@ -380,35 +380,35 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_012, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_013
+ * @tc.name: UK_NEGOTIATE_INIT_Test_001
  * @tc.desc: UkNegotiateInit test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_013, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_INIT_Test_001, TestSize.Level1)
 {
     int32_t ret = UkNegotiateInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_014
+ * @tc.name: UK_NEGOTIATE_DEINIT_Test_001
  * @tc.desc: UkNegotiateDeinit test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_014, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_DEINIT_Test_001, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(UkNegotiateDeinit());
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_015
+ * @tc.name: UK_NEGOTIATE_SESSION_INIT_Test_001
  * @tc.desc: UkNegotiateSessionInit test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_015, TestSize.Level1)
+HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_SESSION_INIT_Test_001, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(UkNegotiateSessionInit());
 }
