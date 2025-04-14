@@ -28,7 +28,6 @@
 #include "trans_session_account_adapter.h"
 #include "trans_session_manager.h"
 
-#define DEFAULT_ACCOUNT_UID  "ohosAnonymousUid"
 static SoftBusList *g_ukRequestManagerList = NULL;
 
 char *PackUkRequest(const AppInfo *appInfo)
@@ -54,10 +53,8 @@ char *PackUkRequest(const AppInfo *appInfo)
     uint32_t size = 0;
     char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
     ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
-    if (ret == SOFTBUS_NOT_LOGIN) {
-        if (strcpy_s(accountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "strcpy_s default accountId failed");
-        }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get accountId by userId=%{public}d failed, ret=%{public}d", userId, ret);
     }
     if (!AddStringToJsonObject(json, "SESSION_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(json, "SOURCE_UDID", sourceUdid) ||
@@ -413,10 +410,8 @@ int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *
     }
     uint32_t size = 0;
     ret = GetOsAccountUidByUserId(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
-    if (ret == SOFTBUS_NOT_LOGIN) {
-        if (strcpy_s(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, DEFAULT_ACCOUNT_UID) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "strcpy_s default accountId failed");
-        }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get accountId by userId=%{public}d failed, ret=%{public}d", userId, ret);
     }
     aclInfo->sinkUserId = userId;
     aclInfo->isServer = true;
