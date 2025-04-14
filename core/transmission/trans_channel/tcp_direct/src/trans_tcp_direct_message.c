@@ -1216,7 +1216,7 @@ static int32_t TransTcpGenUk(int32_t channelId, const AuthACLInfo *acl)
 
 static int32_t OpenDataBusUkRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
-    TRANS_LOGI(TRANS_CTRL, "recv uk rquest msg channelId=%{public}d, seq=%{public}" PRId64, channelId, seq);
+    TRANS_LOGI(TRANS_CTRL, "recv uk request msg channelId=%{public}d, seq=%{public}" PRId64, channelId, seq);
     char *errDesc = NULL;
     AuthACLInfo aclInfo = { 0 };
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
