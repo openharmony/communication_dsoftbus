@@ -96,8 +96,8 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_003, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthUserKeyInfo userKeyInfo = {
         .keyLen = strlen("testKey"),
         .time = 12345,
@@ -121,8 +121,8 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_003, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(aclInfo1.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo1.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo1.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo1.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo1.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo1.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthUserKeyInfo userKeyInfo1 = {
         .keyLen = strlen("testKey1"),
         .time = 12345,
@@ -150,8 +150,8 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_004, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthUserKeyInfo userKeyInfo = {};
     int32_t ret = GetUserKeyInfoSameAccount(nullptr, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -179,8 +179,8 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_005, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthUserKeyInfo userKeyInfo = {};
     int32_t ret = GetUserKeyInfoDiffAccount(nullptr, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

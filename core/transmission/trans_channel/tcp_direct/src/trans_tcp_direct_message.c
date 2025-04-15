@@ -1205,7 +1205,7 @@ static int32_t TransTcpGenUk(int32_t channelId, const AuthACLInfo *acl)
         TRANS_LOGE(TRANS_CTRL, "add uk requset failed");
         return ret;
     }
-    ret = AuthGenUkIdByACLInfo(acl, requestId, &tdcAuthGenUkCallback);
+    ret = AuthGenUkIdByAclInfo(acl, requestId, &tdcAuthGenUkCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "gen uk failed");
         (void)TransUkRequestDeleteItem(requestId);
@@ -1229,7 +1229,7 @@ static int32_t OpenDataBusUkRequest(int32_t channelId, uint32_t flags, uint64_t 
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
     if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
         TRANS_LOGE(TRANS_CTRL, "find uk fail, no acl, ret=%{public}d", ret);
         goto EXIT_ERR;
@@ -1288,7 +1288,7 @@ static int32_t OpenDataBusUkReply(int32_t channelId, uint64_t seq, const cJSON *
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukIdInfo.myId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukIdInfo.myId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "find uk fail, ret=%{public}d", ret);
         return ret;

@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+
 #include "auth_log.h"
 #include "auth_common.h"
 #include "auth_connection.h"
@@ -148,10 +149,13 @@ void DeInitUkNegoInstanceList(void)
 static int32_t GetGenUkInstanceByChannel(int32_t channelId, UkNegotiateInstance *instance)
 {
     if (g_ukNegotiateList == NULL) {
-        AUTH_LOGE(AUTH_CONN, "uknego instance is null");
+        AUTH_LOGE(AUTH_CONN, "g_ukNegotiateList is null");
         return SOFTBUS_NO_INIT;
     }
-
+    if (instance == NULL) {
+        AUTH_LOGE(AUTH_CONN, "instance is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     UkNegotiateInstance *item = NULL;
     UkNegotiateInstance *nextItem = NULL;
     if (!RequireUkNegotiateListLock()) {
@@ -162,8 +166,7 @@ static int32_t GetGenUkInstanceByChannel(int32_t channelId, UkNegotiateInstance 
         if (item->channelId != channelId) {
             continue;
         }
-        if (instance != NULL &&
-            memcpy_s(instance, sizeof(UkNegotiateInstance), item, sizeof(UkNegotiateInstance)) != EOK) {
+        if (memcpy_s(instance, sizeof(UkNegotiateInstance), item, sizeof(UkNegotiateInstance)) != EOK) {
             ReleaseUkNegotiateListLock();
             AUTH_LOGE(AUTH_CONN, "uknego memcpy_s instance fail, channelId=%{public}d", channelId);
             return SOFTBUS_MEM_ERR;
@@ -363,6 +366,7 @@ static int32_t UpdateUkNegotiateInfo(uint32_t requestId, const UkNegotiateInstan
             item->negoInfo.isRecvFinishEvent, item->negoInfo.isRecvCloseAckEvent);
         if (memcpy_s(&item->info, sizeof(AuthACLInfo), (uint8_t *)&instance->info, sizeof(AuthACLInfo)) != EOK) {
             AUTH_LOGE(AUTH_CONN, "memcpy_s uknego acl data fail");
+            ReleaseUkNegotiateListLock();
             return SOFTBUS_AUTH_ACL_SET_CHANNEL_FAIL;
         }
         ReleaseUkNegotiateListLock();
@@ -407,7 +411,6 @@ bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool 
         return false;
     }
 
-    bool isCompared = false;
     if (isSameSide) {
         if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
@@ -417,7 +420,7 @@ bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool 
             AUTH_LOGE(AUTH_CONN, "same side compare fail");
             return false;
         }
-        isCompared = true;
+        return true;
     } else {
         if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId ||
@@ -427,9 +430,8 @@ bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool 
             AUTH_LOGE(AUTH_CONN, "diff side compare fail");
             return false;
         }
-        isCompared = true;
+        return true;
     }
-    return isCompared;
 }
 
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
@@ -439,7 +441,6 @@ bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
         return false;
     }
 
-    bool isCompared = false;
     if (isSameSide) {
         if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
@@ -447,7 +448,7 @@ bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
             AUTH_LOGE(AUTH_CONN, "same side compare fail");
             return false;
         }
-        isCompared = true;
+        return true;
     } else {
         if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId ||
@@ -455,9 +456,8 @@ bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
             AUTH_LOGE(AUTH_CONN, "diff side compare fail");
             return false;
         }
-        isCompared = true;
+        return true;
     }
-    return isCompared;
 }
 
 bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
@@ -473,7 +473,6 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
         AUTH_LOGE(AUTH_CONN, "acl is not same account");
         return false;
     }
-    bool isCompared = false;
     if (isSameSide) {
         if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
@@ -482,7 +481,7 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
             AUTH_LOGE(AUTH_CONN, "same side compare fail");
             return false;
         }
-        isCompared = true;
+        return true;
     } else {
         if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId ||
@@ -491,9 +490,8 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
             AUTH_LOGE(AUTH_CONN, "diff side compare fail");
             return false;
         }
-        isCompared = true;
+        return true;
     }
-    return isCompared;
 }
 
 static void AsyncCallGenUkResultReceived(void *para)
@@ -555,6 +553,7 @@ static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int3
         }
         SyncGenUkResult *result = (SyncGenUkResult *)SoftBusCalloc(sizeof(SyncGenUkResult));
         if (result == NULL) {
+            ReleaseUkNegotiateListLock();
             AUTH_LOGE(AUTH_CONN, "calloc result fail");
             return;
         }
@@ -646,8 +645,8 @@ static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *inf
         !GetJsonObjectNumberItem(msg, FIELD_USER_ID, &info->sinkUserId) ||
         !GetJsonObjectNumber64Item(msg, FIELD_PEER_CONN_DEVICE_ID, &info->sourceTokenId) ||
         !GetJsonObjectNumber64Item(msg, FIELD_DEVICE_ID, &info->sinkTokenId) ||
-        !GetJsonObjectStringItem(msg, PEER_ACCOUNT_ID, info->sourceAccountId, ACCOUNTID_BUF_LEN) ||
-        !GetJsonObjectStringItem(msg, LOCAL_ACCOUNT_ID, info->sinkAccountId, ACCOUNTID_BUF_LEN) ||
+        !GetJsonObjectStringItem(msg, PEER_ACCOUNT_ID, info->sourceAccountId, ACCOUNT_ID_BUF_LEN) ||
+        !GetJsonObjectStringItem(msg, LOCAL_ACCOUNT_ID, info->sinkAccountId, ACCOUNT_ID_BUF_LEN) ||
         !GetJsonObjectBoolItem(msg, FIELD_IS_CLIENT, &isClient)) {
         AUTH_LOGE(AUTH_CONN, "get json object fail");
         cJSON_Delete(msg);
@@ -673,7 +672,7 @@ static bool JudgeIsSameAccount(const char *accountHash)
     }
     AUTH_LOGI(AUTH_CONN, "local account=%{public}02X%{public}02X, peer account=%{public}02X%{public}02X",
         localAccountHash[0], localAccountHash[1], peerAccountHash[0], peerAccountHash[1]);
-    return ((memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == EOK) && (!LnnIsDefaultOhosAccount()));
+    return ((memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == 0) && (!LnnIsDefaultOhosAccount()));
 }
 
 static int32_t GetShortUdidHash(char *udid, char *udidHash, uint32_t len)
@@ -766,7 +765,7 @@ static int32_t GetUkNegoAuthParamInfo(char *remoteUdid, HiChainAuthParam *authPa
     return SOFTBUS_OK;
 }
 
-static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
+static bool OnTransmitted(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         AUTH_LOGE(AUTH_CONN, "data is null");
@@ -788,7 +787,7 @@ static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
         .len = len,
     };
     uint32_t size = AUTH_PKT_HEAD_LEN + len;
-    uint8_t *buf = (uint8_t *)SoftBusMalloc(size);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc fail");
         return false;
@@ -835,8 +834,8 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
         return;
     }
     instance.ukId = sessionKeyId;
-    instance.negoInfo.isRecvSessionKeyEvent = true; //优化更新
-    AUTH_LOGI(AUTH_CONN, "update instance event. sessionkey=%{public}d", instance.negoInfo.isRecvSessionKeyEvent);
+    instance.negoInfo.isRecvSessionKeyEvent = true;
+    AUTH_LOGI(AUTH_CONN, "isRecvSessionKeyEvent=%{public}d", instance.negoInfo.isRecvSessionKeyEvent);
     ret = UpdateUkNegotiateInfo((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "update uknego instance failed! ret=%{public}d", ret);
@@ -844,7 +843,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     }
 }
 
-static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
+static void OnFinished(int64_t authSeq, int32_t operationCode, const char *returnData)
 {
     AUTH_LOGI(AUTH_CONN, "uknego OnFinish: authSeq=%{public}" PRId64, authSeq);
     UkNegotiateInstance instance;
@@ -875,7 +874,7 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
     OnGenSuccess((uint32_t)authSeq);
 }
 
-static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
+static void OnError(int64_t authSeq, int32_t operationCode, int32_t errCode, const char *errorReturn)
 {
     (void)operationCode;
     uint32_t authErrCode = 0;
@@ -924,9 +923,11 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
     }
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
+        AUTH_LOGE(AUTH_CONN, "create json fail");
         return NULL;
     }
     if (JsonObjectPackAuthBaseInfo(&instance, msg) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "pack base info fail");
         cJSON_Delete(msg);
         return NULL;
     }
@@ -957,9 +958,9 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
 }
 
 static DeviceAuthCallback g_GenUkCallback = {
-    .onTransmit = OnTransmit,
+    .onTransmit = OnTransmitted,
     .onSessionKeyReturned = OnSessionKeyReturned,
-    .onFinish = OnFinish,
+    .onFinish = OnFinished,
     .onError = OnError,
     .onRequest = OnRequest
 };
@@ -1021,7 +1022,7 @@ static int32_t SendUkNegoDeviceId(UkNegotiateInstance *instance)
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "send uknego sync info data fail");
     }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static int32_t ProcessUkNegoState(AuthACLInfo *info, bool *isGreater)
@@ -1051,10 +1052,7 @@ static int32_t ProcessUkNegoState(AuthACLInfo *info, bool *isGreater)
 
 static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const void *data, uint32_t dataLen)
 {
-    if (data == NULL) {
-        AUTH_LOGE(AUTH_CONN, "data is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "data is null");
     AuthACLInfo info = { 0 };
     UkNegotiateInstance instance;
     AuthGenUkCallback cb;
@@ -1210,7 +1208,7 @@ static int32_t UkMsgHandler(
     return ret;
 }
 
-int32_t AuthFindUkIdByACLInfo(const AuthACLInfo *acl, int32_t *ukId)
+int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
 {
     if (acl == NULL || ukId == NULL) {
         AUTH_LOGE(AUTH_CONN, "find uknego info is invalid param");
@@ -1293,7 +1291,6 @@ int32_t AuthEncryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
     return SOFTBUS_OK;
 }
 
-
 int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (inData == NULL || inLen < OVERHEAD_LEN || outData == NULL || outLen == NULL ||
@@ -1371,7 +1368,6 @@ int32_t AuthPostTransDataByUk(AuthHandle authHandle, int32_t ukId, int32_t peerU
     head.flag = dataInfo->flag;
     uint32_t outDataLen = AuthGetUkEncryptSize(dataInfo->len) + UK_ENCRYPT_INDEX_LEN;
     uint8_t *outData = (uint8_t *)SoftBusCalloc(outDataLen);
-
     if (outData == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc out data fail.");
         return SOFTBUS_MALLOC_ERR;
@@ -1414,7 +1410,7 @@ static int32_t SecurityOnSessionOpened(int32_t channelId, int32_t channelType, c
 {
     (void)channelType;
     (void)peerNetworkId;
-    AUTH_LOGI(AUTH_CONN, "SecurityOnSessionOpened inner channelId=%{public}d", channelId);
+    AUTH_LOGI(AUTH_CONN, "inner channelId=%{public}d", channelId);
     if (result != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get session open failed! result=%{public}d", result);
         return result;
@@ -1546,7 +1542,7 @@ uint32_t GenUkSeq(void)
     return seq;
 }
 
-int32_t AuthGenUkIdByACLInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb)
+int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb)
 {
     if (acl == NULL || genCb == NULL) {
         AUTH_LOGE(AUTH_CONN, "generate uknogo info is invalid param");
@@ -1611,5 +1607,4 @@ void UkNegotiateSessionInit(void)
         return;
     }
     AUTH_LOGI(AUTH_CONN, "ok");
-    return;
 }

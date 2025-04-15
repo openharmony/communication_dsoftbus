@@ -1309,7 +1309,7 @@ static int32_t TransProxyGenUk(const ProxyMessage *msg, int32_t pid, const AuthA
         (void)TransUkRequestDeleteItem(requestId);
         return ret;
     }
-    ret = AuthGenUkIdByACLInfo(acl, requestId, &proxyAuthGenUkCallback);
+    ret = AuthGenUkIdByAclInfo(acl, requestId, &proxyAuthGenUkCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "gen uk failed");
         (void)TransUkRequestDeleteItem(requestId);
@@ -1364,7 +1364,7 @@ void TransProxyProcessHandshakeUkMsg(const ProxyMessage *msg)
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
     if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
         goto EXIT_ERR;
     }
@@ -1427,7 +1427,7 @@ void TransProxyProcessHandshakeUkAckMsg(const ProxyMessage *msg)
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &(ukIdInfo.myId));
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &(ukIdInfo.myId));
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }

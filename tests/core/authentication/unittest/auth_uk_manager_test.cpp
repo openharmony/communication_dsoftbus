@@ -75,7 +75,7 @@ void AuthUkManagerTest::TearDown() { }
 
 /*
  * @tc.name: AUTH_UK_MANAGER_Test_001
- * @tc.desc: AuthFindUkIdByACLInfo test
+ * @tc.desc: AuthFindUkIdByAclInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -83,17 +83,17 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_001, TestSize.Level1)
 {
     AuthACLInfo aclInfo = { 0 };
     int32_t ukId;
-    int32_t ret = AuthFindUkIdByACLInfo(nullptr, &ukId);
+    int32_t ret = AuthFindUkIdByAclInfo(nullptr, &ukId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthFindUkIdByACLInfo(&aclInfo, nullptr);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
     EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
 }
 
 /*
  * @tc.name: AUTH_UK_MANAGER_Test_002
- * @tc.desc: AuthGenUkIdByACLInfo test
+ * @tc.desc: AuthGenUkIdByAclInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -103,11 +103,11 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_002, TestSize.Level1)
     uint32_t requestId = 1;
     AuthGenUkCallback genCb = { 0 };
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
-    int32_t ret = AuthGenUkIdByACLInfo(nullptr, requestId, &genCb);
+    int32_t ret = AuthGenUkIdByAclInfo(nullptr, requestId, &genCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthGenUkIdByACLInfo(&aclInfo, requestId, nullptr);
+    ret = AuthGenUkIdByAclInfo(&aclInfo, requestId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthGenUkIdByACLInfo(&aclInfo, requestId, &genCb);
+    ret = AuthGenUkIdByAclInfo(&aclInfo, requestId, &genCb);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
@@ -237,8 +237,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_008, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -248,8 +248,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_008, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAllAcl(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAllAcl(&oldAcl, &newAcl, true);
@@ -273,8 +273,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_009, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -284,8 +284,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_009, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAclDiffAccount(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAclDiffAccount(&oldAcl, &newAcl, true);
@@ -309,8 +309,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_010, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -320,8 +320,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_010, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAclSameAccount(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAclSameAccount(&oldAcl, &newAcl, true);
@@ -345,8 +345,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_011, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     AuthACLInfo newAcl = {
         .isServer = false,
         .sinkUserId = 1,
@@ -356,8 +356,8 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_011, TestSize.Level1)
     };
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNTID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNTID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAllAcl(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAllAcl(&oldAcl, &newAcl, true);

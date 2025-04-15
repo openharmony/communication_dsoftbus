@@ -1358,7 +1358,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkReplyTest001, TestSize.Le
 
     EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_MEM_ERR));
     EXPECT_CALL(TcpMessageMock, UnPackUkReply).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByACLInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusUkReply(channelId, seq, reply);
     EXPECT_NE(SOFTBUS_OK, ret);
 
@@ -2475,12 +2475,12 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkRequestTest001, TestSize.
     EXPECT_NE(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByACLInfo).WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND));
     ret = OpenDataBusUkRequest(channelId, flags, seq, request);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByACLInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusUkRequest(channelId, flags, seq, request);
     EXPECT_NE(SOFTBUS_OK, ret);
 
