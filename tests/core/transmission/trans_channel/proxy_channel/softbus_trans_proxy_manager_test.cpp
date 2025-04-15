@@ -542,7 +542,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyHandshakeUkMsgTest001, TestSize.Level1
     EXPECT_CALL(authMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(TransProxyOnMessageReceived(&msg));
 
-    EXPECT_CALL(authMock, AuthFindUkIdByACLInfo)
+    EXPECT_CALL(authMock, AuthFindUkIdByAclInfo)
         .WillOnce(Return(SOFTBUS_AUTH_ACL_NOT_FOUND))
         .WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND))
         .WillOnce(Return(SOFTBUS_OK));
