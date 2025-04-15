@@ -27,6 +27,7 @@
 #include "nstackx.h"
 #include "softbus_error_code.h"
 
+#define DEVICE_NAME_BUF_LEN 128
 #define TEST_ERRO_MOUDULE1 ((MODULE_LNN)-1)
 #define TEST_ERRO_MOUDULE2 ((MODULE_LNN)-2)
 #define TEST_ERRO_MOUDULE  ((MODULE_LNN) + 3)
@@ -2436,5 +2437,104 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     int32_t ret = DiscCoapUnpulbishService(1, 0);
     TEST_ASSERT_TRUE(ret == 0);
     DiscCoapDeinit();
+}
+
+/**
+ * @tc.name: DiscSetDisplayNameTest001
+ * @tc.desc: Test Disc setDisplayName, using wrong parameters.
+ * @tc.type: FUNC
+ * @tc.require: The DiscCoapUnpulbishService operates normally.
+ */
+ HWTEST_F(DiscManagerTest, DiscSetDisplayNameTest001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest001 begin ----");
+    const char *pkgName = "ohos.distributedhardware.devicemanager";
+    const char *nameDate = "{\"name18\":\"Display Name 18\","
+        "\"name21\":\"Display Name 21\",\"name24\":\"Display Name 24\"}";
+    int32_t ret = DiscSetDisplayName(pkgName, nameDate, strlen(nameDate));
+    TEST_ASSERT_TRUE(ret != 0);
+    DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest001 end ----");
+}
+
+ /**
+ * @tc.name: DiscSetDisplayNameTest002
+ * @tc.desc: Test Disc setDisplayName, using wrong parameters.
+ * @tc.type: FUNC
+ * @tc.require: The DiscCoapUnpulbishService operates normally.
+ */
+ HWTEST_F(DiscManagerTest, DiscSetDisplayNameTest002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest002 begin ----");
+    const char *pkgName = "ohos.distributedhardware.devicemanager";
+    const char *nameDate = "{\"raw\":\"My Device\",\"name18\":\"Display Name 18\","
+        "\"name21\":\"Display Name 21\",\"name24\":\"Display Name 24\"}";
+    int32_t ret = DiscSetDisplayName(pkgName, nameDate, strlen(nameDate));
+    TEST_ASSERT_TRUE(ret != 0);
+    DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest002 end ----");
+}
+
+ /**
+ * @tc.name: DiscSetDisplayNameTest003
+ * @tc.desc: Test Disc setDisplayName, using wrong parameters.
+ * @tc.type: FUNC
+ * @tc.require: The DiscCoapUnpulbishService operates normally.
+ */
+ HWTEST_F(DiscManagerTest, DiscSetDisplayNameTest003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest001 begin ----");
+    const char *pkgName = "ohos.distributedhardware.devicemanager";
+    const char *nameDate = "{\"raw\":\"DisplayMyDeviceaaaaaaaaaaaaaa\",\"name18\":\"Display Name 18\","
+        "\"name21\":\"Display Name 21\",\"name24\":\"Display Name 24\"}";
+    int32_t ret = DiscSetDisplayName(pkgName, nameDate, strlen(nameDate));
+    TEST_ASSERT_TRUE(ret != 0);
+    DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest001 end ----");
+}
+
+/**
+ * @tc.name: DiscGetDisplayNameTest001
+ * @tc.desc: Test Disc setDisplayName, using the normal parameters.
+ * @tc.type: FUNC
+ * @tc.require: The DiscCoapUnpulbishService operates normally.
+ */
+ HWTEST_F(DiscManagerTest, DiscGetDisplayNameTest001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest001 begin ----");
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    uint32_t remainLen = 25;
+    int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, remainLen);
+    TEST_ASSERT_TRUE(ret == 0);
+    DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest001 end ----");
+}
+
+/**
+ * @tc.name: DiscGetDisplayNameTest002
+ * @tc.desc: Test Disc setDisplayName, using the normal parameters.
+ * @tc.type: FUNC
+ * @tc.require: The DiscCoapUnpulbishService operates normally.
+ */
+ HWTEST_F(DiscManagerTest, DiscGetDisplayNameTest002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest002 begin ----");
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    uint32_t remainLen = 22;
+    int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, remainLen);
+    TEST_ASSERT_TRUE(ret == 0);
+    DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest002 end ----");
+}
+
+/**
+ * @tc.name: DiscGetDisplayNameTest003
+ * @tc.desc: Test Disc setDisplayName, using the normal parameters.
+ * @tc.type: FUNC
+ * @tc.require: The DiscCoapUnpulbishService operates normally.
+ */
+ HWTEST_F(DiscManagerTest, DiscGetDisplayNameTest003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest003 begin ----");
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    uint32_t remainLen = 19;
+    int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, remainLen);
+    TEST_ASSERT_TRUE(ret == 0);
+    DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest003 end ----");
 }
 } // namespace OHOS
