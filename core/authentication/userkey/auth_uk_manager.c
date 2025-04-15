@@ -49,7 +49,6 @@
 #define JSON_UK_DATA_TYPE       "ukDataType"
 #define UK_NEGO_PKGNAME         "gen_Uk"
 #define UK_NEGO_SESSIONNAME     "ohos.genUk.com"
-#define IS_SUPPORT_UK_NEGO      "is_support_uk"
 #define PEER_ACCOUNT_ID         "peer_account_id"
 #define LOCAL_ACCOUNT_ID        "local_account_id"
 #define DEFAULT_ACCOUNT_UID     "ohosAnonymousUid"
@@ -70,7 +69,7 @@ static SoftBusMutex g_ukNegotiateListLock;
 static void OnGenFailed(uint32_t requestId, int32_t reason);
 static void OnGenSuccess(uint32_t requestId);
 static int32_t SendUkNegoCloseAckEvent(int32_t channelId, uint32_t requestId);
-static HiChainAuthMode GetHichainAuthMode(bool isPeerSupportUkNego, const AuthACLInfo *info);
+static HiChainAuthMode GetHichainAuthMode(const AuthACLInfo *info);
 
 typedef struct {
     uint32_t requestId;
@@ -313,7 +312,7 @@ static int32_t CreateUkNegotiateInstance(
     instance->channelId = channelId;
     instance->requestId = requestId;
     instance->info = *info;
-    instance->authMode = GetHichainAuthMode(true, info);
+    instance->authMode = GetHichainAuthMode(info);
     instance->state = GENUK_STATE_UNKNOW;
     if (memcpy_s(&instance->genCb, sizeof(AuthGenUkCallback), (uint8_t *)genCb, sizeof(AuthGenUkCallback)) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memcpy_s uknego callback data fail");
@@ -612,12 +611,6 @@ static char *PackUkAclParam(const AuthACLInfo *info, bool isClient)
         AUTH_LOGE(AUTH_CONN, "create json fail");
         return NULL;
     }
-    bool isSupportUkNego = false;
-    if (LnnGetLocalBoolInfo(BOOL_KEY_SUPPORT_UK_NEGO, &isSupportUkNego, NODE_SCREEN_STATUS_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get uknego info fail");
-        cJSON_Delete(msg);
-        return NULL;
-    }
     if (!AddStringToJsonObject(msg, FIELD_PEER_UDID, info->sourceUdid) ||
         !AddStringToJsonObject(msg, FIELD_UDID, info->sinkUdid) ||
         !AddNumberToJsonObject(msg, FIELD_PEER_USER_ID, info->sourceUserId) ||
@@ -626,8 +619,7 @@ static char *PackUkAclParam(const AuthACLInfo *info, bool isClient)
         !AddNumber64ToJsonObject(msg, FIELD_DEVICE_ID, info->sinkTokenId) ||
         !AddStringToJsonObject(msg, PEER_ACCOUNT_ID, info->sourceAccountId) ||
         !AddStringToJsonObject(msg, LOCAL_ACCOUNT_ID, info->sinkAccountId) ||
-        !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient) ||
-        !AddBoolToJsonObject(msg, IS_SUPPORT_UK_NEGO, isSupportUkNego)) {
+        !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient)) {
         AUTH_LOGE(AUTH_CONN, "add json object fail");
         cJSON_Delete(msg);
         return NULL;
@@ -640,7 +632,7 @@ static char *PackUkAclParam(const AuthACLInfo *info, bool isClient)
     return data;
 }
 
-static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *info, bool *isSupportUkNego)
+static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *info)
 {
     cJSON *msg = cJSON_ParseWithLength((char *)data, len);
     if (msg == NULL) {
@@ -656,8 +648,7 @@ static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *inf
         !GetJsonObjectNumber64Item(msg, FIELD_DEVICE_ID, &info->sinkTokenId) ||
         !GetJsonObjectStringItem(msg, PEER_ACCOUNT_ID, info->sourceAccountId, ACCOUNTID_BUF_LEN) ||
         !GetJsonObjectStringItem(msg, LOCAL_ACCOUNT_ID, info->sinkAccountId, ACCOUNTID_BUF_LEN) ||
-        !GetJsonObjectBoolItem(msg, FIELD_IS_CLIENT, &isClient) ||
-        !GetJsonObjectBoolItem(msg, IS_SUPPORT_UK_NEGO, isSupportUkNego)) {
+        !GetJsonObjectBoolItem(msg, FIELD_IS_CLIENT, &isClient)) {
         AUTH_LOGE(AUTH_CONN, "get json object fail");
         cJSON_Delete(msg);
         return SOFTBUS_PARSE_JSON_ERR;
@@ -973,17 +964,9 @@ static DeviceAuthCallback g_GenUkCallback = {
     .onRequest = OnRequest
 };
 
-static HiChainAuthMode GetHichainAuthMode(bool isPeerSupportUkNego, const AuthACLInfo *info)
+static HiChainAuthMode GetHichainAuthMode(const AuthACLInfo *info)
 {
-    bool isSupportUkNego = false;
     HiChainAuthMode authMode = HICHAIN_AUTH_IDENTITY_SERVICE;
-    int32_t ret = LnnGetLocalBoolInfo(BOOL_KEY_SUPPORT_UK_NEGO, &isSupportUkNego, NODE_SCREEN_STATUS_LEN);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "cannot get local uknego");
-        return authMode;
-    }
-    authMode = (isSupportUkNego & isPeerSupportUkNego) ? HICHAIN_AUTH_IDENTITY_SERVICE : HICHAIN_AUTH_DEVICE;
-    AUTH_LOGI(AUTH_CONN, "get authMode=%{public}d", authMode);
     if (!JudgeIsSameAccount(!info->isServer ? info->sourceAccountId : info->sinkAccountId)) {
         AUTH_LOGW(AUTH_CONN, "no same account not support auth identity");
         authMode = HICHAIN_AUTH_DEVICE;
@@ -1077,9 +1060,8 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     AuthGenUkCallback cb;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     (void)memset_s(&cb, sizeof(AuthGenUkCallback), 0, sizeof(AuthGenUkCallback));
-    bool isPeerSupportUkNego = true;
     bool isLocalUdidGreater = false;
-    int32_t ret = UnpackUkAclParam(data, dataLen, &info, &isPeerSupportUkNego);
+    int32_t ret = UnpackUkAclParam(data, dataLen, &info);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "UnpackUkAclParam failed! ret=%{public}d", ret);
         return ret;
@@ -1094,7 +1076,7 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     } else {
         instance.channelId = channelId;
         instance.info = info;
-        instance.authMode = GetHichainAuthMode(isPeerSupportUkNego, &instance.info);
+        instance.authMode = GetHichainAuthMode(&instance.info);
         ret = UpdateUkNegotiateInfo(requestId, &instance);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "create uknego instance failed! ret=%{public}d", ret);
@@ -1450,7 +1432,7 @@ static int32_t SecurityOnSessionOpened(int32_t channelId, int32_t channelType, c
             return ret;
         }
         bool isGreater = false;
-        instance.authMode = GetHichainAuthMode(true, &instance.info);
+        instance.authMode = GetHichainAuthMode(&instance.info);
         ret = ProcessUkNegoState(&instance.info, &isGreater);
         if (ret == SOFTBUS_OK && isGreater) {
             AUTH_LOGI(AUTH_CONN, "start uknego auth");

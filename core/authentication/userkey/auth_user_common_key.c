@@ -124,6 +124,7 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
     ListInit(&keyInfo->node);
     ListAdd(&g_userKeyList->list, &keyInfo->node);
     g_userKeyList->cnt++;
+    AUTH_LOGI(AUTH_KEY, "add user key, index=%{public}d", userKeyInfo->keyIndex);
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
     return SOFTBUS_OK;
 }
@@ -155,8 +156,8 @@ void DelUserKeyByNetworkId(char *networkId)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_userKeyList->list, UserKeyInfo, node) {
-        if ((item->aclInfo.isServer && strcmp(item->aclInfo.sourceUdid, peerUdid) != 0) ||
-            (!item->aclInfo.isServer && strcmp(item->aclInfo.sinkUdid, peerUdid) != 0)) {
+        if ((item->aclInfo.isServer && strcmp(item->aclInfo.sinkUdid, peerUdid) != 0) ||
+            (!item->aclInfo.isServer && strcmp(item->aclInfo.sourceUdid, peerUdid) != 0)) {
             continue;
         }
         ListDelete(&item->node);
