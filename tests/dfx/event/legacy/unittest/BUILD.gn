@@ -30,7 +30,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")
 
-  module_output_path = "dsoftbus/common"
+  module_output_path = "dsoftbus/soft_bus/common"
   ohos_unittest("DiscConnDfxTest") {
     module_out_path = module_output_path
     sources = [ "disc_conn_dfx_test.cpp" ]
