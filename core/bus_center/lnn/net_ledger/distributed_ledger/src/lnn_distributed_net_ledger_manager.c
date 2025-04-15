@@ -354,7 +354,7 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
         AnonymizeFree(anonyNetworkId);
         return false;
     }
-    
+
     info->isScreenOn = isScreenOn;
     LNN_LOGI(LNN_LEDGER, "set %{public}s screen status to %{public}s",
         AnonymizeWrapper(anonyNetworkId), isScreenOn ? "on" : "off");
@@ -1741,6 +1741,10 @@ int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
 
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
+    NodeInfo recoveryInfo;
+    (void)memset_s(&recoveryInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo tempNodeInfo;
+    (void)memset_s(&tempNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
@@ -1752,13 +1756,26 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->netCapacity = connCapability;
-    int32_t ret = LnnSaveRemoteDeviceInfo(nodeInfo);
-    if (ret != SOFTBUS_OK) {
+    if (memcpy_s(&tempNodeInfo, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-        LNN_LOGE(LNN_LEDGER, "save remote netCapacity fail");
-        return ret;
+        return SOFTBUS_MEM_ERR;
     }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    int32_t ret = LnnRetrieveDeviceInfoByUdid(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
+        if (LnnSaveRemoteDeviceInfo(&tempNodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote info fail");
+        }
+        return ret;
+    }
+    recoveryInfo.netCapacity = connCapability;
+    ret = LnnSaveRemoteDeviceInfo(&recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save remote device info fail, ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
