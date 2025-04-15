@@ -16,7 +16,7 @@ import("../../../../../dsoftbus.gni")
 import("../../common/mock/mock.gni")
 import("proxy_channel_unittest.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 dsoftbus_root_path = "../../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 

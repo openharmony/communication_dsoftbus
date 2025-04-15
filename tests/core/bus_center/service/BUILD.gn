@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("../../../../core/authentication/authentication.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/bus_center"
+module_output_path = "dsoftbus/soft_bus/bus_center"
 dsoftbus_root_path = "../../../.."
 
 ohos_unittest("BusCenterDecisionTest") {
