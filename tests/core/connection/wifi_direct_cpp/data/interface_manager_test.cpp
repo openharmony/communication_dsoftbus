@@ -88,7 +88,7 @@ HWTEST_F(InterfaceManagerTest, InitInterfaceManagerTest, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InterfaceManagerTest, IsInterfaceAvailableTest, TestSize.Level0)
+HWTEST_F(InterfaceManagerTest, IsInterfaceAvailableTest, TestSize.Level1)
 {
     InterfaceManager interfaceManager;
     InterfaceInfo::InterfaceType type = InterfaceInfo::InterfaceType::HML;
@@ -114,7 +114,7 @@ HWTEST_F(InterfaceManagerTest, IsInterfaceAvailableTest, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InterfaceManagerTest, LockTest, TestSize.Level0)
+HWTEST_F(InterfaceManagerTest, LockTest, TestSize.Level1)
 {
     InterfaceManager interfaceManager;
     std::string owner = "owner";
