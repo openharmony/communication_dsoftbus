@@ -16,7 +16,7 @@ import("../../../core/authentication/authentication.gni")
 import("../../../dsoftbus.gni")
 import("unittest/authmanager.gni")
 
-module_output_path = "dsoftbus/auth"
+module_output_path = "dsoftbus/soft_bus/auth"
 
 ohos_unittest("AuthTest") {
   module_out_path = module_output_path
