@@ -154,6 +154,10 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
 
     ret = TransGetUserIdFromUid(TEST_UID);
     EXPECT_NE(ret, INVALID_USER_ID);
+
+    int32_t UID_1 = 30001000; // test value
+    ret = TransGetUserIdFromUid(UID_1);
+    EXPECT_NE(ret, INVALID_USER_ID);
 }
 
 /**
@@ -455,6 +459,52 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest16, TestSize.Level1)
 
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+static SessionServer *GenerateSessionServer()
+{
+    SessionServer *sessionServer = static_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    EXPECT_NE(nullptr, sessionServer);
+
+    int32_t ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
+    if (ret != EOK) {
+        SoftBusFree(sessionServer);
+        return nullptr;
+    }
+
+    ret = strcpy_s(sessionServer->pkgName, sizeof(sessionServer->pkgName), g_pkgName);
+    if (ret != EOK) {
+        SoftBusFree(sessionServer);
+        return nullptr;
+    }
+
+    return sessionServer;
+}
+
+/**
+ * @tc.name: TransSessionManagerTest17
+ * @tc.desc: Transmission session manager test .
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest17, TestSize.Level1)
+{
+    int32_t ret = TransGetUserIdFromSessionName(nullptr);
+    EXPECT_EQ(INVALID_USER_ID, ret);
+
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SessionServer *sessionServer = GenerateSessionServer();
+    EXPECT_NE(nullptr, sessionServer);
+
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransGetUserIdFromSessionName(g_sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     TransSessionMgrDeinit();
 }
 }
