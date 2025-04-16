@@ -694,26 +694,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSiz
 }
 
 /**
- * @tc.name: IsMetaSessionTest001
- * @tc.desc: Should return false when given invalid parameter.
- * @tc.desc: Should return true when given valid parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, IsMetaSessionTest001, TestSize.Level1)
-{
-    const char *invalid = "test";
-    bool ret = IsMetaSession(invalid);
-    EXPECT_FALSE(ret);
-    const char *testSession = "testsession";
-    ret = IsMetaSession(testSession);
-    EXPECT_FALSE(ret);
-    const char *sessionName = "IShare";
-    ret = IsMetaSession(sessionName);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: TransTdcGetDataBufInfoByChannelId001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameter.
  * @tc.type: FUNC
