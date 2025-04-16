@@ -403,6 +403,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         return SOFTBUS_OK;
     }
     DumpChangedAccountId(info->accountId, *((int64_t *)buf));
+    info->accountId = *((int64_t *)buf);
     UpdateStateVersionAndStore(UPDATE_ACCOUNT_LONG);
     return SOFTBUS_OK;
 }
