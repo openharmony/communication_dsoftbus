@@ -178,7 +178,7 @@ HWTEST_F(InterfaceInfoTest, GetAndSetTest02, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_02, TestSize.Level0)
+HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_02, TestSize.Level1)
 {
     InterfaceInfo interfaceInfo;
     std::string groupConfig = "test\n123\n456\n789\n1011";
@@ -192,7 +192,7 @@ HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_02, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_03, TestSize.Level0)
+HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_03, TestSize.Level1)
 {
     InterfaceInfo interfaceInfo;
     std::string groupConfig = "test\n123\n456\n789\n1011";
@@ -207,7 +207,7 @@ HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_03, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_04, TestSize.Level0)
+HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_04, TestSize.Level1)
 {
     InterfaceInfo interfaceInfo;
     std::string groupConfig = "test\n123\n456\n789\n1011";
@@ -222,7 +222,7 @@ HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_04, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InterfaceInfoTest, RefreshIsAvailable_01, TestSize.Level0)
+HWTEST_F(InterfaceInfoTest, RefreshIsAvailable_01, TestSize.Level1)
 {
     InterfaceInfo interfaceInfo;
     interfaceInfo.SetIsEnable(true);
