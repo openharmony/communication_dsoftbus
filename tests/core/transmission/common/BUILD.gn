@@ -13,11 +13,36 @@
 
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
+module_output_path = "dsoftbus/transmission"
+
+ohos_unittest("TransProcessDataTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_process_data_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
 
 group("unittest") {
   testonly = true
 
   deps = [
+    ":TransProcessDataTest",
     "softbus_message_open_channel_test:unittest",
     "trans_pending_pkt_test:unittest",
   ]
