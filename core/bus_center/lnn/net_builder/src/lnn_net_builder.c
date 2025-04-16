@@ -292,8 +292,10 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     connFsm->isSession = para->isSession ? true : connFsm->isSession;
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
         FlushDeviceInfo(connFsm);
-        ret = UpdateConnFsmBleMac(connFsm, para, needReportFailure);
-        LNN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, LNN_BUILDER, "update bleMac failed");
+        if (UpdateConnFsmBleMac(connFsm, para, needReportFailure) != SOFTBUS_OK) {
+            FreeJoinLnnMsgPara(para);
+            return SOFTBUS_STRCPY_ERR;
+        }
         if ((LnnSendJoinRequestToConnFsm(connFsm, para->isForceJoin) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
