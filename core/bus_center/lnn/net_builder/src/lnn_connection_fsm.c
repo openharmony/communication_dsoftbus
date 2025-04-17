@@ -939,6 +939,35 @@ static bool IsRepeatDeviceId(NodeInfo *info)
     return true;
 }
 
+static bool needUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+{
+    bool needUpdateAuthManager = false;
+    needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, false);
+    if (!needUpdateAuthManager) {
+        needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, true);
+    }
+    if (!needUpdateAuthManager) {
+        return false;
+    }
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_SESSION_WITH_KEY)
+    {
+        return true;
+    }
+    return false;
+}
+
+static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+{
+    if (needUpdateRawEnhanceP2p(connFsm)) {
+        LnnNotifyRawEnhanceP2pEvent event = {.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P};
+        event.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P;
+        event.type = connFsm->connInfo.addr.type;
+        event.uuid = connFsm->connInfo.nodeInfo->uuid;
+        event.networkId = connFsm->connInfo.nodeInfo->networkId;
+        LnnNotifyAddRawEnhanceP2pEvent(&event);
+    }
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;

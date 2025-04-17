@@ -57,6 +57,7 @@ typedef enum {
     LNN_EVENT_NET_LINK_STATE_CHANGE,
     /* event from sa monitor */
     LNN_EVENT_WIFI_SERVICE_START,
+    LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -246,6 +247,13 @@ typedef struct {
 
 typedef struct {
     LnnEventBasicInfo basic;
+    ConnectionAddrType type;
+    const char *networkId;
+    const char *uuid;
+} LnnNotifyRawEnhanceP2pEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
     char networkId[NETWORK_ID_BUF_LEN];
 } LnnNetworkIdChangedEvent;
 
@@ -343,6 +351,8 @@ void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state);
 void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName);
 
 void LnnNotifyWifiServiceStart(void *para);
+
+void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event);
 
 #ifdef __cplusplus
 }
