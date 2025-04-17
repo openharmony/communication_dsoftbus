@@ -939,7 +939,7 @@ static bool IsRepeatDeviceId(NodeInfo *info)
     return true;
 }
 
-static bool needUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+static bool NeedUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
 {
     bool needUpdateAuthManager = false;
     needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, false);
@@ -949,8 +949,7 @@ static bool needUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
     if (!needUpdateAuthManager) {
         return false;
     }
-    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_SESSION_WITH_KEY)
-    {
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         return true;
     }
     return false;
@@ -958,7 +957,7 @@ static bool needUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
 
 static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
 {
-    if (needUpdateRawEnhanceP2p(connFsm)) {
+    if (NeedUpdateRawEnhanceP2p(connFsm)) {
         LnnNotifyRawEnhanceP2pEvent event = {.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P};
         event.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P;
         event.type = connFsm->connInfo.addr.type;

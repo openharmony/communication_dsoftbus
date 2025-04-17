@@ -1412,6 +1412,7 @@ static void OnPtkSyncCallBack(const char *uuid, int32_t result)
     }
     if (memcpy_s(ptkCbParam->uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
         AUTH_LOGE(AUTH_FSM, "memcpy uuid fail");
+        SoftBusFree(ptkCbParam);
         return;
     }
     ptkCbParam->result = result;
