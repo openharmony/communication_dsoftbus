@@ -534,11 +534,9 @@ static void PackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, int64_t 
             AUTH_LOGE(AUTH_FSM, "get auth key fail");
             deviceKey.keyLen = 0;
             (void)memset_s(deviceKey.deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-            DelSessionKeyProfile(info->deviceKeyId.localDeviceKeyId);
             return;
         }
         deviceKey.keyIndex = authSeq;
-        DelSessionKeyProfile(info->deviceKeyId.localDeviceKeyId);
     } else if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
@@ -653,11 +651,9 @@ static int32_t TryGetDmSessionKeyForUnpack(AuthSessionInfo *info, char *encNorma
         AUTH_LOGE(AUTH_FSM, "get auth key fail");
         deviceKey->keyLen = 0;
         (void)memset_s(deviceKey->deviceKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-        DelSessionKeyProfile(info->deviceKeyId.localDeviceKeyId);
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
     deviceKey->keyIndex = authSeq;
-    DelSessionKeyProfile(info->deviceKeyId.localDeviceKeyId);
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     sessionKey.len = deviceKey->keyLen;
