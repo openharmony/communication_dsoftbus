@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_config_type.h"
+#include "softbus_wifi_api_adapter.h"
 
 namespace OHOS {
 class NetworkInterface {
@@ -63,6 +64,11 @@ public:
         void *para, uint64_t delayMillis) = 0;
     virtual int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener) = 0;
     virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
+    virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
+    virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
+    virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
+    virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {
 public:
@@ -86,6 +92,11 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(StartBaseClient, int32_t (ListenerModule module, const SoftbusBaseListener *listener));
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
+    MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey, uint32_t *));
+    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
+    MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
+    MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *, NetCapability));
+    MOCK_METHOD2(LnnClearNetCapability, int32_t(uint32_t *, NetCapability));
 };
 } // namespace OHOS
 #endif // NET_WORK_MOCK_H

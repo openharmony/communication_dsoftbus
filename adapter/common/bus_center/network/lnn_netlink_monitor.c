@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 
 #include "bus_center_event.h"
+#include "bus_center_manager.h"
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "securec.h"
@@ -41,7 +42,9 @@
 #include "softbus_socket.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_wifi_api_adapter.h"
 #include "lnn_init_monitor.h"
+#include "lnn_net_capability.h"
 
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \
@@ -109,6 +112,30 @@ static void NotifyIpUpdated(const char *ifName, struct nlmsghdr *nlh)
     }
 }
 
+static void WifiBandSetCapability()
+{
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get capability fail from local.");
+        return;
+    }
+    SoftBusBand band = SoftBusGetLinkBand();
+    if (band == BAND_24G) {
+        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+    } else if (band == BAND_5G) {
+        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
+    } else {
+        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+    }
+    LNN_LOGD(LNN_BUILDER, "netCapability==%{public}d", netCapability);
+    if (LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set local capability fail");
+    }
+}
+
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
@@ -127,6 +154,9 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
     if (LnnGetNetIfTypeByName(ifName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
+    }
+    if (type == LNN_NETIF_TYPE_WLAN && nlh->nlmsg_type == RTM_NEWADDR) {
+        WifiBandSetCapability();
     }
     static uint32_t callCount = 0;
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
