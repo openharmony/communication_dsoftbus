@@ -471,7 +471,7 @@ static int32_t SendUdpInfo(cJSON *replyMsg, AuthHandle authHandle, int64_t seq, 
     if (dataInfo.flag == FLAG_NEGOUK_REPLY || FLAG_REPLY) {
         ret = AuthPostTransData(authHandle, &dataInfo);
     } else {
-        dataInfo.module = MODULE_UK_CONNECTION;
+        dataInfo.module = MODULE_USER_KEY_CONNECTION;
         ret = AuthPostTransDataByUk(authHandle, ukIdInfo.myId, ukIdInfo.peerId, &dataInfo);
     }
     cJSON_free(msgStr);
@@ -824,7 +824,7 @@ static int32_t StartExchangeUdpInfo(
     int32_t ret = SOFTBUS_AUTH_REG_DATA_FAIL;
     if (IsValidUkInfo(ukIdInfo)) {
         dataInfo.flag = FLAG_ENCYUK_REQUEST;
-        dataInfo.module = MODULE_UK_CONNECTION;
+        dataInfo.module = MODULE_USER_KEY_CONNECTION;
         ret = AuthPostTransDataByUk(authHandle, ukIdInfo->myId, ukIdInfo->peerId, &dataInfo);
     } else {
         ret = AuthPostTransData(authHandle, &dataInfo);
@@ -922,7 +922,7 @@ static int32_t TransUdpGenUk(AuthHandle *authHandle, int64_t seq, const AuthACLI
         (void)TransUkRequestDeleteItem(requestId);
         return ret;
     }
-    ret = AuthGenUkIdByACLInfo(acl, requestId, &udpGenUkCallback);
+    ret = AuthGenUkIdByAclInfo(acl, requestId, &udpGenUkCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "gen uk failed");
         (void)TransUkRequestDeleteItem(requestId);
@@ -946,7 +946,7 @@ static void TransOnExchangeUdpInfoUkRequest(AuthHandle authHandle, int64_t seq, 
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
     if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
         TRANS_LOGE(TRANS_CTRL, "find uk fail, no acl, ret=%{public}d", ret);
         goto EXIT_ERR;
@@ -999,7 +999,7 @@ static void TransOnExchangeUdpInfoUkReply(AuthHandle authHandle, int64_t seq, co
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukIdInfo.myId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukIdInfo.myId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "find uk fail, ret=%{public}d", ret);
         goto EXIT_ERR;
@@ -1081,6 +1081,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
         ukPolicy = NO_NEED_UK;
     }
+    TRANS_LOGI(TRANS_CTRL, "uk policy=%{public}d", ukPolicy);
     if (ukPolicy == USE_NEGO_UK) {
         ret =  StartExchangeUdpInfo(channel, authHandle, channel->seq, true, NULL);
     } else {
@@ -1471,7 +1472,7 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
         return ret;
     }
 
-    ret = RegAuthTransListener(MODULE_UK_CONNECTION, &transUdpCb);
+    ret = RegAuthTransListener(MODULE_USER_KEY_CONNECTION, &transUdpCb);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "register udp callback to auth failed.");
         (void)SoftBusMutexDestroy(&g_udpNegLock);
@@ -1485,7 +1486,7 @@ void TransUdpChannelDeinit(void)
 {
     TransUdpChannelMgrDeinit();
     UnregAuthTransListener(MODULE_UDP_INFO);
-    UnregAuthTransListener(MODULE_UK_CONNECTION);
+    UnregAuthTransListener(MODULE_USER_KEY_CONNECTION);
     g_channelCb = NULL;
     TRANS_LOGI(TRANS_INIT, "server trans udp channel deinit success.");
 }

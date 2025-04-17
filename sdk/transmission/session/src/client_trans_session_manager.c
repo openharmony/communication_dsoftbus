@@ -2490,7 +2490,7 @@ int32_t ClientWaitSyncBind(int32_t socket)
         TRANS_LOGW(TRANS_SDK, "session is cancelling socket=%{public}d", socket);
         return sessionNode->lifecycle.bindErrCode;
     }
-    SoftBusCond *callbackCond = &(sessionNode->lifecycle.callbackCond);
+    SoftBusCond callbackCond = sessionNode->lifecycle.callbackCond;
     sessionNode->lifecycle.condIsWaiting = true;
     SoftBusSysTime *timePtr = NULL;
     SoftBusSysTime absTime = { 0 };
@@ -2501,14 +2501,14 @@ int32_t ClientWaitSyncBind(int32_t socket)
             timePtr = &absTime;
         }
     }
-    ret = SoftBusCondWait(callbackCond, &(g_clientSessionServerList->lock), timePtr);
+    ret = SoftBusCondWait(&callbackCond, &(g_clientSessionServerList->lock), timePtr);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "cond wait failed, socket=%{public}d", socket);
         return ret;
     }
     UnlockClientSessionServerList();
-    return CheckSessionEnableStatus(socket, callbackCond);
+    return CheckSessionEnableStatus(socket, &callbackCond);
 }
 
 static void TransWaitForBindReturn(int32_t socket)

@@ -17,7 +17,7 @@ dsoftbus_root_path = "../../../../.."
 wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 
 #wifi_direct_unit_path = "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
-ut_out_path = "dsoftbus/connection/wifi_direct_cpp/channel"
+ut_out_path = "dsoftbus/soft_bus/connection/wifi_direct_cpp/channel"
 
 ohos_unittest("AuthNegotiateChannelTest") {
   module_out_path = ut_out_path

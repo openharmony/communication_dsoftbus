@@ -39,6 +39,7 @@ HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
 {
     int32_t index = 0;
     int32_t connDomainBase = 0xd005760;
+    int32_t connSleBase = 0xd005761;
 
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[index], CONN_INIT, connDomainBase, "ConnInit"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BLE, ++connDomainBase, "ConnBle"));
@@ -57,6 +58,7 @@ HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
         "ConnNewIp"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_ACTION, ++connDomainBase,
         "ConnAction"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_SLE, connSleBase, "ConnSle"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_TEST, DOMAIN_ID_TEST, "ConnTest"));
 }
 

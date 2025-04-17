@@ -47,7 +47,6 @@ public:
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit) = 0;
     virtual bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint) = 0;
-    virtual bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time) = 0;
     virtual bool IsSupportUDIDAbatement(void) = 0;
     virtual bool IsNeedUDIDAbatement(const AuthSessionInfo *info) = 0;
     virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise,
@@ -132,7 +131,6 @@ public:
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD2(IsSupportFeatureByCapaBit, bool (uint32_t, AuthCapability));
     MOCK_METHOD2(IsPotentialTrustedDeviceDp, bool (const char *, bool));
-    MOCK_METHOD2(AuthIsLatestNormalizeKeyInTime, bool (const char *, uint64_t));
     MOCK_METHOD0(IsSupportUDIDAbatement, bool (void));
     MOCK_METHOD1(IsNeedUDIDAbatement, bool (const AuthSessionInfo *));
     MOCK_METHOD4(IsPotentialTrustedDevice, bool (TrustedRelationIdType, const char *, bool, bool));

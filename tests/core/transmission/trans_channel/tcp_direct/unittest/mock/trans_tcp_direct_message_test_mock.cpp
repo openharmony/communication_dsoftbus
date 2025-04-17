@@ -260,5 +260,9 @@ int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
 {
     return GetTransTcpDirectMessageInterface()->AuthDecryptByUkId(ukId, inData, inLen, outData, outLen);
 }
+int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
+{
+    return GetTransTcpDirectMessageInterface()->AuthFindUkIdByAclInfo(acl, ukId);
+}
 }
 }

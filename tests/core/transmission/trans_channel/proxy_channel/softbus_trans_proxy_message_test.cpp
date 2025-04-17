@@ -608,7 +608,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
 
     TransAuthInterfaceMock authMock;
     EXPECT_CALL(authMock, AuthGetDecryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
-    EXPECT_CALL(authMock, AuthDecrypt).Times(0);
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
@@ -617,6 +616,25 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
 
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
+
+    ProxyMessageHead msgHead;
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    msgHead.cipher = 1;
+    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msgHead, sizeof(ProxyMessageHead)));
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillRepeatedly(Return(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT));
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msgHead, sizeof(ProxyMessageHead)));
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msgHead, sizeof(ProxyMessageHead)));
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
 }

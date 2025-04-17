@@ -36,6 +36,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
+#include "customized_security_protocol_virtual.c"
 
 namespace OHOS {
 using namespace testing;

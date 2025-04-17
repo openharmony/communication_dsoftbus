@@ -158,7 +158,7 @@
 #define AUTH_START_STATE            "AUTH_START_STATE"
 #define SLE_RANGE_CAP               "SLE_RANGE_CAP"
 #define SLE_MAC                     "SLE_MAC"
-
+#define SUPPORT_USERKEY_NEGO        "SUPPORT_USERKEY_NEGO"
 
 #define HAS_CTRL_CHANNEL                 (0x1L)
 #define HAS_CHANNEL_AUTH                 (0x2L)
@@ -210,8 +210,6 @@
 
 /* udid short hash */
 #define UDID_SHORT_HASH       "UDID_SHORT_HASH"
-
-#define NORMALIZEKEY_CHECK_TIME 10000
 
 static void OptString(
     const JsonObj *json, const char * const key, char *target, uint32_t targetLen, const char *defaultValue)
@@ -1013,42 +1011,6 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
     return SOFTBUS_OK;
 }
 
-static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
-{
-    if (!info->isConnectServer ||
-        (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_SESSION_KEY)) {
-        return true;
-    }
-    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
-    char hashStr[CUST_UDID_LEN + 1] = {0};
-    if (SoftBusGenerateStrHash((const unsigned char *)info->udid, strlen(info->udid), udidHash) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate udidhash fail");
-        return true;
-    }
-    if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash,
-        CUST_UDID_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert udidhash hex string fail");
-        return true;
-    }
-    if (IsPotentialTrustedDeviceDp(hashStr, false)) {
-        return true;
-    }
-
-    char udidShortHash[UDID_SHORT_HASH_HEX_STR + 1] = { 0 };
-    if (ConvertBytesToHexString(udidShortHash, UDID_SHORT_HASH_HEX_STR + 1, udidHash, UDID_SHORT_HASH_LEN_TEMP) !=
-        SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
-        return true;
-    }
-    if (AuthIsLatestNormalizeKeyInTime(udidShortHash, NORMALIZEKEY_CHECK_TIME)) {
-        return true;
-    }
-
-    info->normalizedType = NORMALIZED_KEY_ERROR;
-    return false;
-}
-
-
 static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, const NodeInfo *nodeInfo, int64_t authSeq)
 {
     bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
@@ -1056,7 +1018,7 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         AUTH_LOGE(AUTH_FSM, "add normalizedType fail");
         return SOFTBUS_AUTH_PACK_NORMALIZED_DATA_FAIL;
     }
-    if (isSupportNormalizedKey && IsNeedNormalizedProcess((AuthSessionInfo *)info)) {
+    if (isSupportNormalizedKey) {
         PackNormalizedKey(obj, (AuthSessionInfo *)info, authSeq);
     }
     if (info->isServer &&
@@ -1770,6 +1732,10 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     }
     if (!JSON_AddStringToObject(json, SW_VERSION, info->softBusVersion)) {
         AUTH_LOGE(AUTH_FSM, "add version info fail");
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
+    }
+    if (!JSON_AddBoolToObject(json, SUPPORT_USERKEY_NEGO, true)) {
+        AUTH_LOGE(AUTH_FSM, "add uk nego info fail");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     if (PackCommonDevInfo(json, info, isMetaAuth) != SOFTBUS_OK) {
@@ -2512,6 +2478,7 @@ int32_t UnpackDeviceInfoMessage(
         JSON_Delete(json);
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
+    OptBool(json, SUPPORT_USERKEY_NEGO, &nodeInfo->isSupportUkNego, false);
     UnpackUserIdCheckSum(json, nodeInfo);
     JSON_Delete(json);
     if ((info != NULL) && (nodeInfo->userId != 0) && (nodeInfo->userId != info->userId)) {

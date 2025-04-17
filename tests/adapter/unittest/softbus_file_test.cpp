@@ -20,6 +20,8 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
+#define TEST_PATH_MAX 8
+
 using namespace std;
 using namespace testing::ext;
 
@@ -132,5 +134,55 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGetFileSize("/dev/test", &fileSize);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftBusAdapter_SoftBusWriteFileFd_001
+ * @tc.desc: SoftBusWriteFileFd will return SOFTBUS_FILE_ERR when given invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusWriteFileFd001, TestSize.Level1)
+{
+    int32_t fd = 1;
+    string buff = "0123456";
+    uint32_t len = buff.length();
+    int32_t ret = SoftBusWriteFileFd(fd, buff.c_str(), 0);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+    ret = SoftBusWriteFileFd(fd, NULL, len);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+    ret = SoftBusWriteFileFd(fd, NULL, 0);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftBusAdapter_SoftBusAccessFile_001
+ * @tc.desc: SoftBusAccessFile will return SOFTBUS_ERR when given invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusAccessFile, TestSize.Level1)
+{
+    int32_t ret = SoftBusAccessFile(NULL, F_OK);
+    SoftBusRemoveFile(NULL);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftBusAdapter_SoftBusRealPath_001
+ * @tc.desc: SoftBusRealPath will return NULL when given invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusRealPath, TestSize.Level1)
+{
+    string path = "./path";
+    char absPath[TEST_PATH_MAX] = { 0 };
+    char* ret = SoftBusRealPath(path.c_str(), NULL);
+    EXPECT_EQ(NULL, ret);
+    ret = SoftBusRealPath(NULL, NULL);
+    EXPECT_EQ(NULL, ret);
+    ret = SoftBusRealPath(NULL, absPath);
+    EXPECT_EQ(NULL, ret);
 }
 } // namespace OHOS

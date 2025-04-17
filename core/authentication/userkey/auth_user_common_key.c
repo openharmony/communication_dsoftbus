@@ -159,8 +159,8 @@ void DelUserKeyByNetworkId(char *networkId)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_userKeyList->list, UserKeyInfo, node) {
-        if ((item->aclInfo.isServer && strcmp(item->aclInfo.sourceUdid, peerUdid) != 0) ||
-            (!item->aclInfo.isServer && strcmp(item->aclInfo.sinkUdid, peerUdid) != 0)) {
+        if ((item->aclInfo.isServer && strcmp(item->aclInfo.sinkUdid, peerUdid) != 0) ||
+            (!item->aclInfo.isServer && strcmp(item->aclInfo.sourceUdid, peerUdid) != 0)) {
             continue;
         }
         AUTH_LOGI(AUTH_KEY, "del user key succ, index=%{public}d, anonyUdid=%{public}s", item->ukInfo.keyIndex,

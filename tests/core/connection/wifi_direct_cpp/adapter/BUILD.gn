@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
-ut_out_path = "dsoftbus/connection/wifi_direct_cpp/adapter"
+ut_out_path = "dsoftbus/soft_bus/connection/wifi_direct_cpp/adapter"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_cpp_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
