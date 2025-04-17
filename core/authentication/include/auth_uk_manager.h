@@ -16,15 +16,15 @@
 #ifndef AUTH_UK_MANAGER_H
 #define AUTH_UK_MANAGER_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <securec.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define UDID_BUF_LEN 65
 #define ACCOUNT_ID_BUF_LEN 65
 #define UK_ENCRYPT_INDEX_LEN (ENCRYPT_INDEX_LEN * 2)
 #define UK_ENCRYPT_OVER_HEAD_LEN (OVERHEAD_LEN + UK_ENCRYPT_INDEX_LEN)
@@ -52,8 +52,8 @@ typedef struct {
     void (*onGenFailed)(uint32_t requestId, int32_t reason);
 } AuthGenUkCallback;
 
-int32_t AuthFindUkIdByACLInfo(const AuthACLInfo *acl, int32_t *ukId);
-int32_t AuthGenUkIdByACLInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb);
+int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId);
+int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb);
 uint32_t AuthGetUkEncryptSize(uint32_t inLen);
 uint32_t AuthGetUkDecryptSize(uint32_t inLen);
 int32_t AuthEncryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);

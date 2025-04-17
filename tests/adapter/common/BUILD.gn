@@ -17,7 +17,7 @@ import("//build/test.gni")
 import("../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../.."
-module_output_path = "dsoftbus/adapter"
+module_output_path = "dsoftbus/soft_bus/adapter"
 
 test_deps = [
   "$dsoftbus_dfx_path:softbus_dfx",

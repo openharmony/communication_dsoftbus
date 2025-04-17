@@ -18,7 +18,7 @@ import("./p2pv1_unittest.gni")
 wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
-ut_out_path = "dsoftbus/connection/wifi_direct_cpp/processor"
+ut_out_path = "dsoftbus/soft_bus/connection/wifi_direct_cpp/processor"
 ohos_unittest("P2pv1ProcessorTest") {
   module_out_path = ut_out_path
 

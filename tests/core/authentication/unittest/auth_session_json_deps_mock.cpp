@@ -92,11 +92,6 @@ int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *devi
     return GetInterface()->AuthFindLatestNormalizeKey(udidHash, deviceKey, clearOldKey);
 }
 
-bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time)
-{
-    return GetInterface()->AuthIsLatestNormalizeKeyInTime(udidHash, time);
-}
-
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey)
 {
     return GetInterface()->AuthFindDeviceKey(udidHash, keyType, deviceKey);

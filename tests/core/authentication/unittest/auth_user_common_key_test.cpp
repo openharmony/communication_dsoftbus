@@ -153,7 +153,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_SAME_ACCOUNT_Test_001, TestSize
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
-    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     AuthUserKeyInfo userKeyInfo1 = {
         .keyLen = strlen("testKey1"),
         .time = 12345,

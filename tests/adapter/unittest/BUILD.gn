@@ -50,7 +50,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")
   import("../../../dsoftbus.gni")
-  module_output_path = "dsoftbus/adapter"
+  module_output_path = "dsoftbus/soft_bus/adapter"
 
   ohos_unittest("AdaptorDsoftbusCryptTest") {
     module_out_path = module_output_path

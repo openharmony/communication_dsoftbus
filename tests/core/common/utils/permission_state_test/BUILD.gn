@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/common"
+module_output_path = "dsoftbus/soft_bus/common"
 
 ohos_unittest("PermissionStateTest") {
   module_out_path = module_output_path

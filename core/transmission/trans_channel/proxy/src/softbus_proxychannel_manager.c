@@ -1272,7 +1272,7 @@ static void HandleProxyGenUkResult(uint32_t requestId, int32_t ukId, int32_t rea
         (void)TransUkRequestDeleteItem(requestId);
         return;
     }
-    ret = TransProxyAckHandshakeUk(&ukRequestNode, ukId, SOFTBUS_OK);
+    ret = TransProxyAckHandshakeUk(&ukRequestNode, ukId, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reply uk id failed, ret=%{public}d", ret);
     }
@@ -1309,7 +1309,7 @@ static int32_t TransProxyGenUk(const ProxyMessage *msg, int32_t pid, const AuthA
         (void)TransUkRequestDeleteItem(requestId);
         return ret;
     }
-    ret = AuthGenUkIdByACLInfo(acl, requestId, &proxyAuthGenUkCallback);
+    ret = AuthGenUkIdByAclInfo(acl, requestId, &proxyAuthGenUkCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "gen uk failed");
         (void)TransUkRequestDeleteItem(requestId);
@@ -1350,8 +1350,13 @@ void TransProxyProcessHandshakeUkMsg(const ProxyMessage *msg)
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     int32_t pid = 0;
     int32_t ukId = 0;
+    int32_t ret = SOFTBUS_PARSE_JSON_ERR;
     cJSON *json = cJSON_ParseWithLength(msg->data, msg->dataLen);
-    int32_t ret = UnPackUkRequest(json, &aclInfo, sessionName);
+    if (json == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json from handshake uk msg fail.");
+        goto EXIT_ERR;
+    }
+    ret = UnPackUkRequest(json, &aclInfo, sessionName);
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -1359,7 +1364,7 @@ void TransProxyProcessHandshakeUkMsg(const ProxyMessage *msg)
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
     if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
         goto EXIT_ERR;
     }
@@ -1422,7 +1427,7 @@ void TransProxyProcessHandshakeUkAckMsg(const ProxyMessage *msg)
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &(ukIdInfo.myId));
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &(ukIdInfo.myId));
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }

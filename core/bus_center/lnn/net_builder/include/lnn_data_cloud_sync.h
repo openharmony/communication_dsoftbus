@@ -43,6 +43,7 @@ typedef struct {
     char osVersion[OS_VERSION_BUF_LEN];
     bool isBleP2p;
     bool distributedSwitch;
+    bool isSupportUkNego;
     uint16_t deviceTypeId;
     uint32_t authCapacity;
     uint32_t heartbeatCapacity;

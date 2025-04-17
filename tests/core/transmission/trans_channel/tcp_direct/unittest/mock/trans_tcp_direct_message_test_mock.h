@@ -89,7 +89,8 @@ public:
     virtual int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid) = 0;
     virtual int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId) = 0;
     virtual int32_t AuthDecryptByUkId(
-        int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
+        int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
+    virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -149,6 +150,7 @@ public:
     MOCK_METHOD3(UnPackUkReply, int32_t (const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId));
     MOCK_METHOD5(AuthDecryptByUkId, int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
         uint32_t *outLen));
+    MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

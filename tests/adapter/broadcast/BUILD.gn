@@ -18,7 +18,7 @@ import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../../dsoftbus.gni")
 
 if (!defined(ohos_lite)) {
-  module_output_path = "dsoftbus/adapter"
+  module_output_path = "dsoftbus/soft_bus/adapter"
   bc_gatt_test_sources = [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_gatt.c",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_utils.c",

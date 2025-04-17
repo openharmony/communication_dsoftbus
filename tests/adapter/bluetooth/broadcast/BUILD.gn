@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 import("../../../../tests/utils/utils.gni")
 
-module_output_path = "dsoftbus/adapter"
+module_output_path = "dsoftbus/soft_bus/adapter"
 
 ohos_unittest("SoftbusBroadcastMgrTest") {
   module_out_path = module_output_path

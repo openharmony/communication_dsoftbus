@@ -74,11 +74,6 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoin
     return GetInterface()->IsPotentialTrustedDeviceDp(deviceIdHash, isOnlyPointToPoint);
 }
 
-bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time)
-{
-    return GetInterface()->AuthIsLatestNormalizeKeyInTime(udidHash, time);
-}
-
 bool IsSupportUDIDAbatement(void)
 {
     return GetInterface()->IsSupportUDIDAbatement();

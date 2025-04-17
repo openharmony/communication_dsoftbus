@@ -83,7 +83,7 @@ static ModuleListener g_moduleListener[] = {
         .listener = { NULL, NULL },
     },
     {
-        .module = MODULE_UK_CONNECTION,
+        .module = MODULE_USER_KEY_CONNECTION,
         .listener = { NULL, NULL },
     }
 };

@@ -25,14 +25,14 @@
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
 
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+static PermissionChangeCb g_permissionChangeCb = nullptr;
 constexpr int32_t JUDG_CNT = 1;
 constexpr int32_t DEVICE_KEY_SA_CNT = 3;
 const char *SAMGR_PROCESS_NAME = "samgr";
 const char *DMS_PROCESS_NAME = "distributedsched";
 const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributedsched", "distributedfiledaemon",
     "distributeddata" };
-#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
-static PermissionChangeCb g_permissionChangeCb = nullptr;
 
 namespace OHOS {
 using namespace Security::AccessToken;

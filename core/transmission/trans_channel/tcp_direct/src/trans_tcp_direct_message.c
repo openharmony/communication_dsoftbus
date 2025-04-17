@@ -920,14 +920,6 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static bool IsMetaSession(const char *sessionName)
-{
-    if (strlen(sessionName) < MIN_META_LEN || strncmp(sessionName, META_SESSION, MIN_META_LEN)) {
-        return false;
-    }
-    return true;
-}
-
 static void ReleaseSessionConn(SessionConn *chan)
 {
     if (chan == NULL) {
@@ -1090,15 +1082,10 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, conn, &nodeInfo, peerUuid);
 
-    if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
-        char *tmpName = NULL;
-        Anonymize(conn->appInfo.myData.sessionName, &tmpName);
-        TRANS_LOGI(TRANS_CTRL,
-            "Request denied: session is not a meta session. sessionName=%{public}s", AnonymizeWrapper(tmpName));
-        AnonymizeFree(tmpName);
-        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    if ((flags & FLAG_AUTH_META) != 0) {
+        TRANS_LOGE(TRANS_CTRL, "not support meta auth.");
         ReleaseSessionConn(conn);
-        return SOFTBUS_TRANS_NOT_META_SESSION;
+        return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     char errDesc[MAX_ERRDESC_LEN] = { 0 };
     int32_t errCode = TransTdcFillAppInfoAndNotifyChannel(&conn->appInfo, channelId, errDesc);
@@ -1205,7 +1192,7 @@ static int32_t TransTcpGenUk(int32_t channelId, const AuthACLInfo *acl)
         TRANS_LOGE(TRANS_CTRL, "add uk requset failed");
         return ret;
     }
-    ret = AuthGenUkIdByACLInfo(acl, requestId, &tdcAuthGenUkCallback);
+    ret = AuthGenUkIdByAclInfo(acl, requestId, &tdcAuthGenUkCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "gen uk failed");
         (void)TransUkRequestDeleteItem(requestId);
@@ -1216,7 +1203,7 @@ static int32_t TransTcpGenUk(int32_t channelId, const AuthACLInfo *acl)
 
 static int32_t OpenDataBusUkRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
-    TRANS_LOGI(TRANS_CTRL, "recv uk rquest msg channelId=%{public}d, seq=%{public}" PRId64, channelId, seq);
+    TRANS_LOGI(TRANS_CTRL, "recv uk request msg channelId=%{public}d, seq=%{public}" PRId64, channelId, seq);
     char *errDesc = NULL;
     AuthACLInfo aclInfo = { 0 };
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
@@ -1229,7 +1216,7 @@ static int32_t OpenDataBusUkRequest(int32_t channelId, uint32_t flags, uint64_t 
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
     if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
         TRANS_LOGE(TRANS_CTRL, "find uk fail, no acl, ret=%{public}d", ret);
         goto EXIT_ERR;
@@ -1288,7 +1275,7 @@ static int32_t OpenDataBusUkReply(int32_t channelId, uint64_t seq, const cJSON *
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    ret = AuthFindUkIdByACLInfo(&aclInfo, &ukIdInfo.myId);
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukIdInfo.myId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "find uk fail, ret=%{public}d", ret);
         return ret;
