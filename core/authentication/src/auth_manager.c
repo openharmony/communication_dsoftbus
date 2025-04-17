@@ -735,6 +735,29 @@ static int32_t AuthProcessEmptySessionKey(const AuthSessionInfo *info, int32_t i
     return SOFTBUS_OK;
 }
 
+bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid uuid param");
+        return false;
+    }
+    bool haveSessionAuth = false;
+    bool haveEnhanceP2pAuth = false;
+    AuthManager *item = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_SESSION_KEY, isServer);
+    if (item == NULL) {
+        return false;
+    }
+    haveSessionAuth = true;
+    if (item->connInfo[AUTH_LINK_TYPE_ENHANCED_P2P].type == AUTH_LINK_TYPE_ENHANCED_P2P &&
+        item->hasAuthPassed[AUTH_LINK_TYPE_ENHANCED_P2P]) {
+        haveEnhanceP2pAuth = true;
+    }
+    if (haveSessionAuth && !haveEnhanceP2pAuth) {
+        return true;
+    }
+    return false;
+}
+
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect, bool isOldKey)
 {
