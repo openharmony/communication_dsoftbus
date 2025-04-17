@@ -95,7 +95,7 @@ public:
     virtual int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId) = 0;
     virtual int32_t AuthDecryptByUkId(
         int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
-    virtual int32_t AuthFindUkIdByACLInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
+    virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
@@ -162,7 +162,7 @@ public:
     MOCK_METHOD3(UnPackUkReply, int32_t (const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId));
     MOCK_METHOD5(AuthDecryptByUkId,
         int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen));
-    MOCK_METHOD2(AuthFindUkIdByACLInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
+    MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
 };
 } // namespace OHOS
 #endif // TRANS_AUTH_MOCK_H

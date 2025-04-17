@@ -27,14 +27,14 @@
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_connection_fsm.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_net_builder.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
-#include "lnn_connection_fsm.h"
-#include "lnn_distributed_net_ledger.h"
-#include "lnn_ohos_account_adapter.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -576,11 +576,7 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, H
 int32_t HichainProcessUkNegoData(
     int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode, DeviceAuthCallback *cb)
 {
-    if (data == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "data is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
+    AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_HICHAIN, "data is null");
     int32_t ret = g_hiChainAuthInterface[authMode].processAuthData(authSeq, data, len, cb);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%{public}d", ret);
