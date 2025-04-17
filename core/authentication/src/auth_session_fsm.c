@@ -1393,10 +1393,10 @@ static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
         return;
     }
     ReleaseAuthLock();
+    SoftBusFree(ptkCbParam);
     DelAuthGenCertParaNodeById(reuseKeyNode.requestId);
     AuthManagerSetAuthPassed(authFsm->authSeq, info);
     TryFinishAuthSession(authFsm);
-    SoftBusFree(ptkCbParam);
 }
 
 static void OnPtkSyncCallBack(const char *uuid, int32_t result)
