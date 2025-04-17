@@ -325,14 +325,14 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
 
 static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_tcpConnInfoList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        CONN_COMMON, "lock failed, module=%{public}d, fd=%{public}d", module, fd);
     (void)module;
     TcpConnInfoNode tcpInfo;
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
 
     if (GetTcpInfoByFd(fd, &tcpInfo) != SOFTBUS_OK) {
-        tcpInfo.info.socketInfo.moduleId = UNUSE_BUTT;
-        (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
-        ConnShutdownSocket(fd);
+        (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
         CONN_LOGI(CONN_COMMON, "TcpOnDataEventSocketOut fail. fd=%{public}d", fd);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
@@ -342,6 +342,7 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
         (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
         DelTcpConnNode(tcpInfo.connectionId);
         ConnShutdownSocket(fd);
+        (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
         tcpInfo.result.OnConnectFailed(tcpInfo.requestId, ret);
         tcpInfo.statistics.reqId = tcpInfo.requestId;
         DfxRecordTcpConnectFail(
@@ -349,6 +350,7 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
         return SOFTBUS_OK;
     }
     CONN_LOGI(CONN_COMMON, "notfiy connect ok. reqId=%{public}d", tcpInfo.requestId);
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     DfxRecordTcpConnectSuccess(DEFAULT_PID, &tcpInfo, &tcpInfo.statistics);
     (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
     (void)AddTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, READ_TRIGGER);
