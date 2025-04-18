@@ -782,6 +782,10 @@ int32_t AuthInit(void)
         return ret;
     }
     ret = UkNegotiateInit();
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "user key nego init failed, ret=%{public}d", ret);
+        return ret;
+    }
     AuthLoadDeviceKey();
     return AuthMetaInit(&callBack);
 }
