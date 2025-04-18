@@ -326,6 +326,22 @@ void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const s
     }
 }
 
+bool LinkManager::RefreshAuthHandle(std::string remoteDeviceId, const std::shared_ptr<NegotiateChannel> &channel)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "start refresh auth handle, remoteDeviceId=%{public}s",
+        WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+    std::lock_guard lock(lock_);
+    auto iterator = links_.find({ InnerLink::LinkType::HML, remoteDeviceId });
+    if (iterator == links_.end()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "type=%{public}d remoteDeviceId=%{public}s not found",
+            static_cast<int>(InnerLink::LinkType::HML), WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+        return false;
+    }
+
+    iterator->second->SetNegotiateChannel(channel);
+    return true;
+}
+
 void LinkManager::Dump() const
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");

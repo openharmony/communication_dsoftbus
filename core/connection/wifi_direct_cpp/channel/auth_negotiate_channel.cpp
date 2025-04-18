@@ -15,6 +15,7 @@
 
 #include "securec.h"
 #include "auth_negotiate_channel.h"
+#include "bus_center_event.h"
 #include "command/negotiate_command.h"
 #include "common_timer_errors.h"
 #include "conn_log.h"
@@ -253,6 +254,9 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
         msg.GetLegacyP2pCommandType() == LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "do not process %{public}d", static_cast<int>(msg.GetMessageType()));
         return;
+    } else if (msg.GetMessageType() == NegotiateMessageType::CMD_REFRESH_AUTH_HANDLE) {
+        LinkManager::GetInstance().RefreshAuthHandle(remoteDeviceId, channel);
+        return;
     }
 
     msg.SetRemoteDeviceId(remoteDeviceId);
@@ -315,6 +319,8 @@ void AuthNegotiateChannel::Init()
 
     int32_t ret = RegAuthTransListener(MODULE_P2P_LINK, &authListener);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register auth transfer listener failed");
+    ret = LnnRegisterEventHandler(LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P, AddAuthConnection);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register lnn event failed, ret=%{public}d", ret);
 }
 
 std::pair<int, ListenerModule> AuthNegotiateChannel::StartListening(
@@ -336,52 +342,91 @@ void AuthNegotiateChannel::StopListening(AuthLinkType type, ListenerModule modul
 
 void AuthNegotiateChannel::OnConnOpened(uint32_t requestId, AuthHandle authHandle)
 {
+    AuthOpenEvent event { SOFTBUS_OK, authHandle };
     std::string remoteDeviceId;
     {
         std::lock_guard lock(lock_);
         remoteDeviceId = requestIdToDeviceIdMap_[requestId];
+        CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s", requestId,
+            WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
         requestIdToDeviceIdMap_.erase(requestId);
+        auto it = authOpenEventPromiseMap_.find(requestId);
+        if (it != authOpenEventPromiseMap_.end()) {
+            it->second->set_value(event);
+            authOpenEventPromiseMap_.erase(requestId);
+            return;
+        }
     }
-
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s", requestId,
-        WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
-    AuthOpenEvent event { SOFTBUS_OK, authHandle };
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
 void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
 {
+    AuthOpenEvent event { reason };
     std::string remoteDeviceId;
     {
         std::lock_guard lock(lock_);
         remoteDeviceId = requestIdToDeviceIdMap_[requestId];
+        CONN_LOGE(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s reason=%{public}d", requestId,
+            WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), reason);
         requestIdToDeviceIdMap_.erase(requestId);
+        auto it = authOpenEventPromiseMap_.find(requestId);
+        if (it == authOpenEventPromiseMap_.end()) {
+            it->second->set_value(event);
+            authOpenEventPromiseMap_.erase(requestId);
+            return;
+        }
     }
-
-    CONN_LOGE(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s reason=%{public}d", requestId,
-        WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), reason);
-    AuthOpenEvent event { reason };
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
-int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
-    uint32_t &authReqId)
+void AuthNegotiateChannel::AddAuthConnection(const LnnEventBasicInfo *info)
 {
-    bool isMeta = false;
-    bool needUdid = true;
-    if (channel != nullptr) {
-        isMeta = channel->IsMeta();
-    }
-    if (param.remoteUuid.length() < UUID_BUF_LEN - 1) {
-        isMeta = true;
-        needUdid = false;
-    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "start refresh auth connection");
+    LnnNotifyRawEnhanceP2pEvent *lnnNotifyRawEnhanceP2pEvent =
+        reinterpret_cast<LnnNotifyRawEnhanceP2pEvent *>(const_cast<LnnEventBasicInfo *>(info));
+    std::string remoteUuid = lnnNotifyRawEnhanceP2pEvent->uuid;
+    std::thread(AuthNegotiateChannel::RefreshAuthConnection, remoteUuid).detach();
+}
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, isMeta=%{public}d",
-        WifiDirectAnonymizeDeviceId(param.remoteUuid).c_str(), WifiDirectAnonymizeIp(param.remoteIp).c_str(),
-        param.remotePort, isMeta);
+void AuthNegotiateChannel::RefreshAuthConnection(std::string remoteUuid)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "start refresh auth connection, remoteUuid=%{public}s",
+        WifiDirectAnonymizeDeviceId(remoteUuid).c_str());
+    AuthNegotiateChannel::OpenParam param;
+    param.type = AUTH_LINK_TYPE_ENHANCED_P2P;
+    param.remoteUuid = remoteUuid;
+    bool res = LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::HML, remoteUuid, [&param, &remoteUuid](InnerLink &link) {
+            if (link.GetRemoteDeviceId() == remoteUuid) {
+                param.module = link.GetListenerModule();
+                param.remoteIp = link.GetRemoteIpv4();
+                param.remotePort = link.GetRemotePort();
+                return true;
+            }
+            return false;
+        });
+    CONN_CHECK_AND_RETURN_LOGE(res, CONN_WIFI_DIRECT, "get param failed");
+    CONN_CHECK_AND_RETURN_LOGE(param.remotePort > 0, CONN_WIFI_DIRECT, "remote port is zero");
 
-    AuthConnInfo authConnInfo {};
+    auto authOpenEventPromise = std::make_shared<std::promise<AuthOpenEvent>>();
+    uint32_t authReqId = 0;
+    auto ret = AuthNegotiateChannel::OpenConnection(param, nullptr, authReqId, authOpenEventPromise);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT,
+        "open connection failed, ret=%{public}d", ret);
+    auto authEvent = authOpenEventPromise->get_future().get();
+    CONN_CHECK_AND_RETURN_LOGE(authEvent.reason_ == SOFTBUS_OK, CONN_WIFI_DIRECT,
+        "open connection failed, ret=%{public}d", authEvent.reason_);
+    auto channel = std::make_shared<AuthNegotiateChannel>(authEvent.handle_);
+    LinkManager::GetInstance().RefreshAuthHandle(remoteUuid, channel);
+    NegotiateMessage msg(NegotiateMessageType::CMD_REFRESH_AUTH_HANDLE);
+    msg.SetRemoteDeviceId(remoteUuid);
+    channel->SendMessage(msg);
+}
+
+int AuthNegotiateChannel::AssignValueForAuthConnInfo(bool isMeta, bool needUdid, const OpenParam &param,
+    const std::shared_ptr<AuthNegotiateChannel> &channel, AuthConnInfo &authConnInfo)
+{
     authConnInfo.type = param.type;
     authConnInfo.info.ipInfo.port = param.remotePort;
     authConnInfo.info.ipInfo.moduleId = param.module;
@@ -399,25 +444,58 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
         CONN_CHECK_AND_RETURN_RET_LOGE(
             ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_UUID_FAILED, CONN_WIFI_DIRECT, "copy udid failed");
     }
+    return SOFTBUS_OK;
+}
 
+int AuthNegotiateChannel::AuthOpenConnection(uint32_t requestId, AuthConnInfo authConnInfo, bool isMeta)
+{
     AuthConnCallback authConnCallback = {
         .onConnOpened = AuthNegotiateChannel::OnConnOpened,
         .onConnOpenFailed = AuthNegotiateChannel::OnConnOpenFailed,
     };
 
+    return AuthOpenConn(&authConnInfo, requestId, &authConnCallback, isMeta);
+}
+
+int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
+    uint32_t &authReqId, std::shared_ptr<std::promise<AuthOpenEvent>> authOpenEventPromise)
+{
+    bool isMeta = false;
+    bool needUdid = true;
+    if (channel != nullptr) {
+        isMeta = channel->IsMeta();
+    }
+    if (param.remoteUuid.length() < UUID_BUF_LEN - 1) {
+        isMeta = true;
+        needUdid = false;
+    }
+
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, isMeta=%{public}d",
+        WifiDirectAnonymizeDeviceId(param.remoteUuid).c_str(), WifiDirectAnonymizeIp(param.remoteIp).c_str(),
+        param.remotePort, isMeta);
+
+    AuthConnInfo authConnInfo {};
+    auto ret = AssignValueForAuthConnInfo(isMeta, needUdid, param, channel, authConnInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "assign value for auth conn info failed");
+
     auto requestId = AuthGenRequestId();
     {
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_[requestId] = param.remoteUuid;
+        if (authOpenEventPromise != nullptr) {
+            authOpenEventPromiseMap_[requestId] = authOpenEventPromise;
+        }
     }
-
-    ret = AuthOpenConn(&authConnInfo, requestId, &authConnCallback, isMeta);
+    authReqId = requestId;
+    ret = AuthOpenConnection(requestId, authConnInfo, isMeta);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "auth open connect failed, error=%{public}d", ret);
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_.erase(requestId);
+        if (authOpenEventPromise != nullptr) {
+            authOpenEventPromiseMap_.erase(requestId);
+        }
     }
-    authReqId = requestId;
     return ret;
 }
 
