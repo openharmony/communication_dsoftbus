@@ -958,6 +958,7 @@ static bool NeedUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
 static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
 {
     if (NeedUpdateRawEnhanceP2p(connFsm)) {
+        LNN_LOGI(LNN_BUILDER, "notify add raw auth connection");
         LnnNotifyRawEnhanceP2pEvent event = {.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P};
         event.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P;
         event.type = connFsm->connInfo.addr.type;
