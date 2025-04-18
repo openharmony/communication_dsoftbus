@@ -989,7 +989,9 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
     NotifyJoinExtResultProcess(connFsm, retCode);
-    TryUpdateRawEnhanceP2p(connFsm);
+    if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
+        TryUpdateRawEnhanceP2p(connFsm);
+    }
     int32_t infoNum = 0;
     int32_t lnnType = 0;
     NodeBasicInfo *info = NULL;
