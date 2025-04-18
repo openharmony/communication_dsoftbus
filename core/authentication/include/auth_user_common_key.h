@@ -35,9 +35,10 @@ typedef struct {
 
 int32_t AuthUserKeyInit(void);
 void DeinitUserKeyList(void);
-int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo);
+int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel);
 void DelUserKeyByNetworkId(char *networkId);
 int32_t GetUserKeyInfoSameAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo);
+int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo);
 int32_t GetUserKeyInfoDiffAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo);
 int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen);
 

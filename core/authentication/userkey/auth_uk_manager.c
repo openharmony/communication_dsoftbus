@@ -434,6 +434,30 @@ bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool 
     }
 }
 
+bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
+{
+    if (oldAcl == NULL || newAcl == NULL) {
+        AUTH_LOGE(AUTH_CONN, "acl invalid param");
+        return false;
+    }
+
+    if (isSameSide) {
+        if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
+            oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId) {
+            AUTH_LOGE(AUTH_CONN, "same side compare fail");
+            return false;
+        }
+        return true;
+    } else {
+        if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
+            oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId) {
+            AUTH_LOGE(AUTH_CONN, "diff side compare fail");
+            return false;
+        }
+        return true;
+    }
+}
+
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
 {
     if (oldAcl == NULL || newAcl == NULL) {
@@ -1223,9 +1247,11 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
     aclInfo.isServer = !acl->isServer;
     PrintfAuthAclInfo(0, 0, &aclInfo);
     if (GetUserKeyInfoSameAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
+        GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
         GetUserKeyInfoDiffAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get uk by ukcachelist fail");
         if (GetAccessUkIdSameAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
+            GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get uk by asset fail");
             return SOFTBUS_AUTH_ACL_NOT_FOUND;

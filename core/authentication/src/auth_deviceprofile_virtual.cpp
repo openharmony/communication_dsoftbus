@@ -66,6 +66,14 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t GetAccessUkIdDiffAccountWithUserLevel(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
+{
+    (void)acl;
+    (void)ukId;
+    (void)time;
+    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+}
+
 int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
 {
     (void)acl;

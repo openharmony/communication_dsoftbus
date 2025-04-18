@@ -61,6 +61,7 @@ int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
 uint32_t GenUkSeq(void);
 bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
+bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
 bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide);
 bool AuthIsUkExpired(uint64_t time);
 int32_t UkNegotiateInit(void);
