@@ -617,16 +617,20 @@ static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *rep
 
 static void BleOnScanStart(int listenerId, int status)
 {
-    (void)listenerId;
-    (void)status;
+    DISC_CHECK_AND_RETURN_LOGE(listenerId == g_bleListener.scanListenerId, DISC_BLE,
+        "unexpect scan start cb, localId=%{public}d, comingId=%{public}d", g_bleListener.scanListenerId, listenerId);
+    DISC_CHECK_AND_RETURN_LOGE(status == SOFTBUS_BT_STATUS_SUCCESS, DISC_BLE,
+        "unexpect scan start cb, status=%{public}d", status);
     DISC_LOGD(DISC_BLE, "BleOnScanStart");
     g_isScanning = true;
 }
 
 static void BleOnScanStop(int listenerId, int status)
 {
-    (void)listenerId;
-    (void)status;
+    DISC_CHECK_AND_RETURN_LOGE(listenerId == g_bleListener.scanListenerId, DISC_BLE,
+        "unexpect scan start cb, localId=%{public}d, comingId=%{public}d", g_bleListener.scanListenerId, listenerId);
+    DISC_CHECK_AND_RETURN_LOGE(status == SOFTBUS_BT_STATUS_SUCCESS, DISC_BLE,
+        "unexpect scan start cb, status=%{public}d", status);
     DISC_LOGD(DISC_BLE, "BleOnScanStop");
     g_isScanning = false;
 }
