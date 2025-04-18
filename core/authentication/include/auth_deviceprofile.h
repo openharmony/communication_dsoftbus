@@ -33,6 +33,7 @@ typedef enum {
     UPDATE_ACL_NOT_MATCH,
     GET_ALL_ACL_FAIL,
     GET_ALL_ACL_IS_EMPTY,
+    MATCH_ONE_ACL,
 } UpdateDpAclResult;
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);

@@ -31,11 +31,21 @@
 
 #define DEFAULT_ACCOUNT_UID  "ohosAnonymousUid"
 #define DEFAULT_USER_KEY_INDEX  (-1)
+#define DEFAULT_UKID_TIME  (-1)
+#define DEFAULT_USERID (-1)
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static std::set<std::string> g_notTrustedDevices;
 static std::mutex g_mutex;
 static constexpr const int32_t LONG_TO_STRING_MAX_LEN = 21;
+
+typedef struct {
+    std::string localUdid;
+    std::string peerUdid;
+    int32_t peerUserId;
+    int32_t sessionKeyId;
+    uint64_t time;
+} AclParams;
 
 static bool IsNotTrustDevice(std::string deviceIdHash)
 {
@@ -83,6 +93,14 @@ static int32_t GetAclLocalUserId(const OHOS::DistributedDeviceProfile::AccessCon
         return trustDevice.GetAccesser().GetAccesserUserId();
     }
     return trustDevice.GetAccessee().GetAccesseeUserId();
+}
+
+static int32_t GetAclPeerUserId(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice)
+{
+    if (trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
+        return trustDevice.GetAccessee().GetAccesseeUserId();
+    }
+    return trustDevice.GetAccesser().GetAccesserUserId();
 }
 
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
@@ -248,7 +266,8 @@ static void DumpDpAclInfo(const std::string peerUdid, int32_t localUserId, int32
     AnonymizeFree(anonyUdid);
 }
 
-static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int32_t peerUserId, int32_t sessionKeyId)
+static std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> QueryExistAcl(
+    const std::string &peerUdid, int32_t peerUserId)
 {
     if (peerUserId == 0) {
         peerUserId = -1;
@@ -258,83 +277,142 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
     int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
         LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
-        return GET_ALL_ACL_FAIL;
+        return {};
     }
     if (aclProfiles.empty()) {
         LNN_LOGE(LNN_STATE, "aclProfiles is empty");
-        return GET_ALL_ACL_IS_EMPTY;
+        return {};
     }
-    UpdateDpAclResult updateResult = UPDATE_ACL_NOT_MATCH;
     int32_t localUserId = GetActiveOsAccountIds();
     char udid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get local udid fail");
+        return {};
     }
     std::string localUdid(udid);
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> matchAcl;
     for (auto &aclProfile : aclProfiles) {
         if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             aclProfile.GetTrustDeviceId().empty() || aclProfile.GetTrustDeviceId() != peerUdid ||
             aclProfile.GetBindType() != (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
-            aclProfile.GetAccesser().GetAccesserUserId() != localUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != peerUserId) {
+            GetAclLocalUserId(aclProfile) != localUserId ||
+            GetAclPeerUserId(aclProfile) != peerUserId) {
             continue;
         }
-        OHOS::DistributedDeviceProfile::Accesser accesser(aclProfile.GetAccesser());
-        if (sessionKeyId != DEFAULT_USER_KEY_INDEX) {
-            accesser.SetAccesserSessionKeyId(sessionKeyId);
-            accesser.SetAccesserSKTimeStamp(SoftBusGetSysTimeMs());
-        }
-        aclProfile.SetAccesser(accesser);
-        if (aclProfile.GetAccessee().GetAccesseeDeviceId() == peerUdid &&
-            aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid) {
+        if ((aclProfile.GetAccessee().GetAccesseeDeviceId() == peerUdid &&
+            aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid) ||
+            (aclProfile.GetAccesser().GetAccesserDeviceId() == peerUdid &&
+            aclProfile.GetAccessee().GetAccesseeDeviceId() != localUdid)) {
             continue;
         }
-        DumpDpAclInfo(peerUdid, localUserId, peerUserId, aclProfile);
-        if (aclProfile.GetStatus() != (int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE) {
-            aclProfile.SetStatus((int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
-        }
-        ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
-        LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile ret=%{public}d", ret);
-        updateResult = UPDATE_ACL_SUCC;
+        matchAcl.push_back(aclProfile);
     }
-    return updateResult;
+    return matchAcl;
 }
 
-static void InsertDpSameAccountAcl(const std::string peerUdid, int32_t peerUserId, int32_t sessionKeyId)
+static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId)
+{
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> matchAcl = QueryExistAcl(peerUdid, peerUserId);
+    if (matchAcl.empty()) {
+        return UPDATE_ACL_NOT_MATCH;
+    }
+    uint64_t currentTime = SoftBusGetSysTimeMs();
+    for (auto &aclProfile : matchAcl) {
+        if (aclProfile.GetAccessee().GetAccesseeDeviceId() == peerUdid) {
+            OHOS::DistributedDeviceProfile::Accesser accesser(aclProfile.GetAccesser());
+            if (sessionKeyId != DEFAULT_USER_KEY_INDEX) {
+                accesser.SetAccesserSessionKeyId(sessionKeyId);
+                accesser.SetAccesserSKTimeStamp(currentTime);
+            }
+            aclProfile.SetStatus((int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
+            aclProfile.SetAccesser(accesser);
+            int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            LNN_LOGI(LNN_STATE, "updateAccessControlProfile ret=%{public}d", ret);
+        } else if (aclProfile.GetAccesser().GetAccesserDeviceId() == peerUdid) {
+            OHOS::DistributedDeviceProfile::Accessee accessee(aclProfile.GetAccessee());
+            if (sessionKeyId != DEFAULT_USER_KEY_INDEX) {
+                accessee.SetAccesseeSessionKeyId(sessionKeyId);
+                accessee.SetAccesseeSKTimeStamp(currentTime);
+            }
+            aclProfile.SetStatus((int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
+            aclProfile.SetAccessee(accessee);
+            int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+            LNN_LOGI(LNN_STATE, "updateAccessControlProfile ret=%{public}d", ret);
+        }
+        DumpDpAclInfo(peerUdid, GetActiveOsAccountIds(), peerUserId, aclProfile);
+    }
+    if (matchAcl.size() == 1) {
+        return MATCH_ONE_ACL;
+    }
+    return UPDATE_ACL_SUCC;
+}
+
+static OHOS::DistributedDeviceProfile::AccessControlProfile GenerateSameAccountAcl(AclParams &aclParams)
 {
     OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
     OHOS::DistributedDeviceProfile::Accesser accesser;
     OHOS::DistributedDeviceProfile::Accessee accessee;
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    OHOS::ErrCode ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
+    if (ret != OHOS::ERR_OK || accountInfo.uid_.empty()) {
+        LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail ret=%{public}d", ret);
+    }
+    accesser.SetAccesserDeviceId(aclParams.localUdid);
+    accesser.SetAccesserUserId(GetActiveOsAccountIds());
+    accesser.SetAccesserAccountId(accountInfo.uid_);
+    accessee.SetAccesseeAccountId(accountInfo.uid_);
+    accessee.SetAccesseeDeviceId(aclParams.peerUdid);
+    accessee.SetAccesseeUserId(aclParams.peerUserId == 0 ? DEFAULT_USERID : aclParams.peerUserId);
+    if (aclParams.sessionKeyId != DEFAULT_USER_KEY_INDEX) {
+        accesser.SetAccesserSessionKeyId(aclParams.sessionKeyId);
+        accesser.SetAccesserSKTimeStamp(aclParams.time);
+    }
+    accessControlProfile.SetBindType((uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT);
+    accessControlProfile.SetDeviceIdType((uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID);
+    accessControlProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
+    accessControlProfile.SetAuthenticationType((uint32_t)OHOS::DistributedDeviceProfile::AuthenticationType::PERMANENT);
+    accessControlProfile.SetTrustDeviceId(aclParams.peerUdid);
+    accessControlProfile.SetAccesser(accesser);
+    accessControlProfile.SetAccessee(accessee);
+    return accessControlProfile;
+}
+
+static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId)
+{
     char udid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get local udid fail");
         return;
     }
-    uint64_t currentTime = SoftBusGetSysTimeMs();
     std::string localUdid(udid);
-    accesser.SetAccesserDeviceId(localUdid);
-    accesser.SetAccesserUserId(GetActiveOsAccountIds());
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-    OHOS::ErrCode ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
-    if (ret != OHOS::ERR_OK || accountInfo.uid_.empty()) {
-        LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail ret=%{public}d", ret);
+    uint64_t currentTime = SoftBusGetSysTimeMs();
+    AclParams aclParams = {
+        .localUdid = localUdid,
+        .peerUdid = peerUdid,
+        .peerUserId = peerUserId,
+        .sessionKeyId = sessionKeyId,
+        .time = currentTime,
+    };
+    OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile = GenerateSameAccountAcl(aclParams);
+    int32_t ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "putAccessControlProfile failed, ret=%{public}d", ret);
         return;
     }
-    accesser.SetAccesserAccountId(accountInfo.uid_);
+
+    /* insert acl two way */
+    OHOS::DistributedDeviceProfile::Accesser accesser = accessControlProfile.GetAccesser();
+    OHOS::DistributedDeviceProfile::Accessee accessee = accessControlProfile.GetAccessee();
+    accesser.SetAccesserSessionKeyId(DEFAULT_USER_KEY_INDEX);
+    accesser.SetAccesserSKTimeStamp(DEFAULT_UKID_TIME);
+    accessee.SetAccesseeDeviceId(localUdid);
+    accessee.SetAccesseeUserId(GetActiveOsAccountIds());
+    accesser.SetAccesserDeviceId(peerUdid);
+    accesser.SetAccesserUserId(peerUserId == 0 ? DEFAULT_USERID : peerUserId);
     if (sessionKeyId != DEFAULT_USER_KEY_INDEX) {
-        accesser.SetAccesserSessionKeyId(sessionKeyId);
-        accesser.SetAccesserSKTimeStamp(currentTime);
+        accessee.SetAccesseeSessionKeyId(sessionKeyId);
+        accessee.SetAccesseeSKTimeStamp(currentTime);
     }
-    accessee.SetAccesseeDeviceId(peerUdid);
-    if (peerUserId != 0) {
-        accessee.SetAccesseeUserId(peerUserId);
-    }
-    accessee.SetAccesseeAccountId(accountInfo.uid_);
-    accessControlProfile.SetBindType((uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT);
-    accessControlProfile.SetDeviceIdType((uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID);
-    accessControlProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
-    accessControlProfile.SetAuthenticationType((uint32_t)OHOS::DistributedDeviceProfile::AuthenticationType::PERMANENT);
-    accessControlProfile.SetTrustDeviceId(peerUdid);
     accessControlProfile.SetAccesser(accesser);
     accessControlProfile.SetAccessee(accessee);
     ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
@@ -347,8 +425,7 @@ static void InsertDpSameAccountAcl(const std::string peerUdid, int32_t peerUserI
     LNN_LOGI(LNN_STATE,
         "insert dp same account succ, udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d, "
         "sessionKeyId=%{public}d, currentTime=%{public}" PRIu64,
-        AnonymizeWrapper(anonyUdid), accesser.GetAccesserUserId(), accessee.GetAccesseeUserId(), sessionKeyId,
-        currentTime);
+        AnonymizeWrapper(anonyUdid), GetActiveOsAccountIds(), peerUserId, sessionKeyId, currentTime);
     AnonymizeFree(anonyUdid);
 }
 
