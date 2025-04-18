@@ -681,4 +681,12 @@ int WifiDirectUtils::GetChload()
 {
     return SOFTBUS_OK;
 }
+
+// test source not using c++ 17, from_chars is C++17 feature
+static constexpr int WIFI_5G_FREQ = 5180;
+bool WifiDirectUtils::StringToInt(const std::string &channelString, int32_t &result)
+{
+    result = WIFI_5G_FREQ;
+    return true;
+}
 } // namespace OHOS::SoftBus

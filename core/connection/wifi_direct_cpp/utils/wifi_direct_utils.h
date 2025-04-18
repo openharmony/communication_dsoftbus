@@ -82,6 +82,7 @@ public:
     static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, size_t addrArraySize);
 
     static std::string ChannelListToString(const std::vector<int> &channels);
+    static bool StringToInt(const std::string &channelString, int32_t &result);
     static std::vector<int> StringToChannelList(std::string channels);
 
     static WifiDirectRole ToWifiDirectRole(LinkInfo::LinkMode mode);
