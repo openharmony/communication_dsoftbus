@@ -35,6 +35,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
+#include "lnn_ohos_account_adapter.h"
 #include "session.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -62,6 +63,7 @@
 #define SEQ_TIME_STAMP_MASK     0xFFL
 #define UK_SEQ_INTEGER_BITS     7
 #define UK_SEQ_INTEGER_MAX      0x0FFFFFFF
+#define PEER_OS_ACCOUNT_ID_STR  "peerOsAccountId"
 
 static uint32_t g_uniqueId = 0;
 static SoftBusList *g_ukNegotiateList = NULL;
@@ -132,6 +134,10 @@ void DeInitUkNegoInstanceList(void)
     UkNegotiateInstance *item = NULL;
     UkNegotiateInstance *nextItem = NULL;
 
+    if (g_ukNegotiateList == NULL) {
+        AUTH_LOGE(AUTH_CONN, "g_ukNegotiateList is null");
+        return;
+    }
     if (!RequireUkNegotiateListLock()) {
         AUTH_LOGE(AUTH_CONN, "RequireUkNegotiateListLock fail");
         return;
@@ -317,12 +323,7 @@ static int32_t CreateUkNegotiateInstance(
     instance->info = *info;
     instance->authMode = GetHichainAuthMode(info);
     instance->state = GENUK_STATE_UNKNOW;
-    if (memcpy_s(&instance->genCb, sizeof(AuthGenUkCallback), (uint8_t *)genCb, sizeof(AuthGenUkCallback)) != EOK) {
-        AUTH_LOGE(AUTH_CONN, "memcpy_s uknego callback data fail");
-        SoftBusFree(instance);
-        ReleaseUkNegotiateListLock();
-        return SOFTBUS_AUTH_ACL_SET_CHANNEL_FAIL;
-    }
+    instance->genCb = *genCb;
     instance->negoInfo.isRecvSessionKeyEvent = false;
     instance->negoInfo.isRecvFinishEvent = false;
     instance->negoInfo.isRecvCloseAckEvent = false;
@@ -340,9 +341,13 @@ static int32_t UpdateUkNegotiateInfo(uint32_t requestId, const UkNegotiateInstan
         AUTH_LOGE(AUTH_INIT, "uknego instance is null");
         return SOFTBUS_NO_INIT;
     }
-
+    if (instance == NULL) {
+        AUTH_LOGE(AUTH_CONN, "instance is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     UkNegotiateInstance *item = NULL;
     UkNegotiateInstance *nextItem = NULL;
+
     if (!RequireUkNegotiateListLock()) {
         AUTH_LOGE(AUTH_CONN, "RequireUkNegotiateListLock fail");
         return SOFTBUS_LOCK_ERR;
@@ -501,7 +506,7 @@ static void AsyncCallGenUkResultReceived(void *para)
         return;
     }
     SyncGenUkResult *res = (SyncGenUkResult *)para;
-    UkNegotiateInstance instance = { 0 };
+    UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(res->requestId, &instance);
     if (ret != SOFTBUS_OK) {
@@ -572,7 +577,7 @@ static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int3
 static void OnGenSuccess(uint32_t requestId)
 {
     AUTH_LOGI(AUTH_CONN, "OnGenSuccess, requestId=%{public}u", requestId);
-    UkNegotiateInstance instance = { 0 };
+    UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
@@ -593,7 +598,7 @@ static void OnGenSuccess(uint32_t requestId)
 static void OnGenFailed(uint32_t requestId, int32_t reason)
 {
     AUTH_LOGE(AUTH_CONN, "OnGenFailed, requestId=%{public}u, reason=%{public}d", requestId, reason);
-    UkNegotiateInstance instance = { 0 };
+    UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
@@ -677,7 +682,7 @@ static bool JudgeIsSameAccount(const char *accountHash)
 
 static int32_t GetShortUdidHash(char *udid, char *udidHash, uint32_t len)
 {
-    if (udid == NULL || udidHash == NULL || len < UDID_HASH_LEN) {
+    if (udid == NULL || udidHash == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -714,34 +719,26 @@ static char *GetCredIdByIdService(char *localUdidHash, char *remoteUdidHash, cha
     credId = IdServiceGetCredIdFromCredList(userId, credList);
     if (credId == NULL) {
         AUTH_LOGE(AUTH_CONN, "get cred id fail");
-        return credId;
     }
     IdServiceDestroyCredentialList(&credList);
     return credId;
 }
 
-static int32_t GetUkNegoAuthParamInfo(char *remoteUdid, HiChainAuthParam *authParam, HiChainAuthMode authMode)
+static int32_t GenerateAuthParam(NodeInfo *localNodeInfo, NodeInfo *remoteNodeInfo, const AuthACLInfo *info,
+    HiChainAuthMode authMode, HiChainAuthParam *authParam)
 {
-    if (remoteUdid == NULL || authParam == NULL) {
+    if (localNodeInfo == NULL || remoteNodeInfo == NULL || info == NULL || authParam == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get node info fail");
-        return ret;
-    }
-    NodeInfo *remoteNodeInfo = LnnGetNodeInfoById(remoteUdid, CATEGORY_UDID);
-    if (remoteNodeInfo == NULL) {
-        AUTH_LOGE(AUTH_CONN, "remote node info is null");
-        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
-    }
+    char *credId = NULL;
     char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     char remoteUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    ret = GetShortUdidHash(nodeInfo.deviceInfo.deviceUdid, localUdidHash, SHA_256_HEX_HASH_LEN);
+    char *remoteUdid = info->isServer ? (char *)info->sinkUdid : (char *)info->sourceUdid;
+    char *remoteAccountId = info->isServer ? (char *)info->sinkAccountId : (char *)info->sourceAccountId;
+    int32_t remoteUserId = info->isServer ? info->sinkUserId : info->sourceUserId;
+
+    int32_t ret = GetShortUdidHash(localNodeInfo->deviceInfo.deviceUdid, localUdidHash, SHA_256_HEX_HASH_LEN);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local udid hash fail");
         return ret;
@@ -751,16 +748,52 @@ static int32_t GetUkNegoAuthParamInfo(char *remoteUdid, HiChainAuthParam *authPa
         AUTH_LOGE(AUTH_CONN, "get remote udid hash fail");
         return ret;
     }
-    authParam->udid = remoteUdid;
-    authParam->uid = remoteNodeInfo->accountHash;
-    authParam->userId = remoteNodeInfo->userId;
+    if (strcpy_s(authParam->udid, UDID_BUF_LEN, remoteUdid) != EOK ||
+        strcpy_s(authParam->uid, MAX_ACCOUNT_HASH_LEN, remoteAccountId) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "copy peer udid and uid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
     if (authMode == HICHAIN_AUTH_IDENTITY_SERVICE) {
-        authParam->credId =
-            GetCredIdByIdService(localUdidHash, remoteUdidHash, remoteNodeInfo->accountHash, nodeInfo.userId);
-        if (authParam->credId == NULL) {
+        credId =
+            GetCredIdByIdService(localUdidHash, remoteUdidHash, remoteNodeInfo->accountHash, localNodeInfo->userId);
+        if (credId == NULL) {
             AUTH_LOGE(AUTH_CONN, "get cred id fail");
             return SOFTBUS_AUTH_GET_CRED_ID_FAIL;
         }
+        if (strcpy_s(authParam->credId, MAX_CRED_ID_SIZE, credId) != EOK) {
+            AUTH_LOGE(AUTH_FSM, "copy peer udid and uid fail");
+            SoftBusFree(credId);
+            return SOFTBUS_STRCPY_ERR;
+        }
+        SoftBusFree(credId);
+    }
+    authParam->userId = remoteUserId;
+    return SOFTBUS_OK;
+}
+
+static int32_t GetUkNegoAuthParamInfo(const AuthACLInfo *info, HiChainAuthMode authMode, HiChainAuthParam *authParam)
+{
+    if (info == NULL || authParam == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local node info fail");
+        return ret;
+    }
+    NodeInfo *remoteNodeInfo = LnnGetNodeInfoById(info->isServer ? info->sinkUdid : info->sourceUdid, CATEGORY_UDID);
+    if (remoteNodeInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "remote node info is null");
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    ret = GenerateAuthParam(&nodeInfo, remoteNodeInfo, info, authMode, authParam);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "gen auth param fail");
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -901,7 +934,7 @@ static int32_t JsonObjectPackAuthBaseInfo(const UkNegotiateInstance *instance, c
         !AddStringToJsonObject(
             json, FIELD_DEVICE_ID, instance->info.isServer ? instance->info.sourceUdid : instance->info.sinkUdid) ||
         !AddBoolToJsonObject(json, FIELD_IS_UDID_HASH, false) ||
-        (peerUserId != 0 && !AddNumberToJsonObject(json, "peerOsAccountId", peerUserId))) {
+        (peerUserId != 0 && !AddNumberToJsonObject(json, PEER_OS_ACCOUNT_ID_STR, peerUserId))) {
         AUTH_LOGE(AUTH_CONN, "pack request json fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -912,7 +945,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
 {
     (void)reqParams;
     AUTH_LOGI(AUTH_CONN, "uknego OnRequest: authSeq=%{public}" PRId64 ", ret=%{public}d", authSeq, operationCode);
-    HiChainAuthParam authParam = { 0 };
+    HiChainAuthParam authParam = {};
     UkNegotiateInstance instance;
 
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -932,8 +965,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         return NULL;
     }
     if (instance.authMode == HICHAIN_AUTH_IDENTITY_SERVICE) {
-        ret = GetUkNegoAuthParamInfo(
-            instance.info.isServer ? instance.info.sinkUdid : instance.info.sourceUdid, &authParam, instance.authMode);
+        ret = GetUkNegoAuthParamInfo(&instance.info, instance.authMode, &authParam);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get authparam failed! ret=%{public}d", ret);
             cJSON_Delete(msg);
@@ -941,12 +973,10 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         }
         if (!AddStringToJsonObject(msg, FIELD_CRED_ID, authParam.credId)) {
             AUTH_LOGE(AUTH_CONN, "add credid fail");
-            SoftBusFree(authParam.credId);
             cJSON_Delete(msg);
             return NULL;
         }
     }
-    SoftBusFree(authParam.credId);
     char *msgStr = cJSON_PrintUnformatted(msg);
     if (msgStr == NULL) {
         AUTH_LOGE(AUTH_CONN, "cJSON_PrintUnformatted fail");
@@ -977,11 +1007,10 @@ static HiChainAuthMode GetHichainAuthMode(const AuthACLInfo *info)
 
 static int32_t ProcessAuthHichainParam(uint32_t requestId, AuthACLInfo *info, HiChainAuthMode authMode)
 {
-    HiChainAuthParam authParam = { 0 };
-    int32_t ret = GetUkNegoAuthParamInfo(!info->isServer ? info->sourceUdid : info->sinkUdid, &authParam, authMode);
+    HiChainAuthParam authParam = {};
+    int32_t ret = GetUkNegoAuthParamInfo(info, authMode, &authParam);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "hichain auth parameter invalid");
-        SoftBusFree(authParam.credId);
         return ret;
     }
     authParam.cb = &g_GenUkCallback;
@@ -1004,7 +1033,7 @@ static int32_t SendUkNegoDeviceId(UkNegotiateInstance *instance)
         .len = strlen(ukParams),
     };
     uint32_t size = AUTH_PKT_HEAD_LEN + head.len;
-    uint8_t *buf = (uint8_t *)SoftBusMalloc(size);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc fail");
         cJSON_free(ukParams);
@@ -1128,7 +1157,7 @@ static int32_t SendUkNegoCloseAckEvent(int32_t channelId, uint32_t requestId)
         .len = strlen(msg) + 1,
     };
     uint32_t size = AUTH_PKT_HEAD_LEN + head.len;
-    uint8_t *buf = (uint8_t *)SoftBusMalloc(size);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc fail");
         return SOFTBUS_MEM_ERR;
@@ -1243,6 +1272,10 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
 
 uint32_t AuthGetUkEncryptSize(uint32_t inLen)
 {
+    if (inLen > UINT32_MAX - OVERHEAD_LEN) {
+        AUTH_LOGE(AUTH_CONN, "inLen is over head");
+        return inLen;
+    }
     return inLen + OVERHEAD_LEN;
 }
 
@@ -1261,7 +1294,7 @@ int32_t AuthEncryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint8_t *userKey = (uint8_t *)SoftBusMalloc(SESSION_KEY_LENGTH);
+    uint8_t *userKey = (uint8_t *)SoftBusCalloc(SESSION_KEY_LENGTH);
     if (userKey == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc fail");
         return SOFTBUS_MEM_ERR;
@@ -1270,6 +1303,7 @@ int32_t AuthEncryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
     if (GetUserKeyByUkId(ukId, userKey, SESSION_KEY_LENGTH) != SOFTBUS_OK &&
         GetAccessUkByUkId(ukId, userKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get user key by ukId fail");
+        (void)memset_s(userKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         SoftBusFree(userKey);
         return SOFTBUS_AUTH_ACL_NOT_FOUND;
     }
@@ -1299,7 +1333,7 @@ int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint8_t *userKey = (uint8_t *)SoftBusMalloc(SESSION_KEY_LENGTH);
+    uint8_t *userKey = (uint8_t *)SoftBusCalloc(SESSION_KEY_LENGTH);
     if (userKey == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc fail");
         return SOFTBUS_MEM_ERR;
@@ -1357,15 +1391,17 @@ static int32_t ProcessDataToEncrypt(
 
 int32_t AuthPostTransDataByUk(AuthHandle authHandle, int32_t ukId, int32_t peerUkId, const AuthTransData *dataInfo)
 {
-    if (dataInfo == NULL) {
-        AUTH_LOGE(AUTH_CONN, "dataInfo is null.");
+    if (dataInfo == NULL || authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX ||
+        AuthGetUkEncryptSize(dataInfo->len) > UINT32_MAX - UK_ENCRYPT_INDEX_LEN) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthDataHead head;
-    head.dataType = DATA_TYPE_UK_CONNECTION;
-    head.module = dataInfo->module;
-    head.seq = dataInfo->seq;
-    head.flag = dataInfo->flag;
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_UK_CONNECTION,
+        .module = dataInfo->module,
+        .seq = dataInfo->seq,
+        .flag = dataInfo->flag,
+    };
     uint32_t outDataLen = AuthGetUkEncryptSize(dataInfo->len) + UK_ENCRYPT_INDEX_LEN;
     uint8_t *outData = (uint8_t *)SoftBusCalloc(outDataLen);
     if (outData == NULL) {
@@ -1475,10 +1511,10 @@ static int32_t SecuritySetChannelInfoByReqId(uint32_t requestId, int32_t channel
 {
     (void)channelType;
     UkNegotiateInstance instance;
-    (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     AuthACLInfo info = { 0 };
     AuthGenUkCallback cb;
     (void)memset_s(&cb, sizeof(AuthGenUkCallback), 0, sizeof(AuthGenUkCallback));
+    (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
@@ -1551,7 +1587,7 @@ int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const A
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     AuthACLInfo *info = (AuthACLInfo *)acl;
 
-    info->isServer = !acl->isServer;
+    info->isServer = (!acl->isServer);
     int32_t ret = LnnGetNetworkIdByUdid(acl->sourceUdid, networkId, sizeof(networkId));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get networkId by udid fail");

@@ -36,6 +36,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
@@ -1229,7 +1230,7 @@ static int32_t TryRecoveryKey(AuthFsm *authFsm)
 
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
-    HiChainAuthParam authParam = { 0 };
+    HiChainAuthParam authParam = {};
     HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount &&
         !GetSecEnhanceFlag())) ? HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
@@ -1242,10 +1243,13 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s peerUserId=%{public}d", AnonymizeWrapper(anonyUdid),
         authFsm->info.userId);
     AnonymizeFree(anonyUdid);
-    authParam.udid = authFsm->info.udid;
-    authParam.uid = authFsm->info.connInfo.peerUid;
+    if (strcpy_s(authParam.udid, UDID_BUF_LEN, authFsm->info.udid) != EOK ||
+        strcpy_s(authParam.uid, MAX_ACCOUNT_HASH_LEN, authFsm->info.connInfo.peerUid) != EOK ||
+        strcpy_s(authParam.credId, MAX_CRED_ID_SIZE, authFsm->info.credId) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "copy authParam fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
     authParam.userId = authFsm->info.userId;
-    authParam.credId = authFsm->info.credId;
     authParam.cb = NULL;
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
 }

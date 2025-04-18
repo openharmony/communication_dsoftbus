@@ -49,7 +49,6 @@ constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
 constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
 constexpr char UUID_TEST[UUID_BUF_LEN] = "0123456789ABC";
 constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
-static constexpr int32_t DEFALUT_USERID = 100;
 
 #define LINK_TYPE      AUTH_LINK_TYPE_MAX
 #define CLIENT_PORT    6666
@@ -147,23 +146,20 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
 {
-    HiChainAuthParam hiChainParam;
+    HiChainAuthParam hiChainParam = {};
     int64_t authSeq = 0;
     const char *udid = "testdata";
     const char *uid = "testdata";
     int32_t ret;
 
-    hiChainParam.userId = DEFALUT_USERID;
-    hiChainParam.udid = NULL;
-    hiChainParam.uid = (char *)uid;
-
-    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
+    ret = HichainStartAuth(authSeq, NULL, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    hiChainParam.udid = (char *)udid;
-    hiChainParam.uid = NULL;
-    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
+    if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
+        strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        return;
+    }
+    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_BUTT);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    hiChainParam.uid = (char *)uid;
     (void)HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
 }
 
