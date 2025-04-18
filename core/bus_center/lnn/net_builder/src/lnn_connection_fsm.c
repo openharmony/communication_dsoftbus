@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1242,6 +1242,15 @@ static void CheckDupOk(LnnConnectionFsm *connFsm, NodeInfo *deviceInfo, bool *du
     }
 }
 
+static void FillDeviceKeyId(AuthVerifyParam *authVerifyParam, DeviceKeyId *deviceKeyId)
+{
+    if (deviceKeyId->hasDeviceKeyId) {
+        authVerifyParam->deviceKeyId.localDeviceKeyId = deviceKeyId->localDeviceKeyId;
+        authVerifyParam->deviceKeyId.remoteDeviceKeyId = deviceKeyId->remoteDeviceKeyId;
+        authVerifyParam->deviceKeyId.hasDeviceKeyId = true;
+    }
+}
+
 static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthVerifyParam *authVerifyParam)
 {
     int32_t connId;
@@ -1255,12 +1264,7 @@ static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthVerifyPar
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
     }
-    authVerifyParam->deviceKeyId.localDeviceKeyId = connInfo->addr.info.session.localDeviceKeyId;
-    authVerifyParam->deviceKeyId.remoteDeviceKeyId = connInfo->addr.info.session.remoteDeviceKeyId;
-    if (authVerifyParam->deviceKeyId.localDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID &&
-        authVerifyParam->deviceKeyId.remoteDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID) {
-        authVerifyParam->deviceKeyId.hasDeviceKeyId = true;
-    }
+    FillDeviceKeyId(authVerifyParam, &connInfo->addr.deviceKeyId);
 }
 
 static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam, uint32_t requestId)
@@ -1301,6 +1305,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         CheckDeviceKeyByPreLinkNode(connInfo, &authVerifyParam);
     } else {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+        FillDeviceKeyId(&authVerifyParam, &connInfo->addr.deviceKeyId);
     }
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
