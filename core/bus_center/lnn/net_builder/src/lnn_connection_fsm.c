@@ -939,6 +939,33 @@ static bool IsRepeatDeviceId(NodeInfo *info)
     return true;
 }
 
+static bool NeedUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+{
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_SESSION_WITH_KEY) {
+        LNN_LOGI(LNN_BUILDER, "addr type not session wiht key, skip");
+        return false;
+    }
+    bool needUpdateAuthManager = false;
+    needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, false);
+    if (!needUpdateAuthManager) {
+        needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, true);
+    }
+    return needUpdateAuthManager;
+}
+
+static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+{
+    if (NeedUpdateRawEnhanceP2p(connFsm)) {
+        LNN_LOGI(LNN_BUILDER, "notify add raw auth connection");
+        LnnNotifyRawEnhanceP2pEvent event = {.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P};
+        event.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P;
+        event.type = connFsm->connInfo.addr.type;
+        event.uuid = connFsm->connInfo.nodeInfo->uuid;
+        event.networkId = connFsm->connInfo.nodeInfo->networkId;
+        LnnNotifyAddRawEnhanceP2pEvent(&event);
+    }
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -955,13 +982,13 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
         SetLnnConnNodeInfo(connInfo, networkId, connFsm, retCode);
+        TryUpdateRawEnhanceP2p(connFsm);
     } else if (retCode != SOFTBUS_OK) {
         NotifyJoinResult(connFsm, networkId, retCode);
         connFsm->isDead = true;
         LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
     NotifyJoinExtResultProcess(connFsm, retCode);
-
     int32_t infoNum = 0;
     int32_t lnnType = 0;
     NodeBasicInfo *info = NULL;
