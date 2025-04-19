@@ -811,14 +811,6 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static bool IsMetaSession(const char *sessionName)
-{
-    if (strlen(sessionName) < MIN_META_LEN || strncmp(sessionName, META_SESSION, MIN_META_LEN)) {
-        return false;
-    }
-    return true;
-}
-
 static void ReleaseSessionConn(SessionConn *chan)
 {
     if (chan == NULL) {
@@ -979,15 +971,10 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, conn, &nodeInfo, peerUuid);
 
-    if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
-        char *tmpName = NULL;
-        Anonymize(conn->appInfo.myData.sessionName, &tmpName);
-        TRANS_LOGI(TRANS_CTRL,
-            "Request denied: session is not a meta session. sessionName=%{public}s", AnonymizeWrapper(tmpName));
-        AnonymizeFree(tmpName);
-        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    if ((flags & FLAG_AUTH_META) != 0) {
+        TRANS_LOGE(TRANS_CTRL, "not support meta auth.");
         ReleaseSessionConn(conn);
-        return SOFTBUS_TRANS_NOT_META_SESSION;
+        return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     char errDesc[MAX_ERRDESC_LEN] = { 0 };
     int32_t errCode = TransTdcFillAppInfoAndNotifyChannel(&conn->appInfo, channelId, errDesc);
