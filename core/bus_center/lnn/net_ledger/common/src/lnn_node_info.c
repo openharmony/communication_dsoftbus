@@ -21,6 +21,7 @@
 
 #include "anonymizer.h"
 #include "lnn_log.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
@@ -631,8 +632,8 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     }
     char *anonyPtk = NULL;
     char *anonyOldPtk = NULL;
-    Anonymize(ptkStr, &anonyPtk);
-    Anonymize(oldPtkStr, &anonyOldPtk);
+    LnnAnonymizePtk(ptkStr, PTK_STR_LEN, &anonyPtk);
+    LnnAnonymizePtk(oldPtkStr, PTK_STR_LEN, &anonyOldPtk);
     LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s",
         log, AnonymizeWrapper(anonyPtk), AnonymizeWrapper(anonyOldPtk));
     AnonymizeFree(anonyPtk);
@@ -670,4 +671,112 @@ int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
     info->isScreenOn = isScreenOn;
     LNN_LOGI(LNN_LEDGER, "set local screen status to %{public}s", isScreenOn ? "on" : "off");
     return SOFTBUS_OK;
+}
+
+void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr)
+{
+    if (ptk == NULL || len != PTK_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    char emptyByte[PTK_DEFAULT_LEN] = { 0 };
+    char emptyStr[PTK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, PTK_STR_LEN, (unsigned char *)emptyByte, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    if (memcmp(ptk, emptyStr, PTK_STR_LEN) == 0) {
+        Anonymize(ptk, anonymizedStr);
+        return;
+    }
+    uint8_t ptkHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)ptk, len, ptkHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate ptkHash fail");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    char ptkStr[PTK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(ptkStr, PTK_STR_LEN, (unsigned char *)ptkHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert ptk to string fail.");
+        (void)memset_s(ptkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    Anonymize(ptkStr, anonymizedStr);
+    (void)memset_s(ptkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
+}
+
+void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr)
+{
+    if (broadcastCipher == NULL || len != SESSION_KEY_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    unsigned char emptyByte[SESSION_KEY_LENGTH] = { 0 };
+    char emptyStr[SESSION_KEY_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, SESSION_KEY_STR_LEN, emptyByte, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    if (memcmp(broadcastCipher, emptyStr, SESSION_KEY_STR_LEN) == 0) {
+        Anonymize(broadcastCipher, anonymizedStr);
+        return;
+    }
+    uint8_t broadcastCipherHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)broadcastCipher, len, broadcastCipherHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate broadcastCipherHash fail");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    char hashStr[SESSION_KEY_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(hashStr, SESSION_KEY_STR_LEN, broadcastCipherHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert broadcastCipher to string fail.");
+        (void)memset_s(broadcastCipherHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    Anonymize(hashStr, anonymizedStr);
+    (void)memset_s(broadcastCipherHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(hashStr, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+}
+
+void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr)
+{
+    if (irk == NULL || len != LFINDER_IRK_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    uint8_t emptyByte[LFINDER_IRK_LEN] = { 0 };
+    char emptyStr[LFINDER_IRK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, LFINDER_IRK_STR_LEN, emptyByte, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    if (memcmp(irk, emptyStr, LFINDER_IRK_STR_LEN) == 0) {
+        Anonymize(irk, anonymizedStr);
+        return;
+    }
+    uint8_t irkHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)irk, len, irkHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate irkHash fail");
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    char irkStr[LFINDER_IRK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(irkStr, LFINDER_IRK_STR_LEN, (unsigned char *)irkHash, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert irk to string fail.");
+        (void)memset_s(irkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        Anonymize(NULL, anonymizedStr);
+        return;
+    }
+    Anonymize(irkStr, anonymizedStr);
+    (void)memset_s(irkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(irkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 }
