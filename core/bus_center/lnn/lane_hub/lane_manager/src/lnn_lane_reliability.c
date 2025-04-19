@@ -91,7 +91,7 @@ static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
     }
     char localIp[IP_LEN] = {0};
     int32_t fd = SOFTBUS_INVALID_FD;
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, IP_LEN, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get local ip fail");
         fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
     } else {

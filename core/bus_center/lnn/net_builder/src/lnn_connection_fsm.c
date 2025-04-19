@@ -1355,8 +1355,11 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
         LNN_LOGE(LNN_BUILDER, "fill uuid fail");
         return ret;
     }
-    if (connInfo->addr.type == CONNECTION_ADDR_ETH || connInfo->addr.type == CONNECTION_ADDR_WLAN) {
-        if (strcpy_s(nodeInfo->connectInfo.deviceIp, MAX_ADDR_LEN, connInfo->addr.info.ip.ip) != EOK) {
+    if (connInfo->addr.type == CONNECTION_ADDR_ETH || connInfo->addr.type == CONNECTION_ADDR_WLAN ||
+        connInfo->addr.type == CONNECTION_ADDR_NCM) {
+        int32_t ifnameIdx = (connInfo->addr.type == CONNECTION_ADDR_NCM) ? USB_IF : WLAN_IF;
+        if (strcpy_s(nodeInfo->connectInfo.ifInfo[ifnameIdx].deviceIp, MAX_ADDR_LEN,
+            connInfo->addr.info.ip.ip) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fill deviceIp fail");
             return SOFTBUS_STRCPY_ERR;
         }
@@ -1626,32 +1629,35 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
     return false;
 }
 
-static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo)
+static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo, ConnectionAddrType type)
 {
-    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
-        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi, discoveryType=%{public}u", oldNodeInfo->discoveryType);
+    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI) &&
+        !LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_USB)) {
+        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi or usb, discoveryType=%{public}u", oldNodeInfo->discoveryType);
         return false;
     }
-    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
+    int32_t ifIdx = (type == CONNECTION_ADDR_NCM) ? USB_IF : WLAN_IF;
+    if (strcmp(newNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp,
+        oldNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp) != 0) {
         char *newIp = NULL;
         char *oldIp = NULL;
-        Anonymize(newNodeInfo->connectInfo.deviceIp, &newIp);
-        Anonymize(oldNodeInfo->connectInfo.deviceIp, &oldIp);
+        Anonymize(newNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp, &newIp);
+        Anonymize(oldNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp, &oldIp);
         LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s",
             AnonymizeWrapper(oldIp), AnonymizeWrapper(newIp));
         AnonymizeFree(newIp);
         AnonymizeFree(oldIp);
         return true;
     }
-    if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
+    if (newNodeInfo->connectInfo.ifInfo[ifIdx].authPort != oldNodeInfo->connectInfo.ifInfo[ifIdx].authPort) {
         LNN_LOGI(LNN_BUILDER, "peer authPort changed");
         return true;
     }
-    if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
+    if (newNodeInfo->connectInfo.ifInfo[ifIdx].proxyPort != oldNodeInfo->connectInfo.ifInfo[ifIdx].proxyPort) {
         LNN_LOGI(LNN_BUILDER, "peer proxyPort changed");
         return true;
     }
-    if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
+    if (newNodeInfo->connectInfo.ifInfo[ifIdx].sessionPort != oldNodeInfo->connectInfo.ifInfo[ifIdx].sessionPort) {
         LNN_LOGI(LNN_BUILDER, "peer sessionPort changed");
         return true;
     }
@@ -1665,8 +1671,9 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         *type = CONNECTION_ADDR_MAX;
         return true;
     }
-    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN) {
-        if (IsWifiConnectInfoChanged(oldNodeInfo, newNodeInfo)) {
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN ||
+        connFsm->connInfo.addr.type == CONNECTION_ADDR_NCM) {
+        if (IsWifiConnectInfoChanged(oldNodeInfo, newNodeInfo, connFsm->connInfo.addr.type)) {
             *type = connFsm->connInfo.addr.type;
             return true;
         }
@@ -1687,8 +1694,8 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     if (IsBasicNodeInfoChanged(&oldNodeInfo, nodeInfo, false)) {
         return true;
     }
-    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
-        if (IsWifiConnectInfoChanged(&oldNodeInfo, nodeInfo)) {
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_NCM) {
+        if (IsWifiConnectInfoChanged(&oldNodeInfo, nodeInfo, type)) {
             return true;
         }
     }

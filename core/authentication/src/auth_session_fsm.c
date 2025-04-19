@@ -203,6 +203,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             (void)memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, request.connInfo.info.ipInfo.deviceIdHash,
                 UDID_HASH_LEN);
             break;
@@ -825,7 +826,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
 
 static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra *lnnAuditExtra)
 {
-    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, reportInfo->localIp, IP_LEN);
+    (void)LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, reportInfo->localIp, IP_LEN, WLAN_IF);
     char *anonyLocalIp = NULL;
     Anonymize(reportInfo->localIp, &anonyLocalIp);
     if (strcpy_s((char *)lnnAuditExtra->localIp, IP_LEN, AnonymizeWrapper(anonyLocalIp)) != EOK) {
@@ -877,9 +878,9 @@ static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
     AuditReportDevInfo reportInfo;
     (void)memset_s(&reportInfo, sizeof(AuditReportDevInfo), 0, sizeof(AuditReportDevInfo));
     GetLocalDevReportInfo(&reportInfo, lnnAuditExtra);
-    (void)LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &lnnAuditExtra->localAuthPort);
-    (void)LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort);
-    (void)LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort);
+    (void)LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &lnnAuditExtra->localAuthPort, WLAN_IF);
+    (void)LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort, WLAN_IF);
+    (void)LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort, WLAN_IF);
     (void)LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &lnnAuditExtra->localDevType);
     char udid[UDID_BUF_LEN] = { 0 };
     uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
@@ -1135,6 +1136,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             /* WIFI: client firstly send device info, server just reponse it. */
             if (!info->isServer) {
                 return PostDeviceInfoMessage(authSeq, info);
@@ -1491,7 +1493,8 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
     if (IsAuthPreLinkNodeExist(info->requestId)) {
         UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
     }
-    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
+    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY ||
+        info->connInfo.type == AUTH_LINK_TYPE_USB) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {
             ClientTryCompleteAuthSession(authFsm, info);
@@ -1973,8 +1976,9 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
             AUTH_LOGE(AUTH_FSM, "auth fsm has dead. authSeq=%{public}" PRId64 "", item->authSeq);
             continue;
         }
-        if ((GetConnType(item->info.connId) == AUTH_LINK_TYPE_WIFI ||
-            GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P)) {
+        if (GetConnType(item->info.connId) == AUTH_LINK_TYPE_WIFI ||
+            GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P ||
+            GetConnType(item->info.connId) == AUTH_LINK_TYPE_USB) {
             if (isNeedDisconnect) {
                 DisconnectAuthDevice(&item->info.connId);
                 isDisconnected = true;
@@ -1985,7 +1989,8 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);
     }
     ReleaseAuthLock();
-    if (isNeedDisconnect && !isDisconnected && GetConnType(connId) == AUTH_LINK_TYPE_WIFI &&
+    if (isNeedDisconnect && !isDisconnected &&
+        (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) &&
         IsExistWifiConnItemByConnId(GetConnId(connId))) {
         DeleteWifiConnItemByConnId(GetConnId(connId));
         DisconnectAuthDevice(&connId);

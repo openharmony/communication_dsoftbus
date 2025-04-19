@@ -379,7 +379,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_BR_MAC:
             return LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)info, infoLen);
         case NODE_KEY_IP_ADDRESS:
-            return LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, (char *)info, infoLen);
+            return LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, (char *)info, infoLen, WLAN_IF);
         case NODE_KEY_DEV_NAME:
             return LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, (char *)info, infoLen);
         case NODE_KEY_BLE_OFFLINE_CODE:
@@ -420,7 +420,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
         case NODE_KEY_BR_MAC:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, (char *)info, infoLen);
         case NODE_KEY_IP_ADDRESS:
-            return LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, (char *)info, infoLen);
+            return LnnGetRemoteStrInfoByIfnameIdx(networkId, STRING_KEY_IP, (char *)info, infoLen, WLAN_IF);
         case NODE_KEY_DEV_NAME:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_NAME, (char *)info, infoLen);
         case NODE_KEY_BLE_OFFLINE_CODE:

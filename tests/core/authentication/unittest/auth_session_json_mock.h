@@ -42,6 +42,7 @@ public:
     virtual ~AuthSessionJsonInterface() {};
     virtual int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
@@ -55,8 +56,8 @@ public:
     virtual int32_t GetFd(uint64_t connId) = 0;
     virtual int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr) = 0;
     virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
-    virtual int32_t LnnGetAuthPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetSessionPort(const NodeInfo *info) = 0;
+    virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data) = 0;
     virtual int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t **outData, uint32_t *outLen);
@@ -76,7 +77,7 @@ public:
     uint8_t **outData, uint32_t *outLen) = 0;
     virtual int32_t DataDecompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLen) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual int32_t LnnGetProxyPort(const NodeInfo *info) = 0;
+    virtual int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual const char *LnnGetBtMac(const NodeInfo *info) = 0;
     virtual const char *LnnGetP2pMac(const NodeInfo *info) = 0;
     virtual const char *LnnGetDeviceName(const DeviceBasicInfo *info) = 0;
@@ -126,6 +127,7 @@ public:
     ~AuthSessionJsonInterfaceMock() override;
     MOCK_METHOD3(LnnGetUdidByBrMac, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD2(FindAuthPreLinkNodeById, int32_t (uint32_t, AuthPreLinkNode *));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
@@ -138,8 +140,8 @@ public:
     MOCK_METHOD1(GetFd, int32_t (uint64_t));
     MOCK_METHOD3(AddToAuthPreLinkList, int32_t (uint32_t, int32_t, ConnectionAddr *));
     MOCK_METHOD3(GetSessionKeyProfile, bool (int32_t, uint8_t *, uint32_t *));
-    MOCK_METHOD1(LnnGetAuthPort, int32_t (const NodeInfo *));
-    MOCK_METHOD1(LnnGetSessionPort, int32_t (const NodeInfo *));
+    MOCK_METHOD2(LnnGetAuthPort, int32_t (const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetSessionPort, int32_t (const NodeInfo *, int32_t));
     MOCK_METHOD4(PostAuthData, int32_t (uint64_t, bool, const AuthDataHead *, const uint8_t *));
     MOCK_METHOD5(EncryptInner,
         int32_t (const SessionKeyList *, AuthLinkType, const InDataInfo *, uint8_t **, uint32_t *));
@@ -156,7 +158,7 @@ public:
         uint32_t *));
     MOCK_METHOD4(DataDecompress, int32_t (uint8_t *, uint32_t, uint8_t **, uint32_t *));
     MOCK_METHOD0(LnnGetLocalNodeInfo, const NodeInfo * (void));
-    MOCK_METHOD1(LnnGetProxyPort, int32_t (const NodeInfo *));
+    MOCK_METHOD2(LnnGetProxyPort, int32_t (const NodeInfo *, int32_t));
     MOCK_METHOD1(LnnGetBtMac, const char * (const NodeInfo *));
     MOCK_METHOD1(LnnGetP2pMac, const char * (const NodeInfo *));
     MOCK_METHOD1(LnnGetDeviceName, const char * (const DeviceBasicInfo *));

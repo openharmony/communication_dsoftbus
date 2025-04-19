@@ -143,7 +143,8 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     }
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    if (!LnnConvertAuthConnInfoToAddr(&addr, &authRequest.connInfo, GetCurrentConnectType())) {
+    if (!LnnConvertAuthConnInfoToAddr(&addr, &authRequest.connInfo,
+        GetCurrentConnectType(authRequest.connInfo.type))) {
         LNN_LOGE(LNN_BUILDER, "ConvertToConnectionAddr failed");
         return;
     }
@@ -353,7 +354,8 @@ void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
             if (strncmp(item->connInfo.addr.info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0) {
                 return;
             }
-        } else if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+        } else if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH ||
+            addr1->type == CONNECTION_ADDR_NCM) {
             if (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0) {
                 return;
             }
@@ -625,7 +627,7 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
     }
 
     if (authHandle.type != AUTH_LINK_TYPE_ENHANCED_P2P && authHandle.type != AUTH_LINK_TYPE_SESSION) {
-        if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType())) {
+        if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType(connInfo.type))) {
             LNN_LOGE(LNN_BUILDER, "convert connInfo to addr fail");
             SoftBusFree(para);
             return;

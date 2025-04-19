@@ -344,9 +344,9 @@ HWTEST_F(LNNNetBuilderMockTest, GET_CURRENT_CONNECT_TYPE_TEST_001, TestSize.Leve
     EXPECT_CALL(NetBuilderMock, LnnGetAddrTypeByIfName(_, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
-    EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
-    EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
+    EXPECT_TRUE(GetCurrentConnectType(AUTH_LINK_TYPE_WIFI) == CONNECTION_ADDR_MAX);
+    EXPECT_TRUE(GetCurrentConnectType(AUTH_LINK_TYPE_WIFI) == CONNECTION_ADDR_MAX);
+    EXPECT_TRUE(GetCurrentConnectType(AUTH_LINK_TYPE_WIFI) == CONNECTION_ADDR_MAX);
 }
 
 /*

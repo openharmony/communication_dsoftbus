@@ -623,12 +623,12 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_WIFI_TEST_001, TestSize.Level1)
     EXPECT_CALL(mocker, LnnGetAuthPort).WillRepeatedly(Return(TEST_AUTH_PORT));
     EXPECT_CALL(mocker, LnnGetSessionPort).WillRepeatedly(Return(TEST_SESSION_PORT));
     EXPECT_CALL(mocker, LnnGetProxyPort).WillRepeatedly(Return(TEST_PROXY_PORT));
-    int32_t ret = PackWiFi(&json, &info, SOFTBUS_NEW_V1, false);
+    int32_t ret = PackWiFi(&json, &info, SOFTBUS_NEW_V1, false, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, JSON_AddStringToObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = PackWiFi(&json, &info, SOFTBUS_NEW_V1, false);
+    ret = PackWiFi(&json, &info, SOFTBUS_NEW_V1, false, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
