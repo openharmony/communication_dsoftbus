@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,11 @@ uint64_t TransACLGetFirstTokenID(void)
 uint64_t TransACLGetCallingTokenID(void)
 {
     return TOKENID_NOT_SET;
+}
+
+pid_t TransGetCallingPid(void)
+{
+    return CALLINGPID_NOT_GET;
 }
 
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)

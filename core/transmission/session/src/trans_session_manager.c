@@ -502,7 +502,7 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
     return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
-int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo)
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo, pid_t callingPid)
 {
     if (sessionName == NULL || accessInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
@@ -519,7 +519,7 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     }
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
-        if (strcmp(pos->sessionName, sessionName) == 0) {
+        if (strcmp(pos->sessionName, sessionName) == 0 && pos->pid == callingPid) {
             pos->accessInfo.userId = accessInfo->userId;
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
