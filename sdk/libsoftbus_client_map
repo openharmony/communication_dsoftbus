@@ -31,6 +31,7 @@
         "UnregisterRangeCallbackForMsdp";
         "SyncTrustedRelationShip";
         "SetDisplayName";
+        "StartUsbNcm";
         "GetNodeKeyInfo";
         "GetSessionKey";
         "SendFile";
