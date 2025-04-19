@@ -55,6 +55,7 @@
 #define DEVICE_ID_TAG         "TEDeviceId"
 #define DATA_BUF_SIZE_TAG     "DataBufSize"
 #define SOFTBUS_VERSION_TAG   "softbusVersion"
+#define AUTH_VERSION_TAG      "authVersion"
 #define SUPPORT_INFO_COMPRESS "supportInfoCompress"
 #define IS_NORMALIZED         "isNormalized"
 #define NORMALIZED_DATA       "normalizedData"
@@ -1000,8 +1001,9 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
             return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
         }
     }
-    if (!JSON_AddInt32ToObject(obj, AUTH_START_STATE, info->localState)) {
-        AUTH_LOGE(AUTH_FSM, "add local auth state fail.");
+    if (!JSON_AddInt32ToObject(obj, AUTH_START_STATE, info->localState) ||
+        !JSON_AddInt32ToObject(obj, AUTH_VERSION_TAG, AUTH_VERSION_VALUE)) {
+        AUTH_LOGE(AUTH_FSM, "add auth info fail.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     return SOFTBUS_OK;
@@ -1282,7 +1284,7 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 
     AUTH_LOGI(AUTH_FSM, "softbusVersion is %{public}d", info->version);
     OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
-
+    OptInt(obj, AUTH_VERSION_TAG, (int32_t *)&info->authVersion, AUTH_VERSION_INVALID);
     if (info->version >= SOFTBUS_NEW_V3) {
         return;
     }
@@ -1755,6 +1757,9 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
 
     if (!JSON_AddInt32ToObject(json, DEVICE_SECURITY_LEVEL, info->deviceSecurityLevel)) {
         AUTH_LOGE(AUTH_FSM, "pack deviceSecurityLevel fail.");
+    }
+    if (!JSON_AddInt32ToObject(json, AUTH_VERSION_TAG, AUTH_VERSION_VALUE)) {
+        AUTH_LOGE(AUTH_FSM, "pack authVersion fail.");
     }
     return SOFTBUS_OK;
 }
@@ -2445,6 +2450,25 @@ static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
     }
 }
 
+static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSessionInfo *info)
+{
+    if (obj == NULL || nodeInfo == NULL || info == NULL) {
+        AUTH_LOGE(AUTH_FSM, "param err!");
+        return false;
+    }
+    int32_t authVersion = 0;
+    if (!JSON_GetInt32FromOject(obj, AUTH_VERSION_TAG, (int32_t *)&authVersion)) {
+        AUTH_LOGW(AUTH_FSM, "peer not send authVersion.");
+        return false;
+    }
+    AUTH_LOGI(AUTH_FSM, "authVersion new=%{public}d, old=%{public}d", authVersion, info->authVersion);
+    if (authVersion != (int32_t)info->authVersion) {
+        AUTH_LOGE(AUTH_FSM, "authVersion change!");
+        return true;
+    }
+    return false;
+}
+
 int32_t UnpackDeviceInfoMessage(
     const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth, const AuthSessionInfo *info)
 {
@@ -2476,6 +2500,10 @@ int32_t UnpackDeviceInfoMessage(
     }
     OptBool(json, SUPPORT_USERKEY_NEGO, &nodeInfo->isSupportUkNego, false);
     UnpackUserIdCheckSum(json, nodeInfo);
+    if (IsInvalidDeviceInfo(json, nodeInfo, info)) {
+        JSON_Delete(json);
+        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+    }
     JSON_Delete(json);
     if ((info != NULL) && (nodeInfo->userId != 0) && (nodeInfo->userId != info->userId)) {
         AUTH_LOGE(AUTH_FSM, "deviceIdUserId=%{public}d, deviceInfoUserId=%{public}d", info->userId, nodeInfo->userId);

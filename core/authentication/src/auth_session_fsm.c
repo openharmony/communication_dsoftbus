@@ -282,6 +282,7 @@ static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *co
     authFsm->info.connId = authFsmParam->connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V3;
+    authFsm->info.authVersion = AUTH_VERSION_INVALID;
     authFsm->info.idType = EXCHANGE_UDID;
     authFsm->info.isSupportDmDeviceKey = false;
     authFsm->info.deviceKeyId = authFsmParam->deviceKeyId;
