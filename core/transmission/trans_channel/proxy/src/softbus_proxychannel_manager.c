@@ -1459,7 +1459,7 @@ static int32_t TransProxyUpdateReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult)
+int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid)
 {
     ProxyChannelInfo chan;
     (void)memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
@@ -1467,6 +1467,10 @@ int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get proxy channelInfo failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
+    }
+    if (chan.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     ret = TransProxyUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
@@ -2470,13 +2474,17 @@ static int32_t TransProxyResetReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult)
+int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     ProxyChannelInfo chan = { 0 };
     int32_t ret = TransProxyGetChanByChanId(channelId, &chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelInfo failed, channelId=%{public}d.", channelId);
         return ret;
+    }
+    if (chan.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
 
     ret = TransProxyUpdateReplyCnt(channelId);

@@ -182,6 +182,7 @@ ohos_unittest("TransInnerTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/common/mock",
+    "$dsoftbus_root_path/core/common/security/permission/include",
   ]
 
   deps = [
@@ -200,7 +201,7 @@ ohos_unittest("TransInnerTest") {
 ohos_unittest("TransUkManagerTest") {
   module_out_path = module_output_path
   sources = [
-    "mock/trans_lane_common_test_mock.cpp", 
+    "mock/trans_lane_common_test_mock.cpp",
     "trans_uk_manager_test.cpp",
   ]
 
@@ -248,9 +249,9 @@ ohos_unittest("TransUkManagerTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":TransInnerTest",
     ":TransLaneCommonTest",
     ":TransLanePendingTest",
-    ":TransInnerTest",
     ":TransUkManagerTest",
   ]
   if (dsoftbus_feature_lnn_lane_mgr) {
