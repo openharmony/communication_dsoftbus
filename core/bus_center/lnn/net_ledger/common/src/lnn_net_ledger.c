@@ -838,7 +838,7 @@ static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyIrk = NULL;
-    Anonymize(peerIrkStr, &anonyIrk);
+    LnnAnonymizeIrk(peerIrkStr, LFINDER_IRK_STR_LEN, &anonyIrk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyIrk);
     (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
@@ -866,7 +866,7 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyBroadcastCipher = NULL;
-    Anonymize((char *)broadcastCipherStr, &anonyBroadcastCipher);
+    LnnAnonymizeBroadcastCipher(broadcastCipherStr, SESSION_KEY_STR_LEN, &anonyBroadcastCipher);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", AnonymizeWrapper(anonyBroadcastCipher));
     AnonymizeFree(anonyBroadcastCipher);
     (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
@@ -894,7 +894,7 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyRemotePtk = NULL;
-    Anonymize(remotePtkStr, &anonyRemotePtk);
+    LnnAnonymizePtk(remotePtkStr, PTK_STR_LEN, &anonyRemotePtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", AnonymizeWrapper(anonyRemotePtk));
     AnonymizeFree(anonyRemotePtk);
     (void)memset_s(remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
@@ -926,7 +926,7 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyLocalPtk = NULL;
-    Anonymize(localPtkStr, &anonyLocalPtk);
+    LnnAnonymizePtk(localPtkStr, PTK_STR_LEN, &anonyLocalPtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", AnonymizeWrapper(anonyLocalPtk));
     AnonymizeFree(anonyLocalPtk);
     (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
