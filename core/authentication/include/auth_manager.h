@@ -103,6 +103,7 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
     int64_t lastAuthSeq);
 bool IsHaveAuthIdByConnId(uint64_t connId);
 void DelAuthManagerByConnectionId(uint32_t connectionId);
+bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer);
 
 #ifdef __cplusplus
 #if __cplusplus
