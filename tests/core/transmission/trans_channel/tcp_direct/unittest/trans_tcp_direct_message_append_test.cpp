@@ -1434,48 +1434,6 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
 }
 
 /**
- * @tc.name: IsMetaSessionTest001
- * @tc.desc: Should return false when sessionname len less than 6.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, IsMetaSessionTest001, TestSize.Level1)
-{
-    const char *sessionName = "test";
-
-    bool ret = IsMetaSession(sessionName);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: IsMetaSessionTest002
- * @tc.desc: Should return false when sessionname is not IShare.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, IsMetaSessionTest002, TestSize.Level1)
-{
-    const char *sessionName = "testSessionName";
-
-    bool ret = IsMetaSession(sessionName);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: IsMetaSessionTest003
- * @tc.desc: Should return true when sessionname is IShare.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, IsMetaSessionTest003, TestSize.Level1)
-{
-    const char *sessionName = "IShare";
-
-    bool ret = IsMetaSession(sessionName);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: OpenDataBusRequestTest001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when GetSessionConnById return nullptr.
  * @tc.type: FUNC
@@ -2294,7 +2252,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     channelId = TEST_NEW_CHANNEL_ID;
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NOT_META_SESSION);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
 
     TransDelSessionConnById(TEST_NEW_CHANNEL_ID);
     TransDelSessionConnById(TEST_CHANNELID);
