@@ -1364,8 +1364,6 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
 static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
 {
     uint32_t *optionCapBitMap = NULL;
-    bool isSameAccount = false;
-    bool isWakeRemote = false;
     bool ranging = false;
     if (option->publishOption != NULL) {
         optionCapBitMap = option->publishOption->capabilityBitmap;
@@ -1374,8 +1372,6 @@ static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
     } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
         optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
-        isSameAccount = option->subscribeOption->isSameAccount;
-        isWakeRemote = option->subscribeOption->isWakeRemote;
         ranging = false;
     }
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
@@ -1391,8 +1387,8 @@ static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
             info->capDataLen[pos] = 0;
             info->needUpdate = true;
         }
-        info->isSameAccount[pos] = isSameAccount;
-        info->isWakeRemote[pos] = isWakeRemote;
+        info->isSameAccount[pos] = false;
+        info->isWakeRemote[pos] = false;
         info->freq[pos] = -1;
     }
     if (ranging && info->rangingRefCnt > 0) {
