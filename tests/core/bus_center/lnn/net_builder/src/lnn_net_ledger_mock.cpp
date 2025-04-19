@@ -194,7 +194,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, cha
         }
         return SOFTBUS_OK;
     }
-    if (key == STRING_KEY_WLAN_IP) {
+    if (key == STRING_KEY_IP) {
         if (strcpy_s(info, len, "127.0.0.2") != EOK) {
             return SOFTBUS_STRCPY_ERR;
         }
@@ -236,24 +236,34 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return GetNetLedgerInterface()->LnnGetLocalStrInfo(key, info, len);
 }
 
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
+int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
+}
+
 const NodeInfo *LnnGetLocalNodeInfo(void)
 {
     return GetNetLedgerInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetAuthPort(info);
+    return GetNetLedgerInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetSessionPort(info);
+    return GetNetLedgerInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetProxyPort(info);
+    return GetNetLedgerInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 const char *LnnGetBtMac(const NodeInfo *info)

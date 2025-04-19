@@ -36,9 +36,9 @@ public:
     virtual ~LnnNetLedgerInterface() {};
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual int32_t LnnGetAuthPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetSessionPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetProxyPort(const NodeInfo *info) = 0;
+    virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual const char *LnnGetBtMac(const NodeInfo *info) = 0;
     virtual const char *LnnGetDeviceName(const DeviceBasicInfo *info) = 0;
     virtual char *LnnConvertIdToDeviceType(uint16_t typeId) = 0;
@@ -114,6 +114,8 @@ public:
     virtual int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type) = 0;
     virtual int32_t LnnSetStaticNetCap(uint32_t *capability, StaticNetCapability type) = 0;
     virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
+    virtual int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -121,9 +123,9 @@ public:
     ~LnnNetLedgertInterfaceMock() override;
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
     MOCK_METHOD0(LnnGetLocalNodeInfo, const NodeInfo *());
-    MOCK_METHOD1(LnnGetAuthPort, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnGetSessionPort, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnGetProxyPort, int32_t(const NodeInfo *));
+    MOCK_METHOD2(LnnGetAuthPort, int32_t(const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetSessionPort, int32_t(const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetProxyPort, int32_t(const NodeInfo *, int32_t));
     MOCK_METHOD1(LnnGetBtMac, const char *(const NodeInfo *));
     MOCK_METHOD1(LnnGetDeviceName, const char *(const DeviceBasicInfo *));
     MOCK_METHOD1(LnnConvertIdToDeviceType, char *(uint16_t));
@@ -198,6 +200,8 @@ public:
     MOCK_METHOD2(LnnClearStaticNetCap, int32_t(uint32_t *, StaticNetCapability));
     MOCK_METHOD2(LnnSetStaticNetCap, int32_t(uint32_t *, StaticNetCapability));
     MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
+    MOCK_METHOD3(LnnGetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t *, int32_t));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(
         const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);

@@ -111,12 +111,12 @@ static void ConstructRemoteNode(void)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetDiscoveryType(&g_nodeInfo, DISCOVERY_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetProxyPort(&g_nodeInfo, REMOTE_PROXY_PORT);
+    ret = LnnSetProxyPort(&g_nodeInfo, REMOTE_PROXY_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetSessionPort(&g_nodeInfo, REMOTE_SESSION_PORT);
+    ret = LnnSetSessionPort(&g_nodeInfo, REMOTE_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnSetWiFiIp(&g_nodeInfo, REMOTE_WLAN_IP);
-    ret = LnnSetAuthPort(&g_nodeInfo, REMOTE_AUTH_PORT);
+    LnnSetWiFiIp(&g_nodeInfo, REMOTE_WLAN_IP, WLAN_IF);
+    ret = LnnSetAuthPort(&g_nodeInfo, REMOTE_AUTH_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnSetBtMac(&g_nodeInfo, NODE_BT_MAC);
     (void)LnnAddOnlineNode(&g_nodeInfo);

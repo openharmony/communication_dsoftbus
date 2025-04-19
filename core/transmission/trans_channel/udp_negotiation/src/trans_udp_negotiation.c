@@ -596,7 +596,7 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     char localIp[IP_LEN] = { 0 };
     if (appInfo->udpConnType == UDP_CONN_TYPE_WIFI) {
         appInfo->routeType = WIFI_STA;
-        ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, sizeof(localIp));
+        ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, sizeof(localIp), WLAN_IF);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local strInfo failed.");
     } else {
         appInfo->routeType = WIFI_P2P;
@@ -1289,7 +1289,8 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
         case CONNECT_TCP:
             appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
             appInfo->routeType = WIFI_STA;
-            ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr));
+            ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
+                sizeof(appInfo->myData.addr), WLAN_IF);
             TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local ip fail");
             appInfo->protocol = connOpt->socketOption.protocol;
             break;

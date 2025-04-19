@@ -667,7 +667,7 @@ static bool CheckWifiOfflineMsgResult(const char *networkId, int32_t authPort, c
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
 
-    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != 0) {
+    if (LnnGetRemoteNumInfoByIfnameIdx(networkId, NUM_KEY_AUTH_PORT, &port, WLAN_IF) != 0) {
         LNN_LOGE(LNN_BUILDER, "get remote port fail, neteorkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
@@ -1280,7 +1280,7 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
 {
     int32_t authPort = 0;
     char localOfflineCode[WIFI_OFFLINE_CODE_LEN] = {0};
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
+    if (LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local authPort fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }

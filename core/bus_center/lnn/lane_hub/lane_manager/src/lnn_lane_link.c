@@ -1449,10 +1449,10 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
     int32_t port = 0;
 
     if (reqInfo->isInnerCalled) {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port, WLAN_IF);
         LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
     } else {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port, WLAN_IF);
         LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
     }
     if (ret != SOFTBUS_OK) {
@@ -1476,8 +1476,8 @@ static int32_t CreateWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqI
     }
     LNN_LOGI(LNN_LANE, "get remote wlan ip with protocol=%{public}u", protocol);
     if (protocol == LNN_PROTOCOL_IP) {
-        if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP, linkInfo->linkInfo.wlan.connInfo.addr,
-            sizeof(linkInfo->linkInfo.wlan.connInfo.addr)) != SOFTBUS_OK) {
+        if (LnnGetRemoteStrInfoByIfnameIdx(reqInfo->peerNetworkId, STRING_KEY_IP, linkInfo->linkInfo.wlan.connInfo.addr,
+            sizeof(linkInfo->linkInfo.wlan.connInfo.addr), WLAN_IF) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "get remote wlan ip fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }

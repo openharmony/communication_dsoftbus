@@ -127,10 +127,10 @@ static void NotifyConnected(ListenerModule module, int32_t fd, bool isClient)
     }
 }
 
-static void NotifyDisconnected(int32_t fd)
+static void NotifyDisconnected(ListenerModule module, int32_t fd)
 {
     if (g_callback.onDisconnected != NULL) {
-        g_callback.onDisconnected(fd);
+        g_callback.onDisconnected(module, fd);
     }
     NotifyChannelDisconnected(fd);
 }
@@ -223,7 +223,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail.");
             (void)DelTrigger(module, fd, READ_TRIGGER);
-            NotifyDisconnected(fd);
+            NotifyDisconnected(module, fd);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         offset += (uint32_t)recvLen;
@@ -351,7 +351,7 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
 FAIL:
     (void)DelTrigger(module, fd, READ_TRIGGER);
     ConnShutdownSocket(fd);
-    NotifyDisconnected(fd);
+    NotifyDisconnected(module, fd);
     return SOFTBUS_AUTH_SOCKET_EVENT_INVALID;
 }
 
@@ -416,7 +416,8 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         ConnShutdownSocket(cfd);
         return SOFTBUS_AUTH_ADD_TRIGGER_FAIL;
     }
-    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_CLIENT && !IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_USB && module != AUTH_P2P && module != AUTH_RAW_P2P_CLIENT &&
+        !IsEnhanceP2pModuleId(module)) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");
@@ -426,7 +427,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         }
         return SOFTBUS_OK;
     }
-    if (module == AUTH && AddWifiConnItem(cfd) != SOFTBUS_OK) {
+    if ((module == AUTH || module == AUTH_USB) && AddWifiConnItem(cfd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
         return SOFTBUS_MEM_ERR;
     }
@@ -578,17 +579,24 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
     return SOFTBUS_OK;
 }
 
-int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
+int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
 {
     CHECK_NULL_PTR_RETURN_VALUE(ip, AUTH_INVALID_FD);
     char localIp[MAX_ADDR_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, MAX_ADDR_LEN, ifnameIdx) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local ip fail.");
         return AUTH_INVALID_FD;
     }
     ConnectOption option = {
         .type = CONNECT_TCP, .socketOption = { .addr = "", .port = port, .moduleId = AUTH, .protocol = LNN_PROTOCOL_IP }
     };
+    if (ifnameIdx == USB_IF) {
+        option.socketOption.moduleId = AUTH_USB;
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, localIp, MAX_ADDR_LEN, USB_IF) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "get local ip failed");
+            return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+        }
+    }
     if (strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), ip) != EOK) {
         AUTH_LOGE(AUTH_CONN, "copy remote ip fail.");
         return AUTH_INVALID_FD;
@@ -600,7 +608,8 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     }
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
-    if (AddTrigger(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+    ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
+    if (AddTrigger(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
@@ -608,14 +617,14 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(AUTH, fd, triggerMode);
+        (void)DelTrigger(module, fd, triggerMode);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
     int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
     if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
         AUTH_LOGE(AUTH_CONN, "set option fail.");
-        (void)DelTrigger(AUTH, fd, triggerMode);
+        (void)DelTrigger(module, fd, triggerMode);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
@@ -701,7 +710,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     return SOFTBUS_OK;
 }
 
-int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
+int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer, int32_t ifnameIdx)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(isServer, SOFTBUS_INVALID_PARAM);
@@ -716,13 +725,16 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
         return SOFTBUS_INVALID_PORT;
     }
     connInfo->type = AUTH_LINK_TYPE_WIFI;
+    if (ifnameIdx == USB_IF) {
+        connInfo->type = AUTH_LINK_TYPE_USB;
+    }
     if (strcpy_s(connInfo->info.ipInfo.ip, sizeof(connInfo->info.ipInfo.ip), socket.addr) != EOK) {
         AUTH_LOGE(AUTH_CONN, "copy ip fail, fd=%{public}d.", fd);
         return SOFTBUS_MEM_ERR;
     }
     connInfo->info.ipInfo.port = socket.port;
     int32_t serverPort = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &serverPort) != SOFTBUS_OK) {
+    if (LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &serverPort, ifnameIdx) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local auth port fail.");
     }
     *isServer = (serverPort != localPort);
@@ -815,7 +827,7 @@ int32_t AuthOpenChannel(const char *ip, int32_t port)
         AUTH_LOGE(AUTH_CONN, "invalid param.");
         return INVALID_CHANNEL_ID;
     }
-    int32_t fd = SocketConnectDevice(ip, port, true);
+    int32_t fd = SocketConnectDevice(ip, port, true, WLAN_IF);
     if (fd < 0) {
         AUTH_LOGE(AUTH_CONN, "connect fail.");
         return INVALID_CHANNEL_ID;

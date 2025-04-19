@@ -273,8 +273,8 @@ static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInf
         }
     } else {
         if (connInfo->type == CONNECT_TCP) {
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
-                SOFTBUS_OK) {
+            if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
+                sizeof(appInfo->myData.addr), WLAN_IF) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
