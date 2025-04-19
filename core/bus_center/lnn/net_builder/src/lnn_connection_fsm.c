@@ -950,10 +950,7 @@ static bool NeedUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
     if (!needUpdateAuthManager) {
         needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, true);
     }
-    if (!needUpdateAuthManager) {
-        return false;
-    }
-    return true;
+    return needUpdateAuthManager;
 }
 
 static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
