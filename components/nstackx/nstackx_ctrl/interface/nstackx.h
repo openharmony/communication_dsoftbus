@@ -29,7 +29,7 @@ extern "C" {
 #define NSTACKX_MAX_DEVICE_ID_LEN 96
 #define NSTACKX_MAX_SENDMSG_DATA_LEN 512
 #define NSTACKX_MAX_MAC_STRING_LEN 18
-#define NSTACKX_MAX_IP_STRING_LEN 16
+#define NSTACKX_MAX_IP_STRING_LEN 46
 #define NSTACKX_MAX_CAPABILITY_NUM 2
 #define NSTACKX_MAX_INTERFACE_NAME_LEN 16
 #define NSTACKX_MAX_SERVICE_DATA_LEN 64
@@ -353,6 +353,23 @@ DFINDER_EXPORT int32_t NSTACKX_SubscribeModule(void);
  * return 0 on success, negative value on failure
  */
 DFINDER_EXPORT int32_t NSTACKX_UnsubscribeModule(void);
+
+/*
+ * Register the device hash of local device.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceHash(uint64_t deviceHash);
+
+struct NSTACKX_ServiceData {
+    char ip[NSTACKX_MAX_IP_STRING_LEN];
+    char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN];
+};
+
+/*
+ * Register the serviceData of local device.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt);
 
 /*
  * Register the capability of local device.

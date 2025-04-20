@@ -1041,3 +1041,12 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
     }
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
 }
+
+void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event)
+{
+    if (event == NULL) {
+        LNN_LOGE(LNN_EVENT, "event is null");
+        return;
+    }
+    NotifyEvent((const LnnEventBasicInfo *)event);
+}

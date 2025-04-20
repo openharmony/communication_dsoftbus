@@ -33,6 +33,7 @@
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "legacy/softbus_adapter_hitrace.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
@@ -90,6 +91,11 @@ typedef struct {
     uint32_t len;
     uint8_t data[0];
 } MessagePara;
+
+typedef struct {
+    char uuid[UUID_BUF_LEN];
+    int32_t result;
+} OnPtkSyncCallBackParam;
 
 typedef struct {
     int64_t param1;
@@ -277,6 +283,7 @@ static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *co
     authFsm->info.connId = authFsmParam->connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V3;
+    authFsm->info.authVersion = AUTH_VERSION_INVALID;
     authFsm->info.idType = EXCHANGE_UDID;
     authFsm->info.isSupportDmDeviceKey = false;
     authFsm->info.deviceKeyId = authFsmParam->deviceKeyId;
@@ -1353,21 +1360,23 @@ static AuthFsm *GetAuthFsmByRequestId(uint64_t requestId)
     return NULL;
 }
 
-
-static void OnPtkSyncCallBack(const char *uuid, int32_t result)
+static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
 {
-    if (uuid == NULL) {
+    if (voidPtkCbParam == NULL) {
         AUTH_LOGE(AUTH_FSM, "get invalid param");
         return;
     }
+    OnPtkSyncCallBackParam *ptkCbParam = (OnPtkSyncCallBackParam *)voidPtkCbParam;
     if (!RequireAuthLock()) {
+        SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "require auth lock fail");
         return;
     }
     AuthPreLinkNode reuseKeyNode;
     (void)memset_s(&reuseKeyNode, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
-    if (FindAuthPreLinkNodeByUuid(uuid, &reuseKeyNode) != SOFTBUS_OK) {
+    if (FindAuthPreLinkNodeByUuid(ptkCbParam->uuid, &reuseKeyNode) != SOFTBUS_OK) {
         ReleaseAuthLock();
+        SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "auth reuse devicekey not found");
         return;
     }
@@ -1375,19 +1384,46 @@ static void OnPtkSyncCallBack(const char *uuid, int32_t result)
     AuthSessionInfo *info = &authFsm->info;
     if (authFsm == NULL) {
         ReleaseAuthLock();
+        SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "auth fsm not found");
         return;
     }
-    if (result != SOFTBUS_OK) {
+    if (ptkCbParam->result != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "sync ptk fail");
         ReleaseAuthLock();
+        SoftBusFree(ptkCbParam);
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_PTK_ERR);
         return;
     }
     ReleaseAuthLock();
+    SoftBusFree(ptkCbParam);
     DelAuthGenCertParaNodeById(reuseKeyNode.requestId);
     AuthManagerSetAuthPassed(authFsm->authSeq, info);
     TryFinishAuthSession(authFsm);
+}
+
+static void OnPtkSyncCallBack(const char *uuid, int32_t result)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get invalid param");
+        return;
+    }
+    OnPtkSyncCallBackParam *ptkCbParam = (OnPtkSyncCallBackParam *)SoftBusCalloc(sizeof(OnPtkSyncCallBackParam));
+    if (ptkCbParam == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc ptkCbParam fail");
+        return;
+    }
+    if (memcpy_s(ptkCbParam->uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy uuid fail");
+        SoftBusFree(ptkCbParam);
+        return;
+    }
+    ptkCbParam->result = result;
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), OnPtkSyncCallBackLooper, (void *)ptkCbParam);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "LnnAsyncCallbackHelper call error");
+        SoftBusFree(ptkCbParam);
+    }
 }
 
 static void TrySyncPtkClient(AuthSessionInfo *info)

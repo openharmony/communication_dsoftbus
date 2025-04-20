@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("TransProcessDataTest") {
   module_out_path = module_output_path
