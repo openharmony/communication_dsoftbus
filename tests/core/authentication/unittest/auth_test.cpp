@@ -653,7 +653,7 @@ HWTEST_F(AuthTest, SOCKET_CONNECT_DEVICE_Test_001, TestSize.Level1)
     int32_t port = 22;
     bool isBlockMode = true;
 
-    int32_t ret = SocketConnectDevice(ip, port, isBlockMode);
+    int32_t ret = SocketConnectDevice(ip, port, isBlockMode, WLAN_IF);
     EXPECT_TRUE(ret == AUTH_INVALID_FD);
 }
 
@@ -686,7 +686,7 @@ HWTEST_F(AuthTest, SOCKER_GET_CONN_INFO_Test_001, TestSize.Level1)
     bool isServer = true;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -1997,11 +1997,11 @@ HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
     int32_t fd = 0;
     AuthConnInfo *connInfo = nullptr;
     bool isServer = false;
-    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo connInfoValue;
     (void)memset_s(&connInfoValue, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer);
+    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 

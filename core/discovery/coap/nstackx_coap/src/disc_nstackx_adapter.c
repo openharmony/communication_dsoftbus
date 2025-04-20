@@ -67,7 +67,8 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     settings->length = 0;
     settings->businessType = bType;
     char localNetifName[NET_IF_NAME_LEN] = { 0 };
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, localNetifName, sizeof(localNetifName));
+    int32_t ret = LnnGetLocalStrInfoByIfnameIdx(
+        STRING_KEY_NET_IF_NAME, localNetifName, sizeof(localNetifName), WLAN_IF);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local network name from LNN failed, ret=%{public}d", ret);
         return ret;
@@ -305,7 +306,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
 int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap)
 {
     int32_t authPort = 0;
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
+    int32_t ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF);
     if (ret != SOFTBUS_OK) {
         DISC_LOGW(DISC_COAP, "get auth port from lnn failed. ret=%{public}d", ret);
     }
@@ -362,7 +363,7 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
 static bool IsNetworkValid(void)
 {
     char localIp[IP_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, IP_LEN, WLAN_IF) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local ip failed");
         return false;
     }
@@ -518,10 +519,10 @@ static int32_t SetLocalDeviceInfo(void)
     }
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
-            sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr)) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->localIfInfo[0].networkName,
-            sizeof(g_localDeviceInfo->localIfInfo[0].networkName)) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
+        sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr), WLAN_IF) != SOFTBUS_OK ||
+        LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->localIfInfo[0].networkName,
+        sizeof(g_localDeviceInfo->localIfInfo[0].networkName), WLAN_IF) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local device info from lnn failed.");
         (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         return SOFTBUS_DISCOVER_GET_LOCAL_STR_FAILED;

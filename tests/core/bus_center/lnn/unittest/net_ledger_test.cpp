@@ -147,11 +147,11 @@ HWTEST_F(NetLedgerTest, DL_GET_Test_001, TestSize.Level1)
 {
     char networkId[DEFAULT_SIZE] = "1234";
     int32_t info = 1234;
-    EXPECT_TRUE(LnnGetRemoteNumInfo(nullptr, NUM_KEY_SESSION_PORT, &info) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetRemoteNumInfoByIfnameIdx(nullptr, NUM_KEY_SESSION_PORT, &info, WLAN_IF) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, STRING_KEY_END, &info) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_END, &info) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_END, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &info) != SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetRemoteNumInfoByIfnameIdx(networkId, NUM_KEY_AUTH_PORT, &info, WLAN_IF) != SOFTBUS_OK);
 }
 
 /*

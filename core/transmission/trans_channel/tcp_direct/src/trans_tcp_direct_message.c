@@ -435,7 +435,7 @@ static int32_t GetServerSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t le
 {
     char myIp[IP_LEN] = { 0 };
     if (appInfo->routeType == WIFI_STA) {
-        if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, myIp, sizeof(myIp), WLAN_IF) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }

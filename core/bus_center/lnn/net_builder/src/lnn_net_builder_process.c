@@ -730,9 +730,9 @@ static int32_t ProcessLeaveByAddrType(const void *para)
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
         }
     }
-    LNN_LOGD(LNN_BUILDER, "notify=%{public}d, eth=%{public}d, wifi=%{public}d", notify, addrType[CONNECTION_ADDR_ETH],
-        addrType[CONNECTION_ADDR_WLAN]);
-    if (notify && (addrType[CONNECTION_ADDR_ETH] || addrType[CONNECTION_ADDR_WLAN])) {
+    LNN_LOGD(LNN_BUILDER, "notify=%{public}d, eth=%{public}d, wifi=%{public}d, usb=%{public}d", notify,
+        addrType[CONNECTION_ADDR_ETH], addrType[CONNECTION_ADDR_WLAN], addrType[CONNECTION_ADDR_NCM]);
+    if (notify && (addrType[CONNECTION_ADDR_ETH] || addrType[CONNECTION_ADDR_WLAN] || addrType[CONNECTION_ADDR_NCM])) {
         (void)LnnNotifyAllTypeOffline(CONNECTION_ADDR_MAX);
     }
     RemovePendingRequestByAddrType(addrType, CONNECTION_ADDR_MAX);

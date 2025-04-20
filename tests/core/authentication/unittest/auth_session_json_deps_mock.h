@@ -87,6 +87,7 @@ public:
     virtual void AuthUpdateCreateTime(const char *udidHash, int32_t keyType, bool isServer) = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual bool IsSupportUDIDAbatement(void) = 0;
     virtual bool JSON_AddBoolToObject(JsonObj *obj, const char *key, bool value) = 0;
     virtual bool IsNeedUDIDAbatement(const AuthSessionInfo *info) = 0;
@@ -135,9 +136,9 @@ public:
     virtual uint64_t SoftBusGetSysTimeMs(void) = 0;
     virtual uint64_t LnnGetSupportedProtocols(const NodeInfo *info) = 0;
     virtual int32_t StringToUpperCase(const char *str, char *buf, int32_t size) = 0;
-    virtual int32_t LnnGetAuthPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetSessionPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetProxyPort(const NodeInfo *info) = 0;
+    virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual bool JSON_AddBytesToObject(JsonObj *obj, const char *key, uint8_t *value, uint32_t size) = 0;
     virtual bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value,
         uint32_t bufLen, uint32_t *size) = 0;
@@ -231,9 +232,9 @@ public:
     MOCK_METHOD0(SoftBusGetSysTimeMs, uint64_t (void));
     MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t (const NodeInfo *));
     MOCK_METHOD3(StringToUpperCase, int32_t (const char *, char *, int32_t));
-    MOCK_METHOD1(LnnGetAuthPort, int32_t (const NodeInfo *));
-    MOCK_METHOD1(LnnGetSessionPort, int32_t (const NodeInfo *));
-    MOCK_METHOD1(LnnGetProxyPort, int32_t (const NodeInfo *));
+    MOCK_METHOD2(LnnGetAuthPort, int32_t (const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetSessionPort, int32_t (const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetProxyPort, int32_t (const NodeInfo *, int32_t));
     MOCK_METHOD4(JSON_AddBytesToObject, bool (JsonObj *, const char *, uint8_t *, uint32_t));
     MOCK_METHOD5(JSON_GetBytesFromObject, bool (const JsonObj *, const char *, uint8_t *, uint32_t, uint32_t *));
     MOCK_METHOD3(JSON_AddInt16ToObject, bool (JsonObj *, const char *, int16_t));
@@ -250,6 +251,7 @@ public:
     MOCK_METHOD1(AuthSessionGetIsSameAccount, bool (int64_t authSeq));
     MOCK_METHOD1(AuthSessionGetUserId, int32_t (int64_t authSeq));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H

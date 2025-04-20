@@ -37,7 +37,7 @@ extern "C" {
 
 typedef struct {
     void (*onConnected)(ListenerModule module, int32_t fd, bool isClient);
-    void (*onDisconnected)(int32_t fd);
+    void (*onDisconnected)(ListenerModule module, int32_t fd);
     void (*onDataReceived)(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data);
 } SocketCallback;
 int32_t SetSocketCallback(const SocketCallback *cb);
@@ -45,14 +45,14 @@ void UnsetSocketCallback(void);
 
 // connect succ, return fd; otherwise, return -1.
 int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *remoteIp, int32_t port, bool isBlockMode);
-int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode);
+int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx);
 int32_t SocketSetDevice(int32_t fd, bool isBlockMode);
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode);
 
 void SocketDisconnectDevice(ListenerModule module, int32_t fd);
 
 int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data);
-int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer);
+int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer, int32_t ifnameIdx);
 
 int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info);
 void StopSocketListening(ListenerModule moduleId);

@@ -338,6 +338,14 @@ static bool CompareSleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *in
     return isLinkble;
 }
 
+static bool CompareUsbConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_USB && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
 static CompareByType g_compareByType[] = {
     {AUTH_LINK_TYPE_WIFI,         CompareWifiConnInfo},
     {AUTH_LINK_TYPE_BR,           CompareBrConnInfo},
@@ -347,6 +355,7 @@ static CompareByType g_compareByType[] = {
     {AUTH_LINK_TYPE_SESSION,      CompareSessionConnInfo},
     {AUTH_LINK_TYPE_SESSION_KEY,  CompareSessionKeyConnInfo},
     {AUTH_LINK_TYPE_SLE,          CompareSleConnInfo},
+    {AUTH_LINK_TYPE_USB,          CompareUsbConnInfo},
 };
 
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)

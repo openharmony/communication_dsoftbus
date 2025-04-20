@@ -65,11 +65,12 @@ void UnsetSocketCallback(void)
     return;
 }
 
-int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
+int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
 {
     (void)ip;
     (void)port;
     (void)isBlockMode;
+    (void)ifnameIdx;
     AUTH_LOGW(AUTH_CONN, "not implement.");
     return SOFTBUS_NOT_IMPLEMENT;
 }
@@ -89,11 +90,12 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
+int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer, int32_t ifnameIdx)
 {
     (void)fd;
     (void)connInfo;
     (void)isServer;
+    (void)ifnameIdx;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

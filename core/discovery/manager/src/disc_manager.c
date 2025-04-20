@@ -1150,7 +1150,7 @@ int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId, int32_t 
     return InnerStopDiscovery(packageName, subscribeId, SUBSCRIBE_SERVICE, callingPid);
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx)
 {
     if (medium == COAP) {
         if (g_discCoapInterface != NULL) {

@@ -65,6 +65,11 @@ public:
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
+    virtual int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *netWorkId, InfoKey key, char *info,
+        uint32_t len, int32_t ifIdx) = 0;
+    virtual int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *netWorkId, InfoKey key, int32_t *info,
+        int32_t ifIdx) = 0;
     virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
@@ -182,6 +187,9 @@ public:
     MOCK_METHOD2(LnnRequestCheckOnlineStatus, int32_t (const char *networkId, uint64_t timeout));
     MOCK_METHOD2(AuthCheckMetaExist, int32_t (const AuthConnInfo *connInfo, bool *isExist));
     MOCK_METHOD2(LnnSetDLConnCapability, int32_t(const char *, uint64_t));
+    MOCK_METHOD5(LnnGetRemoteStrInfoByIfnameIdx, int32_t (const char*, InfoKey, char *, uint32_t, int32_t));
+    MOCK_METHOD4(LnnGetRemoteNumInfoByIfnameIdx, int32_t (const char*, InfoKey, int32_t *, int32_t));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey, char *, uint32_t, int32_t));
 
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
