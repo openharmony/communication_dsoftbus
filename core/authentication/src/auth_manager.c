@@ -760,6 +760,38 @@ static void UpdateSessionKeyScheduled(AuthManager *auth, AuthSessionInfo *info)
     }
 }
 
+bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid uuid param");
+        return false;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "require auth lock fail");
+        return false;
+    }
+    bool haveSessionAuth = false;
+    bool haveEnhanceP2pAuth = false;
+    AuthManager *item = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_SESSION_KEY, isServer);
+    if (item == NULL) {
+        ReleaseAuthLock();
+        AUTH_LOGI(AUTH_FSM, "not found session key auth manager");
+        return false;
+    }
+    haveSessionAuth = true;
+    if (item->connInfo[AUTH_LINK_TYPE_ENHANCED_P2P].type == AUTH_LINK_TYPE_ENHANCED_P2P &&
+        item->hasAuthPassed[AUTH_LINK_TYPE_ENHANCED_P2P]) {
+        AUTH_LOGI(AUTH_FSM, "have enhance p2p auth, skip");
+        haveEnhanceP2pAuth = true;
+    }
+    ReleaseAuthLock();
+    if (haveSessionAuth && !haveEnhanceP2pAuth) {
+        AUTH_LOGI(AUTH_FSM, "need add auth");
+        return true;
+    }
+    return false;
+}
+
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect, bool isOldKey)
 {
