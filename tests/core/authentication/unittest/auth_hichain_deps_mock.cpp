@@ -20,7 +20,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 constexpr int64_t TEST_AUTH_SEQ = 1;
-constexpr int32_t SOFTBUS_NEW_V3 = 102;
 void *g_hichainMockInterface;
 AuthHichainInterfaceMock::AuthHichainInterfaceMock()
 {
@@ -170,13 +169,13 @@ bool RequireAuthLock(void)
     return GetAuthHichainMockInterface()->RequireAuthLock();
 }
 
-int32_t AuthSessionGetVersion(int64_t authSeq, int32_t *version)
+int32_t AuthSessionGetAuthVersion(int64_t authSeq, int32_t *version)
 {
     if (authSeq == TEST_AUTH_SEQ) {
         return SOFTBUS_AUTH_GET_SESSION_INFO_FAIL;
     }
 
-    *version = SOFTBUS_NEW_V3;
+    *version = AUTH_VERSION_V1;
     return SOFTBUS_OK;
 }
 
@@ -254,11 +253,6 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value)
 void IdServiceDestroyCredentialList(char **returnData)
 {
     return GetAuthHichainMockInterface()->IdServiceDestroyCredentialList(returnData);
-}
-
-bool GetSecEnhanceFlag(void)
-{
-    return GetAuthHichainMockInterface()->GetSecEnhanceFlag();
 }
 
 int32_t GetActiveOsAccountIds(void)
