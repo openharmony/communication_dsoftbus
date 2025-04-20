@@ -26,6 +26,7 @@ extern "C" {
 #define NETWORK_TYPE_WIFI "1"
 #define NETWORK_TYPE_BLE  "2"
 #define NETWORK_TYPE_BR   "3"
+#define NETWORK_TYPE_USB  "4"
 
 typedef struct {
     char udid[UDID_BUF_LEN];

@@ -208,7 +208,7 @@ int32_t LnnIpNetworkImplInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, 
         }
         return SOFTBUS_OK;
     }
-    if (key == STRING_KEY_WLAN_IP) {
+    if (key == STRING_KEY_IP) {
         if (strcpy_s(info, len, "127.0.0.2") != EOK) {
             return SOFTBUS_STRCPY_ERR;
         }
@@ -255,9 +255,9 @@ int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager)
     return GetLnnIpNetworkImplInterface()->LnnRegistPhysicalSubnet(manager);
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx)
 {
-    return GetLnnIpNetworkImplInterface()->DiscLinkStatusChanged(status, medium);
+    return GetLnnIpNetworkImplInterface()->DiscLinkStatusChanged(status, medium, ifnameIdx);
 }
 
 bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
@@ -385,19 +385,19 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetLnnIpNetworkImplInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetLnnIpNetworkImplInterface()->LnnGetAuthPort(info);
+    return GetLnnIpNetworkImplInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetLnnIpNetworkImplInterface()->LnnGetSessionPort(info);
+    return GetLnnIpNetworkImplInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetLnnIpNetworkImplInterface()->LnnGetProxyPort(info);
+    return GetLnnIpNetworkImplInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 const char *LnnGetBtMac(const NodeInfo *info)

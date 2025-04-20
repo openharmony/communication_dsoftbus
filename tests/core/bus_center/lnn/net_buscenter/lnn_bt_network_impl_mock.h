@@ -51,9 +51,9 @@ public:
     virtual void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status) = 0;
         virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual int32_t LnnGetAuthPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetSessionPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetProxyPort(const NodeInfo *info) = 0;
+    virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual const char *LnnGetBtMac(const NodeInfo *info) = 0;
     virtual const char *LnnGetDeviceName(const DeviceBasicInfo *info) = 0;
     virtual char *LnnConvertIdToDeviceType(uint16_t typeId) = 0;
@@ -146,9 +146,9 @@ public:
     static int32_t ActionOfLnnGetNetIfTypeByNameBle(const char *ifName, LnnNetIfType *type);
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
     MOCK_METHOD0(LnnGetLocalNodeInfo, const NodeInfo *());
-    MOCK_METHOD1(LnnGetAuthPort, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnGetSessionPort, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnGetProxyPort, int32_t(const NodeInfo *));
+    MOCK_METHOD2(LnnGetAuthPort, int32_t(const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetSessionPort, int32_t(const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetProxyPort, int32_t(const NodeInfo *, int32_t));
     MOCK_METHOD1(LnnGetBtMac, const char *(const NodeInfo *));
     MOCK_METHOD1(LnnGetDeviceName, const char *(const DeviceBasicInfo *));
     MOCK_METHOD1(LnnConvertIdToDeviceType, char *(uint16_t));

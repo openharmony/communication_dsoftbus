@@ -33,6 +33,7 @@ typedef uint32_t LnnProtocolAbility;
 #define LNN_PROTOCOL_DMSG  (1L << 5)
 #define LNN_PROTOCOL_VTP   (1L << 6)
 #define LNN_PROTOCOL_NIP   (1L << 7)
+#define LNN_PROTOCOL_USB   (1L << 8)
 #define LNN_PROTOCOL_ALL   ((uint32_t)-1)
 typedef uint32_t ProtocolType;
 
