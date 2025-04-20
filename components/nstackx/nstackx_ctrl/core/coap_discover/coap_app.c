@@ -35,8 +35,10 @@
 #include "nstackx_event.h"
 #include "nstackx_statistics.h"
 #include "nstackx_device_local.h"
+#include "nstackx_inet.h"
 
 #define TAG "nStackXCoAP"
+#define COAP_IPV6_DEFAULT_ADDR "::"
 
 #define DEFAULT_COAP_TIMEOUT (COAP_RESOURCE_CHECK_TIME * COAP_TICKS_PER_SECOND)
 
@@ -115,7 +117,7 @@ static void CoAPEpollReadHandle(void *data)
     if (data == NULL) {
         return;
     }
-    EpollTask *task = data;
+    EpollTask *task = (EpollTask *)data;
     if (task->taskfd < 0) {
         return;
     }
@@ -139,7 +141,7 @@ static void CoAPEpollWriteHandle(void *data)
     if (data == NULL) {
         return;
     }
-    EpollTask *task = data;
+    EpollTask *task = (EpollTask *)data;
     if (task->taskfd < 0) {
         return;
     }
@@ -160,7 +162,7 @@ static void CoAPEpollWriteHandle(void *data)
 
 static void CoAPEpollErrorHandle(void *data)
 {
-    EpollTask *task = data;
+    EpollTask *task = (EpollTask *)data;
     if (task == NULL || task->taskfd < 0) {
         return;
     }
@@ -168,7 +170,6 @@ static void CoAPEpollErrorHandle(void *data)
     if (socket == NULL) {
         return;
     }
-
     IncStatistics(STATS_SOCKET_ERROR);
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
 
@@ -176,12 +177,11 @@ static void CoAPEpollErrorHandle(void *data)
     LIST_FOR_EACH(pos, &g_ctxList) {
         CoapCtxType *ctx = (CoapCtxType *)pos;
         if (IsCoapCtxEndpointSocket(ctx->ctx, socket->fd)) {
-            DFINDER_LOGE(TAG, "coap epoll error occurred");
+            DFINDER_LOGE(TAG, "not coap context endpoint socket");
             ctx->socketErrFlag = NSTACKX_TRUE;
             return;
         }
     }
-
     DFINDER_LOGE(TAG, "coap session socket error occurred and close it");
     DeRegisterEpollTask(task);
     CloseDesc(socket->fd);
@@ -304,23 +304,21 @@ static void DeRegisteCoAPEpollTaskCtx(CoapCtxType *ctx)
     coap_io_do_io(ctx->ctx, now);
 }
 
-static int DeRegisterCoAPEpollTaskCb(CoapCtxType *ctx)
+static void DeRegisterCoAPEpollTaskCb(CoapCtxType *ctx)
 {
     if (ctx->socketErrFlag == NSTACKX_TRUE) {
-        DFINDER_LOGI(TAG, "error of ctx socket occurred and destroy g_ctx");
+        DFINDER_LOGI(TAG, "socket error occurred of current coap ctx, notify caller and destroy corresponding iface");
         ctx->socketErrFlag = NSTACKX_FALSE;
         NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
         DestroyLocalIface(ctx->iface, NSTACKX_FALSE);
     }
 
-    DFINDER_LOGD(TAG, "Deregistercoap epollTask freeCtxLater %d", ctx->freeCtxLater);
     DeRegisteCoAPEpollTaskCtx(ctx);
     if (ctx->freeCtxLater == NSTACKX_TRUE) {
         CoapContextRemove(ctx);
         coap_free_context(ctx->ctx);
         free(ctx);
     }
-    return NSTACKX_EOK;
 }
 
 void DeRegisterCoAPEpollTask(void)
@@ -328,7 +326,7 @@ void DeRegisterCoAPEpollTask(void)
     List *pos = NULL;
     List *tmp = NULL;
     LIST_FOR_EACH_SAFE(pos, tmp, &g_ctxList) {
-        (void)DeRegisterCoAPEpollTaskCb((CoapCtxType *)pos);
+        DeRegisterCoAPEpollTaskCb((CoapCtxType *)pos);
     }
 }
 
@@ -480,26 +478,27 @@ void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit)
         }
         (void)DeRegisterEpollTask(&ctx->taskList[i]);
     }
+
     CoapContextRemove(ctx);
     coap_free_context(ctx->ctx);
     free(ctx);
 }
 
-CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface)
+// iface must not be null
+CoapCtxType *CoapServerInit(uint8_t af, const union InetAddr *ip, void *iface)
 {
-    DFINDER_LOGI(TAG, "CoapServerInit");
-    CoapCtxType *ctx = calloc(1, sizeof(CoapCtxType));
+    DFINDER_LOGI(TAG, "begin to init coap server for current iface");
+    CoapCtxType *ctx = (CoapCtxType *)calloc(1, sizeof(CoapCtxType));
     if (ctx == NULL) {
-        DFINDER_LOGE(TAG, "alloc failed");
+        DFINDER_LOGE(TAG, "calloc for coap context type fail, size wanted: %zu", sizeof(CoapCtxType));
         return NULL;
     }
 
     coap_startup();
-
-    char addrStr[NI_MAXHOST] = COAP_SRV_DEFAULT_ADDR;
+    char *addrStr = af == AF_INET ? COAP_SRV_DEFAULT_ADDR : COAP_IPV6_DEFAULT_ADDR;
     char portStr[NI_MAXSERV] = COAP_SRV_DEFAULT_PORT;
 
-    ctx->ctx = CoapGetContext(addrStr, portStr, NSTACKX_TRUE, ip);
+    ctx->ctx = CoapGetContext(addrStr, portStr, af, ip);
     if (ctx->ctx == NULL) {
         DFINDER_LOGE(TAG, "coap init get context failed");
         free(ctx);

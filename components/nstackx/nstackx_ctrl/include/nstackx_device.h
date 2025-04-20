@@ -22,6 +22,7 @@
 #include <stdbool.h>
 
 #include "nstackx.h"
+#include "nstackx_inet.h"
 #include "coap_discover.h"
 #include "coap_app.h"
 
@@ -32,6 +33,7 @@ extern "C" {
 enum {
     IFACE_TYPE_ETH,
     IFACE_TYPE_WLAN,
+    IFACE_TYPE_USB_SCALE,
     IFACE_TYPE_P2P,
     IFACE_TYPE_USB,
     IFACE_TYPE_UNKNOWN,
@@ -95,7 +97,8 @@ typedef struct {
 } NetworkInterfacePrefiexPossible;
 
 typedef struct {
-    struct in_addr ip;
+    union InetAddr addr;
+    uint8_t af;
     uint8_t state;
 } WifiApChannelInfo;
 
