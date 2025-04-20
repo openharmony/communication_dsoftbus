@@ -146,10 +146,8 @@ static char *IdServiceCopyCredId(char *credId)
     } else {
         char *anonyCredId = NULL;
         Anonymize(credIdMem, &anonyCredId);
-        if (anonyCredId != NULL) {
-            AUTH_LOGD(AUTH_HICHAIN, "hichain identity service get credid=%{public}s", anonyCredId);
-            AnonymizeFree(anonyCredId);
-        }
+        AUTH_LOGD(AUTH_HICHAIN, "hichain identity service get credid=%{public}s", AnonymizeWrapper(anonyCredId));
+        AnonymizeFree(anonyCredId);
     }
     
     return credIdMem;

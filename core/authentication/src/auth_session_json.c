@@ -873,7 +873,7 @@ static int32_t GetLocalUdidShortHash(char *localUdidHash)
 
 static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
 {
-    if (info->version < SOFTBUS_NEW_V3) {
+    if (info->authVersion < AUTH_VERSION_V1) {
         AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
         return;
     }
@@ -1004,8 +1004,14 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
             return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
         }
     }
+#ifdef DISABLE_IDENTITY_SERVICE
+    int32_t authVersion = AUTH_VERSION_INVALID;
+#else
+    int32_t authVersion = AUTH_VERSION_VALUE;
+#endif
+
     if (!JSON_AddInt32ToObject(obj, AUTH_START_STATE, info->localState) ||
-        !JSON_AddInt32ToObject(obj, AUTH_VERSION_TAG, AUTH_VERSION_VALUE)) {
+        !JSON_AddInt32ToObject(obj, AUTH_VERSION_TAG, authVersion)) {
         AUTH_LOGE(AUTH_FSM, "add auth info fail.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
@@ -1282,21 +1288,8 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
 static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 {
     int32_t maxBuffSize;
-    int32_t version = (int32_t)info->version;
     OptString(obj, DEVICE_ID_TAG, info->udid, UDID_BUF_LEN, "");
     OptInt(obj, DATA_BUF_SIZE_TAG, &maxBuffSize, PACKET_SIZE);
-
-    if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
-        AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
-    }
-    info->version = version < info->version ? (SoftBusVersion)version : info->version;
-
-    AUTH_LOGI(AUTH_FSM, "softbusVersion is %{public}d", info->version);
-    OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
-    OptInt(obj, AUTH_VERSION_TAG, (int32_t *)&info->authVersion, AUTH_VERSION_INVALID);
-    if (info->version >= SOFTBUS_NEW_V3) {
-        return;
-    }
 
     if (strlen(info->udid) != 0) {
         info->version = SOFTBUS_OLD_V2;
@@ -1306,6 +1299,11 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
             AUTH_LOGE(AUTH_FSM, "strcpy udid fail, ignore");
         }
     }
+    if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
+        AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
+    }
+    OptInt(obj, AUTH_START_STATE, (int32_t *)&info->peerState, AUTH_STATE_COMPATIBLE);
+    OptInt(obj, AUTH_VERSION_TAG, (int32_t *)&info->authVersion, AUTH_VERSION_INVALID);
 }
 
 static int32_t IsCmdMatchByDeviceId(JsonObj *obj, AuthSessionInfo *info)
@@ -1769,7 +1767,13 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (!JSON_AddInt32ToObject(json, DEVICE_SECURITY_LEVEL, info->deviceSecurityLevel)) {
         AUTH_LOGE(AUTH_FSM, "pack deviceSecurityLevel fail.");
     }
-    if (!JSON_AddInt32ToObject(json, AUTH_VERSION_TAG, AUTH_VERSION_VALUE)) {
+
+#ifdef DISABLE_IDENTITY_SERVICE
+    int32_t authVersion = AUTH_VERSION_INVALID;
+#else
+    int32_t authVersion = AUTH_VERSION_VALUE;
+#endif
+    if (!JSON_AddInt32ToObject(json, AUTH_VERSION_TAG, authVersion)) {
         AUTH_LOGE(AUTH_FSM, "pack authVersion fail.");
     }
     return SOFTBUS_OK;

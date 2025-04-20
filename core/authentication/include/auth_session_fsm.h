@@ -151,7 +151,7 @@ AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer, bool isConnectSide);
 void AuthSessionFsmExit(void);
 AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq);
 char *AuthSessionGetCredId(int64_t authSeq);
-int32_t AuthSessionGetVersion(int64_t authSeq, int32_t *version);
+int32_t AuthSessionGetAuthVersion(int64_t authSeq, int32_t *version);
 bool AuthSessionGetIsSameAccount(int64_t authSeq);
 int32_t AuthSessionGetUserId(int64_t authSeq);
 

@@ -62,10 +62,11 @@ if (dsoftbus_feature_lnn_frame) {
   ]
 
   if (defined(ohos_lite)) {
-    auth_server_src += [ "$authentication_path/src/auth_identity_service_adapter.c" ]
-    defines += 
+    auth_server_src += [ "$authentication_path/src/virtual/auth_identity_service_adapter_virtual.c" ]
+    AUTH_SERVER_DEFINES += [ "DISABLE_IDENTITY_SERVICE" ]
   } else {
-    auth_server_src += [ "$authentication_path/src/auth_identity_service_adapter.c" ]
+    auth_server_src +=
+        [ "$authentication_path/src/auth_identity_service_adapter.c" ]
   }
 
   if (enhanced) {
