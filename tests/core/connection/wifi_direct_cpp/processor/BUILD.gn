@@ -23,6 +23,7 @@ ohos_unittest("P2pv1ProcessorTest") {
   module_out_path = ut_out_path
 
   include_dirs = processorv1_ut_include_dirs
+  include_dirs += [ "$dsoftbus_root_path/core/bus_center/service/include" ]
 
   sources = processorv1_ut_sources
 
