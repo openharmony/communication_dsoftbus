@@ -71,6 +71,9 @@ int32_t GetAuthConn(const char *uuid, LaneLinkType laneType, AuthConnInfo *connI
         case LANE_WLAN_5G:
             authType = AUTH_LINK_TYPE_WIFI;
             break;
+        case LANE_USB:
+            authType = AUTH_LINK_TYPE_USB;
+            break;
         default:
             return SOFTBUS_AUTH_CONN_TYPE_INVALID;
     }

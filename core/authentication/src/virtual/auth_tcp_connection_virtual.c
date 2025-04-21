@@ -32,10 +32,11 @@ void UnregAuthChannelListener(int32_t module)
     (void)module;
 }
 
-int32_t AuthOpenChannel(const char *ip, int32_t port)
+int32_t AuthOpenChannel(const char *ip, int32_t port, int32_t ifnameIdx)
 {
     (void)ip;
     (void)port;
+    (void)ifnameIdx;
     AUTH_LOGW(AUTH_CONN, "not implement.");
     return INVALID_CHANNEL_ID;
 }

@@ -579,6 +579,18 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
     return SOFTBUS_OK;
 }
 
+static ConnectOption GetConnectOptionByIfname(int32_t ifnameIdx, int32_t port)
+{
+    ConnectOption option = {
+        .type = CONNECT_TCP, .socketOption = { .addr = "", .port = port, .moduleId = AUTH, .protocol = LNN_PROTOCOL_IP }
+    };
+    if (ifnameIdx == USB_IF) {
+        option.socketOption.moduleId = AUTH_USB;
+        option.socketOption.protocol = LNN_PROTOCOL_USB;
+    }
+    return option;
+}
+
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
 {
     CHECK_NULL_PTR_RETURN_VALUE(ip, AUTH_INVALID_FD);
@@ -587,11 +599,8 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
         AUTH_LOGE(AUTH_CONN, "get local ip fail.");
         return AUTH_INVALID_FD;
     }
-    ConnectOption option = {
-        .type = CONNECT_TCP, .socketOption = { .addr = "", .port = port, .moduleId = AUTH, .protocol = LNN_PROTOCOL_IP }
-    };
+    ConnectOption option = GetConnectOptionByIfname(ifnameIdx, port);
     if (ifnameIdx == USB_IF) {
-        option.socketOption.moduleId = AUTH_USB;
         if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, localIp, MAX_ADDR_LEN, USB_IF) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get local ip failed");
             return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
@@ -715,9 +724,16 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer, in
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(isServer, SOFTBUS_INVALID_PARAM);
     SocketAddr socket;
-    if (ConnGetPeerSocketAddr(fd, &socket) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
-        return SOFTBUS_AUTH_GET_PEER_SOCKET_ADDR_FAIL;
+    if (ifnameIdx == USB_IF) {
+        if (ConnGetPeerSocketAddr6(fd, &socket) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
+            return SOFTBUS_AUTH_GET_PEER_SOCKET_ADDR_FAIL;
+        }
+    } else {
+        if (ConnGetPeerSocketAddr(fd, &socket) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
+            return SOFTBUS_AUTH_GET_PEER_SOCKET_ADDR_FAIL;
+        }
     }
     int32_t localPort = ConnGetLocalSocketPort(fd);
     if (localPort <= 0) {
@@ -821,13 +837,13 @@ int32_t AuthOpenChannelWithAllIp(const char *localIp, const char *remoteIp, int3
     return fd;
 }
 
-int32_t AuthOpenChannel(const char *ip, int32_t port)
+int32_t AuthOpenChannel(const char *ip, int32_t port, int32_t ifnameIdx)
 {
     if (ip == NULL || port <= 0) {
         AUTH_LOGE(AUTH_CONN, "invalid param.");
         return INVALID_CHANNEL_ID;
     }
-    int32_t fd = SocketConnectDevice(ip, port, true, WLAN_IF);
+    int32_t fd = SocketConnectDevice(ip, port, true, ifnameIdx);
     if (fd < 0) {
         AUTH_LOGE(AUTH_CONN, "connect fail.");
         return INVALID_CHANNEL_ID;

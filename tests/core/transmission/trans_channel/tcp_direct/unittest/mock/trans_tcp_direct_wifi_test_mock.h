@@ -36,6 +36,7 @@ public:
     virtual int32_t TransTdcAddSessionConn(SessionConn *conn) = 0;
     virtual int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock) = 0;
     virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
 };
 
 class TransTcpDirectWifiInterfaceMock : public TransTcpDirectWifiInterface {
@@ -51,6 +52,7 @@ public:
     MOCK_METHOD1(TransTdcAddSessionConn, int32_t (SessionConn *conn));
     MOCK_METHOD3(ConnOpenClientSocket, int32_t (const ConnectOption *option, const char *bindAddr, bool isNonBlock));
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_WIFI_TEST_MOCK_H
