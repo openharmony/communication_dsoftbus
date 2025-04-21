@@ -90,7 +90,7 @@ public:
     virtual void DelDupAuthManager(AuthManager *auth) = 0;
     virtual void DelUserKeyByNetworkId(char *networkId) = 0;
     virtual void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event) = 0;
-    virtual bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer) = 0;
+    virtual bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
