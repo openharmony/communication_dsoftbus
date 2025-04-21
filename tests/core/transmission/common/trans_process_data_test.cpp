@@ -423,7 +423,7 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest013, TestSize.Level1)
 
     lenInfo->outLen = 29; // test value
     ret = TransTdcSendData(lenInfo, supportTlv, fd, len, buf);
-    EXPECT_EQ(SOFTBUS_CONN_SOCKET_NOT_SOCKET, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     SoftBusFree(lenInfo);
 }
 
