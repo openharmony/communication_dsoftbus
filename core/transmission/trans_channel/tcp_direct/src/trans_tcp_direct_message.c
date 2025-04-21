@@ -1394,6 +1394,9 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
     }
     ret = SetAuthHandleByChanId(channelId, &authHandle);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "srv process recv data: set authId fail.");
+    if ((pktHead->module == MODULE_UK_ENCYSESSION) && (pktHead->dataLen <= sizeof(UkIdInfo))) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t dataLen =
         pktHead->module == MODULE_UK_ENCYSESSION ? pktHead->dataLen - sizeof(UkIdInfo) : pktHead->dataLen;
     uint32_t decDataLen = AuthGetDecryptSize(dataLen) + 1;
