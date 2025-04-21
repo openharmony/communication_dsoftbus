@@ -174,6 +174,23 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
     return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
 }
 
+static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
+{
+    int32_t ret = TransProxyResetPeer(chan);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "reset to peer msg send failed.");
+        SOFTBUS_TRANS_PROXYCHANNEL_SEND_RESET_FAILED;
+    }
+    if (TransDecConnRefByConnId(chan->connId, chan->isServer) == SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
+            !chan->isServer, chan->connId, chan->deviceTypelsWinpc);
+        // only client side can disconnect connection
+        if (((!chan->isServer) || ret != SOFTBUS_OK) && (!chan->deviceTypelsWinpc)) {
+            (void)ConnDisconnectDevice(chan->connId);
+        }
+    }
+    return SOFTBUS_OK;
+}
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
@@ -211,7 +228,7 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
         case LOOP_RESETPEER_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
             TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_RESETPEER_MSG, chan is null");
-            TransProxyResetPeer(chan);
+            TransProxyResetAndCloseConn(chan);
             break;
         case LOOP_AUTHSTATECHECK_MSG: {
             uint32_t authRequestId = (uint32_t)msg->arg1;

@@ -407,23 +407,6 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCod
     }
 }
 
-static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
-{
-    uint32_t connId = info->connId;
-    bool isServer = (bool)info->isServer;
-    ProxyChannelInfo *disChanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (disChanInfo != NULL) {
-        if (memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), info, sizeof(ProxyChannelInfo)) != EOK) {
-            SoftBusFree(disChanInfo);
-            SoftBusFree((void *)info);
-            TRANS_LOGE(TRANS_SVC, "memcpy info to disChanInfo failed");
-            return;
-        }
-    }
-    TransProxyPostResetPeerMsgToLoop(info);
-    TransProxyPostDisConnectMsgToLoop(connId, isServer, disChanInfo);
-}
-
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
     TRANS_CHECK_AND_RETURN_LOGE(!IsListEmpty(proxyChannelList), TRANS_CTRL, "proxyChannelList is empty");
@@ -1966,7 +1949,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         TransProxyUpdateBlePriority(channelId, info->connId, BLE_PRIORITY_BALANCED);
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    TransProxyCloseProxyOtherRes(channelId, info);
+    TransProxyPostResetPeerMsgToLoop(info);
     return SOFTBUS_OK;
 }
 
