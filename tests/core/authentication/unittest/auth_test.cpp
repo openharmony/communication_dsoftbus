@@ -717,10 +717,10 @@ HWTEST_F(AuthTest, AUTH_OPRN_CHANNEL_Test_001, TestSize.Level1)
     int32_t port = 1;
     int32_t ret;
 
-    ret = AuthOpenChannel(nullptr, port);
+    ret = AuthOpenChannel(nullptr, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
     port = 0;
-    ret = AuthOpenChannel(ip, port);
+    ret = AuthOpenChannel(ip, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 
@@ -2026,9 +2026,9 @@ HWTEST_F(AuthTest, AUTH_OPEN_CHANNEL_Test_001, TestSize.Level1)
     char *ip = nullptr;
     char ipValue[32] = "0";
     int32_t port = 22;
-    int32_t ret = AuthOpenChannel(ip, port);
+    int32_t ret = AuthOpenChannel(ip, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
-    ret = AuthOpenChannel(ipValue, port);
+    ret = AuthOpenChannel(ipValue, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 

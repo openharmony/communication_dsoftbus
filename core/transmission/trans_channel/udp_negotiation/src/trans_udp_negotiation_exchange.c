@@ -39,7 +39,7 @@ typedef enum {
 
 static inline CodeType getCodeType(const AppInfo *appInfo)
 {
-    return ((appInfo->udpConnType == UDP_CONN_TYPE_P2P) &&
+    return ((appInfo->udpConnType == UDP_CONN_TYPE_P2P || appInfo->udpConnType == UDP_CONN_TYPE_USB) &&
         CompareSessionName(ISHARE_SESSION_NAME, appInfo->myData.sessionName) &&
         (CompareSessionName(ISHARE_SESSION_NAME, appInfo->peerData.sessionName))) ?
         CODE_FILE_TRANS_UDP : CODE_EXCHANGE_UDP_INFO;

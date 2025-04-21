@@ -1695,6 +1695,19 @@ static int32_t SetHmlConnectInfo(const P2pConnInfo *p2pInfo, ConnectOption *conn
     return SOFTBUS_OK;
 }
 
+static int32_t SetUsbConnInfo(const UsbConnInfo *connInfo, ConnectOption *connOpt)
+{
+    connOpt->type = CONNECT_TCP;
+    connOpt->socketOption.port = (int32_t)connInfo->port;
+    connOpt->socketOption.protocol = connInfo->protocol;
+    connOpt->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), connInfo->addr) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "set usb localIp err");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
@@ -1715,6 +1728,8 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         return SetBleDirectConnInfo(&(info->connInfo.bleDirect), connOpt);
     } else if (info->type == LANE_HML) {
         return SetHmlConnectInfo(&(info->connInfo.p2p), connOpt);
+    } else if (info->type == LANE_USB) {
+        return SetUsbConnInfo(&(info->connInfo.usb), connOpt);
     }
 
     TRANS_LOGE(TRANS_SVC, "get conn opt err: type=%{public}d", info->type);

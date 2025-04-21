@@ -133,7 +133,7 @@ static int SetRecvBuf(int fd)
     return -1;
 }
 
-static void SetServerOption(int fd)
+void SetServerOption(int fd)
 {
     (void)SetReuseAddr(fd, 1);
     (void)SetNoDelay(fd, 1);
@@ -145,7 +145,7 @@ static void SetServerOption(int fd)
     (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
 
-static void SetClientOption(int fd)
+void SetClientOption(int fd)
 {
     SetReuseAddr(fd, 1);
     SetNoDelay(fd, 1);
@@ -158,7 +158,7 @@ static void SetClientOption(int fd)
     (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
 
-static int BindLocalIP(int32_t domain, int fd, const char *localIP, uint16_t port)
+int BindLocalIP(int32_t domain, int fd, const char *localIP, uint16_t port)
 {
     int rc = SOFTBUS_ADAPTER_OK;
     if (domain == SOFTBUS_AF_INET6) {
@@ -232,7 +232,7 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     return fd;
 }
 
-static int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr)
+int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr)
 {
     if (inputAddr == NULL) {
         return SOFTBUS_OK;
@@ -252,7 +252,7 @@ static int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr)
     return BindLocalIP(domain, fd, bindAddr, 0);
 }
 
-static int32_t SocketConnect(int32_t fd, int32_t domain, const ConnectOption *option)
+int32_t SocketConnect(int32_t fd, int32_t domain, const ConnectOption *option)
 {
     int rc = SOFTBUS_ADAPTER_OK;
     if (domain == SOFTBUS_AF_INET6) {
@@ -331,7 +331,7 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     return fd;
 }
 
-static int32_t GetTcpSockPort(int32_t fd)
+int32_t GetTcpSockPort(int32_t fd)
 {
     SoftBusSockAddr addr;
     int rc = SoftBusSocketGetLocalName(fd, &addr);

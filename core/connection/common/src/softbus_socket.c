@@ -26,6 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_usb_tcp_socket.h"
 #include "softbus_watch_event_interface.h"
 
 #define HML_IPV4_ADDR_PREFIX "172.30."
@@ -76,6 +77,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
     const SocketInterface *result = NULL;
     for (uint8_t i = 0; i < MAX_SOCKET_TYPE; i++) {
         if (g_socketInterfaces[i] != NULL && g_socketInterfaces[i]->type == protocolType) {
+            CONN_LOGI(CONN_COMMON, "protocolType=%{public}d", protocolType);
             result = g_socketInterfaces[i];
             break;
         }
@@ -114,6 +116,14 @@ int32_t ConnInitSockets(void)
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
+
+    ret = RegistSocketProtocol(GetUsbProtocol());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "regist usb failed!! ret=%{public}" PRId32, ret);
+        (void)SoftBusMutexDestroy(&g_socketsMutex);
+        return ret;
+    }
+    CONN_LOGD(CONN_INIT, "usb registed!");
 
     return ret;
 }
@@ -274,6 +284,36 @@ int32_t ConnGetLocalSocketPort(int32_t fd)
         return SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR;
     }
     return socketInterface->GetSockPort(fd);
+}
+
+int32_t ConnGetPeerSocketAddr6(int32_t fd, SocketAddr *socketAddr)
+{
+    SoftBusSockAddr addr;
+    if (socketAddr == NULL) {
+        CONN_LOGW(CONN_COMMON, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int rc = SoftBusSocketGetPeerName(fd, &addr);
+    if (rc != 0) {
+        CONN_LOGE(CONN_COMMON, "GetPeerName fd=%{public}d, rc=%{public}d", fd, rc);
+        return SOFTBUS_TCP_SOCKET_ERR;
+    }
+    if (addr.saFamily == SOFTBUS_AF_INET6) {
+        if (SoftBusInetNtoP(SOFTBUS_AF_INET6, (void *)&((SoftBusSockAddrIn6 *)&addr)->sin6Addr,
+            socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
+            CONN_LOGE(CONN_COMMON, "Get ipv6 fail. fd=%{public}d", fd);
+            return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+        }
+        socketAddr->port = SoftBusNtoHs(((SoftBusSockAddrIn6 *)&addr)->sin6Port);
+        return SOFTBUS_OK;
+    }
+    socketAddr->port = SoftBusNtoHs(((SoftBusSockAddrIn *)&addr)->sinPort);
+    if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&((SoftBusSockAddrIn *)&addr)->sinAddr,
+        socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
+        CONN_LOGE(CONN_COMMON, "InetNtoP fail. fd=%{public}d", fd);
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)

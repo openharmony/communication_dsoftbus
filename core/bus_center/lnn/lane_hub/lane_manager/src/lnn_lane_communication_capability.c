@@ -423,6 +423,39 @@ static int32_t CocDynamicCommCapa(const char *networkId)
     return SOFTBUS_OK;
 }
 
+static int32_t UsbStaticCommCapa(const char *networkId)
+{
+    bool localUsbEnable = false;
+    bool remoteUsbEnable = false;
+    int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_USB, &localUsbEnable, &remoteUsbEnable);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "check static net cap fail, ret=%{public}d", ret);
+        return ret;
+    }
+    if (!localUsbEnable) {
+        return SOFTBUS_LANE_LOCAL_NO_USB_STATIC_CAP;
+    }
+    if (!remoteUsbEnable) {
+        return SOFTBUS_LANE_REMOTE_NO_USB_STATIC_CAP;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UsbDynamicCommCapa(const char *networkId)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote node info fail");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_USB)) {
+        LNN_LOGE(LNN_LANE, "peer node not USB online");
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
+    }
+    return SOFTBUS_OK;
+}
+
 static LaneCommCapa g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = {BrStaticCommCapa, BrDynamicCommCapa, BIT_BR },
     [LANE_BLE] = {BleStaticCommCapa, BleDynamicCommCapa, BIT_BLE},
@@ -436,6 +469,7 @@ static LaneCommCapa g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_BLE_REUSE] = {BleStaticCommCapa, BleDynamicCommCapa, BIT_BLE},
     [LANE_COC] = {CocStaticCommCapa, CocDynamicCommCapa, BIT_BLE},
     [LANE_COC_DIRECT] = {CocStaticCommCapa, CocDynamicCommCapa, BIT_BLE},
+    [LANE_USB] = {UsbStaticCommCapa, UsbDynamicCommCapa, BIT_USB},
 };
 
 static LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType)
