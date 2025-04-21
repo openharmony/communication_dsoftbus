@@ -182,9 +182,9 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
     }
     if (TransDecConnRefByConnId(chan->connId, chan->isServer) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
-            !chan->isServer, chan->connId, chan->deviceTypelsWinpc);
+            !chan->isServer, chan->connId, chan->deviceTypeIsWinpc);
         // only client side can disconnect connection
-        if (((!chan->isServer) || ret != SOFTBUS_OK) && (!chan->deviceTypelsWinpc)) {
+        if (((!chan->isServer) || ret != SOFTBUS_OK) && (!chan->deviceTypeIsWinpc)) {
             (void)ConnDisconnectDevice(chan->connId);
         }
     }
