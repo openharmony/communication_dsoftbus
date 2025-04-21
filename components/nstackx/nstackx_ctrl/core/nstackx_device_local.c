@@ -632,9 +632,9 @@ int32_t SetLocalDeviceServiceDataV2(const struct NSTACKX_ServiceData *param, uin
     for (i = 0; i < cnt; i++) {
         union InetAddr addr;
         uint8_t af = InetGetAfType(param[i].ip, &addr);
-        ret = UpdateLocalDeviceServiceDataV2(af, &(param[i]));
-        if (ret != NSTACKX_EOK) {
-            break;
+        if (UpdateLocalDeviceServiceDataV2(af, &(param[i])) == NSTACKX_EOK) {
+            DFINDER_LOGI(TAG, "update local device serviceData by param[%u]", i);
+            ret = NSTACKX_EOK;
         }
     }
     if (PthreadMutexUnlock(&g_serviceDataLock) != 0) {
