@@ -117,7 +117,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterDeInit001, TestSize.Level1)
  */
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread001, TestSize.Level1)
 {
-    DiscCoapModifyNstackThread(LINK_STATUS_DOWN);
+    DiscCoapModifyNstackThread(LINK_STATUS_DOWN, 0);
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
@@ -130,7 +130,8 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread001, TestSize.Lev
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
 
-    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    DiscCoapRecordLinkStatus(LINK_STATUS_UP, 0);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP, 0);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -145,7 +146,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread001, TestSize.Lev
  */
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread002, TestSize.Level1)
 {
-    DiscCoapModifyNstackThread(LINK_STATUS_DOWN);
+    DiscCoapModifyNstackThread(LINK_STATUS_DOWN, 0);
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
@@ -158,7 +159,8 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread002, TestSize.Lev
     ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
     EXPECT_EQ(ret, NSTACKX_EFAILED);
 
-    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    DiscCoapRecordLinkStatus(LINK_STATUS_UP, 0);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP, 0);
     ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -254,6 +256,10 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
     };
     ret = DiscCoapRegisterServiceData(&option, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapRecordLinkStatus(LINK_STATUS_UP, 0);
+    ret = DiscCoapRegisterServiceData(&option, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
@@ -293,7 +299,8 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
-    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    DiscCoapRecordLinkStatus(LINK_STATUS_UP, 0);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP, 0);
 
     DiscCoapOption testCoapOption = {
         .freq = LOW,
@@ -311,13 +318,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level
 
     testCoapOption.mode = ACTIVE_PUBLISH;
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testCoapOption.mode = ACTIVE_DISCOVERY;
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -337,38 +344,39 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
-    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    DiscCoapRecordLinkStatus(LINK_STATUS_UP, 0);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP, 0);
 
     DiscCoapOption testOption = { 0 };
     testOption.freq = LOW;
     testOption.mode = ACTIVE_PUBLISH;
 
     ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = MID;
     ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = HIGH;
     ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = SUPER_HIGH;
     ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = EXTREME_HIGH;
     ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -401,16 +409,16 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterUpdate001, TestSize.Level1)
         .freq = LOW,
         .mode = ACTIVE_DISCOVERY
     };
-    DiscCoapUpdateLocalIp(LINK_STATUS_UP);
+    DiscCoapUpdateLocalIp(LINK_STATUS_UP, 0);
     DiscCoapUpdateDevName();
     ret = DiscCoapStartDiscovery(&testCoapOption);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 
-    DiscCoapUpdateLocalIp(LINK_STATUS_DOWN);
+    DiscCoapUpdateLocalIp(LINK_STATUS_DOWN, 0);
     ret = DiscCoapStartDiscovery(&testCoapOption);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 
-    DiscCoapUpdateLocalIp((LinkStatus)(-1));
+    DiscCoapUpdateLocalIp((LinkStatus)(-1), 0);
     ret = DiscCoapStartDiscovery(&testCoapOption);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 }
@@ -578,7 +586,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Le
     int32_t ret = DiscNstackxInit();
     LnnInitLocalLedger();
     ASSERT_EQ(ret, SOFTBUS_OK);
-    
+
     NSTACKX_DeviceInfo testNstackxDevice;
     DeviceInfo testDiscDevInfo;
     testNstackxDevice.mode = PUBLISH_MODE_PROACTIVE;
@@ -586,6 +594,16 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Le
     EXPECT_EQ(ret, EOK);
     ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
     EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_WLAN);
+
+    ret = strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "ncm0");
+    EXPECT_EQ(ret, EOK);
+    ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
+    EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_NCM);
+
+    ret = strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "wwan0");
+    EXPECT_EQ(ret, EOK);
+    ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
+    EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_NCM);
 
     ret = strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "eth");
     EXPECT_EQ(ret, EOK);
@@ -684,9 +702,11 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Leve
  */
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
 {
+    LnnDeinitLocalLedger();
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
-    DiscCoapModifyNstackThread(LINK_STATUS_UP);
+    DiscCoapRecordLinkStatus(LINK_STATUS_UP, 0);
+    DiscCoapModifyNstackThread(LINK_STATUS_UP, 0);
 
     DeviceInfo testDiscDevInfo {
         .devId = "test",

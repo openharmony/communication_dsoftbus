@@ -147,12 +147,12 @@ static int32_t BleDispatchStopPassiveDiscovery(const SubscribeOption *option)
     return BleDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
-static void BleDispatchLinkStatusChanged(LinkStatus status)
+static void BleDispatchLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&
             g_dispatchers[i]->mediumInterface->LinkStatusChanged != NULL) {
-            g_dispatchers[i]->mediumInterface->LinkStatusChanged(status);
+            g_dispatchers[i]->mediumInterface->LinkStatusChanged(status, ifnameIdx);
         }
     }
 }
