@@ -99,6 +99,7 @@ int32_t AddAuthGenCertParaNode(int32_t requestId)
 
     item->requestId = requestId;
     item->isValid = false;
+    item->softbusCertChain = NULL;
     atomic_store_explicit(&item->isParallelGen, 1, memory_order_release);
     if (AuthGenCertParallelLock() != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth generate certificate parallel lock fail");
@@ -140,6 +141,8 @@ int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isParallelGen, bool is
     AUTH_CHECK_AND_RETURN_RET_LOGE(softbusCertChain != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "CertChain is NULL");
     if (AuthGenCertParallelLock() != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth generate certificate parallel lock fail");
+        FreeSoftbusChain(softbusCertChain);
+        SoftBusFree(softbusCertChain);
         return SOFTBUS_LOCK_ERR;
     }
     AuthGenCertNode *item = NULL;
@@ -156,6 +159,8 @@ int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isParallelGen, bool is
             return SOFTBUS_OK;
         }
     }
+    FreeSoftbusChain(softbusCertChain);
+    SoftBusFree(softbusCertChain);
     AuthGenCertParallelUnLock();
     return SOFTBUS_NOT_FIND;
 }
@@ -168,6 +173,11 @@ int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **
     ret = FindAuthGenCertParaNodeById(requestId, genCertParaNode);
     if (ret != SOFTBUS_OK) {
         return ret;
+    }
+    if ((*genCertParaNode)->softbusCertChain == NULL) {
+        DelAuthGenCertParaNodeById(requestId);
+        *genCertParaNode = NULL;
+        return SOFTBUS_AUTH_TIMEOUT;
     }
     while (((*genCertParaNode)->isParallelGen) && totalSleepMs < AUTH_GEN_CERT_PARA_EXPIRE_TIME) {
         SoftBusSleepMs(AUTH_GEN_CERT_PARA_TIME);
