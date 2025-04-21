@@ -1,5 +1,5 @@
- /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+/*
+ * Copyright (C) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,38 @@
  * limitations under the License.
  */
 
-#ifndef LNN_IP_UTILS_ADAPTER_H
-#define LNN_IP_UTILS_ADAPTER_H
+#ifndef NSTACKX_INET_H
+#define NSTACKX_INET_H
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-#include <securec.h>
+#include <arpa/inet.h>
+#include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
+#include <netinet/in.h>
+#include <netinet/ip6.h>
+#include <unistd.h>
 
-#include "softbus_def.h"
-#include "softbus_error_code.h"
+#define AF_ERROR 255
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len);
-int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len);
-bool GetLinkUpStateByIfName(const char *ifName);
+union InetAddr {
+    struct in_addr in;
+    struct in6_addr in6;
+};
+uint8_t InetGetAfType(const char *ipStr, union InetAddr *addr);
 
+bool InetEqual(uint8_t af, const union InetAddr *a, const union InetAddr *b);
+
+bool InetEqualZero(uint8_t af, const union InetAddr *a);
+
+bool InetEqualNone(uint8_t af, const union InetAddr *a);
+
+bool InetEqualLoop(uint8_t af, const char *ip);
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_IP_UTILS_ADAPTER_H
+
+#endif

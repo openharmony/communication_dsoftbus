@@ -229,7 +229,8 @@ static int32_t CoapSendMessageEx(const CoapBuildParam *param, uint8_t isBroadcas
     sndPktBuff.size = COAP_MAX_PDU_SIZE;
     sndPktBuff.len = 0;
     if (!isAckMsg) {
-        payload = PrepareServiceDiscover(GetLocalIfaceIpStr(g_coapCtx.iface), isBroadcast, businessType);
+        payload = PrepareServiceDiscover(AF_INET, GetLocalIfaceIpStr(g_coapCtx.iface), isBroadcast, businessType,
+            DEFAULT_AUTH_PORT);
         if (payload == NULL) {
             free(sndPktBuff.readWriteBuf);
             DFINDER_LOGE(TAG, "prepare payload data failed");
@@ -352,8 +353,13 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
     return fd;
 }
 
-CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface)
+CoapCtxType *CoapServerInit(uint8_t af, const union InetAddr *ip, void *iface)
 {
+    (void)ip;
+    if (af != AF_INET) {
+        DFINDER_LOGE(TAG, "only support ipv4");
+        return NULL;
+    }
     if (g_coapCtx.inited) {
         return &g_coapCtx;
     }

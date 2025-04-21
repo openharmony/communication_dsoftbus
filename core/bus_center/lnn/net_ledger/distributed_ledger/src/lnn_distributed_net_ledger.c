@@ -213,34 +213,49 @@ static void NewWifiDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
     }
 }
 
-static void NewBrBleDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
+static void UpdateNodeIpInfo(const NodeInfo *oldInfo, NodeInfo *newInfo, int32_t ifnameIdx)
 {
+    if (oldInfo == NULL || newInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error!");
+        return;
+    }
     const char *ipAddr = NULL;
+    ipAddr = LnnGetWiFiIp(newInfo, ifnameIdx);
+    if (ipAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetWiFiIp Fail %{public}d!", ifnameIdx);
+        return;
+    }
+    if (strcmp(ipAddr, DEFAULT_IP) == 0 || strcmp(ipAddr, LOCAL_IP) == 0 || strcmp(ipAddr, LOCAL_IPV6_STR) == 0) {
+        LnnSetWiFiIp(newInfo, LnnGetWiFiIp(oldInfo, ifnameIdx), ifnameIdx);
+    }
+    newInfo->connectInfo.ifInfo[ifnameIdx].authPort = oldInfo->connectInfo.ifInfo[ifnameIdx].authPort;
+    newInfo->connectInfo.ifInfo[ifnameIdx].proxyPort = oldInfo->connectInfo.ifInfo[ifnameIdx].proxyPort;
+    newInfo->connectInfo.ifInfo[ifnameIdx].sessionPort = oldInfo->connectInfo.ifInfo[ifnameIdx].sessionPort;
+    if (ifnameIdx == WLAN_IF) {
+        (void)LnnSetNetCapability(&newInfo->netCapacity, BIT_WIFI);
+        (void)LnnSetNetCapability(&newInfo->netCapacity, BIT_WIFI_P2P);
+        if ((oldInfo->netCapacity & (1 << BIT_WIFI_5G)) != 0) {
+            (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_WIFI_5G);
+        }
+        if ((oldInfo->netCapacity & (1 << BIT_WIFI_24G)) != 0) {
+            (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_WIFI_24G);
+        }
+    } else if (ifnameIdx == USB_IF) {
+        if ((oldInfo->netCapacity & (1 << BIT_USB)) != 0) {
+            (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_USB);
+        }
+    }
+}
+
+static void NeedUpdateIpPortInfo(const NodeInfo *oldInfo, NodeInfo *newInfo)
+{
     if (oldInfo == NULL || newInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error!");
         return;
     }
     newInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
-    ipAddr = LnnGetWiFiIp(newInfo);
-    if (ipAddr == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetWiFiIp Fail!");
-        return;
-    }
-    if (strcmp(ipAddr, DEFAULT_IP) == 0 || strcmp(ipAddr, LOCAL_IP) == 0) {
-        LnnSetWiFiIp(newInfo, LnnGetWiFiIp(oldInfo));
-    }
-
-    newInfo->connectInfo.authPort = oldInfo->connectInfo.authPort;
-    newInfo->connectInfo.proxyPort = oldInfo->connectInfo.proxyPort;
-    newInfo->connectInfo.sessionPort = oldInfo->connectInfo.sessionPort;
-    (void)LnnSetNetCapability(&newInfo->netCapacity, BIT_WIFI);
-    (void)LnnSetNetCapability(&newInfo->netCapacity, BIT_WIFI_P2P);
-    if ((oldInfo->netCapacity & (1 << BIT_WIFI_5G)) != 0) {
-        (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_WIFI_5G);
-    }
-    if ((oldInfo->netCapacity & (1 << BIT_WIFI_24G)) != 0) {
-        (void)LnnSetNetCapability(&(newInfo->netCapacity), BIT_WIFI_24G);
-    }
+    UpdateNodeIpInfo(oldInfo, newInfo, WLAN_IF);
+    UpdateNodeIpInfo(oldInfo, newInfo, USB_IF);
 }
 
 static void RetainOfflineCode(const NodeInfo *oldInfo, NodeInfo *newInfo)
@@ -466,7 +481,11 @@ static NodeInfo *LnnGetNodeInfoByDeviceId(const char *id)
             LnnMapDeinitIterator(it);
             return info;
         }
-        if (strcmp(info->connectInfo.deviceIp, id) == 0) {
+        if (strcmp(info->connectInfo.ifInfo[WLAN_IF].deviceIp, id) == 0) {
+            LnnMapDeinitIterator(it);
+            return info;
+        }
+        if (strcmp(info->connectInfo.ifInfo[USB_IF].deviceIp, id) == 0) {
             LnnMapDeinitIterator(it);
             return info;
         }
@@ -773,9 +792,15 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
     }
     if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
         oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
-        oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
-        oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
-        oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
+        oldInfo->connectInfo.ifInfo[WLAN_IF].authPort = newInfo->connectInfo.ifInfo[WLAN_IF].authPort;
+        oldInfo->connectInfo.ifInfo[WLAN_IF].proxyPort = newInfo->connectInfo.ifInfo[WLAN_IF].proxyPort;
+        oldInfo->connectInfo.ifInfo[WLAN_IF].sessionPort = newInfo->connectInfo.ifInfo[WLAN_IF].sessionPort;
+    }
+    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_USB)) {
+        oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
+        oldInfo->connectInfo.ifInfo[USB_IF].authPort = newInfo->connectInfo.ifInfo[USB_IF].authPort;
+        oldInfo->connectInfo.ifInfo[USB_IF].proxyPort = newInfo->connectInfo.ifInfo[USB_IF].proxyPort;
+        oldInfo->connectInfo.ifInfo[USB_IF].sessionPort = newInfo->connectInfo.ifInfo[USB_IF].sessionPort;
     }
     if (deviceName != NULL) {
         if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK) {
@@ -906,11 +931,12 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
         LNN_LOGI(LNN_LEDGER, "old capa=%{public}u new capa=%{public}u", oldInfo->netCapacity, info->netCapacity);
-        oldInfo->connectInfo.sessionPort = info->connectInfo.sessionPort;
-        oldInfo->connectInfo.authPort = info->connectInfo.authPort;
-        oldInfo->connectInfo.proxyPort = info->connectInfo.proxyPort;
+        oldInfo->connectInfo.ifInfo[WLAN_IF].sessionPort = info->connectInfo.ifInfo[WLAN_IF].sessionPort;
+        oldInfo->connectInfo.ifInfo[WLAN_IF].authPort = info->connectInfo.ifInfo[WLAN_IF].authPort;
+        oldInfo->connectInfo.ifInfo[WLAN_IF].proxyPort = info->connectInfo.ifInfo[WLAN_IF].proxyPort;
         oldInfo->netCapacity = info->netCapacity;
-        if (strcpy_s(oldInfo->connectInfo.deviceIp, IP_LEN, info->connectInfo.deviceIp) != EOK) {
+        if (strcpy_s(oldInfo->connectInfo.ifInfo[WLAN_IF].deviceIp, IP_LEN,
+            info->connectInfo.ifInfo[WLAN_IF].deviceIp) != EOK) {
             LNN_LOGE(LNN_LEDGER, "strcpy ip fail!");
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             return SOFTBUS_STRCPY_ERR;
@@ -1042,6 +1068,13 @@ static void FilterWifiInfo(NodeInfo *info)
     info->authChannelId[CONNECTION_ADDR_WLAN][AUTH_AS_SERVER_SIDE] = 0;
 }
 
+static void FilterUsbInfo(NodeInfo *info)
+{
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_USB);
+    info->authChannelId[CONNECTION_ADDR_NCM][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[CONNECTION_ADDR_NCM][AUTH_AS_SERVER_SIDE] = 0;
+}
+
 static void FilterBrInfo(NodeInfo *info)
 {
     (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_BR);
@@ -1160,6 +1193,9 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
         FilterWifiInfo(info);
     }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_USB)) {
+        FilterUsbInfo(info);
+    }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         FilterBrInfo(info);
     }
@@ -1182,18 +1218,28 @@ static void NodeOnlineProc(NodeInfo *info)
     BleDirectlyOnlineProc(&nodeInfo);
 }
 
-static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbility *infoAbility)
+static void InitInfoAbility(NodeInfo *info, NodeInfoAbility *infoAbility)
 {
+    if (infoAbility == NULL) {
+        return;
+    }
     infoAbility->isOffline = true;
     infoAbility->oldWifiFlag = false;
+    infoAbility->oldUsbFlag = false;
     infoAbility->oldBrFlag = false;
     infoAbility->oldBleFlag = false;
     infoAbility->isChanged = false;
     infoAbility->isMigrateEvent = false;
     infoAbility->isNetworkChanged = false;
     infoAbility->newWifiFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI);
+    infoAbility->newUsbFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_USB);
     infoAbility->newBleBrFlag =
         LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR);
+}
+
+static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbility *infoAbility)
+{
+    InitInfoAbility(info, infoAbility);
     if (oldInfo != NULL) {
         info->metaInfo = oldInfo->metaInfo;
     }
@@ -1205,14 +1251,17 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         infoAbility->isOffline = false;
         infoAbility->isChanged = IsNetworkIdChanged(info, oldInfo);
         infoAbility->oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
+        infoAbility->oldUsbFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_USB);
         infoAbility->oldBleFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE);
         infoAbility->oldBrFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BR);
-        if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && infoAbility->newWifiFlag) {
+        if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) &&
+            (infoAbility->newWifiFlag || infoAbility->newUsbFlag)) {
             NewWifiDiscovered(oldInfo, info);
             infoAbility->isNetworkChanged = true;
-        } else if (infoAbility->oldWifiFlag && infoAbility->newBleBrFlag) {
+        } else if ((infoAbility->oldWifiFlag || infoAbility->oldUsbFlag) &&
+            (infoAbility->newBleBrFlag || infoAbility->newWifiFlag || infoAbility->newUsbFlag)) {
             RetainOfflineCode(oldInfo, info);
-            NewBrBleDiscovered(oldInfo, info);
+            NeedUpdateIpPortInfo(oldInfo, info);
             infoAbility->isNetworkChanged = true;
         } else {
             RetainOfflineCode(oldInfo, info);
@@ -1494,7 +1543,8 @@ static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type
     if ((LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) ||
         (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BLE) ||
         (LnnHasDiscoveryType(info, DISCOVERY_TYPE_SESSION_KEY) &&
-        LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_SESSION_KEY)) {
+        LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_SESSION_KEY) ||
+        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_USB) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_USB)) {
         if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] == authId) {
             info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
         }
@@ -1512,6 +1562,21 @@ static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type
     info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
     info->authChannelId[type][AUTH_AS_SERVER_SIDE] = 0;
     return REPORT_OFFLINE;
+}
+
+static void LnnClearIpInfo(NodeInfo *info, ConnectionAddrType type)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "info is null");
+        return;
+    }
+    if (LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
+        LnnSetWiFiIp(info, LOCAL_IP, WLAN_IF);
+    }
+    if (LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_USB) {
+        LnnSetWiFiIp(info, LOCAL_IPV6_STR, USB_IF);
+    }
+    LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
 }
 
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
@@ -1539,10 +1604,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
-    if (LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
-        LnnSetWiFiIp(info, LOCAL_IP);
-    }
-    LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
+    LnnClearIpInfo(info, type);
     if (info->discoveryType != 0) {
         LNN_LOGI(LNN_LEDGER, "after clear, not need to report offline. discoveryType=%{public}u", info->discoveryType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);

@@ -202,7 +202,7 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_001, TestSize.Le
 
     EXPECT_TRUE(SetIpaddr(ip) == SOFTBUS_OK);
     sleep(2);
-    EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, ipAddr, IP_LEN, WLAN_IF) == SOFTBUS_OK);
     EXPECT_TRUE(strncmp(ipAddr, ip, IP_LEN) == 0);
 }
 
@@ -218,7 +218,7 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_002, TestSize.Le
     char ip[IP_LEN] = "0.0.0.0";
     EXPECT_TRUE(SetIpaddr(ip) == SOFTBUS_OK);
     sleep(2);
-    EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, ipAddr, IP_LEN, WLAN_IF) == SOFTBUS_OK);
     EXPECT_TRUE(strncmp(ipAddr, "127.0.0.1", IP_LEN) == 0);
 }
 
@@ -233,7 +233,7 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_003, TestSize.Le
     char ipAddr[IP_LEN] = { 0 };
     EXPECT_TRUE(SetIpDown() == SOFTBUS_OK);
     sleep(2);
-    EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, ipAddr, IP_LEN, WLAN_IF) == SOFTBUS_OK);
     EXPECT_TRUE(strncmp(ipAddr, "127.0.0.1", IP_LEN) == 0);
 }
 } // namespace OHOS

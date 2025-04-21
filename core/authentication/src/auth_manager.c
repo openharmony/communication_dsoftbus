@@ -550,6 +550,19 @@ static int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
     return authId;
 }
 
+static bool IsAuthNoNeedDisconnect(const AuthManager *auth, const AuthSessionInfo *info)
+{
+    if (auth == NULL || info == NULL) {
+        return false;
+    }
+    AuthLinkType type = info->connInfo.type;
+    if ((type == AUTH_LINK_TYPE_WIFI || type == AUTH_LINK_TYPE_USB) &&
+        info->connInfo.info.ipInfo.port != auth->connInfo[type].info.ipInfo.port) {
+        return true;
+    }
+    return false;
+}
+
 int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOut)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, AUTH_INVALID_ID, AUTH_CONN, "info is null");
@@ -655,7 +668,8 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
             AUTH_LOGE(AUTH_FSM, "str copy uuid fail");
         }
         if (auth->connId[info->connInfo.type] != info->connId &&
-            auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI) {
+            (auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI ||
+            auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_USB)) {
             AuthFsm *fsm = GetAuthFsmByConnId(auth->connId[info->connInfo.type], info->isServer, false);
             DisconnectAuthDevice(&auth->connId[info->connInfo.type]);
             if (fsm != NULL) {
@@ -735,6 +749,49 @@ static int32_t AuthProcessEmptySessionKey(const AuthSessionInfo *info, int32_t i
     return SOFTBUS_OK;
 }
 
+static void UpdateSessionKeyScheduled(AuthManager *auth, AuthSessionInfo *info)
+{
+    AUTH_CHECK_AND_RETURN_LOGE(auth != NULL, AUTH_FSM, "auth is null");
+    AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
+    AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
+    AuthLinkType type = auth->connInfo[info->connInfo.type].type;
+    if ((type== AUTH_LINK_TYPE_WIFI || type == AUTH_LINK_TYPE_USB) && !auth->isServer) {
+        ScheduleUpdateSessionKey(authHandle, SCHEDULE_UPDATE_SESSION_KEY_PERIOD);
+    }
+}
+
+bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid uuid param");
+        return false;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_FSM, "require auth lock fail");
+        return false;
+    }
+    bool haveSessionAuth = false;
+    bool haveEnhanceP2pAuth = false;
+    AuthManager *item = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_SESSION_KEY, isServer);
+    if (item == NULL) {
+        ReleaseAuthLock();
+        AUTH_LOGI(AUTH_FSM, "not found session key auth manager");
+        return false;
+    }
+    haveSessionAuth = true;
+    if (item->connInfo[AUTH_LINK_TYPE_ENHANCED_P2P].type == AUTH_LINK_TYPE_ENHANCED_P2P &&
+        item->hasAuthPassed[AUTH_LINK_TYPE_ENHANCED_P2P]) {
+        AUTH_LOGI(AUTH_FSM, "have enhance p2p auth, skip");
+        haveEnhanceP2pAuth = true;
+    }
+    ReleaseAuthLock();
+    if (haveSessionAuth && !haveEnhanceP2pAuth) {
+        AUTH_LOGI(AUTH_FSM, "need add auth");
+        return true;
+    }
+    return false;
+}
+
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect, bool isOldKey)
 {
@@ -771,10 +828,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         ReleaseAuthLock();
         return SOFTBUS_AUTH_SESSION_KEY_PROC_ERR;
     }
-    AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
-    if (auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI && !auth->isServer) {
-        ScheduleUpdateSessionKey(authHandle, SCHEDULE_UPDATE_SESSION_KEY_PERIOD);
-    }
+    UpdateSessionKeyScheduled(auth, info);
     int32_t ret = SOFTBUS_OK;
     if (!isConnect) {
         ret = SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(sessionKeyIndex));
@@ -828,7 +882,7 @@ static void ReportAuthRequestPassed(uint32_t requestId, AuthHandle authHandle, c
         if (CheckAuthConnCallback(&request.connCb)) {
             AuthNotifyDeviceVerifyPassed(authHandle, nodeInfo);
             if (request.connInfo.type == AUTH_LINK_TYPE_WIFI || request.connInfo.type == AUTH_LINK_TYPE_P2P ||
-                request.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P ||
+                request.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P || request.connInfo.type == AUTH_LINK_TYPE_USB ||
                 request.connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
                 PerformAuthConnCallback(request.requestId, SOFTBUS_OK, authHandle.authId);
                 DelAuthRequest(request.requestId);
@@ -919,7 +973,7 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_SESSION &&
-        info->connInfo.type != AUTH_LINK_TYPE_SESSION_KEY) {
+        info->connInfo.type != AUTH_LINK_TYPE_SESSION_KEY && info->connInfo.type != AUTH_LINK_TYPE_USB) {
         PostCancelAuthMessage(authSeq, info);
     }
     if (!info->isConnectServer) {
@@ -1005,7 +1059,8 @@ static void UpdateAuthConnIdSyncWithInfo(const AuthConnInfo *connInfo, uint64_t 
             connInfo->type, GetAuthSideStr(isServer));
         return;
     }
-    if (auth->connId[connInfo->type] == connId &&  GetConnType(connId) == AUTH_LINK_TYPE_WIFI) {
+    if (auth->connId[connInfo->type] == connId &&
+        (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB)) {
         AUTH_LOGI(AUTH_FSM,
             "When conntype is wifi, auth connId sync with connInfo, connId=%{public}" PRIu64, connId);
         UpdateFd(&auth->connId[connInfo->type], AUTH_INVALID_FD);
@@ -1026,8 +1081,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
     }
     bool needDisconnect = true;
-    if (auth != NULL && reason == SOFTBUS_AUTH_TIMEOUT && info->connInfo.type == AUTH_LINK_TYPE_WIFI
-        && info->connInfo.info.ipInfo.port != auth->connInfo[AUTH_LINK_TYPE_WIFI].info.ipInfo.port) {
+    if (reason == SOFTBUS_AUTH_TIMEOUT && IsAuthNoNeedDisconnect(auth, info)) {
         AUTH_LOGE(AUTH_FSM, "auth manager port change, connType=%{public}d, side=%{public}s",
             info->connInfo.type, GetAuthSideStr(info->isServer));
         needDisconnect = false;
@@ -1043,7 +1097,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
     }
     ReportAuthRequestFailed(info->requestId, reason);
-    if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
+    if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI || GetConnType(info->connId) == AUTH_LINK_TYPE_USB) {
         UpdateAuthConnIdSyncWithInfo(&info->connInfo, info->connId, info->isServer);
         DisconnectAuthDevice((uint64_t *)&info->connId);
     } else if (!info->isConnectServer) {
@@ -1423,7 +1477,7 @@ static int32_t PostDecryptFailAuthData(
 static void HandleUkConnectionData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
-    if (AuthGetUkDecryptSize(head->len) < UK_ENCRYPT_INDEX_LEN) {
+    if (AuthGetUkDecryptSize(head->len) <= UK_ENCRYPT_INDEX_LEN) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return;
     }
@@ -1474,7 +1528,7 @@ static void HandleConnectionDataInner(
         AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
         ReleaseAuthLock();
         if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI ||
-            connInfo->type == AUTH_LINK_TYPE_SESSION_KEY) {
+            connInfo->type == AUTH_LINK_TYPE_SESSION_KEY || connInfo->type == AUTH_LINK_TYPE_USB) {
             return;
         }
         (void)PostDecryptFailAuthData(connId, fromServer, head, data);
@@ -1526,6 +1580,10 @@ static void HandleConnectionData(
 static void HandleDecryptFailData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
+    if (head->len < ENCRYPT_INDEX_LEN) {
+        AUTH_LOGE(AUTH_CONN, "data len not enough");
+        return;
+    }
     if (!RequireAuthLock()) {
         return;
     }
@@ -1578,7 +1636,8 @@ static void HandleCancelAuthData(
 
 static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, bool *fromServer)
 {
-    if (connInfo->type != AUTH_LINK_TYPE_WIFI && connInfo->type != AUTH_LINK_TYPE_SESSION_KEY) {
+    if (connInfo->type != AUTH_LINK_TYPE_WIFI && connInfo->type != AUTH_LINK_TYPE_SESSION_KEY &&
+        connInfo->type != AUTH_LINK_TYPE_USB) {
         return;
     }
     uint32_t num = 0;
@@ -1683,7 +1742,8 @@ static void HandleDisconnectedEvent(const void *para)
             g_transCallback.onDisconnected(authHandle);
         }
         if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P ||
-            GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P || GetConnType(connId) == AUTH_LINK_TYPE_SESSION_KEY) {
+            GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P || GetConnType(connId) == AUTH_LINK_TYPE_SESSION_KEY ||
+            GetConnType(connId) == AUTH_LINK_TYPE_USB) {
             AuthNotifyDeviceDisconnect(authHandle);
             DisconnectAuthDevice(&dupConnId);
             AuthManager inAuth = {0};
@@ -1739,7 +1799,8 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
         ReleaseAuthLock();
         return;
     }
-    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_WIFI) {
+    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_WIFI ||
+        auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_USB) {
         AUTH_LOGI(AUTH_FSM, "AuthHandleLeaveLNN disconnect");
         DisconnectAuthDevice(&auth->connId[authHandle.type]);
     }
@@ -1855,7 +1916,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
+    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_USB, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
         AUTH_LINK_TYPE_SESSION_KEY, AUTH_LINK_TYPE_SLE};
     uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
     for (uint32_t i = 0; i < linkTypeNum; i++) {
@@ -1991,7 +2052,7 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t nu
     bool notFound = true;
     AuthManager *authClient = NULL;
     AuthManager *authServer = NULL;
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_BR,
+    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_USB, AUTH_LINK_TYPE_BLE, AUTH_LINK_TYPE_BR,
         AUTH_LINK_TYPE_SESSION_KEY, AUTH_LINK_TYPE_SLE};
     for (size_t i = 0; i < sizeof(linkList) / sizeof(AuthLinkType); i++) {
         authClient = FindAuthManagerByUdid(udid, linkList[i], false);

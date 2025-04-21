@@ -125,7 +125,8 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 ||
             strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
     }
-    if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+    if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH ||
+        addr1->type == CONNECTION_ADDR_NCM) {
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0)
             && (addr1->info.ip.port == addr2->info.ip.port);
     }
@@ -751,7 +752,6 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t rc;
-
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "join lnn not init");
         return SOFTBUS_NO_INIT;

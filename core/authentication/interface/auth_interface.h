@@ -50,6 +50,11 @@ typedef enum {
 } SoftBusVersion;
 
 typedef enum {
+    AUTH_VERSION_INVALID = 0,
+    AUTH_VERSION_V1 = 1,
+} AuthVersion;
+
+typedef enum {
     AUTH_LINK_TYPE_WIFI = 1,
     AUTH_LINK_TYPE_BR,
     AUTH_LINK_TYPE_BLE,
@@ -60,6 +65,7 @@ typedef enum {
     AUTH_LINK_TYPE_SESSION,
     AUTH_LINK_TYPE_SESSION_KEY,
     AUTH_LINK_TYPE_SLE,
+    AUTH_LINK_TYPE_USB,
     AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 

@@ -2468,7 +2468,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_002, TestSize.Level1)
 
 /*
  * @tc.name: LnnSendWifiOfflineInfoMsg_001
- * @tc.desc: LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK
+ * @tc.desc: LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
  */

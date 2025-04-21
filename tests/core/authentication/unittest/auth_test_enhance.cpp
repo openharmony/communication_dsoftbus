@@ -126,13 +126,15 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_START_LISTENING_Test_001, TestSize.Level0)
  */
 HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
 {
-    HiChainAuthParam hiChainParam = { 0 };
+    HiChainAuthParam hiChainParam = {};
     const char *udid = "1111222233334444";
     const char *uid = "8888";
     int64_t authSeq = 5678;
 
-    hiChainParam.udid = (char *)udid;
-    hiChainParam.uid = (char *)uid;
+    if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
+        strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        return;
+    }
     hiChainParam.userId = DEFALUT_USERID;
     NiceMock<AuthCommonInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
