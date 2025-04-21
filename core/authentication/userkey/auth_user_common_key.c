@@ -134,12 +134,8 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
 
 void DelUserKeyByNetworkId(char *networkId)
 {
-    if (g_userKeyList == NULL) {
-        AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
-        return;
-    }
-    if (networkId == NULL) {
-        AUTH_LOGE(AUTH_KEY, "networkId is empty");
+    if (g_userKeyList == NULL || networkId == NULL) {
+        AUTH_LOGE(AUTH_KEY, "invalid param");
         return;
     }
     NodeInfo info;

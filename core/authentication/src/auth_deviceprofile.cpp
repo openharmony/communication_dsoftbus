@@ -120,7 +120,8 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", AnonymizeWrapper(anonyUdid), anonyDeviceIdHash);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", AnonymizeWrapper(anonyUdid),
+            AnonymizeWrapper(anonyDeviceIdHash));
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
         char hashStr[CUST_UDID_LEN + 1] = { 0 };
@@ -453,7 +454,6 @@ void UpdateDpSameAccount(
 {
     if (deviceId == nullptr) {
         LNN_LOGE(LNN_STATE, "deviceId is null");
-        (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;
     }
     int32_t sessionKeyId = DEFAULT_USER_KEY_INDEX;
@@ -472,7 +472,6 @@ void UpdateDpSameAccount(
             InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
         }
     }
-    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
 
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
