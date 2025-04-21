@@ -179,7 +179,7 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
     int32_t ret = TransProxyResetPeer(chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset to peer msg send failed.");
-        SOFTBUS_TRANS_PROXYCHANNEL_SEND_RESET_FAILED;
+        return SOFTBUS_TRANS_PROXYCHANNEL_SEND_RESET_FAILED;
     }
     if (TransDecConnRefByConnId(chan->connId, chan->isServer) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
