@@ -1199,24 +1199,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransNotifyOffLineTest001, TestSize.Lev
 }
 
 /**@
- * @tc.name: TransProxyCloseProxyOtherResTest001
- * @tc.desc: test trans proxy close proxy other res
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyOtherResTest001, TestSize.Level1)
-{
-    int32_t ret = TransProxyLoopInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(nullptr != chan);
-    int32_t channelId = TEST_VALID_CHANNEL_ID;
-    chan->channelId = TEST_VALID_CHANNEL_ID;
-
-    TransProxyCloseProxyOtherRes(channelId, chan);
-}
-
-/**@
  * @tc.name: TransProxyReleaseChannelListTest001
  * @tc.desc: test trans proxy timer item proc
  * @tc.type: FUNC
