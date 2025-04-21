@@ -55,6 +55,7 @@ declare_args() {
   dsoftbus_feature_deps_power_manager = true
   dsoftbus_feature_deps_ffrt = true
   dsoftbus_feature_deps_usb_manager = true
+  dsoftbus_feature_deps_datamgr_service = true
 }
 
 if (defined(global_parts_info) &&
@@ -209,4 +210,8 @@ if (defined(global_parts_info) &&
 }
 if (defined(global_parts_info) && !defined(global_parts_info.usb_usb_manager)) {
   dsoftbus_feature_deps_usb_manager = false
+}
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.distributeddatamgr_datamgr_service)) {
+  dsoftbus_feature_deps_datamgr_service = false
 }
