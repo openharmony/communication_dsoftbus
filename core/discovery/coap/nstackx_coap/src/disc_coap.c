@@ -497,10 +497,11 @@ static int32_t CoapUnsubscribe(const SubscribeOption *option)
     return ret;
 }
 
-static void CoapUpdateLocalIp(LinkStatus status)
+static void CoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
 {
-    DiscCoapModifyNstackThread(status);
-    DiscCoapUpdateLocalIp(status);
+    DiscCoapRecordLinkStatus(status, ifnameIdx);
+    DiscCoapModifyNstackThread(status, ifnameIdx);
+    DiscCoapUpdateLocalIp(status, ifnameIdx);
 }
 
 static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
