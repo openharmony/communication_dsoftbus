@@ -39,6 +39,13 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ConfigLocalIpv6(const char *ifName, const char *localIpv6)
+{
+    (void)ifName;
+    (void)localIpv6;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t LnnInitNetManagerMonitorImpl(void)
 {
     return SOFTBUS_OK;

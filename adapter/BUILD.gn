@@ -145,6 +145,19 @@ if (defined(ohos_lite)) {
         "$hilog_lite_deps_path",
       ]
 
+      if (dsoftbus_feature_usb == 1 && dsoftbus_feature_deps_usb_manager) {
+        include_dirs +=
+            [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+        sources += [
+          "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
+        ]
+        external_deps += [ "usb_manager:usbsrv_client" ]
+      } else {
+        include_dirs +=
+            [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+        sources += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]
+      }
+
       if (dsoftbus_feature_encrypt == 0) {
         sources += [
           "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
@@ -216,6 +229,19 @@ if (defined(ohos_lite)) {
         "init:libbegetutil",
       ]
       public_external_deps = [ "json:nlohmann_json_static" ]
+
+      if (dsoftbus_feature_usb == 1 && dsoftbus_feature_deps_usb_manager) {
+        include_dirs +=
+            [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+        sources += [
+          "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
+        ]
+        external_deps += [ "usb_manager:usbsrv_client" ]
+      } else {
+        include_dirs +=
+            [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+        sources += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]
+      }
 
       if (dsoftbus_feature_encrypt == 0) {
         sources += [
@@ -328,6 +354,17 @@ if (defined(ohos_lite)) {
       ]
     } else {
       sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
+    }
+
+    if (dsoftbus_feature_usb == 1 && dsoftbus_feature_deps_usb_manager) {
+      include_dirs += [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+      sources += [
+        "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
+      ]
+      external_deps += [ "usb_manager:usbsrv_client" ]
+    } else {
+      include_dirs += [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+      sources += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]
     }
 
     if (dsoftbus_feature_encrypt == 0) {
