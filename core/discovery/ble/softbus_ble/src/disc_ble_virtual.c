@@ -66,9 +66,10 @@ static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static void BleLinkStatusChanged(LinkStatus status)
+static void BleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     (void)status;
+    (void)ifnameIdx;
 }
 
 static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)

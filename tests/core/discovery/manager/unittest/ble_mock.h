@@ -30,7 +30,7 @@ public:
     virtual int32_t Subscribe(const SubscribeOption *option) = 0;
     virtual int32_t Unsubscribe(const SubscribeOption *option) = 0;
     virtual int32_t StopAdvertise(const SubscribeOption *option) = 0;
-    virtual void LinkStatusChanged(LinkStatus status) = 0;
+    virtual void LinkStatusChanged(LinkStatus status, int32_t ifnameIdx) = 0;
     virtual void UpdateLocalDeviceInfo(InfoTypeChanged type) = 0;
 };
 
@@ -52,7 +52,7 @@ public:
     MOCK_METHOD(int32_t, Subscribe, (const SubscribeOption* option), (override));
     MOCK_METHOD(int32_t, StopAdvertise, (const SubscribeOption* option), (override));
     MOCK_METHOD(int32_t, Unsubscribe, (const SubscribeOption* option), (override));
-    MOCK_METHOD(void, LinkStatusChanged, (LinkStatus status), (override));
+    MOCK_METHOD(void, LinkStatusChanged, (LinkStatus status, int32_t ifnameIdx), (override));
     MOCK_METHOD(void, UpdateLocalDeviceInfo, (InfoTypeChanged type), (override));
 
     static inline bool callLnnStatus = false;
@@ -66,7 +66,7 @@ private:
     static int32_t BleSubscribe(const SubscribeOption *option);
     static int32_t BleUnsubscribe(const SubscribeOption *option);
     static int32_t BleStopAdvertise(const SubscribeOption *option);
-    static void BleLinkStatusChanged(LinkStatus status);
+    static void BleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx);
     static void BleUpdateLocalDeviceInfo(InfoTypeChanged type);
 
     static inline DiscoveryFuncInterface interface_ = {

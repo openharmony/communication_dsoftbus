@@ -159,7 +159,7 @@ static int32_t StopAdvertiseA(const SubscribeOption *option)
     return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
-static void LinkStatusChangedA(LinkStatus status)
+static void LinkStatusChangedA(LinkStatus status, int32_t ifnameIdx)
 {
     g_interfaceFunCntA.linkStatusChangedCntA = 1;
 }
@@ -688,7 +688,7 @@ HWTEST_F(DiscBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
     int32_t beforeFunCntA;
     int32_t afterFunCntA;
     beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    interface->LinkStatusChanged(status);
+    interface->LinkStatusChanged(status, 0);
     afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
     EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
 };
