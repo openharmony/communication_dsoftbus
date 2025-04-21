@@ -132,6 +132,14 @@ if (defined(ohos_lite)) {
       "openssl:libcrypto_shared",
     ]
   }
+  if (dsoftbus_feature_usb == 1 && dsoftbus_feature_deps_usb_manager) {
+    bus_center_core_adapter_src += [
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
+    ]
+    bus_center_core_adapter_external_deps += [ "usb_manager:usbsrv_client" ]
+  } else {
+    bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]
+  }
   bus_center_core_adapter_src += [
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_sa_status_monitor.cpp",
   ]
