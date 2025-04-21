@@ -59,7 +59,7 @@ void AuthHichainMockTest::TearDown() {}
 HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
-    HiChainAuthParam hiChainParam = { 0 };
+    HiChainAuthParam hiChainParam = {};
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {
         return;
@@ -67,8 +67,10 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg));
     const char *udid = "123456";
     const char *uid = "123";
-    hiChainParam.udid = (char *)udid;
-    hiChainParam.uid = (char *)uid;
+    if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
+        strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        return;
+    }
     hiChainParam.userId = DEFALUT_USERID;
     static char *ptr = GenDeviceLevelParam(&hiChainParam);
     EXPECT_EQ(ptr, nullptr);
@@ -329,15 +331,17 @@ HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
 HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
-    HiChainAuthParam hiChainParam = { 0 };
+    HiChainAuthParam hiChainParam = {};
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr));
     int64_t authSeq = TEST_AUTH_SEQ;
     const char *udid = "udidTest";
     const char *uid = "uidTest";
     const char *groupInfo = "groupInfoTest";
 
-    hiChainParam.udid = (char *)udid;
-    hiChainParam.uid = (char *)uid;
+    if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
+        strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        return;
+    }
     hiChainParam.userId = DEFALUT_USERID;
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(hiChainParam.udid, nullptr));
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(nullptr, groupInfo));

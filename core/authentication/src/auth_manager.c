@@ -1477,7 +1477,7 @@ static int32_t PostDecryptFailAuthData(
 static void HandleUkConnectionData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
-    if (AuthGetUkDecryptSize(head->len) < UK_ENCRYPT_INDEX_LEN) {
+    if (AuthGetUkDecryptSize(head->len) <= UK_ENCRYPT_INDEX_LEN) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return;
     }
@@ -1580,6 +1580,10 @@ static void HandleConnectionData(
 static void HandleDecryptFailData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
+    if (head->len < ENCRYPT_INDEX_LEN) {
+        AUTH_LOGE(AUTH_CONN, "data len not enough");
+        return;
+    }
     if (!RequireAuthLock()) {
         return;
     }

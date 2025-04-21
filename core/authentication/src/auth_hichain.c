@@ -525,8 +525,7 @@ void UnregTrustDataChangeListener(void)
 
 int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode)
 {
-    if ((hiChainParam == NULL) || (hiChainParam->udid == NULL) || (hiChainParam->uid == NULL) ||
-        (authMode >= HICHAIN_AUTH_BUTT)) {
+    if ((hiChainParam == NULL) || (authMode >= HICHAIN_AUTH_BUTT)) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain auth parameter invalid, mode=%{public}d", authMode);
         return SOFTBUS_INVALID_PARAM;
     }
