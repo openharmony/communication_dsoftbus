@@ -191,6 +191,7 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
     }
     return SOFTBUS_OK;
 }
+
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
