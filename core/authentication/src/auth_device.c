@@ -676,6 +676,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             authHandle.authId = GetLatestIdByConnInfo(info);
             if (authHandle.authId == AUTH_INVALID_ID) {
                 return SOFTBUS_AUTH_NOT_FOUND;

@@ -128,9 +128,46 @@ static int64_t GenerateSeq(bool isServer)
     return seq;
 }
 
+static int32_t AppendIpv6WithIfname(char *ip, int32_t ifIdx)
+{
+    char ifName[NET_IF_NAME_LEN] = {0};
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN, ifIdx) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get local ifname failed");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (strcat_s(ip, MAX_ADDR_LEN, "%") != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "combine ip fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcat_s(ip, MAX_ADDR_LEN, ifName) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "combine ip and ifname fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SetChannelInfoBySide(ChannelInfo *info, bool isServerSide, const AppInfo *appInfo)
+{
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Channel info is null.");
+        return SOFTBUS_ERR;
+    }
+    if (!isServerSide) {
+        info->peerPort = appInfo->peerData.port;
+        return AppendIpv6WithIfname(info->peerIp, USB_IF);
+    } else {
+        if (appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            info->peerUserId = appInfo->peerData.userId;
+            info->peerAccountId = (char*)appInfo->peerData.accountId;
+        }
+        return AppendIpv6WithIfname(info->myIp, USB_IF);
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGI(TRANS_CTRL, "enter, isServerSide: %{public}d", isServerSide);
     ChannelInfo info = {0};
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     info.sessionId = appInfo->myData.sessionId;
@@ -157,13 +194,10 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.streamType = (int32_t)appInfo->streamType;
     info.isUdpFile = appInfo->fileProtocol == APP_INFO_UDP_FILE_PROTOCOL ? true : false;
     info.peerIp = (char*)appInfo->peerData.addr;
-    if (!isServerSide) {
-        info.peerPort = appInfo->peerData.port;
-    } else {
-        if (appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
-            info.peerUserId = appInfo->peerData.userId;
-            info.peerAccountId = (char*)appInfo->peerData.accountId;
-        }
+    ret = SetChannelInfoBySide(&info, isServerSide, appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "set channel info fail.");
+        return ret;
     }
     info.autoCloseTime = appInfo->autoCloseTime;
     info.timeStart = appInfo->timeStart;
@@ -553,6 +587,7 @@ static void TransSetUdpConnectTypeByAuthType(int32_t *connectType, AuthHandle au
             *connectType = CONNECT_HML;
             break;
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_USB:
             *connectType = CONNECT_TCP;
             break;
         default:
@@ -598,6 +633,10 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         appInfo->routeType = WIFI_STA;
         ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, sizeof(localIp), WLAN_IF);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local strInfo failed.");
+    } else if (appInfo->udpConnType == UDP_CONN_TYPE_USB) {
+        appInfo->routeType = WIFI_USB;
+        ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, sizeof(localIp), USB_IF);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get usb local strInfo failed.");
     } else {
         appInfo->routeType = WIFI_P2P;
         struct WifiDirectManager *mgr = GetWifiDirectManager();
@@ -1186,13 +1225,17 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
         TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
     }
+    if (ret != SOFTBUS_OK && linkType == LANE_USB) {
+        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
+        ret = AuthGetUsbConnInfo(peerUdid, &auth, isMeta);
+    }
     if (ret != SOFTBUS_OK && isMeta == true) {
         ret = AuthGetConnInfoBySide(peerUdid, &auth, isMeta, isClient);
     }
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK && linkType != LANE_USB) {
         ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
     }
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK && linkType != LANE_USB) {
         ret = AuthGetPreferConnInfo(peerUdid, &auth, true);
         isMeta = true;
     }
@@ -1287,12 +1330,21 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
     int32_t connType = connOpt->type;
     switch (connType) {
         case CONNECT_TCP:
-            appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
-            appInfo->routeType = WIFI_STA;
-            ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
-                sizeof(appInfo->myData.addr), WLAN_IF);
-            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local ip fail");
-            appInfo->protocol = connOpt->socketOption.protocol;
+            if (connOpt->socketOption.protocol == LNN_PROTOCOL_USB) {
+                appInfo->udpConnType = UDP_CONN_TYPE_USB;
+                appInfo->routeType = WIFI_USB;
+                ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
+                    sizeof(appInfo->myData.addr), USB_IF);
+                TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local ip fail");
+                appInfo->protocol = connOpt->socketOption.protocol;
+            } else {
+                appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
+                appInfo->routeType = WIFI_STA;
+                appInfo->protocol = connOpt->socketOption.protocol;
+                ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
+                    sizeof(appInfo->myData.addr), WLAN_IF);
+                TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local ip fail");
+            }
             break;
         case CONNECT_P2P:
         case CONNECT_P2P_REUSE:
@@ -1416,8 +1468,8 @@ static void UdpModuleCb(AuthHandle authHandle, const AuthTransData *data)
         TRANS_LOGW(TRANS_CTRL, "authHandle type error");
         return;
     }
-    TRANS_LOGI(TRANS_CTRL, "udp module callback enter: module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
-        data->module, data->seq, data->len);
+    TRANS_LOGI(TRANS_CTRL, "udp module callback enter: module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u. \
+        type=%{public}d", data->module, data->seq, data->len, authHandle.type);
     cJSON *json = cJSON_ParseWithLength((char *)data->data, data->len);
     if (json == NULL) {
         TRANS_LOGE(TRANS_CTRL, "cjson parse failed!");

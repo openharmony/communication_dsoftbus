@@ -1057,6 +1057,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
         case AUTH_LINK_TYPE_USB: {
             info.socketOption.moduleId = AUTH_USB;
             info.socketOption.port = 0;
+            info.socketOption.protocol = LNN_PROTOCOL_USB;
             return StartSocketListening(AUTH_USB, &info);
         }
         default:

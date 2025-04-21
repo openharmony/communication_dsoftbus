@@ -83,6 +83,9 @@ static int32_t ConvertAuthLinkToLaneLink(AuthLinkTypeList *authLinkType, LanePre
             case AUTH_LINK_TYPE_ENHANCED_P2P:
                 laneLinkType->linkType[laneLinkType->linkTypeNum++] = LANE_HML;
                 break;
+            case AUTH_LINK_TYPE_USB:
+                laneLinkType->linkType[laneLinkType->linkTypeNum++] = LANE_USB;
+                break;
             default:
                 break;
         }

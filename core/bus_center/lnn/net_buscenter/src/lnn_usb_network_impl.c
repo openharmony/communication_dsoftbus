@@ -171,11 +171,56 @@ static void CloseAuthPort(void)
     (void)LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, IP_DEFAULT_PORT, USB_IF);
 }
 
+static int32_t OpenSessionPort(void)
+{
+    int32_t sessionPort = 0;
+    if (LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, &sessionPort, USB_IF) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get port failed, use default value.");
+    }
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = sessionPort,
+            .moduleId = DIRECT_CHANNEL_SERVER_USB,
+            .protocol = LNN_PROTOCOL_USB,
+        }
+    };
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, info.socketOption.addr,
+        sizeof(info.socketOption.addr), USB_IF) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local ip failed");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    int32_t port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
+    if (port < 0) {
+        LNN_LOGE(LNN_BUILDER, "open session server failed");
+        return SOFTBUS_INVALID_PORT;
+    }
+    if (sessionPort == 0) {
+        return LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, port, USB_IF);
+    }
+
+    return SOFTBUS_OK;
+}
+
+static void CloseSessionPort(void)
+{
+    TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_USB);
+    (void)LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, IP_DEFAULT_PORT, USB_IF);
+}
+
 static int32_t OpenIpLink(void)
 {
     int32_t ret = OpenAuthPort();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "OpenAuthPort fail");
+        return SOFTBUS_NETWORK_PORT_PROCESS_FAILED;
+    }
+    ret = OpenSessionPort();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "OpenSessionPort fail");
+        CloseAuthPort();
         return SOFTBUS_NETWORK_PORT_PROCESS_FAILED;
     }
     return SOFTBUS_OK;
@@ -184,6 +229,7 @@ static int32_t OpenIpLink(void)
 static void CloseIpLink(void)
 {
     CloseAuthPort();
+    CloseSessionPort();
     LNN_LOGI(LNN_BUILDER, "close port success");
 }
 
