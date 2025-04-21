@@ -89,11 +89,13 @@ typedef struct {
     bool oldWifiFlag;
     bool oldBrFlag;
     bool oldBleFlag;
+    bool oldUsbFlag;
     bool isChanged;
     bool isMigrateEvent;
     bool isNetworkChanged;
     bool newWifiFlag;
     bool newBleBrFlag;
+    bool newUsbFlag;
 } NodeInfoAbility;
 
 NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id);

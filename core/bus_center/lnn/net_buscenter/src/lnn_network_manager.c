@@ -50,6 +50,8 @@
 #define LNN_DEFAULT_IF_NAME_ETH  "eth0"
 #define LNN_DEFAULT_IF_NAME_BR   "br0"
 #define LNN_DEFAULT_IF_NAME_BLE  "ble0"
+#define LNN_DEFAULT_IF_NAME_USB_NCM  "ncm0"
+#define LNN_DEFAULT_IF_NAME_USB_WWAN  "wwan0"
 
 #define LNN_CHECK_OOBE_DELAY_LEN (5 * 60 * 1000LL)
 
@@ -61,6 +63,7 @@ typedef enum {
     LNN_WLAN_TYPE,
     LNN_BR_TYPE,
     LNN_BLE_TYPE,
+    LNN_USB_TYPE,
     LNN_MAX_NUM_TYPE,
 } LnnNetIfNameType;
 
@@ -220,6 +223,18 @@ static int32_t SetIfNameDefaultVal(void)
     netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
     if (netIfMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "add default BLE netIfMgr failed");
+        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
+    }
+    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+    netIfMgr = NetifMgrFactory(LNN_USB_TYPE, LNN_DEFAULT_IF_NAME_USB_NCM);
+    if (netIfMgr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "add default USB NCM netIfMgr failed");
+        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
+    }
+    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+    netIfMgr = NetifMgrFactory(LNN_USB_TYPE, LNN_DEFAULT_IF_NAME_USB_WWAN);
+    if (netIfMgr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "add default USB WWAN netIfMgr failed");
         return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
@@ -499,7 +514,7 @@ void RestartCoapDiscovery(void)
         LNN_LOGW(LNN_BUILDER, "network is disabled yet, dont restart coap discovery");
         return;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ifName error!");
         return;
     }
@@ -507,12 +522,12 @@ void RestartCoapDiscovery(void)
         LNN_LOGI(LNN_BUILDER, "ip invalid now, stop restart coap discovery");
         return;
     }
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
+    if (LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local auth port failed.");
         return;
     }
     LNN_LOGI(LNN_BUILDER, "open previous discovery again");
-    DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
+    DiscLinkStatusChanged(LINK_STATUS_UP, COAP, WLAN_IF);
     LnnStopPublish();
     if (LnnStartPublish() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "start publish failed");
@@ -700,6 +715,12 @@ static int32_t RegistProtocolManager(void)
         return ret;
     }
     LNN_LOGI(LNN_BUILDER, "IP protocol registed.");
+    ret = RegistUsbProtocolManager();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "regist usb protocol manager failed, ret=%{public}d", ret);
+        return ret;
+    }
+    LNN_LOGI(LNN_BUILDER, "USB protocol registed.");
 #endif
     ret = RegistBtProtocolManager();
     if (ret != SOFTBUS_OK) {
@@ -754,6 +775,7 @@ int32_t LnnInitNetworkManager(void)
     RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
     RegistNetIfMgr(LNN_BR_TYPE, CreateNetifMgr);
     RegistNetIfMgr(LNN_BLE_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_USB_TYPE, CreateNetifMgr);
 
     int32_t ret = LnnInitManagerByConfig();
     if (ret != SOFTBUS_OK) {
@@ -933,6 +955,9 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
             break;
         case LNN_NETIF_TYPE_BLE:
             *type = CONNECTION_ADDR_BLE;
+            break;
+        case LNN_NETIF_TYPE_USB:
+            *type = CONNECTION_ADDR_NCM;
             break;
         default:
             ret = SOFTBUS_NETWORK_NOT_SUPPORT;

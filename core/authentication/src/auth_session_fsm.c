@@ -33,9 +33,11 @@
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "legacy/softbus_adapter_hitrace.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
@@ -90,6 +92,11 @@ typedef struct {
     uint32_t len;
     uint8_t data[0];
 } MessagePara;
+
+typedef struct {
+    char uuid[UUID_BUF_LEN];
+    int32_t result;
+} OnPtkSyncCallBackParam;
 
 typedef struct {
     int64_t param1;
@@ -203,6 +210,7 @@ static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInf
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             (void)memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, request.connInfo.info.ipInfo.deviceIdHash,
                 UDID_HASH_LEN);
             break;
@@ -276,6 +284,7 @@ static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *co
     authFsm->info.connId = authFsmParam->connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V3;
+    authFsm->info.authVersion = AUTH_VERSION_INVALID;
     authFsm->info.idType = EXCHANGE_UDID;
     authFsm->info.isSupportDmDeviceKey = false;
     authFsm->info.deviceKeyId = authFsmParam->deviceKeyId;
@@ -825,7 +834,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
 
 static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra *lnnAuditExtra)
 {
-    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, reportInfo->localIp, IP_LEN);
+    (void)LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, reportInfo->localIp, IP_LEN, WLAN_IF);
     char *anonyLocalIp = NULL;
     Anonymize(reportInfo->localIp, &anonyLocalIp);
     if (strcpy_s((char *)lnnAuditExtra->localIp, IP_LEN, AnonymizeWrapper(anonyLocalIp)) != EOK) {
@@ -877,9 +886,9 @@ static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
     AuditReportDevInfo reportInfo;
     (void)memset_s(&reportInfo, sizeof(AuditReportDevInfo), 0, sizeof(AuditReportDevInfo));
     GetLocalDevReportInfo(&reportInfo, lnnAuditExtra);
-    (void)LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &lnnAuditExtra->localAuthPort);
-    (void)LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort);
-    (void)LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort);
+    (void)LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &lnnAuditExtra->localAuthPort, WLAN_IF);
+    (void)LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort, WLAN_IF);
+    (void)LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort, WLAN_IF);
     (void)LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &lnnAuditExtra->localDevType);
     char udid[UDID_BUF_LEN] = { 0 };
     uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
@@ -1135,6 +1144,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             /* WIFI: client firstly send device info, server just reponse it. */
             if (!info->isServer) {
                 return PostDeviceInfoMessage(authSeq, info);
@@ -1229,7 +1239,7 @@ static int32_t TryRecoveryKey(AuthFsm *authFsm)
 
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
-    HiChainAuthParam authParam = { 0 };
+    HiChainAuthParam authParam = {};
     HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount &&
         !GetSecEnhanceFlag())) ? HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
@@ -1242,10 +1252,13 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s peerUserId=%{public}d", AnonymizeWrapper(anonyUdid),
         authFsm->info.userId);
     AnonymizeFree(anonyUdid);
-    authParam.udid = authFsm->info.udid;
-    authParam.uid = authFsm->info.connInfo.peerUid;
+    if (strcpy_s(authParam.udid, UDID_BUF_LEN, authFsm->info.udid) != EOK ||
+        strcpy_s(authParam.uid, MAX_ACCOUNT_HASH_LEN, authFsm->info.connInfo.peerUid) != EOK ||
+        strcpy_s(authParam.credId, MAX_CRED_ID_SIZE, authFsm->info.credId) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "copy authParam fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
     authParam.userId = authFsm->info.userId;
-    authParam.credId = authFsm->info.credId;
     authParam.cb = NULL;
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
 }
@@ -1351,21 +1364,23 @@ static AuthFsm *GetAuthFsmByRequestId(uint64_t requestId)
     return NULL;
 }
 
-
-static void OnPtkSyncCallBack(const char *uuid, int32_t result)
+static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
 {
-    if (uuid == NULL) {
+    if (voidPtkCbParam == NULL) {
         AUTH_LOGE(AUTH_FSM, "get invalid param");
         return;
     }
+    OnPtkSyncCallBackParam *ptkCbParam = (OnPtkSyncCallBackParam *)voidPtkCbParam;
     if (!RequireAuthLock()) {
+        SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "require auth lock fail");
         return;
     }
     AuthPreLinkNode reuseKeyNode;
     (void)memset_s(&reuseKeyNode, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
-    if (FindAuthPreLinkNodeByUuid(uuid, &reuseKeyNode) != SOFTBUS_OK) {
+    if (FindAuthPreLinkNodeByUuid(ptkCbParam->uuid, &reuseKeyNode) != SOFTBUS_OK) {
         ReleaseAuthLock();
+        SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "auth reuse devicekey not found");
         return;
     }
@@ -1373,19 +1388,46 @@ static void OnPtkSyncCallBack(const char *uuid, int32_t result)
     AuthSessionInfo *info = &authFsm->info;
     if (authFsm == NULL) {
         ReleaseAuthLock();
+        SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "auth fsm not found");
         return;
     }
-    if (result != SOFTBUS_OK) {
+    if (ptkCbParam->result != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "sync ptk fail");
         ReleaseAuthLock();
+        SoftBusFree(ptkCbParam);
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_PTK_ERR);
         return;
     }
     ReleaseAuthLock();
+    SoftBusFree(ptkCbParam);
     DelAuthGenCertParaNodeById(reuseKeyNode.requestId);
     AuthManagerSetAuthPassed(authFsm->authSeq, info);
     TryFinishAuthSession(authFsm);
+}
+
+static void OnPtkSyncCallBack(const char *uuid, int32_t result)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get invalid param");
+        return;
+    }
+    OnPtkSyncCallBackParam *ptkCbParam = (OnPtkSyncCallBackParam *)SoftBusCalloc(sizeof(OnPtkSyncCallBackParam));
+    if (ptkCbParam == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc ptkCbParam fail");
+        return;
+    }
+    if (memcpy_s(ptkCbParam->uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy uuid fail");
+        SoftBusFree(ptkCbParam);
+        return;
+    }
+    ptkCbParam->result = result;
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), OnPtkSyncCallBackLooper, (void *)ptkCbParam);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "LnnAsyncCallbackHelper call error");
+        SoftBusFree(ptkCbParam);
+    }
 }
 
 static void TrySyncPtkClient(AuthSessionInfo *info)
@@ -1491,7 +1533,8 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
     if (IsAuthPreLinkNodeExist(info->requestId)) {
         UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
     }
-    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
+    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY ||
+        info->connInfo.type == AUTH_LINK_TYPE_USB) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {
             ClientTryCompleteAuthSession(authFsm, info);
@@ -1973,8 +2016,9 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
             AUTH_LOGE(AUTH_FSM, "auth fsm has dead. authSeq=%{public}" PRId64 "", item->authSeq);
             continue;
         }
-        if ((GetConnType(item->info.connId) == AUTH_LINK_TYPE_WIFI ||
-            GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P)) {
+        if (GetConnType(item->info.connId) == AUTH_LINK_TYPE_WIFI ||
+            GetConnType(item->info.connId) == AUTH_LINK_TYPE_P2P ||
+            GetConnType(item->info.connId) == AUTH_LINK_TYPE_USB) {
             if (isNeedDisconnect) {
                 DisconnectAuthDevice(&item->info.connId);
                 isDisconnected = true;
@@ -1985,7 +2029,8 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);
     }
     ReleaseAuthLock();
-    if (isNeedDisconnect && !isDisconnected && GetConnType(connId) == AUTH_LINK_TYPE_WIFI &&
+    if (isNeedDisconnect && !isDisconnected &&
+        (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) &&
         IsExistWifiConnItemByConnId(GetConnId(connId))) {
         DeleteWifiConnItemByConnId(GetConnId(connId));
         DisconnectAuthDevice(&connId);

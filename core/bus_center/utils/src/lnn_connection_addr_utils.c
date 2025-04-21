@@ -51,7 +51,8 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
                 strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
         }
     }
-    if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+    if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH ||
+        addr1->type == CONNECTION_ADDR_NCM) {
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0) &&
         (addr1->info.ip.port == addr2->info.ip.port);
     }
@@ -92,7 +93,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         }
         return true;
     }
-    if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
+    if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN || addr->type == CONNECTION_ADDR_NCM) {
         option->type = CONNECT_TCP;
         if (strncpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), addr->info.ip.ip,
             strlen(addr->info.ip.ip)) != EOK) {
@@ -100,8 +101,8 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
             return false;
         }
         option->socketOption.port = addr->info.ip.port;
-        option->socketOption.protocol = LNN_PROTOCOL_IP;
-        option->socketOption.moduleId = AUTH;
+        option->socketOption.protocol = (addr->type == CONNECTION_ADDR_NCM) ? LNN_PROTOCOL_USB : LNN_PROTOCOL_IP;
+        option->socketOption.moduleId = (addr->type == CONNECTION_ADDR_NCM) ? AUTH_USB : AUTH;
         return true;
     }
     LNN_LOGE(LNN_STATE, "not supported type=%{public}d", addr->type);
@@ -168,6 +169,8 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
         return DISCOVERY_TYPE_BLE;
     } else if (type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         return DISCOVERY_TYPE_SESSION_KEY;
+    } else if (type == CONNECTION_ADDR_NCM) {
+        return DISCOVERY_TYPE_USB;
     } else {
         return DISCOVERY_TYPE_COUNT;
     }
@@ -184,6 +187,8 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
             return CONNECTION_ADDR_BR;
         case DISCOVERY_TYPE_SESSION_KEY:
             return CONNECTION_ADDR_SESSION_WITH_KEY;
+        case DISCOVERY_TYPE_USB:
+            return CONNECTION_ADDR_NCM;
         default:
             break;
     }
@@ -200,7 +205,7 @@ static bool ConvertAddrToAuthConnInfoForSession(const ConnectionAddr *addr, Auth
         return false;
     }
     bool isServer = false;
-    rc = SocketGetConnInfo(connId, connInfo, &isServer);
+    rc = SocketGetConnInfo(connId, connInfo, &isServer, WLAN_IF);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "SocketGetConnInfo fail");
         return false;
@@ -236,8 +241,8 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
         connInfo->info.bleInfo.psm = addr->info.ble.psm;
         return true;
     }
-    if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
-        connInfo->type = AUTH_LINK_TYPE_WIFI;
+    if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN || addr->type == CONNECTION_ADDR_NCM) {
+        connInfo->type = (addr->type == CONNECTION_ADDR_NCM) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
         if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, addr->info.ip.ip) != EOK ||
             memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, addr->info.ip.udidHash, UDID_HASH_LEN) != EOK) {
             LNN_LOGE(LNN_STATE, "copy ip to connInfo fail");
@@ -278,7 +283,8 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
         addr->info.ble.psm = connInfo->info.bleInfo.psm;
         return true;
     }
-    if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
+    if (connInfo->type == AUTH_LINK_TYPE_WIFI ||
+        connInfo->type == AUTH_LINK_TYPE_USB) {
         addr->type = hintType;
         if (strcpy_s(addr->info.ip.ip, IP_LEN, connInfo->info.ipInfo.ip) != EOK) {
             LNN_LOGE(LNN_STATE, "copy ip to addr fail");
@@ -310,6 +316,7 @@ bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr)
         case CONNECTION_ADDR_WLAN:
         /* fall-through */
         case CONNECTION_ADDR_ETH:
+        case CONNECTION_ADDR_NCM:
             if (strnlen(addr->info.ip.ip, IP_STR_MAX_LEN) == 0 ||
                 strnlen(addr->info.ip.ip, IP_STR_MAX_LEN) == IP_STR_MAX_LEN) {
                 LNN_LOGE(LNN_STATE, "get invalid ip info");
@@ -354,6 +361,7 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
         case CONNECTION_ADDR_WLAN:
         /* fall-through */
         case CONNECTION_ADDR_ETH:
+        case CONNECTION_ADDR_NCM:
             Anonymize(addr->info.ip.ip, &anonyIp);
             ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
                 "Ip=%s", AnonymizeWrapper(anonyIp));

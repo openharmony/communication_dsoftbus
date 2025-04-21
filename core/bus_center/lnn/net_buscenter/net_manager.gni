@@ -24,6 +24,7 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_wifi) {
   bus_center_net_mgr_src += [
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_ip_network_impl.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_physical_subnet_manager.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_usb_network_impl.c",
   ]
 } else {
   bus_center_net_mgr_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_physical_subnet_manager_virtual.c" ]

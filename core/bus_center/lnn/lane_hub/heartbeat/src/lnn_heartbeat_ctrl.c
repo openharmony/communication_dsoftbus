@@ -188,7 +188,7 @@ static void HbIpAddrChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_HEART_BEAT, "ip addr change evt handler get invalid param");
         return;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, IP_LEN, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get local ip err");
         return;
     }

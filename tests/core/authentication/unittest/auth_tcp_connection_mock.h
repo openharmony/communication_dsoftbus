@@ -27,14 +27,14 @@ public:
     AuthTcpConnetionInterface() {};
     virtual ~AuthTcpConnetionInterface() {};
 
-    virtual int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode) = 0;
+    virtual int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx) = 0;
 };
 class AuthTcpConnectionInterfaceMock : public AuthTcpConnetionInterface {
 public:
     AuthTcpConnectionInterfaceMock();
     ~AuthTcpConnectionInterfaceMock() override;
 
-    MOCK_METHOD3(SocketConnectDevice, int32_t(const char *, int32_t, bool));
+    MOCK_METHOD4(SocketConnectDevice, int32_t(const char *, int32_t, bool, int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H

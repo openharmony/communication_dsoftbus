@@ -39,7 +39,6 @@ typedef struct RemoteNode_ {
     List node;
     List orderedNode;
     DeviceInfo deviceInfo;
-    struct in_addr remoteIp;
     struct RxIface_ *rxIface;
     UpdateState updateState;
     struct timespec updateTs;
@@ -214,13 +213,17 @@ static RxIface *FindRxIface(const RemoteDevice* device, const NSTACKX_InterfaceI
     return NULL;
 }
 
-static RemoteNode *FindRemoteNodeByRemoteIp(const RxIface* rxIface, const struct in_addr *remoteIp)
+static RemoteNode *FindRemoteNodeByRemoteIp(const RxIface* rxIface, const DeviceInfo *deviceInfo)
 {
     List *pos = NULL;
     RemoteNode *remoteNode = NULL;
     LIST_FOR_EACH(pos, &rxIface->remoteNodeList) {
         remoteNode = (RemoteNode *)pos;
-        if (remoteNode->remoteIp.s_addr == remoteIp->s_addr) {
+        WifiApChannelInfo *info = &(remoteNode->deviceInfo.netChannelInfo.wifiApInfo);
+        if (info->af != deviceInfo->netChannelInfo.wifiApInfo.af) {
+            continue;
+        }
+        if (InetEqual(info->af, &(info->addr), &(deviceInfo->netChannelInfo.wifiApInfo.addr))) {
             return remoteNode;
         }
     }
@@ -280,7 +283,7 @@ static uint32_t CheckAndUpdateBusinessAll(BusinessDataAll *curInfo, const Busine
     return NSTACKX_EOK;
 }
 
-static RemoteNode *CreateRemoteNode(RxIface *rxIface, const struct in_addr *remoteIp, const DeviceInfo *deviceInfo)
+static RemoteNode *CreateRemoteNode(RxIface *rxIface, const DeviceInfo *deviceInfo)
 {
     RemoteNode *remoteNode = (RemoteNode *)calloc(1, sizeof(RemoteNode));
     if (remoteNode == NULL) {
@@ -289,7 +292,6 @@ static RemoteNode *CreateRemoteNode(RxIface *rxIface, const struct in_addr *remo
     }
 
     remoteNode->rxIface = rxIface;
-    remoteNode->remoteIp = *remoteIp;
     remoteNode->updateState = DFINDER_UPDATE_STATE_NULL;
     (void)memcpy_s(&remoteNode->deviceInfo, sizeof(DeviceInfo), deviceInfo, sizeof(DeviceInfo));
 
@@ -598,14 +600,13 @@ uint32_t GetRemoteNodeCount(void)
     return g_remoteNodeCount;
 }
 
-static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface,
-    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo)
+static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface, const DeviceInfo *deviceInfo)
 {
     if (rxIface->remoteNodeCnt >= RX_IFACE_REMOTE_NODE_COUNT) {
         DestroyOldestRemoteNode(rxIface);
     }
 
-    RemoteNode *remoteNode = CreateRemoteNode(rxIface, remoteIp, deviceInfo);
+    RemoteNode *remoteNode = CreateRemoteNode(rxIface, deviceInfo);
     if (remoteNode == NULL) {
         return NULL;
     }
@@ -626,7 +627,7 @@ static bool UpdateOldRemoteNode(void)
 }
 
 int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_InterfaceInfo *interfaceInfo,
-    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, int8_t *updated)
+    const DeviceInfo *deviceInfo, int8_t *updated)
 {
     if (!UpdateOldRemoteNode()) {
         return NSTACKX_EFAILED;
@@ -651,9 +652,9 @@ int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_Interfa
         ListInsertTail(&(device->rxIfaceList), &(rxIface->node));
     }
 
-    RemoteNode *remoteNode = FindRemoteNodeByRemoteIp(rxIface, remoteIp);
+    RemoteNode *remoteNode = FindRemoteNodeByRemoteIp(rxIface, deviceInfo);
     if (remoteNode == NULL) {
-        remoteNode = CheckAndCreateRemoteNode(rxIface, remoteIp, deviceInfo);
+        remoteNode = CheckAndCreateRemoteNode(rxIface, deviceInfo);
         if (remoteNode == NULL) {
             goto FAIL_AND_FREE;
         }
@@ -795,7 +796,12 @@ static RemoteNode *GetRxIfaceFirstRemoteNode(RxIface *rxIface)
     RemoteNode *remoteNode = NULL;
     LIST_FOR_EACH(pos, &rxIface->remoteNodeList) {
         remoteNode = (RemoteNode *)pos;
-        if (remoteNode->remoteIp.s_addr != 0) {
+        // use only double frames, only support iopv4
+        WifiApChannelInfo *info = &(remoteNode->deviceInfo.netChannelInfo.wifiApInfo);
+        if (info->af != AF_INET) {
+            continue;
+        }
+        if (info->addr.in.s_addr != 0) {
             return remoteNode;
         }
     }
@@ -832,7 +838,7 @@ const struct in_addr *GetRemoteDeviceIpInner(List *list, const char *deviceId)
         return NULL;
     }
 
-    return &remoteNode->remoteIp;
+    return &(remoteNode->deviceInfo.netChannelInfo.wifiApInfo.addr.in);
 }
 
 const struct in_addr *GetRemoteDeviceIp(const char *deviceId)
