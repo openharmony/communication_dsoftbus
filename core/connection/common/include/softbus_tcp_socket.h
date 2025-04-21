@@ -29,6 +29,12 @@ extern "C" {
 const SocketInterface *GetTcpProtocol(void);
 
 int32_t SetIpTos(int fd, uint32_t tos);
+int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr);
+int32_t SocketConnect(int32_t fd, int32_t domain, const ConnectOption *option);
+void SetClientOption(int fd);
+void SetServerOption(int fd);
+int32_t GetTcpSockPort(int32_t fd);
+int BindLocalIP(int32_t domain, int fd, const char *localIP, uint16_t port);
 
 #ifdef __cplusplus
 #if __cplusplus

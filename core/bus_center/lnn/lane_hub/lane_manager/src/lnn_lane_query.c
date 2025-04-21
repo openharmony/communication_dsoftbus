@@ -20,6 +20,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_communication_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_lane_link.h"
@@ -262,6 +263,34 @@ static int32_t HmlLinkState(const char *networkId)
     return ret;
 }
 
+static int32_t UsbLinkState(const char *networkId)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote node info fail");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_USB) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        LNN_LOGE(LNN_LANE, "peer node not USB online");
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
+    }
+
+    int32_t ret = CheckStaticNetCap(networkId, LANE_USB);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "check static capability fail, errorCode: %{public}d", ret);
+        return ret;
+    }
+
+    ret = CheckDynamicNetCap(networkId, LANE_USB);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "check dynamic capability fail, errorCode: %{public}d", ret);
+        return ret;
+    }
+    LNN_LOGI(LNN_LANE, "usb link ok");
+    return SOFTBUS_OK;
+}
+
 static LinkState g_linkState[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = {true,   BrLinkState},
     [LANE_BLE] = { true,   BleLinkState},
@@ -269,6 +298,7 @@ static LinkState g_linkState[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_5G] = { true,   WlanLinkState},
     [LANE_P2P] = { true,   P2pLinkState},
     [LANE_HML] = { true,   HmlLinkState},
+    [LANE_USB] = { true,   UsbLinkState},
 };
 
 static int32_t IsValidLaneLink(const char *networkId, LaneLinkType linkType)

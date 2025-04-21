@@ -356,6 +356,7 @@ void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
     } else if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
         module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
     }
+    TRANS_LOGI(TRANS_CTRL, "moduleId=%{public}d, channelType=%{public}d", connOpt->socketOption.moduleId, channelType);
     if (module != UNUSE_BUTT) {
         connOpt->socketOption.moduleId = module;
     }

@@ -24,6 +24,17 @@
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
+static int32_t PackUsbLinkTypeMsg(cJSON *msg, const AppInfo *appInfo)
+{
+    if (appInfo->linkType == LANE_USB) {
+        if (!AddNumberToJsonObject(msg, "LANE_LINK_TYPE", appInfo->linkType)) {
+            TRANS_LOGE(TRANS_SVC, "add usb linkType failed");
+            return SOFTBUS_CREATE_JSON_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
 {
     if (appInfo == NULL || msg == NULL) {
@@ -57,7 +68,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
             return SOFTBUS_CREATE_JSON_ERR;
         }
     }
-    return SOFTBUS_OK;
+    return PackUsbLinkTypeMsg(msg, appInfo);
 }
 
 int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len)

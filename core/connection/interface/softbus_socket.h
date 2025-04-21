@@ -79,6 +79,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
 int32_t ConnGetSocketError(int32_t fd);
 int32_t ConnGetLocalSocketPort(int32_t fd);
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr);
+int32_t ConnGetPeerSocketAddr6(int32_t fd, SocketAddr *socketAddr);
 
 int32_t ConnPreAssignPort(int32_t domain);
 int32_t GetDomainByAddr(const char *addr);

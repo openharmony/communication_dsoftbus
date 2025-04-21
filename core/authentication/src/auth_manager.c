@@ -1916,7 +1916,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_USB, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
+    AuthLinkType linkList[] = {AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
         AUTH_LINK_TYPE_SESSION_KEY, AUTH_LINK_TYPE_SLE};
     uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
     for (uint32_t i = 0; i < linkTypeNum; i++) {
@@ -1970,6 +1970,19 @@ int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)
     int32_t ret = GetAvailableAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_P2P, connInfo);
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_CONN, "select auth type=%{public}d", AUTH_LINK_TYPE_P2P);
+    }
+    return ret;
+}
+
+int32_t AuthDeviceGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo)
+{
+    if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = GetAvailableAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_USB, connInfo);
+    if (ret == SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_CONN, "select auth type=%{public}d", AUTH_LINK_TYPE_USB);
     }
     return ret;
 }

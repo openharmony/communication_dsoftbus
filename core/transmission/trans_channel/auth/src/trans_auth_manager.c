@@ -388,6 +388,8 @@ static void TransAuthCloseChannel(int32_t authId, int32_t linkType, bool isClien
         AuthCloseChannel(authId, AUTH_RAW_P2P_CLIENT);
     } else if (linkType == LANE_HML_RAW && !isClient) {
         AuthCloseChannel(authId, AUTH_RAW_P2P_SERVER);
+    } else if (linkType == LANE_USB) {
+        AuthCloseChannel(authId, AUTH_USB);
     } else {
         AuthCloseChannel(authId, AUTH);
     }
@@ -1160,6 +1162,9 @@ static AuthChannelInfo *TransOpenAuthChannelPrepareParam(const char *sessionName
     *channelId = (int32_t)channel->appInfo.myData.channelId;
     channel->appInfo.timeStart = GetSoftbusRecordTimeMillis();
     channel->appInfo.connectType = connOpt->type;
+    if (connOpt->socketOption.moduleId == AUTH_USB) {
+        channel->appInfo.linkType = LANE_USB;
+    }
     return channel;
 }
 
@@ -1176,7 +1181,8 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     }
     TransEventExtra extra;
     FillAndReportEventStart(sessionName, channelId, connOpt->type, &extra, channel);
-    int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
+    int32_t ifnameIdx = (connOpt->socketOption.moduleId == AUTH_USB) ? USB_IF : WLAN_IF;
+    int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port, ifnameIdx);
     if (authId < 0) {
         TRANS_LOGE(TRANS_SVC, "AuthOpenChannel failed");
         SoftBusFree(channel);

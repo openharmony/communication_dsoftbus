@@ -90,5 +90,15 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 {
     return GetLaneQueryDepsInterface()->LnnGetOnlineStateById(id, type);
 }
+
+int32_t CheckStaticNetCap(const char *networkId, LaneLinkType linkType)
+{
+    return GetLaneQueryDepsInterface()->CheckStaticNetCap(networkId, linkType);
+}
+
+int32_t CheckDynamicNetCap(const char *networkId, LaneLinkType linkType)
+{
+    return GetLaneQueryDepsInterface()->CheckDynamicNetCap(networkId, linkType);
+}
 }
 } // namespace OHOS
