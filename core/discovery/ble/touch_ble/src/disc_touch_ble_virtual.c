@@ -66,9 +66,10 @@ static int32_t TouchBleStopActiveDiscovery(const SubscribeOption *option)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static void TouchBleLinkStatusChanged(LinkStatus status)
+static void TouchBleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     (void)status;
+    (void)ifnameIdx;
 }
 
 static void TouchBleUpdateLocalDeviceInfo(InfoTypeChanged type)

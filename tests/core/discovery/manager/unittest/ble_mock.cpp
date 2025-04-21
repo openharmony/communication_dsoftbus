@@ -70,9 +70,9 @@ int32_t BleMock::BleStopAdvertise(const SubscribeOption *option)
     return Get()->StopAdvertise(option);
 }
 
-void BleMock::BleLinkStatusChanged(LinkStatus status)
+void BleMock::BleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
-    Get()->LinkStatusChanged(status);
+    Get()->LinkStatusChanged(status, ifnameIdx);
 }
 
 void BleMock::BleUpdateLocalDeviceInfo(InfoTypeChanged type)
