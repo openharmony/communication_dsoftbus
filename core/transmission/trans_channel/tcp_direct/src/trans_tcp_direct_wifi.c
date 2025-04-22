@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_manager.h"
 #include "lnn_network_manager.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -144,7 +145,16 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
         return ret;
     }
-    AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &newConn->authHandle);
+    if (module == DIRECT_CHANNEL_SERVER_USB) {
+        AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_USB, false, &newConn->authHandle);
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, newConn->appInfo.myData.addr,
+            sizeof(newConn->appInfo.myData.addr), USB_IF) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local ip failed");
+            return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+        }
+    } else {
+        AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &newConn->authHandle);
+    }
     if ((newConn->authHandle.authId == AUTH_INVALID_ID) && (connInfo->type == CONNECT_P2P_REUSE)) {
         AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &newConn->authHandle);
     }

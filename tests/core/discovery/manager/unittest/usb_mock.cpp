@@ -70,9 +70,9 @@ int32_t UsbMock::UsbStopAdvertise(const SubscribeOption *option)
     return Get()->StopAdvertise(option);
 }
 
-void UsbMock::UsbLinkStatusChanged(LinkStatus status)
+void UsbMock::UsbLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
-    Get()->LinkStatusChanged(status);
+    Get()->LinkStatusChanged(status, ifnameIdx);
 }
 
 void UsbMock::UsbUpdateLocalDeviceInfo(InfoTypeChanged type)

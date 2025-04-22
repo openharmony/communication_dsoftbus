@@ -49,7 +49,6 @@ constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
 constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
 constexpr char UUID_TEST[UUID_BUF_LEN] = "0123456789ABC";
 constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
-static constexpr int32_t DEFALUT_USERID = 100;
 
 #define LINK_TYPE      AUTH_LINK_TYPE_MAX
 #define CLIENT_PORT    6666
@@ -147,23 +146,20 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
 {
-    HiChainAuthParam hiChainParam;
+    HiChainAuthParam hiChainParam = {};
     int64_t authSeq = 0;
     const char *udid = "testdata";
     const char *uid = "testdata";
     int32_t ret;
 
-    hiChainParam.userId = DEFALUT_USERID;
-    hiChainParam.udid = NULL;
-    hiChainParam.uid = (char *)uid;
-
-    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
+    ret = HichainStartAuth(authSeq, NULL, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    hiChainParam.udid = (char *)udid;
-    hiChainParam.uid = NULL;
-    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
+    if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
+        strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        return;
+    }
+    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_BUTT);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    hiChainParam.uid = (char *)uid;
     (void)HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
 }
 
@@ -653,7 +649,7 @@ HWTEST_F(AuthTest, SOCKET_CONNECT_DEVICE_Test_001, TestSize.Level1)
     int32_t port = 22;
     bool isBlockMode = true;
 
-    int32_t ret = SocketConnectDevice(ip, port, isBlockMode);
+    int32_t ret = SocketConnectDevice(ip, port, isBlockMode, WLAN_IF);
     EXPECT_TRUE(ret == AUTH_INVALID_FD);
 }
 
@@ -686,7 +682,7 @@ HWTEST_F(AuthTest, SOCKER_GET_CONN_INFO_Test_001, TestSize.Level1)
     bool isServer = true;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -721,10 +717,10 @@ HWTEST_F(AuthTest, AUTH_OPRN_CHANNEL_Test_001, TestSize.Level1)
     int32_t port = 1;
     int32_t ret;
 
-    ret = AuthOpenChannel(nullptr, port);
+    ret = AuthOpenChannel(nullptr, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
     port = 0;
-    ret = AuthOpenChannel(ip, port);
+    ret = AuthOpenChannel(ip, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 
@@ -1997,11 +1993,11 @@ HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
     int32_t fd = 0;
     AuthConnInfo *connInfo = nullptr;
     bool isServer = false;
-    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo connInfoValue;
     (void)memset_s(&connInfoValue, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer);
+    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -2030,9 +2026,9 @@ HWTEST_F(AuthTest, AUTH_OPEN_CHANNEL_Test_001, TestSize.Level1)
     char *ip = nullptr;
     char ipValue[32] = "0";
     int32_t port = 22;
-    int32_t ret = AuthOpenChannel(ip, port);
+    int32_t ret = AuthOpenChannel(ip, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
-    ret = AuthOpenChannel(ipValue, port);
+    ret = AuthOpenChannel(ipValue, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 

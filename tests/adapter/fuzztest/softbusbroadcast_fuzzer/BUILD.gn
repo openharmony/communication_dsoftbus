@@ -52,7 +52,6 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
     "-g",
     "-O0",
     "-fno-omit-frame-pointer",
-    "-fstack-protector-strong",
   ]
 }
 

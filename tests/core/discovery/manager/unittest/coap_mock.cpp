@@ -70,9 +70,9 @@ int32_t CoapMock::CoapStopAdvertise(const SubscribeOption *option)
     return Get()->StopAdvertise(option);
 }
 
-void CoapMock::CoapLinkStatusChanged(LinkStatus status)
+void CoapMock::CoapLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
-    Get()->LinkStatusChanged(status);
+    Get()->LinkStatusChanged(status, ifnameIdx);
 }
 
 void CoapMock::CoapUpdateLocalDeviceInfo(InfoTypeChanged type)

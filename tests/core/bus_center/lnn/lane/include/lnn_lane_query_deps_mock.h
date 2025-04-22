@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_interface.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 
@@ -41,6 +42,8 @@ public:
     virtual int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info) = 0;
     virtual uint64_t LnnGetFeatureCapabilty(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+    virtual int32_t CheckStaticNetCap(const char *networkId, LaneLinkType linkType) = 0;
+    virtual int32_t CheckDynamicNetCap(const char *networkId, LaneLinkType linkType) = 0;
 };
 
 class LaneQueryDepsInterfaceMock : public LaneQueryDepsInterface {
@@ -59,6 +62,8 @@ public:
     MOCK_METHOD3(LnnGetRemoteBoolInfo, int32_t (const char *networkId, InfoKey key, bool *info));
     MOCK_METHOD0(LnnGetFeatureCapabilty, uint64_t (void));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
+    MOCK_METHOD2(CheckStaticNetCap, int32_t (const char *networkId, LaneLinkType linkType));
+    MOCK_METHOD2(CheckDynamicNetCap, int32_t (const char *networkId, LaneLinkType linkType));
 };
 } // namespace OHOS
 #endif // LNN_LANE_QUERY_DEPS_MOCK_H

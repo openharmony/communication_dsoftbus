@@ -208,9 +208,17 @@ static void TransSetTcpDirectConnectType(int32_t *connectType, ListenerModule mo
         *connectType = CONNECT_HML;
     } else if (module == DIRECT_CHANNEL_SERVER_P2P) {
         *connectType = CONNECT_P2P;
-    } else if (module == DIRECT_CHANNEL_SERVER_WIFI) {
+    } else if (module == DIRECT_CHANNEL_SERVER_WIFI || module == DIRECT_CHANNEL_SERVER_USB) {
         *connectType = CONNECT_TCP;
     }
+}
+
+static RouteType TransGetRouteTypeByModule(ListenerModule module)
+{
+    if (module == DIRECT_CHANNEL_SERVER_USB) {
+        return WIFI_USB;
+    }
+    return (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
 }
 
 static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chanId, const ConnectOption *clientAddr)
@@ -228,7 +236,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->timeout = 0;
     conn->listenMod = module;
     conn->authHandle.authId = AUTH_INVALID_ID;
-    conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
+    conn->appInfo.routeType = TransGetRouteTypeByModule(module);
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
     TransSetTcpDirectConnectType(&conn->appInfo.connectType, module);
     int32_t ret =

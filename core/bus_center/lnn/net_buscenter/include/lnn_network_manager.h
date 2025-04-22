@@ -32,9 +32,10 @@ extern "C" {
 #define LNN_NETIF_TYPE_WLAN (0x1 << 1)
 #define LNN_NETIF_TYPE_BR   (0x1 << 2)
 #define LNN_NETIF_TYPE_BLE  (0x1 << 3)
+#define LNN_NETIF_TYPE_USB  (0x1 << 4)
 typedef uint16_t LnnNetIfType;
 
-#define LNN_NETWORK_MAX_PROTOCOL_COUNT 3
+#define LNN_NETWORK_MAX_PROTOCOL_COUNT 4
 
 typedef struct {
     ListNode node;
@@ -87,6 +88,7 @@ bool LnnIsAutoNetWorkingEnabled(void);
 bool LnnVisitNetif(VisitNetifCallback callback, void *data);
 bool LnnVisitProtocol(VisitProtocolCallback callback, void *data);
 int32_t RegistIPProtocolManager(void);
+int32_t RegistUsbProtocolManager(void);
 void LnnSetUnlockState(void);
 void LnnGetDataShareInitResult(bool *isDataShareInit);
 

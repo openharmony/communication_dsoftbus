@@ -84,6 +84,7 @@ typedef struct {
     char uuid[UUID_BUF_LEN];
     char udidHash[SHA_256_HEX_HASH_LEN];
     SoftBusVersion version;
+    AuthVersion authVersion;
     bool isSupportCompress;
     bool isSupportFastAuth;
     bool isNeedFastAuth;

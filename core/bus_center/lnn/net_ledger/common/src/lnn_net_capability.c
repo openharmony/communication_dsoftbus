@@ -156,6 +156,9 @@ uint32_t LnnGetDefaultStaticNetCap(void)
     if ((configValue & (1 << STATIC_CAP_BIT_ETH)) != 0) {
         (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ETH);
     }
+    if ((configValue & (1 << STATIC_CAP_BIT_USB)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_USB);
+    }
     return capability;
 }
 

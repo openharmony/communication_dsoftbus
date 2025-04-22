@@ -396,7 +396,7 @@ void LnnDumpLocalBasicInfo(void)
     AnonymizeFree(anonyUdidHash);
     AnonymizeFree(anonyNetworkId);
     const char *devTypeStr = LnnConvertIdToDeviceType(localInfo.deviceTypeId);
-    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN);
+    (void)LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, IP_LEN, WLAN_IF);
     (void)LnnGetLocalStrInfo(STRING_KEY_P2P_MAC, localP2PMac, MAC_LEN);
     (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, localBtMac, BT_MAC_LEN);
     (void)LnnGetAllOnlineNodeNum(&onlineNodeNum);
@@ -459,7 +459,7 @@ static int32_t LnnDumpPrintMac(const char *networkId)
 static int32_t LnnDumpPrintIp(const char *networkId)
 {
     char ipAddr[IP_STR_MAX_LEN] = {0};
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, ipAddr, IP_STR_MAX_LEN) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfoByIfnameIdx(networkId, STRING_KEY_IP, ipAddr, IP_STR_MAX_LEN, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get ipAddr failed");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }

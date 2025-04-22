@@ -268,7 +268,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.
     AuthHichainIdServiceInterfaceMock IdServiceMock;
     char *param;
     const char *data = "1234";
-    HiChainAuthParam hiChainParam = { 0 };
+    HiChainAuthParam hiChainParam = {};
     
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {

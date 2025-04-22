@@ -82,11 +82,13 @@ void NotifyJoinResult(LnnConnectionFsm *connFsm, const char *networkId, int32_t 
     }
     NodeInfo *nodeInfo = connInfo->nodeInfo;
     if (retCode == SOFTBUS_OK && nodeInfo != NULL) {
-        if (connInfo->addr.type == CONNECTION_ADDR_WLAN &&
-            connInfo->addr.info.ip.port != nodeInfo->connectInfo.authPort) {
-            LNN_LOGI(LNN_BUILDER, "before port =%{public}d, after port=%{public}d",
-                connInfo->addr.info.ip.port, nodeInfo->connectInfo.authPort);
-            connInfo->addr.info.ip.port = nodeInfo->connectInfo.authPort;
+        if (connInfo->addr.type == CONNECTION_ADDR_WLAN || connInfo->addr.type == CONNECTION_ADDR_NCM) {
+            int32_t ifIdx = (connInfo->addr.type == CONNECTION_ADDR_NCM) ? USB_IF : WLAN_IF;
+            if (connInfo->addr.info.ip.port != nodeInfo->connectInfo.ifInfo[ifIdx].authPort) {
+                LNN_LOGI(LNN_BUILDER, "before port =%{public}d, after port=%{public}d",
+                    connInfo->addr.info.ip.port, nodeInfo->connectInfo.ifInfo[ifIdx].authPort);
+                connInfo->addr.info.ip.port = nodeInfo->connectInfo.ifInfo[ifIdx].authPort;
+            }
         }
         LnnNotifyJoinResult(&connInfo->addr, networkId, retCode);
     }

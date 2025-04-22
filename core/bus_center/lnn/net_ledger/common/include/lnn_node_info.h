@@ -71,6 +71,7 @@ typedef enum {
 typedef enum {
     DISCOVERY_TYPE_UNKNOWN = 0,
     DISCOVERY_TYPE_WIFI,
+    DISCOVERY_TYPE_USB,
     DISCOVERY_TYPE_BLE,
     DISCOVERY_TYPE_BR,
     DISCOVERY_TYPE_P2P,
@@ -218,18 +219,18 @@ const char *LnnGetBtMac(const NodeInfo *info);
 void LnnSetBtMac(NodeInfo *info, const char *mac);
 const char *LnnGetBleMac(const NodeInfo *info);
 void LnnSetBleMac(NodeInfo *info, const char *mac);
-const char *LnnGetWiFiIp(const NodeInfo *info);
-void LnnSetWiFiIp(NodeInfo *info, const char *ip);
-const char *LnnGetNetIfName(const NodeInfo *info);
-void LnnSetNetIfName(NodeInfo *info, const char *netIfName);
+const char *LnnGetWiFiIp(const NodeInfo *info, int32_t ifnameIdx);
+void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx);
+const char *LnnGetNetIfName(const NodeInfo *info, int32_t ifnameIdx);
+void LnnSetNetIfName(NodeInfo *info, const char *netIfName, int32_t ifnameIdx);
 const char *LnnGetMasterUdid(const NodeInfo *info);
 int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid);
-int32_t LnnGetAuthPort(const NodeInfo *info);
-int32_t LnnSetAuthPort(NodeInfo *info, int32_t port);
-int32_t LnnGetSessionPort(const NodeInfo *info);
-int32_t LnnSetSessionPort(NodeInfo *info, int32_t port);
-int32_t LnnGetProxyPort(const NodeInfo *info);
-int32_t LnnSetProxyPort(NodeInfo *info, int32_t port);
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx);
+int32_t LnnSetAuthPort(NodeInfo *info, int32_t port, int32_t ifnameIdx);
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx);
+int32_t LnnSetSessionPort(NodeInfo *info, int32_t port, int32_t ifnameIdx);
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx);
+int32_t LnnSetProxyPort(NodeInfo *info, int32_t port, int32_t ifnameIdx);
 int32_t LnnSetP2pRole(NodeInfo *info, int32_t role);
 int32_t LnnGetP2pRole(const NodeInfo *info);
 int32_t LnnSetWifiCfg(NodeInfo *info, const char *wifiCfg);
@@ -264,6 +265,7 @@ int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
 const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log);
 int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn);
+bool isIfnameIdxInvalid(int32_t ifnameIdx);
 void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr);
 void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr);
 void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr);

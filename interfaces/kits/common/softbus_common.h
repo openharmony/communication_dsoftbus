@@ -260,6 +260,7 @@ typedef enum {
     CONNECTION_ADDR_USB,      /**< USB */
     CONNECTION_ADDR_SESSION_WITH_KEY, /**< Session with key */
     CONNECTION_ADDR_SLE,      /**< SLE */
+    CONNECTION_ADDR_NCM,      /**< USB NCM */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 

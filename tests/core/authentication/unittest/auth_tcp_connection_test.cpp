@@ -138,7 +138,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Leve
     int32_t fd = 0;
     bool isClient = true;
     NotifyConnected(AUTH, fd, isClient);
-    NotifyDisconnected(fd);
+    NotifyDisconnected(AUTH, fd);
     StopSocketListening(AUTH);
 
     int32_t ret = ProcessSocketOutEvent(AUTH, fd);
@@ -238,11 +238,11 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     bool isServer;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    int32_t ret = SocketGetConnInfo(fd, nullptr, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, nullptr, &isServer, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = SocketGetConnInfo(fd, &connInfo, nullptr);
+    ret = SocketGetConnInfo(fd, &connInfo, nullptr, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = SocketGetConnInfo(fd, &connInfo, &isServer);
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 

@@ -131,7 +131,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Level1)
 {
     static InfoKey keyStringTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_UUID,
-        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_WLAN_IP, STRING_KEY_MASTER_NODE_UDID,
+        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_IP, STRING_KEY_MASTER_NODE_UDID,
         STRING_KEY_P2P_MAC, STRING_KEY_P2P_GO_MAC, STRING_KEY_NODE_ADDR, STRING_KEY_OFFLINE_CODE,
         STRING_KEY_WIFIDIRECT_ADDR, STRING_KEY_SLE_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
@@ -567,8 +567,8 @@ HWTEST_F(LNNDisctributedLedgerTest, NEW_BRBLE_DISCOVERED_Test_001, TestSize.Leve
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)NewWifiDiscovered(nullptr, nullptr);
     (void)NewWifiDiscovered(&oldInfo, &newInfo);
-    (void)NewBrBleDiscovered(nullptr, nullptr);
-    (void)NewBrBleDiscovered(&oldInfo, &newInfo);
+    (void)NeedUpdateIpPortInfo(nullptr, nullptr);
+    (void)NeedUpdateIpPortInfo(&oldInfo, &newInfo);
     (void)RetainOfflineCode(nullptr, nullptr);
     (void)ConvertNodeInfoToBasicInfo(nullptr, nullptr);
     bool ret = IsNetworkIdChanged(nullptr, nullptr);
@@ -681,11 +681,11 @@ HWTEST_F(LNNDisctributedLedgerTest, DL_GET_WIFICFG_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = DlGetNetType(nullptr, true, nullptr, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DlGetProxyPort(nullptr, true, nullptr, len);
+    ret = DlGetProxyPort(nullptr, true, nullptr, len, WLAN_IF);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DlGetSessionPort(nullptr, true, nullptr, len);
+    ret = DlGetSessionPort(nullptr, true, nullptr, len, WLAN_IF);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DlGetAuthPort(nullptr, true, nullptr, len);
+    ret = DlGetAuthPort(nullptr, true, nullptr, len, WLAN_IF);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -1480,9 +1480,9 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_REMOTE_NODE_INFO_Test_001, TestSize.L
     EXPECT_EQ(EOK, memcpy_s(newInfo.userIdCheckSum, USERID_CHECKSUM_LEN, "101", strlen("101")));
     EXPECT_EQ(EOK, strcpy_s(newInfo.networkId, NETWORK_ID_BUF_LEN, NODE2_NETWORK_ID));
     newInfo.discoveryType = DISCOVERY_TYPE;
-    newInfo.connectInfo.authPort = 0;
-    newInfo.connectInfo.proxyPort = 1;
-    newInfo.connectInfo.sessionPort = 3;
+    newInfo.connectInfo.ifInfo[WLAN_IF].authPort = 0;
+    newInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = 1;
+    newInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = 3;
     EXPECT_EQ(EOK, strcpy_s(newInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, NODE2_DEVICE_NAME));
     EXPECT_EQ(EOK, strcpy_s(newInfo.deviceInfo.nickName, DEVICE_NAME_BUF_LEN, NODE2_DEVICE_NAME));
     EXPECT_EQ(EOK, strcpy_s(newInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, NODE2_DEVICE_NAME));

@@ -39,6 +39,7 @@
 #include "nstackx_smartgenius.h"
 #include "nstackx_timer.h"
 #include "nstackx_util.h"
+#include "nstackx_inet.h"
 #include "json_payload.h"
 #include "nstackx_statistics.h"
 #include "nstackx_dfinder_hidump.h"
@@ -52,6 +53,7 @@
 #define DFINDER_THREAD_STACK_SIZE (1024 * 32)
 #endif
 
+#define MAX_COAP_SERVICE_DATA_CNT 3
 #define TAG "nStackXDFinder"
 #define DFINDER_THREAD_NAME TAG
 
@@ -896,8 +898,8 @@ static bool IsIpAddressValid(const char *ipStr, size_t len)
         return NSTACKX_FALSE;
     }
 
-    struct in_addr ipAddr;
-    if (len != 0 && ipStr[0] != '\0' && inet_pton(AF_INET, ipStr, &ipAddr) != 1) {
+    union InetAddr addr;
+    if (len != 0 && ipStr[0] != '\0' && InetGetAfType(ipStr, &addr) == AF_ERROR) {
         DFINDER_LOGE(TAG, "invalid ip address");
         return NSTACKX_FALSE;
     }
@@ -972,7 +974,8 @@ static int32_t RegisterDeviceWithDeviceHash(const NSTACKX_LocalDeviceInfo *local
     NSTACKX_LocalDeviceInfoV2 v2;
     DeviceInfoV2Init(&v2, localDeviceInfo, hasDeviceHash, deviceHash);
 
-    NSTACKX_InterfaceInfo ifaceInfo = { {0}, {0} };
+    NSTACKX_InterfaceInfo ifaceInfo;
+    (void)memset_s(&ifaceInfo, sizeof(ifaceInfo), 0, sizeof(ifaceInfo));
     if (localDeviceInfo->ifNums == 0) {
         if (strcpy_s(ifaceInfo.networkName, sizeof(ifaceInfo.networkName), localDeviceInfo->networkName) != EOK ||
             strcpy_s(ifaceInfo.networkIpAddr, sizeof(ifaceInfo.networkIpAddr),
@@ -1004,6 +1007,37 @@ static void ConfigureLocalDeviceNameInner(void *argument)
 
     ConfigureLocalDeviceName(localDevName);
     free(localDevName);
+}
+
+static void RegisterLocalDeviceHash(void *arg)
+{
+    uint64_t hash = (uint64_t)(uintptr_t)arg;
+    SetLocalDeviceHash(hash);
+}
+
+static int32_t RegisterDeviceHashInner(uint64_t deviceHash)
+{
+    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+        SetLocalDeviceHash(deviceHash);
+        return NSTACKX_EOK;
+    }
+
+    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterLocalDeviceHash, (void *)deviceHash)) {
+        DFINDER_LOGE(TAG, "Failed to configure local device hash!");
+        return NSTACKX_EFAILED;
+    }
+
+    return NSTACKX_EOK;
+}
+
+int32_t NSTACKX_RegisterDeviceHash(uint64_t deviceHash)
+{
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_CTRL is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+
+    return RegisterDeviceHashInner(deviceHash);
 }
 
 int32_t NSTACKX_RegisterDeviceName(const char *devName)
@@ -1261,6 +1295,94 @@ static void RegisterServiceDataInner(void *argument)
     }
     free(serviceData);
 }
+
+static bool RegisterServiceDataParamCheck(const struct NSTACKX_ServiceData *param, uint32_t cnt)
+{
+    uint32_t i;
+    if (param == NULL) {
+        DFINDER_LOGE(TAG, "param is null");
+        return false;
+    }
+
+    if (cnt == 0 || cnt >= MAX_COAP_SERVICE_DATA_CNT) {
+        DFINDER_LOGE(TAG, "cnt is error");
+        return false;
+    }
+
+    for (i = 0; i < cnt; i++) {
+        size_t len = strnlen(param[i].serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
+        if (len == NSTACKX_MAX_SERVICE_DATA_LEN) {
+            DFINDER_LOGE(TAG, "param[%u] serviceData is error, no terminator", i);
+            return false;
+        }
+
+        len = strnlen(param[i].ip, NSTACKX_MAX_IP_STRING_LEN);
+        if (len == NSTACKX_MAX_IP_STRING_LEN) {
+            DFINDER_LOGE(TAG, "param[%u] ip is error, no terminator", i);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+struct ServiceDataInfo {
+    const struct NSTACKX_ServiceData *param;
+    uint32_t cnt;
+    sem_t wait;
+};
+
+static int32_t ServiceDataInfoInit(struct ServiceDataInfo *info, const struct NSTACKX_ServiceData *param, uint32_t cnt)
+{
+    if (SemInit(&info->wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
+        return NSTACKX_EFAILED;
+    }
+    info->param = param;
+    info->cnt = cnt;
+    return NSTACKX_EOK;
+}
+
+static void RegisterServiceDataV2(void *arg)
+{
+    struct ServiceDataInfo *info = (struct ServiceDataInfo *)arg;
+    if (SetLocalDeviceServiceDataV2(info->param, info->cnt) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "register v2 info failed");
+    }
+    SemPost(&info->wait);
+}
+
+int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
+{
+    DFINDER_LOGI(TAG, "begin to call NSTACKX_RegisterServiceDataV2");
+    if (!RegisterServiceDataParamCheck(param, cnt)) {
+        return NSTACKX_EINVAL;
+    }
+
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+
+    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+        return SetLocalDeviceServiceDataV2(param, cnt);
+    }
+
+    struct ServiceDataInfo info;
+    if (ServiceDataInfoInit(&info, param, cnt) != NSTACKX_EOK) {
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterServiceDataV2, (void *)&info) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to register serviceDatav2!");
+        SemDestroy(&info.wait);
+        return NSTACKX_EFAILED;
+    }
+
+    SemWait(&info.wait);
+    SemDestroy(&info.wait);
+    return NSTACKX_EOK;
+}
+
 
 int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 {

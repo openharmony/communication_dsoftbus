@@ -17,6 +17,7 @@
 #define COAP_CLIENT_H
 
 #include <coap3/coap.h>
+#include "nstackx_inet.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,7 +33,8 @@ typedef struct {
     const coap_address_t *dst;
 } CoapServerParameter;
 
-coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needBind, const struct in_addr *ip);
+coap_context_t *CoapGetContext(const char *node, const char *port,
+    uint8_t af, const union InetAddr *ip);
 coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const char *localPort,
     const CoapServerParameter *coapServerParameter);
 

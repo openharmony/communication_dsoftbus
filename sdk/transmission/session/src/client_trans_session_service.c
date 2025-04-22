@@ -365,10 +365,14 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
     if (addrInfo == NULL || num <= 0) {
         return addrIndex;
     }
+    int32_t usbIndex = -1;
     int32_t wifiIndex = -1;
     int32_t brIndex = -1;
     int32_t bleIndex = -1;
     for (int32_t index = 0; index < num; index++) {
+        if (addrInfo[index].type == CONNECTION_ADDR_NCM && usbIndex < 0) {
+            usbIndex = index;
+        }
         if ((addrInfo[index].type == CONNECTION_ADDR_ETH || addrInfo[index].type == CONNECTION_ADDR_WLAN) &&
             wifiIndex < 0) {
             wifiIndex = index;
@@ -380,7 +384,8 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
             bleIndex = index;
         }
     }
-    addrIndex = (wifiIndex >= 0) ? wifiIndex : addrIndex;
+    addrIndex = (usbIndex >= 0) ? usbIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? wifiIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
     return addrIndex;

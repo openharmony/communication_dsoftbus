@@ -41,6 +41,7 @@ if (dsoftbus_feature_inner_coap) {
     "core/nstackx_device_local.c",
     "core/nstackx_device_remote.c",
     "core/nstackx_dfinder_log.c",
+    "core/nstackx_inet.c",
   ]
 
   base_include_dirs = [
