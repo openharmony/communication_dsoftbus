@@ -71,7 +71,7 @@ static void BuildChannelMsg(ChannelMsg *data)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -99,7 +99,7 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel;
@@ -152,7 +152,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelMsg data;
@@ -180,7 +180,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level1)
 {
     int32_t ret;
     char networkId[] = "ABCDEFG";
@@ -218,7 +218,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelMsg data;
@@ -246,7 +246,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -281,7 +281,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -315,7 +315,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level1)
 {
     ChannelMsg *data = nullptr;
     int32_t ret = ClientIpcOnChannelBind(data);
@@ -349,7 +349,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Level1)
 {
     ChannelMsg *data = nullptr;
     int32_t errCode = 0;
@@ -370,7 +370,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level1)
 {
     const char *peerIp = "1234"; // test value
     int32_t routeType = TEST_REMOTE_TYPE;
@@ -392,7 +392,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level1)
 {
     ChannelMsg *data = nullptr;
     int32_t ret = ClientIpcOnChannelClosed(data);
@@ -412,7 +412,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level1)
 {
     int32_t sessionId = TEST_PID;
     int32_t pid = TEST_PID;
@@ -447,7 +447,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Level1)
 {
     int32_t ret = ClientIpcOnChannelMsgReceived(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -476,7 +476,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Level1)
 {
     uint8_t tos = 0;
     int32_t ret = ClientIpcOnTransLimitChange(nullptr, TEST_PID, TEST_CHANNELID, tos);
@@ -495,7 +495,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level1)
 {
     int32_t ret = CheckServiceIsRegistered(nullptr, TEST_PID);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -510,7 +510,7 @@ HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level1)
 {
     int32_t ret = ClientIpcChannelOnQos(nullptr, QOS_SATISFIED, nullptr, QOS_TYPE_BUTT);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -544,7 +544,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Level1)
 {
     int32_t pid = 0;
     CollabInfo sourceInfo = {
@@ -578,7 +578,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcCheckParamTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcCheckParamTest001, TestSize.Level1)
 {
     int32_t pid = 0;
     int32_t ret = ClientIpcOnChannelOpened(nullptr, nullptr, nullptr, pid);

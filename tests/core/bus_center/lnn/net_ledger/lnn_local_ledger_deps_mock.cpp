@@ -416,9 +416,9 @@ int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager)
     return GetLocalLedgerDepsInterface()->LnnRegistPhysicalSubnet(manager);
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx)
 {
-    return GetLocalLedgerDepsInterface()->DiscLinkStatusChanged(status, medium);
+    return GetLocalLedgerDepsInterface()->DiscLinkStatusChanged(status, medium, ifnameIdx);
 }
 
 bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)

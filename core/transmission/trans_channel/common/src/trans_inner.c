@@ -721,7 +721,7 @@ int32_t TdcSendData(int32_t channelId, const void *data, uint32_t len)
         .len = len,
     };
     seq++;
-    char *buf = TransTdcPackAllData(&dataInfo, info.sessionKey, data, FLAG_BYTES, &lenInfo);
+    char *buf = TransTdcPackAllData(&dataInfo, info.sessionKey, (const char *)data, FLAG_BYTES, &lenInfo);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "tdc send bytes failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return SOFTBUS_ENCRYPT_ERR;

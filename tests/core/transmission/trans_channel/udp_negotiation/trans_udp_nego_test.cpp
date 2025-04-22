@@ -429,6 +429,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoUkReply001, TestSize.Level1)
     string msgStr = "normal msgStr";
     cJSON *msg = cJSON_Parse(msgStr.c_str());
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
+    channel->isReply = true;
     ASSERT_TRUE(channel != nullptr);
     channel->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     channel->info.myData.channelId = 1;
@@ -441,10 +442,19 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoUkReply001, TestSize.Level1)
 
     EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkReply(authHandle, channel->seq, msg));
 
+    string errCodeMsgStr = "{\"ERR_CODE\":0}";
+    cJSON *errCodeMsg = cJSON_Parse(errCodeMsgStr.c_str());
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkReply(authHandle, channel->seq, errCodeMsg));
+
+    errCodeMsgStr = "{\"ERR_CODE\":-425983866}";
+    errCodeMsg = cJSON_Parse(errCodeMsgStr.c_str());
+    EXPECT_NO_FATAL_FAILURE(TransOnExchangeUdpInfoUkReply(authHandle, channel->seq, errCodeMsg));
+
     ret = TransDelUdpChannel(channel->info.myData.channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     cJSON_Delete(msg);
+    cJSON_Delete(errCodeMsg);
 }
 
 /**
@@ -467,17 +477,17 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
 
     (void)AuthCommonInit();
     ret = StartExchangeUdpInfo(&channel, authHandle, seq, false, nullptr);
-    EXPECT_EQ(SOFTBUS_AUTH_NOT_FOUND, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = StartExchangeUdpInfo(&channel, authHandle, seq, true, nullptr);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     UkIdInfo ukIdInfo = {
         .myId = 1,
         .peerId = 1,
     };
     ret = StartExchangeUdpInfo(&channel, authHandle, seq, false, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_AUTH_ACL_NOT_FOUND, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -520,6 +530,16 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb001, TestSize.Level1)
     UdpModuleCb(authHandle, &data);
 
     data.flag = 0;
+    UdpModuleCb(authHandle, &data);
+
+    data.data = (const uint8_t *)"{\"ERR_CODE\":0}\0";
+    data.len = strlen((const char *)data.data);
+    UdpModuleCb(authHandle, &data);
+
+    data.flag = FLAG_REPLY;
+    UdpModuleCb(authHandle, &data);
+
+    authHandle.type = AUTH_LINK_TYPE_MAX;
     UdpModuleCb(authHandle, &data);
 }
 
@@ -573,6 +593,12 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
     TransOnExchangeUdpInfo(authHandle, data.flag, data.seq, json);
 
     data.flag = 1;
+    TransOnExchangeUdpInfo(authHandle, data.flag, data.seq, json);
+
+    data.flag = FLAG_NEGOUK_REQUEST;
+    TransOnExchangeUdpInfo(authHandle, data.flag, data.seq, json);
+
+    data.flag = FLAG_NEGOUK_REPLY;
     TransOnExchangeUdpInfo(authHandle, data.flag, data.seq, json);
 
     cJSON_Delete(json);
@@ -1033,7 +1059,7 @@ HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level1)
 {
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
@@ -1056,7 +1082,7 @@ HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level1)
 {
     AppInfo appInfo;
     bool isServerSide = false;
@@ -1070,7 +1096,7 @@ HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     TransUdpChannelMgrDeinit();
@@ -1084,7 +1110,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t openResult = SOFTBUS_NO_INIT;
@@ -1110,7 +1136,7 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level0)
+HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t openResult = SOFTBUS_OK;

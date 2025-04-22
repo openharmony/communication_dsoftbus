@@ -72,9 +72,10 @@ static int32_t StopAdvertise(const SubscribeOption *option)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static void LinkStatusChanged(LinkStatus status)
+static void LinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     (void)status;
+    (void)ifnameIdx;
 }
 
 static void UpdateLocalDeviceInfo(InfoTypeChanged type)

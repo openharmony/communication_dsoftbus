@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
@@ -82,7 +83,7 @@ static ModuleListener g_moduleListener[] = {
         .listener = { NULL, NULL },
     },
     {
-        .module = MODULE_UK_CONNECTION,
+        .module = MODULE_USER_KEY_CONNECTION,
         .listener = { NULL, NULL },
     }
 };
@@ -336,6 +337,14 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
         return AUTH_INVALID_ID;
     }
     return AuthDeviceGetP2pConnInfo(uuid, connInfo);
+}
+
+int32_t AuthGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return AUTH_INVALID_ID;
+    }
+    return AuthDeviceGetUsbConnInfo(uuid, connInfo);
 }
 
 int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
@@ -661,7 +670,7 @@ uint32_t AuthGetGroupType(const char *udid, const char *uuid)
     return type;
 }
 
-bool AuthIsPotentialTrusted(const DeviceInfo *device)
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     DeviceInfo defaultInfo;
@@ -688,8 +697,9 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
             device->accountHash[0], device->accountHash[1]);
         return true;
     }
-    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, true) ||
-        IsPotentialTrustedDeviceDp(device->devId, true)) {
+    if (IdServiceIsPotentialTrustedDevice(device->devId, device->accountHash, false) ||
+        IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, isOnlyPointToPoint) ||
+        IsPotentialTrustedDeviceDp(device->devId, isOnlyPointToPoint)) {
         AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
@@ -780,6 +790,10 @@ int32_t AuthInit(void)
         return ret;
     }
     ret = UkNegotiateInit();
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "user key nego init failed, ret=%{public}d", ret);
+        return ret;
+    }
     AuthLoadDeviceKey();
     return AuthMetaInit(&callBack);
 }

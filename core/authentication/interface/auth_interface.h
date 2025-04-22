@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,11 @@ typedef enum {
 } SoftBusVersion;
 
 typedef enum {
+    AUTH_VERSION_INVALID = 0,
+    AUTH_VERSION_V1 = 1,
+} AuthVersion;
+
+typedef enum {
     AUTH_LINK_TYPE_WIFI = 1,
     AUTH_LINK_TYPE_BR,
     AUTH_LINK_TYPE_BLE,
@@ -60,6 +65,7 @@ typedef enum {
     AUTH_LINK_TYPE_SESSION,
     AUTH_LINK_TYPE_SESSION_KEY,
     AUTH_LINK_TYPE_SLE,
+    AUTH_LINK_TYPE_USB,
     AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
@@ -176,7 +182,7 @@ int32_t RegGroupChangeListener(const GroupChangeListener *listener);
 void UnregGroupChangeListener(void);
 
 TrustedReturnType AuthHasTrustedRelation(void);
-bool AuthIsPotentialTrusted(const DeviceInfo *device);
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint);
 bool IsAuthHasTrustedRelation(void);
 bool IsSameAccountDevice(const DeviceInfo *device);
 bool AuthHasSameAccountGroup(void);
@@ -211,6 +217,7 @@ int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo 
 int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient);
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
+int32_t AuthGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);
 int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
     DiscoveryType type);

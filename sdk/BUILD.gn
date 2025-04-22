@@ -74,8 +74,10 @@ config("dsoftbus_sdk_interface") {
   }
 
   if (dsoftbus_feature_ex_kits) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
+    include_dirs += [
+      "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/meta",
+    ]
   }
 
   if (schema_enhanced) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -450,7 +450,6 @@ static void SetLnnConnNodeInfo(
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         connInfo->nodeInfo->isSupportSv = true;
     }
-    connInfo->nodeInfo->isSupportUkNego = true;
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
@@ -911,6 +910,62 @@ static void NotifyJoinExtResultProcess(LnnConnectionFsm *connFsm, int32_t retCod
     NotifyStateForSession(&connFsm->connInfo.addr);
 }
 
+static bool IsRepeatDeviceId(NodeInfo *info)
+{
+    if (info == NULL || (strlen(info->deviceInfo.deviceUdid) != UDID_BUF_LEN - 1) ||
+        (strlen(info->networkId) != NETWORK_ID_BUF_LEN - 1)) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo err");
+        return false;
+    }
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "device not found");
+        return false;
+    }
+    if (strcmp(info->deviceInfo.deviceUdid, oldInfo.deviceInfo.deviceUdid) == 0) {
+        LNN_LOGE(LNN_BUILDER, "same device");
+        return false;
+    }
+    if (!LnnIsNodeOnline(&oldInfo)) {
+        LnnRemoveNode(oldInfo.deviceInfo.deviceUdid);
+        LNN_LOGE(LNN_BUILDER, "delete old info");
+        return false;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(oldInfo.deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "repeat networkId. old udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
+    return true;
+}
+
+static bool NeedUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+{
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_SESSION_WITH_KEY) {
+        LNN_LOGI(LNN_BUILDER, "addr type not session wiht key, skip");
+        return false;
+    }
+    bool needUpdateAuthManager = false;
+    needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, false);
+    if (!needUpdateAuthManager) {
+        needUpdateAuthManager = RawLinkNeedUpdateAuthManager(connFsm->connInfo.nodeInfo->uuid, true);
+    }
+    return needUpdateAuthManager;
+}
+
+static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
+{
+    if (NeedUpdateRawEnhanceP2p(connFsm)) {
+        LNN_LOGI(LNN_BUILDER, "notify add raw auth connection");
+        LnnNotifyRawEnhanceP2pEvent event = {.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P};
+        event.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P;
+        event.type = connFsm->connInfo.addr.type;
+        event.uuid = connFsm->connInfo.nodeInfo->uuid;
+        event.networkId = connFsm->connInfo.nodeInfo->networkId;
+        LnnNotifyAddRawEnhanceP2pEvent(&event);
+    }
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -927,13 +982,13 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
         SetLnnConnNodeInfo(connInfo, networkId, connFsm, retCode);
+        TryUpdateRawEnhanceP2p(connFsm);
     } else if (retCode != SOFTBUS_OK) {
         NotifyJoinResult(connFsm, networkId, retCode);
         connFsm->isDead = true;
         LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
     NotifyJoinExtResultProcess(connFsm, retCode);
-
     int32_t infoNum = 0;
     int32_t lnnType = 0;
     NodeBasicInfo *info = NULL;
@@ -1214,6 +1269,15 @@ static void CheckDupOk(LnnConnectionFsm *connFsm, NodeInfo *deviceInfo, bool *du
     }
 }
 
+static void FillDeviceKeyId(AuthVerifyParam *authVerifyParam, DeviceKeyId *deviceKeyId)
+{
+    if (deviceKeyId->hasDeviceKeyId) {
+        authVerifyParam->deviceKeyId.localDeviceKeyId = deviceKeyId->localDeviceKeyId;
+        authVerifyParam->deviceKeyId.remoteDeviceKeyId = deviceKeyId->remoteDeviceKeyId;
+        authVerifyParam->deviceKeyId.hasDeviceKeyId = true;
+    }
+}
+
 static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthVerifyParam *authVerifyParam)
 {
     int32_t connId;
@@ -1227,12 +1291,7 @@ static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthVerifyPar
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "add to auth reuse key list fail");
     }
-    authVerifyParam->deviceKeyId.localDeviceKeyId = connInfo->addr.info.session.localDeviceKeyId;
-    authVerifyParam->deviceKeyId.remoteDeviceKeyId = connInfo->addr.info.session.remoteDeviceKeyId;
-    if (authVerifyParam->deviceKeyId.localDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID &&
-        authVerifyParam->deviceKeyId.remoteDeviceKeyId != AUTH_INVALID_DEVICEKEY_ID) {
-        authVerifyParam->deviceKeyId.hasDeviceKeyId = true;
-    }
+    FillDeviceKeyId(authVerifyParam, &connInfo->addr.deviceKeyId);
 }
 
 static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam, uint32_t requestId)
@@ -1273,6 +1332,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         CheckDeviceKeyByPreLinkNode(connInfo, &authVerifyParam);
     } else {
         (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+        FillDeviceKeyId(&authVerifyParam, &connInfo->addr.deviceKeyId);
     }
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -1322,8 +1382,11 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
         LNN_LOGE(LNN_BUILDER, "fill uuid fail");
         return ret;
     }
-    if (connInfo->addr.type == CONNECTION_ADDR_ETH || connInfo->addr.type == CONNECTION_ADDR_WLAN) {
-        if (strcpy_s(nodeInfo->connectInfo.deviceIp, MAX_ADDR_LEN, connInfo->addr.info.ip.ip) != EOK) {
+    if (connInfo->addr.type == CONNECTION_ADDR_ETH || connInfo->addr.type == CONNECTION_ADDR_WLAN ||
+        connInfo->addr.type == CONNECTION_ADDR_NCM) {
+        int32_t ifnameIdx = (connInfo->addr.type == CONNECTION_ADDR_NCM) ? USB_IF : WLAN_IF;
+        if (strcpy_s(nodeInfo->connectInfo.ifInfo[ifnameIdx].deviceIp, MAX_ADDR_LEN,
+            connInfo->addr.info.ip.ip) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fill deviceIp fail");
             return SOFTBUS_STRCPY_ERR;
         }
@@ -1593,32 +1656,35 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
     return false;
 }
 
-static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo)
+static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo, ConnectionAddrType type)
 {
-    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
-        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi, discoveryType=%{public}u", oldNodeInfo->discoveryType);
+    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI) &&
+        !LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_USB)) {
+        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi or usb, discoveryType=%{public}u", oldNodeInfo->discoveryType);
         return false;
     }
-    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
+    int32_t ifIdx = (type == CONNECTION_ADDR_NCM) ? USB_IF : WLAN_IF;
+    if (strcmp(newNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp,
+        oldNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp) != 0) {
         char *newIp = NULL;
         char *oldIp = NULL;
-        Anonymize(newNodeInfo->connectInfo.deviceIp, &newIp);
-        Anonymize(oldNodeInfo->connectInfo.deviceIp, &oldIp);
+        Anonymize(newNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp, &newIp);
+        Anonymize(oldNodeInfo->connectInfo.ifInfo[ifIdx].deviceIp, &oldIp);
         LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s",
             AnonymizeWrapper(oldIp), AnonymizeWrapper(newIp));
         AnonymizeFree(newIp);
         AnonymizeFree(oldIp);
         return true;
     }
-    if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
+    if (newNodeInfo->connectInfo.ifInfo[ifIdx].authPort != oldNodeInfo->connectInfo.ifInfo[ifIdx].authPort) {
         LNN_LOGI(LNN_BUILDER, "peer authPort changed");
         return true;
     }
-    if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
+    if (newNodeInfo->connectInfo.ifInfo[ifIdx].proxyPort != oldNodeInfo->connectInfo.ifInfo[ifIdx].proxyPort) {
         LNN_LOGI(LNN_BUILDER, "peer proxyPort changed");
         return true;
     }
-    if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
+    if (newNodeInfo->connectInfo.ifInfo[ifIdx].sessionPort != oldNodeInfo->connectInfo.ifInfo[ifIdx].sessionPort) {
         LNN_LOGI(LNN_BUILDER, "peer sessionPort changed");
         return true;
     }
@@ -1632,8 +1698,9 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         *type = CONNECTION_ADDR_MAX;
         return true;
     }
-    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN) {
-        if (IsWifiConnectInfoChanged(oldNodeInfo, newNodeInfo)) {
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN ||
+        connFsm->connInfo.addr.type == CONNECTION_ADDR_NCM) {
+        if (IsWifiConnectInfoChanged(oldNodeInfo, newNodeInfo, connFsm->connInfo.addr.type)) {
             *type = connFsm->connInfo.addr.type;
             return true;
         }
@@ -1654,8 +1721,8 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     if (IsBasicNodeInfoChanged(&oldNodeInfo, nodeInfo, false)) {
         return true;
     }
-    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
-        if (IsWifiConnectInfoChanged(&oldNodeInfo, nodeInfo)) {
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_NCM) {
+        if (IsWifiConnectInfoChanged(&oldNodeInfo, nodeInfo, type)) {
             return true;
         }
     }
@@ -1768,7 +1835,8 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
+    int32_t ret = IsRepeatDeviceId(connFsm->connInfo.nodeInfo) ? SOFTBUS_NETWORK_REPEATED_DEVICEID : SOFTBUS_OK;
+    CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, ret);
 }
 
 static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)

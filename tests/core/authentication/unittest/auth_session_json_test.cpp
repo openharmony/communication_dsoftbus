@@ -553,7 +553,7 @@ HWTEST_F(AuthSessionJsonTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
     JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, 3);
     ret = UnpackBt(json, &info, SOFTBUS_NEW_V1, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = PackWiFi(json, &info, SOFTBUS_NEW_V1, false);
+    ret = PackWiFi(json, &info, SOFTBUS_NEW_V1, false, WLAN_IF);
     EXPECT_EQ(ret, SOFTBUS_AUTH_PACK_DEVINFO_FAIL);
     JSON_Delete(json);
 }
@@ -573,17 +573,17 @@ HWTEST_F(AuthSessionJsonTest, CheckBusVersion_TEST_001, TestSize.Level1)
     EXPECT_NE(CheckBusVersion(json1), SOFTBUS_OK);
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_NE(UnpackWiFi(json1, &info, SOFTBUS_OLD_V1, false), SOFTBUS_OK);
+    EXPECT_NE(UnpackWiFi(json1, &info, SOFTBUS_OLD_V1, false, WLAN_IF), SOFTBUS_OK);
     JSON_Delete(json1);
     JsonObj *json = JSON_CreateObject();
     EXPECT_NE(json, nullptr);
     JSON_AddInt32ToObject(json, BUS_MAX_VERSION, 3);
     JSON_AddInt32ToObject(json, BUS_MIN_VERSION, 0);
     EXPECT_TRUE(CheckBusVersion(json) == 2);
-    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false) == SOFTBUS_OK);
+    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false, WLAN_IF) == SOFTBUS_OK);
     JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, 63);
     JSON_AddStringToObject(json, BLE_OFFLINE_CODE, "123");
-    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false) == SOFTBUS_OK);
+    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false, WLAN_IF) == SOFTBUS_OK);
     JSON_Delete(json);
 }
 
@@ -707,14 +707,14 @@ HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     }
     JSON_AddStringToObject(obj, BLE_OFFLINE_CODE, "10244");
 
-    info->connectInfo.authPort = 8710;
-    info->connectInfo.sessionPort = 26;
-    info->connectInfo.proxyPort = 80;
+    info->connectInfo.ifInfo[WLAN_IF].authPort = 8710;
+    info->connectInfo.ifInfo[WLAN_IF].sessionPort = 26;
+    info->connectInfo.ifInfo[WLAN_IF].proxyPort = 80;
     info->supportedProtocols = LNN_PROTOCOL_BR;
-    int32_t ret = UnpackWiFi(obj, info, version, false);
+    int32_t ret = UnpackWiFi(obj, info, version, false, WLAN_IF);
     EXPECT_EQ(ret, SOFTBUS_OK);
     JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)-1);
-    ret = UnpackWiFi(obj, info, version, false);
+    ret = UnpackWiFi(obj, info, version, false, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_KEY", "1222222222");

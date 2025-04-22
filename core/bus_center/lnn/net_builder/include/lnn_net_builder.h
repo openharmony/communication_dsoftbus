@@ -189,7 +189,7 @@ void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const 
 void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size);
 int32_t ConfigLocalLedger(void);
 int32_t SyncElectMessage(const char *networkId);
-ConnectionAddrType GetCurrentConnectType(void);
+ConnectionAddrType GetCurrentConnectType(AuthLinkType linkType);
 NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo);
 bool NeedPendingJoinRequest(void);
 void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle, const NodeInfo *info);

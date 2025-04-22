@@ -113,16 +113,21 @@ static void TransSetUserId(CallerType callerType, SessionServer *newNode)
     }
 }
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
+static void PrintSessionInfo(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
         pkgName, AnonymizeWrapper(tmpName), uid, pid);
     AnonymizeFree(tmpName);
+}
+
+int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    PrintSessionInfo(pkgName, sessionName, uid, pid);
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     TRANS_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc failed");
     if (strcpy_s(newNode->pkgName, sizeof(newNode->pkgName), pkgName) != EOK) {
@@ -138,7 +143,11 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->pid = pid;
 
     int32_t ret = TransGetCallingFullTokenId(&newNode->tokenId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get callingTokenId failed");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get callingTokenId failed, ret=%{public}d", ret);
+        SoftBusFree(newNode);
+        return ret;
+    }
     int32_t tokenType = SoftBusGetAccessTokenType(newNode->tokenId);
     newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
         CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;

@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 dsoftbus_root_path = "../../../../../"
 
 ohos_unittest("SoftbusJsonUtilsTest") {

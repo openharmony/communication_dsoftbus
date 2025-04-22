@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
   trans_sdk_proxy_test_deps =
       [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("TransSdkStreamTest") {
     module_out_path = module_output_path
     sources = [ "udp/stream/trans_sdk_stream_test.cpp" ]
@@ -86,7 +86,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("TransSdkCommStreamTest") {
     module_out_path = module_output_path
     sources = [ "udp/stream/trans_sdk_comm_stream_test.cpp" ]
@@ -101,7 +101,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransProxyFileCommonTest") {
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_proxy_file_common_test.cpp" ]
@@ -116,7 +116,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransPendingTest") {
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_pending_test.cpp" ]
@@ -131,7 +131,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransProxyManagerTest") {
     sanitize = {
       cfi = true
@@ -157,7 +157,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransUdpManagerTest") {
     sanitize = {
       cfi = true
@@ -190,7 +190,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransUdpManagerStaticTest") {
     module_out_path = module_output_path
     sources = [ "udp/common/client_trans_udp_manager_static_test.cpp" ]
@@ -228,7 +228,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransProxyFileManagerTest") {
     sanitize = {
       cfi = true
@@ -262,7 +262,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransProxyFileManagerMockTest") {
     module_out_path = module_output_path
     sources = [
@@ -292,7 +292,7 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransChannelManagerTest") {
     sanitize = {
       cfi = true
@@ -318,7 +318,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  module_output_path = "dsoftbus/transmission"
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransChannelCallbackTest") {
     sanitize = {
       cfi = true

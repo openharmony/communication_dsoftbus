@@ -230,6 +230,16 @@ void InnerLink::SetLocalPort(int port)
     Set(InnerLinKey::LOCAL_PORT, port);
 }
 
+int InnerLink::GetRemotePort() const
+{
+    return Get(InnerLinKey::REMOTE_PORT, 0);
+}
+
+void InnerLink::SetRemotePort(int port)
+{
+    Set(InnerLinKey::REMOTE_PORT, port);
+}
+
 ListenerModule InnerLink::GetListenerModule() const
 {
     return Get(InnerLinKey::LISTENER_MODULE_ID, static_cast<ListenerModule>(UNUSE_BUTT));

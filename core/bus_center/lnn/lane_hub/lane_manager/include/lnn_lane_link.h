@@ -35,6 +35,7 @@ extern "C" {
 #define BLE_LATENCY             1500
 #define HML_LATENCY             1500
 #define BR_REUSE_LATENCY        1000
+#define USB_LATENCY             800
 
 typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
@@ -61,6 +62,12 @@ typedef struct {
     LaneBandwidth bw;
     WlanConnInfo connInfo;
 } WlanLinkInfo;
+
+typedef struct {
+    int32_t channel;
+    LaneBandwidth bw;
+    UsbConnInfo connInfo;
+} UsbLinkInfo;
 
 typedef struct {
     int32_t channel;
@@ -97,6 +104,7 @@ typedef struct {
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
         RawWifiDirectConnInfo rawWifiDirect;
+        UsbLinkInfo usb;
     } linkInfo;
 } LaneLinkInfo;
 

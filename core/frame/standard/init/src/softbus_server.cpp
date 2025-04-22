@@ -47,6 +47,7 @@ static ConnectType ConvertConnectType(ConnectionAddrType type)
         case CONNECTION_ADDR_ETH:
             return CONNECT_TCP;
         case CONNECTION_ADDR_WLAN:
+        case CONNECTION_ADDR_NCM:
             return CONNECT_TCP;
         default:
             return CONNECT_TYPE_MAX;
@@ -104,6 +105,11 @@ int32_t SoftBusServer::OpenSession(const SessionParam *param, TransInfo *info)
     return TransOpenSession(param, info);
 }
 
+static bool IsNcmAddrType(ConnectionAddrType addrType)
+{
+    return (addrType == CONNECTION_ADDR_NCM) ? true : false;
+}
+
 int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
     if (sessionName == nullptr || addrInfo == nullptr) {
@@ -123,8 +129,8 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
                 return SOFTBUS_MEM_ERR;
             }
             connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
-            connOpt.socketOption.protocol = LNN_PROTOCOL_IP;
-            connOpt.socketOption.moduleId = AUTH;
+            connOpt.socketOption.protocol = IsNcmAddrType(addrInfo->type) ? LNN_PROTOCOL_USB : LNN_PROTOCOL_IP;
+            connOpt.socketOption.moduleId = IsNcmAddrType(addrInfo->type) ? AUTH_USB : AUTH;
             break;
         case CONNECT_BLE:
             if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {

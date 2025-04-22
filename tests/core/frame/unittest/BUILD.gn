@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/frame"
+module_output_path = "dsoftbus/soft_bus/frame"
 dsoftbus_root_path = "../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
@@ -115,6 +115,7 @@ ohos_unittest("SoftbusServerTest") {
     external_deps = [
       "c_utils:utils",
       "dsoftbus:softbus_client",
+      "ipc:ipc_single",
       "googletest:gmock",
       "hilog:libhilog",
       "safwk:system_ability_fwk",
@@ -141,6 +142,7 @@ ohos_unittest("SoftbusClientInfoManagerTest") {
     external_deps = [
       "c_utils:utils",
       "dsoftbus:softbus_client",
+      "ipc:ipc_single",
       "googletest:gmock",
       "hilog:libhilog",
       "safwk:system_ability_fwk",

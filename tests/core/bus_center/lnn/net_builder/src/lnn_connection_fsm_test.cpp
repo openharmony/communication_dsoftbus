@@ -806,32 +806,33 @@ HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.L
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
     NodeInfo oldNodeInfo = {
-        .connectInfo.authPort = PORT,
-        .connectInfo.proxyPort = PORT,
-        .connectInfo.sessionPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].authPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].proxyPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].sessionPort = PORT,
     };
     NodeInfo newNodeInfo = {
-        .connectInfo.authPort = PORT,
-        .connectInfo.proxyPort = PORT,
-        .connectInfo.sessionPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].authPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].proxyPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].sessionPort = PORT,
     };
-    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
-    EXPECT_EQ(EOK, memcpy_s(newNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
-    bool ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
+    EXPECT_EQ(EOK, memcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
+    bool ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, false);
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, false);
-    oldNodeInfo.connectInfo.sessionPort = PORT + 1;
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT + 1;
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, true);
-    oldNodeInfo.connectInfo.proxyPort = PORT + 1;
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT + 1;
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, true);
-    oldNodeInfo.connectInfo.authPort = PORT + 1;
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT + 1;
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp,
+        IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, true);
 }
 

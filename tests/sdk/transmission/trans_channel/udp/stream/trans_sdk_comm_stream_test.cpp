@@ -47,7 +47,7 @@ void TransSdkCommStreamTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require: I5KRE8
  */
-HWTEST_F(TransSdkCommStreamTest, SendCommStreamTest001, TestSize.Level0)
+HWTEST_F(TransSdkCommStreamTest, SendCommStreamTest001, TestSize.Level1)
 {
     int32_t sessionId = 1;
     const StreamData streamData = {0};

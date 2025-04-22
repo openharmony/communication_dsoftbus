@@ -66,9 +66,9 @@ int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx)
 {
-    return GetNetworkManagerInterface()->DiscLinkStatusChanged(status, medium);
+    return GetNetworkManagerInterface()->DiscLinkStatusChanged(status, medium, ifnameIdx);
 }
 
 void LnnStopPublish(void)

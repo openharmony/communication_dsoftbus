@@ -315,7 +315,7 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteStrInfo(_, Eq(STRING_KEY_BT_MAC), _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteStrInfo(_, Eq(STRING_KEY_WLAN_IP), _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteStrInfoByIfnameIdx(_, Eq(STRING_KEY_IP), _, _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(heartbeatUtilsMock, LnnGetRemoteNumU32Info(_, Eq(NUM_KEY_NET_CAP), _))

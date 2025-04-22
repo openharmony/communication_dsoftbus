@@ -179,19 +179,35 @@ static int DumpStatistics(char *buf, uint32_t size)
     return PostDumpMsg(buf, size, DumpStatisticsInner);
 }
 
-int DFinderDumpIface(char *buf, int size, const char *ifname, const struct in_addr *ip, uint8_t state)
+int DFinderDumpIface(const struct DumpIfaceInfo *info, char *buf, int size)
 {
     uint32_t index = 0;
     int ret;
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "network name:%s"CRLF, ifname);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "if state:%hhu"CRLF, state);
+    if (info == NULL || info->addr == NULL) {
+        DFINDER_LOGE(TAG, "info is err");
+        return NSTACKX_EFAILED;
+    }
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "network name:%s"CRLF, info->ifname);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "if state:%hhu"CRLF, info->state);
 
     struct sockaddr_in addr;
+    struct sockaddr_in6 addr6;
+    struct sockaddr *ptr = (struct sockaddr *)&addr;
+    size_t len = sizeof(struct sockaddr_in);
     char ipStr[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    (void)memset_s(&addr, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = ip->s_addr;
-    ret = IpAddrAnonymousFormat(ipStr, NSTACKX_MAX_IP_STRING_LEN, (struct sockaddr *)&addr, sizeof(addr));
+    if (info->af == AF_INET) {
+        (void)memset_s(&addr, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = info->addr->in.s_addr;
+    } else {
+        (void)memset_s(&addr6, sizeof(struct sockaddr_in6), 0, sizeof(struct sockaddr_in6));
+        addr6.sin6_family = AF_INET6;
+        addr6.sin6_addr = info->addr->in6;
+        ptr = (struct sockaddr *)&addr6;
+        len = sizeof(struct sockaddr_in6);
+    }
+
+    ret = IpAddrAnonymousFormat(ipStr, NSTACKX_MAX_IP_STRING_LEN, ptr, len);
     if (ret < 0) {
         return ret;
     }

@@ -131,6 +131,7 @@ int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 
 void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *status)
 {
+    LNN_LOGI(LNN_BUILDER, "if name is %{public}s, protocolType %{public}d", ifName, protocolType);
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
@@ -170,6 +171,10 @@ void LnnNotifyAllTypeOffline(ConnectionAddrType type)
     if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_MAX) {
         CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_IP));
         LNN_LOGI(LNN_BUILDER, "success");
+    }
+    if (type == CONNECTION_ADDR_NCM) {
+        CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_USB));
+        LNN_LOGI(LNN_BUILDER, "usb success");
     }
 }
 

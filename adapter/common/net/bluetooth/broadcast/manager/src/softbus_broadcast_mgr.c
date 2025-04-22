@@ -1364,6 +1364,7 @@ static int32_t CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilt
         int32_t ret = CovertSoftBusBcScanFilters(filter, currentSize, *adapterFilter + size);
         if (ret != SOFTBUS_OK) {
             ReleaseSoftBusBcScanFilter(*adapterFilter, size);
+            *adapterFilter = NULL;
             DISC_LOGE(DISC_BROADCAST, "convert bc scan filters failed");
             return ret;
         }
@@ -1386,6 +1387,7 @@ static int32_t GetScanFiltersForOneListener(int32_t listenerId, SoftBusBcScanFil
     int32_t ret = CovertSoftBusBcScanFilters(filter, size, *adapterFilter);
     if (ret != SOFTBUS_OK) {
         ReleaseSoftBusBcScanFilter(*adapterFilter, size);
+        *adapterFilter = NULL;
         DISC_LOGE(DISC_BROADCAST, "convert bc scan filters failed");
         return ret;
     }

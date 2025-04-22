@@ -296,4 +296,37 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest010, TestSize.Level1)
     GenerateSeq(true);
     EXPECT_EQ(TEST_RET, g_seq);
 }
+
+/**
+ * @tc.name: TransUdpUserKeyTest001
+ * @tc.desc: udp channel user key static test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticTest, TransUdpUserKeyTest001, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int64_t seq = 0;
+    AuthACLInfo aclInfo;
+    (void)memset_s(&aclInfo, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    int32_t ret = HandUdpUkReply(authHandle, seq, &aclInfo, 0);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = TransUdpGenUk(&authHandle, seq, &aclInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = TransUkRequestMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t requestId = 1;
+    ret = TransUkRequestAddItem(requestId, 0, 0, 0, &aclInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_NO_FATAL_FAILURE(OnUdpGenUkSuccess(0, 0));
+    EXPECT_NO_FATAL_FAILURE(OnUdpOnGenUkFailed(0, 0));
+
+    EXPECT_NO_FATAL_FAILURE(OnUdpGenUkSuccess(requestId, 0));
+    EXPECT_NO_FATAL_FAILURE(OnUdpOnGenUkFailed(requestId, 0));
+
+    TransUkRequestMgrDeinit();
+}
 }

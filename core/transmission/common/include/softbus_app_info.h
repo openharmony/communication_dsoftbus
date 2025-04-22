@@ -66,12 +66,14 @@ typedef enum {
     BT_BR = 3,
     BT_BLE = 4,
     WIFI_P2P_REUSE = 6,
+    WIFI_USB = 7,
 } RouteType;
 
 typedef enum {
     UDP_CONN_TYPE_INVALID = -1,
     UDP_CONN_TYPE_WIFI = 0,
     UDP_CONN_TYPE_P2P = 1,
+    UDP_CONN_TYPE_USB = 2,
 } UdpConnType;
 
 typedef enum {

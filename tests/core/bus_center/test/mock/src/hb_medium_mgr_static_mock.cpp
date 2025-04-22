@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,9 +114,9 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     return HbMediumMgrInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-bool AuthIsPotentialTrusted(const DeviceInfo *device)
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
 {
-    return HbMediumMgrInterface()->AuthIsPotentialTrusted(device);
+    return HbMediumMgrInterface()->AuthIsPotentialTrusted(device, isOnlyPointToPoint);
 }
 
 int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len)

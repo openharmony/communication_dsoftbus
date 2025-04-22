@@ -18,12 +18,24 @@
 
 #include "auth_hichain.h"
 #include "device_auth.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
+
+typedef struct {
+    int32_t credIdType;
+    int32_t subject;
+    char udid[UDID_BUF_LEN];
+    char userId[MAX_ACCOUNT_HASH_LEN];
+} SoftBusCredInfo;
+
+int32_t IdServiceRegCredMgr(void);
+void IdServiceUnRegCredMgr(void);
+bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount);
 
 int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
     bool isSameAccount, char **credList);

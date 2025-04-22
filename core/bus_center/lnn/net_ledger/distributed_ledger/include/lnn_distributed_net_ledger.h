@@ -31,6 +31,11 @@ typedef struct {
     int32_t (*getInfo)(const char *netWorkId, bool checkOnline, void *info, uint32_t len);
 } DistributedLedgerKey;
 
+typedef struct {
+    InfoKey key;
+    int32_t (*getInfo)(const char *netWorkId, bool checkOnline, void *info, uint32_t len, int32_t ifnameIdx);
+} DistributedLedgerKeyByIfname;
+
 typedef enum {
     CATEGORY_UDID,
     CATEGORY_UUID,

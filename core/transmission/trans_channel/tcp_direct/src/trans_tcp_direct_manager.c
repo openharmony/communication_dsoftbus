@@ -273,8 +273,9 @@ static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInf
         }
     } else {
         if (connInfo->type == CONNECT_TCP) {
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
-                SOFTBUS_OK) {
+            int32_t ifNameIdx = (connInfo->socketOption.moduleId == DIRECT_CHANNEL_SERVER_USB) ? USB_IF : WLAN_IF;
+            if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
+                sizeof(appInfo->myData.addr), ifNameIdx) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
@@ -301,7 +302,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         appInfo->routeType = WIFI_P2P_REUSE;
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     } else {
-        appInfo->routeType = WIFI_STA;
+        appInfo->routeType = (connInfo->socketOption.moduleId == DIRECT_CHANNEL_SERVER_USB) ? WIFI_USB : WIFI_STA;
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
 

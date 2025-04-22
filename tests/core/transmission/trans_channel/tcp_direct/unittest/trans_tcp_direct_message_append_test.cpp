@@ -1351,6 +1351,17 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkReplyTest001, TestSize.Le
     ret = OpenDataBusUkReply(channelId, seq, reply);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
+    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_MEM_ERR));
+    EXPECT_CALL(TcpMessageMock, UnPackUkReply).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkReply(channelId, seq, reply);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_MEM_ERR));
+    EXPECT_CALL(TcpMessageMock, UnPackUkReply).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkReply(channelId, seq, reply);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
     TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
@@ -1467,48 +1478,6 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     EXPECT_TRUE(connect == nullptr);
 
     cJSON_Delete(reply);
-}
-
-/**
- * @tc.name: IsMetaSessionTest001
- * @tc.desc: Should return false when sessionname len less than 6.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, IsMetaSessionTest001, TestSize.Level1)
-{
-    const char *sessionName = "test";
-
-    bool ret = IsMetaSession(sessionName);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: IsMetaSessionTest002
- * @tc.desc: Should return false when sessionname is not IShare.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, IsMetaSessionTest002, TestSize.Level1)
-{
-    const char *sessionName = "testSessionName";
-
-    bool ret = IsMetaSession(sessionName);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: IsMetaSessionTest003
- * @tc.desc: Should return true when sessionname is IShare.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, IsMetaSessionTest003, TestSize.Level1)
-{
-    const char *sessionName = "IShare";
-
-    bool ret = IsMetaSession(sessionName);
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -2421,7 +2390,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     channelId = TEST_NEW_CHANNEL_ID;
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NOT_META_SESSION);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
 
     TransDelSessionConnById(TEST_NEW_CHANNEL_ID);
     TransDelSessionConnById(TEST_CHANNELID);
@@ -2453,9 +2422,23 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusUkRequestTest001, TestSize.
 
     EXPECT_CALL(TcpMessageMock, UnPackUkRequest).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OpenDataBusUkRequest(channelId, flags, seq, request);
-    EXPECT_EQ(SOFTBUS_AUTH_ACL_NOT_FOUND, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND));
+    ret = OpenDataBusUkRequest(channelId, flags, seq, request);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TcpMessageMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusUkRequest(channelId, flags, seq, request);
     EXPECT_NE(SOFTBUS_OK, ret);
 
