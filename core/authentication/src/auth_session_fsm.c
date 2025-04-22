@@ -1401,7 +1401,6 @@ static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
     }
     ReleaseAuthLock();
     SoftBusFree(ptkCbParam);
-    DelAuthGenCertParaNodeById(reuseKeyNode.requestId);
     AuthManagerSetAuthPassed(authFsm->authSeq, info);
     TryFinishAuthSession(authFsm);
 }
