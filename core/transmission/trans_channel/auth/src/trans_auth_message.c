@@ -61,7 +61,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         return SOFTBUS_CREATE_JSON_ERR;
     }
     if (appInfo->linkType == LANE_HML_RAW) {
-        if (!AddNumberToJsonObject(msg, "LANE_LINK_TYPE", appInfo->linkType) {
+        if (!AddNumberToJsonObject(msg, "LANE_LINK_TYPE", appInfo->linkType)) {
             TRANS_LOGE(TRANS_SVC, "add linkType failed");
             return SOFTBUS_CREATE_JSON_ERR;
         }
