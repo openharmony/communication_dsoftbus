@@ -319,6 +319,21 @@ static int32_t SpliceDisplayName(DeviceWrapper *device)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateDeviceName(DeviceWrapper *device)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "device is null");
+    int32_t ret = SOFTBUS_OK;
+    if (strlen(device->nickname) != 0) {
+        ret = SpliceDisplayName(device);
+    } else {
+        ret = memcpy_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN, device->devName, strlen(device->devName));
+        DISC_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_BLE, "devName copy failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t curLen = 0;
@@ -367,7 +382,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         // move cursor to next TLV
         curLen += len + 1;
     }
-    ret = SpliceDisplayName(device);
+    ret = UpdateDeviceName(device);
     return ret;
 }
 
