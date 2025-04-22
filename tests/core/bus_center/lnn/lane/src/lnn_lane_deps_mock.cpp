@@ -462,5 +462,20 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
     return GetLaneDepsInterface()->LnnSetDLConnCapability(networkId, connCapability);
 }
+
+int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *networkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteStrInfoByIfnameIdx(networkId, key, info, len, ifIdx);
+}
+
+int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *networkId, InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNumInfoByIfnameIdx(networkId, key, info, ifIdx);
+}
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetLaneDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
 }
 } // namespace OHOS

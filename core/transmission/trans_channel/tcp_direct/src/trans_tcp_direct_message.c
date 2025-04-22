@@ -61,6 +61,8 @@
 #define MIN_META_LEN 6
 #define META_SESSION "IShare"
 #define MAX_ERRDESC_LEN 128
+#define NCM_DEVICE_TYPE "ncm0"
+#define NCM_HOST_TYPE "wwan0"
 
 typedef struct {
     int32_t channelType;
@@ -318,7 +320,7 @@ static int32_t PackBytesWithUk(
 
 static void SendFailToFlushDevice(SessionConn *conn)
 {
-    if (conn->appInfo.routeType == WIFI_STA) {
+    if (conn->appInfo.routeType == WIFI_STA || conn->appInfo.routeType == WIFI_USB) {
         char *tmpId = NULL;
         Anonymize(conn->appInfo.peerData.deviceId, &tmpId);
         TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%{public}s", AnonymizeWrapper(tmpId));
@@ -435,7 +437,7 @@ static int32_t GetServerSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t le
 {
     char myIp[IP_LEN] = { 0 };
     if (appInfo->routeType == WIFI_STA) {
-        if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, myIp, sizeof(myIp), WLAN_IF) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
@@ -457,6 +459,11 @@ static int32_t GetServerSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t le
         }
         if (LnnSetDLP2pIp(appInfo->peerData.deviceId, CATEGORY_UUID, appInfo->peerData.addr) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide set peer p2p ip fail");
+        }
+    } else if (appInfo->routeType == WIFI_USB) {
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, myIp, sizeof(myIp), USB_IF) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "ServerSide get local usb ip fail");
+            return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
     }
     if (strcpy_s(ip, len, myIp) != EOK) {
@@ -1329,6 +1336,14 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
     return ret;
 }
 
+static bool IsNcmType(char *ifName)
+{
+    if (ifName == NULL) {
+        return false;
+    }
+    return (strcmp(ifName, NCM_DEVICE_TYPE) == 0 || strcmp(ifName, NCM_HOST_TYPE) == 0) ? true : false;
+}
+
 static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t cipherFlag, AuthHandle *authHandle)
 {
     if (authHandle == NULL) {
@@ -1355,7 +1370,12 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         AuthConnInfo connInfo;
-        connInfo.type = AUTH_LINK_TYPE_WIFI;
+        char ifName[NET_IF_NAME_LEN] = {0};
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN, USB_IF) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local ifname failed");
+            return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+        }
+        connInfo.type = IsNcmType(ifName) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
         if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
             return SOFTBUS_MEM_ERR;
@@ -1394,6 +1414,9 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
     }
     ret = SetAuthHandleByChanId(channelId, &authHandle);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "srv process recv data: set authId fail.");
+    if ((pktHead->module == MODULE_UK_ENCYSESSION) && (pktHead->dataLen <= sizeof(UkIdInfo))) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t dataLen =
         pktHead->module == MODULE_UK_ENCYSESSION ? pktHead->dataLen - sizeof(UkIdInfo) : pktHead->dataLen;
     uint32_t decDataLen = AuthGetDecryptSize(dataLen) + 1;

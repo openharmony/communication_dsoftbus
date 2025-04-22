@@ -28,6 +28,7 @@ extern "C" {
 int32_t ConfigNetLinkUp(const char *ifName);
 int32_t ConfigLocalIp(const char *ifName, const char *localIp);
 int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destination, const char *gateway);
+int32_t ConfigLocalIpv6(const char *ifName, const char *localIpv6);
 
 #ifdef __cplusplus
 #if __cplusplus

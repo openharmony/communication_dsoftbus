@@ -35,6 +35,13 @@ typedef struct {
     int32_t (*setInfo)(const void *info);
 } LocalLedgerKey;
 
+typedef struct {
+    InfoKey key;
+    int32_t maxLen;
+    int32_t (*getInfo)(void *info, uint32_t len, int32_t ifnameIdx);
+    int32_t (*setInfo)(const void *info, int32_t ifnameIdx);
+} LocalLedgerKeyByIfname;
+
 typedef enum {
     UPDATE_ACCOUNT_LONG = 1,
     UPDATE_DEV_NAME = 2,

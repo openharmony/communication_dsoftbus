@@ -54,6 +54,7 @@ enum class InnerLinKey {
     LOCAL_CUSTOM_PORT = 24,
     REMOTE_CUSTOM_PORT = 25,
     IS_LEGACY_REUSED = 26,
+    REMOTE_PORT = 27,
 };
 
 struct LinkIdStruct {
@@ -129,6 +130,9 @@ public:
 
     int GetLocalPort() const;
     void SetLocalPort(int port);
+
+    int GetRemotePort() const;
+    void SetRemotePort(int port);
 
     ListenerModule GetListenerModule() const;
     void SetListenerModule(ListenerModule module);

@@ -53,6 +53,8 @@
 #define NSTACKX_WLAN_INTERFACE_NAME_PREFIX "wlan"
 #endif
 #define NSTACKX_ETH_INTERFACE_NAME_PREFIX "eth"
+#define NSTACKX_USB_SCALE_NCM_INTERFACE_NAME_PREFIX "ncm0"
+#define NSTACKX_USB_SCALE_WWAN_INTERFACE_NAME_PREFIX "wwan0"
 #define NSTACKX_P2P_INTERFACE_NAME_PREFIX "p2p-p2p0-"
 #define NSTACKX_P2P_WLAN_INTERFACE_NAME_PREFIX "p2p-wlan0-"
 #define NSTACKX_USB_INTERFACE_NAME_PREFIX "rndis0"
@@ -83,6 +85,7 @@ static pthread_mutex_t g_maxDeviceNumLock = PTHREAD_MUTEX_INITIALIZER;
 static const NetworkInterfacePrefiexPossible g_interfacePrefixList[NSTACKX_MAX_INTERFACE_NUM] = {
     {{"eth", "", ""}},
     {{NSTACKX_WLAN_INTERFACE_NAME_PREFIX, "ap", ""}},
+    {{NSTACKX_USB_SCALE_NCM_INTERFACE_NAME_PREFIX, NSTACKX_USB_SCALE_WWAN_INTERFACE_NAME_PREFIX, ""}},
     {{"p2p-p2p0-", "p2p-wlan0-", "p2p0"}},
     {{"rndis0", "", ""}}
 };
@@ -113,16 +116,16 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
     uint8_t forceUpdate, uint8_t receiveBcast)
 {
     const char *deviceId = deviceInfo->deviceId;
+    int8_t updated = NSTACKX_FALSE;
     NSTACKX_InterfaceInfo info;
     if (strcpy_s(info.networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, GetLocalIfaceIpStr(coapCtx->iface)) != EOK ||
         strcpy_s(info.networkName, NSTACKX_MAX_INTERFACE_NAME_LEN, GetLocalIfaceName(coapCtx->iface)) != EOK) {
         DFINDER_LOGE(TAG, "copy interfaceinfo failed");
         return NSTACKX_EFAILED;
     }
-    const struct in_addr *remoteIp = &(deviceInfo->netChannelInfo.wifiApInfo.ip);
-    int8_t updated = NSTACKX_FALSE;
-    if (UpdateRemoteNodeByDeviceInfo(deviceId, &info, remoteIp, deviceInfo, &updated) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "update remote node by deviceinfo failed");
+
+    if (UpdateRemoteNodeByDeviceInfo(deviceId, &info, deviceInfo, &updated) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "update remote node by device info failed");
         return NSTACKX_EFAILED;
     }
     if (!receiveBcast && (ShouldAutoReplyUnicast(deviceInfo->businessType) != NSTACKX_TRUE)) {
@@ -224,7 +227,11 @@ int32_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, const Devi
     int32_t ret  = NSTACKX_EFAILED;
 
     (void)memset_s(wifiIpAddr, sizeof(wifiIpAddr), 0, sizeof(wifiIpAddr));
-    (void)inet_ntop(AF_INET, &deviceInfo->netChannelInfo.wifiApInfo.ip, wifiIpAddr, sizeof(wifiIpAddr));
+    if (inet_ntop(deviceInfo->netChannelInfo.wifiApInfo.af, &deviceInfo->netChannelInfo.wifiApInfo.addr,
+        wifiIpAddr, sizeof(wifiIpAddr)) <= 0) {
+        DFINDER_LOGW(TAG, "no set wifi ip addr, cause inet_ntop failed");
+        return NSTACKX_EOK;
+    }
     if (sprintf_s(deviceList->reservedInfo, sizeof(deviceList->reservedInfo),
         NSTACKX_RESERVED_INFO_JSON_FORMAT, wifiIpAddr) == -1) {
         DFINDER_LOGE(TAG, "sprintf_s reservedInfo with wifiIpAddr fails");
@@ -463,13 +470,17 @@ void DeviceModuleClean(void)
     LocalDeviceDeinit();
 }
 
-static void GlobalInterfaceListInit()
+static void GlobalInterfaceListInit(void)
 {
     (void)memset_s(g_interfaceList, sizeof(g_interfaceList), 0, sizeof(g_interfaceList));
     (void)strcpy_s(g_interfaceList[IFACE_TYPE_WLAN].name,
         sizeof(g_interfaceList[IFACE_TYPE_WLAN].name), NSTACKX_WLAN_INTERFACE_NAME_PREFIX);
     (void)strcpy_s(g_interfaceList[IFACE_TYPE_ETH].name,
         sizeof(g_interfaceList[IFACE_TYPE_ETH].name), NSTACKX_ETH_INTERFACE_NAME_PREFIX);
+    (void)strcpy_s(g_interfaceList[IFACE_TYPE_USB_SCALE].name,
+        sizeof(g_interfaceList[IFACE_TYPE_USB_SCALE].name), NSTACKX_USB_SCALE_NCM_INTERFACE_NAME_PREFIX);
+    (void)strcpy_s(g_interfaceList[IFACE_TYPE_USB_SCALE].alias,
+        sizeof(g_interfaceList[IFACE_TYPE_USB_SCALE].alias), NSTACKX_USB_SCALE_WWAN_INTERFACE_NAME_PREFIX);
     (void)strcpy_s(g_interfaceList[IFACE_TYPE_P2P].name,
         sizeof(g_interfaceList[IFACE_TYPE_P2P].name), NSTACKX_P2P_INTERFACE_NAME_PREFIX);
     (void)strcpy_s(g_interfaceList[IFACE_TYPE_P2P].alias,
@@ -576,7 +587,7 @@ uint8_t GetIfaceType(const char *ifname)
     uint8_t i;
     for (i = IFACE_TYPE_ETH; i < NSTACKX_MAX_INTERFACE_NUM; i++) {
         if (NetworkInterfaceNamePrefixCmp(ifname, g_interfaceList[i].name) ||
-            (g_interfaceList[i].alias[0] != '\0' && NetworkInterfaceNamePrefixCmp(ifname, g_interfaceList[i].name))) {
+            (g_interfaceList[i].alias[0] != '\0' && NetworkInterfaceNamePrefixCmp(ifname, g_interfaceList[i].alias))) {
             return i;
         }
     }

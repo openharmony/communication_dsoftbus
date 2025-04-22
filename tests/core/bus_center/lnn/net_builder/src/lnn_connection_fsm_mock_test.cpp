@@ -95,14 +95,14 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     ConnectionAddrType type;
     (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID1);
     (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID1);
-    (void)strcpy_s(oldNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
-    (void)strcpy_s(newNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
-    oldNodeInfo.connectInfo.authPort = PORT1;
-    newNodeInfo.connectInfo.authPort = PORT1;
-    oldNodeInfo.connectInfo.proxyPort = PORT1;
-    newNodeInfo.connectInfo.proxyPort = PORT1;
-    oldNodeInfo.connectInfo.sessionPort = PORT1;
-    newNodeInfo.connectInfo.sessionPort = PORT1;
+    (void)strcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
+    (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT1;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT1;
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT1;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT1;
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT1;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT1;
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -116,16 +116,16 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     EXPECT_TRUE(ret1 == false);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == false);
-    newNodeInfo.connectInfo.sessionPort = PORT2;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-    newNodeInfo.connectInfo.proxyPort = PORT2;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-    newNodeInfo.connectInfo.authPort = PORT2;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-    (void)strcpy_s(newNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
+    (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
 

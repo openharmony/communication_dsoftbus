@@ -108,6 +108,7 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_DISCONNECT_V2_REQ,       "CMD_DISCONNECT_V2_REQ"       },
     { NegotiateMessageType::CMD_DISCONNECT_V2_RESP,      "CMD_DISCONNECT_V2_RESP"      },
     { NegotiateMessageType::CMD_FORCE_DISCONNECT_REQ,    "CMD_FORCE_DISCONNECT_REQ"    },
+    { NegotiateMessageType::CMD_REFRESH_AUTH_HANDLE,     "CMD_REFRESH_AUTH_HANDLE"     },
     { NegotiateMessageType::CMD_CLIENT_JOIN_FAIL_NOTIFY, "CMD_CLIENT_JOIN_FAIL_NOTIFY" },
     { NegotiateMessageType::CMD_TRIGGER_REQ,             "CMD_TRIGGER_REQ"             },
     { NegotiateMessageType::CMD_TRIGGER_RESP,            "CMD_TRIGGER_RESP"            },

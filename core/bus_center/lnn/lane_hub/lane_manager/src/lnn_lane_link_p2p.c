@@ -2083,13 +2083,13 @@ static void DetectFail(uint32_t laneReqId, int32_t reason, LaneLinkType linkType
 
 static int32_t GetWlanInfo(const char *networkId, LaneLinkInfo *linkInfo)
 {
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, linkInfo->linkInfo.wlan.connInfo.addr,
-        sizeof(linkInfo->linkInfo.wlan.connInfo.addr)) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfoByIfnameIdx(networkId, STRING_KEY_IP, linkInfo->linkInfo.wlan.connInfo.addr,
+        sizeof(linkInfo->linkInfo.wlan.connInfo.addr), WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote wlan ip fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     int32_t port;
-    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_SESSION_PORT, &port) != SOFTBUS_OK) {
+    if (LnnGetRemoteNumInfoByIfnameIdx(networkId, NUM_KEY_SESSION_PORT, &port, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote wlan port fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }

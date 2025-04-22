@@ -75,6 +75,7 @@ enum class NegotiateMessageType {
     CMD_DETECT_LINK_REQ = 57,
     CMD_DETECT_LINK_RSP = 58,
     CMD_FORCE_DISCONNECT_REQ = 59,
+    CMD_REFRESH_AUTH_HANDLE = 60,
 
     CMD_V3_REQ = 100,
     CMD_V3_RSP = 101,

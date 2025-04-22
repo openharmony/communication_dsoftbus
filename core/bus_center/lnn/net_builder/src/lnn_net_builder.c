@@ -160,7 +160,7 @@ static bool IsNeedSyncElectMsg(const char *networkId)
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         return false;
     }
-    return LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI);
+    return LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_USB);
 }
 
 int32_t SyncElectMessage(const char *networkId)
@@ -459,6 +459,7 @@ static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, const ConnectionAddr *ad
         case CONNECTION_ADDR_WLAN:
             /* fall-through */
         case CONNECTION_ADDR_ETH:
+        case CONNECTION_ADDR_NCM:
             lnnEventExtra->peerIp = addr->info.ip.ip;
             break;
         default:
@@ -513,12 +514,13 @@ NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
     return node;
 }
 
-ConnectionAddrType GetCurrentConnectType(void)
+ConnectionAddrType GetCurrentConnectType(AuthLinkType linkType)
 {
     char ifCurrentName[NET_IF_NAME_LEN] = { 0 };
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
-
-    if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+    int32_t ifIdx = (linkType == AUTH_LINK_TYPE_USB) ? USB_IF : WLAN_IF;
+    if (LnnGetLocalStrInfoByIfnameIdx(
+        STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN, ifIdx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetLocalStrInfo getCurrentConnectType failed");
         return type;
     }
@@ -589,6 +591,7 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
     (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_WIFI, &authSeq[DISCOVERY_TYPE_WIFI]);
     (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BLE, &authSeq[DISCOVERY_TYPE_BLE]);
     (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BR, &authSeq[DISCOVERY_TYPE_BR]);
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_USB, &authSeq[DISCOVERY_TYPE_USB]);
     JSON_Delete(json);
     int64_t curAuthSeq[DISCOVERY_TYPE_COUNT] = { 0 };
     char udid[UDID_BUF_LEN] = { 0 };
@@ -1355,8 +1358,9 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
         LNN_LOGE(LNN_BUILDER, "invalid typeLen");
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGD(LNN_BUILDER, "wlan=%{public}d, br=%{public}d, ble=%{public}d, eth=%{public}d", type[CONNECTION_ADDR_WLAN],
-        type[CONNECTION_ADDR_BR], type[CONNECTION_ADDR_BLE], type[CONNECTION_ADDR_ETH]);
+    LNN_LOGD(LNN_BUILDER, "wlan=%{public}d, br=%{public}d, ble=%{public}d, eth=%{public}d, usb=%{public}d",
+        type[CONNECTION_ADDR_WLAN], type[CONNECTION_ADDR_BR], type[CONNECTION_ADDR_BLE], type[CONNECTION_ADDR_ETH],
+        type[CONNECTION_ADDR_NCM]);
     if (g_netBuilder.isInit == false) {
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;

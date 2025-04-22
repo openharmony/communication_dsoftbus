@@ -36,9 +36,9 @@ static AuthTcpConnetionInterface *GetAuthTcpConnetionInterface()
 }
 
 extern "C" {
-int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
+int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
 {
-    return GetAuthTcpConnetionInterface()->SocketConnectDevice(ip, port, isBlockMode);
+    return GetAuthTcpConnetionInterface()->SocketConnectDevice(ip, port, isBlockMode, ifnameIdx);
 }
 }
 } // namespace OHOS

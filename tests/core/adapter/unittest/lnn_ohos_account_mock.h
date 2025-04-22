@@ -148,7 +148,7 @@ public:
     virtual void AuthStopListening(AuthLinkType type);
     virtual void ConnCoapStopServerListen(void);
     virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage);
-    virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium);
+    virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx);
     virtual void LnnDeinitP2p(void);
     virtual void LnnDeinitPhysicalSubnetManager(void);
     virtual void LnnDeinitSyncInfoManager(void);
@@ -236,7 +236,7 @@ public:
     MOCK_METHOD2(AuthGetConnInfo, int32_t(AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(CreateTable, int32_t(DbContext *, TableNameID));
     MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
-    MOCK_METHOD2(DiscLinkStatusChanged, void(LinkStatus, ExchangeMedium));
+    MOCK_METHOD3(DiscLinkStatusChanged, void(LinkStatus, ExchangeMedium, int32_t));
     MOCK_METHOD2(GetWlanIpv4Addr, int32_t(char *, uint32_t));
     MOCK_METHOD2(LnnConvertAddrToOption, bool(const ConnectionAddr *, ConnectOption *));
     MOCK_METHOD2(LnnGenerateRandomByHuks, int32_t(uint8_t *, uint32_t));

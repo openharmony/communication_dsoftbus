@@ -21,6 +21,7 @@
 #include "coap_adapter.h"
 #include "coap_def.h"
 #include "nstackx_epoll.h"
+#include "nstackx_inet.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +51,7 @@ bool IsCoapContextReady(void);
 const char *CoapGetLocalIfaceName(void);
 CoapCtxType *CoapGetCoapCtxType(void);
 
-CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface);
+CoapCtxType *CoapServerInit(uint8_t af, const union InetAddr *addr, void *iface);
 void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit);
 
 void ResetCoapSocketTaskCount(uint8_t isBusy);

@@ -141,12 +141,12 @@ static int32_t UsbDispatchStopPassiveDiscovery(const SubscribeOption *option)
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
-static void UsbDispatchLinkStatusChanged(LinkStatus status)
+static void UsbDispatchLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_usbDispatchers[i] != NULL && g_usbDispatchers[i]->mediumInterface != NULL &&
             g_usbDispatchers[i]->mediumInterface->LinkStatusChanged != NULL) {
-            g_usbDispatchers[i]->mediumInterface->LinkStatusChanged(status);
+            g_usbDispatchers[i]->mediumInterface->LinkStatusChanged(status, ifnameIdx);
         }
     }
 }

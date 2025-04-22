@@ -15,6 +15,7 @@
 
 #include "wifi_direct_mock.h"
 #include <thread>
+#include "bus_center_event.h"
 #include "conn_log.h"
 #include "softbus_adapter_socket.h"
 
@@ -43,6 +44,11 @@ WifiErrorCode Hid2dGetChannelListFor5G(int32_t *chanList, int32_t len)
 WifiErrorCode GetP2pEnableStatus(P2pState *state)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetP2pEnableStatus(state);
+}
+
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return SOFTBUS_OK;
 }
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)

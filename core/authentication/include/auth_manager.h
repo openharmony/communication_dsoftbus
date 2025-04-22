@@ -81,6 +81,7 @@ int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo);
 /*check whether AUTH device is exist or not*/
 bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConnection);
+int32_t AuthDeviceGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle);

@@ -339,6 +339,14 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return AuthDeviceGetP2pConnInfo(uuid, connInfo);
 }
 
+int32_t AuthGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return AUTH_INVALID_ID;
+    }
+    return AuthDeviceGetUsbConnInfo(uuid, connInfo);
+}
+
 int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
@@ -782,6 +790,10 @@ int32_t AuthInit(void)
         return ret;
     }
     ret = UkNegotiateInit();
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "user key nego init failed, ret=%{public}d", ret);
+        return ret;
+    }
     AuthLoadDeviceKey();
     return AuthMetaInit(&callBack);
 }
