@@ -1385,13 +1385,13 @@ static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
         return;
     }
     AuthFsm *authFsm = GetAuthFsmByRequestId(reuseKeyNode.requestId);
-    AuthSessionInfo *info = &authFsm->info;
     if (authFsm == NULL) {
         ReleaseAuthLock();
         SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "auth fsm not found");
         return;
     }
+    AuthSessionInfo *info = &authFsm->info;
     if (ptkCbParam->result != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "sync ptk fail");
         ReleaseAuthLock();
