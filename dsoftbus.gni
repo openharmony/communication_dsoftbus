@@ -167,6 +167,10 @@ if (dsoftbus_feature_lnn_ble) {
   defines += [ "ENABLE_FEATURE_LNN_BLE" ]
 }
 
+if (dsoftbus_feature_deps_data_share && dsoftbus_feature_deps_datamgr_service) {
+  defines += [ "ENABLE_FEATURE_DATAMGR_SERVICE" ]
+}
+
 if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
     dsoftbus_feature_conn_tcp_comm) {
   defines += [ "DSOFTBUS_FEATURE_CONN_PV1" ]
