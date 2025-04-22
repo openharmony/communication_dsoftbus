@@ -371,7 +371,7 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
             WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), reason);
         requestIdToDeviceIdMap_.erase(requestId);
         auto it = authOpenEventPromiseMap_.find(requestId);
-        if (it == authOpenEventPromiseMap_.end()) {
+        if (it != authOpenEventPromiseMap_.end()) {
             it->second->set_value(event);
             authOpenEventPromiseMap_.erase(requestId);
             return;
