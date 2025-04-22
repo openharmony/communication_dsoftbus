@@ -22,6 +22,7 @@
 #include "softbus_ddos.h"
 #include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
+#include "lnn_sle_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_disc_server.h"
@@ -54,6 +55,7 @@ static void ServerModuleDeinit(void)
     SoftBusHiDumperDeinit();
     DeinitSoftbusSysEvt();
     DeinitDdos();
+    LnnDeinitSle();
 }
 
 bool GetServerIsInit(void)
@@ -63,49 +65,36 @@ bool GetServerIsInit(void)
 
 static int32_t InitServicesAndModules(void)
 {
-    if (ConnServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus conn server init failed.");
-        return SOFTBUS_CONN_SERVER_INIT_FAILED;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(ConnServerInit() == SOFTBUS_OK,
+        SOFTBUS_CONN_SERVER_INIT_FAILED, COMM_SVC, "softbus conn server init failed.");
 
-    if (AuthInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus auth init failed.");
-        return SOFTBUS_AUTH_INIT_FAIL;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(AuthInit() == SOFTBUS_OK,
+        SOFTBUS_AUTH_INIT_FAIL, COMM_SVC, "softbus auth init failed.");
 
-    if (DiscServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus disc server init failed.");
-        return SOFTBUS_DISC_SERVER_INIT_FAILED;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(DiscServerInit() == SOFTBUS_OK,
+        SOFTBUS_DISC_SERVER_INIT_FAILED, COMM_SVC, "softbus disc server init failed.");
 
-    if (BusCenterServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus buscenter server init failed.");
-        return SOFTBUS_CENTER_SERVER_INIT_FAILED;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(BusCenterServerInit() == SOFTBUS_OK,
+        SOFTBUS_CENTER_SERVER_INIT_FAILED, COMM_SVC, "softbus buscenter server init failed.");
 
-    if (TransServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus trans server init failed.");
-        return SOFTBUS_TRANS_SERVER_INIT_FAILED;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(TransServerInit() == SOFTBUS_OK,
+        SOFTBUS_TRANS_SERVER_INIT_FAILED, COMM_SVC, "softbus trans server init failed.");
 
-    if (DiscEventManagerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus disc event manager init failed.");
-        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(DiscEventManagerInit() == SOFTBUS_OK,
+        SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, COMM_SVC, "softbus disc event manager init failed.");
 
-    if (GetWifiDirectManager()->init() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus wifi direct init failed.");
-        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(GetWifiDirectManager()->init() == SOFTBUS_OK,
+        SOFTBUS_WIFI_DIRECT_INIT_FAILED, COMM_SVC, "softbus wifi direct init failed.");
 
-    if (ConnBleDirectInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus ble direct init failed.");
-        return SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(ConnBleDirectInit() == SOFTBUS_OK,
+        SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED, COMM_SVC, "softbus ble direct init failed.");
 
     if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
         return SOFTBUS_DFX_INIT_FAILED;
+    }
+    if (LnnInitSle() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus lnn sle init failed.");
     }
     InstRegister(NULL);
     return SOFTBUS_OK;
@@ -140,7 +129,6 @@ void InitSoftBusServer(void)
         COMM_LOGE(COMM_SVC, "softbus framework init failed, err = %{public}d", ret);
         return;
     }
-
     ret = SoftBusBtInit();
     if (ret != SOFTBUS_OK) {
         LnnInitModuleReturnSet(INIT_DEPS_BLUETOOTH, ret);

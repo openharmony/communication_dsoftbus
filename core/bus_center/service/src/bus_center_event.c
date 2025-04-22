@@ -664,6 +664,19 @@ void LnnNotifyBtStateChangeEvent(void *state)
     SoftBusFree(btState);
 }
 
+void LnnNotifySleStateChangeEvent(void *state)
+{
+    SoftBusSleState *sleState = (SoftBusSleState *)state;
+    if (*sleState < SOFTBUS_SLE_TURN_ON || *sleState >= SOFTBUS_SLE_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad sleState=%{public}d", *sleState);
+        SoftBusFree(sleState);
+        return;
+    }
+    LnnMonitorSleStateChangedEvent event = {.basic.event = LNN_EVENT_SLE_STATE_CHANGED, .status = (uint8_t)(*sleState)};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(sleState);
+}
+
 void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
 {
     LnnLaneVapChangeEvent event = {.basic.event = LNN_EVENT_LANE_VAP_CHANGE, .vapPreferChannel = preferChannel};

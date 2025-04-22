@@ -150,6 +150,7 @@ typedef enum {
 #define ENABLE_WIFI_CAP       (1 << 3)
 #define DISABLE_BR_CAP        (1 << 4)
 #define BLE_TRIGGER_HML       (1 << 5)
+#define ENABLE_SLE_CAP        (1 << 6)
 
 typedef struct {
     int32_t (*onDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
