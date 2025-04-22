@@ -272,7 +272,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1
         .WillRepeatedly(Return(SOFTBUS_OK));
     WifiStateProcess(TYPE_63, true);
     WifiStateProcess(TYPE_63, false);
-    SendNetCapabilityToRemote(TYPE_63, TYPE_1);
+    SendNetCapabilityToRemote(TYPE_63, TYPE_1, false);
     uint8_t *ret = ConvertCapabilityToMsg(TYPE_63);
     EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);

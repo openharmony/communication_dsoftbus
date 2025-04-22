@@ -243,7 +243,25 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
     }
 }
 
-static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
+static void SendSleCapabilityToRemote(NodeInfo *nodeInfo, NodeBasicInfo netInfo, uint8_t *msg, uint32_t netCapability)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BR)) {
+        ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+    } else if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI)) {
+        ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+    } else {
+        LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(netInfo.networkId, &anonyNetworkId);
+    LNN_LOGE(LNN_BUILDER,
+        "sync cap info ret=%{public}d, peerNetworkId=%{public}s.",
+        ret, AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+}
+
+static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, bool isSyncSle)
 {
     uint8_t *msg = ConvertCapabilityToMsg(netCapability);
     if (msg ==NULL) {
@@ -270,7 +288,11 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
+        if (!isSyncSle) {
+            DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
+        } else {
+            SendSleCapabilityToRemote(&nodeInfo, netInfo[i], msg, netCapability);
+        }
     }
     SoftBusFree(netInfo);
     SoftBusFree(msg);
@@ -285,7 +307,7 @@ static void WifiStateProcess(uint32_t netCapability, bool isSend)
         return;
     }
     uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
-    SendNetCapabilityToRemote(netCapability, type);
+    SendNetCapabilityToRemote(netCapability, type, false);
     LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler exit");
     return;
 }
@@ -472,8 +494,34 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     if (!isSend) {
         return;
     }
-    SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI);
+    SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI, false);
     return;
+}
+
+static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_SLE_STATE_CHANGED) {
+        LNN_LOGE(LNN_BUILDER, "sle state change evt handler get invalid param");
+        return;
+    }
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get netcap fail");
+        return;
+    }
+    const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
+    SoftBusSleState sleState = (SoftBusSleState)event->status;
+    if (sleState == SOFTBUS_SLE_TURN_ON) {
+        (void)LnnSetNetCapability(&netCapability, BIT_SLE);
+    } else if (sleState == SOFTBUS_SLE_TURN_OFF) {
+        (void)LnnClearNetCapability(&netCapability, BIT_SLE);
+    }
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "sle netCapability=%{public}d", netCapability);
+    SendNetCapabilityToRemote(netCapability, 0, true);
 }
 
 static int32_t GetEnhancedP2PCap(uint32_t *staticNetCap)
@@ -608,6 +656,9 @@ int32_t LnnInitNetworkInfo(void)
         LNN_LOGE(LNN_BUILDER, "network info register bt state change fail, ret=%{public}d", ret);
         return ret;
     }
+    ret = LnnRegisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, SleStateChangeEventHandle);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        ret, LNN_BUILDER, "register sle state change event failed. ret=%{public}d", ret);
     ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail, ret=%{public}d", ret);

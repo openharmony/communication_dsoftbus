@@ -55,6 +55,7 @@ typedef enum {
     LNN_EVENT_NODE_NET_TYPE,
     LNN_EVENT_DEVICE_INFO_CHANGED,
     LNN_EVENT_NET_LINK_STATE_CHANGE,
+    LNN_EVENT_SLE_STATE_CHANGED,
     /* event from sa monitor */
     LNN_EVENT_WIFI_SERVICE_START,
     LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
@@ -97,6 +98,12 @@ typedef enum {
     SOFTBUS_BR_TURN_OFF,
     SOFTBUS_BT_UNKNOWN,
 } SoftBusBtState;
+
+typedef enum {
+    SOFTBUS_SLE_TURN_ON,
+    SOFTBUS_SLE_TURN_OFF,
+    SOFTBUS_SLE_UNKNOWN,
+} SoftBusSleState;
 
 typedef enum {
     SOFTBUS_SCREEN_LOCK,
@@ -200,6 +207,11 @@ typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
 } LnnMonitorHbStateChangedEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    uint8_t status;
+} LnnMonitorSleStateChangedEvent;
 
 typedef struct {
     LnnEventBasicInfo basic;
@@ -310,6 +322,7 @@ void LnnNotifyWlanStateChangeEvent(void *state);
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state);
 void LnnNotifyDifferentAccountChangeEvent(void *state);
 void LnnNotifyBtStateChangeEvent(void *state);
+void LnnNotifySleStateChangeEvent(void *state);
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state);
 void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state);

@@ -148,6 +148,48 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_BR_COMM_CAPA_CHECK_001, TestSize.Level1)
 
 /*
  * @tc.name: LNNLaneCommCapaTest
+ * @tc.desc: sle communication capability check test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLaneCommCapaTest, LNN_SLE_COMM_CAPA_CHECK_001, TestSize.Level1)
+{
+    LaneLinkType type = LANE_SLE;
+    NiceMock<LaneCommCapaDepsInterfaceMock> commCapaMock;
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)));
+    int32_t ret = CheckStaticNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_SLE_STATIC_CAP);
+    ret = CheckDynamicNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_SLE_CAP);
+
+    uint32_t staticCap = 1 << STATIC_CAP_BIT_SLE;
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(staticCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(commCapaMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
+    ret = CheckStaticNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_SLE_STATIC_CAP);
+
+    uint32_t dynamicCap = 1 << BIT_SLE;
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(dynamicCap), Return(SOFTBUS_OK)));
+    ret = CheckDynamicNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_SLE_CAP);
+
+    uint32_t allNetCap = (staticCap | dynamicCap);
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(allNetCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(commCapaMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(allNetCap), Return(SOFTBUS_OK)));
+    ret = CheckStaticNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckDynamicNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNNLaneCommCapaTest
  * @tc.desc: ble communication capability check test
  * @tc.type: FUNC
  * @tc.require:

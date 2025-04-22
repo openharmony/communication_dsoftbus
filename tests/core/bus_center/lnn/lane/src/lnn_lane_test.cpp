@@ -1785,6 +1785,72 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
 }
 
 /*
+* @tc.name: LNN_BUILD_LINK_SLE_001
+* @tc.desc: BUILDLINK
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_SLE_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LinkRequest reqInfo = {};
+    LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+    reqInfo.linkType = LANE_SLE;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+
+    ASSERT_EQ(strncpy_s(reqInfo.peerSleMac, MAX_MAC_LEN,
+        PEER_MAC, strlen(PEER_MAC)), EOK);
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_ENCRYPT_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_BUILD_LINK_SLE_DIRECT_001
+* @tc.desc: BUILDLINK
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_SLE_DIRECT_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LinkRequest reqInfo = {};
+    LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+    reqInfo.linkType = LANE_SLE_DIRECT;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
 * @tc.name: LANE_FLOAD_EXPLORE_001
 * @tc.desc: LANE FLOAD EXPLORE TEST
 * @tc.type: FUNC
