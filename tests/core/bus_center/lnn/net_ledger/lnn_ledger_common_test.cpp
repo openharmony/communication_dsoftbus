@@ -339,18 +339,18 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     LnnSetNodeConnStatus(nullptr, STATUS_ONLINE);
     LnnGetBtMac(nullptr);
     LnnSetBtMac(nullptr, nullptr);
-    LnnGetNetIfName(nullptr);
-    LnnSetNetIfName(nullptr, nullptr);
-    LnnGetWiFiIp(nullptr);
-    LnnSetWiFiIp(nullptr, nullptr);
+    LnnGetNetIfName(nullptr, WLAN_IF);
+    LnnSetNetIfName(nullptr, nullptr, WLAN_IF);
+    LnnGetWiFiIp(nullptr, WLAN_IF);
+    LnnSetWiFiIp(nullptr, nullptr, WLAN_IF);
     EXPECT_TRUE(LnnGetMasterUdid(nullptr) == nullptr);
     EXPECT_TRUE(LnnSetMasterUdid(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetAuthPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetAuthPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetSessionPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetProxyPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetAuthPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetAuthPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetSessionPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetProxyPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetP2pRole(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetP2pRole(nullptr) == 0);
     EXPECT_TRUE(LnnSetP2pMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
@@ -496,24 +496,24 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_006, TestSize.Level1)
     NodeInfo nodeInfo;
     constexpr char netIfName1[] = "wlan0";
 
-    LnnSetNetIfName(nullptr, netIfName1);
-    EXPECT_NE(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+    LnnSetNetIfName(nullptr, netIfName1, WLAN_IF);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
-    LnnSetNetIfName(&nodeInfo, nullptr);
-    EXPECT_NE(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+    LnnSetNetIfName(&nodeInfo, nullptr, WLAN_IF);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
     char *netIfName2 = (char *)SoftBusCalloc((NET_IF_NAME_LEN + 1) * sizeof(char));
-    LnnSetNetIfName(&nodeInfo, netIfName2);
+    LnnSetNetIfName(&nodeInfo, netIfName2, WLAN_IF);
     SoftBusFree(netIfName2);
 
-    LnnSetNetIfName(&nodeInfo, netIfName1);
-    EXPECT_EQ(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+    LnnSetNetIfName(&nodeInfo, netIfName1, WLAN_IF);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
     const char *netIfName = nullptr;
-    netIfName = LnnGetNetIfName(&nodeInfo);
+    netIfName = LnnGetNetIfName(&nodeInfo, WLAN_IF);
     EXPECT_EQ(strcmp(netIfName, netIfName1), 0);
 
-    netIfName = LnnGetNetIfName(nullptr);
+    netIfName = LnnGetNetIfName(nullptr, WLAN_IF);
     EXPECT_EQ(strcmp(netIfName, DEFAULT_IFNAME), 0);
 }
 
@@ -527,10 +527,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_007, TestSize.Level1)
 {
     NodeInfo nodeInfo;
 
-    LnnSetWiFiIp(nullptr, LOCAL_WLAN_IP);
-    EXPECT_NE(strcmp(nodeInfo.connectInfo.deviceIp, LOCAL_WLAN_IP), 0);
-    LnnSetWiFiIp(&nodeInfo, LOCAL_WLAN_IP);
-    EXPECT_EQ(strcmp(nodeInfo.connectInfo.deviceIp, LOCAL_WLAN_IP), 0);
+    LnnSetWiFiIp(nullptr, LOCAL_WLAN_IP, WLAN_IF);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, LOCAL_WLAN_IP), 0);
+    LnnSetWiFiIp(&nodeInfo, LOCAL_WLAN_IP, WLAN_IF);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, LOCAL_WLAN_IP), 0);
 }
 
 /*
@@ -989,7 +989,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_UUID, LOCAL_UUID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, LOCAL_WLAN_IP) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_BR) == SOFTBUS_OK);
     NodeBasicInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -1010,7 +1010,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     static InfoKey getLocalStringInfoKeyTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_NETWORKID,
-        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_WLAN_IP,
+        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_IP,
         STRING_KEY_NET_IF_NAME, STRING_KEY_MASTER_NODE_UDID, STRING_KEY_NODE_ADDR, STRING_KEY_P2P_MAC,
         STRING_KEY_P2P_GO_MAC, STRING_KEY_OFFLINE_CODE, STRING_KEY_WIFIDIRECT_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
@@ -1044,9 +1044,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     ret = LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, LOCAL_WLAN_IP);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalStrInfo(STRING_KEY_NET_IF_NAME, LOCAL_NET_IF_NAME);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, LOCAL_NET_IF_NAME, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, MASTER_NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -1074,7 +1074,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
         NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_DEV_TYPE_ID, NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE,
         NUM_KEY_STATIC_CAP_LEN };
     int32_t ret, info;
-    LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
+    LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT, WLAN_IF);
     for (uint32_t i = 0; i < sizeof(getLocalNumInfoKeyTable) / sizeof(InfoKey); i++) {
         info = 0;
         ret = LnnGetLocalNumInfo(getLocalNumInfoKeyTable[i], &info);
@@ -1092,11 +1092,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
-    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT);
+    int32_t ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
+    ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT);
+    ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, LOCAL_CAPACITY);
     EXPECT_TRUE(ret == SOFTBUS_OK);

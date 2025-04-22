@@ -17,7 +17,7 @@ import("../../../../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../../../../dsoftbus.gni")
 import("../bluetooth_mock/bluetooth_mock.gni")
 
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscBtStateMockTest") {
   module_out_path = module_output_path

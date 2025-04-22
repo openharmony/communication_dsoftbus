@@ -24,6 +24,8 @@ extern "C" {
 #endif
 #endif
 
+#define AUTH_VERSION_VALUE AUTH_VERSION_V1
+
 char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq);
 int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info, int64_t authSeq);
 bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen);

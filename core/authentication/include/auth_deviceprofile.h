@@ -33,6 +33,7 @@ typedef enum {
     UPDATE_ACL_NOT_MATCH,
     GET_ALL_ACL_FAIL,
     GET_ALL_ACL_IS_EMPTY,
+    MATCH_ONE_ACL,
 } UpdateDpAclResult;
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
@@ -43,6 +44,7 @@ void DelNotTrustDevice(const char *udid);
 void DelSessionKeyProfile(int32_t sessionKeyId);
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length);
 int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
+int32_t GetAccessUkIdDiffAccountWithUserLevel(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
 int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
 int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen);
 void UpdateAssetSessionKeyByAcl(

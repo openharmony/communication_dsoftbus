@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,6 +117,31 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     return GetNetworkInterface()->AddTrigger(module, fd, trigger);
+}
+
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetNetworkInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetNetworkInterface()->LnnSetLocalNumU32Info(key, info);
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return GetNetworkInterface()->SoftBusGetLinkBand();
+}
+
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetNetworkInterface()->LnnSetNetCapability(capability, type);
+}
+
+int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetNetworkInterface()->LnnClearNetCapability(capability, type);
 }
 }
 }

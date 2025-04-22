@@ -237,5 +237,15 @@ void DelUserKeyByNetworkId(char *networkId)
 {
     return GetLnnConnInterface()->DelUserKeyByNetworkId(networkId);
 }
+
+void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event)
+{
+    return GetLnnConnInterface()->LnnNotifyAddRawEnhanceP2pEvent(event);
+}
+
+bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer)
+{
+    return GetLnnConnInterface()->RawLinkNeedUpdateAuthManager(uuid, isServer);
+}
 }
 } // namespace OHOS

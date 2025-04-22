@@ -109,19 +109,19 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetLnnBtNetworkImplInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetLnnBtNetworkImplInterface()->LnnGetAuthPort(info);
+    return GetLnnBtNetworkImplInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetLnnBtNetworkImplInterface()->LnnGetSessionPort(info);
+    return GetLnnBtNetworkImplInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetLnnBtNetworkImplInterface()->LnnGetProxyPort(info);
+    return GetLnnBtNetworkImplInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 const char *LnnGetBtMac(const NodeInfo *info)

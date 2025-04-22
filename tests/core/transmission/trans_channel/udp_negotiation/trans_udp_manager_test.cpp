@@ -982,7 +982,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpResetReplyCnt002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransSetUdpChannelOptTypeTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransSetUdpChannelOptTypeTest001, TestSize.Level1)
 {
     UdpChannelOptType type = TYPE_INVALID_CHANNEL;
     int32_t ret = TransSetUdpChannelOptType(INVALID_CHAN_ID, type);
@@ -995,7 +995,7 @@ HWTEST_F(TransUdpManagerTest, TransSetUdpChannelOptTypeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransGetUdpAppInfoByChannelIdTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransGetUdpAppInfoByChannelIdTest001, TestSize.Level1)
 {
     AppInfo appInfo;
     int32_t ret = TransGetUdpAppInfoByChannelId(INVALID_CHAN_ID, &appInfo);
@@ -1008,7 +1008,7 @@ HWTEST_F(TransUdpManagerTest, TransGetUdpAppInfoByChannelIdTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, UdpChannelFileTransRecoveryLimitTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, UdpChannelFileTransRecoveryLimitTest001, TestSize.Level1)
 {
     uint8_t tos = FILE_PRIORITY_BK;
     int32_t ret = TransUdpChannelMgrInit();
@@ -1027,7 +1027,7 @@ HWTEST_F(TransUdpManagerTest, UdpChannelFileTransRecoveryLimitTest001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, IsUdpRecoveryTransLimitTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, IsUdpRecoveryTransLimitTest001, TestSize.Level1)
 {
     int32_t ret = IsUdpRecoveryTransLimit();
     EXPECT_EQ(false, ret);
@@ -1039,7 +1039,7 @@ HWTEST_F(TransUdpManagerTest, IsUdpRecoveryTransLimitTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpUpdateReplyCntTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransUdpUpdateReplyCntTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t ret = TransUdpUpdateReplyCnt(channelId);
@@ -1058,7 +1058,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateReplyCntTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpUpdateUdpPortTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransUdpUpdateUdpPortTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t udpPort = 1;
@@ -1087,7 +1087,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateUdpPortTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransCheckUdpChannelOpenStatusTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransCheckUdpChannelOpenStatusTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t *curCount = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
@@ -1122,7 +1122,7 @@ HWTEST_F(TransUdpManagerTest, TransCheckUdpChannelOpenStatusTest001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     uint8_t tos = FILE_PRIORITY_BK;
@@ -1151,7 +1151,7 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest001, TestSize.Level1)
 {
     uint64_t tokenId = 1;
     int32_t pid = 1;
@@ -1182,7 +1182,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest002, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest002, TestSize.Level1)
 {
     uint64_t tokenId = 1;
     int32_t pid = 1;
@@ -1211,7 +1211,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest003, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest003, TestSize.Level1)
 {
     uint64_t tokenId = 1;
     int32_t pid = 1;
@@ -1240,7 +1240,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, CompareSessionNameTest001, TestSize.Level0)
+HWTEST_F(TransUdpManagerTest, CompareSessionNameTest001, TestSize.Level1)
 {
     int32_t ret = CompareSessionName(nullptr, nullptr);
     EXPECT_EQ(false, ret);

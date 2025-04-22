@@ -92,11 +92,6 @@ int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *devi
     return GetInterface()->AuthFindLatestNormalizeKey(udidHash, deviceKey, clearOldKey);
 }
 
-bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time)
-{
-    return GetInterface()->AuthIsLatestNormalizeKeyInTime(udidHash, time);
-}
-
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey)
 {
     return GetInterface()->AuthFindDeviceKey(udidHash, keyType, deviceKey);
@@ -384,19 +379,19 @@ int32_t StringToUpperCase(const char *str, char *buf, int32_t size)
     return GetInterface()->StringToUpperCase(str, buf, size);
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetInterface()->LnnGetAuthPort(info);
+    return GetInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetInterface()->LnnGetSessionPort(info);
+    return GetInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetInterface()->LnnGetProxyPort(info);
+    return GetInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 bool JSON_AddBytesToObject(JsonObj *obj, const char *key, uint8_t *value, uint32_t size)
@@ -483,6 +478,11 @@ int32_t GetActiveOsAccountIds(void)
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 {
     return GetInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
 }
 } // namespace OHOS

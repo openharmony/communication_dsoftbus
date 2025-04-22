@@ -367,6 +367,13 @@ static int32_t GetCocScore(const char *networkId, uint32_t expectedBw)
     return LNN_LINK_DEFAULT_SCORE;
 }
 
+static int32_t GetUsbScore(const char *networkId, uint32_t expectedBw)
+{
+    (void)networkId;
+    (void)expectedBw;
+    return LNN_LINK_DEFAULT_SCORE;
+}
+
 static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = {true, DefaultFeatureCheck, GetBrScore},
     [LANE_BLE] = { true,  DefaultFeatureCheck,       GetBleScore     },
@@ -380,6 +387,7 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_BLE_REUSE] = { false, NULL,              NULL            },
     [LANE_COC] = { true,  CocFeatureCheck,       GetCocScore     },
     [LANE_COC_DIRECT] = { true,  CocDirectFeatureCheck, GetCocScore     },
+    [LANE_USB] = { true,  DefaultFeatureCheck, GetUsbScore     },
 };
 
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
@@ -391,14 +399,14 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
 }
 
 static uint32_t g_firstPriorityLane[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
-    [HIGH_BAND_WIDTH] = {LANE_HML, LANE_P2P, LANE_LINK_TYPE_BUTT},
+    [HIGH_BAND_WIDTH] = {LANE_USB, LANE_HML, LANE_P2P, LANE_LINK_TYPE_BUTT},
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_HML, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_LINK_TYPE_BUTT},
 };
 
 static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
-    [HIGH_BAND_WIDTH] = {LANE_HML, LANE_P2P, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [HIGH_BAND_WIDTH] = {LANE_USB, LANE_HML, LANE_P2P, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_P2P, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_HML, LANE_WLAN_2P4G, LANE_P2P, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_BR, LANE_P2P,
@@ -1246,7 +1254,7 @@ void DeinitLaneSelectRule(void)
 }
 
 static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
-    [HIGH_BAND_WIDTH] = {LANE_HML, LANE_LINK_TYPE_BUTT},
+    [HIGH_BAND_WIDTH] = {LANE_USB, LANE_HML, LANE_LINK_TYPE_BUTT},
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_WLAN_5G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_BR, LANE_P2P, LANE_LINK_TYPE_BUTT},

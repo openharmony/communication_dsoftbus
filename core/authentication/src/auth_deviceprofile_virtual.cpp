@@ -37,6 +37,7 @@ void UpdateDpSameAccount(
     (void)deviceId;
     (void)peerUserId;
     (void)sessionKey;
+    (void)isNeedUpdateDk;
 }
 
 void DelNotTrustDevice(const char *udid)
@@ -62,6 +63,14 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     (void)acl;
     (void)ukId;
     (void)time;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t GetAccessUkIdDiffAccountWithUserLevel(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
+{
+    (void)acl;
+    (void)ukId;
+    (void)time;
     return SOFTBUS_AUTH_ACL_NOT_FOUND;
 }
 
@@ -70,7 +79,7 @@ int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     (void)acl;
     (void)ukId;
     (void)time;
-    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
@@ -78,7 +87,7 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
     (void)sessionKeyId;
     (void)uk;
     (void)ukLen;
-    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void UpdateAssetSessionKeyByAcl(
@@ -88,4 +97,5 @@ void UpdateAssetSessionKeyByAcl(
     (void)sessionKey;
     (void)sessionKeyLen;
     (void)sessionKeyId;
+    (void)isSameAccount;
 }

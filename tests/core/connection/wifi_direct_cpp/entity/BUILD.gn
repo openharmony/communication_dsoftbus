@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
-ut_out_path = "dsoftbus/connection/wifi_direct_cpp/entity"
+ut_out_path = "dsoftbus/soft_bus/connection/wifi_direct_cpp/entity"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_cpp_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
@@ -31,6 +31,7 @@ ohos_unittest("P2pEntityTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/manager/include",

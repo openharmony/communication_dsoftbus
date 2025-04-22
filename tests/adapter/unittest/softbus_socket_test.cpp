@@ -1135,6 +1135,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdZeroTest001, TestSize.Level0)
     set.fdsBits[0] = 1;
     SoftBusSocketFdZero(&set);
     EXPECT_TRUE(set.fdsBits[0] == 0);
+    SoftBusSocketFdZero(nullptr);
 }
 
 /*
@@ -1155,20 +1156,22 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest001, TestSize.Level0)
 }
 
 /*
- * @tc.name: SoftBusSocketFdSetTest003
- * @tc.desc: set is NULL
+ * @tc.name: SoftBusSocketFdSetTest002
+ * @tc.desc: set is NULL, socketFd=SOFTBUS_FD_SETSIZE
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdSetTest002, TestSize.Level0)
 {
     int32_t socketFd;
+    SoftBusFdSet set = { 0 };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     SoftBusSocketFdSet(socketFd, nullptr);
 
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
+    SoftBusSocketFdSet(SOFTBUS_FD_SETSIZE, &set);
 }
 
 /*
@@ -1184,6 +1187,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdClrTest001, TestSize.Level0)
     SoftBusSocketFdSet(1, &set);
     SoftBusSocketFdClr(1, &set);
     EXPECT_TRUE(set.fdsBits[0] == 0);
+    SoftBusSocketFdClr(1, nullptr);
 }
 
 /*
@@ -1223,6 +1227,19 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest002, TestSize.Level0
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest003, TestSize.Level0)
 {
     int32_t ret = SoftBusSocketFdIsset(1, nullptr);
+    EXPECT_TRUE(ret == 0);
+}
+
+/*
+ * @tc.name: SoftBusSocketFdIssetTest004
+ * @tc.desc: SoftBusSocketFdIsset will return 0 when socketFd=SOFTBUS_FD_SETSIZE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest004, TestSize.Level0)
+{
+    SoftBusFdSet set = { 0 };
+    int32_t ret = SoftBusSocketFdIsset(SOFTBUS_FD_SETSIZE, &set);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -1428,7 +1445,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
     char buf[TEST_BUF_SIZE] = { 0 };
 
     int32_t ret = SoftBusSocketSend(socketFd, buf, TEST_BUF_SIZE, 0);
-    EXPECT_EQ(-1, ret);
+    EXPECT_TRUE(ret < 0);
 }
 #endif
 
@@ -1784,6 +1801,25 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvFromTest001, TestSize.Level
 }
 
 /*
+ * @tc.name: SoftBusSocketRecvFromTest002
+ * @tc.desc: SoftBusSocketRecvFrom will return SOFTBUS_ADAPTER_ERR when given invalid param
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvFromTest002, TestSize.Level0)
+{
+    int32_t socketFd = -1;
+    SoftBusSockAddr fromAddr = { 0 };
+    int32_t fromAddrLen;
+    int32_t ret = SoftBusSocketRecvFrom(socketFd, nullptr, 0, 0, nullptr, &fromAddrLen);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+    ret = SoftBusSocketRecvFrom(socketFd, nullptr, 0, 0, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+    ret = SoftBusSocketRecvFrom(socketFd, nullptr, 0, 0, &fromAddr, nullptr);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+}
+
+/*
  * @tc.name: SoftBusSocketShutDownTest001
  * @tc.desc: socketFd is service fd
  * @tc.type: FUNC
@@ -1962,6 +1998,24 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest007, TestSize.Level0)
     char dst[46] = { 0 };
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET6, src, dst);
     EXPECT_EQ(0, ret);
+}
+
+/*
+ * @tc.name: SoftBusInetPtoNTest008
+ * @tc.desc: loop back
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetPtoNTest008, TestSize.Level0)
+{
+    const char *src = "::1";
+    char dst[46] = { 0 };
+    int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET6, nullptr, dst);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+    ret = SoftBusInetPtoN(SOFTBUS_AF_INET6, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+    ret = SoftBusInetPtoN(SOFTBUS_AF_INET6, src, nullptr);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
 /*

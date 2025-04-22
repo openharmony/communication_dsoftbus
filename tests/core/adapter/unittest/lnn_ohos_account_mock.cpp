@@ -482,9 +482,9 @@ void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
     GetLnnOhosAccountInterface()->DfxRecordTriggerTime(reason, stage);
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx)
 {
-    GetLnnOhosAccountInterface()->DiscLinkStatusChanged(status, medium);
+    GetLnnOhosAccountInterface()->DiscLinkStatusChanged(status, medium, ifnameIdx);
 }
 
 void LnnDeinitP2p(void)

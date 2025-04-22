@@ -120,7 +120,7 @@ void FileTest::SetUp()
     DeviceManager::Instance()->WaitNetworkSizeMoreThan(1);
 };
 
-HWTEST_F(FileTest, SendFileDstNULL, TestSize.Level0)
+HWTEST_F(FileTest, SendFileDstNULL, TestSize.Level1)
 {
     g_sessionId = OpenSession(ECHO_SERVICE_SESSION_NAME, ECHO_SERVICE_SESSION_NAME,
         DeviceManager::Instance()->GetRemoteByIndex(0).c_str(), groupId, GetSessionAttr());

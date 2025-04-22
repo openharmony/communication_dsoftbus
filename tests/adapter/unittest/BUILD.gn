@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,8 +17,6 @@ if (defined(ohos_lite)) {
   import("../../../dsoftbus.gni")
 
   dsoftbus_root_path = "../../.."
-
-  defines += [ "HAVE_PRO = 0" ]
 
   if (ohos_build_type == "debug") {
     unittest("AdapterTest") {
@@ -45,13 +43,14 @@ if (defined(ohos_lite)) {
       ]
 
       external_deps = [ "bounds_checking_function:libsec_static" ]
+
+      defines += [ "HAVE_PRO = 0" ]
     }
   }
 } else {
   import("//build/test.gni")
   import("../../../dsoftbus.gni")
-  defines += [ "HAVE_PRO = 0" ]
-  module_output_path = "dsoftbus/adapter"
+  module_output_path = "dsoftbus/soft_bus/adapter"
 
   ohos_unittest("AdaptorDsoftbusCryptTest") {
     module_out_path = module_output_path
@@ -150,6 +149,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    defines += [ "HAVE_PRO = 1" ]
   }
 
   ohos_unittest("SoftbusThreadTest") {
@@ -166,6 +166,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    defines += [ "HAVE_PRO = 1" ]
   }
 
   ohos_unittest("SoftbusTimeTest") {
@@ -246,6 +247,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+      "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/adapter/default_config/spec_config",
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
@@ -293,7 +295,11 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/adapter/default_config/spec_config",
       "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/core/discovery/manager/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
       "$dsoftbus_root_path/adapter/default_config/spec_config",

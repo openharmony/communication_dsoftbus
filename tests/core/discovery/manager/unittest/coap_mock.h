@@ -30,7 +30,7 @@ public:
     virtual int32_t Subscribe(const SubscribeOption *option) = 0;
     virtual int32_t Unsubscribe(const SubscribeOption *option) = 0;
     virtual int32_t StopAdvertise(const SubscribeOption *option) = 0;
-    virtual void LinkStatusChanged(LinkStatus status) = 0;
+    virtual void LinkStatusChanged(LinkStatus status, int32_t ifnameIdx) = 0;
     virtual void UpdateLocalDeviceInfo(InfoTypeChanged type) = 0;
 };
 
@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(int32_t, Subscribe, (const SubscribeOption* option), (override));
     MOCK_METHOD(int32_t, StopAdvertise, (const SubscribeOption* option), (override));
     MOCK_METHOD(int32_t, Unsubscribe, (const SubscribeOption* option), (override));
-    MOCK_METHOD(void, LinkStatusChanged, (LinkStatus status), (override));
+    MOCK_METHOD(void, LinkStatusChanged, (LinkStatus status, int32_t ifnameIdx), (override));
     MOCK_METHOD(void, UpdateLocalDeviceInfo, (InfoTypeChanged type), (override));
 
 private:
@@ -63,7 +63,7 @@ private:
     static int32_t CoapSubscribe(const SubscribeOption *option);
     static int32_t CoapUnsubscribe(const SubscribeOption *option);
     static int32_t CoapStopAdvertise(const SubscribeOption *option);
-    static void CoapLinkStatusChanged(LinkStatus status);
+    static void CoapLinkStatusChanged(LinkStatus status, int32_t ifnameIdx);
     static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type);
 
     static inline DiscoveryFuncInterface interface_ = {

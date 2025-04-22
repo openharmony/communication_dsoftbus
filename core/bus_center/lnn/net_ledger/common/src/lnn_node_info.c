@@ -149,42 +149,44 @@ void LnnSetBleMac(NodeInfo *info, const char *mac)
     }
 }
 
-const char *LnnGetNetIfName(const NodeInfo *info)
+const char *LnnGetNetIfName(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return DEFAULT_IFNAME;
     }
-    return info->connectInfo.netIfName;
+    return info->connectInfo.ifInfo[ifnameIdx].netIfName;
 }
 
-void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
+void LnnSetNetIfName(NodeInfo *info, const char *netIfName, int32_t ifnameIdx)
 {
-    if (info == NULL || netIfName == NULL) {
+    if (info == NULL || netIfName == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
-    if (strncpy_s(info->connectInfo.netIfName, NET_IF_NAME_LEN, netIfName, strlen(netIfName)) != EOK) {
+    if (strncpy_s(info->connectInfo.ifInfo[ifnameIdx].netIfName, NET_IF_NAME_LEN,
+        netIfName, strlen(netIfName)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
 }
 
-const char *LnnGetWiFiIp(const NodeInfo *info)
+const char *LnnGetWiFiIp(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "PARA error");
         return DEFAULT_IP;
     }
-    return info->connectInfo.deviceIp;
+    return info->connectInfo.ifInfo[ifnameIdx].deviceIp;
 }
 
-void LnnSetWiFiIp(NodeInfo *info, const char *ip)
+void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx)
 {
-    if (info == NULL || ip == NULL) {
+    if (info == NULL || ip == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
-    if (strncpy_s(info->connectInfo.deviceIp, sizeof(info->connectInfo.deviceIp), ip, strlen(ip)) != EOK) {
+    if (strncpy_s(info->connectInfo.ifInfo[ifnameIdx].deviceIp, sizeof(info->connectInfo.ifInfo[ifnameIdx].deviceIp),
+        ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
     }
 }
@@ -211,60 +213,60 @@ int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    return info->connectInfo.authPort;
+    return info->connectInfo.ifInfo[ifnameIdx].authPort;
 }
 
-int32_t LnnSetAuthPort(NodeInfo *info, int32_t port)
+int32_t LnnSetAuthPort(NodeInfo *info, int32_t port, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    info->connectInfo.authPort = port;
+    info->connectInfo.ifInfo[ifnameIdx].authPort = port;
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    return info->connectInfo.sessionPort;
+    return info->connectInfo.ifInfo[ifnameIdx].sessionPort;
 }
 
-int32_t LnnSetSessionPort(NodeInfo *info, int32_t port)
+int32_t LnnSetSessionPort(NodeInfo *info, int32_t port, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    info->connectInfo.sessionPort = port;
+    info->connectInfo.ifInfo[ifnameIdx].sessionPort = port;
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    return info->connectInfo.proxyPort;
+    return info->connectInfo.ifInfo[ifnameIdx].proxyPort;
 }
 
-int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
+int32_t LnnSetProxyPort(NodeInfo *info, int32_t port, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    info->connectInfo.proxyPort = port;
+    info->connectInfo.ifInfo[ifnameIdx].proxyPort = port;
     return SOFTBUS_OK;
 }
 
@@ -670,4 +672,9 @@ int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
     info->isScreenOn = isScreenOn;
     LNN_LOGI(LNN_LEDGER, "set local screen status to %{public}s", isScreenOn ? "on" : "off");
     return SOFTBUS_OK;
+}
+
+bool isIfnameIdxInvalid(int32_t ifnameIdx)
+{
+    return (ifnameIdx < MIN_IF || ifnameIdx > MAX_IF) ? true : false;
 }

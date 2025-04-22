@@ -373,6 +373,10 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
 
 static int32_t EncryptedMessageAddUk(uint8_t *encData, uint32_t *encDataLen, const UkIdInfo *ukIdInfo)
 {
+    if (*encDataLen < sizeof(uint32_t) || *encDataLen < sizeof(UkIdInfo)) {
+        TRANS_LOGE(TRANS_CTRL, "invalid encDataLen");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t tempUkId = SoftBusHtoLl((uint32_t)ukIdInfo->myId);
     if (memcpy_s(encData, *encDataLen, &tempUkId, sizeof(tempUkId)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy my ukid fail.");

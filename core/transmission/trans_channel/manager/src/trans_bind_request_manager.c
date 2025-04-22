@@ -76,13 +76,13 @@ static BindRequestManager *GetBindRequestManagerByPeer(BindRequestParam *bindReq
 static int32_t GenerateParam(
     const char *mySocketName, const char *peerSocketName, const char *peerNetworkId, BindRequestParam *bindReqParam)
 {
-    int32_t ret = memcpy_s(bindReqParam->mySocketName, SESSION_NAME_SIZE_MAX, mySocketName, SESSION_NAME_SIZE_MAX);
+    int32_t ret = strcpy_s(bindReqParam->mySocketName, sizeof(bindReqParam->mySocketName), mySocketName);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy mySocketName failed");
 
-    ret = memcpy_s(bindReqParam->peerSocketName, SESSION_NAME_SIZE_MAX, peerSocketName, SESSION_NAME_SIZE_MAX);
+    ret = strcpy_s(bindReqParam->peerSocketName, sizeof(bindReqParam->peerSocketName), peerSocketName);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerSocketName failed");
 
-    ret = memcpy_s(bindReqParam->peerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
+    ret = strcpy_s(bindReqParam->peerNetworkId, sizeof(bindReqParam->peerNetworkId), peerNetworkId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "memcpy peerNetworkId failed");
     return SOFTBUS_OK;
 }

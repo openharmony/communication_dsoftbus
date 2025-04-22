@@ -33,7 +33,6 @@ extern "C" {
 typedef enum {
     LANE_BR = 0x0,
     LANE_BLE,
-    LANE_SLE,
     LANE_P2P,
     LANE_WLAN_2P4G,
     LANE_WLAN_5G,
@@ -45,6 +44,8 @@ typedef enum {
     LANE_COC_DIRECT,
     LANE_HML,
     LANE_HML_RAW,
+    LANE_SLE,
+    LANE_USB,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 
@@ -79,6 +80,7 @@ typedef enum {
     LANE_LINK_TYPE_COC_DIRECT = 4,
     LANE_LINK_TYPE_BLE_DIRECT = 5,
     LANE_LINK_TYPE_HML = 6,
+    LANE_LINK_TYPE_USB = 7,
     LANE_LINK_TYPE_MAX,
 } LaneSpecifiedLink;
 
@@ -111,6 +113,12 @@ typedef struct {
 } WlanConnInfo;
 
 typedef struct {
+    ProtocolType protocol;
+    char addr[MAX_SOCKET_ADDR_LEN];
+    uint16_t port;
+} UsbConnInfo;
+
+typedef struct {
     bool isReuse;
     int32_t pid;
 
@@ -134,6 +142,7 @@ typedef struct {
         WlanConnInfo wlan;
         BleDirectConnInfo bleDirect;
         RawWifiDirectConnInfo rawWifiDirect;
+        UsbConnInfo usb;
     } connInfo;
 } LaneConnInfo;
 

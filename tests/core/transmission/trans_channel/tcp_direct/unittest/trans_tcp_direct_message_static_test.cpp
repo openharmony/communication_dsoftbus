@@ -694,26 +694,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSiz
 }
 
 /**
- * @tc.name: IsMetaSessionTest001
- * @tc.desc: Should return false when given invalid parameter.
- * @tc.desc: Should return true when given valid parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, IsMetaSessionTest001, TestSize.Level1)
-{
-    const char *invalid = "test";
-    bool ret = IsMetaSession(invalid);
-    EXPECT_FALSE(ret);
-    const char *testSession = "testsession";
-    ret = IsMetaSession(testSession);
-    EXPECT_FALSE(ret);
-    const char *sessionName = "IShare";
-    ret = IsMetaSession(sessionName);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: TransTdcGetDataBufInfoByChannelId001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameter.
  * @tc.type: FUNC
@@ -992,9 +972,24 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTcpGenUkTest001, TestSize.Level1)
     ret = TransTcpGenUk(channelId, &aclInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
+    ret = TransUkRequestMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t requestId = 1;
+    ret = TransUkRequestAddItem(requestId, 0, 0, 0, &aclInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     EXPECT_NO_FATAL_FAILURE(OnGenUkSuccess(0, 0));
 
     EXPECT_NO_FATAL_FAILURE(OnGenUkFailed(0, 0));
+
+    EXPECT_NO_FATAL_FAILURE(OnGenUkSuccess(requestId, 0));
+
+    EXPECT_NO_FATAL_FAILURE(OnGenUkFailed(requestId, 0));
+
+    TransUkRequestMgrDeinit();
+
+    ret = HandUkReply(channelId, 0, &aclInfo, 0);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     TransDelSessionConnById(channelId);
 }
@@ -1007,7 +1002,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTcpGenUkTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectMessageStaticTest, TransOpenDataBusUkRequest001, TestSize.Level1)
 {
     int32_t channelId = 1;
-    uint32_t flags = 0;
+    uint32_t flags = FLAG_REQUEST;
     uint64_t seq = 0;
     cJSON *json = cJSON_CreateObject();
     ASSERT_TRUE(json != nullptr);
@@ -1029,6 +1024,21 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransOpenDataBusUkRequest001, TestSize
     const char *data = "test\0";
     ret = ProcessUkNegoMessage(channelId, flags, seq, data, strlen(data));
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    const char *vaildData = "{\"ERR_CODE\":0}\0";
+    ret = ProcessUkNegoMessage(channelId, flags, seq, vaildData, strlen(vaildData));
+    EXPECT_NE(SOFTBUS_OK, ret);
+    flags = FLAG_REPLY;
+    ret = ProcessUkNegoMessage(channelId, flags, seq, vaildData, strlen(vaildData));
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    const char *errCodeData0 = "{\"ERR_CODE\":-426115007}\0";
+    ret = ProcessUkNegoMessage(channelId, flags, seq, errCodeData0, strlen(errCodeData0));
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    const char *errCodeData1 = "{\"ERR_CODE\":-425983866}\0";
+    ret = ProcessUkNegoMessage(channelId, flags, seq, errCodeData1, strlen(errCodeData1));
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     TransDelSessionConnById(channelId);
     cJSON_Delete(json);

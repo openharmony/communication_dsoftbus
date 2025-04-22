@@ -65,8 +65,8 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(UpdateUnifiedDefaultName(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateNickName(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateLocalBtMac(nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UpdateLocalDeviceIp(nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UpdateLocalNetIfName(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalDeviceIp(nullptr, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalNetIfName(nullptr, 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LlUpdateNodeAddr(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateP2pMac(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateWifiCfg(nullptr), SOFTBUS_INVALID_PARAM);
@@ -76,9 +76,9 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(LlUpdateLocalExtData(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateWifiDirectAddr(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LlUpdateLocalP2pIp(nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UpdateLocalSessionPort(nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UpdateLocalAuthPort(nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UpdateLocalProxyPort(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalSessionPort(nullptr, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalAuthPort(nullptr, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalProxyPort(nullptr, 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateLocalNetCapability(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateLocalFeatureCapability(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateLocalCipherInfoKey(nullptr), SOFTBUS_INVALID_PARAM);
@@ -907,6 +907,7 @@ HWTEST_F(LNNLedgerMockTest, LL_UPDATE_LOCAL_P2P_IP_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
 {
+    LocalLedgerDepsInterfaceMock localLedgerMock;
     int32_t userId = 0;
     uint32_t len = sizeof(int32_t) - 1;
     EXPECT_EQ(L1GetUserId(nullptr, len), SOFTBUS_INVALID_PARAM);

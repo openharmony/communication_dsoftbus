@@ -14,6 +14,9 @@
  */
 
 #include "nstackx_dfinder_mgt_msg_log.h"
+
+#include <arpa/inet.h>
+
 #include "nstackx_device.h"
 #include "nstackx_dfinder_hidump.h"
 #include "nstackx_dfinder_log.h"
@@ -98,13 +101,28 @@ static void RemoveCoapReqJsonData(cJSON *data)
     cJSON_DeleteItemFromObjectCaseSensitive(data, JSON_DEVICE_HASH);
 }
 
-static int32_t GetAnonymizedIp(char *dstIp, size_t dstLen, char *srcIp)
+static int32_t GetAnonymizedIp(uint8_t af, char *dstIp, size_t dstLen, char *srcIp)
 {
-    struct sockaddr_in addr;
-    (void)memset_s(&addr, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(srcIp);
-    return IpAddrAnonymousFormat(dstIp, dstLen, (struct sockaddr *)&addr, sizeof(addr));
+    struct sockaddr_in addrIn;
+    struct sockaddr_in6 addrIn6;
+    struct sockaddr *addr = (struct sockaddr *)&addrIn;
+    size_t len = sizeof(struct sockaddr_in);
+    if (af == AF_INET) {
+        (void)memset_s(&addrIn, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
+        addrIn.sin_family = AF_INET;
+        addrIn.sin_addr.s_addr = inet_addr(srcIp);
+    } else {
+        (void)memset_s(&addrIn6, sizeof(struct sockaddr_in6), 0, sizeof(struct sockaddr_in6));
+        addrIn6.sin6_family = AF_INET6;
+        if (inet_pton(AF_INET6, srcIp, &addrIn6.sin6_addr) <= 0) {
+            DFINDER_LOGE(TAG, "inet_pthon AF_INET6 err");
+            return NSTACKX_EFAILED;
+        }
+        len = sizeof(struct sockaddr_in6);
+        addr = (struct sockaddr *)&addrIn6;
+    }
+
+    return IpAddrAnonymousFormat(dstIp, dstLen, addr, len);
 }
 
 static cJSON *CheckAnonymizeJsonData(cJSON *data, const char * const jsonKey)
@@ -156,7 +174,13 @@ static int32_t AnonymizeIpJsonData(cJSON *data)
         return NSTACKX_EFAILED;
     }
     char ipStr[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    int ret = GetAnonymizedIp(ipStr, sizeof(ipStr), item->valuestring);
+    union InetAddr addr;
+    uint8_t af = InetGetAfType(item->valuestring, &addr);
+    if (af == AF_ERROR) {
+        DFINDER_LOGE(TAG, "get af type from ip failed");
+        return NSTACKX_EFAILED;
+    }
+    int ret = GetAnonymizedIp(af, ipStr, sizeof(ipStr), item->valuestring);
     if (ret < 0) {
         DFINDER_LOGE(TAG, "get anonymized ip failed");
         return NSTACKX_EFAILED;
@@ -281,12 +305,12 @@ void DFinderMgtReqLog(CoapRequest *coapRequest)
 static int32_t UnpackLogToStr(DeviceInfo *dev, char *msg, uint32_t size)
 {
     char ip[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    if (inet_ntop(AF_INET, &(dev->netChannelInfo.wifiApInfo.ip), ip, sizeof(ip)) == NULL) {
+    if (inet_ntop(dev->netChannelInfo.wifiApInfo.af, &(dev->netChannelInfo.wifiApInfo.addr), ip, sizeof(ip)) == NULL) {
         DFINDER_LOGE(TAG, "convert ip struct failed");
         return NSTACKX_EFAILED;
     }
     char ipStr[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    if (GetAnonymizedIp(ipStr, sizeof(ipStr), ip) < 0) {
+    if (GetAnonymizedIp(dev->netChannelInfo.wifiApInfo.af, ipStr, sizeof(ipStr), ip) < 0) {
         DFINDER_LOGE(TAG, "get anonymized ip failed");
         return NSTACKX_EFAILED;
     }

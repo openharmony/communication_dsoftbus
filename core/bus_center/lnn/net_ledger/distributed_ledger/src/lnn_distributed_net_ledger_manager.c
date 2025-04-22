@@ -169,13 +169,13 @@ static int32_t DlGetBtMac(const char *networkId, bool checkOnline, void *buf, ui
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetWlanIp(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+static int32_t DlGetWlanIp(const char *networkId, bool checkOnline, void *buf, uint32_t len, int32_t ifnameIdx)
 {
     (void)checkOnline;
     NodeInfo *info = NULL;
     const char *ip = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    ip = LnnGetWiFiIp(info);
+    ip = LnnGetWiFiIp(info, ifnameIdx);
     if (ip == NULL) {
         LNN_LOGE(LNN_LEDGER, "get wifi ip fail.");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
@@ -354,7 +354,7 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
         AnonymizeFree(anonyNetworkId);
         return false;
     }
-    
+
     info->isScreenOn = isScreenOn;
     LNN_LOGI(LNN_LEDGER, "set %{public}s screen status to %{public}s",
         AnonymizeWrapper(anonyNetworkId), isScreenOn ? "on" : "off");
@@ -363,7 +363,7 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
     return true;
 }
 
-static int32_t DlGetAuthPort(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+static int32_t DlGetAuthPort(const char *networkId, bool checkOnline, void *buf, uint32_t len, int32_t ifnameIdx)
 {
     (void)checkOnline;
     NodeInfo *info = NULL;
@@ -371,11 +371,11 @@ static int32_t DlGetAuthPort(const char *networkId, bool checkOnline, void *buf,
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = LnnGetAuthPort(info);
+    *((int32_t *)buf) = LnnGetAuthPort(info, ifnameIdx);
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetSessionPort(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+static int32_t DlGetSessionPort(const char *networkId, bool checkOnline, void *buf, uint32_t len, int32_t ifnameIdx)
 {
     (void)checkOnline;
     NodeInfo *info = NULL;
@@ -383,11 +383,11 @@ static int32_t DlGetSessionPort(const char *networkId, bool checkOnline, void *b
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = LnnGetSessionPort(info);
+    *((int32_t *)buf) = LnnGetSessionPort(info, ifnameIdx);
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetProxyPort(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+static int32_t DlGetProxyPort(const char *networkId, bool checkOnline, void *buf, uint32_t len, int32_t ifnameIdx)
 {
     (void)checkOnline;
     NodeInfo *info = NULL;
@@ -395,7 +395,7 @@ static int32_t DlGetProxyPort(const char *networkId, bool checkOnline, void *buf
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = LnnGetProxyPort(info);
+    *((int32_t *)buf) = LnnGetProxyPort(info, ifnameIdx);
     return SOFTBUS_OK;
 }
 
@@ -819,7 +819,6 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_DEV_TYPE, DlGetDeviceType},
     {STRING_KEY_DEV_NAME, DlGetDeviceName},
     {STRING_KEY_BT_MAC, DlGetBtMac},
-    {STRING_KEY_WLAN_IP, DlGetWlanIp},
     {STRING_KEY_MASTER_NODE_UDID, DlGetMasterUdid},
     {STRING_KEY_P2P_MAC, DlGetP2pMac},
     {STRING_KEY_WIFI_CFG, DlGetWifiCfg},
@@ -832,9 +831,6 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_P2P_IP, DlGetNodeP2pIp},
     {STRING_KEY_SLE_ADDR, DlGetSleAddr},
     {NUM_KEY_META_NODE, DlGetAuthType},
-    {NUM_KEY_SESSION_PORT, DlGetSessionPort},
-    {NUM_KEY_AUTH_PORT, DlGetAuthPort},
-    {NUM_KEY_PROXY_PORT, DlGetProxyPort},
     {NUM_KEY_NET_CAP, DlGetNetCap},
     {NUM_KEY_FEATURE_CAPA, DlGetFeatureCap},
     {NUM_KEY_DISCOVERY_TYPE, DlGetNetType},
@@ -858,6 +854,13 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {BYTE_KEY_BROADCAST_CIPHER_IV, DlGetDeviceCipherInfoIv},
     {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
     {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap}
+};
+
+static DistributedLedgerKeyByIfname g_dlKeyByIfnameTable[] = {
+    {STRING_KEY_IP, DlGetWlanIp},
+    {NUM_KEY_SESSION_PORT, DlGetSessionPort},
+    {NUM_KEY_AUTH_PORT, DlGetAuthPort},
+    {NUM_KEY_PROXY_PORT, DlGetProxyPort},
 };
 
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
@@ -1220,6 +1223,39 @@ int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *networkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    uint32_t i;
+    int32_t ret;
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "info is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (key >= STRING_KEY_END) {
+        LNN_LOGE(LNN_LEDGER, "KEY error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (i = 0; i < sizeof(g_dlKeyByIfnameTable) / sizeof(DistributedLedgerKeyByIfname); i++) {
+        if (key == g_dlKeyByIfnameTable[i].key) {
+            if (g_dlKeyByIfnameTable[i].getInfo != NULL) {
+                ret = g_dlKeyByIfnameTable[i].getInfo(networkId, true, (void *)info, len, ifIdx);
+                SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+                return ret;
+            }
+        }
+    }
+    SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    LNN_LOGE(LNN_LEDGER, "KEY NOT exist");
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
 {
     uint32_t i;
@@ -1244,6 +1280,40 @@ int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
                 ret = g_dlKeyTable[i].getInfo(networkId, true, (void *)info, LNN_COMMON_LEN);
+                SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+                return ret;
+            }
+        }
+    }
+    SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    LNN_LOGE(LNN_LEDGER, "KEY NOT exist");
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *networkId, InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    uint32_t i;
+    int32_t ret;
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        LNN_LOGE(LNN_LEDGER, "networkId is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "info is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
+        LNN_LOGE(LNN_LEDGER, "KEY error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (i = 0; i < sizeof(g_dlKeyByIfnameTable) / sizeof(DistributedLedgerKeyByIfname); i++) {
+        if (key == g_dlKeyByIfnameTable[i].key) {
+            if (g_dlKeyByIfnameTable[i].getInfo != NULL) {
+                ret = g_dlKeyByIfnameTable[i].getInfo(networkId, true, (void *)info, LNN_COMMON_LEN, ifIdx);
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1741,6 +1811,10 @@ int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
 
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
+    NodeInfo recoveryInfo;
+    (void)memset_s(&recoveryInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo tempNodeInfo;
+    (void)memset_s(&tempNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
@@ -1752,13 +1826,26 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->netCapacity = connCapability;
-    int32_t ret = LnnSaveRemoteDeviceInfo(nodeInfo);
-    if (ret != SOFTBUS_OK) {
+    if (memcpy_s(&tempNodeInfo, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-        LNN_LOGE(LNN_LEDGER, "save remote netCapacity fail");
-        return ret;
+        return SOFTBUS_MEM_ERR;
     }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    int32_t ret = LnnRetrieveDeviceInfoByUdid(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
+        if (LnnSaveRemoteDeviceInfo(&tempNodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote info fail");
+        }
+        return ret;
+    }
+    recoveryInfo.netCapacity = connCapability;
+    ret = LnnSaveRemoteDeviceInfo(&recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save remote device info fail, ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1897,7 +1984,7 @@ int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->connectInfo.proxyPort = proxyPort;
+    nodeInfo->connectInfo.ifInfo[WLAN_IF].proxyPort = proxyPort;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
@@ -1914,7 +2001,7 @@ int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->connectInfo.sessionPort = sessionPort;
+    nodeInfo->connectInfo.ifInfo[WLAN_IF].sessionPort = sessionPort;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
@@ -1931,7 +2018,7 @@ int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->connectInfo.authPort = authPort;
+    nodeInfo->connectInfo.ifInfo[WLAN_IF].authPort = authPort;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }

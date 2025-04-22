@@ -859,7 +859,7 @@ static void InstUpdateRemoteInfoByLnn(InstantRemoteInfo *remoteInfo, NodeBasicIn
     if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &nodeInfo) == SOFTBUS_OK) {
         remoteInfo->udid = std::string(nodeInfo.deviceInfo.deviceUdid);
         remoteInfo->uuid = std::string(nodeInfo.uuid);
-        remoteInfo->wlanIp = std::string(nodeInfo.connectInfo.deviceIp);
+        remoteInfo->wlanIp = std::string(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp);
         remoteInfo->bleMac = std::string(nodeInfo.connectInfo.bleMacAddr);
         remoteInfo->brMac = std::string(nodeInfo.connectInfo.macAddr);
         remoteInfo->p2pRole = nodeInfo.p2pInfo.p2pRole;

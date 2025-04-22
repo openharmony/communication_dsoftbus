@@ -641,6 +641,9 @@ static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink lin
         case LANE_LINK_TYPE_HML:
             optionalLink[linkNum++] = LANE_HML;
             break;
+        case LANE_LINK_TYPE_USB:
+            optionalLink[linkNum++] = LANE_USB;
+            break;
         default:
             LNN_LOGE(LNN_LANE, "unexpected link=%{public}d", link);
             break;
@@ -1147,6 +1150,7 @@ static int32_t g_laneLatency[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC] = COC_DIRECT_LATENCY,
     [LANE_COC_DIRECT] = COC_DIRECT_LATENCY,
     [LANE_HML] = HML_LATENCY,
+    [LANE_USB] = USB_LATENCY,
 };
 
 static void LaneTriggerLink(SoftBusMessage *msg)

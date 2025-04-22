@@ -113,7 +113,7 @@ static ISessionListener g_noQosCb = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransQosStatServerTest, QosStatServerTest001, TestSize.Level0)
+HWTEST_F(TransQosStatServerTest, QosStatServerTest001, TestSize.Level1)
 {
     int32_t ret;
     if (g_testWay == 0) {

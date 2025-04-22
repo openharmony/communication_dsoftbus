@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #define LOCAL_IP "127.0.0.1"
+#define LOCAL_IPV6_STR "::1"
 #define DEFAULT_IP ""
 #define DEFAULT_MAC ""
 #define DEFAULT_IFNAME ""
@@ -34,12 +35,17 @@ typedef struct {
     char netIfName[NET_IF_NAME_LEN];
     char deviceIp[MAX_ADDR_LEN];
     char macAddr[MAC_LEN];
-    char bleMacAddr[MAC_LEN];
-    char sleMacAddr[MAC_LEN];
     int authPort;
     int proxyPort;
     int sessionPort;
+} IfInfo;
+
+typedef struct {
+    char macAddr[MAC_LEN];
+    char bleMacAddr[MAC_LEN];
+    char sleMacAddr[MAC_LEN];
     uint64_t latestTime;
+    IfInfo ifInfo[MAX_IF + 1];
 } ConnectInfo;
 
 #ifdef __cplusplus

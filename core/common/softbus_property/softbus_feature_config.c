@@ -48,7 +48,7 @@
 #define MAX_NODE_STATE_CB_CNT 10
 #define MAX_LNN_CONNECTION_CNT 30
 #define LNN_SUPPORT_CAPBILITY 62
-#define LNN_STATIC_CAPABILITY 63
+#define LNN_STATIC_CAPABILITY 127
 #define LNN_SUPPORT_FEATURE     0x177C2
 #define AUTH_ABILITY_COLLECTION 0
 #define DEFAULT_SUPPORT_AUTHCAPACITY 0xF
@@ -57,7 +57,7 @@
 #define DEFAULT_STORAGE_PATH "/data/service/el1/public"
 #endif
 #define LNN_UDID_INIT_DELAY_LEN 1500
-#define LNN_NET_IF_NAME "0:eth0,1:wlan0,2:br0,3:ble0"
+#define LNN_NET_IF_NAME "0:eth0,1:wlan0,2:br0,3:ble0,4:ncm0,4:wwan0"
 #define LNN_MAX_CONCURENT_NUM 2
 #define DEFAULT_DISC_FREQ_LOW ((5 << 16) | 12)
 #define DEFAULT_DISC_FREQ_MID ((5 << 16) | 24)

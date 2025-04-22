@@ -49,6 +49,11 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return GetInterface()->LnnGetLocalStrInfo(key, info, len);
 }
 
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
 int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode)
 {
     return GetInterface()->FindAuthPreLinkNodeById(requestId, reuseNode);
@@ -72,11 +77,6 @@ bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint)
 {
     return GetInterface()->IsPotentialTrustedDeviceDp(deviceIdHash, isOnlyPointToPoint);
-}
-
-bool AuthIsLatestNormalizeKeyInTime(const char *udidHash, uint64_t time)
-{
-    return GetInterface()->AuthIsLatestNormalizeKeyInTime(udidHash, time);
 }
 
 bool IsSupportUDIDAbatement(void)
@@ -119,14 +119,14 @@ void DelSessionKeyProfile(int32_t sessionKeyId)
 (void)sessionKeyId;
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetInterface()->LnnGetAuthPort(info);
+    return GetInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetInterface()->LnnGetSessionPort(info);
+    return GetInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
 int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
@@ -219,9 +219,9 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetInterface()->LnnGetProxyPort(info);
+    return GetInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 const char *LnnGetBtMac(const NodeInfo *info)

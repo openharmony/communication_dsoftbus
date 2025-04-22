@@ -75,5 +75,10 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     return GetTransTcpDirectWifiInterface()->AddTrigger(module, fd, trigger);
 }
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetTransTcpDirectWifiInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
 }
 }

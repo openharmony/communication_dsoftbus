@@ -78,5 +78,45 @@ void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusEr
     return;
 }
 
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnGetLocalStrInfo(key, info, len);
+}
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->GetActiveOsAccountIds();
+}
+
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+}
+
+void LnnHbOnTrustedRelationReduced(void)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnHbOnTrustedRelationReduced();
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnGetLocalNumInfo(key, info);
+}
+
+int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnInsertSpecificTrustedDevInfo(udid);
+}
+
+void LnnHbOnTrustedRelationIncreased(int32_t groupType)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnHbOnTrustedRelationIncreased(groupType);
+}
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnGetLocalByteInfo(key, info, len);
+}
+
 } // extern "C"
 } // namespace OHOS

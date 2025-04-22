@@ -237,10 +237,6 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
     LNN_LOGI(LNN_STATE, "accountUid=%{public}s, len=%{public}u", AnonymizeWrapper(anonyUid), *len);
     AnonymizeFree(anonyUid);
 
-    if (memcmp(DEFAULT_ACCOUNT_UID, accountInfo.uid_.c_str(), *len) == 0) {
-        LNN_LOGE(LNN_STATE, "not login account");
-        return SOFTBUS_NOT_LOGIN;
-    }
     if (memcpy_s(id, idLen, accountInfo.uid_.c_str(), *len) != EOK) {
         LNN_LOGE(LNN_STATE, "memcpy_s accountUid failed, idLen=%{public}u, len=%{public}u", idLen, *len);
         return SOFTBUS_MEM_ERR;

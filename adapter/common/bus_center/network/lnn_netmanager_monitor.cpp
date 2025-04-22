@@ -15,6 +15,8 @@
 
 #include "lnn_netmanager_monitor.h"
 
+#include <linux/if_addr.h>
+
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
@@ -30,6 +32,7 @@ static const int32_t DELAY_LEN = 1000;
 static const int32_t NETMANAGER_OK = 0;
 static const int32_t DUPLICATE_ROUTE = -17;
 static const int32_t MAX_RETRY_COUNT = 20;
+static constexpr int IPV6_PREFIX = 64;
 
 namespace OHOS {
 namespace BusCenter {
@@ -58,18 +61,22 @@ NetInterfaceStateMonitor::NetInterfaceStateMonitor()
 
 int32_t NetInterfaceStateMonitor::OnInterfaceAdded(const std::string &ifName)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceAdded, ifname = %{public}s", ifName.c_str());
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_ADDED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceRemoved, ifname = %{public}s", ifName.c_str());
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_REMOVED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t NetInterfaceStateMonitor::OnInterfaceChanged(const std::string &ifName, bool isUp)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceChanged, ifname = %{public}s, isUp=%{public}s",
+        ifName.c_str(), isUp ? "true" : "false");
     return SOFTBUS_OK;
 }
 
@@ -126,6 +133,10 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
+    if ((flags & IFA_F_TENTATIVE) != 0 && (strstr(ifName.c_str(), "ncm0") != NULL ||
+        strstr(ifName.c_str(), "wwan0") != NULL)) {
+        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IP_UPDATED, ifName.c_str());
+    }
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -162,6 +173,8 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
 int32_t NetInterfaceStateMonitor::OnInterfaceAddressRemoved(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceAddressRemoved, ifname=%{public}s, flags=%{public}d",
+        ifName.c_str(), flags);
     return SOFTBUS_OK;
 }
 } // namespace BusCenter
@@ -208,6 +221,21 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
     if (ret != NETMANAGER_OK && ret != DUPLICATE_ROUTE) {
         LNN_LOGE(LNN_BUILDER, "config net interface %{public}s route failed with ret=%{public}d", ifName, ret);
         return SOFTBUS_NETWORK_CONFIG_NETLINK_ROUTE_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ConfigLocalIpv6(const char *ifName, const char *localIpv6)
+{
+    if (ifName == nullptr || localIpv6 == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret =
+        OHOS::NetManagerStandard::NetConnClient::GetInstance().AddInterfaceAddress(ifName, localIpv6, IPV6_PREFIX);
+    if (ret != NETMANAGER_OK && ret != DUPLICATE_ROUTE) {
+        LNN_LOGE(LNN_BUILDER, "config net interface %{public}s ipv6 failed with ret=%{public}d", ifName, ret);
+        return SOFTBUS_NETWORK_CONFIG_NETLINK_IP_FAIL;
     }
     return SOFTBUS_OK;
 }

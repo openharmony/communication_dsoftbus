@@ -58,6 +58,7 @@
 #define LANE_ID_HASH_LEN 32
 #define UDID_SHORT_HASH_HEXSTR_LEN_TMP 16
 #define UDID_SHORT_HASH_LEN_TMP 8
+#define LOOP_IP_ADDR "127.0.0.1"
 
 static bool g_enabledLowPower = false;
 
@@ -156,6 +157,12 @@ static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *
         case LANE_ETH:
             if (strncmp(sourceLink->linkInfo.wlan.connInfo.addr,
                 linkInfoItem->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
+                break;
+            }
+            return true;
+        case LANE_USB:
+            if (strncmp(sourceLink->linkInfo.usb.connInfo.addr,
+                linkInfoItem->linkInfo.usb.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
                 break;
             }
             return true;
@@ -587,7 +594,7 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId)
 static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_HML, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
-        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT, LANE_BLE_REUSE, LANE_HML_RAW };
+        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT, LANE_BLE_REUSE, LANE_HML_RAW, LANE_USB };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
@@ -1449,10 +1456,10 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
     int32_t port = 0;
 
     if (reqInfo->isInnerCalled) {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port, WLAN_IF);
         LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
     } else {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port, WLAN_IF);
         LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
     }
     if (ret != SOFTBUS_OK) {
@@ -1476,8 +1483,8 @@ static int32_t CreateWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqI
     }
     LNN_LOGI(LNN_LANE, "get remote wlan ip with protocol=%{public}u", protocol);
     if (protocol == LNN_PROTOCOL_IP) {
-        if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP, linkInfo->linkInfo.wlan.connInfo.addr,
-            sizeof(linkInfo->linkInfo.wlan.connInfo.addr)) != SOFTBUS_OK) {
+        if (LnnGetRemoteStrInfoByIfnameIdx(reqInfo->peerNetworkId, STRING_KEY_IP, linkInfo->linkInfo.wlan.connInfo.addr,
+            sizeof(linkInfo->linkInfo.wlan.connInfo.addr), WLAN_IF) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "get remote wlan ip fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
@@ -1522,6 +1529,83 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         LNN_LOGE(LNN_LANE, "lane detect reliability fail, laneReqId=%{public}u", reqId);
         return ret;
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t FillUsbLinkInfo(ProtocolType protocol, const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    int32_t ret = SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    int32_t port = 0;
+
+    if (reqInfo->isInnerCalled) {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port, USB_IF);
+        LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
+    } else {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port, USB_IF);
+        LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
+    }
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    linkInfo->type = reqInfo->linkType;
+    UsbLinkInfo *usb = &(linkInfo->linkInfo.usb);
+    usb->channel = -1;
+    usb->bw = LANE_BW_160M;
+    usb->connInfo.protocol = protocol;
+    usb->connInfo.port = port;
+    return SOFTBUS_OK;
+}
+
+static int32_t CreateUsbLinkInfo(ProtocolType protocol, const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
+        linkInfo->peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LNN_LOGI(LNN_LANE, "get remote usb ip with protocol=%{public}u", protocol);
+    if (protocol == LNN_PROTOCOL_USB) {
+        if (LnnGetRemoteStrInfoByIfnameIdx(reqInfo->peerNetworkId, STRING_KEY_IP, linkInfo->linkInfo.usb.connInfo.addr,
+            sizeof(linkInfo->linkInfo.usb.connInfo.addr), USB_IF) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get remote usb ip fail");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+        if (strnlen(linkInfo->linkInfo.usb.connInfo.addr, sizeof(linkInfo->linkInfo.usb.connInfo.addr)) == 0 ||
+            strnlen(linkInfo->linkInfo.usb.connInfo.addr,
+            sizeof(linkInfo->linkInfo.usb.connInfo.addr)) == MAX_SOCKET_ADDR_LEN ||
+            strncmp(linkInfo->linkInfo.usb.connInfo.addr, LOOP_IP_ADDR, strlen(LOOP_IP_ADDR)) == 0) {
+            LNN_LOGE(LNN_LANE, "Usb ip not found");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+    } else {
+        if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_NODE_ADDR, linkInfo->linkInfo.usb.connInfo.addr,
+            sizeof(linkInfo->linkInfo.usb.connInfo.addr)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get remote usb ip fail");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+    }
+    return FillUsbLinkInfo(protocol, reqInfo, linkInfo);
+}
+
+static int32_t LaneLinkOfUsb(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LaneLinkInfo linkInfo;
+    ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    if (reqInfo->transType == LANE_T_MSG || reqInfo->transType == LANE_T_BYTE) {
+        acceptableProtocols |= LNN_PROTOCOL_NIP;
+    }
+    acceptableProtocols = acceptableProtocols & reqInfo->acceptableProtocols;
+    ProtocolType protocol = LnnLaneSelectProtocol(LNN_NETIF_TYPE_USB, reqInfo->peerNetworkId, acceptableProtocols);
+    if (protocol == 0) {
+        LNN_LOGE(LNN_LANE, "protocal is invalid!");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    int32_t ret = CreateUsbLinkInfo(protocol, reqInfo, &linkInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "CreateUsbLinkInfo fail, laneReqId=%{public}u", reqId);
+        return ret;
+    }
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -1593,6 +1677,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC_DIRECT] = LaneLinkOfCocDirect,
     [LANE_HML] = LaneLinkOfHml,
     [LANE_HML_RAW] = LaneLinkOfHmlRaw,
+    [LANE_USB] = LaneLinkOfUsb,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)

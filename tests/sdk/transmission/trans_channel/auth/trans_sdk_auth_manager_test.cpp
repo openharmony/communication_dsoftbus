@@ -47,7 +47,7 @@ void TransClientSdkAuthManagerTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest001, TestSize.Level0)
+HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest001, TestSize.Level1)
 {
     int32_t ret = ClientTransAuthInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -59,7 +59,7 @@ HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest002, TestSize.Level0)
+HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest002, TestSize.Level1)
 {
     ChannelInfo channel;
     int32_t ret = ClientTransAuthOnChannelOpened(nullptr, &channel);
@@ -72,7 +72,7 @@ HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest002, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest003, TestSize.Level0)
+HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest003, TestSize.Level1)
 {
     int32_t channelId = 0;
     uint32_t len = -1;

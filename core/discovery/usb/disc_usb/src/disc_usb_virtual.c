@@ -65,9 +65,10 @@ static int32_t UsbDiscStopActiveDiscovery(const SubscribeOption *option)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static void UsbDiscLinkStatusChanged(LinkStatus status)
+static void UsbDiscLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     (void)status;
+    (void)ifnameIdx;
 }
 
 static void UsbDiscUpdateLocalDeviceInfo(InfoTypeChanged type)

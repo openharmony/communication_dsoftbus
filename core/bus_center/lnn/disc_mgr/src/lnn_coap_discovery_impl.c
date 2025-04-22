@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s, devType=%{public}03X, port=%{public}u",
         AnonymizeWrapper(anonyDevName), AnonymizeWrapper(anonyDevId), device->devType, device->addr[0].info.ip.port);
     AnonymizeFree(anonyDevName);
-    if (!AuthIsPotentialTrusted(device)) {
+    if (!AuthIsPotentialTrusted(device, true)) {
         LNN_LOGW(LNN_BUILDER, "discovery device is not potential trusted, devId=%{public}s, "
             "accountHash=%{public}02X%{public}02X", AnonymizeWrapper(anonyDevId),
             device->accountHash[0], device->accountHash[1]);

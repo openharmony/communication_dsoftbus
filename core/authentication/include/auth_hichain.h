@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "device_auth.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -32,11 +33,12 @@ extern "C" {
 #define GROUP_TYPE_MESH (1 << 2)
 #define GROUP_TYPE_COMPATIBLE (1 << 3)
 #define PC_PROOF_NON_CONSISTENT_ERRCODE 2046820418
+#define MAX_CRED_ID_SIZE 65
 
 typedef struct {
-    char *udid;
-    char *uid;
-    char *credId;
+    char udid[UDID_BUF_LEN];
+    char uid[MAX_ACCOUNT_HASH_LEN];
+    char credId[MAX_CRED_ID_SIZE];
     int32_t userId;
     DeviceAuthCallback *cb;
 } HiChainAuthParam;
