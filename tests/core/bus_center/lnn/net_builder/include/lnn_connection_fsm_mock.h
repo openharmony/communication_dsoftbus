@@ -138,7 +138,7 @@ public:
     MOCK_METHOD1(DelDupAuthManager, void(AuthManager *));
     MOCK_METHOD1(DelUserKeyByNetworkId, void(char *));
     MOCK_METHOD1(LnnNotifyAddRawEnhanceP2pEvent, void(LnnNotifyRawEnhanceP2pEvent *));
-    MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(char *, bool));
+    MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(const char *, bool));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H
