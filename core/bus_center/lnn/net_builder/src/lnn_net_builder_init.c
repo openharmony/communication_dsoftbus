@@ -876,6 +876,9 @@ int32_t LnnInitNetBuilderDelay(void)
         LNN_LOGE(LNN_INIT, "fast offline init fail!");
         return ret;
     }
+#ifndef ENABLE_FEATURE_DATAMGR_SERVICE
+    LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
+#endif
     return SOFTBUS_OK;
 }
 
