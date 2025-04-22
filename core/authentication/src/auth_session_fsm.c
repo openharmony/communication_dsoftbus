@@ -1128,13 +1128,17 @@ static int32_t SoftbusCertChainParallel(const AuthSessionInfo *info)
     }
     if (GenerateCertificate(softbusCertChain, info) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "GenerateCertificate fail");
-        if (UpdateAuthGenCertParaNode(info->requestId, false, false, softbusCertChain) != SOFTBUS_OK) {
+        if (UpdateAuthGenCertParaNode(info->requestId, false, softbusCertChain) != SOFTBUS_OK) {
             AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+            FreeSoftbusChain(softbusCertChain);
+            SoftBusFree(softbusCertChain);
         }
         return SOFTBUS_OK;
     }
-    if (UpdateAuthGenCertParaNode(info->requestId, false, true, softbusCertChain) != SOFTBUS_OK) {
+    if (UpdateAuthGenCertParaNode(info->requestId, true, softbusCertChain) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+        FreeSoftbusChain(softbusCertChain);
+        SoftBusFree(softbusCertChain);
     }
     return SOFTBUS_OK;
 }

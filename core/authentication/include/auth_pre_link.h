@@ -55,8 +55,7 @@ void DeinitAuthPreLinkList(void);
 
 int32_t InitAuthGenCertParallelList(void);
 int32_t AddAuthGenCertParaNode(int32_t requestId);
-int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isParallelGen, bool isValid,
-    SoftbusCertChain *softbusCertChain);
+int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isValid, SoftbusCertChain *softbusCertChain);
 int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **genCertParaNode);
 void DelAuthGenCertParaNodeById(int32_t requestId);
 void DeinitAuthGenCertParallelList(void);
