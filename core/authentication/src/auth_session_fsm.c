@@ -1254,7 +1254,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     AnonymizeFree(anonyUdid);
     if (strcpy_s(authParam.udid, UDID_BUF_LEN, authFsm->info.udid) != EOK ||
         strcpy_s(authParam.uid, MAX_ACCOUNT_HASH_LEN, authFsm->info.connInfo.peerUid) != EOK ||
-        strcpy_s(authParam.credId, MAX_CRED_ID_SIZE, authFsm->info.credId) != EOK) {
+        (authFsm->info.credId != NULL && strcpy_s(authParam.credId, MAX_CRED_ID_SIZE, authFsm->info.credId) != EOK)) {
         AUTH_LOGE(AUTH_FSM, "copy authParam fail");
         return SOFTBUS_STRCPY_ERR;
     }

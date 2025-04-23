@@ -163,33 +163,36 @@ static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
     }
 }
 
-static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
+static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
 {
-    uint32_t oldNetCapa = *deviceInfoNetCapacity;
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
-        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+        (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI);
+        if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI) &&
+            (hbResp->capabiltiy & (1 << BIT_WIFI_5G)) == 0 && (hbResp->capabiltiy & (1 << BIT_WIFI_24G)) == 0) {
+            (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_24G);
+        }
     } else {
-        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI);
-        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_5G);
-        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_24G);
-    }
-    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
-        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_BR);
-    } else {
-        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI);
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_5G);
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_24G);
     }
     if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
-        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+        (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_P2P);
     } else {
-        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_P2P);
+    }
+    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_BR);
+    } else {
+        (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BR);
     }
     if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
-        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_SLE);
+        (void)LnnSetNetCapability(nodeInfo->netCapacity, BIT_SLE);
     } else {
-        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_SLE);
+        (void)LnnClearNetCapability(nodeInfo->netCapacity, BIT_SLE);
     }
-    (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
-    LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);
+    (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BLE);
 }
 
 static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
@@ -209,7 +212,7 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         return;
     }
     uint32_t oldNetCapa = nodeInfo.netCapacity;
-    SetDeviceNetCapability(&nodeInfo.netCapacity, hbResp);
+    UpdateCapacity(&nodeInfo, hbResp);
     if (oldNetCapa == nodeInfo.netCapacity) {
         LNN_LOGD(LNN_HEART_BEAT, "capa not change, don't update devInfo");
         return;
@@ -420,6 +423,35 @@ static bool IsLocalSupportThreeState()
         return false;
     }
     return true;
+}
+
+static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
+{
+    uint32_t oldNetCapa = *deviceInfoNetCapacity;
+    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_24G);
+    }
+    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_BR);
+    } else {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
+    }
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    }
+    if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_SLE);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_SLE);
+    }
+    (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
+    LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);
 }
 
 static int32_t SetDeviceScreenStatus(NodeInfo *nodeInfo, bool isScreenOn)
