@@ -188,9 +188,9 @@ static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
         (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BR);
     }
     if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
-        (void)LnnSetNetCapability(nodeInfo->netCapacity, BIT_SLE);
+        (void)LnnSetNetCapability(&nodeInfo->netCapacity, BIT_SLE);
     } else {
-        (void)LnnClearNetCapability(nodeInfo->netCapacity, BIT_SLE);
+        (void)LnnClearNetCapability(&nodeInfo->netCapacity, BIT_SLE);
     }
     (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BLE);
 }
