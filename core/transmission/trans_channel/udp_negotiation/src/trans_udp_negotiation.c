@@ -148,19 +148,23 @@ static int32_t AppendIpv6WithIfname(char *ip, int32_t ifIdx)
 
 static int32_t SetChannelInfoBySide(ChannelInfo *info, bool isServerSide, const AppInfo *appInfo)
 {
-    if (info == NULL) {
+    if (info == NULL || appInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Channel info is null.");
         return SOFTBUS_ERR;
     }
     if (!isServerSide) {
         info->peerPort = appInfo->peerData.port;
-        return AppendIpv6WithIfname(info->peerIp, USB_IF);
+        if (appInfo->udpConnType == UDP_CONN_TYPE_USB && appInfo->routeType == WIFI_USB) {
+            return AppendIpv6WithIfname(info->peerIp, USB_IF);
+        }
     } else {
         if (appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             info->peerUserId = appInfo->peerData.userId;
             info->peerAccountId = (char*)appInfo->peerData.accountId;
         }
-        return AppendIpv6WithIfname(info->myIp, USB_IF);
+        if (appInfo->udpConnType == UDP_CONN_TYPE_USB && appInfo->routeType == WIFI_USB) {
+            return AppendIpv6WithIfname(info->myIp, USB_IF);
+        }
     }
     return SOFTBUS_OK;
 }
