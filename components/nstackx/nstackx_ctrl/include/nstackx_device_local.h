@@ -60,7 +60,6 @@ DeviceInfo *GetLocalDeviceInfo(void);
 const char *GetLocalDeviceNetworkName(void);
 
 int GetBroadcastIp(const struct LocalIface *iface, char *ipStr, size_t ipStrLen);
-const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface);
 const char *GetLocalIfaceIpStr(const struct LocalIface *iface);
 const char *GetLocalIfaceName(const struct LocalIface *iface);
 const char *GetLocalIfaceServiceData(const struct LocalIface *iface);
@@ -68,6 +67,9 @@ uint8_t GetLocalIfaceAf(const struct LocalIface *iface);
 CoapCtxType *LocalIfaceGetCoapCtx(uint8_t af, const char *ifname);
 #ifndef DFINDER_USE_MINI_NSTACKX
 CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint8_t serverType);
+#else
+// only mini device support ipv4, other support ipv4 and ipv6
+const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface);
 #endif
 int AddLocalIface(const char *ifname, uint8_t af, const union InetAddr *addr);
 void RemoveLocalIface(uint8_t af, const char *ifname);
