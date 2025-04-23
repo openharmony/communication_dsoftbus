@@ -485,6 +485,122 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level
 }
 
 /**
+ * @tc.name: TransDecConnRefByConnId002
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId002, TestSize.Level1)
+{
+    ProxyConnInfo *chan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, chan);
+    chan->connId = 123; // test value
+    chan->isServerSide = true;
+    chan->ref = 1;
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    chan->connInfo = connectOption;
+    int32_t ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDecConnRefByConnId(123, true); // test value
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransDecConnRefByConnId003
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId003, TestSize.Level1)
+{
+    ProxyConnInfo *chan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, chan);
+    chan->connId = 123; // test value
+    chan->isServerSide = true;
+    chan->ref = 5; // test value
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    chan->connInfo = connectOption;
+    int32_t ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
+    ret = TransDecConnRefByConnId(123, true); // test value
+    EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
+
+    SoftBusFree(chan);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransProxyPostOpenCloseMsgToLoop001
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostOpenCloseMsgToLoop001, TestSize.Level1)
+{
+    int32_t ret = TransAddConnItem(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ProxyConnInfo *chan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, chan);
+    chan->connId = 10; // test value
+    chan->requestId = 10; // test value
+    chan->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    chan->isServerSide = true;
+    chan->ref = 1;
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    chan->connInfo = connectOption;
+    ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    uint32_t state = 1;
+    ret = TransSetConnStateByReqId(chan->requestId, chan->connId, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(chan);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: CheckIsProxyAuthChannel001
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, CheckIsProxyAuthChannel001, TestSize.Level1)
+{
+    int32_t ret = CheckIsProxyAuthChannel(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    ret = CheckIsProxyAuthChannel(&connectOption);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
  * @tc.name: TransAddConnRefByConnId001
  * @tc.desc: test TransAddConnRefByConnId.
  * @tc.type: FUNC
