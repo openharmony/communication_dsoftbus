@@ -1021,12 +1021,7 @@ static DeviceAuthCallback g_GenUkCallback = {
 
 static HiChainAuthMode GetHichainAuthMode(const AuthACLInfo *info)
 {
-    HiChainAuthMode authMode = HICHAIN_AUTH_IDENTITY_SERVICE;
-    if (!JudgeIsSameAccount(!info->isServer ? info->sourceAccountId : info->sinkAccountId)) {
-        AUTH_LOGW(AUTH_CONN, "no same account not support auth identity");
-        authMode = HICHAIN_AUTH_DEVICE;
-    }
-    return authMode;
+    return HICHAIN_AUTH_IDENTITY_SERVICE;
 }
 
 static int32_t ProcessAuthHichainParam(uint32_t requestId, AuthACLInfo *info, HiChainAuthMode authMode)
