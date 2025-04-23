@@ -200,8 +200,8 @@ typedef enum {
     BIT_WIFI_24G,   /**< Support WIFI 2.4G */
     BIT_WIFI_5G,    /**< Support WIFI 5G */
     BIT_ETH,        /**< Support ETH */
-    BIT_SLE,
     BIT_USB,        /**< Support USB */
+    BIT_SLE,        /**< Support SLE */
     BIT_COUNT,      /**< Invalid type */
 } NetCapability;
 
@@ -218,8 +218,8 @@ typedef enum {
     STATIC_CAP_BIT_P2P,             /**< Support WIFI P2P */
     STATIC_CAP_BIT_ENHANCED_P2P,    /**< Support WIFI ENHANCED P2P */
     STATIC_CAP_BIT_ETH,             /**< Support ETH */
-    STATIC_CAP_BIT_SLE,
     STATIC_CAP_BIT_USB,             /**< Support USB */
+    STATIC_CAP_BIT_SLE,             /**< Support SLE */
     STATIC_CAP_BIT_COUNT,           /**< Invalid type */
 } StaticNetCapability;
 
