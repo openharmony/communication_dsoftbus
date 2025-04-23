@@ -43,6 +43,7 @@ constexpr uint64_t LANE_ID_P2P = 0x1000000000000001;
 constexpr uint64_t LANE_ID_HML = 0x1000000000000002;
 constexpr int32_t CHANNEL_ID = 10;
 constexpr char MAC_TEST[] = "testMac";
+constexpr uint32_t CONNECTION_ID = 10;
 
 class LNNLaneListenerTest : public testing::Test {
 public:
@@ -658,5 +659,91 @@ HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
     EXPECT_EQ(CreateSinkLinkInfo(nullptr, &linkInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(CreateSinkLinkInfo(&link, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: CONNECT_CALLBACK_TEST_001
+* @tc.desc: OnCommConnected
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, CONNECT_CALLBACK_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, NULL));
+
+    ConnectionInfo info = {};
+    info.type = CONNECT_BLE;
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+
+    info.type = CONNECT_BR;
+    info.isServer = false;
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+
+    info.isServer = true;
+    
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+
+    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_OK));
+    
+    EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+
+    EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneListenerDepsInterfaceMock listenerMock;
+    EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(INVALID_LANE_ID));
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+
+    EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_P2P));
+    EXPECT_CALL(listenerMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+
+    EXPECT_CALL(listenerMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnCommConnected(CONNECTION_ID, &info));
+}
+
+/*
+* @tc.name: CONNECT_CALLBACK_TEST_002
+* @tc.desc: OnCommDisconnected
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, CONNECT_CALLBACK_TEST_002, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnCommDisconnected(CONNECTION_ID, NULL));
+
+    ConnectionInfo info = {};
+    info.type = CONNECT_BLE;
+    EXPECT_NO_FATAL_FAILURE(OnCommDisconnected(CONNECTION_ID, &info));
+
+    info.type = CONNECT_BR;
+    info.isServer = false;
+    EXPECT_NO_FATAL_FAILURE(OnCommDisconnected(CONNECTION_ID, &info));
+
+    info.isServer = true;
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(OnCommDisconnected(CONNECTION_ID, &info));
+
+    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneListenerDepsInterfaceMock listenerMock;
+    EXPECT_CALL(listenerMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND));
+    EXPECT_NO_FATAL_FAILURE(OnCommDisconnected(CONNECTION_ID, &info));
+
+    EXPECT_CALL(listenerMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(listenerMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnCommDisconnected(CONNECTION_ID, &info));
+}
+
+/*
+* @tc.name: CONNECT_CALLBACK_TEST_003
+* @tc.desc: OnCommDataReceived
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, CONNECT_CALLBACK_TEST_003, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnCommDataReceived(CONNECTION_ID, MODULE_LANE_SELECT, 0, NULL, 0));
 }
 } // namespace OHOS
