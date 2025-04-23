@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_log.h"
+#include "auth_uk_manager.c"
 #include "auth_uk_manager.h"
 #include "auth_user_common_key.h"
 #include "lnn_distributed_net_ledger.h"
@@ -26,7 +27,6 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 
-#define OVERHEAD_LEN  28
 #define UK_AGING_TIME (168 * 60 * 60 * 1000L)
 
 namespace OHOS {
@@ -288,6 +288,10 @@ HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_DIFF_ACCOUNT_WITH_USERKEY_Test_001, T
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAclDiffAccountWithUserLevel(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
+    ret = CompareByAclDiffAccount(nullptr, nullptr, false);
+    EXPECT_EQ(ret, false);
+    ret = CompareByAclDiffAccount(&oldAcl, nullptr, false);
+    EXPECT_EQ(ret, false);
     ret = CompareByAclDiffAccountWithUserLevel(&oldAcl, &newAcl, true);
     EXPECT_EQ(ret, true);
 }
@@ -360,6 +364,12 @@ HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_SAME_ACCOUNT_Test_001, TestSize.Level
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAclSameAccount(&oldAcl, &newAcl, false);
     EXPECT_EQ(ret, false);
+    ret = CompareByAclSameAccount(nullptr, nullptr, false);
+    EXPECT_EQ(ret, false);
+    ret = CompareByAclSameAccount(&oldAcl, nullptr, false);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     ret = CompareByAclSameAccount(&oldAcl, &newAcl, true);
     EXPECT_EQ(ret, true);
 }
@@ -395,6 +405,10 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_011, TestSize.Level1)
     EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool ret = CompareByAllAcl(&oldAcl, &newAcl, false);
+    EXPECT_EQ(ret, false);
+    ret = CompareByAllAcl(nullptr, nullptr, false);
+    EXPECT_EQ(ret, false);
+    ret = CompareByAllAcl(&oldAcl, nullptr, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAllAcl(&oldAcl, &newAcl, true);
     EXPECT_EQ(ret, true);
@@ -447,5 +461,151 @@ HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_DEINIT_Test_001, TestSize.Level1)
 HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_SESSION_INIT_Test_001, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(UkNegotiateSessionInit());
+}
+
+/*
+ * @tc.name: GET_SHORT_UDID_HASH_Test_001
+ * @tc.desc: GetShortUdidHash test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, GET_SHORT_UDID_HASH_Test_001, TestSize.Level1)
+{
+    char udid[SHA_256_HEX_HASH_LEN] = {0};
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    uint32_t len = 0;
+
+    int32_t ret = GetShortUdidHash(nullptr, nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetShortUdidHash(nullptr, nullptr, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetShortUdidHash(nullptr, udidHash, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetShortUdidHash(udid, nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    (void)strcpy_s(udid, SHA_256_HEX_HASH_LEN, "0123456789ABCDEFG");
+    ret = GetShortUdidHash(udid, udidHash, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: GET_UK_NEGO_AUTH_PARAM_INFO_Test_001
+ * @tc.desc: GetUkNegoAuthParamInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, GET_UK_NEGO_AUTH_PARAM_INFO_Test_001, TestSize.Level1)
+{
+    HiChainAuthParam authParam;
+    AuthACLInfo info;
+
+    (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
+    (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    int32_t ret = GetUkNegoAuthParamInfo(nullptr, HICHAIN_AUTH_DEVICE, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetUkNegoAuthParamInfo(&info, HICHAIN_AUTH_DEVICE, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetUkNegoAuthParamInfo(nullptr, HICHAIN_AUTH_DEVICE, &authParam);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetUkNegoAuthParamInfo(&info, HICHAIN_AUTH_DEVICE, &authParam);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
+}
+
+/*
+ * @tc.name: UK_MSG_HANDLER_Test_001
+ * @tc.desc: UkMsgHandler test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UK_MSG_HANDLER_Test_001, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    uint32_t requestId = 0;
+    AuthDataHead head;
+
+    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    int32_t ret = UkMsgHandler(channelId, requestId, nullptr, nullptr, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UkMsgHandler(channelId, requestId, nullptr, TEST_DATA, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UkMsgHandler(channelId, requestId, &head, nullptr, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    head.dataType = DATA_TYPE_DEVICE_ID;
+    ret = UkMsgHandler(channelId, requestId, &head, TEST_DATA, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+    head.dataType = DATA_TYPE_AUTH;
+    ret = UkMsgHandler(channelId, requestId, &head, TEST_DATA, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    head.dataType = DATA_TYPE_CLOSE_ACK;
+    ret = UkMsgHandler(channelId, requestId, &head, TEST_DATA, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    head.dataType = DATA_TYPE_DECRYPT_FAIL;
+    ret = UkMsgHandler(channelId, requestId, &head, TEST_DATA, TEST_DATA_LEN);
+    EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL);
+}
+
+static void OnGenSuccess(uint32_t requestId, int32_t ukId)
+{
+    (void)requestId;
+    (void)ukId;
+}
+
+static void OnGenFailed(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+}
+
+/*
+ * @tc.name: CREATE_UK_NEGOTIATE_INSTANCE_Test_001
+ * @tc.desc: CreateUkNegotiateInstance test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, CREATE_UK_NEGOTIATE_INSTANCE_Test_001, TestSize.Level1)
+{
+    uint32_t requestId = 0;
+    uint32_t channelId = 0;
+    AuthACLInfo info;
+    UkNegotiateInstance instance;
+    AuthGenUkCallback genCb = {
+        .onGenSuccess = OnGenSuccess,
+        .onGenFailed = OnGenFailed,
+    };
+
+    (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
+    int32_t ret = CreateUkNegotiateInstance(requestId, channelId, &info, &genCb);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = InitUkNegoInstanceList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CreateUkNegotiateInstance(requestId, channelId, &info, &genCb);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ret = UkNegotiateInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CreateUkNegotiateInstance(requestId, channelId, &info, &genCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UpdateUkNegotiateInfo(requestId, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteUkNegotiateInstance(requestId);
+    DeInitUkNegoInstanceList();
+    UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: PACK_UK_ACL_PARAM_Test_001
+ * @tc.desc: PackUkAclParam test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, PACK_UK_ACL_PARAM_Test_001, TestSize.Level1)
+{
+    AuthACLInfo info;
+
+    (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    char *data = PackUkAclParam(&info, true);
+    EXPECT_NE(data, nullptr);
+    int32_t ret = UnpackUkAclParam(data, sizeof(AuthACLInfo), &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
