@@ -66,37 +66,31 @@ HWTEST_F(AuthPreLinkTest, ADD_AUTH_GEN_CER_PARA_NODE_TEST_001, TestSize.Level1)
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_001, TestSize.Level1)
 {
     int32_t requestId = 1;
-    bool isParallelGen = true;
     bool isValid = true;
     SoftbusCertChain *softbusCertChain = nullptr;
-    int32_t ret = UpdateAuthGenCertParaNode(requestId, isParallelGen, isValid, softbusCertChain);
+    int32_t ret = UpdateAuthGenCertParaNode(requestId, isValid, softbusCertChain);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_002, TestSize.Level1)
 {
     int32_t requestId = 1;
-    bool isParallelGen = true;
     bool isValid = true;
     SoftbusCertChain softbusCertChain;
     (void)memset_s(&softbusCertChain, sizeof(SoftbusCertChain), 0, sizeof(SoftbusCertChain));
-    int32_t ret = UpdateAuthGenCertParaNode(requestId, isParallelGen, isValid, &softbusCertChain);
+    int32_t ret = UpdateAuthGenCertParaNode(requestId, isValid, &softbusCertChain);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_003, TestSize.Level1)
 {
     int32_t requestId = 1;
-    bool isParallelGen = true;
     bool isValid = true;
     SoftbusCertChain *softbusCertChain = (SoftbusCertChain *)SoftBusCalloc(sizeof(SoftbusCertChain));
     ASSERT_NE(softbusCertChain, nullptr);
     int32_t ret = AddAuthGenCertParaNode(requestId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UpdateAuthGenCertParaNode(requestId, isParallelGen, isValid, softbusCertChain);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    isParallelGen = false;
-    ret = UpdateAuthGenCertParaNode(requestId, isParallelGen, isValid, softbusCertChain);
+    ret = UpdateAuthGenCertParaNode(requestId, isValid, softbusCertChain);
     EXPECT_EQ(ret, SOFTBUS_OK);
     DelAuthGenCertParaNodeById(requestId);
 }
@@ -128,7 +122,7 @@ HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_003, 
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftbusCertChain *softbusCertChain = (SoftbusCertChain *)SoftBusCalloc(sizeof(SoftbusCertChain));
     ASSERT_NE(softbusCertChain, nullptr);
-    ret = UpdateAuthGenCertParaNode(requestId, false, true, softbusCertChain);
+    ret = UpdateAuthGenCertParaNode(requestId, true, softbusCertChain);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = FindAndWaitAuthGenCertParaNodeById(requestId, &genCertParaNode);
     EXPECT_EQ(ret, SOFTBUS_OK);

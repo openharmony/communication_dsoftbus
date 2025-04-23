@@ -243,7 +243,7 @@ void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event)
     return GetLnnConnInterface()->LnnNotifyAddRawEnhanceP2pEvent(event);
 }
 
-bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer)
+bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer)
 {
     return GetLnnConnInterface()->RawLinkNeedUpdateAuthManager(uuid, isServer);
 }

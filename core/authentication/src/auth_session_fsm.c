@@ -1128,13 +1128,17 @@ static int32_t SoftbusCertChainParallel(const AuthSessionInfo *info)
     }
     if (GenerateCertificate(softbusCertChain, info) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "GenerateCertificate fail");
-        if (UpdateAuthGenCertParaNode(info->requestId, false, false, softbusCertChain) != SOFTBUS_OK) {
+        if (UpdateAuthGenCertParaNode(info->requestId, false, softbusCertChain) != SOFTBUS_OK) {
             AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+            FreeSoftbusChain(softbusCertChain);
+            SoftBusFree(softbusCertChain);
         }
         return SOFTBUS_OK;
     }
-    if (UpdateAuthGenCertParaNode(info->requestId, false, true, softbusCertChain) != SOFTBUS_OK) {
+    if (UpdateAuthGenCertParaNode(info->requestId, true, softbusCertChain) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+        FreeSoftbusChain(softbusCertChain);
+        SoftBusFree(softbusCertChain);
     }
     return SOFTBUS_OK;
 }
@@ -1385,13 +1389,13 @@ static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
         return;
     }
     AuthFsm *authFsm = GetAuthFsmByRequestId(reuseKeyNode.requestId);
-    AuthSessionInfo *info = &authFsm->info;
     if (authFsm == NULL) {
         ReleaseAuthLock();
         SoftBusFree(ptkCbParam);
         AUTH_LOGE(AUTH_FSM, "auth fsm not found");
         return;
     }
+    AuthSessionInfo *info = &authFsm->info;
     if (ptkCbParam->result != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "sync ptk fail");
         ReleaseAuthLock();
@@ -1401,7 +1405,6 @@ static void OnPtkSyncCallBackLooper(void *voidPtkCbParam)
     }
     ReleaseAuthLock();
     SoftBusFree(ptkCbParam);
-    DelAuthGenCertParaNodeById(reuseKeyNode.requestId);
     AuthManagerSetAuthPassed(authFsm->authSeq, info);
     TryFinishAuthSession(authFsm);
 }
