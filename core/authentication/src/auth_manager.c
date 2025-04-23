@@ -760,7 +760,7 @@ static void UpdateSessionKeyScheduled(AuthManager *auth, AuthSessionInfo *info)
     }
 }
 
-bool RawLinkNeedUpdateAuthManager(char *uuid, bool isServer)
+bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer)
 {
     if (uuid == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid uuid param");
