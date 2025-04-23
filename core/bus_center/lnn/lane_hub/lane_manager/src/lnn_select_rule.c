@@ -503,7 +503,7 @@ static int32_t CheckLinkParam(LaneLinkType linkType, LaneTransType transType)
         LNN_LOGE(LNN_LANE, "invalid param, linkType=%{public}d", linkType);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_INVALID_PARAM;
+    int32_t ret = SOFTBUS_OK;
     if (IsTransTypeValid(transType)) {
         ret = CheckLinkWithTransType(transType, linkType);
         if (ret != SOFTBUS_OK) {
