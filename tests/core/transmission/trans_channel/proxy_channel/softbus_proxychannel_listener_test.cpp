@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,8 +235,17 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestS
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelOpenFailed(TEST_NUMBER_25, appInfo, 0);
-    SoftBusFree(appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo->appType = APP_TYPE_INNER;
+    ret = OnProxyChannelOpenFailed(TEST_NUMBER_25, appInfo, 0);
+    EXPECT_EQ(SOFTBUS_TRANS_NOTIFY_NETWORK_OPEN_ERR, ret);
+
+    appInfo->appType = static_cast<AppType>(5); // test value
+    ret = OnProxyChannelOpenFailed(TEST_NUMBER_25, appInfo, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_APPTYPE, ret);
+
+    SoftBusFree(appInfo);
 }
 
 /**
@@ -322,9 +331,70 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest001, Tes
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelBindTest001, TestSize.Level1)
 {
     AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = OnProxyChannelBind(TEST_NUMBER_25, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo.appType = APP_TYPE_INNER;
+    ret = OnProxyChannelBind(TEST_NUMBER_25, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo.appType = APP_TYPE_NOT_CARE;
+    ret = OnProxyChannelBind(TEST_NUMBER_25, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+}
+
+/**
+ * @tc.name: FillExtraByProxyChannelErrorEndTest001
+ * @tc.desc: test OnProxyChannelBind.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEndTest001, TestSize.Level1)
+{
+    FillExtraByProxyChannelErrorEnd(nullptr, nullptr, nullptr, 1);
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    TransEventExtra extra = {
+        .socketName = nullptr,
+        .peerNetworkId = nullptr,
+        .calleePkg = nullptr,
+        .callerPkg = nullptr,
+        .channelId = 1111, // test value
+        .costTime = 1000, // test value
+        .errcode = 0,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    EXPECT_NE(nullptr, appInfo);
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "testSessionName");
+    (void)strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), "testPkgName");
+    (void)strcpy_s(appInfo->peerVersion, sizeof(appInfo->peerVersion), "testPeerVersion");
+    appInfo->connectType = 1;
+    appInfo->appType = APP_TYPE_AUTH;
+    FillExtraByProxyChannelErrorEnd(&extra, appInfo, localUdid, 1);
+    SoftBusFree(appInfo);
+}
+/**
+ * @tc.name: TransGetConnectOptionTest001
+ * @tc.desc: test OnProxyChannelBind.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, TransGetConnectOptionTest001, TestSize.Level1)
+{
+    const char *sessionName = "testSessionName";
+    const char *peerNetworkId = "1111"; // test value
+    LanePreferredLinkList *preferred =
+        static_cast<LanePreferredLinkList *>(SoftBusCalloc(sizeof(LanePreferredLinkList)));
+    EXPECT_NE(nullptr, preferred);
+    preferred->linkTypeNum = 1;
+    int32_t channelId = 1111; // test value
+
+    int32_t ret = TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
+    SoftBusFree(preferred);
 }
 } // namespace OHOS
+
