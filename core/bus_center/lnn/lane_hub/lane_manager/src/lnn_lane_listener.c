@@ -29,6 +29,7 @@
 #include "lnn_trans_lane.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_manager.h"
 #include "softbus_socket.h"
@@ -593,6 +594,113 @@ static void RegisterWifiDirectListener(void)
     }
 }
 
+static void ProcessRemoteBrConnected(const ConnectionInfo *info)
+{
+    LaneLinkInfo laneLinkInfo;
+    NodeInfo nodeInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoByKey(info->brInfo.brMac, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote nodeInfo by brMac failed, ret=%{public}d", ret);
+        return;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(nodeInfo.deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
+
+    laneLinkInfo.type = LANE_BR;
+    if (strncpy_s(laneLinkInfo.peerUdid, UDID_BUF_LEN, nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK ||
+        strncpy_s(laneLinkInfo.linkInfo.br.brMac, BT_MAC_LEN, info->brInfo.brMac, BT_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy fail");
+        return;
+    }
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get local udid fail");
+        return;
+    }
+    uint64_t laneId = GenerateLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
+    if (laneId == INVALID_LANE_ID) {
+        LNN_LOGE(LNN_LANE, "generate laneId fail");
+        return;
+    }
+    ret = AddLaneResourceToPool(&laneLinkInfo, laneId, true);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add server lane resource fail, ret=%{public}d", ret);
+        return;
+    }
+}
+
+static void ProcessRemoteBrDisconnected(const ConnectionInfo *info)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoByKey(info->brInfo.brMac, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote nodeInfo by brMac failed, ret=%{public}d", ret);
+        return;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(nodeInfo.deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s", AnonymizeWrapper(anonyUdid));
+    AnonymizeFree(anonyUdid);
+
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    ret = FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, LANE_BR, &resourceItem);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "find lane resource fail, ret=%{public}d", ret);
+        return;
+    }
+    (void)DelLaneResourceByLaneId(resourceItem.laneId, true);
+}
+
+static void OnCommConnected(uint32_t connectionId, const ConnectionInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LANE, "info is null");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "connectionId=%{public}u, connType=%{public}d, isServer=%{public}d",
+        connectionId, info->type, info->isServer);
+    if (info->type == CONNECT_BR && info->isServer) {
+        ProcessRemoteBrConnected(info);
+    }
+}
+
+static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LANE, "info is null");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "connectionId=%{public}u, connType=%{public}d, isServer=%{public}d",
+        connectionId, info->type, info->isServer);
+    if (info->type == CONNECT_BR && info->isServer) {
+        ProcessRemoteBrDisconnected(info);
+    }
+}
+
+static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
+{
+    LNN_LOGD(LNN_LANE, "connectionId=%{public}u, moduleId=%{public}d, seq=%{public}" PRId64 ", len=%{public}d",
+        connectionId, moduleId, seq, len);
+    (void)data;
+}
+
+static void RegisterConnectListener(void)
+{
+    ConnectCallback connCb = {
+        .OnConnected = OnCommConnected,
+        .OnDisconnected = OnCommDisconnected,
+        .OnDataReceived = OnCommDataReceived,
+    };
+    int32_t ret = ConnSetConnectCallback(MODULE_LANE_SELECT, &connCb);
+    LNN_LOGI(LNN_LANE, "ConnSetConnectCallback, ret=%{public}d", ret);
+}
+
 int32_t InitLaneListener(void)
 {
     if (SoftBusMutexInit(&g_laneStateListenerMutex, NULL) != SOFTBUS_OK) {
@@ -604,6 +712,7 @@ int32_t InitLaneListener(void)
     ListInit(&g_laneBusinessInfoList);
 
     RegisterWifiDirectListener();
+    RegisterConnectListener();
     return SOFTBUS_OK;
 }
 
