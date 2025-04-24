@@ -130,6 +130,7 @@ typedef struct {
     int16_t peerId;
     ConnectType type;
     BleProtocolType bleProtocolType;
+    SleProtocolType sleProtocolType;
     uint32_t connId;
     int32_t channelId;
     int32_t reqId;

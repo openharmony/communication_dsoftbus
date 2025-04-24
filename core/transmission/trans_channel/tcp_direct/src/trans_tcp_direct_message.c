@@ -216,6 +216,10 @@ static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
     if (cipherFlag & FLAG_SESSION_KEY) {
         return AUTH_LINK_TYPE_SESSION_KEY;
     }
+
+    if (cipherFlag & FLAG_SLE) {
+        return AUTH_LINK_TYPE_SLE;
+    }
     return AUTH_LINK_TYPE_WIFI;
 }
 

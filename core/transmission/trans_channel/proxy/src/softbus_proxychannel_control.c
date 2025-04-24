@@ -116,9 +116,10 @@ static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
         return AUTH_LINK_TYPE_BLE;
     } else if (type == CONNECT_BR) {
         return AUTH_LINK_TYPE_BR;
-    } else {
-        return AUTH_LINK_TYPE_P2P;
+    } else if ((type == CONNECT_SLE) || (type == CONNECT_SLE_DIRECT)) {
+        return AUTH_LINK_TYPE_SLE;
     }
+    return AUTH_LINK_TYPE_P2P;
 }
 
 static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)

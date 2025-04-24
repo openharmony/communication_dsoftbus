@@ -152,7 +152,8 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
         return CHANNEL_TYPE_BUTT;
     }
 
-    if (type == LANE_BR || type == LANE_BLE || type == LANE_BLE_DIRECT || type == LANE_COC || type == LANE_COC_DIRECT) {
+    if (type == LANE_BR || type == LANE_BLE || type == LANE_BLE_DIRECT || type == LANE_COC ||
+        type == LANE_COC_DIRECT || type == LANE_SLE || type == LANE_SLE_DIRECT) {
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
         transType == LANE_T_RAW_STREAM) {

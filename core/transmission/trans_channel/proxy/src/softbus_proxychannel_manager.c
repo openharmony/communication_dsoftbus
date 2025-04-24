@@ -953,6 +953,8 @@ static void SelectRouteType(ConnectType type, RouteType *routeType)
         *routeType = BT_BR;
     } else if (type == CONNECT_BLE) {
         *routeType = BT_BLE;
+    } else if (type == CONNECT_SLE) {
+        *routeType = BT_SLE;
     } else if (type == CONNECT_BLE_DIRECT) {
         *routeType = BT_BLE;
     }
@@ -977,6 +979,8 @@ static void ConstructProxyChannelInfo(
     chan->ukIdInfo.peerId = msg->ukIdInfo.peerId;
     if (chan->type == CONNECT_BLE || chan->type == CONNECT_BLE_DIRECT) {
         chan->bleProtocolType = info->bleInfo.protocol;
+    } else if (chan->type == CONNECT_SLE || chan->type == CONNECT_SLE_DIRECT) {
+        chan->sleProtocolType = info->sleInfo.protocol;
     }
 
     SelectRouteType(info->type, &chan->appInfo.routeType);
@@ -2105,6 +2109,8 @@ static void TransNotifySingleNetworkOffLine(const LnnEventBasicInfo *info)
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_BLE);
     } else if (type == CONNECTION_ADDR_BR) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_BR);
+    } else if (type == CONNECTION_ADDR_SLE) {
+        TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_SLE);
     }
 }
 
@@ -2123,6 +2129,7 @@ static void TransNotifyOffLine(const LnnEventBasicInfo *info)
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", WIFI_STA);
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_BR);
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_BLE);
+    TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_SLE);
 }
 
 static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)
