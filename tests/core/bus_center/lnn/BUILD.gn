@@ -1603,6 +1603,47 @@ ohos_unittest("LNNLaneExtMockTest") {
   }
 }
 
+ohos_unittest("LNNSelectRuleTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/lnn_select_rule_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/lnn_select_rule_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("LNNLaneLinkLedgerTest") {
   module_out_path = module_output_path
   sources = [
@@ -3077,6 +3118,7 @@ group("unittest") {
     ":LNNNodeWeightTest",
     ":LNNP2pInfoTest",
     ":LNNPhysicalSubnetManagerTest",
+    ":LNNSelectRuleTest",
     ":LNNSyncInfoItemTest",
     ":LNNSyncInfoManagerTest",
     ":LNNTopoManagerTest",
