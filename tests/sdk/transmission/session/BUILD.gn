@@ -291,6 +291,7 @@ ohos_unittest("TransClientSocketTest") {
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
         "cJSON:cjson_static",
+        "selinux_adapter:librestorecon",
       ]
     }
   } else {
