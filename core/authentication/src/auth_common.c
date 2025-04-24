@@ -516,6 +516,8 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
             return DISCOVERY_TYPE_WIFI;
         case AUTH_LINK_TYPE_BLE:
             return DISCOVERY_TYPE_BLE;
+        case AUTH_LINK_TYPE_SLE:
+            return DISCOVERY_TYPE_SLE;
         case AUTH_LINK_TYPE_BR:
             return DISCOVERY_TYPE_BR;
         case AUTH_LINK_TYPE_P2P:
@@ -536,6 +538,8 @@ AuthLinkType ConvertToAuthLinkType(DiscoveryType type)
             return AUTH_LINK_TYPE_WIFI;
         case DISCOVERY_TYPE_BLE:
             return AUTH_LINK_TYPE_BLE;
+        case DISCOVERY_TYPE_SLE:
+            return AUTH_LINK_TYPE_SLE;
         case DISCOVERY_TYPE_BR:
             return AUTH_LINK_TYPE_BR;
         case DISCOVERY_TYPE_P2P:
