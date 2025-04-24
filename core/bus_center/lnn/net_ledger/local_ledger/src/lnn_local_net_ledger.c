@@ -598,7 +598,7 @@ static int32_t LlGetIp6WithIfname(void *buf, uint32_t len, int32_t ifnameIdx)
     Anonymize(combineIp, &anonyIp);
     LNN_LOGI(LNN_LEDGER, "get LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
-    if (strncpy_s((char *) buf, len, combineIp, strlen(combineIp)) != EOK) {
+    if (strncpy_s((char *)buf, len, combineIp, strlen(combineIp)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }

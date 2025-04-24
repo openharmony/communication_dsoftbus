@@ -554,8 +554,9 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
         SoftBusFree(info);
         return;
     }
-    uint32_t type;
-    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB };
+    for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
+        DiscoveryType type = typeList[i];
         LNN_LOGI(
             LNN_BUILDER, "after 5s, authSeq:%{public}" PRId64 "->%{public}" PRId64, info->authSeq[type], authSeq[type]);
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
@@ -600,8 +601,9 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
         LNN_LOGE(LNN_BUILDER, "get latest authSeq fail");
         return;
     }
-    uint32_t type;
-    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB };
+    for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
+        DiscoveryType type = typeList[i];
         LNN_LOGI(LNN_BUILDER, "authSeq:%{public}" PRId64 "->%{public}" PRId64, curAuthSeq[type], authSeq[type]);
         if (authSeq[type] == curAuthSeq[type] && authSeq[type] != 0 && curAuthSeq[type] != 0) {
             if (type == DISCOVERY_TYPE_WIFI) {

@@ -187,8 +187,8 @@ public:
     MOCK_METHOD2(LnnRequestCheckOnlineStatus, int32_t (const char *networkId, uint64_t timeout));
     MOCK_METHOD2(AuthCheckMetaExist, int32_t (const AuthConnInfo *connInfo, bool *isExist));
     MOCK_METHOD2(LnnSetDLConnCapability, int32_t(const char *, uint64_t));
-    MOCK_METHOD5(LnnGetRemoteStrInfoByIfnameIdx, int32_t (const char*, InfoKey, char *, uint32_t, int32_t));
-    MOCK_METHOD4(LnnGetRemoteNumInfoByIfnameIdx, int32_t (const char*, InfoKey, int32_t *, int32_t));
+    MOCK_METHOD5(LnnGetRemoteStrInfoByIfnameIdx, int32_t (const char *, InfoKey, char *, uint32_t, int32_t));
+    MOCK_METHOD4(LnnGetRemoteNumInfoByIfnameIdx, int32_t (const char *, InfoKey, int32_t *, int32_t));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey, char *, uint32_t, int32_t));
 
     void SetDefaultResult(NodeInfo *info);
