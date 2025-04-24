@@ -912,6 +912,12 @@ CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint
 
     return iface->ctx;
 }
+
+#else
+const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface)
+{
+    return &iface->in;
+}
 #endif
 
 #ifdef NSTACKX_DFINDER_HIDUMP
