@@ -198,7 +198,7 @@ int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConn
     int64_t authId = AUTH_INVALID_ID;
     AuthLinkType type = connInfo->type;
     if (authClient == NULL && authServer == NULL) {
-        if (connInfo->type == AUTH_LINK_TYPE_BR) {
+        if (connInfo->type == AUTH_LINK_TYPE_BR || connInfo->type == AUTH_LINK_TYPE_SLE) {
             AUTH_LOGI(AUTH_CONN, "check ble sessionkey");
             authId = AuthDeviceGetIdByUuid(nodeInfo.uuid, AUTH_LINK_TYPE_BLE, false);
             authClient = GetAuthManagerByAuthId(authId);
