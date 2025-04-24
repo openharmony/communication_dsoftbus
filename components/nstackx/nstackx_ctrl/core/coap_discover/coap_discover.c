@@ -262,6 +262,8 @@ static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint
     }
 
     uint8_t coapMsgType = (ShouldAutoReplyUnicast(businessType) == NSTACKX_TRUE) ? COAP_MESSAGE_NON : COAP_MESSAGE_CON;
+    // current multicast ipv6 only support NON type
+    coapMsgType = GetLocalIfaceAf(ctx->iface) == AF_INET6 ? COAP_MESSAGE_NON : coapMsgType;
     int32_t ret = CoapSendRequest(ctx, coapMsgType, remoteUrl, data, strlen(data) + 1);
 
     cJSON_free(data);
@@ -1353,8 +1355,8 @@ static int32_t SendDiscoveryRspEx(CoapCtxType *ctx, const NSTACKX_ResponseSettin
         return NSTACKX_EFAILED;
     }
 
-    if (sprintf_s(remoteUrl, sizeof(remoteUrl), "coap://%s/" COAP_DEVICE_DISCOVER_URI, host) < 0) {
-        DFINDER_LOGE(TAG, "failed to get discoveryRsp remoteUrl");
+    if (CoapSetUri(GetLocalIfaceAf((const struct LocalIface *)ctx->iface), remoteUrl, sizeof(remoteUrl),
+        host, COAP_DEVICE_DISCOVER_URI) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
     IncreaseSequenceNumber(NSTACKX_FALSE);
