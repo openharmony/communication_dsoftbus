@@ -477,5 +477,15 @@ int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int
 {
     return GetLaneDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNodeInfoByKey(key, info);
+}
+
+int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
+{
+    return GetLaneDepsInterface()->ConnSetConnectCallback(moduleId, callback);
+}
 }
 } // namespace OHOS
