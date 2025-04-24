@@ -45,7 +45,7 @@ int32_t SetSleAddrToLocalLedger()
 {
     if (!IsSleEnabled()) {
         LNN_LOGI(LNN_LEDGER, "SLE not enabled!");
-        return SOFTBUS_SLE_NOT_ENABLE;
+        return SOFTBUS_SLE_RANGING_NOT_ENABLE;
     }
     char sleMacAddr[MAC_LEN];
     int32_t ret = GetLocalSleAddr(sleMacAddr, MAC_LEN);
