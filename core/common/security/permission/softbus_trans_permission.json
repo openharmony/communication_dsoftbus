@@ -534,6 +534,17 @@
     ]
   },
   {
+    "SESSION_NAME": "carservice.distributedengine.carsatellite",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "PKG_NAME": "carservice.distributedengine",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "com.huawei.wearlink",
     "DEVID": "NETWORKID",
     "APP_INFO": [
