@@ -46,6 +46,7 @@ typedef enum {
     LANE_HML_RAW,
     LANE_SLE,
     LANE_USB,
+    LANE_SLE_DIRECT,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 
@@ -80,7 +81,8 @@ typedef enum {
     LANE_LINK_TYPE_COC_DIRECT = 4,
     LANE_LINK_TYPE_BLE_DIRECT = 5,
     LANE_LINK_TYPE_HML = 6,
-    LANE_LINK_TYPE_USB = 7,
+    LANE_LINK_TYPE_SLE_DIRECT = 7,
+    LANE_LINK_TYPE_USB = 8,
     LANE_LINK_TYPE_MAX,
 } LaneSpecifiedLink;
 
@@ -99,6 +101,17 @@ typedef struct {
     BleProtocolType protoType;
     char networkId[NETWORK_ID_BUF_LEN];
 } BleDirectConnInfo;
+
+typedef struct {
+    SleProtocolType protoType;
+    char networkId[NETWORK_ID_BUF_LEN];
+} SleDirectConnInfo;
+
+typedef struct {
+    SleProtocolType protoType;
+    char sleMac[BT_MAC_LEN];
+    char deviceIdHash[UDID_HASH_LEN];
+} SleConnInfo;
 
 typedef struct {
     uint16_t protocol;
@@ -143,6 +156,8 @@ typedef struct {
         BleDirectConnInfo bleDirect;
         RawWifiDirectConnInfo rawWifiDirect;
         UsbConnInfo usb;
+        SleConnInfo sle;
+        SleDirectConnInfo sleDirect;
     } connInfo;
 } LaneConnInfo;
 

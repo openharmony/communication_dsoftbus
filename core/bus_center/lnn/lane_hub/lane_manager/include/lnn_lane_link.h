@@ -36,6 +36,8 @@ extern "C" {
 #define HML_LATENCY             1500
 #define BR_REUSE_LATENCY        1000
 #define USB_LATENCY             800
+#define SLE_DIRECT_LATENCY      1200
+#define SLE_LATENCY             1500
 
 typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
@@ -43,6 +45,7 @@ typedef struct {
     bool p2pOnly;
     //OldInfo
     char peerBleMac[MAX_MAC_LEN];
+    char peerSleMac[MAX_MAC_LEN];
     bool isSupportIpv6;
     bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
     int32_t psm;
@@ -94,6 +97,17 @@ typedef struct {
 } BleDirectInfo;
 
 typedef struct {
+    SleProtocolType protoType;
+    char networkId[NETWORK_ID_BUF_LEN];
+} SleDirectInfo;
+
+typedef struct {
+    char sleMac[BT_MAC_LEN];
+    char deviceIdHash[UDID_HASH_LEN];
+    SleProtocolType protoType;
+} SleLinkInfo;
+
+typedef struct {
     char peerUdid[UDID_BUF_LEN];
     char netifName[NET_IF_NAME_LEN];
     LaneLinkType type;
@@ -105,6 +119,8 @@ typedef struct {
         BleDirectInfo bleDirect;
         RawWifiDirectConnInfo rawWifiDirect;
         UsbLinkInfo usb;
+        SleLinkInfo sle;
+        SleDirectInfo sleDirect;
     } linkInfo;
 } LaneLinkInfo;
 

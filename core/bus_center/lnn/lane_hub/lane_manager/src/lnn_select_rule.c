@@ -308,6 +308,24 @@ static int32_t CocDirectFeatureCheck(const char *networkId)
     return SOFTBUS_OK;
 }
 
+static int32_t SleFeatureCheck(const char *networkId)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LANE, "networkId is nullptr");
+    bool localEnable = false;
+    bool remoteEnable = false;
+    int32_t ret = CheckTargetFeature(networkId, BIT_SUPPORT_SLE_CAPABILITY, &localEnable, &remoteEnable);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (!localEnable) {
+        return SOFTBUS_LANE_LOCAL_NO_SLE_FEATURE;
+    }
+    if (!remoteEnable) {
+        return SOFTBUS_LANE_REMOTE_NO_SLE_FEATURE;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
@@ -375,6 +393,13 @@ static int32_t GetUsbScore(const char *networkId, uint32_t expectedBw)
     return LNN_LINK_DEFAULT_SCORE;
 }
 
+static int32_t GetSleScore(const char *networkId, uint32_t expectedBw)
+{
+    (void)networkId;
+    (void)expectedBw;
+    return LNN_LINK_DEFAULT_SCORE;
+}
+
 static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = {true, DefaultFeatureCheck, GetBrScore},
     [LANE_BLE] = { true,  DefaultFeatureCheck,       GetBleScore     },
@@ -389,6 +414,8 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC] = { true,  CocFeatureCheck,       GetCocScore     },
     [LANE_COC_DIRECT] = { true,  CocDirectFeatureCheck, GetCocScore     },
     [LANE_USB] = { true,  DefaultFeatureCheck, GetUsbScore     },
+    [LANE_SLE] = { true,  SleFeatureCheck, GetSleScore     },
+    [LANE_SLE_DIRECT] = { true,  SleFeatureCheck, GetSleScore     },
 };
 
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
@@ -411,7 +438,7 @@ static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_P2P, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_HML, LANE_WLAN_2P4G, LANE_P2P, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_BR, LANE_P2P,
-        LANE_COC_DIRECT, LANE_BLE, LANE_LINK_TYPE_BUTT},
+        LANE_SLE_DIRECT, LANE_SLE, LANE_COC_DIRECT, LANE_BLE, LANE_LINK_TYPE_BUTT},
 };
 
 static uint32_t g_defaultLinkList[LANE_DATA_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
@@ -457,6 +484,19 @@ static int32_t CheckLinkWithTransType(LaneTransType transType, LaneLinkType link
     return SOFTBUS_OK;
 }
 
+static int32_t CheckSleLinkWithTransType(LaneTransType transType, LaneLinkType linkType)
+{
+    bool isStreamOrFile = (transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VIDEO ||
+                    transType == LANE_T_COMMON_VOICE || transType == LANE_T_FILE);
+    bool IsSle = (linkType == LANE_SLE || linkType == LANE_SLE_DIRECT);
+    if (isStreamOrFile && IsSle) {
+        LNN_LOGE(LNN_LANE, "sle not support stream and file datatype, transType=%{public}d, link=%{public}d",
+            transType, linkType);
+        return SOFTBUS_LANE_TRANS_TYPE_NOT_MATCH;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t CheckLinkParam(LaneLinkType linkType, LaneTransType transType)
 {
     if (!IsLinkTypeValid(linkType)) {
@@ -468,6 +508,11 @@ static int32_t CheckLinkParam(LaneLinkType linkType, LaneTransType transType)
         ret = CheckLinkWithTransType(transType, linkType);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "check link with transType err, ret=%{public}d", ret);
+            return ret;
+        }
+        ret = CheckSleLinkWithTransType(transType, linkType);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "check sle link with transType err, ret=%{public}d", ret);
         }
     }
     return ret;
