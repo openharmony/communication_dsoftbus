@@ -218,9 +218,15 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 
     // coap not support range now, just assign -1 as unknown
     discDevInfo->range = -1;
-    ret = SpliceCoapDisplayName(devName, nickName, discDevInfo);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
-        "parse display name failed, ret=%{public}d", ret);
+    if (strlen(nickName) != 0) {
+        ret = SpliceCoapDisplayName(devName, nickName, discDevInfo);
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
+            "parse display name failed, ret=%{public}d", ret);
+    } else {
+        ret = memcpy_s(discDevInfo->devName, DISC_MAX_DEVICE_NAME_LEN, devName, strlen(devName));
+        DISC_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_COAP, "devName copy failed, ret=%{public}d", ret);
+    }
 
     return SOFTBUS_OK;
 }
