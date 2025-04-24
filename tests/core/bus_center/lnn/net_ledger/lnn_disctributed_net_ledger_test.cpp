@@ -567,8 +567,6 @@ HWTEST_F(LNNDisctributedLedgerTest, NEW_BRBLE_DISCOVERED_Test_001, TestSize.Leve
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)NewWifiDiscovered(nullptr, nullptr);
     (void)NewWifiDiscovered(&oldInfo, &newInfo);
-    (void)NeedUpdateIpPortInfo(nullptr, nullptr);
-    (void)NeedUpdateIpPortInfo(&oldInfo, &newInfo);
     (void)RetainOfflineCode(nullptr, nullptr);
     (void)ConvertNodeInfoToBasicInfo(nullptr, nullptr);
     bool ret = IsNetworkIdChanged(nullptr, nullptr);

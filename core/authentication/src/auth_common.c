@@ -340,6 +340,7 @@ static bool CompareSleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *in
 
 static bool CompareUsbConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
+    (void)cmpShortHash;
     if (info2->type == AUTH_LINK_TYPE_USB && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
         return true;
     }
