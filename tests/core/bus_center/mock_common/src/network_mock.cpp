@@ -88,6 +88,26 @@ int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_
     return GetNetworkInterface()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
+int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId)
+{
+    return GetNetworkInterface()->SoftBusAddSleStateListener(listener, listenerId);
+}
+
+bool IsSleEnabled(void)
+{
+    return GetNetworkInterface()->IsSleEnabled();
+}
+
+void SoftBusRemoveSleStateListener(int listenerId)
+{
+    return GetNetworkInterface()->SoftBusRemoveSleStateListener(listenerId);
+}
+
+void LnnNotifySleStateChangeEvent(void *state)
+{
+    return GetNetworkInterface()->LnnNotifySleStateChangeEvent(state);
+}
+
 int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetworkInterface()->SoftbusGetConfig(type, val, len);

@@ -616,38 +616,46 @@ static int32_t AllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *allo
     return BuildTargetLink(laneHandle, allocInfo, listener);
 }
 
-static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink link, LanePreferredLinkList *preferLink)
+static void SelectSpecifiedLink(LaneSpecifiedLink link, uint32_t *linkNum, LaneLinkType *optionalLink)
 {
-    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
-    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
-    uint32_t linkNum = 0;
     switch (link) {
         case LANE_LINK_TYPE_WIFI_WLAN:
-            optionalLink[linkNum++] = LANE_WLAN_5G;
-            optionalLink[linkNum++] = LANE_WLAN_2P4G;
+            optionalLink[(*linkNum)++] = LANE_WLAN_5G;
+            optionalLink[(*linkNum)++] = LANE_WLAN_2P4G;
             break;
         case LANE_LINK_TYPE_WIFI_P2P:
-            optionalLink[linkNum++] = LANE_P2P;
+            optionalLink[(*linkNum)++] = LANE_P2P;
             break;
         case LANE_LINK_TYPE_BR:
-            optionalLink[linkNum++] = LANE_BR;
+            optionalLink[(*linkNum)++] = LANE_BR;
             break;
         case LANE_LINK_TYPE_COC_DIRECT:
-            optionalLink[linkNum++] = LANE_COC_DIRECT;
+            optionalLink[(*linkNum)++] = LANE_COC_DIRECT;
             break;
         case LANE_LINK_TYPE_BLE_DIRECT:
-            optionalLink[linkNum++] = LANE_BLE_DIRECT;
+            optionalLink[(*linkNum)++] = LANE_BLE_DIRECT;
             break;
         case LANE_LINK_TYPE_HML:
-            optionalLink[linkNum++] = LANE_HML;
+            optionalLink[(*linkNum)++] = LANE_HML;
             break;
         case LANE_LINK_TYPE_USB:
-            optionalLink[linkNum++] = LANE_USB;
+            optionalLink[(*linkNum)++] = LANE_USB;
+            break;
+        case LANE_LINK_TYPE_SLE_DIRECT:
+            optionalLink[(*linkNum)++] = LANE_SLE_DIRECT;
             break;
         default:
             LNN_LOGE(LNN_LANE, "unexpected link=%{public}d", link);
             break;
     }
+}
+
+static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink link, LanePreferredLinkList *preferLink)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
+    uint32_t linkNum = 0;
+    SelectSpecifiedLink(link, &linkNum, optionalLink);
     if (linkNum == 0) {
         return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
@@ -1151,6 +1159,8 @@ static int32_t g_laneLatency[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC_DIRECT] = COC_DIRECT_LATENCY,
     [LANE_HML] = HML_LATENCY,
     [LANE_USB] = USB_LATENCY,
+    [LANE_SLE] = SLE_LATENCY,
+    [LANE_SLE_DIRECT] = SLE_DIRECT_LATENCY,
 };
 
 static void LaneTriggerLink(SoftBusMessage *msg)

@@ -187,6 +187,11 @@ static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
     } else {
         (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BR);
     }
+    if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
+        (void)LnnSetNetCapability(&nodeInfo->netCapacity, BIT_SLE);
+    } else {
+        (void)LnnClearNetCapability(&nodeInfo->netCapacity, BIT_SLE);
+    }
     (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BLE);
 }
 
@@ -435,10 +440,15 @@ static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *
     } else {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
     }
-    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
     } else {
         (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    }
+    if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_SLE);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_SLE);
     }
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
     LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);

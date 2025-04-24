@@ -456,6 +456,42 @@ static int32_t UsbDynamicCommCapa(const char *networkId)
     return SOFTBUS_OK;
 }
 
+static int32_t SleStaticCommCapa(const char *networkId)
+{
+    bool localEnable = false;
+    bool remoteEnable = false;
+    int32_t ret = StaticNetCapaCalc(networkId, STATIC_CAP_BIT_SLE, &localEnable, &remoteEnable);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "check static net cap fail, ret=%{public}d", ret);
+        return ret;
+    }
+    if (!localEnable) {
+        return SOFTBUS_LANE_LOCAL_NO_SLE_STATIC_CAP;
+    }
+    if (!remoteEnable) {
+        return SOFTBUS_LANE_REMOTE_NO_SLE_STATIC_CAP;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SleDynamicCommCapa(const char *networkId)
+{
+    bool localEnable = false;
+    bool remoteEnable = false;
+    int32_t ret = DynamicNetCapaCalc(networkId, BIT_SLE, &localEnable, &remoteEnable);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "check dynamic net cap fail, ret=%{public}d", ret);
+        return ret;
+    }
+    if (!localEnable) {
+        return SOFTBUS_LANE_LOCAL_NO_SLE_CAP;
+    }
+    if (!remoteEnable) {
+        return SOFTBUS_LANE_REMOTE_NO_SLE_CAP;
+    }
+    return SOFTBUS_OK;
+}
+
 static LaneCommCapa g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = {BrStaticCommCapa, BrDynamicCommCapa, BIT_BR },
     [LANE_BLE] = {BleStaticCommCapa, BleDynamicCommCapa, BIT_BLE},
@@ -470,6 +506,8 @@ static LaneCommCapa g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC] = {CocStaticCommCapa, CocDynamicCommCapa, BIT_BLE},
     [LANE_COC_DIRECT] = {CocStaticCommCapa, CocDynamicCommCapa, BIT_BLE},
     [LANE_USB] = {UsbStaticCommCapa, UsbDynamicCommCapa, BIT_USB},
+    [LANE_SLE] = {SleStaticCommCapa, SleDynamicCommCapa, BIT_SLE},
+    [LANE_SLE_DIRECT] = {SleStaticCommCapa, SleDynamicCommCapa, BIT_SLE},
 };
 
 static LaneCommCapa *GetLinkCapaByLinkType(LaneLinkType linkType)

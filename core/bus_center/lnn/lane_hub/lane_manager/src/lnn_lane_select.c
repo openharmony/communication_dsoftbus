@@ -62,6 +62,10 @@ static char *GetLinkTypeStrng(LaneLinkType preferredLink)
             return "COC_DIRECT";
         case LANE_USB:
             return "USB";
+        case LANE_SLE:
+            return "SLE";
+        case LANE_SLE_DIRECT:
+            return "SLE_DIRECT";
         default:
             return "INVALID_LINK";
     }

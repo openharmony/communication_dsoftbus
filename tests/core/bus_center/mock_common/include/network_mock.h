@@ -33,6 +33,7 @@
 #include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_sle_common.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
@@ -57,6 +58,10 @@ public:
     virtual void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state) = 0;
     virtual int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen) = 0;
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
+    virtual int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId) = 0;
+    virtual bool IsSleEnabled() = 0;
+    virtual void SoftBusRemoveSleStateListener(int listenerId) = 0;
+    virtual void LnnNotifySleStateChangeEvent(void *state) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName) = 0;
@@ -86,6 +91,10 @@ public:
     MOCK_METHOD2(LnnNotifyBtAclStateChangeEvent, void(const char *, SoftBusBtAclState));
     MOCK_METHOD4(ConvertBtMacToStr, int32_t(char *, uint32_t, const uint8_t *, uint32_t));
     MOCK_METHOD2(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *, int32_t *));
+    MOCK_METHOD2(SoftBusAddSleStateListener, int(const SoftBusSleStateListener *, int *));
+    MOCK_METHOD0(IsSleEnabled, bool());
+    MOCK_METHOD1(SoftBusRemoveSleStateListener, void(int));
+    MOCK_METHOD1(LnnNotifySleStateChangeEvent, void(void *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void(void *));
     MOCK_METHOD2(LnnNotifyNetlinkStateChangeEvent, void(NetManagerIfNameState, const char *));
