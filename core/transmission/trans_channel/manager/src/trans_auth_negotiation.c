@@ -301,6 +301,17 @@ static int32_t SetBleAuthConnInfo(const struct BleInfo *bleInfo, AuthConnInfo *a
     return SOFTBUS_OK;
 }
 
+static int32_t SetSleAuthConnInfo(const struct SleInfo *sleInfo, AuthConnInfo *authConnInfo)
+{
+    authConnInfo->type = AUTH_LINK_TYPE_SLE;
+    if (memcpy_s(authConnInfo->info.sleInfo.sleMac, BT_MAC_LEN, sleInfo->address, BT_MAC_LEN) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "memcpy_s sle mac failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    authConnInfo->info.sleInfo.protocol = sleInfo->protocol;
+    return SOFTBUS_OK;
+}
+
 static int32_t ConvertConnInfoToAuthConnInfo(const ConnectionInfo *connInfo, AuthConnInfo *authConnInfo)
 {
     switch (connInfo->type) {
@@ -310,6 +321,8 @@ static int32_t ConvertConnInfoToAuthConnInfo(const ConnectionInfo *connInfo, Aut
             return SetBrAuthConnInfo(&(connInfo->brInfo), authConnInfo);
         case CONNECT_BLE:
             return SetBleAuthConnInfo(&(connInfo->bleInfo), authConnInfo);
+        case CONNECT_SLE:
+            return SetSleAuthConnInfo(&(connInfo->sleInfo), authConnInfo);
         default:
             TRANS_LOGE(TRANS_SVC, "not support connection type=%{public}d", connInfo->type);
             return SOFTBUS_FUNC_NOT_SUPPORT;

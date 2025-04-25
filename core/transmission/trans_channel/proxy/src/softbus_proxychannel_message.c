@@ -114,46 +114,65 @@ static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHa
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
+static int32_t SelectAuthType(AuthConnInfo *connInfo, ConnectionInfo *info)
 {
-    ConnectionInfo info = { 0 };
-    int32_t ret = ConnGetConnectionInfo(connId, &info);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%{public}u", connId);
-    switch (info.type) {
+    switch (info->type) {
         case CONNECT_TCP:
             connInfo->type = AUTH_LINK_TYPE_WIFI;
-            if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info.socketInfo.addr) != EOK) {
+            if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info->socketInfo.addr) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "strcpy_s ip fail.");
                 return SOFTBUS_STRCPY_ERR;
             }
             break;
         case CONNECT_BR:
             connInfo->type = AUTH_LINK_TYPE_BR;
-            if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, info.brInfo.brMac) != EOK) {
+            if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, info->brInfo.brMac) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "strcpy_s brMac fail.");
                 return SOFTBUS_STRCPY_ERR;
             }
             break;
         case CONNECT_BLE:
             connInfo->type = AUTH_LINK_TYPE_BLE;
-            if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, info.bleInfo.bleMac) != EOK) {
+            if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, info->bleInfo.bleMac) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "strcpy_s brMac fail.");
                 return SOFTBUS_STRCPY_ERR;
             }
             if (memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
-                info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                info->bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s brMac fail.");
                 return SOFTBUS_MEM_ERR;
             }
-            connInfo->info.bleInfo.protocol = info.bleInfo.protocol;
-            connInfo->info.bleInfo.psm = (int32_t)info.bleInfo.psm;
+            connInfo->info.bleInfo.protocol = info->bleInfo.protocol;
+            connInfo->info.bleInfo.psm = (int32_t)info->bleInfo.psm;
+            break;
+        case CONNECT_SLE:
+            connInfo->type = AUTH_LINK_TYPE_SLE;
+            if (memcpy_s(connInfo->info.sleInfo.sleMac, BT_MAC_LEN, info->sleInfo.address, BT_MAC_LEN) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s sle address fail.");
+                return SOFTBUS_MEM_ERR;
+            }
+            if (memcpy_s(connInfo->info.sleInfo.networkId, NETWORK_ID_BUF_LEN,
+                info->sleInfo.networkId, NETWORK_ID_BUF_LEN) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s networkId fail.");
+                return SOFTBUS_MEM_ERR;
+            }
+            connInfo->info.sleInfo.protocol = info->sleInfo.protocol;
             break;
         default:
-            TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info.type);
+            TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info->type);
             return SOFTBUS_TRANS_UNEXPECTED_CONN_TYPE;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
+{
+    ConnectionInfo info = { 0 };
+    int32_t ret = ConnGetConnectionInfo(connId, &info);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%{public}u", connId);
+    ret = SelectAuthType(connInfo, &info);
+    return ret;
 }
 
 static int32_t ConvertBrConnInfo2BleConnInfo(AuthConnInfo *connInfo)
@@ -183,6 +202,19 @@ static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
     return SOFTBUS_OK;
 }
 
+static int32_t ConvertSleConnInfo2BleConnInfo(AuthConnInfo *connInfo)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    int32_t ret = LnnGetRemoteStrInfo(connInfo->info.sleInfo.networkId, STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get udid fail");
+
+    ret = SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid), connInfo->info.bleInfo.deviceIdHash);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "generate udid hash fail");
+
+    connInfo->type = AUTH_LINK_TYPE_BLE;
+    return SOFTBUS_OK;
+}
+
 static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHandle *authHandle, int32_t index)
 {
     AuthConnInfo connInfo;
@@ -198,6 +230,10 @@ static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHand
         ret = ConvertBleConnInfo2BrConnInfo(&connInfo);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
             TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail, connInfoType=%{public}d", connInfo.type);
+    } else if (isBle && connInfo.type == AUTH_LINK_TYPE_SLE) {
+        ret = ConvertSleConnInfo2BleConnInfo(&connInfo);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_CTRL, "ConvertSleConnInfo2BleConnInfo fail, connInfoType=%{public}d", connInfo.type);
     }
     bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
     authHandle->type = connInfo.type;

@@ -1058,6 +1058,8 @@ static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_COC,
     LANE_COC_DIRECT,
     LANE_HML,
+    LANE_SLE,
+    LANE_SLE_DIRECT,
 };
 static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 {
@@ -1671,6 +1673,18 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
     return SOFTBUS_OK;
 }
 
+static int32_t SetSleDirectConnInfo(const SleDirectConnInfo *sleDirect, ConnectOption *connOpt)
+{
+    if (memcpy_s(connOpt->sleDirectOption.networkId, NETWORK_ID_BUF_LEN,
+        sleDirect->networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        TRANS_LOGW(TRANS_SVC, "set networkId err.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    connOpt->type = CONNECT_SLE_DIRECT;
+    connOpt->sleDirectOption.protoType = sleDirect->protoType;
+    return SOFTBUS_OK;
+}
+
 static int32_t SetBleDirectConnInfo(const BleDirectConnInfo *bleDirect, ConnectOption *connOpt)
 {
     if (strcpy_s(connOpt->bleDirectOption.networkId, NETWORK_ID_BUF_LEN, bleDirect->networkId) != EOK) {
@@ -1730,6 +1744,8 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         return SetHmlConnectInfo(&(info->connInfo.p2p), connOpt);
     } else if (info->type == LANE_USB) {
         return SetUsbConnInfo(&(info->connInfo.usb), connOpt);
+    } else if (info->type == LANE_SLE_DIRECT) {
+        return SetSleDirectConnInfo(&(info->connInfo.sleDirect), connOpt);
     }
 
     TRANS_LOGE(TRANS_SVC, "get conn opt err: type=%{public}d", info->type);
