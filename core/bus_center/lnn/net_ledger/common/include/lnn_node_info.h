@@ -203,6 +203,7 @@ typedef struct {
     uint64_t onlinetTimestamp;
     uint64_t updateTimestamp;
     int64_t lastAuthSeq;
+    uint64_t huksKeyTime;
     ConnectInfo connectInfo;
     int32_t sleRangeCapacity;
 } NodeInfo;

@@ -113,6 +113,13 @@ int32_t SoftBusGetRealTime(SoftBusSysTime *sysTime)
     return SOFTBUS_OK;
 }
 
+int64_t SoftBusGetRealTimeMs(void)
+{
+    struct timespec time = {0};
+    (void)clock_gettime(CLOCK_BOOTTIME, &time);
+    return (int64_t)time.tv_sec * MS_PER_SECOND + (int64_t)time.tv_nsec / US_PER_MSECOND;
+}
+
 uint64_t SoftBusGetSysTimeMs(void)
 {
     struct timeval time;

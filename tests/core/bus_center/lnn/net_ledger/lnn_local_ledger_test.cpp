@@ -87,6 +87,7 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(LlUpdateAccount(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LlUpdateStaticCapability(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnUpdateLocalScreenStatus(true), SOFTBUS_OK);
+    EXPECT_EQ(UpdateHuksKeyTime(nullptr), SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -941,5 +942,19 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_SLE_ADDR, sleAddrRet, MAC_LEN) == SOFTBUS_OK);
     EXPECT_STREQ(sleAddrRet, mockSleAddr);
     LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: L1_GET_HUKS_KEY_TIME_Test_001
+ * @tc.desc: L1 get huks key time test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, L1_GET_HUKS_KEY_TIME_Test_001, TestSize.Level1)
+{
+    int64_t hukTime = 0;
+    uint32_t len = sizeof(uint64_t);
+    EXPECT_EQ(L1GetHuksKeyTime(nullptr, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(L1GetHuksKeyTime(reinterpret_cast<void *>(&hukTime), len), SOFTBUS_OK);
 }
 } // namespace OHOS

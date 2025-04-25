@@ -256,6 +256,9 @@ static void ProcessLocalDeviceInfo(void)
     if (LnnUpdateLocalDeviceName(&info.deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set deviceName fail");
     }
+    if (LnnUpdateLocalHuksKeyTime(info.huksKeyTime) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set huks key time fail");
+    }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
     if (info.networkIdTimestamp != 0) {
         LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
