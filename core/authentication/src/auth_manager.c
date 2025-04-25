@@ -2186,7 +2186,7 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     AuthManager *auth[2] = { NULL, NULL }; /* 2: max size for (CLIENT+ SERVER) */
     auth[num++] = FindAuthManagerByUuid(uuid, type, false);
     auth[num++] = FindAuthManagerByUuid(uuid, type, true);
-    if (type == AUTH_LINK_TYPE_BR && auth[0] == NULL && auth[1] == NULL) {
+    if ((type == AUTH_LINK_TYPE_BR || type == AUTH_LINK_TYPE_SLE) && auth[0] == NULL && auth[1] == NULL) {
         num = 0;
         auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_BLE, false);
         auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_BLE, true);
