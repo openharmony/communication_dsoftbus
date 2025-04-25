@@ -61,6 +61,7 @@ const NodeInfo *LnnGetLocalNodeInfo(void);
 int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info);
 int32_t LnnUpdateLocalNetworkId(const void *id);
 int32_t LnnUpdateLocalNetworkIdTime(int64_t time);
+int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime);
 int32_t LnnUpdateLocalScreenStatus(bool isScreenOn);
 void LnnUpdateStateVersion(StateVersionChangeReason reason);
 int32_t LnnUpdateLocalDeviceName(const DeviceBasicInfo *info);

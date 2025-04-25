@@ -45,6 +45,7 @@ int SoftBusSleepMs(unsigned int ms);
 
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
 int32_t SoftBusGetRealTime(SoftBusSysTime *sysTime);
+int64_t SoftBusGetRealTimeMs(void);
 uint64_t SoftBusGetSysTimeMs(void);
 const char *SoftBusFormatTimestamp(uint64_t timestamp);
 

@@ -22,11 +22,14 @@
 #include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "bus_center_info_key.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_huks_utils.h"
+#include "lnn_node_info.h"
+#include "lnn_secure_storage.h"
 #include "sqlite3_utils.h"
 
 #include "softbus_adapter_file.h"
@@ -76,6 +79,20 @@ public:
         const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
     virtual int32_t LnnCeDecryptDataByHuks(
         const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
+    virtual int64_t SoftBusGetRealTimeMs(void) = 0;
+    virtual int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info) = 0;
+    virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
+    virtual SoftBusLooper *GetLooper(int32_t looper) = 0;
+    virtual int32_t LnnSaveDeviceData(const char *data, LnnDataType dataType) = 0;
+    virtual int32_t LnnRetrieveDeviceData(LnnDataType dataType, char **data, uint32_t *dataLen) = 0;
+    virtual int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums) = 0;
+    virtual int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias) = 0;
+    virtual int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias) = 0;
 };
 class DecisionDbDepsInterfaceMock : public DecisionDbDepsInterface {
 public:
@@ -112,6 +129,19 @@ public:
     static int32_t DecisionDbAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para);
     MOCK_METHOD3(LnnCeEncryptDataByHuks, int32_t(const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
     MOCK_METHOD3(LnnCeDecryptDataByHuks, int32_t(const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
+    MOCK_METHOD0(SoftBusGetRealTimeMs, int64_t(void));
+    MOCK_METHOD2(LnnGetLocalNum64Info, int32_t(InfoKey key, int64_t *));
+    MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD1(GetLooper, SoftBusLooper * (int));
+    MOCK_METHOD2(LnnSaveDeviceData, int32_t(const char *, LnnDataType));
+    MOCK_METHOD3(LnnRetrieveDeviceData, int32_t(LnnDataType, char **, uint32_t *));
+    MOCK_METHOD1(LnnGetLocalDevInfo, int32_t(NodeInfo *));
+    MOCK_METHOD2(LnnGetAllRemoteDevInfo, int32_t(NodeInfo **, int32_t *));
+    MOCK_METHOD1(LnnSaveLocalDeviceInfo, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnSaveRemoteDeviceInfo, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnDeleteCeKeyByHuks, int32_t(struct HksBlob *));
+    MOCK_METHOD1(LnnGenerateCeKeyByHuks, int32_t(struct HksBlob *));
 };
 } // namespace OHOS
 #endif // LNN_DECISION_DB_DEPS_MOCK_H
