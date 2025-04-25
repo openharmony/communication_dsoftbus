@@ -67,6 +67,7 @@ typedef enum {
     BT_BLE = 4,
     WIFI_P2P_REUSE = 6,
     WIFI_USB = 7,
+    BT_SLE = 8,
 } RouteType;
 
 typedef enum {

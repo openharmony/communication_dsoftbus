@@ -52,6 +52,8 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
             return FLAG_BR;
         case AUTH_LINK_TYPE_BLE:
             return FLAG_BLE;
+        case AUTH_LINK_TYPE_SLE:
+            return FLAG_SLE;
         case AUTH_LINK_TYPE_P2P:
             return FLAG_P2P;
         case AUTH_LINK_TYPE_ENHANCED_P2P:

@@ -447,6 +447,13 @@ static bool CompareConnectOption(const ConnectOption *itemConnInfo, const Connec
             return true;
         }
         return false;
+    } else if (connInfo->type == CONNECT_SLE_DIRECT) {
+        TRANS_LOGI(TRANS_CTRL, "CONNECT_SLE_DIRECT");
+        if ((strcmp(connInfo->sleDirectOption.networkId, itemConnInfo->sleDirectOption.networkId) == 0) &&
+            (connInfo->sleDirectOption.protoType == itemConnInfo->sleDirectOption.protoType)) {
+            return true;
+        }
+        return false;
     }
     return false;
 }
@@ -498,6 +505,12 @@ static void TransConnInfoToConnOpt(ConnectionInfo *connInfo, ConnectOption *conn
             connInfo->bleInfo.bleMac, sizeof(char) * BT_MAC_LEN);
         (void)memcpy_s(connOption->bleOption.deviceIdHash, sizeof(char) * UDID_HASH_LEN,
             connInfo->bleInfo.deviceIdHash, sizeof(char) * UDID_HASH_LEN);
+    }  else if (connOption->type == CONNECT_SLE) {
+        TRANS_LOGI(TRANS_CTRL, "CONNECT_SLE");
+        (void)memcpy_s(connOption->sleOption.address, sizeof(char) * BT_MAC_LEN,
+            connInfo->sleInfo.address, sizeof(char) * BT_MAC_LEN);
+        (void)memcpy_s(connOption->sleOption.networkId, sizeof(char) *  NETWORK_ID_BUF_LEN,
+            connInfo->sleInfo.networkId, sizeof(char) * NETWORK_ID_BUF_LEN);
     } else {
         (void)memcpy_s(connOption->socketOption.addr, sizeof(char) * IP_LEN,
             connInfo->socketInfo.addr, sizeof(char) * IP_LEN);
@@ -1009,6 +1022,11 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo)
         } else if (memcmp(item->connInfo.brOption.brMac, connInfo->brOption.brMac,
             sizeof(connInfo->brOption.brMac)) == 0) {
             TRANS_LOGI(TRANS_CTRL, "auth channel type is br");
+            (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+            return SOFTBUS_OK;
+        } else if (memcmp(item->connInfo.sleOption.address, connInfo->sleOption.address,
+            sizeof(connInfo->sleOption.address)) == 0) {
+            TRANS_LOGI(TRANS_CTRL, "auth channel type is sle");
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
         }

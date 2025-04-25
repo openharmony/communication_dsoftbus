@@ -62,6 +62,8 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
             return DUMPER_LANE_BR;
         case LANE_BLE:
             return DUMPER_LANE_BLE;
+        case LANE_SLE:
+            return DUMPER_LANE_SLE;
         case LANE_P2P:
             return DUMPER_LANE_P2P;
         case LANE_WLAN_2P4G:
@@ -806,6 +808,10 @@ static ConnectType ConvertLaneLinkTypeToConnectType(LaneLinkType laneLinkType)
             return CONNECT_HML;
         case LANE_BLE_REUSE:
             return CONNECT_BLE;
+        case LANE_SLE:
+            return CONNECT_SLE;
+        case LANE_SLE_DIRECT:
+            return CONNECT_SLE_DIRECT;
         default:
             return CONNECT_TYPE_MAX;
     }
