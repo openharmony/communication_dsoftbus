@@ -1337,6 +1337,17 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
     return SOFTBUS_OK;
 }
 
+int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_localNetLedger.localInfo.huksKeyTime = huksKeyTime;
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalNetworkId(const void *id)
 {
     int32_t ret = ModifyId(g_localNetLedger.localInfo.lastNetworkId, NETWORK_ID_BUF_LEN,
@@ -2055,6 +2066,30 @@ static int32_t LlSetLocalSleAddr(const void *addr)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateHuksKeyTime(const void *huksKeyTime)
+{
+    if (huksKeyTime == NULL) {
+        LNN_LOGE(LNN_LEDGER, "huks key time null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.huksKeyTime = *(uint64_t *)huksKeyTime;
+    if (LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetHuksKeyTime(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint64_t)) {
+        LNN_LOGE(LNN_LEDGER, "buf null or len error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint64_t *)buf) = info->huksKeyTime;
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -2102,6 +2137,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_USERID, sizeof(int32_t), L1GetUserId, UpdateLocalUserId},
     {NUM_KEY_STATIC_NET_CAP, -1, LlGetStaticNetCap, UpdateStaticNetCap},
     {NUM_KEY_SLE_RANGE_CAP, sizeof(int32_t), LlGetLocalSleRangeCapacity, LlSetLocalSleRangeCapacity},
+    {NUM_KEY_HUKS_TIME, sizeof(uint64_t), L1GetHuksKeyTime, UpdateHuksKeyTime},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
