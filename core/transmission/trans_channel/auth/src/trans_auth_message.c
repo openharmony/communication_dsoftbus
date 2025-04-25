@@ -60,11 +60,11 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         TRANS_LOGE(TRANS_SVC, "failed");
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    char tempAddr[IP_LEN] = { 0 };
+    char compatibleAddr[IP_LEN] = { 0 };
     if (appInfo->linkType == LANE_HML_RAW) {
         if (!AddNumberToJsonObject(msg, "LANE_LINK_TYPE", appInfo->linkType) ||
-            !AddStringToJsonObject(msg, "LOCAL_HML_RAW_IP", tempAddr) ||
-            !AddStringToJsonObject(msg, "PEER_HML_RAW_IP", tempAddr)) {
+            !AddStringToJsonObject(msg, "LOCAL_HML_RAW_IP", compatibleAddr) ||
+            !AddStringToJsonObject(msg, "PEER_HML_RAW_IP", compatibleAddr)) {
             TRANS_LOGE(TRANS_SVC, "add linkType and ip failed");
             return SOFTBUS_CREATE_JSON_ERR;
         }
