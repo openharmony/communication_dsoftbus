@@ -549,6 +549,7 @@ int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
         LNN_LOGE(LNN_LEDGER, "delete ce key fail");
         return ret;
     }
+    g_isGenCeParams = false;
     return SOFTBUS_OK;
 }
 
