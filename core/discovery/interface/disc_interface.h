@@ -204,7 +204,7 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId, int32_t call
  * @brief Modify the connection state.
  * @param[in] status Used to indicate a certain connection state discovered. For details, see {@link LinkStatus}.
  * @param[in] medium A medium for sending information that can be used in a connection route.
- * @Param[in] ifnameIdx Index of ifname for coap discovery.
+ * @param[in] ifnameIdx Index of ifname for coap discovery.
  * For details, see {@link ExchangeMedium}.
  */
 void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx);
