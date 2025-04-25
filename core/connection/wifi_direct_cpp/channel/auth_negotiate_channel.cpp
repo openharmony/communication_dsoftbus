@@ -199,8 +199,8 @@ static bool CheckSameAccount(const NegotiateMessage &msg, const std::string &rem
         CONN_LOGI(CONN_WIFI_DIRECT, "remote osType is %{public}d", osType);
         // The osType of the remote device is not OH_OS_TYPE, the remote device uses the same account.
         if (osType != OH_OS_TYPE) {
-             CONN_LOGI(CONN_WIFI_DIRECT, "remote device version is not later than 4.x");
-             return true;
+            CONN_LOGI(CONN_WIFI_DIRECT, "remote device version is not later than 4.x");
+            return true;
         }
     }
     bool ret = true;
