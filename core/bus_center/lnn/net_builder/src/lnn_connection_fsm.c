@@ -1729,6 +1729,47 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     return false;
 }
 
+static bool IsSameIpOnlineDevice(LnnConntionInfo *connInfo, NodeInfo nodeInfo)
+{
+    if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI) &&
+        (nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp[0] != '\0') &&
+        strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, connInfo->addr.info.ip.ip) == 0 &&
+        strcmp(nodeInfo.deviceInfo.deviceUdid, connInfo->nodeInfo->deviceInfo.deviceUdid) != 0) {
+        return true;
+    }
+    return false;
+}
+
+static void LeaveSameIpOnlineDevice(LnnConntionInfo *connInfo)
+{
+    int32_t infoNum = 0;
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get online node info failed");
+        return;
+    }
+    if (info == NULL || infoNum == 0) {
+        LNN_LOGE(LNN_BUILDER, "get online node is 0");
+        return;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (int32_t i = 0; i < infoNum; ++i) {
+        if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) == SOFTBUS_OK &&
+            IsSameIpOnlineDevice(connInfo, nodeInfo)) {
+            char *anonyNetworkId = NULL;
+            Anonymize(info[i].networkId, &anonyNetworkId);
+            LNN_LOGI(
+                LNN_BUILDER, "need old same ip device offline, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+            AnonymizeFree(anonyNetworkId);
+            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_WLAN);
+            SoftBusFree(info);
+            return;
+        }
+    }
+    SoftBusFree(info);
+}
+
 static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -1739,6 +1780,9 @@ static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
     (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo *newNodeInfo = connInfo->nodeInfo;
     ConnectionAddrType addrType;
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN) {
+        LeaveSameIpOnlineDevice(connInfo);
+    }
     int32_t ret = LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
     if (CheckDeadFlag(connFsm, true)) {
         return;
