@@ -16,12 +16,12 @@
 #include "lnn_ip_utils_adapter.h"
 
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 #include <net/if.h>
+#include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <ifaddrs.h>
-#include <netinet/in.h>
 
 #include "comm_log.h"
 
@@ -89,6 +89,10 @@ int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len)
 {
     if (ifName == NULL || ip == NULL) {
         COMM_LOGE(COMM_ADAPTER, "ifName or ip buffer is NULL!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len < INET6_ADDRSTRLEN) {
+        COMM_LOGE(COMM_ADAPTER, "len value is not long enough !");
         return SOFTBUS_INVALID_PARAM;
     }
     struct ifaddrs *allAddr = NULL;

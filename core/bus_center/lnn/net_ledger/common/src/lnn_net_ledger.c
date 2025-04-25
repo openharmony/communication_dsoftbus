@@ -735,6 +735,34 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
+int32_t SoftbusDumpPrintUsbIp(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char ipAddr[IP_STR_MAX_LEN] = {0};
+    bool isLocalNetworkId = false;
+    char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local network id fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (strncmp(localNetworkId, nodeInfo->networkId, NETWORK_ID_BUF_LEN) == 0) {
+        isLocalNetworkId = true;
+    }
+    if (isLocalNetworkId) {
+        LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, (char *)ipAddr, IP_STR_MAX_LEN, USB_IF);
+    } else {
+        LnnGetRemoteStrInfoByIfnameIdx(nodeInfo->networkId, STRING_KEY_IP, (char *)ipAddr, IP_STR_MAX_LEN, USB_IF);
+    }
+    char *anonyIp = NULL;
+    Anonymize(ipAddr, &anonyIp);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "USB IpAddr", AnonymizeWrapper(anonyIp));
+    AnonymizeFree(anonyIp);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftbusDumpPrintDynamicNetCap(int fd, NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
@@ -980,6 +1008,9 @@ static void SoftbusDumpDeviceAddr(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintIp(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintIp failed");
+    }
+    if (SoftbusDumpPrintUsbIp(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUsbIp failed");
     }
 }
 
