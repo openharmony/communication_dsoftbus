@@ -2487,6 +2487,10 @@ static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSess
         AUTH_LOGE(AUTH_FSM, "param err!");
         return false;
     }
+    if (StrCmpIgnoreCase(info->udid, nodeInfo->deviceInfo.deviceUdid) != 0) {
+        AUTH_LOGE(AUTH_FSM, "verify udid fail");
+        return true;
+    }
     int32_t authVersion = 0;
     if (!JSON_GetInt32FromOject(obj, AUTH_VERSION_TAG, (int32_t *)&authVersion)) {
         AUTH_LOGW(AUTH_FSM, "peer not send authVersion.");
