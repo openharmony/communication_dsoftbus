@@ -624,7 +624,7 @@ static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_HML, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
         LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_SLE, LANE_SLE_DIRECT, LANE_COC_DIRECT, LANE_BLE_REUSE,
-        LANE_HML_RAW };
+        LANE_HML_RAW, LANE_USB };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
