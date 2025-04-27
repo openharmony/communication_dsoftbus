@@ -494,6 +494,10 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
 static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *data, uint32_t len)
 {
     PacketHead head;
+    if (len < sizeof(PacketHead)) {
+        TRANS_LOGE(TRANS_SDK, "check len failed, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy packetHead failed");
         return SOFTBUS_MEM_ERR;
