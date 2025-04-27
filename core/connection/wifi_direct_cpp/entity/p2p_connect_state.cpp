@@ -18,6 +18,7 @@
 #include "p2p_unavailable_state.h"
 #include "softbus_adapter_crypto.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
 static constexpr int IP_SUFFIX_RANGE = 253;
@@ -102,7 +103,9 @@ std::string P2pConnectState::CalculateGcIp(const std::string &goIpAddr)
     auto lastDotPos = goIpAddr.find_last_of('.');
     CONN_CHECK_AND_RETURN_RET_LOGE(
         lastDotPos != std::string::npos, "", CONN_WIFI_DIRECT, "not find last dot of go ip addr");
-    auto goIpSuffix = std::stoi(goIpAddr.substr(lastDotPos + 1));
+    int32_t goIpSuffix = 0;
+    bool result = WifiDirectUtils::StringToInt(goIpAddr.substr(lastDotPos + 1), goIpSuffix);
+    CONN_CHECK_AND_RETURN_RET_LOGE(result, "", CONN_WIFI_DIRECT, "go ip suffix is not valid number string");
     int gcIpSuffix = 0;
     int count = 0;
     do {
