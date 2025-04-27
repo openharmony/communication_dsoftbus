@@ -1330,6 +1330,9 @@ static void HandleDeviceIdData(
             return;
         }
         ReleaseAuthLock();
+        if (head->module == MODULE_SESSION_KEY_AUTH) {
+            SetSessionKeyListenerModule(GetFd(connId));
+        }
         AuthParam authInfo = {
             .authSeq = head->seq, .requestId = AuthGenRequestId(), .connId = connId,
             .isServer = true, .isFastAuth = true,
