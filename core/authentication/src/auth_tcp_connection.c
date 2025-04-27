@@ -954,13 +954,14 @@ void WifiConnListLockDeinit(void)
 
 void SetSessionKeyListenerModule(int32_t fd)
 {
-    AUTH_LOGE(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
+    AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
     SoftbusBaseListener listener = {
         .onConnectEvent = OnConnectEvent,
         .onDataEvent = OnDataEvent,
     };
     if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
+        return;
     }
     if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
