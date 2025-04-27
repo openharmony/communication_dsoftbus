@@ -856,10 +856,10 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
     return ret;
 }
 
-int32_t GetAllLinkWithDevId(const char* peerUdid, LaneLinkType **linkList, uint8_t *linkCnt)
+int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt)
 {
     if (peerUdid == NULL || linkList == NULL || linkCnt == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid parem");
+        LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
