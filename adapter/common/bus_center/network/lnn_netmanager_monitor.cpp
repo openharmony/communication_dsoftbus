@@ -133,9 +133,9 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
-    if ((flags & IFA_F_TENTATIVE) != 0 && (strstr(ifName.c_str(), "ncm0") != NULL ||
-        strstr(ifName.c_str(), "wwan0") != NULL)) {
-        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IP_UPDATED, ifName.c_str());
+    if ((flags & IFA_F_TENTATIVE) == 0 && addr.find("fe80") != std::string::npos) {
+        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IPV6_UPDATED, ifName.c_str());
+        return SOFTBUS_OK;
     }
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -235,7 +235,7 @@ int32_t ConfigLocalIpv6(const char *ifName, const char *localIpv6)
         OHOS::NetManagerStandard::NetConnClient::GetInstance().AddInterfaceAddress(ifName, localIpv6, IPV6_PREFIX);
     if (ret != NETMANAGER_OK && ret != DUPLICATE_ROUTE) {
         LNN_LOGE(LNN_BUILDER, "config net interface %{public}s ipv6 failed with ret=%{public}d", ifName, ret);
-        return SOFTBUS_NETWORK_CONFIG_NETLINK_IP_FAIL;
+        return SOFTBUS_NETWORK_CONFIG_NETLINK_IPV6_FAILED;
     }
     return SOFTBUS_OK;
 }
