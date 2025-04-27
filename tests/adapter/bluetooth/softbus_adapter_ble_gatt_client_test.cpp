@@ -99,12 +99,12 @@ static void MockAll(MockBluetooth &mocker)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcRegister
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcRegister001
  * @tc.desc: test gatt client register
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -116,12 +116,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcUnRegister
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcUnRegister001
  * @tc.desc: test gatt client unregister
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcUnRegister, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcUnRegister001, TestSize.Level3)
 {
     InitSoftbusAdapterClient();
     MockBluetooth mocker;
@@ -136,12 +136,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcUnRegister, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcConnect
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcConnect001
  * @tc.desc: test gatt client connect
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConnect, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConnect001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -157,12 +157,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConnect, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusBleGattcDisconnect
+ * @tc.name: AdapterBleGattClientTest_SoftbusBleGattcDisconnect001
  * @tc.desc: test gatt client disconnect
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusBleGattcDisconnect, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusBleGattcDisconnect001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -174,12 +174,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusBleGattcDisconnect, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcSearchServices
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcSearchServices001
  * @tc.desc: test gatt client search service
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcSearchServices, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcSearchServices001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -224,12 +224,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcSearchServices, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcGetService
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcGetService001
  * @tc.desc: test gatt client get service
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcGetService, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcGetService001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -247,12 +247,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcGetService, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcRegisterNotification
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcRegisterNotification001
  * @tc.desc: test gatt client register notification
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegisterNotification, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegisterNotification001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -275,12 +275,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegisterNotification, TestSize.Le
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcWriteCharacteristic
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcWriteCharacteristic001
  * @tc.desc: test gatt client write characteristic
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcWriteCharacteristic, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcWriteCharacteristic001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -322,12 +322,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcWriteCharacteristic, TestSize.Lev
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcConfigureMtuSize
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcConfigureMtuSize001
  * @tc.desc: test gatt client write characteristic
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConfigureMtuSize, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConfigureMtuSize001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -340,12 +340,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConfigureMtuSize, TestSize.Level3
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_ScanLifecycle
+ * @tc.name: AdapterBleGattClientTest_GattClientConnectCycle001
  * @tc.desc: test complete gatt client connect life cycle
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -396,12 +396,12 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_ScanLifecycle
+ * @tc.name: AdapterBleGattClientTest_GattClientConnectCycle002
  * @tc.desc: test complete gatt client connect life cycle
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle2, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle002, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -459,12 +459,12 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle2, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_EnableFastestConn
+ * @tc.name: AdapterBleGattClientTest_EnableFastestConn001
  * @tc.desc: test ennable ble fatest connect
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, EnableFastestConn, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, EnableFastestConn001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -479,12 +479,12 @@ HWTEST_F(AdapterBleGattClientTest, EnableFastestConn, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SetBleConnectionPriority
+ * @tc.name: AdapterBleGattClientTest_SetBleConnectionPriority001
  * @tc.desc: test ennable ble fatest connect
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, SetBleConnectionPriority, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, SetBleConnectionPriority001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);

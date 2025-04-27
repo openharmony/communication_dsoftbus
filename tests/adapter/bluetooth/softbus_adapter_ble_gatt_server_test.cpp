@@ -135,12 +135,12 @@ static void MockAll(MockBluetooth &mocker)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusRegisterGattsCallbacks
+ * @tc.name: AdapterBleGattServerTest_SoftBusRegisterGattsCallbacks001
  * @tc.desc: test register gatt server callbacks
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusRegisterGattsCallbacks, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusRegisterGattsCallbacks001, TestSize.Level3)
 {
     InitSoftbusAdapterServer();
     MockBluetooth mocker;
@@ -178,12 +178,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusRegisterGattsCallbacks, TestSize.Level
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusUnRegisterGattsCallbacks
+ * @tc.name: AdapterBleGattServerTest_SoftBusUnRegisterGattsCallbacks001
  * @tc.desc: test unregister gatt server callbacks
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusUnRegisterGattsCallbacks, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusUnRegisterGattsCallbacks001, TestSize.Level3)
 {
     InitSoftbusAdapterServer();
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
@@ -211,12 +211,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusUnRegisterGattsCallbacks, TestSize.Lev
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddService
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddService001
  * @tc.desc: test add gatt service
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService001, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service1 = {
@@ -247,12 +247,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddCharacteristic
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddCharacteristic001
  * @tc.desc: test add gatt characteristic
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic001, TestSize.Level3)
 {
     SoftBusBtUuid characteristic = {
         .uuidLen = 0,
@@ -291,12 +291,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddDescriptor
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddDescriptor001
  * @tc.desc: test add gatt descriptor
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor001, TestSize.Level3)
 {
     SoftBusBtUuid desciptor = {
         .uuidLen = 0,
@@ -330,12 +330,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsStartService
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsStartService001
  * @tc.desc: test start gatt service
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService001, TestSize.Level3)
 {
     ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_CONN_BLE_CHECK_STATUS_ERR);
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
@@ -356,12 +356,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsStopService
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsStopService001
  * @tc.desc: test stop gatt service
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService001, TestSize.Level3)
 {
     ASSERT_EQ(SoftBusGattsStopService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_CONN_BLE_CHECK_STATUS_ERR);
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
@@ -382,12 +382,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsDeleteService
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsDeleteService001
  * @tc.desc: test delete gatt service
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService001, TestSize.Level3)
 {
     ASSERT_EQ(SoftBusGattsDeleteService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_CONN_BLE_CHECK_STATUS_ERR);
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
@@ -408,12 +408,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService, TestSize.Level3)
 }
 
  /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsConnect
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsConnect001
  * @tc.desc: test connect gatt connection
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsConnect, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsConnect001, TestSize.Level3)
 {
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
@@ -436,12 +436,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsConnect, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsDisconnect
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsDisconnect001
  * @tc.desc: test disconnect gatt connection
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect001, TestSize.Level3)
 {
     int32_t connId = 1;
     SoftBusBtAddr addr = {
@@ -466,12 +466,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsSendResponse
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsSendResponse001
  * @tc.desc: test send gatt response
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse001, TestSize.Level3)
 {
     ASSERT_EQ(SoftBusGattsSendResponse(nullptr), SOFTBUS_INVALID_PARAM);
     SoftBusGattsResponse resp = { 0 };
@@ -494,12 +494,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_SoftBusGattsSendNotify
+ * @tc.name: AdapterBleGattServerTest_SoftBusGattsSendNotify001
  * @tc.desc: test send gatt notify
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify001, TestSize.Level3)
 {
     ASSERT_EQ(SoftBusGattsSendNotify(nullptr), SOFTBUS_INVALID_PARAM);
     SoftBusGattsNotify notify = { 0 };
@@ -522,12 +522,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_BleConnectServerCallback
+ * @tc.name: AdapterBleGattServerTest_BleConnectServerCallback001
  * @tc.desc: test gatt connect server callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, BleConnectServerCallback, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, BleConnectServerCallback001, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
@@ -555,12 +555,12 @@ HWTEST_F(AdapterBleGattServerTest, BleConnectServerCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_BleDisconnectServerCallback
+ * @tc.name: AdapterBleGattServerTest_BleDisconnectServerCallback001
  * @tc.desc: test gatt disconnect server callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, BleDisconnectServerCallback, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, BleDisconnectServerCallback001, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
@@ -588,12 +588,12 @@ HWTEST_F(AdapterBleGattServerTest, BleDisconnectServerCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_BleServiceAddCallback
+ * @tc.name: AdapterBleGattServerTest_BleServiceAddCallback001
  * @tc.desc: test gatt server add callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, BleServiceAddCallback, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, BleServiceAddCallback001, TestSize.Level3)
 {
     // 注册service
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
@@ -621,12 +621,12 @@ HWTEST_F(AdapterBleGattServerTest, BleServiceAddCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_BleDescriptorAddCallback
+ * @tc.name: AdapterBleGattServerTest_BleDescriptorAddCallback001
  * @tc.desc: test descriptor add callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, BleDescriptorAddCallback, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, BleDescriptorAddCallback001, TestSize.Level3)
 {
     gattServerCallback->characteristicAddCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, nullptr,
         MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_CHARA_HANDLE);
@@ -674,12 +674,12 @@ HWTEST_F(AdapterBleGattServerTest, BleDescriptorAddCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_BleRequestReadCallback
+ * @tc.name: AdapterBleGattServerTest_BleRequestReadCallback001
  * @tc.desc: test ble request read callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, BleRequestReadCallback, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, BleRequestReadCallback001, TestSize.Level3)
 {
     gattServerCallback->serviceStartCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, MOCK_GATT_SERVICE_HANDLE);
     gattServerCallback->serviceStopCb(OHOS_BT_STATUS_SUCCESS, SOFTBUS_INVALID_PARAM, MOCK_GATT_SERVICE_HANDLE);
@@ -733,12 +733,12 @@ HWTEST_F(AdapterBleGattServerTest, BleRequestReadCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_BleRequestWriteCallback
+ * @tc.name: AdapterBleGattServerTest_BleRequestWriteCallback001
  * @tc.desc: test ble request write callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, BleRequestWriteCallback, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, BleRequestWriteCallback001, TestSize.Level3)
 {
     // 注册service
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
@@ -793,12 +793,12 @@ HWTEST_F(AdapterBleGattServerTest, BleRequestWriteCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle
+ * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle001
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle1, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle001, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
@@ -841,12 +841,12 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle1, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle
+ * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle002
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle2, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle002, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
@@ -880,12 +880,12 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle2, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle
+ * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle003
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle3, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle003, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
@@ -937,12 +937,12 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle3, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle
+ * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle004
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle4, TestSize.Level3)
+HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle004, TestSize.Level3)
 {
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
