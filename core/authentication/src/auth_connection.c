@@ -529,7 +529,7 @@ static void OnWiFiDisconnected(ListenerModule module, int32_t fd)
     } else {
         connInfo.type = AUTH_LINK_TYPE_WIFI;
     }
-    if (connInfo.type == AUTH_LINK_TYPE_WIFI) {
+    if (connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
         AUTH_LOGI(AUTH_CONN, "select session key auth link type");
         NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
         AuthConnectResult info = {
