@@ -46,7 +46,6 @@
 
 #define LOW_BW                  (384 * 1024)
 #define MID_BW                  (30 * 1024 * 1024)
-#define MID_HIGH_BW             (90 * 1024 * 1024)
 #define HIGH_BW                 (160 * 1024 * 1024)
 #define TRY_BUILD_INTERVAL_TIME (60 * 1000)
 
@@ -1300,26 +1299,11 @@ void DeinitLaneSelectRule(void)
 }
 
 static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
-    [HIGH_BAND_WIDTH] = {LANE_USB, LANE_HML, LANE_P2P, LANE_LINK_TYPE_BUTT},
+    [HIGH_BAND_WIDTH] = {LANE_USB, LANE_HML, LANE_LINK_TYPE_BUTT},
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_WLAN_5G, LANE_LINK_TYPE_BUTT},
     [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
-    [LOW_BAND_WIDTH] = {LANE_BR, LANE_LINK_TYPE_BUTT},
+    [LOW_BAND_WIDTH] = {LANE_BR, LANE_P2P, LANE_LINK_TYPE_BUTT},
 };
-
-static uint32_t GetBwValue(BandWidthType BWType)
-{
-    uint32_t bandWidth = 0;
-    if (BWType == HIGH_BAND_WIDTH) {
-        bandWidth = HIGH_BW;
-    } else if (BWType == MIDDLE_HIGH_BAND_WIDTH) {
-        bandWidth = MID_HIGH_BW;
-    } else if (BWType == MIDDLE_LOW_BAND_WIDTH) {
-        bandWidth = MID_BW;
-    } else {
-        bandWidth = LOW_BW;
-    }
-    return bandWidth;
-}
 
 int32_t GetSupportBandWidth(const char *peerNetworkId, LaneTransType transType, uint32_t *supportBw)
 {
@@ -1333,7 +1317,7 @@ int32_t GetSupportBandWidth(const char *peerNetworkId, LaneTransType transType, 
                 break;
             }
             if (LaneCheckLinkValid(peerNetworkId, g_laneBandWidth[i][j], transType) == SOFTBUS_OK) {
-                *supportBw = GetBwValue(i);
+                *supportBw = i;
                 return SOFTBUS_OK;
             }
         }
@@ -1364,8 +1348,8 @@ static int32_t BuildSupportReuseQosList(LaneLinkType *linkList, uint8_t linkNum,
             }
             if (CheckLinkWithTransType(transType, g_laneBandWidth[i][j]) == SOFTBUS_OK &&
                 IsLaneExist(linkList, linkNum, g_laneBandWidth[i][j]) &&
-                !(IsBwExist(validBwList, tmpCnt, GetBwValue(i)))) {
-                validBwList[tmpCnt++] = GetBwValue(i);
+                !(IsBwExist(validBwList, tmpCnt, i))) {
+                validBwList[tmpCnt++] = i;
             }
         }
     }
