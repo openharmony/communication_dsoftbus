@@ -17,6 +17,7 @@
 #include "data/info_container.h"
 #include "data/interface_info.h"
 #include "protocol/wifi_direct_protocol_factory.h"
+#include "utils/wifi_direct_utils.h"
 
 using namespace testing::ext;
 

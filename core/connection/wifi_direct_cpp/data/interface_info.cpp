@@ -251,7 +251,10 @@ void InterfaceInfo::SetP2pGroupConfig(const std::string &groupConfig)
         Set(InterfaceInfoKey::DYNAMIC_MAC, ret[P2P_GROUP_CONFIG_INDEX_BSSID]);
     }
     Set(InterfaceInfoKey::PSK, ret[P2P_GROUP_CONFIG_INDEX_SHARE_KEY]);
-    Set(InterfaceInfoKey::CENTER_20M, std::stoi(ret[P2P_GROUP_CONFIG_INDEX_FREQ]));
+    int32_t freq = 0;
+    bool result = WifiDirectUtils::StringToInt(ret[P2P_GROUP_CONFIG_INDEX_FREQ], freq);
+    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "frequency in group config is not valid number string");
+    Set(InterfaceInfoKey::CENTER_20M, freq);
 }
 
 std::string InterfaceInfo::GetP2pGroupConfig() const
