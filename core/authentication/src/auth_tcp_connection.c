@@ -549,7 +549,7 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
         .onConnectEvent = OnConnectEvent,
         .onDataEvent = OnDataEvent,
     };
-    if (StartBaseClient(AUTH, &listener) != SOFTBUS_OK) {
+    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
     }
     if (DelTrigger(AUTH_RAW_P2P_CLIENT, fd, RW_TRIGGER) != SOFTBUS_OK) {
@@ -557,7 +557,7 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
         ConnShutdownSocket(fd);
         return SOFTBUS_INVALID_FD;
     }
-    if (AddTrigger(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH_SESSION_KEY, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return SOFTBUS_INVALID_FD;
