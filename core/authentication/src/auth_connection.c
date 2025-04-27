@@ -518,7 +518,7 @@ static void OnTcpSessionConnected(ListenerModule module, int32_t fd, bool isClie
 
 static void OnWiFiDisconnected(ListenerModule module, int32_t fd)
 {
-    AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: fd=%{public}d", fd);
+    AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: module=%{public}d, fd=%{public}d", module, fd);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = (module == AUTH_USB) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
@@ -530,7 +530,6 @@ static void OnWiFiDisconnected(ListenerModule module, int32_t fd)
         connInfo.type = AUTH_LINK_TYPE_WIFI;
     }
     if (connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
-        AUTH_LOGI(AUTH_CONN, "select session key auth link type");
         NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
         AuthConnectResult info = {
             .fd = fd,
