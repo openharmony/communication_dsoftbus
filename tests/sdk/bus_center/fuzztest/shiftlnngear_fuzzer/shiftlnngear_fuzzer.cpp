@@ -70,6 +70,7 @@ namespace OHOS {
         }
         int32_t ret = strncpy_s(callerId,
                                 callerIdLen, (const char *)data, size >= callerIdLen ? callerIdLen - 1 : size);
+        callerId[callerIdLen - 1] = '\0';
         if (ret != EOK) {
             return;
         }
