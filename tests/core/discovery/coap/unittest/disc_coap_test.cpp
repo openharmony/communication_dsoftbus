@@ -63,13 +63,13 @@ static SubscribeOption g_testSubOption = { .freq = LOW,
     .dataLen = 0 };
 
 /*
- * @tc.name: TestCoapPublish001
+ * @tc.name: CoapPublish001
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return SOFTBUS_INVALID_PARAM when given nullptr,
  *           should return SOFTBUS_OK when given valid PublishOption
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapPublish001, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish001, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -96,13 +96,13 @@ HWTEST_F(DiscCoapTest, TestCoapPublish001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapPublish002
+ * @tc.name: CoapPublish002
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           SOFTBUS_INVALID_PARAM when given nullptr g_publishMgr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapPublish002, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -118,13 +118,13 @@ HWTEST_F(DiscCoapTest, TestCoapPublish002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapPublish003
+ * @tc.name: CoapPublish003
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           not SOFTBUS_OK when given invalid PublishOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapPublish003, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -152,14 +152,14 @@ HWTEST_F(DiscCoapTest, TestCoapPublish003, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapPublish004
+ * @tc.name: CoapPublish004
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should not return SOFTBUS_OK when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapPublish004, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -190,13 +190,13 @@ HWTEST_F(DiscCoapTest, TestCoapPublish004, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartScan001
+ * @tc.name: CoapStartScan001
  * @tc.desc: test DiscCoapStartScan and DiscCoapStopScan should return SOFTBUS_INVALID_PARAM when given nullptr,
  *           should return SOFTBUS_OK when given valid PublishOption
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartScan001, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartScan001, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -222,13 +222,13 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartScan002
+ * @tc.name: CoapStartScan002
  * @tc.desc: Test DiscCoapStartScan and DiscCoapStopScan should return
  *           SOFTBUS_INVALID_PARAM when given nullptr g_publishMgr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartScan002, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartScan002, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -244,14 +244,14 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartScan003
+ * @tc.name: CoapStartScan003
  * @tc.desc: Test DiscCoapStartScan and DiscCoapStopScan when should return
  *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should not return SOFTBUS_OK when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartScan003, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartScan003, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -281,14 +281,14 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan003, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartAdvertise001
+ * @tc.name: CoapStartAdvertise001
  * @tc.desc: Test DiscCoapStartAdvertise and DiscCoapStopAdvertise
  *           should return SOFTBUS_INVALID_PARAM when given nullptr,
  *           should return SOFTBUS_OK when given valid SubscribeOption
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartAdvertise001, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartAdvertise001, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -308,13 +308,13 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartAdvertise002
+ * @tc.name: CoapStartAdvertise002
  * @tc.desc: Test DiscCoapStartAdvertise and DiscCoapStopAdvertise should return
  *           SOFTBUS_INVALID_PARAM when given nullptr g_publishMgr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartAdvertise002, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartAdvertise002, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -331,14 +331,14 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartAdvertise003
+ * @tc.name: CoapStartAdvertise003
  * @tc.desc: Test DiscCoapStartAdvertise and DiscCoapStopAdvertise should return
  *           not SOFTBUS_OK when given invalid SubscribeOption.freq,
  *           should return not SOFTBUS_OK when given invalid SubscribeOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartAdvertise003, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartAdvertise003, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -366,7 +366,7 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise003, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapStartAdvertise004
+ * @tc.name: CoapStartAdvertise004
  * @tc.desc: Test DiscCoapStartAdvertise and DiscCoapStopAdvertise should return
  *           SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL when given capabilityBitmap {0} and
@@ -374,7 +374,7 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapStartAdvertise004, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapStartAdvertise004, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -405,13 +405,13 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise004, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapSubscribe001
+ * @tc.name: CoapSubscribe001
  * @tc.desc: test DiscCoapSubscribe and DiscCoapUnsubscribe should return SOFTBUS_INVALID_PARAM when given nullptr,
  *           should return SOFTBUS_OK when given valid SubscribeOption
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapSubscribe001, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapSubscribe001, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -430,13 +430,13 @@ HWTEST_F(DiscCoapTest, TestCoapSubscribe001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapSubscribe002
+ * @tc.name: CoapSubscribe002
  * @tc.desc: Test DiscCoapSubscribe and DiscCoapUnsubscribe should return
  *           SOFTBUS_INVALID_PARAM when given nullptr g_publishMgr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapSubscribe002, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapSubscribe002, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -452,14 +452,14 @@ HWTEST_F(DiscCoapTest, TestCoapSubscribe002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapSubscribe003
+ * @tc.name: CoapSubscribe003
  * @tc.desc: Test DiscCoapSubscribe and DiscCoapUnsubscribe should return
  *           SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should return SOFTBUS_OK when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, TestCoapSubscribe003, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapSubscribe003, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -489,7 +489,7 @@ HWTEST_F(DiscCoapTest, TestCoapSubscribe003, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapLinkStatusChanged001
+ * @tc.name: CoapLinkStatusChanged001
  * @tc.desc: Test DiscCoapLinkStatusChanged should return SOFTBUS_OK when given LINK_STATUS_UP,
  *           should return SOFTBUS_OK when given LINK_STATUS_DOWN LinkStatus
  * @tc.type: FUNC
@@ -522,7 +522,7 @@ HWTEST_F(DiscCoapTest, testCoapLinkStatusChanged001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestCoapUpdateLocalDevInfo001
+ * @tc.name: CoapUpdateLocalDevInfo001
  * @tc.desc: Test DiscCoapUpdateLocalDevInfo should return SOFTBUS_OK when given TYPE_LOCAL_DEVICE_NAME,
  *           should return SOFTBUS_OK when given TYPE_ACCOUNT InfoTypeChanged
  * @tc.type: FUNC

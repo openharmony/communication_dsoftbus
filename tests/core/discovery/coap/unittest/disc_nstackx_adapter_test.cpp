@@ -73,12 +73,12 @@ static NSTACKX_DeviceInfo g_testNstackxInfo = { .deviceId = "{UDID:1234567890123
     .reservedInfo = "reserved" };
 
 /*
- * @tc.name: TestDiscCoapAdapterInit001
+ * @tc.name: DiscCoapAdapterInit001
  * @tc.desc: Test DiscNstackxInit should return SOFTBUS_OK when repeat init
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterInit001, TestSize.Level1)
 {
     DiscNstackxDeinit();
     int32_t ret = DiscNstackxInit();
@@ -90,12 +90,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterDeInit001
+ * @tc.name: DiscCoapAdapterDeInit001
  * @tc.desc: Test DiscNstackxInit should return SOFTBUS_OK after repeat deinit
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterDeInit001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterDeInit001, TestSize.Level1)
 {
     DiscNstackxDeinit();
     DiscNstackxDeinit();
@@ -110,12 +110,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterDeInit001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapModifyNstackThread001
+ * @tc.name: DiscCoapModifyNstackThread001
  * @tc.desc: Test start discovery.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapModifyNstackThread001, TestSize.Level1)
 {
     DiscCoapModifyNstackThread(LINK_STATUS_DOWN, 0);
     int32_t ret = DiscNstackxInit();
@@ -139,12 +139,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread001, TestSize.Lev
 }
 
 /*
- * @tc.name: TestDiscCoapModifyNstackThread002
+ * @tc.name: DiscCoapModifyNstackThread002
  * @tc.desc: Test send coap rsp.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread002, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapModifyNstackThread002, TestSize.Level1)
 {
     DiscCoapModifyNstackThread(LINK_STATUS_DOWN, 0);
     int32_t ret = DiscNstackxInit();
@@ -169,12 +169,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapModifyNstackThread002, TestSize.Lev
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterRegCb001
+ * @tc.name: DiscCoapAdapterRegCb001
  * @tc.desc: Test DiscCoapRegisterCb should return SOFTBUS_INVALID_PARAM when given invalid DiscInnerCallback
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCb001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterRegCb001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -187,7 +187,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCb001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterRegCapa001
+ * @tc.name: DiscCoapAdapterRegCapa001
  * @tc.desc: Test DiscCoapRegisterCapability should return SOFTBUS_INVALID_PARAM
  *           when given invalid capabilityBitmapNum,
  *           should return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL when given exceed max capabilityBitmapNum,
@@ -195,7 +195,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCb001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapa001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterRegCapa001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -214,7 +214,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapa001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterSetFilter001
+ * @tc.name: DiscCoapAdapterSetFilter001
  * @tc.desc: Test DiscCoapSetFilterCapability should return SOFTBUS_INVALID_PARAM
  *           when given invalid capabilityBitmapNum,
  *           should return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL when given exceed max capabilityBitmapNum,
@@ -222,7 +222,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapa001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterSetFilter001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterSetFilter001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -241,12 +241,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterSetFilter001, TestSize.Level
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterRegData001
+ * @tc.name: DiscCoapAdapterRegData001
  * @tc.desc: Test DiscCoapRegisterServiceData should return SOFTBUS_OK when DiscNstackxInit has started
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterRegData001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -264,12 +264,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
 
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 /*
- * @tc.name: TestDiscCoapAdapterRegCapaData001
+ * @tc.name: DiscCoapAdapterRegCapaData001
  * @tc.desc: Test DiscCoapRegisterCapabilityData should return SOFTBUS_OK when DiscNstackxInit has started
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapaData001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterRegCapaData001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -289,13 +289,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapaData001, TestSize.Lev
 #endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
 
 /*
- * @tc.name: TestDiscCoapAdapterStartDisc001
+ * @tc.name: DiscCoapAdapterStartDisc001
  * @tc.desc: Test DiscCoapStartDiscovery should return SOFTBUS_INVALID_PARAM when given invalid DiscCoapOption
  *           should return SOFTBUS_OK when given valid DiscCoapOption
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterStartDisc001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -334,13 +334,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterStartDisc002
+ * @tc.name: DiscCoapAdapterStartDisc002
  * @tc.desc: Test DiscCoapStartDiscovery should return SOFTBUS_OK when given valid DiscCoapOption.freq,
  *           should return not SOFTBUS_OK when given invalid DiscCoapOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterStartDisc002, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -393,14 +393,14 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterUpdate001
+ * @tc.name: DiscCoapAdapterUpdate001
  * @tc.desc: Test DiscCoapUpdateLocalIp should return SOFTBUS_OK when given LINK_STATUS_UP LinkStatus,
  *           should return SOFTBUS_OK when given LINK_STATUS_DOWN LinkStatus,
  *           should return SOFTBUS_OK when given invalid LinkStatus
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterUpdate001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterUpdate001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -424,13 +424,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterUpdate001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterFound001
+ * @tc.name: DiscCoapAdapterFound001
  * @tc.desc: Test OnDeviceFound should be called when given invalid NSTACKX_DeviceInfo and deviceCount,
  *           should be called when given valid NSTACKX_DeviceInfo and deviceCount
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterFound001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -463,13 +463,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterFound002
+ * @tc.name: DiscCoapAdapterFound002
  * @tc.desc: Test DiscOnDeviceFound should reach the branch when given valid NSTACKX_DeviceInfo and DeviceCount
  *           when DiscCoapRegisterCb was given vaild and nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound002, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterFound002, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -501,13 +501,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterParseResInfo001
+ * @tc.name: DiscCoapAdapterParseResInfo001
  * @tc.desc: Test DiscParseReservedInfo should return SOFTBUS_OK when given Json NSTACKX_DeviceInfo.reservedInfo,
  *           should return SOFTBUS_PARSE_JSON_ERR when given non-Json format NSTACKX_DeviceInfo.reservedInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseResInfo001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -527,12 +527,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo001, TestSize.Le
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterParseResInfo002
+ * @tc.name: DiscCoapAdapterParseResInfo002
  * @tc.desc: Test DiscParseReservedInfo should return SOFTBUS_OK when given nullptr DeviceInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo002, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseResInfo002, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -551,12 +551,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo002, TestSize.Le
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterParseResInfo003
+ * @tc.name: DiscCoapAdapterParseResInfo003
  * @tc.desc: Test DiscParseReservedInfo should return SOFTBUS_OK when given nickname or not
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo003, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseResInfo003, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -574,14 +574,14 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo003, TestSize.Le
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterParseDevInfo001
+ * @tc.name: DiscCoapAdapterParseDevInfo001
  * @tc.desc: Test DiscParseDiscDevInfo DeviceInfo.addr[0].type should be
  *           CONNECTION_ADDR_WLAN and CONNECTION_ADDR_ETH when given PUBLISH_MODE_PROACTIVE NSTACKX_DeviceInfo.mode,
  *           and when NSTACKX_DeviceInfo.networkName are "wlan" and "eth"
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseDevInfo001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     LnnInitLocalLedger();
@@ -613,13 +613,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Le
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterParseDevInfo002
+ * @tc.name: DiscCoapAdapterParseDevInfo002
  * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_PARSE_JSON_ERR
  *           when given non-Json NSTACKX_DeviceInfo.reservedInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseDevInfo002, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     LnnInitLocalLedger();
@@ -644,14 +644,14 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Le
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterParseDevInfo003
+ * @tc.name: DiscCoapAdapterParseDevInfo003
  * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_OK
  *           when given NSTACKX_DISCOVERY_TYPE_ACTIVE NSTACKX_DeviceInfo.discoveryType,
  *           should return SOFTBUS_OK when given PUBLISH_MODE_PROACTIVE NSTACKX_DeviceInfo.mode
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseDevInfo003, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     LnnInitLocalLedger();
@@ -674,13 +674,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Le
 }
 
 /*
- * @tc.name: TestDiscCoapAdapterRegisterCb001
+ * @tc.name: DiscCoapAdapterRegisterCb001
  * @tc.desc: Test DiscCoapRegisterCb should return SOFTBUS_OK when given valid,
  *           should return SOFTBUS_INVALID_PARAM when given nullptr DiscInnerCallback
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterRegisterCb001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -693,14 +693,14 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Leve
 }
 
 /*
- * @tc.name: TestDiscCoapSendRsp001
+ * @tc.name: DiscCoapSendRsp001
  * @tc.desc: Test DiscCoapSendRsp should return SOFTBUS_OK when given valid,
  *           should return SOFTBUS_INVALID_PARAM when given nullptr DeviceInfo
  *           should return SOFTBUS_LOCK_ERR when localledger not init
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapSendRsp001, TestSize.Level1)
 {
     LnnDeinitLocalLedger();
     int32_t ret = DiscNstackxInit();
