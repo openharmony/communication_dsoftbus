@@ -58,15 +58,15 @@ static DiscInnerCallback g_testDiscInnerCallBack = {
 static DiscoveryBleDispatcherInterface *g_testDiscBleDispatcherInterface = nullptr;
 
 /*
- * @tc.name: TestGetNeedUpdateAdvertiser001
+ * @tc.name: GetNeedUpdateAdvertiser001
  * @tc.desc: Test GetNeedUpdateAdvertiser should return false when never execute UpdateInfoManager
  *           should return true/false when UpdateInfoManager's needUpdate param is true/false
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, GetNeedUpdateAdvertiser001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNeedUpdateAdvertiser001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -91,19 +91,19 @@ HWTEST_F(DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1
     EXPECT_EQ(ret, false);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNeedUpdateAdvertiser001, End");
 }
 
 /*
- * @tc.name: TestCheckScanner001
+ * @tc.name: CheckScanner001
  * @tc.desc: Test CheckScanner should return false when given 0x0 g_bleInfoManager[0],[1],[2].capBitMap[0]
  *           should return true when given 0x1 one of g_bleInfoManager[0],[1],[2].capBitMap[0]
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestCheckScanner001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, CheckScanner001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestCheckScanner001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, CheckScanner001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -120,18 +120,18 @@ HWTEST_F(DiscDistributedBleTest, TestCheckScanner001, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestCheckScanner001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, CheckScanner001, End");
 }
 
 /*
- * @tc.name: TestScanFilter001
+ * @tc.name: ScanFilter001
  * @tc.desc: Test ScanFilter should not return SOFTBUS_OK when given invalid reportInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, ScanFilter001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ScanFilter001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -165,18 +165,18 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ScanFilter001, End");
 }
 
 /*
- * @tc.name: TestScanFilter002
+ * @tc.name: ScanFilter002
  * @tc.desc: Test ScanFilter should not return SOFTBUS_OK when given invalid reportInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, ScanFilter002, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter002, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ScanFilter002, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -225,18 +225,18 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter002, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ScanFilter002, End");
 }
 
 /*
- * @tc.name: TestScanFilter003
+ * @tc.name: ScanFilter003
  * @tc.desc: Test ScanFilter should return SOFTBUS_OK when given valid reportInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, ScanFilter003, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter003, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ScanFilter003, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -265,20 +265,20 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter003, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ScanFilter003, End");
 }
 
 /*
- * @tc.name: TestProcessHwHashAccout001
+ * @tc.name: ProcessHwHashAccout001
  * @tc.desc: Test ProcessHwHashAccout should return true when given 0x1 testFoundInfo.capabilityBitmap[0] and
  *           given false g_bleInfoManager[2],[3].isSameAccount[0]
  *           should return false when given true one of g_bleInfoManager[2],[3].isSameAccount[0]
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestProcessHwHashAccout001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, ProcessHwHashAccout001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestProcessHwHashAccout001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ProcessHwHashAccout001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -294,19 +294,19 @@ HWTEST_F(DiscDistributedBleTest, TestProcessHwHashAccout001, TestSize.Level1)
     EXPECT_EQ(ret, false);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestProcessHwHashAccout001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, ProcessHwHashAccout001, End");
 }
 
 /*
- * @tc.name: TestRangeDevice001
+ * @tc.name: RangeDevice001
  * @tc.desc: Test RangeDevice foundInfoTest.range should return -1 when given SOFTBUS_ILLEGAL_BLE_POWER powerTest
  *           should return 0 when given not SOFTBUS_ILLEGAL_BLE_POWER powerTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestRangeDevice001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, RangeDevice001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestRangeDevice001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, RangeDevice001, Start");
     constexpr char validRssi = static_cast<char>(-38);
     constexpr int8_t validAdvPower = -13;
     constexpr int32_t invalidRange = -1;
@@ -315,20 +315,20 @@ HWTEST_F(DiscDistributedBleTest, TestRangeDevice001, TestSize.Level1)
     int32_t ret = RangeDevice(&foundInfoTest, validRssi, validAdvPower);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NE(foundInfoTest.range, invalidRange);
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestRangeDevice001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, RangeDevice001, End");
 }
 
 /*
- * @tc.name: TestGetConDeviceInfo001
+ * @tc.name: GetConDeviceInfo001
  * @tc.desc: Test GetConDeviceInfo should return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL
  *           when given 0x0 g_bleInfoManager[2].capBitMap[0]
  *           should return SOFTBUS_OK when given 0x1 g_bleInfoManager[2].capBitMap[0]
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestGetConDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, GetConDeviceInfo001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetConDeviceInfo001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetConDeviceInfo001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -342,20 +342,20 @@ HWTEST_F(DiscDistributedBleTest, TestGetConDeviceInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetConDeviceInfo001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetConDeviceInfo001, End");
 }
 
 /*
- * @tc.name: TestGetNonDeviceInfo001
+ * @tc.name: GetNonDeviceInfo001
  * @tc.desc: Test GetNonDeviceInfo should return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL
  *           when given 0x0 g_bleInfoManager[0].capBitMap[0]
  *           should return SOFTBUS_OK when given 0x1 g_bleInfoManager[0].capBitMap[0]
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, GetNonDeviceInfo001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNonDeviceInfo001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNonDeviceInfo001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -369,19 +369,19 @@ HWTEST_F(DiscDistributedBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNonDeviceInfo001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNonDeviceInfo001, End");
 }
 
 /*
- * @tc.name: TestBuildBleConfigAdvData001
+ * @tc.name: GetNonDeviceInfo002
  * @tc.desc: Test BuildBleConfigAdvData should return SOFTBUS_INVALID_PARAM when given invalid param
  *           should return SOFTBUS_OK when given ADV_DATA_MAX_LEN BroadcastData.dataLen
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, GetNonDeviceInfo002, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestBuildBleConfigAdvData001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNonDeviceInfo002, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -401,18 +401,18 @@ HWTEST_F(DiscDistributedBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestBuildBleConfigAdvData001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNonDeviceInfo002, End");
 }
 
 /*
- * @tc.name: TestGetBroadcastData001
+ * @tc.name: GetBroadcastData001
  * @tc.desc: Test GetBroadcastData should return SOFTBUS_OK when given CON_ADV_ID and NON_ADV_ID advId
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestGetBroadcastData001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, GetBroadcastData001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetBroadcastData001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetBroadcastData001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -427,18 +427,18 @@ HWTEST_F(DiscDistributedBleTest, TestGetBroadcastData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetBroadcastData001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetBroadcastData001, End");
 }
 
 /*
- * @tc.name: TestGetScannerParam001
+ * @tc.name: GetScannerParam001
  * @tc.desc: Test GetScannerParam should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscDistributedBleTest, TestGetScannerParam001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, GetScannerParam001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetScannerParam001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetScannerParam001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -448,7 +448,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetScannerParam001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetScannerParam001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetScannerParam001, End");
 }
 
 /*
