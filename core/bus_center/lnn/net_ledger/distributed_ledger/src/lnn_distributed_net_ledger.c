@@ -1007,6 +1007,7 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
         AnonymizeFree(anonyDevNetworkId);
         AnonymizeFree(anonyNetworkId);
         GetAndSaveRemoteDeviceInfo(&deviceInfo, info);
+        (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         return;
     }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
