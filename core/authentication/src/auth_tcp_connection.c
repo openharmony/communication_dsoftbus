@@ -954,6 +954,10 @@ void WifiConnListLockDeinit(void)
 
 void SetSessionKeyListenerModule(int32_t fd)
 {
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
+        return;
+    }
     AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
     SoftbusBaseListener listener = {
         .onConnectEvent = OnConnectEvent,
@@ -970,4 +974,14 @@ void SetSessionKeyListenerModule(int32_t fd)
     if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
     }
+}
+
+void StopSessionKeyListening(int32_t fd)
+{
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
+        return;
+    }
+    (void)DelTrigger(AUTH_SESSION_KEY, fd, RW_TRIGGER);
+    StopSocketListening(AUTH_SESSION_KEY);
 }
