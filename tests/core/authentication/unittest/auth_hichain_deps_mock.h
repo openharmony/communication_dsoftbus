@@ -85,7 +85,6 @@ public:
     virtual int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t len,
         DeviceAuthCallback *cb) = 0;
     virtual void IdServiceDestroyCredentialList(char **returnData) = 0;
-    virtual bool GetSecEnhanceFlag(void) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
 };
 
@@ -134,7 +133,6 @@ public:
     MOCK_METHOD4(IdServiceAuthCredential, int32_t (int32_t, int64_t, const char *, const DeviceAuthCallback *));
     MOCK_METHOD4(IdServiceProcessCredData, int32_t (int64_t, const uint8_t *, uint32_t, DeviceAuthCallback *));
     MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **));
-    MOCK_METHOD0(GetSecEnhanceFlag, bool (void));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
 };
 } // namespace OHOS

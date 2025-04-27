@@ -283,7 +283,7 @@ static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *co
     authFsm->info.isConnectServer = authFsmParam->isServer;
     authFsm->info.connId = authFsmParam->connId;
     authFsm->info.connInfo = *connInfo;
-    authFsm->info.version = SOFTBUS_NEW_V3;
+    authFsm->info.version = SOFTBUS_NEW_V2;
     authFsm->info.authVersion = AUTH_VERSION_INVALID;
     authFsm->info.idType = EXCHANGE_UDID;
     authFsm->info.isSupportDmDeviceKey = false;
@@ -1095,8 +1095,8 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
 static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
-    HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount &&
-        !GetSecEnhanceFlag())) ? HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
+    HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V1) ?
+        HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len, authMode);
     if (ret != SOFTBUS_OK) {
         LnnAuditExtra lnnAuditExtra = { 0 };
@@ -1243,10 +1243,11 @@ static int32_t TryRecoveryKey(AuthFsm *authFsm)
 
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
-    HiChainAuthParam authParam = {};
-    HiChainAuthMode authMode = ((authFsm->info.version < SOFTBUS_NEW_V3) || (!authFsm->info.isSameAccount &&
-        !GetSecEnhanceFlag())) ? HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
+    HiChainAuthParam authParam;
+    HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V1) ?
+        HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
+    (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
     /* just client need start authDevice */
     if (ClientSetExchangeIdType(authFsm) != SOFTBUS_OK) {
         return SOFTBUS_OK;
@@ -1867,7 +1868,7 @@ char *AuthSessionGetCredId(int64_t authSeq)
     return info.credId;
 }
 
-int32_t AuthSessionGetVersion(int64_t authSeq, int32_t *version)
+int32_t AuthSessionGetAuthVersion(int64_t authSeq, int32_t *version)
 {
     if (version == NULL) {
         AUTH_LOGE(AUTH_FSM, "version is null");
@@ -1880,7 +1881,7 @@ int32_t AuthSessionGetVersion(int64_t authSeq, int32_t *version)
         return SOFTBUS_AUTH_GET_SESSION_INFO_FAIL;
     }
 
-    *version = info.version;
+    *version = info.authVersion;
     return SOFTBUS_OK;
 }
 

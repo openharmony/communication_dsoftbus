@@ -209,7 +209,6 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg))
         .WillOnce(Return(msg1)).WillOnce(Return(msg2));
-    EXPECT_CALL(hichainMock, GetSecEnhanceFlag).WillRepeatedly(Return(false));
 
     ptr = OnRequest(authSeq, operationCode, reqParams);
     EXPECT_EQ(ptr, nullptr);
@@ -268,7 +267,6 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
     EXPECT_CALL(hichainMock, AddStringToJsonObject).WillOnce(Return(true)).WillOnce(Return(true))
         .WillOnce(Return(true)).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, AddBoolToJsonObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(hichainMock, GetSecEnhanceFlag).WillRepeatedly(Return(true));
 
     char msgStr[10] = {0};
     const char *val = "returnStr";
@@ -439,7 +437,7 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     UnpackExternalAuthInfo(obj, &info);
     EXPECT_EQ(info.credId, NULL);
 
-    info.version = (SoftBusVersion)102;  // SOFTBUS_NEW_V3
+    info.authVersion = (AuthVersion)1;  // AUTH_VERSION_V1
     UnpackExternalAuthInfo(obj, &info);
     EXPECT_EQ(info.credId, NULL);
 
