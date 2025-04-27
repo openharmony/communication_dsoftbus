@@ -57,10 +57,18 @@ if (dsoftbus_feature_lnn_frame) {
     "$authentication_path/src/auth_session_message.c",
     "$authentication_path/src/auth_interface.c",
     "$authentication_path/src/auth_pre_link.c",
-    "$authentication_path/src/auth_identity_service_adapter.c",
     "$authentication_path/userkey/auth_uk_manager.c",
     "$authentication_path/userkey/auth_user_common_key.c",
   ]
+
+  if (defined(ohos_lite)) {
+    auth_server_src += [ "$authentication_path/src/virtual/auth_identity_service_adapter_virtual.c" ]
+    AUTH_SERVER_DEFINES += [ "DISABLE_IDENTITY_SERVICE" ]
+  } else {
+    auth_server_src +=
+        [ "$authentication_path/src/auth_identity_service_adapter.c" ]
+  }
+
   if (enhanced) {
     auth_server_src += [
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_device_common_key.c",

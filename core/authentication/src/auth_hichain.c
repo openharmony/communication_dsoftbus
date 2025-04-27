@@ -23,7 +23,6 @@
 #include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
-#include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "lnn_async_callback_utils.h"
@@ -298,13 +297,13 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
     }
 
     int32_t version = 0;
-    if (AuthSessionGetVersion(authSeq, &version) != SOFTBUS_OK) {
+    if (AuthSessionGetAuthVersion(authSeq, &version) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get softbus version fail");
         cJSON_Delete(msg);
         return NULL;
     }
 
-    bool bFlag = (version < SOFTBUS_NEW_V3) || (!AuthSessionGetIsSameAccount(authSeq) && !GetSecEnhanceFlag());
+    bool bFlag = version < AUTH_VERSION_V1;
     char localUdid[UDID_BUF_LEN] = {0};
     int32_t peerUserId = AuthSessionGetUserId(authSeq);
     LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
