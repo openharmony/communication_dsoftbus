@@ -770,6 +770,7 @@ void LnnDeinitNetBuilder(void)
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_NODE_ADDR, OnReceiveNodeAddrChangedMsg);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler);
     UnregAuthVerifyListener();
     LnnDeinitTopoManager();
     DeinitNodeInfoSync();
