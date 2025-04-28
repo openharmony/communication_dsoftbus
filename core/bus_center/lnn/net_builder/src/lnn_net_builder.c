@@ -853,7 +853,7 @@ void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const 
         return;
     }
     if (!JSON_GetInt32FromOject(json, JSON_KEY_MASTER_WEIGHT, &para->masterWeight) ||
-        !JSON_GetStringFromOject(json, JSON_KEY_MASTER_UDID, para->masterUdid, UDID_BUF_LEN)) {
+        !JSON_GetStringFromObject(json, JSON_KEY_MASTER_UDID, para->masterUdid, UDID_BUF_LEN)) {
         LNN_LOGE(LNN_BUILDER, "parse master info json fail");
         JSON_Delete(json);
         SoftBusFree(para);

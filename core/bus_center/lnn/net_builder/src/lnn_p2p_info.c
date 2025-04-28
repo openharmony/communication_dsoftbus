@@ -121,12 +121,12 @@ static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_WIFI_CFG, info->wifiCfg, sizeof(info->wifiCfg))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_WIFI_CFG, info->wifiCfg, sizeof(info->wifiCfg))) {
         LNN_LOGE(LNN_BUILDER, "wifi cfg not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g, sizeof(info->chanList5g))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g, sizeof(info->chanList5g))) {
         LNN_LOGE(LNN_BUILDER, "chan list 5g not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
@@ -136,12 +136,12 @@ static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
         LNN_LOGE(LNN_BUILDER, "p2p mac not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
         LNN_LOGE(LNN_BUILDER, "go mac not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
@@ -157,7 +157,7 @@ static int32_t LnnParseWifiDirectAddrMsg(const char *msg, char *wifiDirectAddr, 
         LNN_LOGE(LNN_BUILDER, "parse wifidirect addr json fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_LEN)) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_LEN)) {
         LNN_LOGE(LNN_BUILDER, "wifidirect addr not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;

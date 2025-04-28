@@ -54,7 +54,7 @@ class AuthSessionJsonDepsInterface {
 public:
     AuthSessionJsonDepsInterface() {};
     virtual ~AuthSessionJsonDepsInterface() {};
-    virtual bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
+    virtual bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
     virtual bool JSON_GetInt32FromOject(const JsonObj *obj, const char *key, int32_t *value) = 0;
     virtual bool JSON_GetInt64FromOject(const JsonObj *obj, const char *key, int64_t *value) = 0;
     virtual bool JSON_GetBoolFromOject(const JsonObj *obj, const char *key, bool *value) = 0;
@@ -163,7 +163,7 @@ class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
     AuthSessionJsonDepsInterfaceMock();
     ~AuthSessionJsonDepsInterfaceMock() override;
-    MOCK_METHOD4(JSON_GetStringFromOject, bool (const JsonObj *, const char *, char *, uint32_t));
+    MOCK_METHOD4(JSON_GetStringFromObject, bool (const JsonObj *, const char *, char *, uint32_t));
     MOCK_METHOD3(JSON_GetInt32FromOject, bool (const JsonObj *, const char *, int32_t *));
     MOCK_METHOD3(JSON_GetInt64FromOject, bool (const JsonObj *, const char *, int64_t *));
     MOCK_METHOD3(JSON_GetBoolFromOject, bool (const JsonObj *, const char *, bool *));
