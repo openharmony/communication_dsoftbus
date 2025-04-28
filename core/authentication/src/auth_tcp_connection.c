@@ -195,11 +195,9 @@ static void SetSessionKeyListenerModule(int32_t fd)
     };
     if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
-        return;
     }
     if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
-        return;
     }
     if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
