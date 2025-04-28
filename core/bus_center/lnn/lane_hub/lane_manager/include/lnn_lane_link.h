@@ -45,7 +45,7 @@ typedef struct {
     bool p2pOnly;
     //OldInfo
     char peerBleMac[MAX_MAC_LEN];
-    char peerSleMac[MAX_MAC_LEN];
+    char peerSleMac[SLE_MAC_LEN];
     bool isSupportIpv6;
     bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
     int32_t psm;
@@ -102,7 +102,7 @@ typedef struct {
 } SleDirectInfo;
 
 typedef struct {
-    char sleMac[BT_MAC_LEN];
+    char sleMac[SLE_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
     SleProtocolType protoType;
 } SleLinkInfo;
