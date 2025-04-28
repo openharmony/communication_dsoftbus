@@ -115,7 +115,7 @@ int32_t ConnAsyncCall(ConnAsync *async, ConnAsyncFunction function, void *arg, u
     SoftBusLooper *looper = async->handler.looper;
     looper->PostMessageDelay(looper, msg, delayMs);
 
-    CONN_LOGI(CONN_COMMON, "receive async call, call id=%{public}d, delay=%{public}llu ms", callId, delayMs);
+    CONN_LOGI(CONN_COMMON, "receive async call, call id=%{public}d, delay=%{public}" PRIu64 "ms", callId, delayMs);
     return callId;
 }
 
