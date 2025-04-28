@@ -36,6 +36,8 @@
 #define MAP_KEY_LEN              21
 #define USER_KEY_INFO_MAX        100
 
+#define USER_KEY_MAX_INSTANCE_CNT  0x2000000
+
 typedef struct {
     bool isUserBindLevel;
     ListNode node;
@@ -82,6 +84,58 @@ void DeinitUserKeyList(void)
     g_userKeyList = NULL;
 }
 
+static int32_t UpdateUserKeyListByAcl(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo)
+{
+    UserKeyInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
+        if (!CompareByAllAcl(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
+            continue;
+        }
+        if (memcpy_s(&item->ukInfo, sizeof(AuthUserKeyInfo), (AuthUserKeyInfo *)userKeyInfo, sizeof(AuthUserKeyInfo)) !=
+            EOK) {
+            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGE(AUTH_KEY, "not find uk instance from list.");
+    return SOFTBUS_AUTH_UK_CACHE_INSTANCE_NOT_FIND;
+}
+
+static int32_t UpdateUserKeyListByUkId(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo)
+{
+    UserKeyInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
+        if ((strlen(item->aclInfo.sourceUdid) != 0) || (item->ukInfo.keyIndex != userKeyInfo->keyIndex)) {
+            continue;
+        }
+        if (memcpy_s(&item->aclInfo, sizeof(AuthACLInfo), (AuthACLInfo *)aclInfo, sizeof(AuthACLInfo)) != EOK) {
+            AUTH_LOGE(AUTH_KEY, "memcpy_s acl info fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGE(AUTH_KEY, "not find uk instance from list.");
+    return SOFTBUS_AUTH_UK_CACHE_INSTANCE_NOT_FIND;
+}
+
+static void ClearInValidAclFromUserKeyList(void)
+{
+    UserKeyInfo *item = NULL;
+    UserKeyInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_userKeyList->list, UserKeyInfo, node) {
+        if (strlen(item->aclInfo.sourceUdid) != 0) {
+            continue;
+        }
+        ListDelete(&item->node);
+        (void)memset_s(item->ukInfo.deviceKey, sizeof(item->ukInfo.deviceKey), 0, sizeof(item->ukInfo.deviceKey));
+        SoftBusFree(item);
+        g_userKeyList->cnt--;
+    }
+}
+
 int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel)
 {
     if (aclInfo == NULL || userKeyInfo == NULL) {
@@ -95,23 +149,21 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
 
     PrintfAuthAclInfo(0, 0, aclInfo);
     if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "ccmp add key lock fail");
+        AUTH_LOGE(AUTH_KEY, "add key lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    UserKeyInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (!CompareByAllAcl(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
-            continue;
-        }
-        if (memcpy_s(&item->ukInfo, sizeof(AuthUserKeyInfo), (AuthUserKeyInfo *)userKeyInfo, sizeof(AuthUserKeyInfo)) !=
-            EOK) {
-            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
-            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-            return SOFTBUS_MEM_ERR;
-        }
-        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
+    if (UpdateUserKeyListByAcl(aclInfo, userKeyInfo) == SOFTBUS_OK ||
+        UpdateUserKeyListByUkId(aclInfo, userKeyInfo) == SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_userKeyList->lock);
         return SOFTBUS_OK;
+    }
+    if (g_userKeyList->cnt > USER_KEY_MAX_INSTANCE_CNT) {
+        AUTH_LOGE(AUTH_KEY, "user key instance count over max limit");
+        ClearInValidAclFromUserKeyList();
+        if (g_userKeyList->cnt > USER_KEY_MAX_INSTANCE_CNT) {
+            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
+            return SOFTBUS_AUTH_UK_CACHE_INSTANCE_FULL;
+        }
     }
     UserKeyInfo *keyInfo = NULL;
     keyInfo = (UserKeyInfo *)SoftBusCalloc(sizeof(UserKeyInfo));
@@ -159,12 +211,9 @@ void DelUserKeyByNetworkId(char *networkId)
             (!item->aclInfo.isServer && strcmp(item->aclInfo.sourceUdid, peerUdid) != 0)) {
             continue;
         }
-        AUTH_LOGI(AUTH_KEY, "del user key succ, index=%{public}d, anonyUdid=%{public}s", item->ukInfo.keyIndex,
+        AUTH_LOGI(AUTH_KEY, "clear acl info by udid, index=%{public}d, anonyUdid=%{public}s", item->ukInfo.keyIndex,
             AnonymizeWrapper(anonyUdid));
-        ListDelete(&item->node);
-        (void)memset_s(item->ukInfo.deviceKey, sizeof(item->ukInfo.deviceKey), 0, sizeof(item->ukInfo.deviceKey));
-        SoftBusFree(item);
-        g_userKeyList->cnt--;
+        (void)memset_s(&item->aclInfo, sizeof(item->aclInfo), 0, sizeof(item->aclInfo));
     }
     AnonymizeFree(anonyUdid);
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
