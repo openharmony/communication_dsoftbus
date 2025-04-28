@@ -109,7 +109,7 @@ typedef struct {
 
 typedef struct {
     SleProtocolType protoType;
-    char sleMac[BT_MAC_LEN];
+    char sleMac[SLE_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
 } SleConnInfo;
 

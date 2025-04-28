@@ -72,6 +72,15 @@ extern "C" {
 #define BT_MAC_LEN 18
 
 /**
+ * @brief Indicates the length of the SLE device MAC address in string format,
+ * including the terminating null character <b>\0</b>.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define SLE_MAC_LEN 18
+
+/**
  * @brief Indicates the length of the network ID string, including the terminating null character <b>\0</b>.
  *
  * @since 1.0

@@ -195,8 +195,8 @@ static int32_t SleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *con
 static int32_t SleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_SLE;
-    if (memcpy_s(connInfo->connInfo.sle.sleMac, BT_MAC_LEN,
-        linkInfo->linkInfo.sle.sleMac, BT_MAC_LEN) != EOK) {
+    if (memcpy_s(connInfo->connInfo.sle.sleMac, SLE_MAC_LEN,
+        linkInfo->linkInfo.sle.sleMac, SLE_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy btMac fail");
         return SOFTBUS_MEM_ERR;
     }
