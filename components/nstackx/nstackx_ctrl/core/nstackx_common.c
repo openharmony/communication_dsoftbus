@@ -54,6 +54,7 @@
 #endif
 
 #define MAX_COAP_SERVICE_DATA_CNT 3
+#define SINGLE_NIC_CNT 1
 #define TAG "nStackXDFinder"
 #define DFINDER_THREAD_NAME TAG
 
@@ -1132,7 +1133,9 @@ int32_t NSTACKX_RegisterDeviceV2(const NSTACKX_LocalDeviceInfoV2 *localDeviceInf
         return NSTACKX_EFAILED;
     }
 
-    return RegisterDeviceWithType(localDeviceInfo, REGISTER_TYPE_UPDATE_ALL);
+    int registerType = (localDeviceInfo != NULL &&
+        localDeviceInfo->ifNums == SINGLE_NIC_CNT) ? REGISTER_TYPE_UPDATE_SPECIFIED : REGISTER_TYPE_UPDATE_ALL;
+    return RegisterDeviceWithType(localDeviceInfo, registerType);
 }
 
 typedef struct {
