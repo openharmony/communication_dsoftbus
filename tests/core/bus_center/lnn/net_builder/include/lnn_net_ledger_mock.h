@@ -81,7 +81,6 @@ public:
     virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
     virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
-    virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool LnnIsDefaultOhosAccount(void) = 0;
@@ -116,6 +115,8 @@ public:
     virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx) = 0;
+    virtual int32_t LnnSetLocalStrInfoByIfnameIdx(InfoKey key, const char *info, int32_t ifIdx) = 0;
+    virtual int32_t LnnSetLocalNumInfoByIfnameIdx(InfoKey key, int32_t info, int32_t ifIdx) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -171,7 +172,6 @@ public:
     MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
-    MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t(const char *, InfoKey, int32_t *));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
@@ -202,6 +202,8 @@ public:
     MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD3(LnnGetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t *, int32_t));
+    MOCK_METHOD3(LnnSetLocalStrInfoByIfnameIdx, int32_t(InfoKey, const char *, int32_t));
+    MOCK_METHOD3(LnnSetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t, int32_t));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(
         const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);
@@ -218,6 +220,7 @@ public:
     static int32_t ActionOfLnnGetAuthHandle(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
     static int32_t ActionOfLnnGetAuthSeqList(
         const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type);
+    static int32_t ActionOfLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx);
 
     static inline std::string localId = "6c38a1a0a8476679d0da6b24ec1e99eac67857244586e781bb8a07c77f636a3f";
     static inline std::string peerId = "54fec99a89886bef18373f0742661809b83b2d5dac9afbaf1728b940b9d51cb5";

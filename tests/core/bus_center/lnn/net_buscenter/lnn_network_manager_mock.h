@@ -60,6 +60,7 @@ public:
     virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
+    virtual int32_t RegistUsbProtocolManager(void) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -87,6 +88,7 @@ public:
     MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void(void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
+    MOCK_METHOD0(RegistUsbProtocolManager, int32_t(void));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H
