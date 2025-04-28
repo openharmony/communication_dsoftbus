@@ -215,7 +215,7 @@
 static void OptString(
     const JsonObj *json, const char * const key, char *target, uint32_t targetLen, const char *defaultValue)
 {
-    if (JSON_GetStringFromOject(json, key, target, targetLen)) {
+    if (JSON_GetStringFromObject(json, key, target, targetLen)) {
         return;
     }
     if (strcpy_s(target, targetLen, defaultValue) != EOK) {
@@ -750,7 +750,7 @@ static void UnpackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, bool i
 {
     info->normalizedType = NORMALIZED_KEY_ERROR;
     char encNormalizedKey[ENCRYPTED_NORMALIZED_KEY_MAX_LEN] = { 0 };
-    if (!JSON_GetStringFromOject(obj, NORMALIZED_DATA, encNormalizedKey, ENCRYPTED_NORMALIZED_KEY_MAX_LEN)) {
+    if (!JSON_GetStringFromObject(obj, NORMALIZED_DATA, encNormalizedKey, ENCRYPTED_NORMALIZED_KEY_MAX_LEN)) {
         AUTH_LOGI(AUTH_FSM, "peer not send normalizedKey");
         return;
     }
@@ -807,7 +807,7 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
 {
     info->isSupportFastAuth = false;
     char encryptedFastAuth[ENCRYPTED_FAST_AUTH_MAX_LEN] = { 0 };
-    if (!JSON_GetStringFromOject(obj, FAST_AUTH, encryptedFastAuth, ENCRYPTED_FAST_AUTH_MAX_LEN)) {
+    if (!JSON_GetStringFromObject(obj, FAST_AUTH, encryptedFastAuth, ENCRYPTED_FAST_AUTH_MAX_LEN)) {
         AUTH_LOGI(AUTH_FSM, "old version or not support fastAuth");
         return;
     }
@@ -878,12 +878,12 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
         return;
     }
 
-    if (!JSON_GetStringFromOject(obj, UDID_SHORT_HASH, info->udidShortHash, SHA_256_HEX_HASH_LEN)) {
+    if (!JSON_GetStringFromObject(obj, UDID_SHORT_HASH, info->udidShortHash, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_FSM, "udid short hash not found");
         return;
     }
 
-    if (!JSON_GetStringFromOject(obj, ACCOUNT_HASH, info->accountHash, SHA_256_HEX_HASH_LEN)) {
+    if (!JSON_GetStringFromObject(obj, ACCOUNT_HASH, info->accountHash, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_FSM, "account hash not found");
         return;
     }
@@ -1150,7 +1150,7 @@ static bool UnpackWifiSinglePassInfo(JsonObj *obj, AuthSessionInfo *info)
         return true;
     }
     char devIpHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    if (!JSON_GetStringFromOject(obj, DEV_IP_HASH_TAG, devIpHash, SHA_256_HEX_HASH_LEN)) {
+    if (!JSON_GetStringFromObject(obj, DEV_IP_HASH_TAG, devIpHash, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGD(AUTH_FSM, "devIpHash hash not found, ignore");
         return true;
     }
@@ -1309,7 +1309,7 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 static int32_t IsCmdMatchByDeviceId(JsonObj *obj, AuthSessionInfo *info)
 {
     char cmd[CMD_TAG_LEN] = { 0 };
-    if (!JSON_GetStringFromOject(obj, CMD_TAG, cmd, CMD_TAG_LEN)) {
+    if (!JSON_GetStringFromObject(obj, CMD_TAG, cmd, CMD_TAG_LEN)) {
         AUTH_LOGE(AUTH_FSM, "CMD_TAG not found");
         return SOFTBUS_NOT_FIND;
     }
@@ -1360,7 +1360,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info,
         JSON_Delete(obj);
         return ret;
     }
-    if (!JSON_GetStringFromOject(obj, DATA_TAG, info->uuid, UUID_BUF_LEN)) {
+    if (!JSON_GetStringFromObject(obj, DATA_TAG, info->uuid, UUID_BUF_LEN)) {
         AUTH_LOGE(AUTH_FSM, "uuid not found");
         JSON_Delete(obj);
         return SOFTBUS_AUTH_UNPACK_DEV_ID_FAIL;
@@ -1638,10 +1638,10 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
     char pubMac[LFINDER_MAC_ADDR_STR_LEN] = { 0 };
 
     do {
-        if (!JSON_GetStringFromOject(json, BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_STR_LEN) ||
-            !JSON_GetStringFromOject(json, BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_STR_LEN) ||
-            !JSON_GetStringFromOject(json, IRK, peerIrk, LFINDER_IRK_STR_LEN) ||
-            !JSON_GetStringFromOject(json, PUB_MAC, pubMac, LFINDER_MAC_ADDR_STR_LEN)) {
+        if (!JSON_GetStringFromObject(json, BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_STR_LEN) ||
+            !JSON_GetStringFromObject(json, BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_STR_LEN) ||
+            !JSON_GetStringFromObject(json, IRK, peerIrk, LFINDER_IRK_STR_LEN) ||
+            !JSON_GetStringFromObject(json, PUB_MAC, pubMac, LFINDER_MAC_ADDR_STR_LEN)) {
             AUTH_LOGE(AUTH_FSM, "get json info fail.");
             break;
         }
@@ -1818,7 +1818,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
         AUTH_LOGE(AUTH_FSM, "get static cap len fail");
         return;
     }
-    if (!JSON_GetStringFromOject(json, STATIC_CAP, staticCap, STATIC_CAP_STR_LEN)) {
+    if (!JSON_GetStringFromObject(json, STATIC_CAP, staticCap, STATIC_CAP_STR_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get static cap fail");
         return;
     }
@@ -1828,7 +1828,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
         return;
     }
     char encodePtk[PTK_ENCODE_LEN] = { 0 };
-    if (!JSON_GetStringFromOject(json, PTK, encodePtk, PTK_ENCODE_LEN)) {
+    if (!JSON_GetStringFromObject(json, PTK, encodePtk, PTK_ENCODE_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get encode ptk fail");
         return;
     }
@@ -1846,7 +1846,7 @@ static void ParseDeviceName(const JsonObj *json, NodeInfo *info)
     OptString(json, UNIFIED_DEVICE_NAME, info->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, "");
     OptString(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, "");
     OptString(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, "");
-    (void)JSON_GetStringFromOject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
+    (void)JSON_GetStringFromObject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
 }
 
 static void ParseCommonJsonOptInfo(const JsonObj *json, NodeInfo *info)
@@ -1885,19 +1885,19 @@ static void ParseCommonJsonOptInfo(const JsonObj *json, NodeInfo *info)
 static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
 {
     ParseDeviceName(json, info);
-    (void)JSON_GetStringFromOject(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
+    (void)JSON_GetStringFromObject(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
     char deviceType[DEVICE_TYPE_BUF_LEN] = { 0 };
-    if (JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
+    if (JSON_GetStringFromObject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
         (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
     }
-    (void)JSON_GetStringFromOject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN);
-    (void)JSON_GetStringFromOject(json, PRODUCT_ID, info->deviceInfo.productId, PRODUCT_ID_SIZE_MAX);
-    (void)JSON_GetStringFromOject(json, MODEL_NAME, info->deviceInfo.modelName, MODEL_NAME_SIZE_MAX);
+    (void)JSON_GetStringFromObject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN);
+    (void)JSON_GetStringFromObject(json, PRODUCT_ID, info->deviceInfo.productId, PRODUCT_ID_SIZE_MAX);
+    (void)JSON_GetStringFromObject(json, MODEL_NAME, info->deviceInfo.modelName, MODEL_NAME_SIZE_MAX);
     if (isMetaAuth) {
-        (void)JSON_GetStringFromOject(json, DEVICE_UUID, info->uuid, UDID_BUF_LEN);
+        (void)JSON_GetStringFromObject(json, DEVICE_UUID, info->uuid, UDID_BUF_LEN);
     }
-    (void)JSON_GetStringFromOject(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
-    (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
+    (void)JSON_GetStringFromObject(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
+    (void)JSON_GetStringFromObject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
     (void)JSON_GetInt32FromOject(json, HB_CAP, (int32_t *)&info->heartbeatCapacity);
@@ -1913,12 +1913,12 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
 static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
-        if (!JSON_GetStringFromOject(json, MASTER_UDID, info->masterUdid, UDID_BUF_LEN) ||
+        if (!JSON_GetStringFromObject(json, MASTER_UDID, info->masterUdid, UDID_BUF_LEN) ||
             !JSON_GetInt32FromOject(json, MASTER_WEIGHT, &info->masterWeight)) {
             AUTH_LOGE(AUTH_FSM, "get master node info fail");
         }
         AUTH_LOGE(AUTH_FSM, "get master weight=%{public}d", info->masterWeight);
-        if (!JSON_GetStringFromOject(json, NODE_ADDR, info->nodeAddress, sizeof(info->nodeAddress))) {
+        if (!JSON_GetStringFromObject(json, NODE_ADDR, info->nodeAddress, sizeof(info->nodeAddress))) {
             AUTH_LOGW(AUTH_FSM,
                 "no node address packed. set to address NODE_ADDR_LOOPBACK. NODE_ADDR_LOOPBACK=%{public}s",
                 NODE_ADDR_LOOPBACK);
@@ -2186,11 +2186,11 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
 static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
 {
     char deviceType[DEVICE_TYPE_BUF_LEN] = { 0 };
-    if (!JSON_GetStringFromOject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, UUID, info->uuid, UUID_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, BR_MAC_ADDR, info->connectInfo.macAddr, MAC_LEN)) {
+    if (!JSON_GetStringFromObject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) ||
+        !JSON_GetStringFromObject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN) ||
+        !JSON_GetStringFromObject(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN) ||
+        !JSON_GetStringFromObject(json, UUID, info->uuid, UUID_BUF_LEN) ||
+        !JSON_GetStringFromObject(json, BR_MAC_ADDR, info->connectInfo.macAddr, MAC_LEN)) {
         AUTH_LOGE(AUTH_FSM, "parse devinfo fail, invalid msg");
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
@@ -2458,8 +2458,8 @@ static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
 {
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = { 0 };
     OptInt(json, USERID, &nodeInfo->userId, 0);
-    if (!JSON_GetStringFromOject(json, USERID_CHECKSUM, userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
-        AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromOject failed!");
+    if (!JSON_GetStringFromObject(json, USERID_CHECKSUM, userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
+        AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromObject failed!");
         return;
     }
     int32_t ret = ConvertHexStringToBytes(

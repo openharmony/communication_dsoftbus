@@ -252,7 +252,7 @@ static void OnReceiveDeviceNickName(LnnSyncInfoType type, const char *networkId,
     int64_t accountId = 0;
     char nickName[DEVICE_NAME_BUF_LEN] = {0};
     if (!JSON_GetInt64FromOject(json, KEY_ACCOUNT, &accountId) ||
-        !JSON_GetStringFromOject(json, KEY_NICK_NAME, nickName, DEVICE_NAME_BUF_LEN)) {
+        !JSON_GetStringFromObject(json, KEY_NICK_NAME, nickName, DEVICE_NAME_BUF_LEN)) {
         LNN_LOGE(LNN_BUILDER, "nickName json parse fail");
         JSON_Delete(json);
         return;
