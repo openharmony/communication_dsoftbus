@@ -27,8 +27,6 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 
-#define UK_AGING_TIME (168 * 60 * 60 * 1000L)
-
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
@@ -38,6 +36,7 @@ constexpr char NODE1_ACCOUNT_ID[] = "123456ABCDEFACCOUNTID";
 constexpr char NODE2_ACCOUNT_ID[] = "123456ABCDEGACCOUNTID";
 constexpr int32_t TEST_DATA_LEN = 9;
 constexpr char TEST_DATA[] = "testdata";
+constexpr uint64_t UK_DECAY_TIME = 15552000000;
 
 class AuthUkManagerTest : public testing::Test {
 public:
@@ -425,7 +424,7 @@ HWTEST_F(AuthUkManagerTest, AUTH_IS_UK_EXPIRED_Test_001, TestSize.Level1)
     bool ret = AuthIsUkExpired(0);
     EXPECT_EQ(ret, false);
     uint64_t currentTime = SoftBusGetSysTimeMs();
-    ret = AuthIsUkExpired(currentTime - UK_AGING_TIME + 1);
+    ret = AuthIsUkExpired(currentTime - UK_DECAY_TIME + 1);
     EXPECT_EQ(ret, true);
 }
 

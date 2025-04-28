@@ -646,23 +646,26 @@ static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_
     }
     userKeyInfo.time = time;
     userKeyInfo.keyIndex = ukId;
-    std::vector<uint8_t> sessionKey;
-    if (DpClient::GetInstance().GetSessionKey(info.sourceUserId, ukId, sessionKey) != OHOS::ERR_OK) {
-        LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
-        return;
-    }
-    if (SESSION_KEY_LENGTH < sessionKey.size()) {
-        LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}zu", (uint32_t)sessionKey.size());
+    userKeyInfo.keyLen = SESSION_KEY_LENGTH;
+    if (GetUserKeyByUkId(ukId, userKeyInfo.deviceKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        std::vector<uint8_t> sessionKey;
+        if (DpClient::GetInstance().GetSessionKey(info.sourceUserId, ukId, sessionKey) != OHOS::ERR_OK) {
+            LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail");
+            return;
+        }
+        if (SESSION_KEY_LENGTH < sessionKey.size()) {
+            LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}zu", (uint32_t)sessionKey.size());
+            sessionKey.clear();
+            return;
+        }
+        for (size_t i = 0; i < sessionKey.size(); ++i) {
+            userKeyInfo.deviceKey[i] = sessionKey[i];
+        }
+        userKeyInfo.keyLen = sessionKey.size();
         sessionKey.clear();
-        return;
     }
-    for (size_t i = 0; i < sessionKey.size(); ++i) {
-        userKeyInfo.deviceKey[i] = sessionKey[i];
-    }
-    userKeyInfo.keyLen = sessionKey.size();
     (void)AuthInsertUserKey(&info, &userKeyInfo, isUserBindLevel);
     (void)memset_s(userKeyInfo.deviceKey, sizeof(userKeyInfo.deviceKey), 0, sizeof(userKeyInfo.deviceKey));
-    sessionKey.clear();
 }
 
 static void GetLocalUkIdFromAccess(OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile,
