@@ -65,6 +65,7 @@ static SoftBusMutex g_wifiConnListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
+static void SetSessionKeyListenerModule(int32_t fd);
 int32_t __attribute__((weak)) RouteBuildServerAuthManager(int32_t cfd, const ConnectOption *clientAddr)
 {
     (void)cfd;
@@ -198,6 +199,12 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
         return;
     }
     if (pktHead->module == MODULE_SESSION_KEY_AUTH) {
+        if (module != AUTH_SESSION_KEY) {
+            ListenerModule sessionKeyModule = AUTH_SESSION_KEY;
+            if (!IsListenerNodeExist(sessionKeyModule)) {
+                SetSessionKeyListenerModule(fd);
+            }
+        }
         SessionKeyNotifyDataReceived(module, fd, pktHead->len, data);
         return;
     }
@@ -549,7 +556,7 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
         .onConnectEvent = OnConnectEvent,
         .onDataEvent = OnDataEvent,
     };
-    if (StartBaseClient(AUTH, &listener) != SOFTBUS_OK) {
+    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
     }
     if (DelTrigger(AUTH_RAW_P2P_CLIENT, fd, RW_TRIGGER) != SOFTBUS_OK) {
@@ -557,7 +564,7 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
         ConnShutdownSocket(fd);
         return SOFTBUS_INVALID_FD;
     }
-    if (AddTrigger(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH_SESSION_KEY, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return SOFTBUS_INVALID_FD;
@@ -950,4 +957,36 @@ void WifiConnListLockDeinit(void)
     if (SoftBusMutexDestroy(&g_wifiConnListLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiConnList mutex destroy fail");
     }
+}
+
+static void SetSessionKeyListenerModule(int32_t fd)
+{
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
+        return;
+    }
+    AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
+    SoftbusBaseListener listener = {
+        .onConnectEvent = OnConnectEvent,
+        .onDataEvent = OnDataEvent,
+    };
+    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
+    }
+    if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
+    }
+    if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
+    }
+}
+
+void StopSessionKeyListening(int32_t fd)
+{
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
+        return;
+    }
+    (void)DelTrigger(AUTH_SESSION_KEY, fd, RW_TRIGGER);
+    StopSocketListening(AUTH_SESSION_KEY);
 }
