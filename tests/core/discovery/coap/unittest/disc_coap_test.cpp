@@ -20,10 +20,12 @@
 #include "disc_coap.h"
 #include "disc_manager.h"
 #include "disc_nstackx_adapter.h"
+#include "nstackx_adapter_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
+using testing::Return;
 namespace OHOS {
 
 static constexpr uint32_t DDMP_CAPABILITY = 64;
@@ -49,7 +51,7 @@ static DiscInnerCallback g_discInnerCb = { .OnDeviceFound = nullptr };
 
 static PublishOption g_testPubOption = {
     .freq = LOW,
-    .capabilityBitmap = {DDMP_CAPABILITY},
+    .capabilityBitmap = { DDMP_CAPABILITY },
     .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = false
@@ -71,6 +73,9 @@ static SubscribeOption g_testSubOption = { .freq = LOW,
  */
 HWTEST_F(DiscCoapTest, CoapPublish001, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
@@ -79,15 +84,17 @@ HWTEST_F(DiscCoapTest, CoapPublish001, TestSize.Level1)
     ret = g_discCoapFuncInterface->Unpublish(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    g_testPubOption.capabilityBitmap[0] = (1 << APPROACH_CAPABILITY_BITMAP);
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_CANCEL_CAP_FAIL);
 
+    g_testPubOption.capabilityBitmap[0] = DDMP_CAPABILITY;
     g_testPubOption.ranging = true;
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
     g_testPubOption.ranging = false;
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -126,6 +133,9 @@ HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
@@ -143,7 +153,7 @@ HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
 
     g_testPubOption.freq = LOW;
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -161,6 +171,9 @@ HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     int32_t ret = DiscNstackxInit();
@@ -168,7 +181,7 @@ HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
 
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -290,6 +303,9 @@ HWTEST_F(DiscCoapTest, CoapStartScan003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise001, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
@@ -298,10 +314,11 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise001, TestSize.Level1)
     ret = g_discCoapFuncInterface->StopAdvertise(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_DOWN, 0);
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
@@ -340,6 +357,9 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise002, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise003, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
@@ -357,7 +377,7 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise003, TestSize.Level1)
 
     g_testSubOption.freq = LOW;
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -376,6 +396,9 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise004, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     int32_t ret = DiscNstackxInit();
@@ -383,7 +406,7 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise004, TestSize.Level1)
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
 
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -497,17 +520,20 @@ HWTEST_F(DiscCoapTest, CoapSubscribe003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, testCoapLinkStatusChanged001, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
     int32_t ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -530,23 +556,26 @@ HWTEST_F(DiscCoapTest, testCoapLinkStatusChanged001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, testCoapUpdateLocalDevInfo001, TestSize.Level1)
 {
+    AdapterMock adapterMock;
+    adapterMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
     int32_t ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     g_discCoapFuncInterface->UpdateLocalDeviceInfo(TYPE_LOCAL_DEVICE_NAME);
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     g_discCoapFuncInterface->UpdateLocalDeviceInfo(TYPE_ACCOUNT);
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
