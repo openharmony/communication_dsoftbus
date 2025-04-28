@@ -65,6 +65,7 @@ static SoftBusMutex g_wifiConnListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
+static void SetSessionKeyListenerModule(int32_t fd);
 int32_t __attribute__((weak)) RouteBuildServerAuthManager(int32_t cfd, const ConnectOption *clientAddr)
 {
     (void)cfd;
@@ -179,28 +180,6 @@ static void SessionKeyNotifyDataReceived(ListenerModule module, int32_t fd,
     }
     if (g_callback.onDataReceived != NULL) {
         g_callback.onDataReceived(module, fd, &head, body);
-    }
-}
-
-static void SetSessionKeyListenerModule(int32_t fd)
-{
-    if (fd < 0) {
-        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
-        return;
-    }
-    AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
-    SoftbusBaseListener listener = {
-        .onConnectEvent = OnConnectEvent,
-        .onDataEvent = OnDataEvent,
-    };
-    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
-    }
-    if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
-    }
-    if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
     }
 }
 
@@ -977,6 +956,28 @@ void WifiConnListLockDeinit(void)
 {
     if (SoftBusMutexDestroy(&g_wifiConnListLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiConnList mutex destroy fail");
+    }
+}
+
+static void SetSessionKeyListenerModule(int32_t fd)
+{
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
+        return;
+    }
+    AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
+    SoftbusBaseListener listener = {
+        .onConnectEvent = OnConnectEvent,
+        .onDataEvent = OnDataEvent,
+    };
+    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
+    }
+    if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
+    }
+    if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
     }
 }
 
