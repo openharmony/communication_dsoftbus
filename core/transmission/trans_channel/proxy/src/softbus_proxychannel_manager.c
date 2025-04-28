@@ -2103,7 +2103,6 @@ static void TransNotifySingleNetworkOffLine(const LnnEventBasicInfo *info)
     }
     LnnSingleNetworkOffLineEvent *offlineInfo = (LnnSingleNetworkOffLineEvent *)info;
     ConnectionAddrType type = offlineInfo->type;
-    TRANS_LOGI(TRANS_CTRL, "trns notify single network offline, type=%{public}d", type);
     if (type == CONNECTION_ADDR_WLAN) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", WIFI_STA);
     } else if (type == CONNECTION_ADDR_BLE) {
