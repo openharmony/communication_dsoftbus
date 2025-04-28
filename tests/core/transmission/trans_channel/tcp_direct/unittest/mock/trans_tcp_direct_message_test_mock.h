@@ -91,6 +91,7 @@ public:
     virtual int32_t AuthDecryptByUkId(
         int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
     virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -151,6 +152,7 @@ public:
     MOCK_METHOD5(AuthDecryptByUkId, int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
         uint32_t *outLen));
     MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey key, char *info, uint32_t len, int32_t ifIdx));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H
