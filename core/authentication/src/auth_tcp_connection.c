@@ -182,6 +182,30 @@ static void SessionKeyNotifyDataReceived(ListenerModule module, int32_t fd,
     }
 }
 
+static void SetSessionKeyListenerModule(int32_t fd)
+{
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
+        return;
+    }
+    AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
+    SoftbusBaseListener listener = {
+        .onConnectEvent = OnConnectEvent,
+        .onDataEvent = OnDataEvent,
+    };
+    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
+        return;
+    }
+    if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
+        return;
+    }
+    if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
+    }
+}
+
 static void NotifyDataReceived(ListenerModule module, int32_t fd,
     const SocketPktHead *pktHead, const uint8_t *data)
 {
@@ -955,30 +979,6 @@ void WifiConnListLockDeinit(void)
 {
     if (SoftBusMutexDestroy(&g_wifiConnListLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiConnList mutex destroy fail");
-    }
-}
-
-void SetSessionKeyListenerModule(int32_t fd)
-{
-    if (fd < 0) {
-        AUTH_LOGE(AUTH_CONN, "fd invalid, fd=%{public}d", fd);
-        return;
-    }
-    AUTH_LOGI(AUTH_CONN, "Update session key listener module, fd=%{public}d", fd);
-    SoftbusBaseListener listener = {
-        .onConnectEvent = OnConnectEvent,
-        .onDataEvent = OnDataEvent,
-    };
-    if (StartBaseClient(AUTH_SESSION_KEY, &listener) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
-        return;
-    }
-    if (DelTrigger(AUTH_RAW_P2P_SERVER, fd, RW_TRIGGER) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "DelTrigger fail.");
-        return;
-    }
-    if (AddTrigger(AUTH_SESSION_KEY, fd, READ_TRIGGER) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
     }
 }
 
