@@ -19,11 +19,6 @@ import("../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscBleDispatcherTest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
   sources = [ "disc_ble_dispatcher_test.cpp" ]
 
@@ -40,7 +35,7 @@ ohos_unittest("DiscBleDispatcherTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   external_deps = [
