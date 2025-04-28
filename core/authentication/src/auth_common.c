@@ -525,6 +525,8 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
             return DISCOVERY_TYPE_P2P;
         case AUTH_LINK_TYPE_SESSION_KEY:
             return DISCOVERY_TYPE_SESSION_KEY;
+        case AUTH_LINK_TYPE_USB:
+            return DISCOVERY_TYPE_USB;
         default:
             break;
     }
@@ -547,6 +549,8 @@ AuthLinkType ConvertToAuthLinkType(DiscoveryType type)
             return AUTH_LINK_TYPE_P2P;
         case DISCOVERY_TYPE_SESSION_KEY:
             return AUTH_LINK_TYPE_SESSION_KEY;
+        case DISCOVERY_TYPE_USB:
+            return AUTH_LINK_TYPE_USB;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected discType=%{public}d", type);
             break;
@@ -624,9 +628,7 @@ bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)
 
 void PrintAuthConnInfo(const AuthConnInfo *connInfo)
 {
-    if (connInfo == NULL) {
-        return;
-    }
+    AUTH_CHECK_AND_RETURN_LOGE(connInfo != NULL, AUTH_FSM, "connInfo is null");
     char *anonyUdidHash = NULL;
     char *anonyMac = NULL;
     char *anonyIp = NULL;
@@ -635,6 +637,7 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_USB:
             Anonymize(connInfo->info.ipInfo.ip, &anonyIp);
             AUTH_LOGD(AUTH_CONN, "print AuthConninfo ip=*.*.*%{public}s", AnonymizeWrapper(anonyIp));
             AnonymizeFree(anonyIp);

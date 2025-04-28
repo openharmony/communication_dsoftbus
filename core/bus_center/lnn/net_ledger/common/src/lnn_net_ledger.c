@@ -738,7 +738,7 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintUsbIp(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintUsbIp(int fd, const NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "Invalid parameter");

@@ -726,6 +726,7 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
         case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             /* Do nothing. */
             break;
         case AUTH_LINK_TYPE_BR:
