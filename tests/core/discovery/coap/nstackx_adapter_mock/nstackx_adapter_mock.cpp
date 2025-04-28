@@ -16,6 +16,13 @@
 #include "nstackx_adapter_mock.h"
 #include "softbus_error_code.h"
 
+#define MOCK_PHONE_DEVICE_TYPE        14
+#define MOCK_ACCOUNT_ID               1234567890
+#define MOCK_DEVICE_ID                "ABCDEF11223344556677889900"
+#define MOCK_DEVICE_NAME              "deviceName"
+#define MOCK_AUTH_PORT                1234
+#define MOCK_WLAN_IP                  "192.168.0.1"
+
 AdapterMock::AdapterMock()
 {
     mock.store(this);
@@ -70,7 +77,7 @@ int32_t AdapterMock::ActionLnnGetLocalNumInfo(InfoKey key, int32_t *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t deviceType = 14;
+    int32_t deviceType = MOCK_PHONE_DEVICE_TYPE;
     if (key == NUM_KEY_DEV_TYPE_ID) {
         *info = deviceType;
     }
@@ -83,7 +90,7 @@ int32_t AdapterMock::ActionLnnGetLocalNum64Info(InfoKey key, int64_t *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int64_t accountId = 1234567890;
+    int64_t accountId = MOCK_ACCOUNT_ID;
     if (key == NUM_KEY_ACCOUNT_LONG) {
         *info = accountId;
     }
@@ -97,10 +104,10 @@ int32_t AdapterMock::ActionLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t 
     }
 
     if (key == STRING_KEY_DEV_UDID) {
-        (void)strncpy_s(info, len, "ABCDEF11223344556677889900", len);
+        (void)strncpy_s(info, len, MOCK_DEVICE_ID, len);
     }
     if (key == STRING_KEY_DEV_NAME) {
-        (void)strncpy_s(info, len, "deviceName", len);
+        (void)strncpy_s(info, len, MOCK_DEVICE_NAME, len);
     }
     return SOFTBUS_OK;
 }
@@ -111,7 +118,7 @@ int32_t AdapterMock::ActionLnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *i
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t port = 1234;
+    int32_t port = MOCK_AUTH_PORT;
     if (key == NUM_KEY_AUTH_PORT) {
         *info = port;
     }
@@ -125,7 +132,7 @@ int32_t AdapterMock::ActionLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info
     }
 
     if (key == STRING_KEY_IP) {
-        (void)strncpy_s(info, len, "192.168.0.1", len);
+        (void)strncpy_s(info, len, MOCK_WLAN_IP, len);
     }
     if (key == STRING_KEY_NET_IF_NAME) {
         (void)strncpy_s(info, len, "wlan0", len);
