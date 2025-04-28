@@ -57,11 +57,6 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     return HbHeartbeatUtilsInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info)
-{
-    return HbHeartbeatUtilsInterface()->LnnGetRemoteNumU32Info(networkId, key, info);
-}
-
 struct WifiDirectManager *GetWifiDirectManager(void)
 {
     return HbHeartbeatUtilsInterface()->GetWifiDirectManager();

@@ -114,6 +114,9 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     EXPECT_CALL(managerMock, RegistIPProtocolManager)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, RegistUsbProtocolManager)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, RegGroupChangeListener)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -125,6 +128,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitNetworkManager();
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);

@@ -298,7 +298,6 @@ HWTEST_F(HeartBeatUtilsTest, LnnIsSupportHeartbeatCapTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<HbHeartbeatUtilsInterfaceMock> heartbeatUtilsMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     int32_t infoNum = 8;
     NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo) * infoNum);
@@ -318,13 +317,13 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteStrInfoByIfnameIdx(_, Eq(STRING_KEY_IP), _, _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(heartbeatUtilsMock, LnnGetRemoteNumU32Info(_, Eq(NUM_KEY_NET_CAP), _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, Eq(NUM_KEY_NET_CAP), _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, Eq(NUM_KEY_DISCOVERY_TYPE), _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfo(_, Eq(NUM_KEY_DISCOVERY_TYPE), _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(heartbeatUtilsMock, LnnGetRemoteNumU32Info(_, Eq(NUM_KEY_STATIC_NET_CAP), _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, Eq(NUM_KEY_STATIC_NET_CAP), _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(LnnDumpOnlineDeviceInfo());

@@ -326,7 +326,7 @@ static void OnLaneAllocFailNoExcept2(uint32_t laneHandle, int32_t errCode)
 
 static LaneAllocListener g_listenerCbForHml = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForHml,
-    .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
 };
@@ -347,21 +347,21 @@ static LaneAllocListener g_listenerCbForBr2 = {
 
 static LaneAllocListener g_listenerCbForBr = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForBr,
-    .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
 static LaneAllocListener g_listenerCbForWlan5g = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForWlan5g,
-    .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
 static LaneAllocListener g_listenerCbForBle = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForBle,
-    .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
 };

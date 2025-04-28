@@ -141,5 +141,10 @@ void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
 {
     return GetNetworkManagerInterface()->DfxRecordTriggerTime(reason, stage);
 }
+
+int32_t RegistUsbProtocolManager(void)
+{
+    return GetNetworkManagerInterface()->RegistUsbProtocolManager();
+}
 }
 } // namespace OHOS

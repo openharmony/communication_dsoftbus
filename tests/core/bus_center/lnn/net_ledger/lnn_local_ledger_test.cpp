@@ -310,9 +310,9 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[8].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[9].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[10].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[11].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[18].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[19].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
+    EXPECT_EQ(g_localKeyTable[11].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[18].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
+    EXPECT_EQ(g_localKeyTable[19].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
 }
@@ -343,12 +343,12 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
         .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     int32_t ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_EQ(g_localKeyTable[12].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
+    EXPECT_EQ(g_localKeyTable[12].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[13].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[14].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[15].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[16].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[17].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[17].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[20].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[24].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[25].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);

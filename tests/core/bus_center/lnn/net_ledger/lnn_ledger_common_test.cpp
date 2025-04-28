@@ -1010,9 +1010,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     static InfoKey getLocalStringInfoKeyTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_NETWORKID,
-        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_IP,
-        STRING_KEY_NET_IF_NAME, STRING_KEY_MASTER_NODE_UDID, STRING_KEY_NODE_ADDR, STRING_KEY_P2P_MAC,
-        STRING_KEY_P2P_GO_MAC, STRING_KEY_OFFLINE_CODE, STRING_KEY_WIFIDIRECT_ADDR };
+        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_MASTER_NODE_UDID,
+        STRING_KEY_NODE_ADDR, STRING_KEY_P2P_MAC, STRING_KEY_P2P_GO_MAC, STRING_KEY_OFFLINE_CODE,
+        STRING_KEY_WIFIDIRECT_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret;
     uint32_t i;
@@ -1024,6 +1024,32 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
     for (i = 0; i < sizeof(getLocalStringInfoKeyTable) / sizeof(InfoKey); i++) {
         (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
         ret = LnnGetLocalStrInfo(getLocalStringInfoKeyTable[i], buf, UDID_BUF_LEN);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+    }
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_001
+ * @tc.desc: lnn get local str by ifname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    static InfoKey getLocalStringInfoKeyTable[] = { STRING_KEY_IP, STRING_KEY_NET_IF_NAME, STRING_KEY_IP6_WITH_IF };
+    char buf[UDID_BUF_LEN] = { 0 };
+    int32_t ret;
+    uint32_t i;
+    LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_DEV_UDID, LOCAL_UDID, WLAN_IF);
+    for (i = 0; i < sizeof(getLocalStringInfoKeyTable) / sizeof(InfoKey); i++) {
+        ret = LnnGetLocalStrInfoByIfnameIdx(getLocalStringInfoKeyTable[i], nullptr, UDID_BUF_LEN, WLAN_IF);
+        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    }
+    for (i = 0; i < sizeof(getLocalStringInfoKeyTable) / sizeof(InfoKey); i++) {
+        (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
+        ret = LnnGetLocalStrInfoByIfnameIdx(getLocalStringInfoKeyTable[i], buf, UDID_BUF_LEN, WLAN_IF);
         EXPECT_TRUE(ret == SOFTBUS_OK);
     }
     LnnDeinitLocalLedger();
@@ -1070,14 +1096,33 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
-    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT,
-        NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_DEV_TYPE_ID, NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE,
-        NUM_KEY_STATIC_CAP_LEN };
+    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_DEV_TYPE_ID,
+        NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE, NUM_KEY_STATIC_CAP_LEN };
+    int32_t ret, info;
+    LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
+    for (uint32_t i = 0; i < sizeof(getLocalNumInfoKeyTable) / sizeof(InfoKey); i++) {
+        info = 0;
+        ret = LnnGetLocalNumInfo(getLocalNumInfoKeyTable[i], &info);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+    }
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_003
+ * @tc.desc: lnn get local num by ifname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_003, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT };
     int32_t ret, info;
     LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT, WLAN_IF);
     for (uint32_t i = 0; i < sizeof(getLocalNumInfoKeyTable) / sizeof(InfoKey); i++) {
         info = 0;
-        ret = LnnGetLocalNumInfo(getLocalNumInfoKeyTable[i], &info);
+        ret = LnnGetLocalNumInfoByIfnameIdx(getLocalNumInfoKeyTable[i], &info, WLAN_IF);
         EXPECT_TRUE(ret == SOFTBUS_OK);
     }
     LnnDeinitLocalLedger();
