@@ -47,7 +47,6 @@ void UnsetSocketCallback(void);
 int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *remoteIp, int32_t port, bool isBlockMode);
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx);
 int32_t SocketSetDevice(int32_t fd, bool isBlockMode);
-void SetSessionKeyListenerModule(int32_t fd);
 void StopSessionKeyListening(int32_t fd);
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode);
 
