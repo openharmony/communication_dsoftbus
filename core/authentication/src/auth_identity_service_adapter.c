@@ -360,8 +360,8 @@ static int32_t GetCredInfoFromJson(const char *credInfo, SoftBusCredInfo *info)
     }
     if (!JSON_GetInt32FromOject(json, FIELD_CRED_TYPE, &(info->credIdType)) ||
         !JSON_GetInt32FromOject(json, FIELD_SUBJECT, &(info->subject)) ||
-        !JSON_GetStringFromOject(json, FIELD_DEVICE_ID, info->udid, UDID_BUF_LEN) ||
-        !JSON_GetStringFromOject(json, FIELD_USER_ID, info->userId, MAX_ACCOUNT_HASH_LEN)) {
+        !JSON_GetStringFromObject(json, FIELD_DEVICE_ID, info->udid, UDID_BUF_LEN) ||
+        !JSON_GetStringFromObject(json, FIELD_USER_ID, info->userId, MAX_ACCOUNT_HASH_LEN)) {
         AUTH_LOGD(AUTH_HICHAIN, "parse credential info json fail");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;

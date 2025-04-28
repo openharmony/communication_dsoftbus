@@ -705,7 +705,7 @@ static void WlanOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
         return;
     }
     if (!JSON_GetInt32FromOject(json, NETWORK_OFFLINE_PORT, &authPort) ||
-        !JSON_GetStringFromOject(json, NETWORK_OFFLINE_CODE, convertOfflineCode,
+        !JSON_GetStringFromObject(json, NETWORK_OFFLINE_CODE, convertOfflineCode,
             WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1)) {
         LNN_LOGE(LNN_BUILDER, "wifi json parse object fail");
         JSON_Delete(json);

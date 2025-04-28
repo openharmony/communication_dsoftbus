@@ -36,9 +36,9 @@ static AuthSessionJsonDepsInterfaceMock *GetInterface()
 }
 
 extern "C" {
-bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size)
+bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size)
 {
-    return GetInterface()->JSON_GetStringFromOject(obj, key, value, size);
+    return GetInterface()->JSON_GetStringFromObject(obj, key, value, size);
 }
 
 bool JSON_GetInt32FromOject(const JsonObj *obj, const char *key, int32_t *value)
