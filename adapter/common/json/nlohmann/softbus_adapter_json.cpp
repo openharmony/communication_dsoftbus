@@ -243,7 +243,7 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value)
     return true;
 }
 
-bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size)
+bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size)
 {
     if (obj == nullptr || key == nullptr || value == nullptr) {
         COMM_LOGE(COMM_ADAPTER, "invalid param");

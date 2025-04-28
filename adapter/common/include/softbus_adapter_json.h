@@ -59,7 +59,7 @@ bool JSON_GetInt64FromOject(const JsonObj *obj, const char *key, int64_t *value)
 
 bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value);
 
-bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size);
+bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size);
 
 bool JSON_AddStringArrayToObject(JsonObj *obj, const char *key, const char **value, int32_t len);
 

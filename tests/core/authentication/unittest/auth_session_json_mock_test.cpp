@@ -302,7 +302,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
     int32_t ret = PackNormalizedData(&info, &obj, &nodeInfo, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, JSON_GetStringFromOject).WillOnce(Return(false))
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(false))
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -360,7 +360,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001, TestSiz
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     const char *inetTest = "SoftBusInetNtoPTest";
-    EXPECT_CALL(mocker, JSON_GetStringFromOject).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, SoftBusInetNtoP).WillOnce(Return(nullptr))
@@ -532,7 +532,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_EX_TEST_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = PackCommonEx(&json, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, JSON_GetStringFromOject).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     UnpackCipherRpaInfo(&json, &info);
     EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_OK))
