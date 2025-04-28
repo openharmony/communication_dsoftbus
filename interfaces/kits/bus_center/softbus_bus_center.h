@@ -235,6 +235,7 @@ typedef enum {
     BIT_NETWORK_TYPE_BLE,          /**< BLE network type */
     BIT_NETWORK_TYPE_BR,           /**< BR network type */
     BIT_NETWORK_TYPE_P2P,          /**< P2P network type */
+    BIT_NETWORK_TYPE_USB = 8,      /**< USB network type */
     BIT_NETWORK_TYPE_COUNT,        /**< Invalid type */
 } NetworkType;
 
