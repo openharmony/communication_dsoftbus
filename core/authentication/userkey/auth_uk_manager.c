@@ -735,7 +735,7 @@ static char *GetCredIdByIdService(char *localUdidHash, char *remoteUdidHash, cha
         return credId;
     }
     bool isSameAccount = JudgeIsSameAccount(accountHashStr);
-    char *udidShortHash = isSameAccount ? localUdidHash : remoteUdidHash;
+    char *udidShortHash = isSameAccount ? (char *)localUdidHash : (char *)remoteUdidHash;
     if (IdServiceQueryCredential(userId, udidShortHash, accountHashStr, isSameAccount, &credList) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "query credential fail");
         return credId;
@@ -883,7 +883,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     bool isSameAccount =
         JudgeIsSameAccount(!instance.info.isServer ? instance.info.sourceAccountId : instance.info.sinkAccountId);
     PrintfAuthAclInfo(instance.requestId, instance.channelId, &instance.info);
-    UpdateAssetSessionKeyByAcl(&instance.info, sessionKey, sessionKeyLen, &sessionKeyId, isSameAccount);
+    UpdateAssetSessionKeyByAcl(&instance.info, (uint8_t *)sessionKey, sessionKeyLen, &sessionKeyId, isSameAccount);
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     ret = GetGenUkInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
@@ -1081,11 +1081,11 @@ static int32_t ProcessUkNegoState(AuthACLInfo *info, bool *isGreater)
     }
     char sourceUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     char sinkUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    if (GetShortUdidHash(info->sourceUdid, sourceUdidHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
+    if (GetShortUdidHash((char *)info->sourceUdid, sourceUdidHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get source udid hash fail");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
-    if (GetShortUdidHash(info->sinkUdid, sinkUdidHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
+    if (GetShortUdidHash((char *)info->sinkUdid, sinkUdidHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get sink udid hash fail");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
@@ -1107,7 +1107,7 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     (void)memset_s(&cb, sizeof(AuthGenUkCallback), 0, sizeof(AuthGenUkCallback));
     bool isLocalUdidGreater = false;
-    int32_t ret = UnpackUkAclParam(data, dataLen, &info);
+    int32_t ret = UnpackUkAclParam((const char *)data, dataLen, &info);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "UnpackUkAclParam failed! ret=%{public}d", ret);
         return ret;
@@ -1240,10 +1240,10 @@ static int32_t UkMsgHandler(
             ret = ProcessUkDeviceId(channelId, requestId, data, dataLen);
             break;
         case DATA_TYPE_AUTH:
-            ret = ProcessUkData(requestId, data, dataLen);
+            ret = ProcessUkData(requestId, (const uint8_t *)data, dataLen);
             break;
         case DATA_TYPE_CLOSE_ACK:
-            ret = ProcessCloseAckData(requestId, data, dataLen);
+            ret = ProcessCloseAckData(requestId, (const uint8_t *)data, dataLen);
             break;
         default:
             ret = SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL;
@@ -1264,9 +1264,10 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
     }
     uint64_t time = 0;
     *ukId = -1;
-    AuthUserKeyInfo userKeyInfo = { 0 };
+    AuthUserKeyInfo userKeyInfo;
     AuthACLInfo aclInfo = { 0 };
 
+    (void)memset_s(&userKeyInfo, sizeof(AuthUserKeyInfo), 0, sizeof(AuthUserKeyInfo));
     aclInfo = *acl;
     aclInfo.isServer = !acl->isServer;
     PrintfAuthAclInfo(0, 0, &aclInfo);
@@ -1619,7 +1620,8 @@ int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const A
         AUTH_LOGE(AUTH_CONN, "uknego open session fail, ret=%{public}d", ret);
         return ret;
     }
-    ret = CreateUkNegotiateInstance(requestId, DEFAULT_CHANNEL_ID, info, genCb);
+    ret = CreateUkNegotiateInstance(requestId, DEFAULT_CHANNEL_ID, (const AuthACLInfo *)info,
+        (AuthGenUkCallback *)genCb);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "uk add instance fail, ret=%{public}d", ret);
         return ret;
