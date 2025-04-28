@@ -2364,7 +2364,7 @@ void DelAuthManagerByConnectionId(uint32_t connectionId)
     int64_t authIds[2]; /* 2: client and server may use same connection. */
     authIds[num++] = GetAuthIdByConnId(connId, false);
     authIds[num++] = GetAuthIdByConnId(connId, true);
-    (void)DelTrigger(AUTH, connectionId, RW_TRIGGER);
+    StopSessionKeyListening(connectionId);
     for (uint32_t i = 0; i < num; i++) {
         if (authIds[i] == AUTH_INVALID_ID) {
             continue;
