@@ -65,11 +65,11 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
     if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
         return false;
     }
-
+    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
     if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         return false;
     }
-    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+
     auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
     if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
         return false;
