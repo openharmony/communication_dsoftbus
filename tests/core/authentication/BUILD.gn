@@ -767,14 +767,22 @@ ohos_unittest("AuthHichainTest") {
 
 ohos_unittest("AuthDeviceProfileTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/auth_device_profile_test.cpp" ]
+  sources = [
+    "unittest/auth_device_profile_mock.cpp",
+    "unittest/auth_device_profile_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "unittest/common/",
   ]
@@ -797,6 +805,8 @@ ohos_unittest("AuthDeviceProfileTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
       "samgr:samgr_proxy",
     ]
   } else {
@@ -808,6 +818,8 @@ ohos_unittest("AuthDeviceProfileTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
     ]
   }
 }
@@ -827,7 +839,7 @@ ohos_unittest("AuthSessionJsonTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributedledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
