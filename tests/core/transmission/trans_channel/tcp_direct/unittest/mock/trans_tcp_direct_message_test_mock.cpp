@@ -264,5 +264,10 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
 {
     return GetTransTcpDirectMessageInterface()->AuthFindUkIdByAclInfo(acl, ukId);
 }
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetTransTcpDirectMessageInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
 }
 }

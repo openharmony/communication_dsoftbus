@@ -418,7 +418,7 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, NULL);
 
-    EXPECT_CALL(hichainMock, JSON_GetStringFromOject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, LnnGetLocalNodeInfoSafe).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hichainMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))

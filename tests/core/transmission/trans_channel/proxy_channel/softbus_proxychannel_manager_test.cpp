@@ -2425,7 +2425,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySendHandShakeMsgWhenInner001,
     channelInfo->appInfo.fastTransDataSize = 1;
 
     ret = TransProxySendHandShakeMsgWhenInner(connId, channelInfo, retCode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 
     SoftBusFree((void*)channelInfo->appInfo.fastTransData);
     SoftBusFree(channelInfo);

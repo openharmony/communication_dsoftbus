@@ -782,10 +782,15 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
     uint32_t passiveCapBitMap[CAPABILITY_NUM] = {0};
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        DISC_BLE, "lock failed.");
     int32_t ret = MatchRecvMessage(g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap,
         passiveCapBitMap, CAPABILITY_NUM);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL,
-        DISC_BLE, "MatchRecvMessage failed");
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "MatchRecvMessage failed");
+        SoftBusMutexUnlock(&g_bleInfoLock);
+        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
+    }
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
         info->capabilityBitmap[pos] =
         g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[pos] | passiveCapBitMap[pos];
@@ -796,6 +801,7 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
 
     int32_t activeCnt = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].rangingRefCnt;
     int32_t passiveCnt = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].rangingRefCnt;
+    SoftBusMutexUnlock(&g_bleInfoLock);
     info->range = activeCnt + passiveCnt;
 
     DISC_CHECK_AND_RETURN_RET_LOGE(!CheckBitMapEmpty(CAPABILITY_NUM, info->capabilityBitmap),
@@ -1277,7 +1283,7 @@ static void StartScaner()
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
-    UpdateScannerInfoManager(false);
+    UpdateScannerInfoManager(true);
     DfxRecordScanEnd(SOFTBUS_OK);
     DISC_LOGD(DISC_BLE, "StartScanner success");
 }

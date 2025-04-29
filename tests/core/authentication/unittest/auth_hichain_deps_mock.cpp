@@ -196,9 +196,9 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
     return GetAuthHichainMockInterface()->LnnGetLocalByteInfo(key, info, len);
 }
 
-bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size)
+bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size)
 {
-    return GetAuthHichainMockInterface()->JSON_GetStringFromOject(obj, key, value, size);
+    return GetAuthHichainMockInterface()->JSON_GetStringFromObject(obj, key, value, size);
 }
 
 int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)

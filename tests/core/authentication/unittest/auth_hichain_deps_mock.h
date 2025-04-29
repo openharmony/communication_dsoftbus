@@ -71,7 +71,7 @@ public:
     virtual bool RequireAuthLock(void) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value) = 0;
-    virtual bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
+    virtual bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual bool LnnIsDefaultOhosAccount(void) = 0;
     virtual int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
@@ -122,7 +122,7 @@ public:
     MOCK_METHOD0(RequireAuthLock, bool (void));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey, uint8_t *, uint32_t));
     MOCK_METHOD3(JSON_AddStringToObject, bool (JsonObj *, const char *, const char *));
-    MOCK_METHOD4(JSON_GetStringFromOject, bool (const JsonObj *, const char *, char *, uint32_t));
+    MOCK_METHOD4(JSON_GetStringFromObject, bool (const JsonObj *, const char *, char *, uint32_t));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *info));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
     MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t, const char *, const char *, bool, char **));
