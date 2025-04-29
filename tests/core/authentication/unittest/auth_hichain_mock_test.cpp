@@ -437,7 +437,7 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     UnpackExternalAuthInfo(obj, &info);
     EXPECT_EQ(info.credId, NULL);
 
-    info.authVersion = (AuthVersion)1;  // AUTH_VERSION_V2
+    info.authVersion = (AuthVersion)2;  // AUTH_VERSION_V2
     UnpackExternalAuthInfo(obj, &info);
     EXPECT_EQ(info.credId, NULL);
 
