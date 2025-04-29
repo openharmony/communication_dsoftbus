@@ -43,6 +43,7 @@ typedef struct {
     uint64_t addTime;
     bool isFastAuth;
     DeviceKeyId deviceKeyId;
+    ForceJoinInfo forceJoinInfo;
 } AuthRequest;
 
 bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb);
