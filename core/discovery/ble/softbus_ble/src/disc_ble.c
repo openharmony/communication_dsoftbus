@@ -1283,7 +1283,7 @@ static void StartScaner()
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
-    UpdateScannerInfoManager(false);
+    UpdateScannerInfoManager(true);
     DfxRecordScanEnd(SOFTBUS_OK);
     DISC_LOGD(DISC_BLE, "StartScanner success");
 }
