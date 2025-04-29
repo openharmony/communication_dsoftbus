@@ -21,6 +21,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_distributed_net_ledger.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
@@ -880,6 +881,7 @@ static void TransBuildLaneAllocFailEvent(
 
 static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
 {
+    SoftBusHitraceChainBegin("TransOnAsyncLaneFail");
     TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
     SessionParam param;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -892,6 +894,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
         TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
         (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
         (void)TransDelLaneReqFromPendingList(laneHandle, true);
+        SoftBusHitraceChainEnd();
         return;
     }
     LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
@@ -907,6 +910,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CreateAppInfoByParam failed");
         CallbackOpenChannelFailed(&param, &appInfo, reason);
+        SoftBusHitraceChainEnd();
         return;
     }
     appInfo.callingTokenId = callingTokenId;
@@ -919,6 +923,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
     (void)TransDelLaneReqFromPendingList(laneHandle, true);
+    SoftBusHitraceChainEnd();
 }
 
 static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)

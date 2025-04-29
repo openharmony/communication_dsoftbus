@@ -21,6 +21,7 @@
 #include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_net_builder.h"
 #include "securec.h"
@@ -577,8 +578,10 @@ int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t
 
 static void LnnSvrJoinCallback(const ConnectionAddr *connAddr, int32_t errCode)
 {
+    SoftBusHitraceChainBegin("LnnSvrJoinCallback");
     if (connAddr == NULL) {
         TRANS_LOGE(TRANS_SVC, "invalid param");
+        SoftBusHitraceChainEnd();
         return;
     }
     TRANS_LOGI(TRANS_SVC, "LnnSvrJoinCallback enter");
@@ -586,6 +589,7 @@ static void LnnSvrJoinCallback(const ConnectionAddr *connAddr, int32_t errCode)
     int32_t ret = GetAuthChannelInfoByChanId(connAddr->info.session.channelId, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "get channel info by chanId failed. chanId=%{public}d", connAddr->info.session.channelId);
+        SoftBusHitraceChainEnd();
         return;
     }
 
@@ -604,6 +608,7 @@ static void LnnSvrJoinCallback(const ConnectionAddr *connAddr, int32_t errCode)
         TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
         ChannelReplyErrProc(&extra, ret, &info, info.authId);
     }
+    SoftBusHitraceChainEnd();
 }
 
 static int32_t UpdateChannelInfo(int32_t authId, const AuthChannelInfo *info)
@@ -693,8 +698,10 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
 
 static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
 {
+    SoftBusHitraceChainBegin("OnAuthChannelDataRecv");
     if (data == NULL || data->data == NULL || data->len < 1) {
         TRANS_LOGW(TRANS_SVC, "invalid param.");
+        SoftBusHitraceChainEnd();
         return;
     }
 
@@ -705,6 +712,7 @@ static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
     } else {
         TRANS_LOGE(TRANS_SVC, "auth channel flags err, authId=%{public}d", authId);
     }
+    SoftBusHitraceChainEnd();
 }
 
 static void OnAuthMsgDataRecv(int32_t authId, const AuthChannelData *data)
@@ -1111,19 +1119,23 @@ static int32_t PostAuthMsg(AuthChannelInfo *channel, TransEventExtra *extra, con
 int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnInfo *connInfo, int32_t *channelId,
     bool accountInfo)
 {
+    SoftBusHitraceChainBegin("TransOpenAuthMsgChannelWithPara");
     if (!CheckForAuthWithParam(sessionName, connInfo, channelId)) {
         TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannelWithPara CheckForAuthWithParam fail");
+        SoftBusHitraceChainEnd();
         return SOFTBUS_INVALID_PARAM;
     }
 
     AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName, true);
     if (channel == NULL) {
         TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannelWithPara CreateAuthChannelInfo fail");
+        SoftBusHitraceChainEnd();
         return SOFTBUS_TRANS_AUTH_CREATE_CHANINFO_FAIL;
     }
     if (TransFillAuthChannelInfo(channel, connInfo, channelId, accountInfo) != SOFTBUS_OK) {
         SoftBusFree(channel);
         TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannelWithPara TransFillAuthChannelInfo failed");
+        SoftBusHitraceChainEnd();
         return SOFTBUS_TRANS_AUTH_FILL_CHANINFO_FAIL;
     }
 
@@ -1141,10 +1153,12 @@ int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnI
     int32_t ret = PostAuthMsg(channel, &extra, connInfo, channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "PostAuthMsg failed, ret=%{public}d", ret);
+        SoftBusHitraceChainEnd();
         return ret;
     }
     extra.result = EVENT_STAGE_RESULT_OK;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
+    SoftBusHitraceChainEnd();
     return SOFTBUS_OK;
 }
 

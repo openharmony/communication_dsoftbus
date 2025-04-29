@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "legacy/softbus_adapter_hitrace.h"
 #include "trans_auth_negotiation.h"
 
 #include <securec.h>
@@ -352,13 +353,19 @@ int32_t GetAuthConnInfoByConnId(uint32_t connectionId, AuthConnInfo *authConnInf
 
 void TransAuthNegoTaskManager(uint32_t authRequestId, int32_t channelId)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(authRequestId != 0, TRANS_SVC, "invalid param");
+    SoftBusHitraceChainBegin("TransAuthNegoTaskManager");
+    if (authRequestId == 0) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        SoftBusHitraceChainEnd();
+        return;
+    }
     bool isFinished = false;
     int32_t errCode = SOFTBUS_TRANS_AUTH_NEGO_TASK_NOT_FOUND;
     int32_t cnt = 0;
     int32_t ret = TransCheckAuthNegoStatusByReqId(authRequestId, &isFinished, &errCode, &cnt);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "check auth status by authRequestId=%{public}u failed", authRequestId);
+        SoftBusHitraceChainEnd();
         return;
     }
 
@@ -368,10 +375,12 @@ void TransAuthNegoTaskManager(uint32_t authRequestId, int32_t channelId)
             TRANS_LOGE(TRANS_SVC, "authRequestId=%{public}u timeout, cnt=%{public}d", authRequestId, cnt);
             TransProxyNegoSessionKeyFail(channelId, SOFTBUS_TRANS_AUTH_NEGOTIATE_SK_TIMEOUT);
             TransDelAuthReqFromPendingList(authRequestId);
+            SoftBusHitraceChainEnd();
             return;
         }
         TRANS_LOGD(TRANS_SVC, "authRequestId=%{public}u not finished, generate new task and waiting", authRequestId);
         TransProxyPostAuthNegoMsgToLooperDelay(authRequestId, channelId, AUTH_NEGOTIATION_CHECK_INTERVAL);
+        SoftBusHitraceChainEnd();
         return;
     }
 
@@ -379,9 +388,11 @@ void TransAuthNegoTaskManager(uint32_t authRequestId, int32_t channelId)
         TRANS_LOGE(TRANS_SVC, "authRequestId=%{public}u negotiate failed, errCode=%{public}d", authRequestId, errCode);
         TransProxyNegoSessionKeyFail(channelId, errCode);
         TransDelAuthReqFromPendingList(authRequestId);
+        SoftBusHitraceChainEnd();
         return;
     }
 
     TransProxyNegoSessionKeySucc(channelId);
     TransDelAuthReqFromPendingList(authRequestId);
+    SoftBusHitraceChainEnd();
 }
