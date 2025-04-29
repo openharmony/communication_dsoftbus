@@ -34,6 +34,7 @@ void NetBuilderMessageHandler(SoftBusMessage *msg);
 LnnConnectionFsm *FindConnectionFsmByAddr(const ConnectionAddr *addr, bool isShort);
 LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr, const char *pkgName, bool isNeedConnect);
 void StopConnectionFsm(LnnConnectionFsm *connFsm);
+LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId);
 
 #ifdef __cplusplus
 }
