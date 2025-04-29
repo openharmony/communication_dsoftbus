@@ -59,7 +59,7 @@
 #define FLAG_NEGOUK_REPLY 3
 #define FLAG_ENCYUK_REQUEST 4
 #define FLAG_ENCYUK_REPLY 5
-#define ID_OFFSET (1)
+#define ID_OFFSET (0xABAB0000)
 #define MAX_ERRDESC_LEN 128
 
 #define ISHARE_SESSION_NAME "IShare*"
@@ -1153,10 +1153,12 @@ EXIT_ERR:
 
 static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 {
+    SoftBusHitraceChainBegin("UdpOnAuthConnOpenFailed");
     TRANS_LOGW(TRANS_CTRL, "reqId=%{public}u, reason=%{public}d", requestId, reason);
     UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     if (channel == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc fail");
+        SoftBusHitraceChainEnd();
         return;
     }
     int32_t ret = TransGetUdpChannelByRequestId(requestId, channel);
@@ -1165,6 +1167,7 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "UdpOnAuthConnOpened get channel fail");
         SoftBusFree(channel);
+        SoftBusHitraceChainEnd();
         return;
     }
     ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
@@ -1182,6 +1185,7 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     SoftBusFree(channel);
     TRANS_LOGW(TRANS_CTRL, "ok");
+    SoftBusHitraceChainEnd();
 }
 
 static void TransCloseUdpChannelByRequestId(uint32_t requestId)

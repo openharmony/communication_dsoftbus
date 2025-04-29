@@ -40,7 +40,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_uk_manager.h"
 
-#define ID_OFFSET (1)
+#define ID_OFFSET (0xABAB0000)
 #define OHOS_TYPE_UNKNOWN (-1)
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
