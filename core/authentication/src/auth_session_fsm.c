@@ -37,6 +37,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -970,6 +971,11 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
+        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast()) {
+            ret = SOFTBUS_FUNC_NOT_SUPPORT;
+            AUTH_LOGI(AUTH_FSM, "not support ble online");
+            break;
+        }
         UpdateUdidHashIfEmpty(authFsm, info);
         if (info->isServer) {
             if (PostDeviceIdMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
@@ -990,6 +996,31 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
     }
 }
 
+static void LocalAuthStateProc(AuthFsm *authFsm, AuthSessionInfo *info, int32_t *result)
+{
+    if (info->localState == AUTH_STATE_START) {
+        info->isServer = false;
+        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
+    } else if (info->localState == AUTH_STATE_ACK) {
+        info->isServer = true;
+        *result = PostDeviceIdMessage(authFsm->authSeq, info);
+        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
+    } else if (info->localState == AUTH_STATE_WAIT) {
+        info->isServer = true;
+        *result = PostDeviceIdMessage(authFsm->authSeq, info);
+    } else if (info->localState == AUTH_STATE_COMPATIBLE) {
+        if (info->isServer) {
+            *result = PostDeviceIdMessage(authFsm->authSeq, info);
+        }
+        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
+    } else if (info->localState == AUTH_STATE_UNKNOW) {
+        *result = PostDeviceIdMessage(authFsm->authSeq, info);
+    } else {
+        AUTH_LOGE(AUTH_FSM, "local auth state error");
+        *result = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+    }
+}
+
 static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t ret = SOFTBUS_OK;
@@ -1002,6 +1033,11 @@ static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
+        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast()) {
+            ret = SOFTBUS_FUNC_NOT_SUPPORT;
+            AUTH_LOGI(AUTH_FSM, "not support ble online");
+            break;
+        }
         UpdateUdidHashIfEmpty(authFsm, info);
         if (UpdateLocalAuthState(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "update auth state fail, authSeq=%{public}" PRId64, authFsm->authSeq);
@@ -1010,29 +1046,8 @@ static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
         if (info->peerState == AUTH_STATE_COMPATIBLE) {
             NotifyNormalizeRequestSuccess(authFsm->authSeq, false);
         }
-        if (info->localState == AUTH_STATE_START) {
-            info->isServer = false;
-            LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
-        } else if (info->localState == AUTH_STATE_ACK) {
-            info->isServer = true;
-            ret = PostDeviceIdMessage(authFsm->authSeq, info);
-            LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
-        } else if (info->localState == AUTH_STATE_WAIT) {
-            info->isServer = true;
-            ret = PostDeviceIdMessage(authFsm->authSeq, info);
-        } else if (info->localState == AUTH_STATE_COMPATIBLE) {
-            if (info->isServer) {
-                ret = PostDeviceIdMessage(authFsm->authSeq, info);
-            }
-            LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
-        } else if (info->localState == AUTH_STATE_UNKNOW) {
-            ret = PostDeviceIdMessage(authFsm->authSeq, info);
-        } else {
-            AUTH_LOGE(AUTH_FSM, "local auth state error");
-            ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
-        }
+        LocalAuthStateProc(authFsm, info, &ret);
     } while (false);
-
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "handle devId msg fail, ret=%{public}d", ret);
         CompleteAuthSession(authFsm, ret);

@@ -72,6 +72,8 @@ public:
     virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex) = 0;
     virtual int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType) = 0;
     virtual int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
+    virtual bool LnnIsNeedInterceptBroadcast(void);
 };
 
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
@@ -114,6 +116,8 @@ public:
     MOCK_METHOD1(SoftBusMutexLockInner, int32_t(SoftBusMutex *));
     MOCK_METHOD2(LnnPostTransStateMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatEventType));
     MOCK_METHOD2(LnnPostUpdateSendInfoMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatUpdateInfoType));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
+    MOCK_METHOD0(LnnIsNeedInterceptBroadcast, bool());
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H

@@ -265,5 +265,9 @@ int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums)
     return GetDecisionDbDepsInterface()->LnnGetAllRemoteDevInfo(info, nums);
 }
 
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetDecisionDbDepsInterface()->LnnGetLocalNumInfo(key, info);
+}
 } // extern "C"
 } // namespace OHOS
