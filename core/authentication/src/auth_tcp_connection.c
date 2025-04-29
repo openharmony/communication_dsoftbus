@@ -200,10 +200,7 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
     }
     if (pktHead->module == MODULE_SESSION_KEY_AUTH) {
         if (module != AUTH_SESSION_KEY) {
-            ListenerModule sessionKeyModule = AUTH_SESSION_KEY;
-            if (!IsListenerNodeExist(sessionKeyModule)) {
-                SetSessionKeyListenerModule(fd);
-            }
+            SetSessionKeyListenerModule(fd);
         }
         SessionKeyNotifyDataReceived(module, fd, pktHead->len, data);
         return;
