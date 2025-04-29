@@ -1697,7 +1697,7 @@ int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->onlinetTimestamp;
+    *timestamp = nodeInfo->onlineTimestamp;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
