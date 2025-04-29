@@ -1870,9 +1870,16 @@ static void OnForceJoinLNNInOnline(LnnConnectionFsm *connFsm)
         .deviceKeyId.hasDeviceKeyId = false, .deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
         .deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
     };
+    authVerifyParam.forceJoinInfo.isForceJoin = true;
+    authVerifyParam.forceJoinInfo.addr = connInfo->addr;
+    if (strcpy_s(authVerifyParam.forceJoinInfo.networkId, NETWORK_ID_BUF_LEN, connInfo->peerNetworkId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy networkId fail");
+        NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+        return;
+    }
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
     if (AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback()) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
+        LNN_LOGE(LNN_BUILDER, "AuthStartVerify error");
         NotifyJoinResult(connFsm, NULL, SOFTBUS_AUTH_START_VERIFY_FAIL);
     }
 }

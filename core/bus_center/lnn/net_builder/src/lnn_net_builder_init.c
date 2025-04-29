@@ -182,9 +182,22 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
 static void OnReAuthVerifyFailed(uint32_t requestId, int32_t reason)
 {
     LNN_LOGI(LNN_BUILDER, "verify failed. requestId=%{public}u, reason=%{public}d", requestId, reason);
-    if (reason >= SOFTBUS_HICHAIN_MIN && reason <= SOFTBUS_HICHAIN_MAX) {
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-        PostVerifyResult(requestId, reason, authHandle, NULL);
+    AuthRequest authRequest = { 0 };
+    if (GetAuthRequest(requestId, &authRequest) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "auth request not found");
+        LnnConnectionFsm *connFsm = FindConnectionFsmByRequestId(requestId);
+        if (connFsm == NULL || connFsm->isDead) {
+            LNN_LOGE(LNN_BUILDER, "can not find connection fsm by requestId. requestId=%{public}d", requestId);
+            return;
+        }
+        if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) != 0) {
+            LnnNotifyJoinResult(&connFsm->connInfo.addr, connFsm->connInfo.peerNetworkId, reason);
+        }
+        return;
+    }
+    if (authRequest.forceJoinInfo.isForceJoin) {
+        LNN_LOGI(LNN_BUILDER, "notify joinLnn result");
+        LnnNotifyJoinResult(&authRequest.forceJoinInfo.addr, authRequest.forceJoinInfo.networkId, reason);
     }
 }
 

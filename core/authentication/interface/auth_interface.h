@@ -115,10 +115,17 @@ typedef struct {
 } AuthConnInfo;
 
 typedef struct {
+    bool isForceJoin;
+    ConnectionAddr addr;
+    char networkId[NETWORK_ID_BUF_LEN];
+} ForceJoinInfo;
+
+typedef struct {
     uint32_t requestId;
     AuthVerifyModule module;
     bool isFastAuth;
     DeviceKeyId deviceKeyId;
+    ForceJoinInfo forceJoinInfo;
 } AuthVerifyParam;
 
 typedef enum {
