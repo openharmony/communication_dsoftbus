@@ -69,7 +69,7 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
     if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         return false;
     }
-
+    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
     auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
     if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
         return false;
@@ -156,8 +156,7 @@ void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &res
     }
 }
 
-void SoftBusRegisterDataSyncPermission(
-    const uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
+void SoftBusRegisterDataSyncPermission(uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     if (permissionName == nullptr || pkgName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, permissionName or pkgName is nullptr");
