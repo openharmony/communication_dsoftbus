@@ -93,6 +93,7 @@ public:
     virtual int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias) = 0;
     virtual int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
 };
 class DecisionDbDepsInterfaceMock : public DecisionDbDepsInterface {
 public:
@@ -142,6 +143,7 @@ public:
     MOCK_METHOD1(LnnSaveRemoteDeviceInfo, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnDeleteCeKeyByHuks, int32_t(struct HksBlob *));
     MOCK_METHOD1(LnnGenerateCeKeyByHuks, int32_t(struct HksBlob *));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
 };
 } // namespace OHOS
 #endif // LNN_DECISION_DB_DEPS_MOCK_H
