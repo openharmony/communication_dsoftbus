@@ -164,7 +164,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     char strSessionName[] = "ohos.distributedschedule.dms.test";
 
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);

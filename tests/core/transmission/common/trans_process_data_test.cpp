@@ -479,4 +479,120 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest015, TestSize.Level1)
     ret = TransTdcUnPackData(channelId, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: TransProcessDataTest016
+ * @tc.desc: Transmission session manager initialize.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProcessDataTest016, TestSize.Level1)
+{
+    int32_t channelId = 1124; // test value
+    const char *sessionKey = "121212"; // test value
+    char plain[10] = "testPlain";
+    uint32_t plainLen = 10; // test value
+    DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
+    ASSERT_NE(nullptr, node);
+    node->data = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    if (node->data == nullptr) {
+        SoftBusFree(node);
+        return;
+    }
+
+    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    if (node->w == nullptr) {
+        SoftBusFree(node->data);
+        SoftBusFree(node);
+        return;
+    }
+
+    node->channelId = channelId;
+    node->size = 10; // test value
+    node->fd = 1;
+    (void)strcpy_s(node->data, 10, plain); // test value
+    (void)strcpy_s(node->w, 10, plain); // test value
+
+    int32_t ret = TransTdcUnPackData(channelId, sessionKey, plain, &plainLen, node);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    SoftBusFree(node->w);
+    SoftBusFree(node->data);
+    SoftBusFree(node);
+}
+
+/**
+ * @tc.name: TransProcessDataTest017
+ * @tc.desc: Transmission session manager initialize.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProcessDataTest017, TestSize.Level1)
+{
+    uint32_t bufLen = 32; // test value
+    char data[] = "testDataStringValue";
+    TcpDataTlvPacketHead *head = static_cast<TcpDataTlvPacketHead *>(SoftBusCalloc(sizeof(TcpDataTlvPacketHead)));
+    ASSERT_NE(nullptr, head);
+    uint32_t headSize = 4; // test value
+
+    int32_t ret = TransTdcParseTlv(bufLen, data, head, &headSize);
+    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
+
+    bufLen = 64; // test value
+    ret = TransTdcParseTlv(bufLen, data, head, &headSize);
+    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
+
+    bufLen = 1024; // test value
+    ret = TransTdcParseTlv(bufLen, data, head, &headSize);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftBusFree(head);
+}
+
+/**
+ * @tc.name: TransProcessDataTest018
+ * @tc.desc: Transmission session manager initialize.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProcessDataTest018, TestSize.Level1)
+{
+    int32_t channelId = 1124; // test value
+    char plain[10] = "testPlain";
+    uint32_t headSize = 1;
+    bool flag = true;
+
+    TcpDataTlvPacketHead *head = static_cast<TcpDataTlvPacketHead *>(SoftBusCalloc(sizeof(TcpDataTlvPacketHead)));
+    ASSERT_NE(nullptr, head);
+    DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
+    if (node == nullptr) {
+        SoftBusFree(head);
+        return;
+    }
+    node->data = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    if (node->data == nullptr) {
+        SoftBusFree(node);
+        SoftBusFree(head);
+        return;
+    }
+
+    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    if (node->w == nullptr) {
+        SoftBusFree(node->data);
+        SoftBusFree(node);
+        SoftBusFree(head);
+        return;
+    }
+
+    node->channelId = channelId;
+    node->size = 10; // test value
+    node->fd = 1;
+    (void)strcpy_s(node->data, 10, plain); // test value
+    (void)strcpy_s(node->w, 10, plain); // test value
+
+    int32_t ret = TransTdcUnPackAllTlvData(channelId, head, &headSize, node, &flag);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftBusFree(node->w);
+    SoftBusFree(node->data);
+    SoftBusFree(node);
+    SoftBusFree(head);
+}
 }
