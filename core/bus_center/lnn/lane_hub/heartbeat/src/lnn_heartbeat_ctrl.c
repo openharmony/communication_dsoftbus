@@ -151,6 +151,17 @@ bool LnnIsCloudSyncEnd(void)
     return g_isCloudSyncEnd;
 }
 
+bool LnnIsNeedInterceptBroadcast(void)
+{
+    int32_t localDevTypeId = TYPE_UNKNOW_ID;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
+        localDevTypeId == TYPE_WATCH_ID && g_hbConditionState.isRequestDisable) {
+        LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
+        return true;
+    }
+    return false;
+}
+
 void SetScreenState(SoftBusScreenState state)
 {
     g_hbConditionState.screenState = state;
@@ -1187,6 +1198,10 @@ int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL && config != NULL && config->medium != SLE_CONN_HADM,
         SOFTBUS_INVALID_PARAM, LNN_INIT, "invalid param");
+    if (LnnIsNeedInterceptBroadcast()) {
+        LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
     const HbMode *mode =  &config->configInfo.heartbeat.mode;
     LNN_LOGI(LNN_HEART_BEAT, "pkgName=%{public}s, connFlag=%{public}d, duration=%{public}d, replyFlag=%{public}d",
         pkgName, mode->connFlag, mode->duration, mode->replyFlag);
@@ -1408,6 +1423,10 @@ void LnnDeinitHeartbeat(void)
 
 int32_t LnnTriggerDataLevelHeartbeat(void)
 {
+    if (LnnIsNeedInterceptBroadcast()) {
+        LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartbeat");
     if (LnnStartHbByTypeAndStrategy(
         HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {

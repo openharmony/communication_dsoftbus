@@ -196,5 +196,15 @@ int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpda
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnPostUpdateSendInfoMsgToHbFsm(hbFsm, type);
 }
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnGetLocalNumInfo(key, info);
+}
+
+bool LnnIsNeedInterceptBroadcast(void)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnIsNeedInterceptBroadcast();
+}
 }
 } // namespace OHOS
