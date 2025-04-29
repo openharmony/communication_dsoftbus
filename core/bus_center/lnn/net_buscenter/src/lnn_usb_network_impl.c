@@ -356,9 +356,9 @@ static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
     if (subnet->status == LNN_SUBNET_RUNNING) {
         CloseIpLink();
         UpdateUsbNetCap(false);
-        DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP, USB_IF);
         LeaveOldIpNetwork(subnet->ifName);
         ReleaseMainPort(subnet->ifName);
+        DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP, USB_IF);
     }
     return SOFTBUS_OK;
 }
@@ -367,9 +367,9 @@ static int32_t ChangeIpSubnetAddress(LnnPhysicalSubnet *subnet)
 {
     CloseIpLink();
     UpdateUsbNetCap(false);
-    DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP, USB_IF);
     LeaveOldIpNetwork(subnet->ifName);
     ReleaseMainPort(subnet->ifName);
+    DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP, USB_IF);
     return SOFTBUS_OK;
 }
 
