@@ -143,7 +143,6 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_DEFAULT, nullptr},
     {LOOP_TYPE_CONN, nullptr},
     {LOOP_TYPE_LNN, nullptr},
-    {LOOP_TYPE_DISC, nullptr},
 };
 
 static void ReleaseLooper(const SoftBusLooper *looper)
