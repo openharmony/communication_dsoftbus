@@ -37,7 +37,7 @@ ohos_unittest("DiscManagerTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   external_deps = [

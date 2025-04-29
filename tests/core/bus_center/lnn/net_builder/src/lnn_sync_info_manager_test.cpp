@@ -1407,7 +1407,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_003, TestSize.Level1)
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, JSON_GetStringFromObject(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     WlanOffLineProcess(&data, authHandle);
@@ -1434,7 +1434,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_004, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> lnnNetLedgertmock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, JSON_GetStringFromObject(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnNetLedgertmock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
@@ -1466,7 +1466,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(true)));
-    EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _))
+    EXPECT_CALL(mock, JSON_GetStringFromObject(_, _, _, _))
         .WillOnce(DoAll(SetArrayArgument<2>(offlineCode, offlineCode + 3), Return(true)));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));

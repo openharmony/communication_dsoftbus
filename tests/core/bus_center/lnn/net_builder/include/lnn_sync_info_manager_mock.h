@@ -35,7 +35,7 @@ public:
     virtual int32_t ConvertBytesToHexString(
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen);
     virtual bool JSON_GetInt32FromOject(const JsonObj *obj, const char *key, int32_t *value) = 0;
-    virtual bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
+    virtual bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
     virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
     virtual void DelAuthManager(AuthManager *auth, int32_t type) = 0;
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
@@ -58,7 +58,7 @@ public:
     MOCK_METHOD4(ConvertBytesToHexString,
         int32_t(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen));
     MOCK_METHOD3(JSON_GetInt32FromOject, bool(const JsonObj *obj, const char *key, int32_t *value));
-    MOCK_METHOD4(JSON_GetStringFromOject, bool(const JsonObj *obj, const char *key, char *value, uint32_t size));
+    MOCK_METHOD4(JSON_GetStringFromObject, bool(const JsonObj *obj, const char *key, char *value, uint32_t size));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t authId));
     MOCK_METHOD2(DelAuthManager, void(AuthManager *auth, int32_t type));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t(const char *, char *, uint32_t));
