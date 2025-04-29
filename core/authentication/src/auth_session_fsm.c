@@ -1095,7 +1095,7 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
 static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
-    HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V1) ?
+    HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V2) ?
         HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len, authMode);
     if (ret != SOFTBUS_OK) {
@@ -1244,7 +1244,7 @@ static int32_t TryRecoveryKey(AuthFsm *authFsm)
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
     HiChainAuthParam authParam;
-    HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V1) ?
+    HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V2) ?
         HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
     (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
