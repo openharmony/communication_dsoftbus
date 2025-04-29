@@ -139,3 +139,8 @@ bool IsHeartbeatEnable(void)
 {
     return false;
 }
+
+bool LnnIsNeedInterceptBroadcast(void)
+{
+    return false;
+}
