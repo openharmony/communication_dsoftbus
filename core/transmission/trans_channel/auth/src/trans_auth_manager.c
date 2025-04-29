@@ -1133,7 +1133,7 @@ int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnI
         .channelId = *channelId,
         .channelType = CHANNEL_TYPE_AUTH,
         .linkType = CONNECT_HML
-     };
+    };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
 
     int32_t ret = PostAuthMsg(channel, &extra, connInfo, channelId);
