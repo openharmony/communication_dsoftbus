@@ -57,7 +57,6 @@
 #define DEFAULT_CHANNEL_ID      0
 #define UK_MAX_INSTANCE_CNT     0x2000000
 #define UK_NEGO_PROCESS_TIMEOUT (10 * 1000LL)
-#define UK_AGING_TIME           (168 * 60 * 60 * 1000L)
 #define UK_SEQ_NETWORK_ID_BITS  16
 #define SEQ_TIME_STAMP_BITS     8
 #define SEQ_TIME_STAMP_MASK     0xFFL
@@ -66,6 +65,7 @@
 #define PEER_OS_ACCOUNT_ID_STR  "peerOsAccountId"
 
 static uint32_t g_uniqueId = 0;
+static uint64_t g_ukDecayTime = 15552000000; //180 * 24 * 60 * 60 * 1000L
 static SoftBusList *g_ukNegotiateList = NULL;
 static SoftBusMutex g_ukNegotiateListLock;
 
@@ -1457,7 +1457,7 @@ int32_t AuthPostTransDataByUk(AuthHandle authHandle, int32_t ukId, int32_t peerU
 bool AuthIsUkExpired(uint64_t time)
 {
     uint64_t currentTime = SoftBusGetSysTimeMs();
-    if (currentTime - time > UK_AGING_TIME) {
+    if (currentTime < time || currentTime - time > g_ukDecayTime) {
         AUTH_LOGE(AUTH_CONN, "UK has expired and cannot be used.");
         return false;
     }
