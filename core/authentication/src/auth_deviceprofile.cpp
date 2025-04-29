@@ -15,7 +15,7 @@
 
 #include "auth_deviceprofile.h"
 
-#include <cstring.h>
+#include <cstring>
 #include <securec.h>
 
 #include "anonymizer.h"
