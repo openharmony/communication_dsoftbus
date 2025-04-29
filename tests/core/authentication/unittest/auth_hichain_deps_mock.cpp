@@ -175,7 +175,7 @@ int32_t AuthSessionGetAuthVersion(int64_t authSeq, int32_t *version)
         return SOFTBUS_AUTH_GET_SESSION_INFO_FAIL;
     }
 
-    *version = AUTH_VERSION_V1;
+    *version = AUTH_VERSION_V2;
     return SOFTBUS_OK;
 }
 
