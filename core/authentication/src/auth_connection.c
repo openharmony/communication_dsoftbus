@@ -521,7 +521,6 @@ static void OnWiFiDisconnected(ListenerModule module, int32_t fd)
     AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: module=%{public}d, fd=%{public}d", module, fd);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    connInfo.type = (module == AUTH_USB) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
     if (module == AUTH_USB) {
         connInfo.type = AUTH_LINK_TYPE_USB;
     } else if (module == AUTH_SESSION_KEY) {
