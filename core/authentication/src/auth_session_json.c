@@ -873,7 +873,7 @@ static int32_t GetLocalUdidShortHash(char *localUdidHash)
 
 static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
 {
-    if (info->authVersion < AUTH_VERSION_V1) {
+    if (info->authVersion < AUTH_VERSION_V2) {
         AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
         return;
     }

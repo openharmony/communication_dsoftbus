@@ -303,7 +303,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         return NULL;
     }
 
-    bool bFlag = version < AUTH_VERSION_V1;
+    bool bFlag = version < AUTH_VERSION_V2;
     char localUdid[UDID_BUF_LEN] = {0};
     int32_t peerUserId = AuthSessionGetUserId(authSeq);
     LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);

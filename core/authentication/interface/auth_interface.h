@@ -50,6 +50,7 @@ typedef enum {
 typedef enum {
     AUTH_VERSION_INVALID = 0,
     AUTH_VERSION_V1 = 1,
+    AUTH_VERSION_V2 = 2,
 } AuthVersion;
 
 typedef enum {
