@@ -1340,14 +1340,6 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
     return ret;
 }
 
-static bool IsNcmType(char *ifName)
-{
-    if (ifName == NULL) {
-        return false;
-    }
-    return (strcmp(ifName, NCM_DEVICE_TYPE) == 0 || strcmp(ifName, NCM_HOST_TYPE) == 0) ? true : false;
-}
-
 static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t cipherFlag, AuthHandle *authHandle)
 {
     if (authHandle == NULL) {
@@ -1374,12 +1366,8 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         AuthConnInfo connInfo;
-        char ifName[NET_IF_NAME_LEN] = {0};
-        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN, USB_IF) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get local ifname failed");
-            return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
-        }
-        connInfo.type = IsNcmType(ifName) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
+        TRANS_LOGI(TRANS_CTRL, "protoclType=%{public}d", appInfo.protocol);
+        connInfo.type = (appInfo.protocol == LNN_PROTOCOL_USB) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
         if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
             return SOFTBUS_MEM_ERR;
