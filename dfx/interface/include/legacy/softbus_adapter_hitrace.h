@@ -30,6 +30,8 @@ typedef enum SoftbusHiTraceIdValid {
 
 void SoftbusHitraceStart(uint32_t flags, uint64_t chainId);
 void SoftbusHitraceStop(void);
+void SoftBusHitraceChainBegin(const char *name);
+void SoftBusHitraceChainEnd(void);
 
 #ifdef __cplusplus
 #if __cplusplus

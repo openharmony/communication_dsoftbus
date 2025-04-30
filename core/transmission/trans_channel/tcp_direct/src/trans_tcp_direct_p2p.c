@@ -40,7 +40,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
 
-#define ID_OFFSET (1)
+#define ID_OFFSET (0xABAB0000)
 #define P2P_VERIFY_REQUEST 0
 #define P2P_VERIFY_REPLY 1
 
@@ -945,28 +945,34 @@ static void OnAuthMsgProc(AuthHandle authHandle, int32_t flags, int64_t seq, con
 
 static void OnAuthDataRecv(AuthHandle authHandle, const AuthTransData *data)
 {
+    SoftBusHitraceChainBegin("OnAuthDataRecv");
     if (data == NULL || data->data == NULL || data->len < 1) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        SoftBusHitraceChainEnd();
         return;
     }
     if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
         TRANS_LOGE(TRANS_CTRL, "authHandle type error");
+        SoftBusHitraceChainEnd();
         return;
     }
     TRANS_LOGI(TRANS_CTRL, "module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u",
         data->module, data->seq, data->len);
     if (data->module != MODULE_P2P_LISTEN && data->module != MODULE_SESSION_KEY_AUTH) {
         TRANS_LOGE(TRANS_CTRL, "module is not MODULE_P2P_LISTEN and MODULE_SESSION_KEY_AUTH");
+        SoftBusHitraceChainEnd();
         return;
     }
 
     cJSON *json = cJSON_ParseWithLength((const char *)(data->data), data->len);
     if (json == NULL) {
         TRANS_LOGE(TRANS_CTRL, "cjson parse with length failed");
+        SoftBusHitraceChainEnd();
         return;
     }
     OnAuthMsgProc(authHandle, data->flag, data->seq, json);
     cJSON_Delete(json);
+    SoftBusHitraceChainEnd();
 }
 
 static void OnAuthChannelClose(AuthHandle authHandle)
