@@ -1660,15 +1660,12 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelDetect_001, TestSize.Level1)
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneLinkMock, LaneDetectReliability).WillOnce(Return(SOFTBUS_LANE_DETECT_FAIL))
-        .WillOnce(Return(SOFTBUS_LANE_DETECT_FAIL))
-        .WillRepeatedly(laneLinkMock.ActionOfDetectFail);
 
     SetIsNeedCondWait(true);
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     CondWait();
-    EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
+    EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
 }

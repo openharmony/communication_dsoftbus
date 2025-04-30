@@ -230,6 +230,25 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList(
     return SOFTBUS_OK;
 }
 
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(
+    InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    (void)ifIdx;
+    if (key == STRING_KEY_NET_IF_NAME) {
+        if (strcpy_s(info, len, "deviceName") != EOK) {
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    if (key == STRING_KEY_IP) {
+        if (strcpy_s(info, len, "127.0.0.2") != EOK) {
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_INVALID_PARAM;
+}
+
 extern "C" {
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
@@ -482,11 +501,6 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uin
     return GetNetLedgerInterface()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
 }
 
-int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
-{
-    return GetNetLedgerInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
-}
-
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalDeviceInfo(info);
@@ -616,6 +630,16 @@ int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
 int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type)
 {
     return GetNetLedgerInterface()->LnnClearStaticNetCap(capability, type);
+}
+
+int32_t LnnSetLocalStrInfoByIfnameIdx(InfoKey key, const char *info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnSetLocalStrInfoByIfnameIdx(key, info, ifIdx);
+}
+
+int32_t LnnSetLocalNumInfoByIfnameIdx(InfoKey key, int32_t info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnSetLocalNumInfoByIfnameIdx(key, info, ifIdx);
 }
 }
 } // namespace OHOS

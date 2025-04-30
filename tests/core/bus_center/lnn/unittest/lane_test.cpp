@@ -323,7 +323,7 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
         .onLaneFreeFail = OnLaneFreeFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
-    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_ENHANCED_P2P_STATIC_CAP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     laneReqId = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);

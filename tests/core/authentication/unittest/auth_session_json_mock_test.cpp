@@ -225,7 +225,7 @@ HWTEST_F(AuthSessionJsonMockTest, VERIFY_SESSION_INFO_ID_TYPE_TEST_001, TestSize
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnGetLocalStrInfoByIfnameIdx).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -359,15 +359,8 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    const char *inetTest = "SoftBusInetNtoPTest";
     EXPECT_CALL(mocker, JSON_GetStringFromObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, SoftBusInetNtoP).WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(inetTest));
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
