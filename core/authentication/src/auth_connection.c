@@ -565,7 +565,8 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     CHECK_NULL_PTR_RETURN_VOID(data);
 
     if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module) &&
-        !IsSessionAuth(head->module) && !IsSessionKeyAuth(head->module) && module != AUTH_USB) {
+        !IsSessionAuth(head->module) && !IsSessionKeyAuth(head->module) && module != AUTH_USB
+        && module != AUTH_SESSION_KEY) {
         return;
     }
     bool fromServer = false;
