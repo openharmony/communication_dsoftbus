@@ -162,6 +162,7 @@ typedef struct {
     uint8_t advFilterPolicy;
     uint8_t ownAddrType;
     uint8_t peerAddrType;
+    uint8_t linkRole;
     int8_t txPower;
     bool isSupportRpa;
     uint8_t ownIrk[SOFTBUS_IRK_LEN];
