@@ -1508,9 +1508,11 @@ int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<Negot
 {
     auto msg = command->GetNegotiateMessage();
     auto ret = ConnectGroup(msg, command->GetNegotiateChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", ret);
-
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "connect group failed, errorCode=%{public}d", ret);
+        SendNegotiateResult(*command->GetNegotiateChannel(), ret);
+        return ret;
+    }
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
     auto pid = connectCommand_->GetConnectInfo().info_.pid;
     WifiDirectLink dlink {};
