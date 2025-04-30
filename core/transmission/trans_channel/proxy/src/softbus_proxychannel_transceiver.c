@@ -39,7 +39,7 @@
 #include "trans_event.h"
 #include "trans_log.h"
 
-#define ID_OFFSET (1)
+#define ID_OFFSET (0xABAB0000)
 
 static SoftBusList *g_proxyConnectionList = NULL;
 const char *g_transProxyLoopName = "transProxyLoopName";
@@ -410,10 +410,12 @@ static void TransProxyOnConnected(uint32_t connId, const ConnectionInfo *connInf
 
 static void TransProxyOnDisConnect(uint32_t connId, const ConnectionInfo *connInfo)
 {
+    SoftBusHitraceChainBegin("TransProxyOnDisConnect");
     (void)connInfo;
     TRANS_LOGI(TRANS_CTRL, "connect disabled, connId=%{public}u", connId);
     TransProxyDelByConnId(connId);
     TransDelConnByConnId(connId);
+    SoftBusHitraceChainEnd();
 }
 
 static bool CompareConnectOption(const ConnectOption *itemConnInfo, const ConnectOption *connInfo)
@@ -633,6 +635,7 @@ static int32_t TransSetConnStateByReqId(uint32_t requestId, uint32_t connId, uin
 
 static void TransOnConnectSucceed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
 {
+    SoftBusHitraceChainBegin("TransOnConnectSucceed");
     TransEventExtra extra = {
         .socketName = NULL,
         .peerNetworkId = NULL,
@@ -647,10 +650,12 @@ static void TransOnConnectSucceed(uint32_t requestId, uint32_t connectionId, con
         "Connect Success requestId=%{public}u, connId=%{public}u", requestId, connectionId);
     int32_t ret = TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
     TransProxyChanProcessByReqId((int32_t)requestId, connectionId, ret);
+    SoftBusHitraceChainEnd();
 }
 
 static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
 {
+    SoftBusHitraceChainBegin("TransOnConnectFailed");
     TransEventExtra extra = {
         .socketName = NULL,
         .peerNetworkId = NULL,
@@ -666,6 +671,7 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
         TRANS_LOGE(TRANS_CTRL, "Connect fail del fail. requestId=%{public}u", requestId);
     }
     TransProxyDelChanByReqId((int32_t)requestId, reason);
+    SoftBusHitraceChainEnd();
 }
 
 int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer)
