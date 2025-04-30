@@ -40,8 +40,6 @@ public:
     virtual void DelAuthManager(AuthManager *auth, int32_t type) = 0;
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
-    virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
-    virtual int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info) = 0;
     virtual int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num) = 0;
     virtual bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value) = 0;
 };
@@ -65,8 +63,6 @@ public:
     MOCK_METHOD2(DelAuthManager, void(AuthManager *auth, int32_t type));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD2(AuthPostTransData, int32_t(AuthHandle authHandle, const AuthTransData *dataInfo));
-    MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *networkId, InfoKey key, uint64_t *info));
-    MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t(const char *, InfoKey, uint32_t *));
     MOCK_METHOD2(GetHmlOrP2pAuthHandle, int32_t(AuthHandle **authHandle, int32_t *num));
     MOCK_METHOD3(JSON_AddStringToObject, bool(JsonObj *obj, const char *key, const char *value));
 };

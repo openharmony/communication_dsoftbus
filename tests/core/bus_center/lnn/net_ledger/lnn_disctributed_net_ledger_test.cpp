@@ -131,9 +131,9 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Level1)
 {
     static InfoKey keyStringTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_UUID,
-        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_IP, STRING_KEY_MASTER_NODE_UDID,
+        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_MASTER_NODE_UDID,
         STRING_KEY_P2P_MAC, STRING_KEY_P2P_GO_MAC, STRING_KEY_NODE_ADDR, STRING_KEY_OFFLINE_CODE,
-        STRING_KEY_WIFIDIRECT_ADDR, STRING_KEY_SLE_ADDR };
+        STRING_KEY_WIFIDIRECT_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -154,6 +154,34 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
 }
 
 /*
+ * @tc.name: LNN_GET_REMOTE_STRINFO_BY_IFNAME_Test_001
+ * @tc.desc: lnn get remote strInfo by ifname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_BY_IFNAME_Test_001, TestSize.Level1)
+{
+    static InfoKey keyStringTable[] = { STRING_KEY_IP };
+    char buf[UDID_BUF_LEN] = { 0 };
+    int32_t ret = LnnGetRemoteStrInfoByIfnameIdx(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN, WLAN_IF);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteStrInfoByIfnameIdx(NODE1_NETWORK_ID, STRING_KEY_HICE_VERSION, nullptr, UDID_BUF_LEN, WLAN_IF);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteStrInfoByIfnameIdx(NODE1_NETWORK_ID, NUM_KEY_BEGIN, buf, UDID_BUF_LEN, WLAN_IF);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    uint32_t i;
+    for (i = 0; i < sizeof(keyStringTable) / sizeof(InfoKey); i++) {
+        (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
+        ret = LnnGetRemoteStrInfoByIfnameIdx(NODE1_NETWORK_ID, keyStringTable[i], buf, UDID_BUF_LEN, WLAN_IF);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+    for (i = 0; i < sizeof(keyStringTable) / sizeof(InfoKey); i++) {
+        ret = LnnGetRemoteStrInfoByIfnameIdx(NODE2_NETWORK_ID, keyStringTable[i], buf, UDID_BUF_LEN, WLAN_IF);
+        EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    }
+}
+
+/*
  * @tc.name: LNN_GET_REMOTE_NUMNFO_Test_002
  * @tc.desc: lnn get remote num info test
  * @tc.type: FUNC
@@ -161,8 +189,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Level1)
 {
-    static InfoKey keyNumTable[] = { NUM_KEY_META_NODE, NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT,
-        NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE, NUM_KEY_SLE_RANGE_CAP };
+    static InfoKey keyNumTable[] = { NUM_KEY_META_NODE, NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE,
+        NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE, NUM_KEY_SLE_RANGE_CAP };
     int32_t ret;
     uint32_t i;
     int32_t len = LNN_COMMON_LEN;
@@ -172,6 +200,28 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Lev
     }
     for (i = 0; i < sizeof(keyNumTable) / sizeof(InfoKey); i++) {
         ret = LnnGetRemoteNumInfo(NODE2_NETWORK_ID, keyNumTable[i], &len);
+        EXPECT_NE(ret, SOFTBUS_OK);
+    }
+}
+
+/*
+ * @tc.name: LNN_GET_REMOTE_NUMNFO_BY_IFNAME_Test_002
+ * @tc.desc: lnn get remote num info by ifname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_BY_IFNAME_Test_002, TestSize.Level1)
+{
+    static InfoKey keyNumTable[] = { NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT };
+    int32_t ret;
+    uint32_t i;
+    int32_t len = LNN_COMMON_LEN;
+    for (i = 0; i < sizeof(keyNumTable) / sizeof(InfoKey); i++) {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(NODE1_NETWORK_ID, keyNumTable[i], &len, WLAN_IF);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+    for (i = 0; i < sizeof(keyNumTable) / sizeof(InfoKey); i++) {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(NODE2_NETWORK_ID, keyNumTable[i], &len, WLAN_IF);
         EXPECT_NE(ret, SOFTBUS_OK);
     }
 }

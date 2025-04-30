@@ -34,7 +34,6 @@ public:
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
         uint32_t inLen) = 0;
-    virtual int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info) = 0;
     virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
 };
 class HbHeartbeatUtilsInterfaceMock : public HbHeartbeatUtilsInterface {
@@ -45,7 +44,6 @@ public:
     MOCK_METHOD3(StringToUpperCase, int32_t(const char *, char *, int32_t));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t(const char *, InfoKey, uint32_t *));
     MOCK_METHOD0(GetWifiDirectManager, WifiDirectManager *());
 };
 } // namespace OHOS

@@ -774,5 +774,9 @@ void LnnDeInitSaStatusMonitor()
     GetNetBuilderDepsInterface()->LnnDeInitSaStatusMonitor();
 }
 
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetNetBuilderDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
 } // extern "C"
 } // namespace OHOS

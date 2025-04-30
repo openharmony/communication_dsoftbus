@@ -103,16 +103,6 @@ int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
     return LnnSyncInfoManagerInstance()->AuthPostTransData(authHandle, dataInfo);
 }
 
-int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
-{
-    return LnnSyncInfoManagerInstance()->LnnGetRemoteNumU64Info(networkId, key, info);
-}
-
-int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
-{
-    return LnnSyncInfoManagerInstance()->LnnGetRemoteNumU32Info(netWorkId, key, info);
-}
-
 int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num)
 {
     return LnnSyncInfoManagerInstance()->GetHmlOrP2pAuthHandle(authHandle, num);
