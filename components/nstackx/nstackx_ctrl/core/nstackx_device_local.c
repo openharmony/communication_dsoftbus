@@ -26,6 +26,7 @@
 #include "nstackx_list.h"
 #include "nstackx_inet.h"
 
+
 #define TAG "LOCALDEVICE"
 enum {
     IFACE_STATE_READY,
