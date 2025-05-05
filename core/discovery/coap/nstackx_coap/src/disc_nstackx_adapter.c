@@ -610,8 +610,11 @@ void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
         "link status change: set local device info failed");
 
     int64_t accountId = 0;
+    int32_t port = 0;
     int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
+    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local port failed");
     DISC_LOGI(DISC_COAP, "register ifname=%{public}s. status=%{public}s, accountInfo=%{public}s",
         g_localDeviceInfo->localIfInfo->networkName, status == LINK_STATUS_UP ? "up" : "down",
         accountId == 0 ? "without" : "with");
@@ -620,12 +623,16 @@ void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
     DISC_CHECK_AND_RETURN_LOGE(deviceIdStr != NULL, DISC_COAP, "get device id failed");
     g_localDeviceInfo->deviceId = deviceIdStr;
     g_localDeviceInfo->deviceHash = (uint64_t)accountId;
+    if (sprintf_s(g_localDeviceInfo->localIfInfo->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "port:%d,%s",
+        port, g_serviceData) < 0) {
+        DISC_LOGE(DISC_COAP, "write service data failed.");
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+        return;
+    }
     ret = NSTACKX_RegisterDeviceV2(g_localDeviceInfo);
     cJSON_free(deviceIdStr);
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device info to dfinder failed");
-    ret = RegisterServiceData();
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register servicedata failed");
     DiscCoapUpdateDevName();
 }
 
