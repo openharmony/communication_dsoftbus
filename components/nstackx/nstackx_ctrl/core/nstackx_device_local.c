@@ -242,7 +242,7 @@ static int LocalIfaceInit(struct LocalIface *iface, const char *ifname, const ch
     return NSTACKX_EOK;
 }
 
-static struct LocalIface *CreateLocalIface(const char *ifname, uint8_t af,
+static struct LocalIface *CreateLocalIface(const char *ifname, const char *serviceData, uint8_t af,
     const union InetAddr *addr, const char *ipStr)
 {
     struct LocalIface *iface = (struct LocalIface *)calloc(1, sizeof(struct LocalIface));
@@ -255,6 +255,7 @@ static struct LocalIface *CreateLocalIface(const char *ifname, uint8_t af,
     DFINDER_LOGI(TAG, "GetIfaceType type %hhu", iface->type);
     iface->addr = *addr;
     iface->af = af;
+    (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
     if (LocalIfaceInit(iface, ifname, ipStr) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "local iface %s init failed", ifname);
         free(iface);
@@ -317,6 +318,7 @@ static void AddToDestroyList(struct LocalIface *iface)
             DFINDER_LOGD(TAG, "iface %s start offline timer", iface->ifname);
         }
         LocalIfaceChangeState(iface, &g_localDevice.destroyList, IFACE_STATE_DESTROYING);
+        (void)memset_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
         ClockGetTime(CLOCK_MONOTONIC, &iface->updateTime);
         if (iface->timer != NULL) {
             (void)TimerSetTimeout(iface->timer, 0, NSTACKX_FALSE);
@@ -325,13 +327,15 @@ static void AddToDestroyList(struct LocalIface *iface)
     }
 }
 
-int AddLocalIface(const char *ifname, uint8_t af, const union InetAddr *addr)
+int AddLocalIface(const char *ifname, const char *serviceData, uint8_t af, const union InetAddr *addr)
 {
     struct LocalIface *iface = GetActiveLocalIface(af, ifname);
     if (iface == NULL) {
         iface = GetLocalIface(&g_localDevice.destroyList, ifname, af, addr);
         if (iface != NULL) {
             DFINDER_LOGI(TAG, "iface %s is in destroying, now make it in ready state", ifname);
+            (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
+                serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
             LocalIfaceChangeState(iface, &g_localDevice.readyList[iface->type], IFACE_STATE_READY);
             return NSTACKX_EOK;
         }
@@ -348,7 +352,7 @@ int AddLocalIface(const char *ifname, uint8_t af, const union InetAddr *addr)
         DFINDER_LOGE(TAG, "inet_ntop fail, errno: %d, desc: %s", errno, strerror(errno));
         return NSTACKX_EFAILED;
     }
-    iface = CreateLocalIface(ifname, af, addr, ipStr);
+    iface = CreateLocalIface(ifname, serviceData, af, addr, ipStr);
     return (iface == NULL) ? NSTACKX_EFAILED : NSTACKX_EOK;
 }
 
@@ -415,7 +419,7 @@ static int AddLocalIfaceIpChanged(const NSTACKX_InterfaceInfo *ifInfo, uint32_t 
             continue;
         }
 
-        if (AddLocalIface(ifInfo[i].networkName, af, &addr) != NSTACKX_EOK) {
+        if (AddLocalIface(ifInfo[i].networkName, ifInfo[i].serviceData, af, &addr) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "create local iface %s failed", ifInfo[i].networkName);
             return NSTACKX_EFAILED;
         }
@@ -762,7 +766,9 @@ void DetectLocalIface(void *arg)
         }
 
         DFINDER_LOGI(TAG, "try to add new iface %s", req[i].ifr_name);
-        (void)AddLocalIface(req[i].ifr_name, AF_INET, &addr);
+        char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN];
+        (void)memset_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
+        (void)AddLocalIface(req[i].ifr_name, serviceData, AF_INET, &addr);
     }
     (void)close(fd);
 

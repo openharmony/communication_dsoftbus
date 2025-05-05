@@ -104,6 +104,7 @@ typedef struct NSTACKX_DeviceInfo {
 typedef struct {
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN];
+    char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN];
 } NSTACKX_InterfaceInfo;
 
 
