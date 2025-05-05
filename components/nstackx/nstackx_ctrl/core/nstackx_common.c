@@ -911,7 +911,8 @@ static int32_t CheckInterfaceInfo(const NSTACKX_InterfaceInfo *ifaces, uint32_t 
 {
     for (uint32_t i = 0; i < count; ++i) {
         if (!IsNetworkNameValid(ifaces[i].networkName, sizeof(ifaces[i].networkName)) ||
-            !IsIpAddressValid(ifaces[i].networkIpAddr, sizeof(ifaces[i].networkIpAddr))) {
+            !IsIpAddressValid(ifaces[i].networkIpAddr, sizeof(ifaces[i].networkIpAddr)) ||
+            !IsNetworkNameValid(ifaces[i].serviceData, sizeof(ifaces[i].serviceData))) {
             DFINDER_LOGE(TAG, "invalid network name or ip address of No.%u local iface", i);
             return NSTACKX_EINVAL;
         }

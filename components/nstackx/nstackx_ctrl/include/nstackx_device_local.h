@@ -16,6 +16,7 @@
 #ifndef NSTACKX_DEVICE_LOCAL_H
 #define NSTACKX_DEVICE_LOCAL_H
 
+
 #include "nstackx_device.h"
 
 #ifdef __cplusplus
