@@ -16,7 +16,6 @@
 #ifndef NSTACKX_DEVICE_LOCAL_H
 #define NSTACKX_DEVICE_LOCAL_H
 
-
 #include "nstackx_device.h"
 
 #ifdef __cplusplus
@@ -72,7 +71,7 @@ CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint
 // only mini device support ipv4, other support ipv4 and ipv6
 const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface);
 #endif
-int AddLocalIface(const char *ifname, uint8_t af, const union InetAddr *addr);
+int AddLocalIface(const char *ifname, const char *serviceData, uint8_t af, const union InetAddr *addr);
 void RemoveLocalIface(uint8_t af, const char *ifname);
 void DestroyLocalIface(struct LocalIface *iface, bool moduleDeinit);
 
