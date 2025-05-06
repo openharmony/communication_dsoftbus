@@ -1047,7 +1047,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     }
     if (isCleanInfo) {
         if (strcpy_s(basic->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "get node info by networkId fail, isCleanInfo=%{public}d", isCleanInfo);
+            LNN_LOGE(LNN_BUILDER, "strcpy networkId fail");
             return needReportOffline;
         }
     }
