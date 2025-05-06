@@ -42,7 +42,8 @@ void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *
             discExtra[i].startTime = stamptime;
         }
         DISC_LOGI(DISC_BLE, "capa=%{public}d, discType=%{public}d, broadcastType=%{public}d, minInterval=%{public}d, "
-            "maxInterval=%{public}d, succCnt=%{public}d, failCnt=%{public}d, costTime=%{public}lld, Scene=%{public}d",
+            "maxInterval=%{public}d, succCnt=%{public}d, failCnt=%{public}d, "
+            "costTime=%{public}" PRId64 ", Scene=%{public}d",
             extra.capabilityBit, extra.discType, extra.broadcastType, extra.minInterval, extra.maxInterval,
             extra.successCnt, extra.failCnt, extra.costTime, eventScene);
         DISC_EVENT(eventScene, eventStage, extra);
