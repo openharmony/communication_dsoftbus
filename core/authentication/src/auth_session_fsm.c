@@ -1529,12 +1529,23 @@ static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *in
 static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info)
 {
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-    if (IsAuthPreLinkNodeExist(info->requestId) && !GetWifiDirectManager()->linkHasPtk(info->uuid)) {
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
         TrySyncPtkClient(info);
         return;
     }
     AuthManagerSetAuthPassed(authFsm->authSeq, info);
     TryFinishAuthSession(authFsm);
+}
+
+static void TryRefreshAuthPreLinkInfo(AuthSessionInfo *info)
+{
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
+        GetWifiDirectManager()->refreshRelationShip(info->uuid, info->nodeInfo.wifiDirectAddr);
+        if (TryUpdateLaneResourceLaneId(info) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "update lane resource laneid fail");
+        }
+        UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
+    }
 }
 
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
@@ -1544,19 +1555,11 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
         TryCompleteAuthSessionForError(authFsm, info);
         return;
     }
-    if (IsAuthPreLinkNodeExist(info->requestId)) {
-        GetWifiDirectManager()->refreshRelationShip(info->uuid, info->nodeInfo.wifiDirectAddr);
-        if (TryUpdateLaneResourceLaneId(info) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "update lane resource laneid fail");
-        }
-    }
+    TryRefreshAuthPreLinkInfo(info);
     info->isNodeInfoReceived = true;
     if (strcpy_s(info->nodeInfo.uuid, UUID_BUF_LEN, info->uuid) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy uuid fail.");
         return;
-    }
-    if (IsAuthPreLinkNodeExist(info->requestId)) {
-        UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY ||
         info->connInfo.type == AUTH_LINK_TYPE_USB) {
@@ -1565,7 +1568,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             ClientTryCompleteAuthSession(authFsm, info);
             return;
         }
-        if (IsAuthPreLinkNodeExist(info->requestId) && !GetWifiDirectManager()->linkHasPtk(info->uuid)) {
+        if (IsAuthPreLinkNodeExist(info->requestId)) {
             TrySavePtkServer(info);
         }
         /* WIFI: server should response device info */
@@ -1575,7 +1578,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             return;
         }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-        if (IsAuthPreLinkNodeExist(info->requestId) && !GetWifiDirectManager()->linkHasPtk(info->uuid)) {
+        if (IsAuthPreLinkNodeExist(info->requestId)) {
             TryAddSyncPtkListenerServer();
             return;
         }
