@@ -1529,7 +1529,7 @@ static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *in
 static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info)
 {
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-    if (IsAuthPreLinkNodeExist(info->requestId)) {
+    if (IsAuthPreLinkNodeExist(info->requestId) && !GetWifiDirectManager()->linkHasPtk(info->uuid)) {
         TrySyncPtkClient(info);
         return;
     }
@@ -1543,6 +1543,12 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
     if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
         TryCompleteAuthSessionForError(authFsm, info);
         return;
+    }
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
+        GetWifiDirectManager()->refreshRelationShip(info->uuid, info->nodeInfo.wifiDirectAddr);
+        if (TryUpdateLaneResourceLaneId(info) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "update lane resource laneid fail");
+        }
     }
     info->isNodeInfoReceived = true;
     if (strcpy_s(info->nodeInfo.uuid, UUID_BUF_LEN, info->uuid) != EOK) {
@@ -1559,7 +1565,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             ClientTryCompleteAuthSession(authFsm, info);
             return;
         }
-        if (IsAuthPreLinkNodeExist(info->requestId)) {
+        if (IsAuthPreLinkNodeExist(info->requestId) && !GetWifiDirectManager()->linkHasPtk(info->uuid)) {
             TrySavePtkServer(info);
         }
         /* WIFI: server should response device info */
@@ -1569,7 +1575,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             return;
         }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-        if (IsAuthPreLinkNodeExist(info->requestId)) {
+        if (IsAuthPreLinkNodeExist(info->requestId) && !GetWifiDirectManager()->linkHasPtk(info->uuid)) {
             TryAddSyncPtkListenerServer();
             return;
         }
