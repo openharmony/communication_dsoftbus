@@ -33,6 +33,7 @@ namespace OHOS {
 #define INVALID_CHAN_ID (-1)
 #define INVALID_CHANNEL_REQUETID (23456)
 #define INVALID_CHANNEL_NETWORK (1111)
+#define TEST_CALLING_PID 433
 static int64_t g_channelId = 0;
 
 class TransUdpManagerTest : public testing::Test {
@@ -1126,7 +1127,7 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     uint8_t tos = FILE_PRIORITY_BK;
-    int32_t ret = TransSetTos(channelId, tos);
+    int32_t ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelMgrInit();
@@ -1136,11 +1137,11 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
     channel->info.myData.channelId = channelId;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransSetTos(channelId, tos);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     TransDelUdpChannel(channelId);
-    ret = TransSetTos(channelId, tos);
+    ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     TransUdpChannelMgrDeinit();
 }

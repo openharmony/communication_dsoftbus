@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -667,8 +667,8 @@ HWTEST_F(TransTcpDirectMessageTest, TransDealTdcCheckCollabResult001, TestSize.L
     TransChannelResultLoopInit();
     TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_TCP_DIRECT, DELAY_TIME);
     int32_t checkResult = SOFTBUS_OK;
-    int32_t ret = TransDealTdcCheckCollabResult(channelId, checkResult);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    int32_t ret = TransDealTdcCheckCollabResult(channelId, checkResult, PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 }
 
 /**
@@ -687,8 +687,8 @@ HWTEST_F(TransTcpDirectMessageTest, TransDealTdcCheckCollabResult002, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int32_t checkResult = SOFTBUS_ERR;
-    ret = TransDealTdcCheckCollabResult(conn->channelId, checkResult);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+    ret = TransDealTdcCheckCollabResult(conn->channelId, checkResult, PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 
     TransTcpDirectDeinit();
 }

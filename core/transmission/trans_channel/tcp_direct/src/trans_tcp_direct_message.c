@@ -1758,16 +1758,18 @@ static void TransProcessAsyncOpenTdcChannelFailed(
     CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
 }
 
-int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult)
+int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid)
 {
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     int32_t ret = GetSessionConnById(channelId, &conn);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
-    ret = TransTdcUpdateReplyCnt(channelId);
-    if (ret != SOFTBUS_OK) {
-        return ret;
+    if (conn.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
+    ret = TransTdcUpdateReplyCnt(channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "update count failed.");
     uint32_t flags = 0;
     uint64_t seq = 0;
     ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
@@ -1872,7 +1874,7 @@ static int32_t TransTdcPostErrorMsg(uint64_t *seq, uint32_t *flags, int32_t chan
     return SOFTBUS_OK;
 }
 
-int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult)
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     uint32_t tranFlags = 0;
     uint64_t seq = 0;
@@ -1881,6 +1883,10 @@ int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get session conn by channelId=%{public}d failed.", channelId);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
+    }
+    if (conn.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     ret = TransTdcUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
