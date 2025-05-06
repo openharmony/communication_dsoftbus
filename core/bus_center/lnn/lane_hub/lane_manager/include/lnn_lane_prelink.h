@@ -40,6 +40,7 @@ typedef struct {
 } PreLinkPara;
 
 typedef struct {
+    bool isPreLink;
     ListNode node;
     uint32_t actionId;
     uint32_t laneReqId;
