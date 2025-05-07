@@ -457,7 +457,7 @@ static void SetLnnConnNodeInfo(
         LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
     }
     if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "update grouptype fail");
+        LNN_LOGE(LNN_BUILDER, "update grouptype fail");
     }
     LNN_LOGI(LNN_BUILDER, "peer feature=%{public}" PRIu64 ", local=%{public}" PRIu64 "",
         connInfo->nodeInfo->feature, localFeature);
