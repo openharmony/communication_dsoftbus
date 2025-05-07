@@ -429,5 +429,7 @@ int32_t LnnInitNetworkInfo(void)
 
 void LnnDeinitNetworkInfo(void)
 {
+    (void)LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
 }

@@ -68,6 +68,10 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnNodeOnlineStateChanged(proxy.first.c_str(), isOnline, info, infoTypeLen);
     }
     return SOFTBUS_OK;
@@ -79,6 +83,10 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        if (clientProxy == nullptr) {
+            LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+            return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+        }
         clientProxy->OnNodeBasicInfoChanged(proxy.first.c_str(), info, infoTypeLen, type);
     }
     return SOFTBUS_OK;
