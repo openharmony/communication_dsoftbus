@@ -39,6 +39,7 @@ ohos_fuzztest("SoftBusServerStub2FuzzTest") {
     "$dsoftbus_root_path/core/frame/standard/init/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connection",
   ]
 
   deps = [

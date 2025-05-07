@@ -55,6 +55,7 @@ ohos_unittest("SoftbusServerStubTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/tests/core/frame/unittest/mock",
     "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connection",
   ]
 
   deps = [
@@ -104,6 +105,7 @@ ohos_unittest("SoftbusServerTest") {
     "$dsoftbus_root_path/core/frame/standard/init/include",
     "$dsoftbus_root_path/core/frame/standard/init/src",
     "$dsoftbus_root_path/tests/core/frame/unittest/mock",
+    "$dsoftbus_root_path/interfaces/kits/connection",
   ]
 
   deps = [
@@ -117,6 +119,7 @@ ohos_unittest("SoftbusServerTest") {
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
+      "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
@@ -143,6 +146,7 @@ ohos_unittest("SoftbusClientInfoManagerTest") {
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
+      "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]

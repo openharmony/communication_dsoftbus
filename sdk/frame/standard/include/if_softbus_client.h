@@ -86,6 +86,12 @@ public:
     virtual int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo,
         int32_t channelId, int32_t channelType);
 
+    virtual int32_t OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason);
+
+    virtual int32_t OnAcceptConnect(const char *name, uint32_t handle);
+
+    virtual int32_t OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len);
+
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
 };
