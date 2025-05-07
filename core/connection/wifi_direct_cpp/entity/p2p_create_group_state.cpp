@@ -83,6 +83,7 @@ void P2pCreateGroupState::OnP2pStateChangeEvent(P2pState state)
             timer_.Unregister(operation_->timerId_);
             result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
+            operation_ = nullptr;
         }
         ChangeState(P2pUnavailableState::Instance(), nullptr);
     }
