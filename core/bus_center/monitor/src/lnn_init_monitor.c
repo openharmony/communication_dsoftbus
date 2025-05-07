@@ -160,8 +160,8 @@ void LnnInitMonitorInit(void)
     g_lnnInitMonitorInfoMgr.depInitEnd = false;
     g_lnnInitMonitorInfoMgr.deviceInfoReady = false;
     /* The passive listening module is set to a state of "failed" in initialization. */
-    g_lnnDeviceInfoDeps[INIT_DEPS_DATA_SHARE].status = DEPS_STATUS_FAILED;
-    g_lnnDeviceInfoDeps[INIT_DEPS_PROCESS_BOOT].status = DEPS_STATUS_FAILED;
+    g_lnnEnableModuleDeps[INIT_DEPS_DATA_SHARE].status = DEPS_STATUS_FAILED;
+    g_lnnEnableModuleDeps[INIT_DEPS_PROCESS_BOOT].status = DEPS_STATUS_FAILED;
 }
 
 bool IsLnnInitCheckSucceed(uint32_t netType)
