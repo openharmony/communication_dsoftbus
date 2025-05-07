@@ -109,6 +109,20 @@ public:
     {
         return SOFTBUS_OK;
     }
+    int32_t OnConnectionStateChange(
+        [[maybe_unused]] uint32_t handle, [[maybe_unused]] int32_t state, [[maybe_unused]] int32_t reason) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnAcceptConnect([[maybe_unused]] const char *name, [[maybe_unused]] uint32_t handle) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t OnDataReceived(
+        [[maybe_unused]] uint32_t handle, [[maybe_unused]] const uint8_t *data, [[maybe_unused]] uint32_t len) override
+    {
+        return SOFTBUS_OK;
+    }
 };
 
 namespace {
@@ -1133,5 +1147,78 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteDiedTest, TestSize.Level1)
 {
     ASSERT_TRUE(g_mock != nullptr);
     g_mock->OnRemoteDied(nullptr);
+}
+
+/**
+ * @tc.name: OnConnectionStateChangeInner
+ * @tc.desc: OnConnectionStateChangeInner, MessageParcel failed return SOFTBUS_IPC_ERR
+ * @tc.desc: OnConnectionStateChangeInner, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnConnectionStateChangeInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnConnectionStateChangeInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnConnectionStateChangeInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnConnectionStateChangeInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(0);
+    EXPECT_EQ(g_stub->OnConnectionStateChangeInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnAcceptConnectInner
+ * @tc.desc: OnAcceptConnectInner, MessageParcel failed return SOFTBUS_IPC_ERR
+ * @tc.desc: OnAcceptConnectInner, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnAcceptConnectInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnAcceptConnectInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("OnAcceptConnectInnerTest");
+    EXPECT_EQ(g_stub->OnAcceptConnectInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("OnAcceptConnectInnerTest");
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnAcceptConnectInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnDataReceivedInner
+ * @tc.desc: OnDataReceivedInner, MessageParcel failed return SOFTBUS_IPC_ERR
+ * @tc.desc: OnDataReceivedInner, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnDataReceivedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnDataReceivedInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnAcceptConnectInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteInt32(0);
+    std::string buffer = "OnDataReceivedInnerTest";
+    data.WriteUint32(buffer.size());
+    data.WriteRawData(buffer.c_str(), buffer.size());
+    EXPECT_EQ(g_stub->OnDataReceivedInner(data, reply), SOFTBUS_OK);
 }
 } // namespace OHOS

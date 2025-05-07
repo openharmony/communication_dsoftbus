@@ -1,0 +1,55 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../dsoftbus.gni")
+
+connection_service_sdk_src =
+    [ "$dsoftbus_root_path/sdk/connection/service/src/general_client_connection.c" ]
+connection_service_sdk_inc = [
+  "$dsoftbus_dfx_path/interface/include",
+  "$dsoftbus_root_path/core/frame/common/include",
+]
+
+connection_manager_sdk_src = []
+connection_manager_sdk_inc =
+    [ "$dsoftbus_root_path/sdk/connection/service/include" ]
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    connection_manager_sdk_inc +=
+        [ "$dsoftbus_root_path/sdk/connection/ipc/include" ]
+    connection_manager_sdk_src += [
+      "$dsoftbus_root_path/sdk/connection/ipc/mini/general_connection_server_proxy.c",
+    ]
+  } else {
+    connection_manager_sdk_inc +=
+        [ "$dsoftbus_root_path/sdk/connection/ipc/include" ]
+    connection_manager_sdk_src += [
+      "$dsoftbus_root_path/sdk/connection/ipc/small/general_connection_server_proxy.c",
+    ]
+  }
+} else {
+  connection_manager_sdk_inc += [
+    "$dsoftbus_root_path/sdk/connection/ipc/include",
+    "$dsoftbus_root_path/sdk/connection/ipc/$os_type/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
+    "$dsoftbus_root_path/interfaces/kits/connection",
+  ]
+  connection_manager_sdk_src += [
+    "$dsoftbus_root_path/sdk/connection/ipc/$os_type/src/general_connection_server_proxy.cpp",
+    "$dsoftbus_root_path/sdk/connection/ipc/$os_type/src/general_connection_server_proxy_standard.cpp",
+  ]
+}
+
+connection_sdk_src = connection_service_sdk_src + connection_manager_sdk_src
+connection_sdk_inc = connection_service_sdk_inc + connection_manager_sdk_inc
