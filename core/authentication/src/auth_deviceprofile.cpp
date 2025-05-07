@@ -654,7 +654,7 @@ static void InsertUserKeyToUKCache(const AuthACLInfo *acl, int32_t ukId, uint64_
             return;
         }
         if (SESSION_KEY_LENGTH < sessionKey.size()) {
-            LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}zu", (uint32_t)sessionKey.size());
+            LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}u", (uint32_t)sessionKey.size());
             sessionKey.clear();
             return;
         }
@@ -836,7 +836,7 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
             return SOFTBUS_AUTH_ACL_NOT_FOUND;
         }
         if (ukLen < sessionKey.size()) {
-            LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}zu", (uint32_t)sessionKey.size());
+            LNN_LOGE(LNN_STATE, "cannot memcpy uk, sessionKeyLen=%{public}u", (uint32_t)sessionKey.size());
             return SOFTBUS_MEM_ERR;
         }
         for (size_t i = 0; i < sessionKey.size(); ++i) {
