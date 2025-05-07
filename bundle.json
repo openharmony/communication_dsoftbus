@@ -130,7 +130,8 @@
         "libnl",
         "power_manager",
         "ffrt",
-        "usb_manager"
+        "usb_manager",
+        "selinux_adapter"
       ],
       "third_party": [
         "cJSON",
