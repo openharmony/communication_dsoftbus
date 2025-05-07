@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,14 +23,14 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "lnn_node_info.h"
+#include "bus_center_manager.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
+#include "lnn_node_info.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "bus_center_manager.h"
 
 static uint64_t GetCurrentTime(void)
 {
