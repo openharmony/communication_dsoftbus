@@ -99,3 +99,12 @@ void UpdateAssetSessionKeyByAcl(
     (void)sessionKeyId;
     (void)isSameAccount;
 }
+
+bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId)
+{
+    (void)sessionKeyId;
+    (void)accountHash;
+    (void)udidShortHash;
+    (void)userId;
+    return false;
+}

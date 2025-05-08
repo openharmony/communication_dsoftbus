@@ -259,5 +259,11 @@ int32_t GetActiveOsAccountIds(void)
 {
     return GetAuthHichainMockInterface()->GetActiveOsAccountIds();
 }
+
+bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
+    int32_t userId)
+{
+    return GetAuthHichainMockInterface()->IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
+}
 } // extern "C"
 } // namespace OHOS
