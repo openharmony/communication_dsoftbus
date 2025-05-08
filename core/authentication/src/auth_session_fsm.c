@@ -1537,6 +1537,17 @@ static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info
     TryFinishAuthSession(authFsm);
 }
 
+static void TryRefreshAuthPreLinkInfo(AuthSessionInfo *info)
+{
+    if (IsAuthPreLinkNodeExist(info->requestId)) {
+        GetWifiDirectManager()->refreshRelationShip(info->uuid, info->nodeInfo.wifiDirectAddr);
+        if (TryUpdateLaneResourceLaneId(info) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "update lane resource laneid fail");
+        }
+        UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
+    }
+}
+
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
 {
     AuthSessionInfo *info = &authFsm->info;
@@ -1544,13 +1555,11 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
         TryCompleteAuthSessionForError(authFsm, info);
         return;
     }
+    TryRefreshAuthPreLinkInfo(info);
     info->isNodeInfoReceived = true;
     if (strcpy_s(info->nodeInfo.uuid, UUID_BUF_LEN, info->uuid) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy uuid fail.");
         return;
-    }
-    if (IsAuthPreLinkNodeExist(info->requestId)) {
-        UpdateAuthPreLinkUuidById(info->requestId, info->uuid);
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY ||
         info->connInfo.type == AUTH_LINK_TYPE_USB) {

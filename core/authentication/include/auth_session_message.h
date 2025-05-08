@@ -61,6 +61,7 @@ int32_t PostDeviceMessage(
 bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer,
     DeviceMessageParse *messageParse);
 int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info);
+int32_t TryUpdateLaneResourceLaneId(AuthSessionInfo *info);
 
 #ifdef __cplusplus
 #if __cplusplus
