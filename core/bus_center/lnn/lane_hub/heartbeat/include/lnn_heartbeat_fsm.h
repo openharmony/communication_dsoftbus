@@ -64,6 +64,7 @@ typedef struct {
 typedef struct {
     bool wakeupFlag;
     bool isRelay;
+    bool isMsdpRange;
     LnnHeartbeatType hbType;
     bool *isRemoved;
 } LnnRemoveSendEndMsgPara;
@@ -85,6 +86,7 @@ typedef struct {
     bool isFirstBegin;
     bool isFast;
     bool isDirectBoardcast;
+    bool isMsdpRange;
     char networkId[NETWORK_ID_BUF_LEN];
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
@@ -111,7 +113,7 @@ int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpda
 int32_t LnnPostScreenOffCheckDevMsgToHbFsm(
     LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis);
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved);
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msg, bool wakeupFlag, bool *isRemoved);
 void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 void LnnRemoveProcessSendOnceMsg(

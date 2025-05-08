@@ -340,6 +340,7 @@ static int32_t RelayHeartbeatV0SplitOld(LnnHeartbeatFsm *hbFsm, LnnProcessSendOn
         .wakeupFlag = wakeupFlag,
         .isRelay = msgPara->isRelay,
         .isLastEnd = false,
+        .isMsdpRange = msgPara->isMsdpRange,
     };
     for (uint32_t i = 1; i < sendCnt; ++i) {
         if (splitHbType < HEARTBEAT_TYPE_MIN) {
@@ -391,6 +392,7 @@ static int32_t RelayHeartbeatV0Split(
         .wakeupFlag = wakeupFlag,
         .isRelay = msgPara->isRelay,
         .isLastEnd = true,
+        .isMsdpRange = msgPara->isMsdpRange,
     };
     delayTime += HB_SEND_RELAY_LEN + HB_TIME_FACTOR_TWO_HUNDRED_MS;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, delayTime) != SOFTBUS_OK) {
@@ -436,6 +438,7 @@ static int32_t RelayHeartbeatV1Split(
         .wakeupFlag = wakeupFlag,
         .isRelay = msgPara->isRelay,
         .isLastEnd = false,
+        .isMsdpRange = msgPara->isMsdpRange,
     };
     for (uint32_t i = 1; i < sendCnt; ++i) {
         if (splitHbType < HEARTBEAT_TYPE_MIN) {
@@ -487,6 +490,7 @@ static int32_t OtherHeartbeatSplit(
         .wakeupFlag = wakeupFlag,
         .isRelay = msgPara->isRelay,
         .isLastEnd = true,
+        .isMsdpRange = msgPara->isMsdpRange,
     };
     totalDelay += HB_SEND_EACH_SEPARATELY_LEN + HB_SEND_RELAY_LEN;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, totalDelay) != SOFTBUS_OK) {
@@ -562,6 +566,7 @@ static int32_t SendDirectBoardcast(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsg
         .wakeupFlag = wakeupFlag,
         .isRelay = msgPara->isRelay,
         .isLastEnd = true,
+        .isMsdpRange = msgPara->isMsdpRange,
     };
     delayTime +=
         (msgPara->duration <= 0 || msgPara->duration > HB_SEND_ONCE_LEN) ? HB_SEND_DIRECT_LEN_ONCE : msgPara->duration;
@@ -587,7 +592,7 @@ static bool VisitClearUnRegistedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTy
 static int32_t ProcessCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara,
     LnnHeartbeatType registedHbType, bool wakeupFlag)
 {
-    if (msgPara->isDirectBoardcast && msgPara->duration < HB_SEND_DIRECT_LEN_ONCE) {
+    if ((msgPara->isDirectBoardcast || msgPara->isMsdpRange) && msgPara->duration < HB_SEND_DIRECT_LEN_ONCE) {
         LNN_LOGE(LNN_HEART_BEAT, "dont process check dev status, duration=%{public}d", msgPara->duration);
         return SOFTBUS_OK;
     }
@@ -621,13 +626,13 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         LNN_LOGW(LNN_HEART_BEAT, "HB send once get hbType is not available. hbType=%{public}d", msgPara->hbType);
         return SOFTBUS_OK;
     }
-    LnnRemoveSendEndMsg(hbFsm, registedHbType, wakeupFlag, msgPara->isRelay, &isRemoved);
+    LnnRemoveSendEndMsg(hbFsm, msgPara, wakeupFlag, &isRemoved);
     bool isUserSwitch = (strlen(msgPara->callerId) != 0 && strcmp(msgPara->callerId, HB_USER_SWITCH_CALLER_ID) == 0) ?
         true : false;
     if (!isUserSwitch && !isRemoved) {
         LNN_LOGW(LNN_HEART_BEAT,
-            "HB send once is beginning, hbType=%{public}d, wakeupFlag=%{public}d, isRelay=%{public}d", msgPara->hbType,
-            wakeupFlag, msgPara->isRelay);
+            "HB send once is beginning, hbType=%{public}d, wakeupFlag=%{public}d, isRelay=%{public}d,"
+            "isMsdpRange=%{public}d", msgPara->hbType, wakeupFlag, msgPara->isRelay, msgPara->isMsdpRange);
         return SOFTBUS_OK;
     }
     if (isUserSwitch) {
@@ -1051,6 +1056,7 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
         .isRelay = isRelay,
         .isSyncData = false,
         .isDirectBoardcast = false,
+        .isMsdpRange = false,
     };
     if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, &msgPara, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB start heartbeat fail, type=%{public}d", hbType);
@@ -1085,6 +1091,7 @@ int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbea
         .isRelay = isRelay,
         .isSyncData = false,
         .isDirectBoardcast = true,
+        .isMsdpRange = false,
         .checkDelay = timeout,
         .hasScanRsp = true,
         .duration = HB_SEND_DIRECT_LEN_ONCE,
@@ -1146,6 +1153,7 @@ int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType type)
         .wakeupFlag = false,
         .isRelay = false,
         .isLastEnd = true,
+        .isMsdpRange = false,
     };
     if (LnnPostSendEndMsgToHbFsm(g_hbFsm, &endData, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}d", type);
