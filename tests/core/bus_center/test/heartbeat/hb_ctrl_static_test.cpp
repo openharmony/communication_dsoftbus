@@ -653,6 +653,8 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_001, TestSize.Le
     EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategyEx).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     HbMode mode = { .connFlag = false, .duration = 5, .replyFlag = false};
     RangeConfig config = {.medium = BLE_ADV_HB, .configInfo.heartbeat.mode = mode };
     int32_t ret = LnnTriggerHbRangeForMsdp("test", &config);
