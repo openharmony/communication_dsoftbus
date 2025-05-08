@@ -112,6 +112,8 @@ int32_t P2pAdapter::P2pCreateGroup(const CreateGroupParam &param)
 int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
 {
     std::vector<std::string> configs = WifiDirectUtils::SplitString(param.groupConfig, "\n");
+    CONN_CHECK_AND_RETURN_RET_LOGW(configs.size() >= P2P_GROUP_CONFIG_INDEX_MODE, SOFTBUS_CONN_REMOTE_CONFIG_NULL,
+        CONN_WIFI_DIRECT, "peer group config info is empty");
 
     Hid2dConnectConfig connectConfig;
     (void)memset_s(&connectConfig, sizeof(connectConfig), 0, sizeof(connectConfig));
