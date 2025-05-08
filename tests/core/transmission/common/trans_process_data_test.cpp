@@ -494,13 +494,13 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest016, TestSize.Level1)
     uint32_t plainLen = 10; // test value
     DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
     ASSERT_NE(nullptr, node);
-    node->data = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    node->data = static_cast<char *>(SoftBusCalloc(sizeof(char) * plainLen));
     if (node->data == nullptr) {
         SoftBusFree(node);
         return;
     }
 
-    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char) * plainLen));
     if (node->w == nullptr) {
         SoftBusFree(node->data);
         SoftBusFree(node);
@@ -562,7 +562,7 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest018, TestSize.Level1)
 
     TcpDataTlvPacketHead *head = static_cast<TcpDataTlvPacketHead *>(SoftBusCalloc(sizeof(TcpDataTlvPacketHead)));
     ASSERT_NE(nullptr, head);
-    DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
+    DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf) * 10)); // test value
     if (node == nullptr) {
         SoftBusFree(head);
         return;
@@ -574,7 +574,7 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest018, TestSize.Level1)
         return;
     }
 
-    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char)));
+    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char) * 10)); // test value
     if (node->w == nullptr) {
         SoftBusFree(node->data);
         SoftBusFree(node);
