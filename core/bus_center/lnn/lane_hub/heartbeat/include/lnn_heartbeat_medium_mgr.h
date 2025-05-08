@@ -64,6 +64,7 @@ typedef struct {
     bool hasScanRsp;
     bool isFast;
     bool isDirectBoardcast;
+    bool isMsdpRange;
     char networkId[NETWORK_ID_BUF_LEN];
 } LnnHeartbeatSendBeginData;
 
@@ -72,6 +73,7 @@ typedef struct {
     bool wakeupFlag;
     bool isRelay;
     bool isLastEnd;
+    bool isMsdpRange;
 } LnnHeartbeatSendEndData;
 
 typedef struct {

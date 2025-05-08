@@ -482,6 +482,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
         .hbType = HEARTBEAT_TYPE_BLE_V1,
         .wakeupFlag = false,
         .isRelay = false,
+        .isMsdpRange = false,
     };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
@@ -514,6 +515,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
         .hbType = HEARTBEAT_TYPE_MAX,
         .wakeupFlag = false,
         .isRelay = false,
+        .isMsdpRange = false,
     };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr).WillRepeatedly(Return(SOFTBUS_OK));
