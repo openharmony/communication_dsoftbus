@@ -348,10 +348,6 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         SoftBusFree(decompressData);
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
-    GetWifiDirectManager()->refreshRelationShip(info->uuid, info->nodeInfo.wifiDirectAddr);
-    if (TryUpdateLaneResourceLaneId(info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "update lane resource laneid fail");
-    }
     SoftBusFree(msg);
     SoftBusFree(decompressData);
     return SOFTBUS_OK;
