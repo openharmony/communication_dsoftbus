@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -79,4 +79,23 @@ if (dsoftbus_feature_ex_kits) {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
     "$dsoftbus_root_path/core/connection/coap/src/conn_coap_manager_virtual.c",
   ]
+}
+conn_manager_inc += [ "$dsoftbus_root_path/core/connection/ipc/include" ]
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    conn_manager_src += [
+      "$dsoftbus_root_path/core/connection/ipc/mini/general_connection_client_proxy.c",
+    ]
+  } else {
+    conn_manager_src += [
+      "$dsoftbus_root_path/core/connection/ipc/small/general_connection_client_proxy.c",
+    ]
+  }
+} else {
+  conn_manager_src += [
+    "$dsoftbus_root_path/core/connection/ipc/$os_type/src/general_connection_client_proxy.cpp",
+    "$dsoftbus_root_path/core/connection/ipc/$os_type/src/general_connection_client_proxy_standard.cpp",
+  ]
+  conn_manager_inc +=
+      [ "$dsoftbus_root_path/core/connection/ipc/$os_type/include" ]
 }

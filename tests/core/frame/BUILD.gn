@@ -105,6 +105,7 @@ ohos_static_library("softbus_server_static") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/connection",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/common/include",
