@@ -737,7 +737,7 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
             continue;
         }
         if (remoteMac == wifiDirectAddr) {
-            auto networkId = basicInfo[i].networkId;
+            std::string networkId = basicInfo[i].networkId;
             SoftBusFree(basicInfo);
             return NetworkIdToUuid(networkId);
         }
