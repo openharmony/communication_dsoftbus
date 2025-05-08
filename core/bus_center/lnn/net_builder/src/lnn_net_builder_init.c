@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -900,6 +900,7 @@ int32_t LnnInitNetBuilderDelay(void)
         return ret;
     }
 #ifndef ENABLE_FEATURE_DATAMGR_SERVICE
+    LNN_LOGI(LNN_INIT, "no data manager, release datashare init monitor");
     LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
 #endif
     return SOFTBUS_OK;
