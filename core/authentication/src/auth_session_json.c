@@ -167,6 +167,7 @@
 #define HAS_SUPPRESS_STRATEGY            (0x08L)
 #define HAS_WAIT_TCP_TX_DONE             (0x10L)
 #define LOCAL_FLAGS (HAS_CTRL_CHANNEL | HAS_P2P_AUTH_V2 | HAS_SUPPRESS_STRATEGY | HAS_WAIT_TCP_TX_DONE)
+#define LONG_TO_STRING_MAX_LEN           21
 #define DEFAULT_BATTERY_LEVEL            100
 #define DEFAULT_NODE_WEIGHT              100
 #define BASE64_OFFLINE_CODE_LEN          16
@@ -295,6 +296,30 @@ static bool GenerateUdidShortHash(const char *udid, char *udidHashBuf, uint32_t 
         return false;
     }
     return true;
+}
+
+static int32_t GenerateAccountHash(int64_t accountId, char *accountHashBuf, uint32_t bufLen)
+{
+    char accountString[LONG_TO_STRING_MAX_LEN] = { 0 };
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, accountId) == -1) {
+        AUTH_LOGE(AUTH_FSM, "long to string fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    char *anonyAccountId = NULL;
+    Anonymize(accountString, &anonyAccountId);
+    AUTH_LOGI(AUTH_FSM, "accountString=%{public}s", AnonymizeWrapper(anonyAccountId));
+    AnonymizeFree(anonyAccountId);
+    int32_t ret = SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString), accountHash);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "accountId hash fail, ret=%{public}d", ret);
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    if (ConvertBytesToHexString(accountHashBuf, bufLen, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
@@ -725,7 +750,7 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
     return SOFTBUS_OK;
 }
 
-static void CheckDeviceKeyValid(JsonObj *obj, AuthSessionInfo *info)
+static void UnpackSKId(JsonObj *obj, AuthSessionInfo *info)
 {
     int32_t localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
     int32_t remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
@@ -873,21 +898,27 @@ static int32_t GetLocalUdidShortHash(char *localUdidHash)
 
 static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
 {
+    OptInt(obj, USERID, &info->userId, 0);
+    UnpackSKId(obj, info);
     if (info->authVersion < AUTH_VERSION_V2) {
         AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
         return;
     }
-
     if (!JSON_GetStringFromObject(obj, UDID_SHORT_HASH, info->udidShortHash, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_FSM, "udid short hash not found");
         return;
     }
-
     if (!JSON_GetStringFromObject(obj, ACCOUNT_HASH, info->accountHash, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_FSM, "account hash not found");
         return;
     }
-
+    if (info->deviceKeyId.hasDeviceKeyId &&
+        IsSKIdInvalid(info->deviceKeyId.localDeviceKeyId, info->accountHash, info->udidShortHash, info->userId)) {
+        info->deviceKeyId.hasDeviceKeyId = false;
+        info->deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+        info->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+        AUTH_LOGE(AUTH_FSM, "SKId invalid, hasDeviceKeyId=false");
+    }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
@@ -895,15 +926,12 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "get node info fail");
         return;
     }
-
     info->isSameAccount = JudgeIsSameAccount(info->accountHash);
-
     char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid short hash fail");
         return;
     }
-
     char *udidShortHash = info->isSameAccount ? localUdidHash : info->udidShortHash;
     char *credList = NULL;
     ret = IdServiceQueryCredential(nodeInfo.userId, udidShortHash, info->accountHash, info->isSameAccount, &credList);
@@ -911,12 +939,10 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "query credential fail");
         return;
     }
-
     info->credId = IdServiceGetCredIdFromCredList(nodeInfo.userId, credList);
     if (info->credId == NULL) {
         AUTH_LOGE(AUTH_FSM, "get cred id fail");
     }
-
     IdServiceDestroyCredentialList(&credList);
 }
 
@@ -1378,14 +1404,12 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info,
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
     UnPackAuthPreLinkNode(obj, info);
-    CheckDeviceKeyValid(obj, info);
     OptInt(obj, AUTH_MODULE, (int32_t *)&info->module, AUTH_MODULE_LNN);
     bool isSupportNormalizedKey = false;
     OptBool(obj, IS_NORMALIZED, &isSupportNormalizedKey, false);
     UnpackFastAuth(obj, info);
     UnpackNormalizedKey(obj, info, isSupportNormalizedKey, authSeq);
     OptBool(obj, IS_NEED_PACK_CERT, &info->isNeedPackCert, false);
-    OptInt(obj, USERID, &info->userId, 0);
     UnpackExternalAuthInfo(obj, info);
     JSON_Delete(obj);
     return SOFTBUS_OK;
@@ -2485,6 +2509,29 @@ static int32_t UnpackDeviceInfoMsgInner(
     return ret;
 }
 
+static bool IsInvalidExternalAuthInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSessionInfo *info)
+{
+    char udidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (!GenerateUdidShortHash(nodeInfo->deviceInfo.deviceUdid, udidHash, SHA_256_HEX_HASH_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "get local udid hash fail");
+        return false;
+    }
+    if (strcmp(udidHash, info->udidShortHash) != 0) {
+        AUTH_LOGE(AUTH_FSM, "udidHash change!");
+        return true;
+    }
+    if (GenerateAccountHash(nodeInfo->accountId, accountHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "gen accountHash fail");
+        return false;
+    }
+    if (strcmp(accountHash, info->accountHash) != 0) {
+        AUTH_LOGE(AUTH_FSM, "accountHash change!");
+        return true;
+    }
+    return false;
+}
+
 static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSessionInfo *info)
 {
     if (obj == NULL || nodeInfo == NULL || info == NULL) {
@@ -2503,6 +2550,10 @@ static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSess
     AUTH_LOGI(AUTH_FSM, "authVersion new=%{public}d, old=%{public}d", authVersion, info->authVersion);
     if (authVersion != (int32_t)info->authVersion) {
         AUTH_LOGE(AUTH_FSM, "authVersion change!");
+        return true;
+    }
+    if (authVersion >= AUTH_VERSION_V2 && IsInvalidExternalAuthInfo(obj, nodeInfo, info)) {
+        AUTH_LOGE(AUTH_FSM, "is invalid ExternalAuthInfo!");
         return true;
     }
     return false;

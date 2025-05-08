@@ -119,6 +119,8 @@ public:
         bool isSameAccount, char **credList) = 0;
     virtual void IdServiceDestroyCredentialList(char **returnData) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
+    virtual bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
+        int32_t userId) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -195,6 +197,7 @@ public:
         bool isSameAccount, char **credList));
     MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **returnData));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
+    MOCK_METHOD4(IsSKIdInvalid, bool (int32_t, const char *, const char *, int32_t));
 };
 
 extern "C" {
