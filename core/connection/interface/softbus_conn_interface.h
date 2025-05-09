@@ -53,6 +53,7 @@ typedef enum {
     MODULE_SESSION_KEY_AUTH = 26,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
+    MODULE_BLE_GENERAL = 102,
     MODULE_NIP_BR_CHANNEL = 201,
     MODULE_OLD_NEARBY = 300,
 } ConnModule;
@@ -66,6 +67,7 @@ typedef enum {
     CONNECT_BLE_DIRECT,
     CONNECT_HML,
     CONNECT_TRIGGER_HML,
+    CONNECT_BLE_GENERAL,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -437,6 +439,8 @@ int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
  * @return <b>SOFTBUS_OK</b> if success, others if failed.
  */
 int32_t ConnConfigPostLimit(const LimitConfiguration *configuration);
+
+void ConnDeathCallback(const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 #if __cplusplus

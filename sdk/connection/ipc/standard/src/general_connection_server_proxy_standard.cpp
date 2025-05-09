@@ -391,8 +391,12 @@ int32_t ConnectionServerProxy::Connect(const char *pkgName, const char *name, co
         CONN_LOGE(CONN_COMMON, "write name failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteRawData((void *)address, sizeof(Address))) {
-        CONN_LOGE(CONN_COMMON, "write address failed!");
+    if (!data.WriteCString(address->addr.ble.mac)) {
+        CONN_LOGE(CONN_COMMON, "write address failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteInt32(address->addrType)) {
+        CONN_LOGE(CONN_COMMON, "write addrType failed");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;

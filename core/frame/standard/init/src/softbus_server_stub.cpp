@@ -39,7 +39,7 @@
 #include "system_ability_definition.h"
 #endif
 
-const char *g_limitPkgName = "dms";
+const char *g_limitPkgName = "ohos.distributedschedule.dms";
 
 #define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
     do {                                                        \
@@ -1904,12 +1904,24 @@ int32_t SoftBusServerStub::ConnectInner(MessageParcel &data, MessageParcel &repl
         COMM_LOGE(COMM_SVC, "read name failed!");
         return SOFTBUS_IPC_ERR;
     }
-    Address *address = const_cast<Address *>(reinterpret_cast<const Address *>(data.ReadRawData(sizeof(Address))));
+    Address connectAddress;
+    const char *address = data.ReadCString();
     if (address == nullptr) {
         COMM_LOGE(COMM_SVC, "read address fail, address is nullptr");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t handle = Connect(pkgName, name, address);
+    int32_t len = strnlen(address, BT_MAC_LEN);
+    if (len != (BT_MAC_LEN - 1) || strcpy_s(connectAddress.addr.ble.mac, BT_MAC_LEN, address) != EOK) {
+        COMM_LOGE(COMM_SVC, "read address fail, address is=%{public}s", address);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t addrType = data.ReadInt32();
+    if (addrType < CONNECTION_ADDR_WLAN || addrType > CONNECTION_ADDR_MAX) {
+        COMM_LOGE(COMM_SVC, "read addrType fail, addrType= %{public}d", addrType);
+        return SOFTBUS_IPC_ERR;
+    }
+    connectAddress.addrType = static_cast<ConnectionAddrType>(addrType);
+    int32_t handle = Connect(pkgName, name, &connectAddress);
     if (!reply.WriteInt32(handle)) {
         COMM_LOGE(COMM_SVC, "write handle failed");
         return SOFTBUS_IPC_ERR;
