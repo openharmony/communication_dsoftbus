@@ -29,10 +29,11 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_utils.h"
 
-#define DEFAULT_ACCOUNT_UID  "ohosAnonymousUid"
-#define DEFAULT_USER_KEY_INDEX  (-1)
-#define DEFAULT_UKID_TIME  (-1)
-#define DEFAULT_USERID (-1)
+#define DEFAULT_ACCOUNT_UID         "ohosAnonymousUid"
+#define DEFAULT_ACCOUNT_VALUE       "0"
+#define DEFAULT_USER_KEY_INDEX      (-1)
+#define DEFAULT_UKID_TIME           (-1)
+#define DEFAULT_USERID              (-1)
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static std::set<std::string> g_notTrustedDevices;
@@ -917,4 +918,98 @@ void UpdateAssetSessionKeyByAcl(
     ret = UpdateDpAclByAuthAcl(info, *sessionKeyId, currentTime, isSameAccount);
     LNN_LOGW(LNN_STATE, "UpdateDpAclByAuthAcl result ret=%{public}d", ret);
     return;
+}
+
+static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
+{
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)str.c_str(), str.length(), hash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate hash fail");
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    if (ConvertBytesToHexString(hashStrBuf, len + 1, hash, len / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "convert hash hex string fail");
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool IsSKIdInvalidInner(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
+    int32_t userId, OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
+{
+    std::string sourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
+    std::string sourceAccountId = aclProfile.GetAccesser().GetAccesserAccountId();
+    std::string sinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
+    std::string sinkAccountId = aclProfile.GetAccessee().GetAccesseeAccountId();
+    char aclUdidShortHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    char aclAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (strcmp(DEFAULT_ACCOUNT_UID, sourceAccountId.c_str()) == 0) {
+        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
+        sourceAccountId = aclAccountHash;
+    }
+    if (strcmp(DEFAULT_ACCOUNT_UID, sinkAccountId.c_str()) == 0) {
+        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
+        sinkAccountId = aclAccountHash;
+    }
+    if (aclProfile.GetAccesser().GetAccesserSessionKeyId() == sessionKeyId) {
+        if (GetStringHash(sinkDeviceId, aclUdidShortHash, CUST_UDID_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "GetStringHash fail");
+            return false;
+        }
+        if (StrCmpIgnoreCase(aclUdidShortHash, udidShortHash) != 0 ||
+            StrCmpIgnoreCase(sinkAccountId.c_str(), accountHash) != 0 ||
+            userId != aclProfile.GetAccessee().GetAccesseeUserId()) {
+            LNN_LOGE(LNN_STATE, "accountId/udid/userId error");
+            return true;
+        }
+        return false;
+    } else if (aclProfile.GetAccessee().GetAccesseeSessionKeyId() == sessionKeyId) {
+        if (GetStringHash(sourceDeviceId, aclUdidShortHash, CUST_UDID_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "GetStringHash fail");
+            return false;
+        }
+        if (StrCmpIgnoreCase(aclUdidShortHash, udidShortHash) != 0 ||
+            StrCmpIgnoreCase(sourceAccountId.c_str(), accountHash) != 0 ||
+            userId != aclProfile.GetAccesser().GetAccesserUserId()) {
+            LNN_LOGE(LNN_STATE, "accountId/udid/userId error");
+            return true;
+        }
+        return false;
+    }
+    LNN_LOGE(LNN_STATE, "skId not match!");
+    return true;
+}
+
+bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId)
+{
+    if (accountHash == nullptr || udidShortHash == nullptr || strlen(udidShortHash) < CUST_UDID_LEN ||
+        strlen(accountHash) < SHA_256_HEX_HASH_LEN - 1) {
+        LNN_LOGE(LNN_STATE, "param error");
+        return false;
+    }
+
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return false;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return true;
+    }
+    int32_t accesserSessionKeyId = 0;
+    int32_t accesseeSessionKeyId = 0;
+    for (auto &aclProfile : aclProfiles) {
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
+        accesserSessionKeyId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
+        accesseeSessionKeyId = aclProfile.GetAccessee().GetAccesseeSessionKeyId();
+        if (accesserSessionKeyId != sessionKeyId && accesseeSessionKeyId != sessionKeyId) {
+            continue;
+        }
+        return IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
+    }
+    LNN_LOGE(LNN_STATE, "key not found");
+    return true;
 }
